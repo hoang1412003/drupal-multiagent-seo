@@ -1,11 +1,11 @@
-"""LangGraph skeleton for the Multi-Agent content review pipeline.
+"""Khung LangGraph cho pipeline Multi-Agent kiểm duyệt nội dung.
 
-Matches the 8-node design in docs/architecture.md:
-Fetch -> Orchestrator/Dispatch -> 4 agents (parallel) -> Aggregator -> Write-back
+Khớp thiết kế 8 node trong docs/architecture.md:
+Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
 
-Content Quality and SEO call real Claude agents (Sprint 1). Brand Consistency
-and Compliance are still STUBS - they need a brand guideline (Brand) and are
-scoped for Sprint 2 per docs/roadmap.md.
+Content Quality và SEO gọi Claude thật (Sprint 1). Brand Consistency và
+Compliance vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
+Sprint 2 theo docs/roadmap.md.
 """
 from langgraph.graph import END, START, StateGraph
 
@@ -31,8 +31,8 @@ def fetch_node(state: ContentReviewState) -> dict:
 
 
 def orchestrator_node(state: ContentReviewState) -> dict:
-    # Pass-through today; reserved for future pre-dispatch checks (e.g.
-    # skipping agents entirely if the body is empty/too short).
+    # Hiện chỉ chuyển tiếp (pass-through); để dành cho logic kiểm tra trước
+    # khi phát cho agent sau này (VD: bỏ qua hết nếu body rỗng/quá ngắn).
     return {}
 
 
@@ -48,7 +48,7 @@ def content_quality_node(state: ContentReviewState) -> dict:
     try:
         result = content_quality.run(state["title"], state["body"])
     except Exception:
-        result = None  # agent lỗi -> Aggregator xử lý theo fail-safe (6.4)
+        result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"content_quality_result": result}
 
 
@@ -81,8 +81,8 @@ def aggregator_node(state: ContentReviewState) -> dict:
     missing = [name for name, r in results.items() if r is None]
 
     if compliance is None:
-        # Compliance has veto power (docs/architecture.md 6.4) - never auto-publish
-        # without being able to verify legal/compliance risk.
+        # Compliance có quyền phủ quyết (docs/architecture.md mục 6.4) - không bao
+        # giờ tự động publish khi không xác minh được rủi ro pháp lý.
         decision = "needs_revision"
         final_score = None
     else:

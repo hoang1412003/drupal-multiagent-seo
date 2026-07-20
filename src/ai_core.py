@@ -19,9 +19,9 @@ def get_client() -> anthropic.Anthropic:
 
 
 def call_agent(system_prompt: str, title: str, body: str, output_schema: dict) -> dict:
-    """Call Claude with an agent's system prompt + article content.
+    """Gọi Claude với system prompt của 1 agent + nội dung bài viết.
 
-    Returns a dict matching output_schema (guaranteed via structured outputs).
+    Trả về dict đúng cấu trúc output_schema (đảm bảo bằng structured outputs).
     """
     client = get_client()
     response = client.messages.create(

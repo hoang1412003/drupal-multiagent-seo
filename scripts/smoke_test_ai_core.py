@@ -1,7 +1,7 @@
-"""Manual smoke test for src/ai_core.py — run this yourself to verify the
-Claude API call works end-to-end with your own ANTHROPIC_API_KEY.
+"""Test thủ công cho src/ai_core.py — tự chạy để xác nhận việc gọi Claude API
+hoạt động end-to-end với ANTHROPIC_API_KEY của bạn.
 
-Usage (from project root, after activating .venv and filling in .env):
+Cách chạy (từ thư mục gốc project, sau khi activate .venv và điền .env):
     .venv\\Scripts\\python.exe scripts\\smoke_test_ai_core.py
 """
 import json
