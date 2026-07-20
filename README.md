@@ -31,9 +31,13 @@ VF_O2O/
 ```
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
-cp .env.example .env   # rồi điền ANTHROPIC_API_KEY
+cp .env.example .env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD
 docker compose up -d   # khởi động Drupal + MySQL
 ```
+
+Trong Drupal admin, cần bật thêm 2 thứ (tắt mặc định):
+- `/admin/config/services/jsonapi` — tick "Accept all JSON:API create, read, update, and delete operations"
+- `/admin/modules` — bật module "HTTP Basic Authentication"
 
 ## Trạng thái Sprint 1
 
@@ -41,5 +45,5 @@ docker compose up -d   # khởi động Drupal + MySQL
 - [x] Dựng Drupal local, bật JSON:API
 - [x] Tạo field tùy chỉnh trên Drupal (field_ai_status, field_ai_score, field_ai_suggestions)
 - [x] AI Core (gọi Claude API, model claude-haiku-4-5-20251001, structured output)
-- [ ] Khung Orchestrator (LangGraph)
+- [x] Khung Orchestrator (LangGraph, 8 node, 4 agent còn là stub)
 - [ ] Agent SEO & Content Quality (thử nghiệm)
