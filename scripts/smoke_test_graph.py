@@ -1,8 +1,8 @@
-"""Manual smoke test for src/graph.py — runs the full LangGraph pipeline
-(Fetch -> Orchestrator -> 4 stub agents -> Aggregator -> Write-back) against
-the real local Drupal instance.
+"""Test thủ công cho src/graph.py — chạy toàn bộ pipeline LangGraph
+(Fetch -> Orchestrator -> 4 agent -> Aggregator -> Write-back) trên
+instance Drupal local thật.
 
-Usage:
+Cách chạy:
     .venv\\Scripts\\python.exe scripts\\smoke_test_graph.py <node_id>
 """
 import json

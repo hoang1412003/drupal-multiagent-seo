@@ -13,10 +13,10 @@ PATCH_HEADERS = {"Content-Type": "application/vnd.api+json"}
 
 
 def fetch_content(node_id: str) -> dict:
-    """Fetch an article node from Drupal via JSON:API.
+    """Lấy 1 bài viết (article) từ Drupal qua JSON:API.
 
-    Returns {"title", "body", "raw_content"} where raw_content is the full
-    JSON:API resource object.
+    Trả về {"title", "body", "raw_content"} - raw_content là toàn bộ
+    JSON:API resource object gốc.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     response = requests.get(url, headers=JSONAPI_HEADERS)
@@ -31,7 +31,7 @@ def fetch_content(node_id: str) -> dict:
 
 
 def write_back(node_id: str, status: str, score: float, suggestions: str) -> None:
-    """PATCH the AI review results back onto the article node."""
+    """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH)."""
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     payload = {
         "data": {
