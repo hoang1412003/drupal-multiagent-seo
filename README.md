@@ -18,7 +18,9 @@ VF_O2O/
 │   ├── ai_core.py               # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   ├── state.py                # ContentReviewState (đối tượng trạng thái dùng chung)
 │   ├── drupal_client.py        # gọi JSON:API Drupal (fetch/patch nội dung)
-│   ├── agents/                 # 4 agent chuyên biệt
+│   ├── agents/
+│   │   ├── content_quality.py  # đã triển khai
+│   │   └── seo.py              # đã triển khai (Brand + Compliance: Sprint 2, hiện là stub trong graph.py)
 │   └── graph.py                # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
 └── docs/
     ├── research.md             # nghiên cứu Drupal CMS
@@ -46,4 +48,6 @@ Trong Drupal admin, cần bật thêm 2 thứ (tắt mặc định):
 - [x] Tạo field tùy chỉnh trên Drupal (field_ai_status, field_ai_score, field_ai_suggestions)
 - [x] AI Core (gọi Claude API, model claude-haiku-4-5-20251001, structured output)
 - [x] Khung Orchestrator (LangGraph, 8 node, 4 agent còn là stub)
-- [ ] Agent SEO & Content Quality (thử nghiệm)
+- [x] Agent SEO & Content Quality (thử nghiệm, chạy thật end-to-end)
+
+**Sprint 1 hoàn thành.** Tiếp theo: Sprint 2 (Brand Voice Agent với RAG, Compliance Agent, hoàn thiện Aggregator, thu thập gold set) — xem [`docs/roadmap.md`](docs/roadmap.md).
