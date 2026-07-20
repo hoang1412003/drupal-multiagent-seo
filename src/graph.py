@@ -3,13 +3,13 @@
 Matches the 8-node design in docs/architecture.md:
 Fetch -> Orchestrator/Dispatch -> 4 agents (parallel) -> Aggregator -> Write-back
 
-The 4 agent nodes are STUBS for now (Sprint 1 skeleton step) - they return a
-fixed placeholder result instead of calling Claude. They get replaced with
-real ai_core.call_agent() calls one at a time in the next Sprint 1 task
-(SEO + Content Quality agents), then Sprint 2 (Brand + Compliance).
+Content Quality and SEO call real Claude agents (Sprint 1). Brand Consistency
+and Compliance are still STUBS - they need a brand guideline (Brand) and are
+scoped for Sprint 2 per docs/roadmap.md.
 """
 from langgraph.graph import END, START, StateGraph
 
+from agents import content_quality, seo
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
 
@@ -45,11 +45,19 @@ def _stub_agent_result(name: str) -> dict:
 
 
 def content_quality_node(state: ContentReviewState) -> dict:
-    return {"content_quality_result": _stub_agent_result("Content Quality")}
+    try:
+        result = content_quality.run(state["title"], state["body"])
+    except Exception:
+        result = None  # agent lỗi -> Aggregator xử lý theo fail-safe (6.4)
+    return {"content_quality_result": result}
 
 
 def seo_node(state: ContentReviewState) -> dict:
-    return {"seo_result": _stub_agent_result("SEO")}
+    try:
+        result = seo.run(state["title"], state["body"])
+    except Exception:
+        result = None
+    return {"seo_result": result}
 
 
 def brand_node(state: ContentReviewState) -> dict:
@@ -108,14 +116,18 @@ def aggregator_node(state: ContentReviewState) -> dict:
     return {"final_score": final_score, "decision": decision, "report": report}
 
 
+ISSUE_LIST_KEYS = ("issues", "meta_issues", "violations", "flags")
+
+
 def write_back_node(state: ContentReviewState) -> dict:
     suggestions_lines = []
     for name, result in (state.get("report") or {}).get("details", {}).items():
         if result is None:
             suggestions_lines.append(f"[{name}] Không có kết quả (agent lỗi/thiếu dữ liệu)")
             continue
-        for issue in result.get("issues", []):
-            suggestions_lines.append(f"[{name}] {issue}")
+        for key in ISSUE_LIST_KEYS:
+            for issue in result.get(key, []):
+                suggestions_lines.append(f"[{name}] {issue}")
 
     write_back(
         node_id=state["node_id"],
