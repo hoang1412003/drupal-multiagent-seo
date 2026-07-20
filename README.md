@@ -2,9 +2,7 @@
 
 Hệ thống Multi-Agent AI hỗ trợ kiểm duyệt, đánh giá và tối ưu nội dung Marketing trước khi xuất bản trên Drupal CMS.
 
-Tài liệu nghiên cứu & thiết kế đầy đủ:
-- `NghienCuu-Drupal-MultiAgent.docx` — bản báo cáo chính thức nộp mentor (không tự chỉnh sửa qua Word để tránh lỗi mất định dạng)
-- `docs/design.md` — bản Markdown tương ứng, dùng làm tài liệu kỹ thuật sống, cập nhật song song với code
+Tài liệu nghiên cứu & thiết kế đầy đủ: [`docs/design.md`](docs/design.md) — cập nhật song song với code, xem trực tiếp trên GitHub.
 
 ## Cấu trúc project
 
@@ -18,7 +16,7 @@ VF_O2O/
 │   ├── drupal_client.py        # gọi JSON:API Drupal (fetch/patch nội dung)
 │   ├── agents/                 # 4 agent chuyên biệt
 │   └── graph.py                # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
-└── NghienCuu-Drupal-MultiAgent.docx
+└── docs/design.md              # tài liệu nghiên cứu & thiết kế
 ```
 
 ## Setup
