@@ -15,6 +15,7 @@ VF_O2O/
 ├── requirements.txt            # Python dependencies
 ├── .env.example                 # copy thành .env và điền ANTHROPIC_API_KEY
 ├── src/
+│   ├── ai_core.py               # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   ├── state.py                # ContentReviewState (đối tượng trạng thái dùng chung)
 │   ├── drupal_client.py        # gọi JSON:API Drupal (fetch/patch nội dung)
 │   ├── agents/                 # 4 agent chuyên biệt
@@ -28,7 +29,8 @@ VF_O2O/
 ## Setup
 
 ```
-pip install -r requirements.txt
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
 cp .env.example .env   # rồi điền ANTHROPIC_API_KEY
 docker compose up -d   # khởi động Drupal + MySQL
 ```
@@ -38,6 +40,6 @@ docker compose up -d   # khởi động Drupal + MySQL
 - [x] Nghiên cứu kiến trúc, chốt công nghệ điều phối (LangGraph)
 - [x] Dựng Drupal local, bật JSON:API
 - [x] Tạo field tùy chỉnh trên Drupal (field_ai_status, field_ai_score, field_ai_suggestions)
-- [ ] AI Core (gọi Claude API)
+- [x] AI Core (gọi Claude API, model claude-haiku-4-5-20251001, structured output)
 - [ ] Khung Orchestrator (LangGraph)
 - [ ] Agent SEO & Content Quality (thử nghiệm)
