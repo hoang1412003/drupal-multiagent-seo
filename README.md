@@ -37,7 +37,7 @@ docker compose up -d   # khởi động Drupal + MySQL
 
 - [x] Nghiên cứu kiến trúc, chốt công nghệ điều phối (LangGraph)
 - [x] Dựng Drupal local, bật JSON:API
-- [ ] Tạo field tùy chỉnh trên Drupal (field_ai_status, field_ai_score, field_ai_suggestions)
+- [x] Tạo field tùy chỉnh trên Drupal (field_ai_status, field_ai_score, field_ai_suggestions)
 - [ ] AI Core (gọi Claude API)
 - [ ] Khung Orchestrator (LangGraph)
 - [ ] Agent SEO & Content Quality (thử nghiệm)
