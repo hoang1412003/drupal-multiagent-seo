@@ -2,7 +2,10 @@
 
 Hệ thống Multi-Agent AI hỗ trợ kiểm duyệt, đánh giá và tối ưu nội dung Marketing trước khi xuất bản trên Drupal CMS.
 
-Tài liệu nghiên cứu & thiết kế đầy đủ: [`docs/design.md`](docs/design.md) — cập nhật song song với code, xem trực tiếp trên GitHub.
+Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
+- [`docs/research.md`](docs/research.md) — nghiên cứu Drupal CMS (kiến trúc, SEO, JSON:API)
+- [`docs/architecture.md`](docs/architecture.md) — thiết kế hệ thống Multi-Agent (LangGraph, 4 agent, Aggregator, calibration, shadow-test)
+- [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 
 ## Cấu trúc project
 
@@ -16,7 +19,10 @@ VF_O2O/
 │   ├── drupal_client.py        # gọi JSON:API Drupal (fetch/patch nội dung)
 │   ├── agents/                 # 4 agent chuyên biệt
 │   └── graph.py                # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
-└── docs/design.md              # tài liệu nghiên cứu & thiết kế
+└── docs/
+    ├── research.md             # nghiên cứu Drupal CMS
+    ├── architecture.md         # thiết kế hệ thống Multi-Agent
+    └── roadmap.md              # lộ trình 3 sprint
 ```
 
 ## Setup
