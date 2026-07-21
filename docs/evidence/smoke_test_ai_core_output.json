@@ -1,0 +1,17 @@
+{
+  "score": 85,
+  "issues": [
+    {
+      "type": "Ngữ pháp",
+      "location": "Câu 1: 'VinFast chính thức triển khai chương trình ưu đãi đặc biệt dành cho khách hàng mua xe VF3 trong tháng 7.'",
+      "suggestion": "Cấu trúc câu hơi cồng kềnh. Có thể rút gọn thành: 'VinFast triển khai chương trình ưu đãi đặc biệt cho khách hàng mua VF3 tháng 7.' (bỏ 'chính thức' và 'xe' để tránh lặp từ)"
+    }
+  ],
+  "strengths": [
+    "Tiêu đề rõ ràng, nêu rõ sản phẩm (VF3) và lợi ích chính (giảm giá 50 triệu)",
+    "Nội dung cô đọng, dễ hiểu, liệt kê đầy đủ các ưu đãi (giảm giá, bảo hiểm, miễn phí sạc pin)",
+    "Thông tin rõ ràng về thời gian áp dụng (17/07/2026 - 31/07/2026)",
+    "Không có lỗi chính tả",
+    "Văn phong chuyên nghiệp, thích hợp cho nội dung marketing"
+  ]
+}
