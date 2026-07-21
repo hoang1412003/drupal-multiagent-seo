@@ -1,0 +1,16 @@
+Uu dai VF5 thang 8 (bai tot)
+  final_score=89.25 decision=publish CQ=85 SEO=65
+Su kien lai thu VF8 (bai tot)
+  final_score=89.9 decision=publish CQ=82 SEO=72
+VF6 ra mat phien ban moi (bai tot)
+  final_score=90.65 decision=publish CQ=85 SEO=72
+VF9 (bai tot nhung kha ngan)
+  final_score=80.5 decision=publish CQ=82 SEO=25
+VF3 thag 7 - loi chinh ta co y
+  final_score=79.5 decision=needs_revision CQ=62 SEO=45
+Tin moi - thieu SEO co y
+  final_score=69.25 decision=needs_revision CQ=45 SEO=15
+Vf 3 giam gia thang 8 - sai thuat ngu brand co y
+  final_score=88.15 decision=publish CQ=75 SEO=72
+VF3 tot nhat the gioi - phong dai/compliance co y
+  final_score=80.25 decision=publish CQ=65 SEO=45

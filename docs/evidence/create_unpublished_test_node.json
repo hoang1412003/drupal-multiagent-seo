@@ -1,0 +1,46 @@
+STATUS 201
+{
+  "jsonapi": {
+    "version": "1.0",
+    "meta": {
+      "links": {
+        "self": {
+          "href": "http://jsonapi.org/format/1.0/"
+        }
+      }
+    }
+  },
+  "data": {
+    "type": "node--article",
+    "id": "7cda0d41-6df7-4c9f-b11c-bf1780256a6d",
+    "links": {
+      "self": {
+        "href": "http://localhost:8080/jsonapi/node/article/7cda0d41-6df7-4c9f-b11c-bf1780256a6d?resourceVersion=id%3A67"
+      },
+      "working-copy": {
+        "href": "http://localhost:8080/jsonapi/node/article/7cda0d41-6df7-4c9f-b11c-bf1780256a6d?resourceVersion=rel%3Aworking-copy"
+      }
+    },
+    "attributes": {
+      "drupal_internal__nid": 12,
+      "drupal_internal__vid": 67,
+      "langcode": "vi",
+      "revision_timestamp": "2026-07-21T10:28:15+00:00",
+      "revision_log": null,
+      "status": false,
+      "title": "TEST EVIDENCE - Bai chua publish (Needs Review)",
+      "created": "2026-07-21T10:28:15+00:00",
+      "changed": "2026-07-21T10:28:15+00:00",
+      "promote": true,
+      "sticky": false,
+      "default_langcode": true,
+      "revision_translation_affected": true,
+      "path": {
+        "alias": null,
+        "pid": null,
+        "langcode": "vi"
+      },
+      "body": {
+        "value": "VinFast VF3 la mau xe dien mini phu hop di lai trong do thi, gia ban hop ly cho nguoi dung lan dau mua xe dien. Chuong trinh khuyen mai thang 8 ap dung cho khach hang dat coc som.",
+        "format": "basic_html",
+        "processed": "VinFast VF3 la mau xe dien mini phu hop di

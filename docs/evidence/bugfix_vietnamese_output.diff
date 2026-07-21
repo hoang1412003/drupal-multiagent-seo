@@ -1,0 +1,271 @@
+commit b1ec06e1e94c9dd64133337268b32ae011c4b1f1
+Author: hoang1412003 <vanhoang1412003@gmail.com>
+Date:   Tue Jul 21 16:05:58 2026 +0700
+
+    Fix: Vietnamese-only agent output, add Sprint 1 report and batch test script
+    
+    - content_quality.py / seo.py: explicitly require Vietnamese output in the
+      system prompt - previously the LLM mixed English/Vietnamese across runs,
+      confusing for the content team reading field_ai_suggestions.
+    - scripts/run_all_samples.py: runs the full pipeline over the 8 sample
+      articles in one go (labeled by intended error type), printing a summary
+      per article for quick manual testing without calling the API 8 separate
+      times.
+    - docs/sprint1-report.md: Sprint 1 report with real, single-run test
+      results across all 8 samples and the 3 bugs found/fixed while reviewing
+      the pipeline before submission.
+    - Add CLAUDE.md and .vscode/settings.json (editor Python path config).
+
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+new file mode 100644
+index 0000000..ed9863b
+--- /dev/null
++++ b/.vscode/settings.json
+@@ -0,0 +1,3 @@
++{
++  "python.analysis.extraPaths": ["./src"]
++}
+diff --git a/CLAUDE.md b/CLAUDE.md
+new file mode 100644
+index 0000000..66cd1ae
+--- /dev/null
++++ b/CLAUDE.md
+@@ -0,0 +1,70 @@
++# CLAUDE.md
++
++Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
++
++**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
++
++## 1. Think Before Coding
++
++**Don't assume. Don't hide confusion. Surface tradeoffs.**
++
++Before implementing:
++
++- State your assumptions explicitly. If uncertain, ask.
++- If multiple interpretations exist, present them - don't pick silently.
++- If a simpler approach exists, say so. Push back when warranted.
++- If something is unclear, stop. Name what's confusing. Ask.
++
++## 2. Simplicity First
++
++**Minimum code that solves the problem. Nothing speculative.**
++
++- No features beyond what was asked.
++- No abstractions for single-use code.
++- No "flexibility" or "configurability" that wasn't requested.
++- No error handling for impossible scenarios.
++- If you write 200 lines and it could be 50, rewrite it.
++
++Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
++
++## 3. Surgical Changes
++
++**Touch only what you must. Clean up only your own mess.**
++
++When editing existing code:
++
++- Don't "improve" adjacent code, comments, or formatting.
++- Don't refactor things that aren't broken.
++- Match existing style, even if you'd do it differently.
++- If you notice unrelated dead code, mention it - don't delete it.
++
++When your changes create orphans:
++
++- Remove imports/variables/functions that YOUR changes made unused.
++- Don't remove pre-existing dead code unless asked.
++
++The test: Every changed line should trace directly to the user's request.
++
++## 4. Goal-Driven Execution
++
++**Define success criteria. Loop until verified.**
++
++Transform tasks into verifiable goals:
++
++- "Add validation" → "Write tests for invalid inputs, then make them pass"
++- "Fix the bug" → "Write a test that reproduces it, then make it pass"
++- "Refactor X" → "Ensure tests pass before and after"
++
++For multi-step tasks, state a brief plan:
++
++```
++1. [Step] → verify: [check]
++2. [Step] → verify: [check]
++3. [Step] → verify: [check]
++```
++
++Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
++
++---
++
++**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+diff --git a/docs/sprint1-report.md b/docs/sprint1-report.md
+new file mode 100644
+index 0000000..3e62cdd
+--- /dev/null
++++ b/docs/sprint1-report.md
+@@ -0,0 +1,89 @@
++# PHẦN 4: BÁO CÁO SPRINT 1
++
++## 1. Mục tiêu Sprint 1
++
++Theo lộ trình 3 sprint đã được mentor duyệt (`docs/roadmap.md`), Sprint 1 có 4 mục tiêu:
++
++1. Nghiên cứu kiến trúc, chốt công nghệ điều phối.
++2. Cải tạo Drupal (tạo content type/field cần thiết) + xây dựng AI Core.
++3. Dựng khung Orchestrator (node Fetch, Dispatch, State object).
++4. Xây thử Agent SEO và Content Quality Agent (2 agent không phụ thuộc brand guideline), chạy thật end-to-end.
++
++Báo cáo này trình bày kết quả đạt được, bằng chứng kiểm thử thực tế, và các vấn đề phát hiện/đã khắc phục trong quá trình rà soát lại trước khi bàn giao.
++
++## 2. Kết quả đạt được
++
++### 2.1. Kiến trúc & công nghệ điều phối
++
++Đã khảo sát 3 lựa chọn (LangGraph, tự viết orchestrator bằng Python thuần, CrewAI) và chốt dùng **LangGraph** — do có sẵn cơ chế fan-out/fan-in (chạy song song nhiều agent rồi gộp kết quả) và quản lý state xuyên suốt, khớp trực tiếp với kiến trúc cố định/tuần tự của đề tài. Căn cứ lựa chọn chi tiết (bao gồm khảo sát case study ngành thực tế) xem `docs/research.md` mục 1 và mục 4.
++
++### 2.2. Hạ tầng Drupal
++
++- Dựng Drupal 10 + MySQL 8 local bằng Docker Compose (`docker-compose.yml`), truy cập qua `http://localhost:8080`.
++- Bật module JSON:API và HTTP Basic Authentication.
++- Tạo 3 field tùy chỉnh trên content type "Bài viết": `field_ai_status` (List text), `field_ai_score` (Number), `field_ai_suggestions` (Long text) — đã xác nhận có dữ liệu thật, không chỉ tạo field rỗng.
++
++### 2.3. AI Core
++
++`src/ai_core.py` — hàm dùng chung `call_agent()` gọi Claude (model `claude-haiku-4-5-20251001`) với structured output (JSON Schema), dùng chung cho toàn bộ 4 agent.
++
++### 2.4. Khung Orchestrator (LangGraph, 8 node)
++
++`src/graph.py` triển khai đủ 8 node theo đúng sơ đồ kiến trúc: Fetch → Orchestrator/Dispatch → 4 agent (song song) → Aggregator → Write-back. Content Quality và SEO Agent chạy thật; Brand Consistency và Compliance Agent là **stub có chủ đích** (luôn trả điểm 100, chưa đánh giá gì) — đúng theo kế hoạch, vì 2 agent này cần brand guideline (Brand) và thuộc phạm vi Sprint 2.
++
++### 2.5. Content Quality Agent & SEO Agent
++
++Cả 2 agent triển khai thật (`src/agents/content_quality.py`, `src/agents/seo.py`), gọi LLM thật với system prompt và output schema riêng biệt, đã kiểm thử end-to-end (xem mục 3).
++
++## 3. Kiểm thử thực tế
++
++Đã tạo 8 bài viết mẫu trên Drupal, cố ý bao phủ các loại lỗi khác nhau (bài tốt, lỗi chính tả, thiếu SEO, sai thuật ngữ thương hiệu, phóng đại/vi phạm compliance), theo đúng khuyến nghị bộ dữ liệu mẫu ở `docs/architecture.md` mục 8.1. Chạy toàn bộ pipeline thật (Fetch → 4 agent → Aggregator → Write-back) trên cả 8 bài:
++
++Toàn bộ 8 bài được chạy trong **cùng một lượt** (1 script, gọi tuần tự `build_graph().invoke()` cho từng bài), đảm bảo mỗi dòng kết quả dưới đây đến từ đúng 1 lần gọi API duy nhất, không ghép số liệu từ các lần chạy khác nhau:
++
++| Bài viết | Loại lỗi cố ý | Content Quality | SEO | Final score | Quyết định |
++|---|---|---|---|---|---|
++| Ưu đãi VF5 tháng 8 | Bài tốt | 85 | 72 | 90.65 | publish |
++| Sự kiện lái thử VF8 | Bài tốt | 85 | 72 | 90.65 | publish |
++| VF6 ra mắt phiên bản mới | Bài tốt | 85 | 72 | 90.65 | publish |
++| VF9 | Bài tốt nhưng khá ngắn | 75 | 25 | 78.75 | needs_revision |
++| Khuyến mãi VF3 thág 7 - ưu đải cực khủng | Lỗi chính tả/ngữ pháp cố ý | 65 | 45 | 80.25 | publish |
++| Tin mới | Thiếu SEO cố ý (title/nội dung quá ngắn) | 35 | 15 | 66.75 | needs_revision |
++| Vf 3 giảm giá tháng 8 | Sai thuật ngữ thương hiệu cố ý (vf3/VF 3/VF-3 lẫn lộn) | 75 | 72 | 88.15 | publish |
++| VF3 - Chiếc xe điện tốt nhất thế giới... | Phóng đại/vi phạm compliance cố ý | 35 | 45 | 72.75 | needs_revision |
++
++**Nhận xét:**
++
++- Content Quality Agent bắt đúng và chi tiết các lỗi chính tả cố ý (ví dụ: "thág"→"tháng", "dc"→"được", "giãm"→"giảm", "goi"→"gói" ở bài lỗi chính tả), và chấm thấp cho các bài nội dung quá sơ sài (Tin mới, VF9 — dù VF9 không cố ý viết lỗi, chỉ vì nội dung quá ngắn nên vẫn bị SEO Agent chấm thấp).
++- SEO Agent phản ánh đúng mức độ nghiêm trọng theo dữ liệu thực tế: bài "Tin mới" (cố ý thiếu SEO) chỉ được 15 điểm, thấp hơn hẳn các bài bình thường (~72 điểm); bài "VF9" tuy không cố ý lỗi SEO nhưng vì chỉ có 2 câu ngắn nên cũng chỉ được 25 điểm — cho thấy SEO Agent nhạy với độ dài nội dung một cách nhất quán, không chỉ với các bài cố ý làm lỗi.
++- Bài "sai thuật ngữ thương hiệu" và bài "vi phạm compliance" **vẫn được Content Quality Agent phát hiện một phần** (nhờ đọc ra sự thiếu nhất quán tên sản phẩm/văn phong phóng đại như "tốt nhất thế giới", "giảm giá không giới hạn", "cơ hội duy nhất trong đời"), nhưng cả 2 vẫn có điểm Brand/Compliance = 100 vì **2 agent này còn là stub** — đây là giới hạn đã biết trước, đúng theo phạm vi Sprint 1, không phải lỗi. Đặc biệt bài vi phạm compliance là minh chứng rõ vì sao Compliance Agent thật là ưu tiên cao nhất ở Sprint 2 (nếu Content Quality Agent không tình cờ đọc ra văn phong phóng đại, sẽ không có gì phát hiện được cả).
++- **Lưu ý quan trọng về tính không xác định (non-determinism) của LLM:** chạy cùng 1 bài ở các thời điểm khác nhau cho điểm số hơi khác nhau mỗi lần (ví dụ bài lỗi chính tả dao động quanh mốc 80, giữa các lần chạy đã ra cả `needs_revision` lẫn `publish`). Đây là đặc điểm tự nhiên của LLM, không phải lỗi hệ thống — nhưng cho thấy rõ tầm quan trọng của việc **hiệu chỉnh ngưỡng quyết định bằng gold set ở Sprint 3** (mục 8.2 `architecture.md`), vì các bài có điểm nằm sát ngưỡng 80/50 có thể đổi quyết định giữa các lần chấm.
++- Đã test riêng cả trường hợp bài viết ở trạng thái **chưa công bố** (unpublished/"Needs Review") — đúng use case chính của đề tài — pipeline chạy và ghi kết quả thành công (xem mục 4.2).
++
++## 4. Lỗi phát hiện và đã khắc phục trong quá trình rà soát
++
++Trong lúc chuẩn bị báo cáo, đã rà soát lại toàn bộ code (không chỉ dựa vào việc README tick sẵn) và phát hiện, sửa 3 lỗi thật:
++
++### 4.1. Aggregator tính sai `final_score` khi bị Compliance veto
++
++Khi Compliance phủ quyết (`score < 50` hoặc có flag `critical`), `final_score` trước đây bị gán bằng riêng điểm Compliance thay vì trung bình có trọng số của toàn bộ agent còn dữ liệu — sai lệch so với công thức ở `docs/architecture.md` mục 6.1, khiến điểm ghi vào `field_ai_score` không phản ánh đúng chất lượng tổng thể bài viết. Đã sửa: tách riêng logic tính điểm (luôn theo trung bình trọng số) và logic quyết định veto.
++
++### 4.2. `fetch_content()` không đọc được bài viết chưa công bố
++
++`fetch_content()` gọi GET không xác thực, chỉ dựa vào quyền đọc công khai (Anonymous role) — quyền này chỉ áp dụng cho bài đã publish. Vì use case chính của hệ thống là đánh giá bài ở trạng thái "Needs Review" (chưa publish), lỗi này khiến pipeline gãy ngay bước Fetch (401 Unauthorized) với đúng loại bài viết mà hệ thống được thiết kế ra để xử lý. Đã tái hiện lỗi bằng test thật (tạo bài chưa publish, xác nhận 401), sửa bằng cách thêm `auth=AUTH`, và verify lại toàn bộ pipeline chạy thành công trên bài chưa publish.
++
++### 4.3. Output lẫn lộn tiếng Anh/tiếng Việt giữa các agent
++
++System prompt của Content Quality và SEO Agent không có chỉ dẫn ngôn ngữ đầu ra, khiến LLM tự chọn ngôn ngữ không nhất quán (có lần trả tiếng Anh, có lần tiếng Việt) trong cùng 1 lần chạy — gây khó hiểu cho đội content (người đọc `field_ai_suggestions`). Đã thêm chỉ dẫn "Luôn trả lời bằng tiếng Việt" vào cả 2 system prompt, verify lại output nhất quán tiếng Việt.
++
++## 5. Giới hạn phạm vi hiện tại (có chủ đích, để lại cho Sprint 2/3)
++
++- Brand Consistency Agent và Compliance Agent còn là stub (Sprint 2, cần brand guideline + rule-based list).
++- Chưa có retry/backoff khi LLM hoặc Drupal API lỗi (`docs/architecture.md` mục 7 mô tả nhưng chưa triển khai).
++- Chưa có test tự động (pytest); hiện dùng script test thủ công (`scripts/smoke_test_*.py`).
++- Chưa có UI báo cáo hiển thị đẹp trong `/admin/content` (mới hiển thị field thô khi mở từng bài viết) — Sprint 2.
++- Trọng số Aggregator (0.25/0.20/0.25/0.30) và ngưỡng quyết định (80/50) hiện là giá trị tạm thời, sẽ hiệu chỉnh từ gold set ở Sprint 3.
++
++## 6. Kết luận
++
++Sprint 1 đã hoàn thành đầy đủ 4 mục tiêu đề ra, có bằng chứng kiểm thử thật (không chỉ dựa vào code chạy được mà đã chạy 8 kịch bản khác nhau, kể cả kịch bản chính "bài chưa publish"). Trong quá trình rà soát đã chủ động phát hiện và khắc phục 3 lỗi thật trước khi bàn giao, nâng cao độ tin cậy của hệ thống. Các hạng mục còn thiếu đều là phạm vi đã được lên kế hoạch rõ ràng cho Sprint 2/3, không phải sai sót ngoài dự kiến.
+diff --git a/scripts/run_all_samples.py b/scripts/run_all_samples.py
+new file mode 100644
+index 0000000..beaf11e
+--- /dev/null
++++ b/scripts/run_all_samples.py
+@@ -0,0 +1,39 @@
++"""Chạy toàn bộ pipeline LangGraph trên bộ 8 bài viết mẫu (golden set nhỏ,
++xem docs/architecture.md muc 8.1), moi bai co 1 loai loi co y khac nhau -
++dung de kiem tra nhanh cac agent co bat dung loi tuong ung khong.
++
++Cach chay (tu thu muc goc project, sau khi Drupal local dang chay va da
++tao du 8 bai viet mau tren Drupal):
++    .venv\\Scripts\\python.exe scripts\\run_all_samples.py
++"""
++import os
++import sys
++
++sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
++
++from graph import build_graph
++
++SAMPLES = [
++    ("3fea90a9-b0cc-422f-bee6-79c2b35aaf0f", "Uu dai VF5 thang 8 (bai tot)"),
++    ("e6611bd7-362f-4f24-93d6-041623dfaa94", "Su kien lai thu VF8 (bai tot)"),
++    ("176ea2cb-5976-4d25-ac3f-dada7d7c28b0", "VF6 ra mat phien ban moi (bai tot)"),
++    ("b4a38180-fc74-42e6-9d5a-aadf8cca9c80", "VF9 (bai tot nhung kha ngan)"),
++    ("a59fff1a-f924-4710-9719-b97cbef83b5c", "VF3 thag 7 - loi chinh ta co y"),
++    ("03b9ed27-145b-4520-b047-bc3bae3c67c6", "Tin moi - thieu SEO co y"),
++    ("b8a6b9c2-d432-4e00-bcb3-cbe1111c7c63", "Vf 3 giam gia thang 8 - sai thuat ngu brand co y"),
++    ("fdeeaec6-472a-449e-b007-1ee0e42dd51f", "VF3 tot nhat the gioi - phong dai/compliance co y"),
++]
++
++if __name__ == "__main__":
++    app = build_graph()
++
++    for node_id, label in SAMPLES:
++        result = app.invoke({"node_id": node_id})
++        report = result["report"]
++        cq = report["details"]["content_quality"]
++        seo = report["details"]["seo"]
++        print(
++            f"{label}\n"
++            f"  final_score={report['final_score']} decision={report['decision']} "
++            f"CQ={cq['score'] if cq else None} SEO={seo['score'] if seo else None}"
++        )
+diff --git a/src/agents/content_quality.py b/src/agents/content_quality.py
+index 0ccd5cf..3659d2f 100644
+--- a/src/agents/content_quality.py
++++ b/src/agents/content_quality.py
+@@ -3,7 +3,8 @@ from ai_core import call_agent
+ SYSTEM_PROMPT = (
+     "Bạn là biên tập viên nội dung marketing. Chỉ đánh giá chính tả, ngữ pháp, "
+     "văn phong, độ rõ ràng, câu quá dài/tối nghĩa, tính mạch lạc. "
+-    "KHÔNG đánh giá SEO hay thương hiệu."
++    "KHÔNG đánh giá SEO hay thương hiệu. "
++    "Luôn trả lời bằng tiếng Việt trong tất cả các trường văn bản."
+ )
+ 
+ OUTPUT_SCHEMA = {
+diff --git a/src/agents/seo.py b/src/agents/seo.py
+index cee71c9..d814755 100644
+--- a/src/agents/seo.py
++++ b/src/agents/seo.py
+@@ -7,7 +7,8 @@ SYSTEM_PROMPT = (
+     "đặc biệt trong 100 từ đầu.\n"
+     "2. Tiêu đề có trong khoảng 50-60 ký tự không (chuẩn hiển thị trên Google).\n"
+     "3. Nội dung có cấu trúc heading rõ ràng không (thẻ <h2>/<h3> nếu có trong HTML).\n"
+-    "4. Độ dài nội dung có đủ cho SEO không (khuyến nghị tối thiểu khoảng 300 từ)."
++    "4. Độ dài nội dung có đủ cho SEO không (khuyến nghị tối thiểu khoảng 300 từ).\n"
++    "Luôn trả lời bằng tiếng Việt trong tất cả các trường văn bản."
+ )
+ 
+ OUTPUT_SCHEMA = {
