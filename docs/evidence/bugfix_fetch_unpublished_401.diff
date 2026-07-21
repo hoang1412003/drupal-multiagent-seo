@@ -1,0 +1,26 @@
+commit c92adf53c7b4813c3b9522bdcd230519e53e6b26
+Author: hoang1412003 <vanhoang1412003@gmail.com>
+Date:   Tue Jul 21 15:05:13 2026 +0700
+
+    Fix: fetch_content cannot read unpublished articles
+    
+    fetch_content() called GET without auth, relying on Drupal's public
+    Anonymous read permission which only covers published content. The
+    system's core use case is reviewing articles in "Needs Review" state
+    (not yet published), so this caused a 401 error right at the Fetch
+    step. Added auth=AUTH (reusing the existing credential) so unpublished
+    articles can be fetched too - verified with a live test against Drupal.
+
+diff --git a/src/drupal_client.py b/src/drupal_client.py
+index 1a5d79a..ac2e810 100644
+--- a/src/drupal_client.py
++++ b/src/drupal_client.py
+@@ -19,7 +19,7 @@ def fetch_content(node_id: str) -> dict:
+     JSON:API resource object gốc.
+     """
+     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
+-    response = requests.get(url, headers=JSONAPI_HEADERS)
++    response = requests.get(url, headers=JSONAPI_HEADERS, auth=AUTH)
+     response.raise_for_status()
+     resource = response.json()["data"]
+     attributes = resource["attributes"]
