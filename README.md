@@ -10,7 +10,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 ## Cấu trúc project
 
 ```
-VF_O2O/
+drupal-multiagent-seo/
 ├── docker-compose.yml          # Drupal + MySQL local instance
 ├── requirements.txt            # Python dependencies
 ├── .env.example                 # copy thành .env và điền ANTHROPIC_API_KEY
