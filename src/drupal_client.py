@@ -19,7 +19,7 @@ def fetch_content(node_id: str) -> dict:
     JSON:API resource object gốc.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
-    response = requests.get(url, headers=JSONAPI_HEADERS)
+    response = requests.get(url, headers=JSONAPI_HEADERS, auth=AUTH)
     response.raise_for_status()
     resource = response.json()["data"]
     attributes = resource["attributes"]
