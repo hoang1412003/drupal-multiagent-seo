@@ -7,7 +7,8 @@ SYSTEM_PROMPT = (
     "đặc biệt trong 100 từ đầu.\n"
     "2. Tiêu đề có trong khoảng 50-60 ký tự không (chuẩn hiển thị trên Google).\n"
     "3. Nội dung có cấu trúc heading rõ ràng không (thẻ <h2>/<h3> nếu có trong HTML).\n"
-    "4. Độ dài nội dung có đủ cho SEO không (khuyến nghị tối thiểu khoảng 300 từ)."
+    "4. Độ dài nội dung có đủ cho SEO không (khuyến nghị tối thiểu khoảng 300 từ).\n"
+    "Luôn trả lời bằng tiếng Việt trong tất cả các trường văn bản."
 )
 
 OUTPUT_SCHEMA = {
