@@ -89,22 +89,20 @@ def aggregator_node(state: ContentReviewState) -> dict:
         has_critical_flag = any(
             f.get("severity") == "critical" for f in compliance.get("flags", [])
         )
+        available = {k: v for k, v in results.items() if v is not None}
+        total_weight = sum(WEIGHTS[k] for k in available)
+        final_score = (
+            sum(WEIGHTS[k] * v["score"] for k, v in available.items())
+            / total_weight
+        )
         if compliance["score"] < 50 or has_critical_flag:
             decision = "rejected"
-            final_score = compliance["score"]
+        elif final_score >= 80:
+            decision = "publish"
+        elif final_score >= 50:
+            decision = "needs_revision"
         else:
-            available = {k: v for k, v in results.items() if v is not None}
-            total_weight = sum(WEIGHTS[k] for k in available)
-            final_score = (
-                sum(WEIGHTS[k] * v["score"] for k, v in available.items())
-                / total_weight
-            )
-            if final_score >= 80:
-                decision = "publish"
-            elif final_score >= 50:
-                decision = "needs_revision"
-            else:
-                decision = "rejected"
+            decision = "rejected"
 
     report = {
         "node_id": state["node_id"],
