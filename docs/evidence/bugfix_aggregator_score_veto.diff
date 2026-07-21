@@ -1,0 +1,51 @@
+commit 9935effa244dabaac726e767042a340d7faed90c
+Author: hoang1412003 <vanhoang1412003@gmail.com>
+Date:   Tue Jul 21 10:21:24 2026 +0700
+
+    Fix: final_score bi ghi de bang diem Compliance khi bi veto
+    
+    Truoc day khi Compliance phu quyet (score<50 hoac co flag critical),
+    final_score duoc gan bang rieng diem Compliance thay vi trung binh co
+    trong so theo dung cong thuc architecture.md muc 6.1, khien field_ai_score
+    ghi nguoc Drupal khong phan anh dung chat luong tong the cua bai viet.
+    
+    Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+diff --git a/src/graph.py b/src/graph.py
+index 454669a..b9929db 100644
+--- a/src/graph.py
++++ b/src/graph.py
+@@ -89,22 +89,20 @@ def aggregator_node(state: ContentReviewState) -> dict:
+         has_critical_flag = any(
+             f.get("severity") == "critical" for f in compliance.get("flags", [])
+         )
++        available = {k: v for k, v in results.items() if v is not None}
++        total_weight = sum(WEIGHTS[k] for k in available)
++        final_score = (
++            sum(WEIGHTS[k] * v["score"] for k, v in available.items())
++            / total_weight
++        )
+         if compliance["score"] < 50 or has_critical_flag:
+             decision = "rejected"
+-            final_score = compliance["score"]
++        elif final_score >= 80:
++            decision = "publish"
++        elif final_score >= 50:
++            decision = "needs_revision"
+         else:
+-            available = {k: v for k, v in results.items() if v is not None}
+-            total_weight = sum(WEIGHTS[k] for k in available)
+-            final_score = (
+-                sum(WEIGHTS[k] * v["score"] for k, v in available.items())
+-                / total_weight
+-            )
+-            if final_score >= 80:
+-                decision = "publish"
+-            elif final_score >= 50:
+-                decision = "needs_revision"
+-            else:
+-                decision = "rejected"
++            decision = "rejected"
+ 
+     report = {
+         "node_id": state["node_id"],

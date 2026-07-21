@@ -1,0 +1,68 @@
+{
+  "node_id": "7cda0d41-6df7-4c9f-b11c-bf1780256a6d",
+  "final_score": 80.75,
+  "decision": "publish",
+  "missing_agents": [],
+  "details": {
+    "content_quality": {
+      "score": 75,
+      "issues": [
+        {
+          "type": "Chính tả",
+          "location": "Tiêu đề",
+          "suggestion": "Thay 'Bai chua publish' thành 'Bài chưa xuất bản' để rõ ràng và chuyên nghiệp hơn"
+        },
+        {
+          "type": "Chính tả",
+          "location": "Đoạn đầu tiên",
+          "suggestion": "Thay 'la' thành 'là', 'mau xe' thành 'mẫu xe', 'phu hop' thành 'phù hợp', 'di lai' thành 'di lại', 'gia ban' thành 'giá bán', 'hop ly' thành 'hợp lý'"
+        },
+        {
+          "type": "Chính tả",
+          "location": "Đoạn thứ hai",
+          "suggestion": "Thay 'Chuong trinh' thành 'Chương trình', 'khuyen mai' thành 'khuyến mãi', 'thang 8' thành 'tháng 8', 'ap dung' thành 'áp dụng', 'khach hang' thành 'khách hàng', 'dat coc' thành 'đặt cọc', 'som' thành 'sớm'"
+        },
+        {
+          "type": "Câu quá dài/tối nghĩa",
+          "location": "Đoạn đầu tiên",
+          "suggestion": "Chia câu thứ nhất thành 2 câu để dễ đọc: 'VinFast VF3 là mẫu xe điện mini phù hợp di lại trong đô thị. Mẫu xe này có giá bán hợp lý cho người dùng lần đầu mua xe điện.'"
+        },
+        {
+          "type": "Tính mạch lạc",
+          "location": "Toàn bài",
+          "suggestion": "Thêm dấu chấm ở cuối câu 'Chương trình khuyến mãi tháng 8 áp dụng cho khách hàng đặt cọc sớm.' để bài viết hoàn chỉnh"
+        }
+      ],
+      "strengths": [
+        "Nội dung ngắn gọn, dễ hiểu về sản phẩm",
+        "Lưu ý rõ về chương trình khuyến mãi thời gian",
+        "Đối tượng khách hàng được xác định rõ ràng"
+      ]
+    },
+    "seo": {
+      "score": 35,
+      "keyword_analysis": {
+        "main_keyword": "VinFast VF3",
+        "found_in_title": false,
+        "density_ok": false
+      },
+      "meta_issues": [
+        "Tiêu đề quá ngắn (chỉ 42 ký tự, cần 50-60 ký tự)",
+        "Từ khóa chính 'VinFast VF3' không xuất hiện trong tiêu đề",
+        "Tiêu đề không phù hợp SEO (chứa 'TEST EVIDENCE', 'Bai chua publish', 'Needs Review')"
+      ],
+      "heading_structure_ok": false
+    },
+    "brand": {
+      "score": 100,
+      "issues": [],
+      "note": "STUB - Brand Consistency agent chưa triển khai (xem Sprint 1 tiếp theo)"
+    },
+    "compliance": {
+      "score": 100,
+      "issues": [],
+      "note": "STUB - Compliance agent chưa triển khai (xem Sprint 1 tiếp theo)",
+      "flags": []
+    }
+  }
+}

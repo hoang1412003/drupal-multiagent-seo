@@ -117,6 +117,16 @@ def aggregator_node(state: ContentReviewState) -> dict:
 ISSUE_LIST_KEYS = ("issues", "meta_issues", "violations", "flags")
 
 
+def _format_issue(issue) -> str:
+    # issue có thể là string (VD: seo.meta_issues) hoặc dict với các trường
+    # khác nhau tùy agent (VD: content_quality {type, location, suggestion}) -
+    # in dict thô sẽ ra dạng {'key': 'value', ...} khó đọc, nên ghép lại thành
+    # chuỗi "key: value" thay vì để nguyên repr Python.
+    if not isinstance(issue, dict):
+        return str(issue)
+    return "; ".join(f"{k}: {v}" for k, v in issue.items())
+
+
 def write_back_node(state: ContentReviewState) -> dict:
     suggestions_lines = []
     for name, result in (state.get("report") or {}).get("details", {}).items():
@@ -125,7 +135,7 @@ def write_back_node(state: ContentReviewState) -> dict:
             continue
         for key in ISSUE_LIST_KEYS:
             for issue in result.get(key, []):
-                suggestions_lines.append(f"[{name}] {issue}")
+                suggestions_lines.append(f"[{name}] {_format_issue(issue)}")
 
     write_back(
         node_id=state["node_id"],
