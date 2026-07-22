@@ -1,0 +1,16 @@
+{
+  "phrases": [
+    {"text": "tốt nhất", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "số 1", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "số một", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "duy nhất", "severity": "critical", "rule": "Cường điệu tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "không đối thủ", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "vô địch", "severity": "critical", "rule": "Cường điệu tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "chưa từng có", "severity": "critical", "rule": "Cường điệu tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "hiệu quả 100%", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ khoa học (Luật Quảng cáo)"},
+    {"text": "an toàn tuyệt đối", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "cam kết 100%", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "giảm giá không giới hạn", "severity": "critical", "rule": "Thông tin khuyến mãi gây hiểu nhầm - thiếu điều kiện/thời hạn rõ ràng"},
+    {"text": "cơ hội duy nhất trong đời", "severity": "critical", "rule": "Cường điệu tuyệt đối không có căn cứ (Luật Quảng cáo)"}
+  ]
+}
