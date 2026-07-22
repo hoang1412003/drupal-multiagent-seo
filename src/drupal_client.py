@@ -58,7 +58,13 @@ def fetch_content(node_id: str) -> dict:
 
 
 def write_back(node_id: str, status: str, score: float, suggestions: str) -> None:
-    """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH)."""
+    """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH).
+
+    Tự retry khi Drupal lỗi mạng/5xx (docs/architecture.md mục 7). Nếu hết
+    retry vẫn lỗi, KHÔNG raise - chỉ ghi log cảnh báo, vì ở bước này bài
+    viết đã được 4 agent chấm điểm xong (tốn API call thật); để lỗi ghi-ngược
+    làm sập cả script sẽ lãng phí toàn bộ công việc đã làm.
+    """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     payload = {
         "data": {
@@ -71,5 +77,10 @@ def write_back(node_id: str, status: str, score: float, suggestions: str) -> Non
             },
         }
     }
-    response = requests.patch(url, headers=PATCH_HEADERS, json=payload, auth=AUTH)
-    response.raise_for_status()
+    try:
+        _request_with_retry(requests.patch, url, headers=PATCH_HEADERS, json=payload, auth=AUTH)
+    except requests.RequestException as e:
+        logging.warning(
+            "Write-back that bai cho node %s sau %d lan thu: %s",
+            node_id, MAX_ATTEMPTS, e,
+        )
