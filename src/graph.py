@@ -3,8 +3,8 @@
 Khớp thiết kế 8 node trong docs/architecture.md:
 Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
 
-Content Quality và SEO gọi Claude thật (Sprint 1). Brand Consistency và
-Compliance vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
+Content Quality, SEO và Compliance gọi Claude thật (Sprint 1 + Compliance Agent).
+Brand Consistency vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
 Sprint 2 theo docs/roadmap.md.
 """
 from langgraph.graph import END, START, StateGraph
