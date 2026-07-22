@@ -3,13 +3,13 @@
 Khớp thiết kế 8 node trong docs/architecture.md:
 Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
 
-Content Quality và SEO gọi Claude thật (Sprint 1). Brand Consistency và
-Compliance vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
+Content Quality, SEO và Compliance gọi Claude thật (Sprint 1 + Compliance Agent).
+Brand Consistency vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
 Sprint 2 theo docs/roadmap.md.
 """
 from langgraph.graph import END, START, StateGraph
 
-from agents import content_quality, seo
+from agents import compliance, content_quality, seo
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
 
@@ -65,8 +65,10 @@ def brand_node(state: ContentReviewState) -> dict:
 
 
 def compliance_node(state: ContentReviewState) -> dict:
-    result = _stub_agent_result("Compliance")
-    result["flags"] = []
+    try:
+        result = compliance.run(state["title"], state["body"])
+    except Exception:
+        result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"compliance_result": result}
 
 
@@ -77,17 +79,18 @@ def aggregator_node(state: ContentReviewState) -> dict:
         "brand": state.get("brand_result"),
         "compliance": state.get("compliance_result"),
     }
-    compliance = results["compliance"]
+    compliance_result = results["compliance"]
     missing = [name for name, r in results.items() if r is None]
+    veto_reason = None
 
-    if compliance is None:
+    if compliance_result is None:
         # Compliance có quyền phủ quyết (docs/architecture.md mục 6.4) - không bao
         # giờ tự động publish khi không xác minh được rủi ro pháp lý.
         decision = "needs_revision"
         final_score = None
     else:
         has_critical_flag = any(
-            f.get("severity") == "critical" for f in compliance.get("flags", [])
+            f.get("severity") == "critical" for f in compliance_result.get("flags", [])
         )
         available = {k: v for k, v in results.items() if v is not None}
         total_weight = sum(WEIGHTS[k] for k in available)
@@ -95,8 +98,15 @@ def aggregator_node(state: ContentReviewState) -> dict:
             sum(WEIGHTS[k] * v["score"] for k, v in available.items())
             / total_weight
         )
-        if compliance["score"] < 50 or has_critical_flag:
+        if compliance_result["score"] < 50 or has_critical_flag:
             decision = "rejected"
+            if has_critical_flag and compliance_result["score"] >= 50:
+                # Score không phản ánh vi phạm (xem spec mục 4) - ghi rõ lý do
+                # thật để tránh gây hiểu nhầm khi điểm cao nhưng vẫn bị từ chối.
+                veto_reason = (
+                    "Bị từ chối do vi phạm Compliance (severity: critical), "
+                    "độc lập với điểm tổng."
+                )
         elif final_score >= 80:
             decision = "publish"
         elif final_score >= 50:
@@ -111,6 +121,8 @@ def aggregator_node(state: ContentReviewState) -> dict:
         "missing_agents": missing,
         "details": results,
     }
+    if veto_reason:
+        report["veto_reason"] = veto_reason
     return {"final_score": final_score, "decision": decision, "report": report}
 
 
@@ -128,8 +140,11 @@ def _format_issue(issue) -> str:
 
 
 def write_back_node(state: ContentReviewState) -> dict:
+    report = state.get("report") or {}
     suggestions_lines = []
-    for name, result in (state.get("report") or {}).get("details", {}).items():
+    if report.get("veto_reason"):
+        suggestions_lines.append(f"[LÝ DO TỪ CHỐI] {report['veto_reason']}")
+    for name, result in report.get("details", {}).items():
         if result is None:
             suggestions_lines.append(f"[{name}] Không có kết quả (agent lỗi/thiếu dữ liệu)")
             continue
