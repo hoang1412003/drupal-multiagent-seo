@@ -1,6 +1,8 @@
 import json
 import os
 
+from ai_core import call_agent
+
 _RULES_PATH = os.path.join(os.path.dirname(__file__), "compliance_rules.json")
 
 _rules_cache = None
@@ -37,3 +39,48 @@ def match_blacklist(text: str) -> list[dict]:
             }
         )
     return flags
+
+
+SYSTEM_PROMPT = (
+    "Bạn là chuyên gia kiểm duyệt tuân thủ pháp lý cho nội dung marketing. "
+    "Chỉ đánh giá các yếu tố sau, KHÔNG đánh giá chính tả, văn phong hay SEO:\n"
+    "1. Claim nhạy cảm/thổi phồng thiếu căn cứ (ví dụ: cam kết hiệu quả tuyệt "
+    "đối, so sánh hơn hẳn đối thủ không có bằng chứng).\n"
+    "2. Nội dung có nguy cơ vi phạm luật quảng cáo Việt Nam.\n"
+    "3. Thông tin giá/khuyến mãi gây hiểu nhầm (ví dụ thời hạn không rõ ràng, "
+    "điều kiện áp dụng bị giấu).\n"
+    "Với mỗi vi phạm tìm thấy, tạo 1 flag với severity 'low' (nhẹ), 'medium' "
+    "(đáng chú ý), hoặc 'critical' (nghiêm trọng, rủi ro pháp lý rõ ràng).\n"
+    "Luôn trả lời bằng tiếng Việt trong tất cả các trường văn bản."
+)
+
+OUTPUT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "score": {"type": "integer"},
+        "flags": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "severity": {"type": "string", "enum": ["low", "medium", "critical"]},
+                    "rule": {"type": "string"},
+                    "excerpt": {"type": "string"},
+                },
+                "required": ["severity", "rule", "excerpt"],
+                "additionalProperties": False,
+            },
+        },
+    },
+    "required": ["score", "flags"],
+    "additionalProperties": False,
+}
+
+
+def run(title: str, body: str) -> dict:
+    llm_result = call_agent(SYSTEM_PROMPT, title, body, OUTPUT_SCHEMA)
+    rule_flags = match_blacklist(f"{title}\n{body}")
+    return {
+        "score": llm_result["score"],
+        "flags": llm_result["flags"] + rule_flags,
+    }
