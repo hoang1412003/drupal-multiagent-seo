@@ -42,11 +42,12 @@ def fetch_content(node_id: str) -> dict:
     """Lấy 1 bài viết (article) từ Drupal qua JSON:API.
 
     Trả về {"title", "body", "raw_content"} - raw_content là toàn bộ
-    JSON:API resource object gốc.
+    JSON:API resource object gốc. Tự retry khi Drupal không phản hồi
+    (docs/architecture.md mục 7); nếu hết retry vẫn lỗi, exception văng ra
+    ngoài để dừng pipeline, không chạy tiếp các agent.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
-    response = requests.get(url, headers=JSONAPI_HEADERS, auth=AUTH)
-    response.raise_for_status()
+    response = _request_with_retry(requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH)
     resource = response.json()["data"]
     attributes = resource["attributes"]
     return {
