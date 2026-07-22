@@ -10,7 +10,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from agents.compliance import run
+from agents.compliance import run, match_blacklist
 
 title = "VF3 - Chiếc xe điện tốt nhất thế giới, giảm giá không giới hạn"
 body = (
@@ -34,3 +34,15 @@ if __name__ == "__main__":
         "Phai co it nhat 1 flag critical tu rule-based (van ban chua 'tot nhat')"
     )
     print("PASS: co flag critical tu rule-based nhu ky vong")
+
+    # Xac nhan rule-based flags duoc hop nhat dung: goi match_blacklist()
+    # tren cung van ban ma run() da xu ly, roi kiem tra tat ca rule
+    # tu match_blacklist() deu co mat trong result["flags"]
+    rule_flags = match_blacklist(f"{title}\n{body}")
+    expected_rules = {f["rule"] for f in rule_flags}
+    actual_rules = {f["rule"] for f in result["flags"]}
+    assert expected_rules.issubset(actual_rules), (
+        f"Rule-based flags phai co mat trong ket qua merge. "
+        f"Thieu: {expected_rules - actual_rules}"
+    )
+    print(f"PASS: {len(expected_rules)} rule-based rule(s) co mat trong ket qua merge")
