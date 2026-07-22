@@ -1,4 +1,6 @@
+import logging
 import os
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -10,6 +12,30 @@ AUTH = (os.environ.get("DRUPAL_USER", ""), os.environ.get("DRUPAL_PASSWORD", "")
 
 JSONAPI_HEADERS = {"Accept": "application/vnd.api+json"}
 PATCH_HEADERS = {"Content-Type": "application/vnd.api+json"}
+
+MAX_ATTEMPTS = 3          # 1 lan goi ban dau + 2 lan retry
+BACKOFF_BASE_SECONDS = 1  # backoff luy thua: 1s sau lan 1, 2s sau lan 2
+
+
+def _request_with_retry(method, url, **kwargs) -> requests.Response:
+    """Goi method(url, **kwargs) (VD requests.get/requests.patch), tu retry
+    khi gap loi mang (mat ket noi/timeout) hoac loi server (5xx).
+
+    KHONG retry loi 4xx (VD 401/403/404) - thu lai khong giai quyet duoc vi
+    day la loi phia client (sai quyen/sai node_id), raise ngay lap tuc.
+    """
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            response = method(url, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.HTTPError:
+            if response.status_code < 500 or attempt == MAX_ATTEMPTS:
+                raise
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == MAX_ATTEMPTS:
+                raise
+        time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)))
 
 
 def fetch_content(node_id: str) -> dict:
