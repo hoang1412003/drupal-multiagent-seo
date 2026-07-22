@@ -19,8 +19,9 @@ def _load_rules() -> list[dict]:
 def match_blacklist(text: str) -> list[dict]:
     """So khớp cứng (không phân biệt hoa/thường) với danh sách từ cấm.
 
-    Mỗi cụm khớp tạo 1 flag severity "critical" (xem
-    docs/superpowers/specs/2026-07-22-compliance-agent-design.md mục 4).
+    Mỗi cụm khớp tạo 1 flag. Severity lấy từ rule entry trong JSON
+    (hiện tất cả đều là "critical"). Chỉ bắt lần khớp đầu tiên của mỗi
+    cụm trong text (không đếm các lần lặp lại).
     """
     text_lower = text.lower()
     flags = []
