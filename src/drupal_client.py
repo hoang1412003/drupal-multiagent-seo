@@ -15,6 +15,7 @@ PATCH_HEADERS = {"Content-Type": "application/vnd.api+json"}
 
 MAX_ATTEMPTS = 3          # 1 lan goi ban dau + 2 lan retry
 BACKOFF_BASE_SECONDS = 1  # backoff luy thua: 1s sau lan 1, 2s sau lan 2
+REQUEST_TIMEOUT_SECONDS = (5, 30)  # (connect_timeout, read_timeout)
 
 
 def _request_with_retry(method, url, **kwargs) -> requests.Response:
@@ -47,7 +48,9 @@ def fetch_content(node_id: str) -> dict:
     ngoài để dừng pipeline, không chạy tiếp các agent.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
-    response = _request_with_retry(requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH)
+    response = _request_with_retry(
+        requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH, timeout=REQUEST_TIMEOUT_SECONDS
+    )
     resource = response.json()["data"]
     attributes = resource["attributes"]
     return {
@@ -78,9 +81,16 @@ def write_back(node_id: str, status: str, score: float, suggestions: str) -> Non
         }
     }
     try:
-        _request_with_retry(requests.patch, url, headers=PATCH_HEADERS, json=payload, auth=AUTH)
+        _request_with_retry(
+            requests.patch,
+            url,
+            headers=PATCH_HEADERS,
+            json=payload,
+            auth=AUTH,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
     except requests.RequestException as e:
         logging.warning(
-            "Write-back that bai cho node %s sau %d lan thu: %s",
-            node_id, MAX_ATTEMPTS, e,
+            "Write-back that bai cho node %s: %s",
+            node_id, e,
         )
