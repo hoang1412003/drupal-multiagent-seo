@@ -5,9 +5,9 @@ Thực tập tại VinFast O2O (VF O2O)*
 
 
 
-**Đề tài: **Nghiên cứu và xây dựng hệ thống Multi-Agent AI hỗ trợ quy trình kiểm duyệt, đánh giá và tối ưu hóa nội dung Marketing trước khi xuất bản trên nền tảng Drupal CMS nhằm nâng cao chất lượng nội dung, tối ưu SEO và đảm bảo tính nhất quán của thương hiệu.
+**Đề tài:** Nghiên cứu và xây dựng hệ thống Multi-Agent AI hỗ trợ quy trình kiểm duyệt, đánh giá và tối ưu hóa nội dung Marketing trước khi xuất bản trên nền tảng Drupal CMS nhằm nâng cao chất lượng nội dung, tối ưu SEO và đảm bảo tính nhất quán của thương hiệu.
 
-**Nhiệm vụ trong báo cáo này: **Theo chỉ đạo của mentor, nghiên cứu Drupal CMS và dựng nhanh một instance thử nghiệm để sử dụng làm nguồn input (nội dung) cho hệ thống Multi-Agent, trước khi tiến hành nghiên cứu thiết kế các agent.
+**Nhiệm vụ trong báo cáo này:** Theo chỉ đạo của mentor, nghiên cứu Drupal CMS và dựng nhanh một instance thử nghiệm để sử dụng làm nguồn input (nội dung) cho hệ thống Multi-Agent, trước khi tiến hành nghiên cứu thiết kế các agent.
 
 ## 1. Drupal CMS là gì
 
@@ -80,7 +80,7 @@ Instance Drupal được dựng cục bộ (local) bằng Docker Compose, sử d
 
 Hai container giao tiếp với nhau qua mạng nội bộ (network) do Docker Compose tự tạo. Container Drupal kết nối tới container MySQL thông qua tên service "db" (thay vì "localhost", vì đây là hai container độc lập, không chia sẻ chung hệ điều hành).
 
-**Địa chỉ truy cập: **http://localhost:8080 (cổng 8080 trên máy host được ánh xạ sang cổng 80 trong container Drupal).
+**Địa chỉ truy cập:** http://localhost:8080 (cổng 8080 trên máy host được ánh xạ sang cổng 80 trong container Drupal).
 
 ### 2.2. Các bước cài đặt đã thực hiện
 
