@@ -7,6 +7,8 @@ Thực tập tại VinFast O2O (VF O2O)*
 
 **Đề tài:** Nghiên cứu và xây dựng hệ thống Multi-Agent AI hỗ trợ quy trình kiểm duyệt, đánh giá và tối ưu hóa nội dung Marketing trước khi xuất bản trên nền tảng Drupal CMS nhằm nâng cao chất lượng nội dung, tối ưu SEO và đảm bảo tính nhất quán của thương hiệu.
 
+**Phạm vi nội dung:** Áp dụng cho toàn bộ bài viết dạng tin tức - gồm 3 nhóm chủ đề: Công ty, Ô tô điện, Xe máy điện - không giới hạn riêng nội dung thông số kỹ thuật xe.
+
 **Nhiệm vụ trong báo cáo này:** Theo chỉ đạo của mentor, nghiên cứu Drupal CMS và dựng nhanh một instance thử nghiệm để sử dụng làm nguồn input (nội dung) cho hệ thống Multi-Agent, trước khi tiến hành nghiên cứu thiết kế các agent.
 
 ## 1. Drupal CMS là gì
