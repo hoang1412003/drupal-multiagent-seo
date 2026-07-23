@@ -230,20 +230,47 @@ _(Trọng số và các ngưỡng quyết định ở mục 6.2 - ví dụ "80" 
 
 **Ý nghĩa và căn cứ của công thức, không chỉ dựa vào suy luận nội bộ:**
 
-Công thức tổng có trọng số này là **Weighted Sum Model (WSM)** - còn gọi là Simple Additive Weighting (SAW), một phương pháp Multi-Criteria Decision Analysis (MCDA) kinh điển từ thập niên 1960, dùng phổ biến trong định giá kinh doanh, quản lý dự án, phát triển sản phẩm - không phải cách tính tự nghĩ ra.
+Công thức tổng có trọng số này là **Weighted Sum Model (WSM)** - còn gọi là Simple Additive Weighting (SAW), một phương pháp Multi-Criteria Decision Analysis (MCDA) kinh điển (có từ các công trình nền tảng thập niên 1950-60: Churchman-Ackoff-Smith 1954, Fishburn 1967), dùng phổ biến trong định giá kinh doanh, quản lý dự án, phát triển sản phẩm - không phải cách tính tự nghĩ ra.
 
-Về lý do Compliance được đề xuất trọng số cao nhất: các hệ thống content moderation thực tế đều ưu tiên rủi ro pháp lý/an toàn lên trên các chỉ số khác - nội dung rủi ro cao thường được ưu tiên xử lý/chặn trước, tương tự cơ chế "phủ quyết" (veto) của Compliance Agent (mục 6.2). Có khung tham chiếu chính thức cho nguyên tắc này: NIST AI Risk Management Framework và EU Digital Services Act đều yêu cầu ưu tiên rủi ro pháp lý/tuân thủ trước các tiêu chí khác khi xử lý nội dung. Google cũng có khái niệm tương tự cho SEO: nhóm nội dung YMYL ("Your Money or Your Life") - liên quan tài chính/quyết định mua hàng, như nội dung giá/khuyến mãi xe - đòi hỏi độ chính xác/đáng tin cậy cao hơn hẳn nội dung thông thường, củng cố lý do Compliance được ưu tiên hơn SEO.
+**Ý nghĩa của từng trọng số (phân theo 3 tầng rủi ro/hậu quả):**
+
+Trọng số của mỗi tiêu chí phản ánh mức độ nghiêm trọng của hậu quả khi tiêu chí đó bị vi phạm, chia thành 3 tầng:
+
+| Tầng | Tiêu chí | Trọng số | Ý nghĩa - vì sao đặt ở mức này |
+| --- | --- | --- | --- |
+| 1 (cao nhất) | Compliance | 0.30 | Vi phạm gây **hậu quả pháp lý** (phạt hành chính, kiện tụng, buộc gỡ bài, tổn hại uy tín pháp nhân) - loại hậu quả nặng nhất và khó khắc phục nhất. Cũng là tiêu chí duy nhất có thêm **quyền phủ quyết** (mục 6.2), nên trọng số cao nhất là nhất quán với vai trò đó. |
+| 2 (giữa) | Content Quality **=** Brand | 0.25 **=** 0.25 | Cả hai ảnh hưởng trực tiếp tới **chất lượng cảm nhận và uy tín thương hiệu** của bài đã đăng: lỗi chính tả/văn phong kém (Content) và sai giọng văn/thuật ngữ thương hiệu (Brand) đều khiến bài "trông thiếu chuyên nghiệp", làm giảm độ tin cậy trong mắt người đọc - nhưng **không** kéo theo rủi ro pháp lý như Compliance. Đặt **bằng nhau** vì chưa có căn cứ khách quan nào để nói lỗi văn phong hại uy tín hơn hay kém hơn lỗi nhận diện thương hiệu; tách đôi lúc này sẽ là áng chừng, nên để bằng và chờ calibration Sprint 3 phân định nếu dữ liệu cho thấy khác biệt. |
+| 3 (thấp nhất) | SEO | 0.20 | Vi phạm chỉ ảnh hưởng **thứ hạng tìm kiếm/khả năng tiếp cận**, và phần lớn **có thể bổ sung/sửa sau khi đăng** (thêm meta description, chỉnh heading, thêm internal link) mà không cần gỡ bài - hậu quả nhẹ nhất và khắc phục được, nên trọng số thấp nhất. |
+
+Về lý do Compliance được đề xuất trọng số cao nhất: các hệ thống content moderation thực tế đều ưu tiên rủi ro pháp lý/an toàn lên trên các chỉ số khác - nội dung rủi ro cao thường được ưu tiên xử lý/chặn trước, tương tự cơ chế "phủ quyết" (veto) của Compliance Agent (mục 6.2). Nguyên tắc "quản trị theo mức độ rủi ro" (risk-based) này có khung tham chiếu chính thức: **NIST AI Risk Management Framework** tổ chức toàn bộ việc quản trị AI quanh việc nhận diện, đo lường và xử lý ưu tiên các rủi ro cao trước; **EU Digital Services Act** áp nghĩa vụ rà soát theo mức rủi ro (risk-based due diligence) - rủi ro hệ thống càng cao thì nghĩa vụ tuân thủ càng nặng - cùng tinh thần với việc dành trọng số cao nhất (kèm quyền phủ quyết) cho tiêu chí rủi ro pháp lý. Google cũng có khái niệm tương tự cho chất lượng nội dung: nhóm **YMYL ("Your Money or Your Life")** - nội dung ảnh hưởng sức khỏe/tài chính/an toàn/quyết định mua hàng, như nội dung giá/khuyến mãi xe - được chính Google yêu cầu áp "tiêu chuẩn tin cậy và an toàn nghiêm ngặt nhất" (strictest standards of trustworthiness and safety) khi đánh giá chất lượng, cao hơn hẳn nội dung thông thường, củng cố lý do Compliance được ưu tiên hơn SEO.
 
 Về các con số cụ thể (0.25/0.20/0.25/0.30): chưa có nguồn nào cho ra đúng các con số này, vì đây chỉ là giá trị minh họa được chọn trong quá trình thiết kế ban đầu, chưa qua thẩm định hay quyết định chính thức nào từ phía VF O2O - mức độ coi trọng thật sự giữa các tiêu chí là quyết định kinh doanh nội bộ mà không tài liệu ngành nào biết trước được. Thay vì áng chừng thuần túy, có thể dùng **AHP (Analytic Hierarchy Process)** - phương pháp suy ra trọng số bằng cách so sánh cặp (pairwise comparison) từng 2 tiêu chí một (ví dụ: "Compliance quan trọng hơn SEO bao nhiêu lần: 3x, 5x, 9x?"), rồi tính trọng số toán học từ ma trận so sánh đó thay vì đoán thẳng ra %. Đây là phương pháp dùng rộng rãi trong risk prioritization thực tế. Trọng số suy ra theo cách này vẫn chỉ là giá trị tạm thời, sẽ được thay bằng số liệu thật hiệu chỉnh từ gold set ở Sprint 3 (xem mục 8.2).
 
+**Ví dụ AHP tính cụ thể (minh họa phương pháp, không phải số chính thức):**
+
+AHP hoạt động theo 3 bước: (1) lập ma trận so sánh cặp - mỗi ô là phán đoán "tiêu chí hàng quan trọng hơn tiêu chí cột bao nhiêu lần" theo thang Saaty 1-9 (1 = ngang nhau, 3 = nhỉnh vừa, 5 = hơn mạnh...); (2) chuẩn hóa ma trận và tính trọng số bằng trung bình cột đã chuẩn hóa (xấp xỉ vector riêng chính); (3) tính **Consistency Ratio (CR)** để kiểm tra các phán đoán có mâu thuẫn nhau không - CR < 0.10 là chấp nhận được.
+
+Áp dụng với các phán đoán ví dụ, phản ánh đúng thứ tự ưu tiên đã nêu (Compliance > Content = Brand > SEO): Compliance nhỉnh hơn Content và Brand (đặt 2), hơn SEO rõ hơn (đặt 3); Content và Brand ngang nhau (đặt 1) và cùng nhỉnh hơn SEO (đặt 2):
+
+| Hàng ÷ Cột | Compliance | Content | Brand | SEO |
+| --- | --- | --- | --- | --- |
+| **Compliance** | 1 | 2 | 2 | 3 |
+| **Content** | 1/2 | 1 | 1 | 2 |
+| **Brand** | 1/2 | 1 | 1 | 2 |
+| **SEO** | 1/3 | 1/2 | 1/2 | 1 |
+
+Trọng số suy ra: **Compliance 0.42, Content 0.23, Brand 0.23, SEO 0.12**, với **CR = 0.004** (rất nhỏ so với ngưỡng 0.10 → bộ phán đoán nhất quán). Kết quả này xác nhận đúng **thứ tự ưu tiên** của thiết kế, nhưng cho Compliance tỷ trọng cao hơn con số minh họa 0.30. Điều đó hợp lý và không mâu thuẫn: ở bộ 0.30/0.25/0.25/0.20, Compliance được đặt nhỉnh vừa phải **vì phần rủi ro nghiêm trọng nhất đã được cơ chế phủ quyết (veto) gánh riêng** rồi, nên không cần đẩy trọng số lên quá cao; còn AHP ví dụ trên dồn toàn bộ mức ưu tiên vào một kênh trọng số duy nhất. Việc chốt con số nào (0.30 hay 0.42, hay giữa) chính là điều mà **calibration từ gold set ở Sprint 3** (mục 8.2) sẽ quyết định dựa trên dữ liệu thật, thay vì tranh luận định tính. (Kiểm tra ngược: bản thân bộ 0.30/0.25/0.25/0.20 cũng tương ứng với một ma trận so sánh cặp nhất quán hoàn toàn, CR = 0 - tức nó là bộ trọng số hợp lệ về mặt logic, không phải các số rời rạc đặt tùy tiện.)
+
 **Nguồn tham khảo:**
 
-- Weighted sum model (WSM/SAW), phương pháp MCDA từ thập niên 1960: en.wikipedia.org/wiki/Weighted_sum_model
-- Analytic Hierarchy Process (AHP), suy ra trọng số bằng so sánh cặp: sciencedirect.com/topics/social-sciences/analytical-hierarchy-process
+- Weighted sum model (WSM/SAW), phương pháp MCDA nền tảng thập niên 1950-60: en.wikipedia.org/wiki/Weighted_sum_model
+- Analytic Hierarchy Process (AHP), suy ra trọng số bằng so sánh cặp (Saaty, thập niên 1970): sciencedirect.com/topics/social-sciences/analytical-hierarchy-process
 - Case study ứng dụng AHP cho risk prioritization thực tế: ijcsrr.org/risk-identification-and-risk-prioritization-using-analytical-hierarchy-process-ahp-case-study-human-capital-management-procurement-and-general-affairs-of-holding-company-pt-abc/
-- Content moderation ưu tiên xử lý theo mức độ rủi ro (severity-based triage): arxiv.org/pdf/2108.04401
-- NIST AI Risk Management Framework và EU Digital Services Act, ưu tiên rủi ro pháp lý/tuân thủ: prudentpartners.in/content-moderation-services-trust-and-safety-guide/
-- Google E-E-A-T/YMYL, độ chính xác cao hơn cho nội dung liên quan tài chính/mua hàng: searchatlas.com/blog/quality-of-content/
+- Content moderation ưu tiên xử lý theo mức độ rủi ro (severity-based triage) - "A Framework of Severity for Harmful Content Online": arxiv.org/abs/2108.04401
+- NIST AI Risk Management Framework (quản trị AI theo mức độ rủi ro): nist.gov/itl/ai-risk-management-framework
+- EU Digital Services Act, nghĩa vụ rà soát theo mức rủi ro hệ thống (Điều 34): digital-strategy.ec.europa.eu/en/policies/digital-services-act
+- NIST AI RMF + EU DSA áp dụng trong bối cảnh kiểm duyệt nội dung (tài liệu tổng hợp): prudentpartners.in/content-moderation-services-trust-and-safety-guide/
+- Google Search Quality Rater Guidelines - YMYL đòi hỏi "tiêu chuẩn tin cậy/an toàn nghiêm ngặt nhất": guidelines.raterhub.com/searchqualityevaluatorguidelines.pdf (giải thích dễ đọc: searchengineland.com/guide/ymyl)
 
 ### 6.2. Quy tắc ra quyết định
 
