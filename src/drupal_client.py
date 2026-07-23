@@ -1,4 +1,6 @@
+import logging
 import os
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -11,16 +13,44 @@ AUTH = (os.environ.get("DRUPAL_USER", ""), os.environ.get("DRUPAL_PASSWORD", "")
 JSONAPI_HEADERS = {"Accept": "application/vnd.api+json"}
 PATCH_HEADERS = {"Content-Type": "application/vnd.api+json"}
 
+MAX_ATTEMPTS = 3          # 1 lan goi ban dau + 2 lan retry
+BACKOFF_BASE_SECONDS = 1  # backoff luy thua: 1s sau lan 1, 2s sau lan 2
+REQUEST_TIMEOUT_SECONDS = (5, 30)  # (connect_timeout, read_timeout)
+
+
+def _request_with_retry(method, url, **kwargs) -> requests.Response:
+    """Goi method(url, **kwargs) (VD requests.get/requests.patch), tu retry
+    khi gap loi mang (mat ket noi/timeout) hoac loi server (5xx).
+
+    KHONG retry loi 4xx (VD 401/403/404) - thu lai khong giai quyet duoc vi
+    day la loi phia client (sai quyen/sai node_id), raise ngay lap tuc.
+    """
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            response = method(url, **kwargs)
+            response.raise_for_status()
+            return response
+        except requests.HTTPError:
+            if response.status_code < 500 or attempt == MAX_ATTEMPTS:
+                raise
+        except (requests.ConnectionError, requests.Timeout):
+            if attempt == MAX_ATTEMPTS:
+                raise
+        time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)))
+
 
 def fetch_content(node_id: str) -> dict:
     """Lấy 1 bài viết (article) từ Drupal qua JSON:API.
 
     Trả về {"title", "body", "raw_content"} - raw_content là toàn bộ
-    JSON:API resource object gốc.
+    JSON:API resource object gốc. Tự retry khi Drupal không phản hồi
+    (docs/architecture.md mục 7); nếu hết retry vẫn lỗi, exception văng ra
+    ngoài để dừng pipeline, không chạy tiếp các agent.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
-    response = requests.get(url, headers=JSONAPI_HEADERS, auth=AUTH)
-    response.raise_for_status()
+    response = _request_with_retry(
+        requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH, timeout=REQUEST_TIMEOUT_SECONDS
+    )
     resource = response.json()["data"]
     attributes = resource["attributes"]
     return {
@@ -31,7 +61,13 @@ def fetch_content(node_id: str) -> dict:
 
 
 def write_back(node_id: str, status: str, score: float, suggestions: str) -> None:
-    """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH)."""
+    """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH).
+
+    Tự retry khi Drupal lỗi mạng/5xx (docs/architecture.md mục 7). Nếu hết
+    retry vẫn lỗi, KHÔNG raise - chỉ ghi log cảnh báo, vì ở bước này bài
+    viết đã được 4 agent chấm điểm xong (tốn API call thật); để lỗi ghi-ngược
+    làm sập cả script sẽ lãng phí toàn bộ công việc đã làm.
+    """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     payload = {
         "data": {
@@ -44,5 +80,17 @@ def write_back(node_id: str, status: str, score: float, suggestions: str) -> Non
             },
         }
     }
-    response = requests.patch(url, headers=PATCH_HEADERS, json=payload, auth=AUTH)
-    response.raise_for_status()
+    try:
+        _request_with_retry(
+            requests.patch,
+            url,
+            headers=PATCH_HEADERS,
+            json=payload,
+            auth=AUTH,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+    except requests.RequestException as e:
+        logging.warning(
+            "Write-back that bai cho node %s: %s",
+            node_id, e,
+        )
