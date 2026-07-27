@@ -428,7 +428,23 @@ Cả hai trường hợp, `note` được Write-back Node đưa lên đầu ph�
 
 Mục đích: kiểm tra tính đúng đắn về mặt chức năng (agent có phát hiện đúng loại lỗi không), thực hiện với bộ mẫu nhỏ, nhanh - khác với gold set ở mục 8.2 (dùng để hiệu chỉnh ngưỡng điểm bằng số liệu thống kê, cần cỡ mẫu lớn hơn).
 
-1. Bộ mẫu kiểm thử chức năng (8-10 bài, tách biệt với gold set 30-50 mẫu ở mục 8.2): tạo khoảng 8-10 bài viết mẫu trong Drupal, cố ý bao gồm bài "tốt" (không lỗi), bài lỗi chính tả, bài thiếu SEO, bài sai thuật ngữ thương hiệu, bài vi phạm compliance - để kiểm tra từng agent có phát hiện đúng loại lỗi tương ứng không.
+1. Bộ mẫu kiểm thử chức năng (8-10 bài, tách biệt với gold set 30-50 mẫu ở mục 8.2): tạo khoảng 8-10 bài viết mẫu trong Drupal, mỗi bài gài đúng **một loại lỗi** để biết agent nào bắt/trượt. Phủ tối thiểu các mã sau (mã lỗi theo `docs/goldset/annotation-guideline.md` mục 4):
+
+| Mẫu | Mã lỗi gài | Kiểm tra |
+| --- | --- | --- |
+| Bài sạch | (không) | Không báo lỗi giả |
+| Claim tuyệt đối | A1 | Compliance CP1 - rule-based blacklist |
+| So sánh đối thủ | A2 | Compliance CP2 - LLM |
+| **Số liệu sai so với công bố** | **A3** | **Compliance CP3 - RAG fact-check** |
+| Khuyến mại thiếu thời hạn | A4 | Compliance CP4 |
+| Thiếu điều kiện đo / loại trụ sạc | B1, B2 | Compliance CP5, CP6 |
+| Thiếu meta description, slug lỗi, thiếu alt | B3, B6, B7 | SEO |
+| Sai thuật ngữ, tên model | B5 | Brand Voice (regex) |
+| Lỗi chính tả, câu quá dài | B8, B9 | Content Quality |
+
+**Đây - không phải gold set - mới là nơi phủ mã lỗi.** Gold set 33 mẫu quá nhỏ để cho ra tỉ lệ theo từng mã (1 hay 3 mẫu A3 đều không phân biệt được "chạy đúng" với "may mắn"), và nhiệm vụ của nó là calibrate ngưỡng nên cần mẫu **gần ranh giới quyết định**, trong khi mẫu chèn lỗi luôn rơi dứt khoát về một phía. Ở bộ chức năng thì thêm mẫu rẻ: không cần gán nhãn mù, không cần test-retest, không đếm vào 33.
+
+Riêng **A3 phải có ở đây**: đó là mã duy nhất kích hoạt đường CP3 → RAG fact-check → severity `critical` → veto, tức đường rủi ro cao nhất của hệ thống. Kèm theo là bộ eval retrieval đo recall@k (`docs/rag-design.md` mục 5) - hai công cụ này bổ sung nhau: eval retrieval đo *có lấy đúng đoạn không*, bộ chức năng đo *có ra đúng quyết định không*.
 
 2. Kiểm tra từng agent riêng lẻ trước khi ghép hệ thống: so sánh kết quả AI trả về với đánh giá thủ công.
 
