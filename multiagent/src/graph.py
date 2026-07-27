@@ -81,12 +81,14 @@ def aggregator_node(state: ContentReviewState) -> dict:
     compliance_result = results["compliance"]
     missing = [name for name, r in results.items() if r is None]
     veto_reason = None
+    note = None
 
     if compliance_result is None:
         # Compliance có quyền phủ quyết (docs/architecture.md mục 6.4) - không bao
         # giờ tự động publish khi không xác minh được rủi ro pháp lý.
         decision = "needs_revision"
         final_score = None
+        note = "Không thể xác minh Compliance - cần con người review thủ công."
     else:
         has_critical_flag = any(
             f.get("severity") == "critical" for f in compliance_result.get("flags", [])
@@ -113,6 +115,15 @@ def aggregator_node(state: ContentReviewState) -> dict:
         else:
             decision = "rejected"
 
+        if missing:
+            # Điểm vẫn tính được (đã chia lại theo trọng số còn lại) nhưng chưa
+            # bao gồm đủ 4 tiêu chí - nói rõ để người duyệt không hiểu nhầm.
+            missing_labels = ", ".join(AGENT_LABELS.get(m, m) for m in missing)
+            note = (
+                f"Điểm số chưa đầy đủ: {missing_labels} không trả được kết quả, "
+                "điểm đã chia lại theo các tiêu chí còn lại."
+            )
+
     report = {
         "node_id": state["node_id"],
         "final_score": final_score,
@@ -122,6 +133,8 @@ def aggregator_node(state: ContentReviewState) -> dict:
     }
     if veto_reason:
         report["veto_reason"] = veto_reason
+    if note:
+        report["note"] = note
     return {"final_score": final_score, "decision": decision, "report": report}
 
 
@@ -163,6 +176,8 @@ def write_back_node(state: ContentReviewState) -> dict:
 
     if report.get("veto_reason"):
         other_lines.append(f"[LÝ DO TỪ CHỐI] {report['veto_reason']}")
+    if report.get("note"):
+        other_lines.append(f"[LƯU Ý] {report['note']}")
 
     for name, result in report.get("details", {}).items():
         label = AGENT_LABELS.get(name, name)
@@ -188,8 +203,11 @@ def write_back_node(state: ContentReviewState) -> dict:
 
     write_back(
         node_id=state["node_id"],
+        # final_score = None nghĩa là CHƯA chấm được (Compliance lỗi), khác hẳn
+        # với 0 điểm. Giữ nguyên None để Drupal hiển thị field trống thay vì
+        # "0 điểm" - xem spec mục 5.1 "Agent lỗi không bị cho điểm 0".
         status=state["decision"],
-        score=state["final_score"] or 0,
+        score=state["final_score"],
         suggestions="\n".join(lines) or "Không có gợi ý sửa.",
     )
     return {}
