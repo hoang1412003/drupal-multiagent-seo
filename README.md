@@ -8,6 +8,9 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`](docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md) — định nghĩa phạm vi "nội dung Marketing" và kiến trúc đánh giá (tài liệu tham chiếu chuẩn)
 - [`docs/research.md`](docs/research.md) — nghiên cứu Drupal CMS (kiến trúc, SEO, JSON:API)
 - [`docs/architecture.md`](docs/architecture.md) — thiết kế hệ thống Multi-Agent (LangGraph, 4 agent, Aggregator, calibration, shadow-test)
+- [`docs/rubrics.md`](docs/rubrics.md) — rubric chấm điểm 4 agent (mức rời rạc + hàm tất định, thay cho điểm 0-100 do LLM tự đặt)
+- [`docs/goldset/annotation-guideline.md`](docs/goldset/annotation-guideline.md) — quy tắc gán nhãn gold set và cách đo độ tin cậy của nhãn
+- [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 
 ## Cấu trúc project
