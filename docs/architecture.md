@@ -96,6 +96,8 @@ Body:
 
 Sau lệnh PATCH này, mở lại bài viết trong giao diện quản trị Drupal, đội content sẽ thấy ngay các field mới hiển thị kết quả đánh giá của hệ Multi-Agent.
 
+**Cách hiển thị trong giao diện soạn bài: xem `docs/editor-ui-design.md`.** Nếu để mặc định, 3 field trên hiện ra dưới dạng **widget nhập liệu** - người soạn sửa được giá trị AI ghi vào, và trông như form nhập chứ không như báo cáo. Thiết kế đó chốt một module Drupal nhỏ (`vf_ai_review`) khoá 3 field lại và render thành khối báo cáo, kèm chú thích ngay dưới từng field tương ứng - phần đáp ứng đúng chữ "báo cáo theo từng field ngay trong giao diện editor" của đề bài. Tài liệu đó cũng bổ sung `field_ai_report_json` (báo cáo có cấu trúc để module render) bên cạnh `field_ai_suggestions` (text người đọc được), để khi chưa có module thì vẫn đọc được.
+
 ## 3. Orchestrator Agent
 
 Orchestrator Agent là thành phần điều phối trung tâm, đứng ngay sau bước lấy nội dung từ Drupal. Nhiệm vụ:
