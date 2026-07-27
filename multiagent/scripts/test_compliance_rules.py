@@ -17,6 +17,9 @@ CASES = [
     ("Đây là chiếc xe SỐ 1 hiện nay", 1),
     ("Chương trình giảm giá không giới hạn tới hết tháng", 1),
     ("VF3 tốt nhất và số 1 thị trường", 2),
+    ("Đây là mẫu số 10 trong catalogue", 0),
+    ("VF9 đi xa nhất phân khúc, sạc nhanh nhất Việt Nam", 2),
+    ("VF5 có quãng đường 326km theo chuẩn NEDC", 0),
 ]
 
 if __name__ == "__main__":

@@ -23,8 +23,10 @@ LangGraph truyền một đối tượng trạng thái duy nhất đi qua toàn 
 ```
 ContentReviewState = {
   node_id: str            # UUID bài viết trong Drupal (lấy từ JSON:API)
-  title: str
-  body: str
+  langcode: str            # (DỰ KIẾN - chưa có trong state.py) mã ngôn ngữ node, cho mở rộng đa ngôn ngữ (mục 5.6)
+  fields: dict            # 6 trường nội dung: title, body, summary, url_alias,
+                          #   meta_description, image_alt (mục 3) - đọc phòng thủ,
+                          #   trường vắng trên Drupal -> chuỗi rỗng
   raw_content: dict        # toàn bộ JSON gốc lấy từ Drupal
 
   content_quality_result: dict | None
@@ -47,7 +49,7 @@ Node 1: Fetch Node                    (lấy nội dung từ Drupal qua JSON:API
 Node 2: Orchestrator/Dispatch         (phát nội dung song song cho 4 agent)
 Node 3: Content Quality Agent   ─┐
 Node 4: SEO Agent                ├─ chạy song song, độc lập với nhau
-Node 5: Brand Consistency Agent  │
+Node 5: Brand Voice Agent        │
 Node 6: Compliance Agent        ─┘
 Node 7: Aggregator                    (tổng hợp 4 kết quả, tính điểm, ra quyết định)
 Node 8: Write-back Node               (ghi kết quả ngược vào Drupal qua PATCH)
@@ -59,18 +61,23 @@ LangGraph tự động quản lý việc chạy song song 4 node agent và chờ
 
 Node cuối cùng trong đồ thị (Node 8) có nhiệm vụ lấy quyết định và báo cáo do Aggregator tạo ra, ghi ngược vào đúng bài viết gốc trong Drupal - để đội content mở lại bài viết là thấy ngay kết quả đánh giá, không cần dùng công cụ nào khác.
 
+**Hệ thống không tự động xuất bản.** Write-back Node chỉ ghi *đề xuất* (field_ai_status, field_ai_score, field_ai_suggestions) vào bài viết, **không** tự chuyển moderation state của node sang Published. Quyết định publish cuối cùng luôn do người duyệt bấm sau khi đọc đề xuất - đúng tinh thần đề tài là "hỗ trợ quy trình kiểm duyệt", không thay thế người duyệt. Vì vậy giá trị `decision = "publish"` ở các mục dưới được hiểu là "đề xuất publish", không phải hành động publish tự động.
+
 Content type "Bài viết" mặc định của Drupal không có sẵn field để lưu kết quả AI, nên cần tạo thêm các field tùy chỉnh sau (qua Cấu trúc > Loại nội dung > Bài viết > Quản lý trường):
 
 | Field mới cần tạo    | Kiểu dữ liệu               | Mục đích                                                   |
 | -------------------- | -------------------------- | ---------------------------------------------------------- |
-| field_ai_status      | Danh sách chọn (List text) | Lưu 1 trong 3 giá trị: publish / needs_revision / rejected |
-| field_ai_score       | Số (Number)                | Lưu điểm tổng (0-100) do Aggregator tính                   |
-| field_ai_suggestions | Văn bản dài (Long text)    | Lưu toàn bộ gợi ý sửa tổng hợp từ 4 agent                  |
+| field_ai_status      | Danh sách chọn (List text) | (OUTPUT) Lưu 1 trong 3 giá trị: publish / needs_revision / rejected |
+| field_ai_score       | Số (Number)                | (OUTPUT) Lưu điểm tổng (0-100) do Aggregator tính                   |
+| field_ai_suggestions | Văn bản dài (Long text)    | (OUTPUT) Gợi ý sửa, gom theo từng field                            |
+| field_meta_description | Văn bản (Text plain, dài ~160) | (INPUT) Meta description để SEO/Compliance Agent chấm. Trong production thật ánh xạ sang module Metatag; dùng custom field cho đơn giản/chắc chắn |
+
+Ngoài ra, các field input khác mà agent đọc đã có sẵn trong Drupal core: `title`, `body` (kèm `summary`/teaser), URL alias (module Pathauto, đọc qua `path.alias`), và alt text ảnh (trên field ảnh, đọc qua relationships). Chỉ `meta_description` cần tạo thêm.
 
 **Cách ghi ngược - gọi phương thức PATCH của JSON:API:**
 
 ```
-PATCH http://localhost:8080/jsonapi/node/article/{node_id}
+PATCH http://drupal.ddev.site/jsonapi/node/article/{node_id}
 Header: Content-Type: application/vnd.api+json
 
 Body:
@@ -81,7 +88,7 @@ Body:
     "attributes": {
       "field_ai_status": "needs_revision",
       "field_ai_score": 76.5,
-      "field_ai_suggestions": "1. Thiếu meta description...\n2. Câu ở đoạn 1 quá dài..."
+      "field_ai_suggestions": "── Meta description ──\n[SEO] type: trống; suggestion: thêm meta description...\n── Nội dung (body) ──\n[Chất lượng] type: câu quá dài; suggestion: chia đoạn 1..."
     }
   }
 }
@@ -93,7 +100,7 @@ Sau lệnh PATCH này, mở lại bài viết trong giao diện quản trị Dru
 
 Orchestrator Agent là thành phần điều phối trung tâm, đứng ngay sau bước lấy nội dung từ Drupal. Nhiệm vụ:
 
-1. Nhận nội dung nháp đã lấy từ Drupal (title, body).
+1. Nhận các field nội dung đã lấy từ Drupal (title, body, summary, url alias, meta description, alt text ảnh).
 
 2. Gửi bản sao nội dung đó cho cả 4 agent chuyên biệt để xử lý song song.
 
@@ -113,7 +120,7 @@ Khảo sát các mô hình pipeline nội dung dùng nhiều AI agent hiện đa
 
 - Các pipeline nội dung dạng agentic phổ biến hiện nay thường tách vai trò theo từng khâu chuyên biệt (researcher, writer, critic, publisher...). Trong đó có một "Optimization Agent" chuyên tối ưu SEO/GEO (mật độ từ khóa, cấu trúc heading, chất lượng meta description), và hệ thống cho phép cấu hình riêng "brand parameters" (thông số thương hiệu) để kiểm soát giọng văn - cho thấy việc tối ưu SEO và kiểm soát thương hiệu được xem là 2 mối quan tâm cần xử lý tách biệt trong một pipeline nội dung.
 
-- Case study thực tế - AWS Marketing & Gradial (Amazon Bedrock, dùng mô hình Claude): đội Marketing của AWS xây dựng hệ thống agentic AI có bước "Quality Validator" kiểm tra đồng thời SEO compliance, accessibility, brand standards, và content health ngay trước khi xuất bản trang - cấu trúc kiểm tra song song nhiều tiêu chí độc lập này tương tự trực tiếp với SEO Agent và Brand Consistency Agent trong đề tài. Kết quả: thời gian dựng trang giảm từ tối đa 4 tiếng xuống còn khoảng 10 phút (giảm 95%), trong khi vẫn duy trì việc kiểm tra chất lượng.
+- Case study thực tế - AWS Marketing & Gradial (Amazon Bedrock, dùng mô hình Claude): đội Marketing của AWS xây dựng hệ thống agentic AI có bước "Quality Validator" kiểm tra đồng thời SEO compliance, accessibility, brand standards, và content health ngay trước khi xuất bản trang - cấu trúc kiểm tra song song nhiều tiêu chí độc lập này tương tự trực tiếp với SEO Agent và Brand Voice Agent trong đề tài. Kết quả: thời gian dựng trang giảm từ tối đa 4 tiếng xuống còn khoảng 10 phút (giảm 95%), trong khi vẫn duy trì việc kiểm tra chất lượng.
 
 - Case study thực tế - AWS "Scaling content review operations with multi-agent workflow": pipeline gồm 3 agent chuyên biệt nối tiếp - Content Scanner Agent (quét và trích xuất thông tin cần kiểm tra), Content Verification Agent (đối chiếu với nguồn tài liệu chuẩn, phân loại kết quả CURRENT/PARTIALLY_OBSOLETE/FULLY_OBSOLETE), và Recommendation Agent (chuyển kết quả kiểm tra thành gợi ý chỉnh sửa cụ thể) - xác nhận mô hình "mỗi agent phụ trách đúng 1 việc hẹp, chuyển tiếp kết quả cho agent sau" là kiến trúc đã được triển khai thực tế, không chỉ là thiết kế lý thuyết.
 
@@ -127,7 +134,7 @@ Tổng hợp: cả 4 mối quan tâm mà tài liệu ngành đề cập - (1) ch
 
 - GEO Optimizer Agent: một số pipeline hiện đại (2026) bắt đầu bổ sung agent tối ưu nội dung để được các công cụ AI (ChatGPT, Perplexity...) trích dẫn khi trả lời người dùng (Generative Engine Optimization) - đây là nhu cầu mới nổi, khác với SEO truyền thống.
 
-- Visual/Image Consistency Agent: Brand Consistency Agent hiện tại chỉ kiểm tra văn bản (giọng văn, thuật ngữ), chưa kiểm tra tính nhất quán của hình ảnh/logo đính kèm bài viết.
+- Visual/Image Consistency Agent: Brand Voice Agent hiện tại chỉ kiểm tra văn bản (giọng văn, thuật ngữ), chưa kiểm tra tính nhất quán của hình ảnh/logo đính kèm bài viết.
 
 Đề xuất: chưa bổ sung 2 agent này vào phạm vi hiện tại, vì (1) đây là các nhu cầu mở rộng (nice-to-have), không phải yêu cầu cốt lõi theo kiến trúc mentor đã cung cấp; (2) việc thêm agent làm tăng độ phức tạp hệ thống, nên ưu tiên hoàn thiện và kiểm chứng 4 agent cốt lõi trước. Ghi nhận đây là hướng mở rộng tiềm năng cho giai đoạn sau.
 
@@ -155,7 +162,9 @@ Kết luận áp dụng cho bài toán của đề tài: yếu tố quyết đ�
 
 ## 5. Các Agent chuyên biệt
 
-Cả 4 agent có chung một cơ chế vận hành: nhận vào title và body, gửi cho LLM (Claude) kèm theo một system prompt (bộ chỉ dẫn/tiêu chí) cố định và riêng biệt cho từng agent, yêu cầu trả về kết quả theo một cấu trúc JSON cố định (structured output) để Aggregator dễ dàng xử lý tiếp. "4 agent" về bản chất là cùng một mô hình LLM được gọi 4 lần với 4 bộ chỉ dẫn khác nhau, không phải 4 mô hình AI riêng biệt.
+Cả 4 agent có chung một cơ chế vận hành: nhận vào các field nội dung liên quan (mỗi agent tự ghép các field nó quan tâm thành khối văn bản có nhãn `[title]`, `[body]`, `[meta_description]`...), gửi cho LLM (Claude) kèm theo một system prompt (bộ chỉ dẫn/tiêu chí) cố định và riêng biệt cho từng agent, yêu cầu trả về kết quả theo một cấu trúc JSON cố định (structured output). **Mỗi lỗi/flag trong output đều gắn trường `field`** cho biết nó thuộc field nào — nhờ đó Write-back Node gom được báo cáo theo từng field (mục 2.3). "4 agent" về bản chất là cùng một mô hình LLM được gọi 4 lần với 4 bộ chỉ dẫn khác nhau, không phải 4 mô hình AI riêng biệt.
+
+Các field mỗi agent đọc: Content Quality đọc `title/body/summary`; SEO đọc `title/meta_description/url_alias/body/image_alt`; Brand Voice (khi triển khai) đọc `title/body/summary`; Compliance đọc `title/body/meta_description`.
 
 ### 5.1. Content Quality Agent
 
@@ -164,31 +173,33 @@ Cả 4 agent có chung một cơ chế vận hành: nhận vào title và body, 
 **Output:**
 
 ```
-{ "score": 0-100, "issues": [{"type","location","suggestion"}], "strengths": [] }
+{ "score": 0-100, "issues": [{"field","type","suggestion"}], "strengths": [] }
 ```
 
 ### 5.2. SEO Agent
 
-**Tiêu chí đánh giá:** mật độ và vị trí từ khóa chính, độ dài title/meta description, cấu trúc heading (H1/H2), độ dài nội dung, alt text ảnh, internal link.
+**Tiêu chí đánh giá:** đọc và chấm trực tiếp trên các field: `title` (độ dài, chứa từ khóa), `meta_description` (tồn tại, độ dài, từ khóa), `url_alias` (slug ngắn gọn, có từ khóa, không dấu), `body` (mật độ/vị trí từ khóa, cấu trúc heading H2/H3, độ dài), `image_alt` (tồn tại, mô tả đúng). Agent đọc giá trị thật của từng field từ Drupal, không suy đoán gián tiếp từ title/body.
 
 **Output:**
 
 ```
-{ "score": 0-100, "keyword_analysis": {}, "meta_issues": [], "heading_structure_ok": bool }
+{ "score": 0-100, "main_keyword": "...", "issues": [{"field","type","suggestion"}] }
 ```
 
-### 5.3. Brand Consistency Agent
+### 5.3. Brand Voice Agent
 
-**Tiêu chí đánh giá:** giọng văn có khớp brand voice guideline không, dùng đúng tên sản phẩm/thuật ngữ chuẩn (ví dụ "VF3" thay vì "VF 3" hoặc "vf3"), sử dụng đúng chuẩn logo/tagline.
+**Tiêu chí đánh giá:** giọng văn có khớp brand voice guideline không, dùng đúng tên sản phẩm/thuật ngữ chuẩn (ví dụ nhất quán "VF 8" thay vì lẫn lộn "VF8"/"vf8"), xưng hô nhất quán.
 
 Vì brand guideline thường dài hàng chục trang, không thể đưa toàn bộ vào system prompt, agent sẽ dùng kiến trúc RAG (Retrieval-Augmented Generation): brand guideline được cắt nhỏ và lưu vào vector database; mỗi lần chấm 1 bài viết, hệ thống tự động truy vấn (retrieve) các đoạn guideline liên quan nhất tới nội dung đang chấm, rồi mới đưa các đoạn đó (không phải toàn bộ tài liệu) vào prompt gửi cho LLM. Cách này giảm chi phí gọi LLM và tăng độ chính xác khi guideline dài.
 
-Lưu ý: agent này cần một tài liệu "quy chuẩn thương hiệu" (brand guideline) làm căn cứ đưa vào system prompt - nếu VF O2O chưa có sẵn tài liệu này ở dạng có thể đưa vào prompt, đây là việc cần chuẩn bị trước khi triển khai agent.
+**Nguồn brand guideline - tự trích xuất từ corpus công khai:** dự án không được cấp tài liệu quy chuẩn thương hiệu nội bộ của VF O2O. Thay vào đó, brand guideline được **suy ra từ dữ liệu**: lấy tập bài cẩm nang đã publish (đã qua kiểm duyệt nên coi là đại diện cho chuẩn brand) rồi thống kê các quy ước lặp lại - cách xưng hô ("khách hàng"/"quý khách"/"bạn"), thuật ngữ chuẩn ("ô tô điện" hay "xe hơi điện"), cách viết tên model, độ dài câu, mức độ trang trọng. Kết quả ghi thành `brand_guideline.md` và nạp vào vector database. Mỗi quy tắc đều chứng minh được bằng số (ví dụ "92% bài dùng 'ô tô điện' → chọn làm thuật ngữ chuẩn"), nhất quán với nguyên tắc "không có ngưỡng nào là số ảo" của đề tài.
+
+Vector database được phân vùng theo `langcode` để guideline tiếng Việt không lẫn với ngôn ngữ khác khi mở rộng đa ngôn ngữ sau này.
 
 **Output:**
 
 ```
-{ "score": 0-100, "violations": [{"rule","found_text","expected"}] }
+{ "score": 0-100, "issues": [{"field","rule","found_text","expected"}] }
 ```
 
 ### 5.4. Compliance Agent
@@ -197,23 +208,55 @@ Lưu ý: agent này cần một tài liệu "quy chuẩn thương hiệu" (brand
 
 Đây là agent có rủi ro cao nhất (rủi ro pháp lý) nếu bỏ sót lỗi. Đề xuất kết hợp thêm một danh sách từ/cụm từ cấm dạng rule-based (so khớp cứng) bên cạnh đánh giá bằng LLM, để đảm bảo không bỏ sót các trường hợp đã biết trước, thay vì chỉ phụ thuộc hoàn toàn vào khả năng suy luận của LLM.
 
-Ngoài đánh giá bằng LLM và rule-based blacklist ở trên, Compliance Agent còn cần một cơ chế thứ ba để kiểm tra tính đúng/sai của các claim có thể kiểm chứng bằng số liệu (ví dụ thông số kỹ thuật: tầm hoạt động, thời gian sạc, giá bán) - gọi là fact-check. LLM tự suy luận một mình không đủ để biết một con số cụ thể trong bài viết có đúng thực tế hay không nếu không có tài liệu chuẩn để đối chiếu, nên cơ chế này dùng kiến trúc RAG tương tự Brand Consistency Agent (mục 5.3), nhưng nguồn tài liệu tham chiếu là tài liệu thông số sản phẩm chính thức (không phải brand guideline): tài liệu được cắt nhỏ và lưu vào vector database; khi chấm 1 bài viết, hệ thống trích ra các claim có thể kiểm chứng, truy vấn (retrieve) đoạn tài liệu thông số liên quan nhất, rồi đưa claim kèm đoạn tài liệu đó vào prompt để LLM so sánh khớp/lệch. Nếu phát hiện sai lệch, tạo một flag mới với rule "Thông tin sai lệch so với tài liệu thông số chính thức" - severity mặc định "critical" vì công bố sai thông số kỹ thuật là rủi ro pháp lý rõ ràng, tương tự các rule blacklist hiện có.
+Ngoài đánh giá bằng LLM và rule-based blacklist ở trên, Compliance Agent còn cần một cơ chế thứ ba để kiểm tra tính đúng/sai của các claim có thể kiểm chứng bằng số liệu (ví dụ thông số kỹ thuật: tầm hoạt động, thời gian sạc, giá bán) - gọi là fact-check. LLM tự suy luận một mình không đủ để biết một con số cụ thể trong bài viết có đúng thực tế hay không nếu không có tài liệu chuẩn để đối chiếu, nên cơ chế này dùng kiến trúc RAG tương tự Brand Voice Agent (mục 5.3), nhưng nguồn tài liệu tham chiếu là **thông số sản phẩm do VinFast công bố công khai** (trang sản phẩm trên vinfastauto.com, không phải tài liệu nội bộ): thông số được thu thập, cắt nhỏ và lưu vào vector database; khi chấm 1 bài viết, hệ thống trích ra các claim có thể kiểm chứng, truy vấn (retrieve) đoạn thông số liên quan nhất, rồi đưa claim kèm đoạn tài liệu đó vào prompt để LLM so sánh khớp/lệch. Nếu phát hiện sai lệch, tạo một flag mới với rule "Thông tin sai lệch so với thông số công bố chính thức" - severity mặc định "critical" vì công bố sai thông số kỹ thuật là rủi ro pháp lý rõ ràng, tương tự các rule blacklist hiện có.
 
-Như vậy Compliance Agent gồm 3 nguồn tạo flag độc lập, gộp chung vào 1 danh sách `flags`: (1) LLM đánh giá claim thổi phồng/nhạy cảm, (2) rule-based blacklist so khớp cứng, (3) RAG fact-check đối chiếu tài liệu thông số sản phẩm.
+Nguồn cho rule-based blacklist và đánh giá LLM cũng dựa trên căn cứ pháp lý công khai: Luật Quảng cáo 2012 (cấm "số 1", "tốt nhất", "duy nhất" khi không có tài liệu chứng minh), Luật Cạnh tranh 2018 (cấm so sánh trực tiếp với đối thủ), Luật Thương mại (khuyến mại phải có thời hạn/giới hạn rõ ràng) - đặc biệt phù hợp với claim xe điện (tầm hoạt động thiếu điều kiện đo, thời gian sạc thiếu loại trụ sạc).
 
-Lưu ý: giống yêu cầu brand guideline ở mục 5.3, cơ chế fact-check cần có sẵn tài liệu thông số sản phẩm chính thức ở dạng văn bản làm nguồn tham chiếu - đây là việc cần chuẩn bị nguồn tài liệu trước khi triển khai.
+Như vậy Compliance Agent gồm 3 nguồn tạo flag độc lập, gộp chung vào 1 danh sách `flags`: (1) LLM đánh giá claim thổi phồng/nhạy cảm, (2) rule-based blacklist so khớp cứng, (3) RAG fact-check đối chiếu thông số sản phẩm công bố công khai.
+
+**Trạng thái hiện tại (Sprint 2):** `compliance.py` đã triển khai nguồn (1) LLM và (2) rule-based blacklist (`compliance_rules.json`, dùng word-boundary regex). Nguồn (3) RAG fact-check **chưa triển khai** - là hạng mục còn lại của Sprint 2, cần thu thập trước tập thông số sản phẩm công bố công khai (xem `docs/goldset/sources.md` mục 2) làm tài liệu tham chiếu. Không phụ thuộc tài liệu nội bộ VF O2O.
 
 **Output:**
 
 ```
-{ "score": 0-100, "flags": [{"severity","rule","excerpt"}] }
+{ "score": 0-100, "flags": [{"field","severity","rule","excerpt"}] }
 ```
 
 Trong đó mỗi "flag" là một lỗi cụ thể được phát hiện, có mức độ nghiêm trọng (severity) phân theo 3 cấp: "low" (nhẹ), "medium" (đáng chú ý), "critical" (nghiêm trọng, có nguy cơ vi phạm pháp lý rõ ràng).
 
-## 6. Aggregator / Scoring Agent
+### 5.5. Xử lý đặc thù tiếng Việt
+
+Nội dung đánh giá là tiếng Việt, nên một số kỹ thuật xử lý ngôn ngữ phổ biến (vốn thiết kế cho tiếng Anh) không áp dụng trực tiếp được.
+
+**Trạng thái hiện tại (Sprint 1-2):** cả 3 vấn đề dưới đây đang được xử lý bằng **LLM (Claude)** thông qua system prompt tiếng Việt của từng agent — LLM hiểu tiếng Việt nên chấm chính tả, ngữ pháp, độ dài câu và nhận diện từ khóa ở mức định tính khá tốt mà không cần thư viện ngoài. Các file agent hiện tại (`content_quality.py`, `seo.py`) là thuần LLM, chưa dùng thư viện xử lý ngôn ngữ riêng.
+
+**Kế hoạch tinh chỉnh (để đo lường chặt chẽ và tất định hơn):**
+
+| Thách thức | Hướng tinh chỉnh |
+| --- | --- |
+| **Readability** - công thức Flesch-Kincaid đếm âm tiết theo quy tắc tiếng Anh, không đúng cho tiếng Việt | Bổ sung chỉ số tự định nghĩa, đo được và tất định: độ dài câu trung bình, tỉ lệ câu quá dài (> 30 từ), tỉ lệ đoạn quá dài (> 5 câu). Ngưỡng calibrate từ gold set (mục 8.2). Ưu điểm so với để LLM tự cảm nhận: con số ổn định, calibrate được. |
+| **Keyword density** - tiếng Việt không tách từ bằng dấu cách ("máy giặt" là 1 từ, 2 tiếng) | Dùng thư viện tách từ tiếng Việt (ví dụ `underthesea`) trước khi đếm mật độ từ khóa, thay cho ước lượng định tính của LLM. Sẽ thêm vào `requirements.txt` khi triển khai. |
+| **Spell/grammar check** - thư viện tiếng Việt yếu hơn tiếng Anh nhiều | Giữ ở LLM (Claude) - đây là lựa chọn cố ý, không phát sinh hạ tầng mới, vì thư viện rule-based tiếng Việt chưa đủ mạnh. |
+
+Ngoài ra, toàn bộ system prompt của 4 agent đều chỉ dẫn LLM trả kết quả bằng tiếng Việt để đội content đọc được trực tiếp (đã áp dụng từ Sprint 1).
+
+### 5.6. Thiết kế mở rộng: hệ thống không set cứng một phạm vi
+
+Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **lựa chọn có chủ đích để đủ sâu**, không phải giới hạn cứng của kiến trúc. Bốn agent được thiết kế **content-agnostic**: nhận đầu vào là các field nội dung kèm `(content_type, langcode)`, không hard-code giả định riêng cho một loại nội dung hay một ngôn ngữ nào trong logic. Có hai trục mở rộng độc lập:
+
+**Trục 1 - loại nội dung.** Rubric và ngưỡng của mỗi tiêu chí lưu theo khóa `(content_type, langcode)` trong config, không nhúng cứng trong code agent. Thêm một loại nội dung mới (landing page, thông cáo báo chí, case study) = thêm một bộ rubric/ngưỡng trong config + thu gold set cho loại đó, **không phải sửa logic 4 agent**. Sở dĩ phạm vi hiện tại chỉ tập trung một loại là để gold set 30-50 mẫu đủ dày cho calibration có ý nghĩa thống kê (chia mẫu cho nhiều loại sẽ làm mỗi loại quá ít mẫu). Lộ trình mở rộng phân tầng P0 (cẩm nang) / P1 (landing page) / P2 (PR, case study) - chi tiết xem spec mục 2.
+
+**Trục 2 - ngôn ngữ.** Ba điểm giữ sẵn để mở rộng mà không đập đi làm lại: (1) `langcode` là tham số đầu vào của Orchestrator và mọi agent, không hard-code "vi"; (2) cùng cơ chế config `(content_type, langcode)` ở trục 1 đã bao luôn trục này; (3) lớp phân tích ngôn ngữ (tách từ, đếm câu, readability - mục 5.5) tách sau một interface chung, hiện chỉ implement cho tiếng Việt, thêm ngôn ngữ mới = thêm một class, không đụng 4 agent.
+
+**Chi phí thật của mở rộng nằm ở dữ liệu, không ở kiến trúc:** mỗi `(content_type, langcode)` mới cần gold set riêng và calibrate lại ngưỡng, vì ngưỡng **không chuyển giao được** giữa các loại/ngôn ngữ. Vì vậy việc code sẵn cho mọi phạm vi là vô nghĩa nếu chưa có dữ liệu - kiến trúc chỉ cần đảm bảo **không cản đường** mở rộng, và đó là điều 3 nguyên tắc trên bảo đảm. Bản thân việc code + calibrate cho loại/ngôn ngữ thứ hai nằm ngoài phạm vi dự án hiện tại.
+
+**Trạng thái hiện tại (Sprint 1-2):** đây là *định hướng thiết kế*, chưa triển khai đầy đủ trong code. Hiện `graph.py` hard-code trọng số (`WEIGHTS`) và ngưỡng quyết định (80/50) cho một phạm vi duy nhất; chưa có file config theo `(content_type, langcode)`, chưa có trường `content_type`/`langcode` trong `state.py`. Việc tách trọng số/ngưỡng ra config là hạng mục của Sprint 2-3 (gắn với calibration). Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
+
+## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 
 Node cuối cùng nhận đủ 4 kết quả, tổng hợp thành một điểm số tổng và một quyết định duy nhất.
+
+**Aggregator là module tính toán tất định (deterministic), không gọi LLM** - khác với 4 agent chuyên biệt. Điểm tổng và quyết định được tính bằng công thức trọng số + so ngưỡng cố định (mục 6.1-6.2), nên chạy nhiều lần trên cùng đầu vào luôn ra cùng kết quả. Đây là điều kiện bắt buộc để calibrate ngưỡng từ gold set ở Sprint 3 (mục 8.2): nếu để LLM tự "cảm nhận" rồi phán điểm tổng thì kết quả không tái lập được, không thể tính F1/Kappa ổn định hay chọn ngưỡng tối ưu. Tên gọi "Aggregator/Scoring" theo sơ đồ mentor được giữ nguyên, nhưng về bản chất kỹ thuật nó là một hàm thuần, không phải một LLM agent.
 
 ### 6.1. Công thức tính điểm tổng (trung bình có trọng số)
 
@@ -226,7 +269,7 @@ final_score = content_quality.score * 0.25
             + compliance.score     * 0.30
 ```
 
-_(Trọng số và các ngưỡng quyết định ở mục 6.2 - ví dụ "80" và "50" - là giá trị tạm thời để minh họa logic. Theo kế hoạch Sprint 3, các ngưỡng này sẽ được hiệu chỉnh lại dựa trên dữ liệu thực tế (xem mục 8.1 - Calibration ngưỡng từ gold set), không dùng số áng chừng khi triển khai chính thức.)_
+_(Trọng số và các ngưỡng quyết định ở mục 6.2 - ví dụ "80" và "50" - là giá trị tạm thời để minh họa logic. Theo kế hoạch Sprint 3, các ngưỡng này sẽ được hiệu chỉnh lại dựa trên dữ liệu thực tế (xem mục 8.2 - Calibration ngưỡng từ gold set), không dùng số áng chừng khi triển khai chính thức.)_
 
 **Ý nghĩa và căn cứ của công thức, không chỉ dựa vào suy luận nội bộ:**
 
@@ -317,7 +360,7 @@ Tuy nhiên, giống như trọng số ở mục 6.1, **không có nguồn nào c
 
 `missing_agents` liệt kê tên các agent không trả được kết quả (xem mục 6.4). `veto_reason` chỉ xuất hiện khi Compliance phủ quyết bằng flag `critical` trong khi điểm Compliance riêng vẫn từ 50 trở lên - tránh gây hiểu nhầm "điểm không thấp mà vẫn bị từ chối" (xem mục 6.2); nếu điểm Compliance đã dưới 50 thì tự bản thân điểm số đã giải thích được lý do, không cần field này.
 
-Object này chỉ chứa dữ liệu thô để tính toán, chưa có sẵn 1 câu tóm tắt ngôn ngữ tự nhiên - phần gợi ý sửa hiển thị cho người dùng (dạng liệt kê từng lỗi theo từng agent) được Write-back Node build riêng từ `details` và ghi vào `field_ai_suggestions` (mục 2.3).
+Object này chỉ chứa dữ liệu thô để tính toán, chưa có sẵn 1 câu tóm tắt ngôn ngữ tự nhiên - phần gợi ý sửa hiển thị cho người dùng được Write-back Node build riêng từ `details`, **gom theo từng field** (mỗi lỗi mang trường `field`) rồi ghi vào `field_ai_suggestions` (mục 2.3). Đây chính là yêu cầu "báo cáo lỗi/rủi ro theo từng field" của đề bài.
 
 ### 6.4. Xử lý khi một trong 4 agent chuyên biệt bị lỗi/không trả kết quả
 
@@ -335,7 +378,7 @@ if compliance_result is None:
 
 Áp dụng bất kể 3 agent còn lại chấm điểm cao thế nào - rủi ro pháp lý không xác minh được luôn được ưu tiên hơn lợi ích tự động hóa.
 
-**Trường hợp 2: Content Quality, SEO, hoặc Brand Consistency Agent bị lỗi**
+**Trường hợp 2: Content Quality, SEO, hoặc Brand Voice Agent bị lỗi**
 
 Rủi ro thấp hơn Compliance. Xử lý bằng cách tính lại điểm trung bình chỉ trên các agent còn dữ liệu, chia lại tỷ trọng theo tổng trọng số còn lại, đồng thời ghi rõ trong báo cáo agent nào bị thiếu để người xem biết điểm số chưa đầy đủ. Ví dụ khi SEO Agent lỗi:
 
@@ -363,7 +406,7 @@ report.summary += " (Lưu ý: SEO Agent không trả được kết quả, đi�
 
 Mục đích: kiểm tra tính đúng đắn về mặt chức năng (agent có phát hiện đúng loại lỗi không), thực hiện với bộ mẫu nhỏ, nhanh - khác với gold set ở mục 8.2 (dùng để hiệu chỉnh ngưỡng điểm bằng số liệu thống kê, cần cỡ mẫu lớn hơn).
 
-1. Bộ dữ liệu mẫu (golden set): tạo khoảng 8-10 bài viết mẫu trong Drupal, cố ý bao gồm bài "tốt" (không lỗi), bài lỗi chính tả, bài thiếu SEO, bài sai thuật ngữ thương hiệu, bài vi phạm compliance - để kiểm tra từng agent có phát hiện đúng loại lỗi tương ứng không.
+1. Bộ mẫu kiểm thử chức năng (8-10 bài, tách biệt với gold set 30-50 mẫu ở mục 8.2): tạo khoảng 8-10 bài viết mẫu trong Drupal, cố ý bao gồm bài "tốt" (không lỗi), bài lỗi chính tả, bài thiếu SEO, bài sai thuật ngữ thương hiệu, bài vi phạm compliance - để kiểm tra từng agent có phát hiện đúng loại lỗi tương ứng không.
 
 2. Kiểm tra từng agent riêng lẻ trước khi ghép hệ thống: so sánh kết quả AI trả về với đánh giá thủ công.
 
@@ -375,7 +418,7 @@ Mục đích: kiểm tra tính đúng đắn về mặt chức năng (agent có 
 
 Theo yêu cầu Sprint 3 của mentor, các ngưỡng quyết định (mục 6.2) không được đặt tùy ý mà phải tính toán từ dữ liệu thực tế, theo quy trình sau:
 
-1. Thu thập gold set: tập hợp 30-50 bài viết, mời người có chuyên môn (đội content VF O2O) chấm thủ công theo đúng 3 mức: publish / needs_revision / rejected - đây là "đáp án chuẩn" để đối chiếu.
+1. Thu thập gold set: tập hợp 30-50 bài cẩm nang từ nguồn công khai (vinfastauto.com), cấu tạo ~60% bài thật (đã publish) và ~40% bài chèn lỗi có chủ đích (perturbation - cố ý thêm claim vi phạm luật, bỏ điều kiện đo, xóa meta description...) để phủ đủ các loại lỗi kể cả loại hiếm gặp trong bài đã duyệt. Tác giả dự án tự gán nhãn thủ công theo 3 mức publish / needs_revision / rejected - đây là "đáp án chuẩn" để đối chiếu. Với bài perturbation, ground truth được biết chính xác vì lỗi do chính mình chèn vào. (Khi thu thập từ web, cần loại bỏ phần template dùng chung của trang - header, footer, khối CTA cuối bài - chỉ giữ nội dung chính; bước này chỉ cần ở khâu thu thập, không nằm trong pipeline chạy thật vì hệ thống đọc trực tiếp field `body` từ Drupal.)
 
 2. Chạy hệ thống AI trên toàn bộ gold set, thu lại kết quả (điểm số + quyết định) của từng bài.
 
@@ -397,6 +440,29 @@ Trước khi cho hệ thống AI có quyền quyết định publish/từ chối
 
 - Chỉ khi kết quả shadow-test đạt mức đồng thuận đủ tin cậy mới cân nhắc giao quyền quyết định thật cho hệ thống AI - tránh rủi ro để AI tự quyết định publish/từ chối ngay từ đầu khi chưa được kiểm chứng trên dữ liệu thực tế.
 
-## 9. Kết luận và bước tiếp theo
+## 9. Tự động hóa quy trình (trạng thái hiện tại → mục tiêu sản phẩm cuối kỳ)
+
+Đề tài yêu cầu node ở trạng thái "Needs Review" **tự động** được chấm và trả báo cáo **ngay trong giao diện editor**. Tự động hóa vì vậy là **deliverable bắt buộc của sản phẩm cuối kỳ**, không phải hạng mục tương lai.
+
+### 9.1. Trạng thái hiện tại
+
+Pipeline (`build_graph().invoke(node_id)`) đã chạy đúng end-to-end nhưng còn được **kích hoạt thủ công** (chạy script với `node_id`). Chưa có cơ chế tự phát hiện bài mới cần chấm, và trạng thái "Needs Review" chưa được cấu hình (hiện chỉ có Draft/Published).
+
+### 9.2. Mục tiêu cuối kỳ: lớp kích hoạt tự động (polling worker)
+
+Bổ sung 2 mắt xích để đạt tự động hóa:
+
+1. **Bật Content Moderation** trên content type Article, thêm state "Needs Review" (cấu hình Drupal, không cần code).
+2. **Polling worker** - một tiến trình Python chạy nền, định kỳ (ví dụ mỗi 30 giây) truy vấn JSON:API tìm node đang ở "Needs Review" mà chưa có kết quả AI mới, rồi gọi `build_graph().invoke()` chấm và ghi ngược. Tái sử dụng toàn bộ code pipeline hiện có; chỉ thêm vòng lặp "phát hiện việc".
+
+Từ góc nhìn người dùng, luồng thành: writer chuyển bài sang "Needs Review" → trong ~30 giây worker tự chấm → báo cáo per-field hiện trong editor. Không ai phải chạy lệnh tay.
+
+### 9.3. Quan hệ với kiến trúc production thật
+
+Ở quy mô production, trigger thường là **event-driven**: Drupal phát sự kiện khi đổi trạng thái → đẩy job vào **message queue** (SQS/RabbitMQ/Redis) → worker tiêu thụ. Lý do phải qua queue: chấm bằng LLM mất nhiều giây/bài, không thể gọi đồng bộ và bắt Drupal đứng chờ.
+
+Điểm mấu chốt: **worker xử lý trong production chính là worker polling ở mục 9.2** - phần "bộ não" giống hệt. Khác biệt duy nhất là *cách job đến với worker* (queue đẩy vào so với worker tự đi hỏi). Vì vậy chọn polling cho bản triển khai là **quyết định có cân nhắc** (đủ đạt mục tiêu tự động, thuần Python, ít rủi ro tiến độ), và khi cần nâng lên production chỉ đổi lớp trigger đặt trước worker - không phải viết lại worker.
+
+## 10. Kết luận và bước tiếp theo
 
 Tài liệu đã hoàn thành nghiên cứu bước 2 theo yêu cầu mentor: xác định rõ vai trò, input/output, và công nghệ triển khai (LangGraph) cho từng thành phần trong kiến trúc hệ thống Multi-Agent AI. Kiến trúc tổng thể được giữ nguyên 1:1 theo sơ đồ mentor cung cấp; LangGraph chỉ là công cụ triển khai kỹ thuật, không làm thay đổi bản thiết kế.

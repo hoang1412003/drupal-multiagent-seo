@@ -1,15 +1,17 @@
 # BÁO CÁO NGHIÊN CỨU DRUPAL CMS
 
-*Giai đoạn 3 - Chương trình AI Thực Chiến VinUni**
-Thực tập tại VinFast O2O (VF O2O)*
+*Giai đoạn 3 - Chương trình AI Thực Chiến VinUni*
+*Thực tập tại VinFast O2O (VF O2O)*
 
 
 
 **Đề tài:** Nghiên cứu và xây dựng hệ thống Multi-Agent AI hỗ trợ quy trình kiểm duyệt, đánh giá và tối ưu hóa nội dung Marketing trước khi xuất bản trên nền tảng Drupal CMS nhằm nâng cao chất lượng nội dung, tối ưu SEO và đảm bảo tính nhất quán của thương hiệu.
 
-**Phạm vi nội dung:** Áp dụng cho toàn bộ bài viết dạng tin tức - gồm 3 nhóm chủ đề: Công ty, Ô tô điện, Xe máy điện - không giới hạn riêng nội dung thông số kỹ thuật xe.
+**Phạm vi nội dung:** Bài cẩm nang / hướng dẫn tiếng Việt về xe điện (dạng URL `/vn_vi/<slug>` trên vinfastauto.com, ví dụ "cách lái xe ô tô điện", "hướng dẫn sạc pin") - đây là nhóm nội dung marketing tối ưu cho SEO, khác với thông cáo báo chí ở mục "Công ty" (không thuộc phạm vi). Toàn bộ dữ liệu lấy từ nguồn công khai; dự án không sử dụng tài liệu nội bộ VF O2O.
 
-**Nhiệm vụ trong báo cáo này:** Theo chỉ đạo của mentor, nghiên cứu Drupal CMS và dựng nhanh một instance thử nghiệm để sử dụng làm nguồn input (nội dung) cho hệ thống Multi-Agent, trước khi tiến hành nghiên cứu thiết kế các agent.
+Đây là phạm vi **tập trung có chủ đích** để gold set đủ sâu, **không phải giới hạn cứng**: hệ thống được thiết kế content-agnostic, rubric và ngưỡng lưu theo config `(content_type, langcode)` nên mở rộng được sang loại nội dung khác (landing page, thông cáo báo chí) và ngôn ngữ khác mà không phải sửa logic 4 agent (chi tiết: architecture.md mục 5.6). Định nghĩa phạm vi đầy đủ, phân tầng lộ trình mở rộng, lý do chọn tiếng Việt xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`.
+
+**Phạm vi báo cáo này:** Kiến trúc tổng thể của hệ thống Multi-Agent do mentor cung cấp (chi tiết ở architecture.md). Theo lộ trình mentor giao, bước đầu tiên là nghiên cứu nền tảng Drupal CMS và triển khai một instance thử nghiệm làm nguồn dữ liệu đầu vào (nội dung) cho hệ thống. Phần nghiên cứu thiết kế các agent được trình bày ở bước tiếp theo.
 
 ## 1. Drupal CMS là gì
 
@@ -49,7 +51,7 @@ Drupal có kiến trúc "module hóa" (modular architecture): mọi tính năng,
 
 | Module SEO | Chức năng | Liên hệ với đề tài |
 | --- | --- | --- |
-| Metatag | Tự động sinh và quản lý meta title, meta description, Open Graph, Twitter Card cho từng nội dung. | Chính là các trường dữ liệu mà SEO Agent (mục 5.2) sẽ đọc để chấm điểm "meta_issues". |
+| Metatag | Tự động sinh và quản lý meta title, meta description, Open Graph, Twitter Card cho từng nội dung. | Chính là trường meta description mà SEO Agent (mục 5.2) đọc trực tiếp để chấm điểm theo từng field. |
 | Pathauto | Tự động tạo URL thân thiện SEO theo mẫu (ví dụ "/khuyen-mai/vf3-thang-7" thay vì "/node/123") dựa trên tiêu đề/danh mục. | Giúp bài viết có URL chuẩn SEO ngay khi tạo, không cần AI can thiệp riêng cho phần này. |
 | Simple XML Sitemap | Tự động sinh sitemap.xml theo chuẩn sitemaps.org, hỗ trợ đa ngôn ngữ, giúp công cụ tìm kiếm phát hiện và thu thập nội dung hiệu quả hơn. | Đảm bảo nội dung sau khi được duyệt "publish" được công cụ tìm kiếm index nhanh chóng. |
 | Schema.org Metatag (Structured data) | Xuất dữ liệu có cấu trúc (JSON-LD) trong phần head của trang, giúp Google hiển thị rich results (đánh giá sao, breadcrumb, FAQ...). | Có thể mở rộng SEO Agent sau này để kiểm tra luôn cả structured data, không chỉ meta tag cơ bản. |
@@ -74,27 +76,33 @@ Kết luận: Drupal không chỉ đóng vai trò "kho nội dung" như trình b
 
 ### 2.1. Môi trường triển khai
 
-Instance Drupal được dựng cục bộ (local) bằng Docker Compose, sử dụng image chính thức từ Docker Hub, gồm 2 container:
+Instance Drupal được dựng cục bộ bằng **DDEV** - công cụ local development được cộng đồng Drupal chọn làm khuyến nghị chính thức từ 6/2024 ([drupal.org/docs/official_docs/local-development-guide](https://www.drupal.org/docs/official_docs/local-development-guide)). Căn cứ lựa chọn: DDEV được 93% lập trình viên Drupal khuyến nghị và chiếm 72% thị phần công cụ local development (Drupal Developer Survey 2025), đồng thời giữ code Drupal trực tiếp trên đĩa nên xem/sửa được bằng editor thông thường, và có sẵn công cụ truy cập CSDL (`ddev mysql`, `ddev launch -y adminer`).
 
-- drupal:10-apache - chạy Drupal 10 kèm Apache và PHP.
+DDEV chạy trên nền Docker nhưng quản lý qua CLI thống nhất (`ddev start`, `ddev composer`, `ddev drush`), không cần tự viết cấu hình container. Project cấu hình theo **Drupal 10** (`--project-type=drupal10`), docroot `web/`, gồm 2 service:
 
-- mysql:8.0 - cơ sở dữ liệu MySQL lưu trữ toàn bộ dữ liệu nội dung, cấu hình.
+- **web**: PHP 8.4, server nginx-fpm (image `ddev/ddev-webserver`)
+- **db**: MariaDB 11.8 (image `ddev/ddev-dbserver-mariadb`) - DDEV mặc định dùng MariaDB thay cho MySQL, tương thích đầy đủ với Drupal và JSON:API
 
-Hai container giao tiếp với nhau qua mạng nội bộ (network) do Docker Compose tự tạo. Container Drupal kết nối tới container MySQL thông qua tên service "db" (thay vì "localhost", vì đây là hai container độc lập, không chia sẻ chung hệ điều hành).
-
-**Địa chỉ truy cập:** http://localhost:8080 (cổng 8080 trên máy host được ánh xạ sang cổng 80 trong container Drupal).
+**Địa chỉ truy cập:** `http://drupal.ddev.site` (DDEV tự cấu hình router và DNS local).
 
 ### 2.2. Các bước cài đặt đã thực hiện
 
-1. Cài đặt qua trình cài đặt web (web installer) của Drupal, chọn hồ sơ "Tiêu chuẩn" (Standard) - hồ sơ cài sẵn các content type và module phổ biến, phù hợp để thực hành nhanh.
+Theo đúng quy trình khuyến nghị chính thức ([DDEV Quickstart - Drupal](https://docs.ddev.com/en/stable/users/quickstart/)), dùng phương pháp Composer:
 
-2. Cấu hình kết nối cơ sở dữ liệu MySQL (tên CSDL, username, password, host = "db", port = 3306).
+```bash
+ddev config --project-type=drupal10 --docroot=web
+ddev start
+ddev composer create-project drupal/recommended-project:^10
+ddev composer require drush/drush
+ddev drush site:install --account-name=admin --account-pass=admin -y
+```
 
-3. Cấu hình thông tin website và tài khoản quản trị (admin).
+Sau khi site chạy, cấu hình thêm qua Drush (script hóa được, tái lập được - xem `drupal/scripts/create_ai_fields.php`):
 
-4. Tạo nội dung mẫu (content type "Bài viết") mô phỏng một bài viết marketing thực tế, đóng vai trò "nội dung nháp" để làm input thử nghiệm cho hệ Multi-Agent.
-
-5. Bật module JSON:API (mặc định không được kích hoạt sẵn trong hồ sơ Standard của Drupal 10) để cho phép xuất nội dung ra dưới dạng dữ liệu JSON qua API.
+1. Bật module JSON:API và HTTP Basic Authentication (`ddev drush en jsonapi basic_auth -y`).
+2. Tắt `read_only` của JSON:API để cho phép ghi (POST/PATCH), không chỉ đọc (`ddev drush config:set jsonapi.settings read_only 0`).
+3. Tạo 4 field tùy chỉnh trên content type Article: `field_ai_status`, `field_ai_score`, `field_ai_suggestions` (OUTPUT - Multi-Agent ghi kết quả về) và `field_meta_description` (INPUT - Multi-Agent đọc để chấm SEO/Compliance). Chi tiết field xem `docs/architecture.md` mục 2.3.
+4. Tạo nội dung mẫu (content type "Bài viết") bằng script tái lập được (`multiagent/scripts/seed_sample_articles.py`) thay vì nhập tay - bài cẩm nang xe điện đúng phạm vi đề tài, cố ý gài kịch bản lỗi cho từng agent (xem `docs/architecture.md` mục 8.1).
 
 ## 3. Kiểm thử lấy nội dung qua JSON:API
 
@@ -103,32 +111,35 @@ Sau khi kích hoạt module JSON:API, tiến hành gọi thử API để kiểm 
 **Request:**
 
 ```
-GET http://localhost:8080/jsonapi/node/article
+GET http://drupal.ddev.site/jsonapi/node/article/{uuid}
 Header: Accept: application/vnd.api+json
+Authorization: Basic (HTTP Basic Auth)
 ```
 
-**Kết quả trả về (rút gọn):**
+**Kết quả trả về (rút gọn, từ bài cẩm nang thật ở trạng thái chưa xuất bản):**
 
 ```
 {
   "type": "node--article",
-  "id": "67859e3c-ccf8-45d5-b4e3-9ee68e0895fa",
+  "id": "d115f055-e97a-4757-af9e-6b4f53e1f408",
   "attributes": {
-    "title": "Khuyến mãi VinFast VF3 tháng 7 - Giảm giá đến 50 triệu",
+    "title": "Hướng dẫn sạc pin ô tô điện VinFast đúng cách và an toàn",
     "body": {
-      "value": "VinFast chính thức triển khai chương trình ưu đãi...",
+      "value": "<h2>Chuẩn bị trước khi sạc</h2><p>Trước khi sạc pin ô tô điện VinFast...",
       "format": "basic_html"
     },
-    "status": true,
-    "created": "2026-07-17T02:23:12+00:00",
-    "changed": "2026-07-17T02:28:05+00:00"
+    "status": false,
+    "created": "2026-07-27T03:36:51+00:00",
+    "changed": "2026-07-27T03:37:09+00:00"
   }
 }
 ```
 
+`status: false` xác nhận đúng use case chính của đề tài: bài ở trạng thái **chưa xuất bản** (bản nháp) - đúng đối tượng mà hệ Multi-Agent AI cần đánh giá trước khi cho phép publish.
+
 ### 3.1. Nhận xét về cấu trúc dữ liệu
 
-- title, body.value: nội dung chính cần đưa vào cho các agent phân tích (Content Quality, SEO, Brand Consistency, Compliance).
+- title, body.value: nội dung chính cần đưa vào cho các agent phân tích (Content Quality, SEO, Brand Voice, Compliance).
 
 - id (UUID): định danh duy nhất của node, dùng để Orchestrator Agent ghi ngược kết quả đánh giá về đúng bài viết tương ứng.
 

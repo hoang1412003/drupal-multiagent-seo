@@ -1,0 +1,32 @@
+[
+  {
+    "uuid": "d115f055-e97a-4757-af9e-6b4f53e1f408",
+    "label": "Huong dan sac pin (bai tot)",
+    "expected": "publish"
+  },
+  {
+    "uuid": "5cdf9115-a633-49ee-8938-8e3450d0b140",
+    "label": "Kinh nghiem lai duong dai (loi chinh ta co y)",
+    "expected": "needs_revision"
+  },
+  {
+    "uuid": "7b5b84b2-1e6a-4c98-aa1f-ab3e21e046f7",
+    "label": "Bao duong xe (thieu SEO co y)",
+    "expected": "needs_revision"
+  },
+  {
+    "uuid": "63f97c51-6f66-4033-b5f3-d6748204db0d",
+    "label": "So sanh chi phi (sai thuat ngu brand co y)",
+    "expected": "needs_revision"
+  },
+  {
+    "uuid": "a744f5db-b5e9-4de1-9386-e51689de536f",
+    "label": "Tam hoat dong (vi pham compliance co y)",
+    "expected": "rejected"
+  },
+  {
+    "uuid": "ec437da9-b099-4bf0-87a7-3a02ef82559e",
+    "label": "Cac loai pin (bai tot)",
+    "expected": "publish"
+  }
+]

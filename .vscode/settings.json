@@ -1,3 +1,4 @@
 {
-  "python.analysis.extraPaths": ["./src"]
+  "python.analysis.extraPaths": ["./multiagent/src"],
+  "python.defaultInterpreterPath": "./multiagent/.venv/Scripts/python.exe"
 }

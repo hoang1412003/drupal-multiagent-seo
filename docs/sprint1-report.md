@@ -11,6 +11,8 @@ Theo lộ trình 3 sprint đã được mentor duyệt (`docs/roadmap.md`), Spri
 
 Báo cáo này trình bày kết quả đạt được, bằng chứng kiểm thử thực tế, và các vấn đề phát hiện/đã khắc phục trong quá trình rà soát lại trước khi bàn giao.
 
+> **Ghi chú đường dẫn (bổ sung sau Sprint 1):** các đường dẫn `src/...`, `scripts/...` trong báo cáo này là vị trí file tại thời điểm Sprint 1 (khi đó ở gốc project). Sau này project được cấu trúc lại: `src/`, `scripts/`, `requirements.txt` chuyển vào `multiagent/` (đứng cạnh `drupal/` - phần hạ tầng Drupal), ví dụ `src/ai_core.py` nay là `multiagent/src/ai_core.py`. Chi tiết: `README.md` mục "Cấu trúc project".
+
 ## 2. Kết quả đạt được
 
 ### 2.1. Kiến trúc & công nghệ điều phối
@@ -18,6 +20,8 @@ Báo cáo này trình bày kết quả đạt được, bằng chứng kiểm th
 Đã khảo sát 3 lựa chọn (LangGraph, tự viết orchestrator bằng Python thuần, CrewAI) và chốt dùng **LangGraph** — do có sẵn cơ chế fan-out/fan-in (chạy song song nhiều agent rồi gộp kết quả) và quản lý state xuyên suốt, khớp trực tiếp với kiến trúc cố định/tuần tự của đề tài. Căn cứ lựa chọn chi tiết (bao gồm khảo sát case study ngành thực tế) xem `docs/research.md` mục 1 và mục 4.
 
 ### 2.2. Hạ tầng Drupal
+
+> **Ghi chú hạ tầng (bổ sung sau Sprint 1):** hạ tầng mô tả dưới đây (Docker Compose tự viết tay) sau đó được thay bằng **DDEV** - công cụ local dev khuyến nghị chính thức của Drupal.org từ 6/2024. Chi tiết và lý do chuyển: `docs/research.md` mục 2.1. Mục này giữ nguyên làm bản ghi lịch sử của Sprint 1.
 
 - Dựng Drupal 10 + MySQL 8 local bằng Docker Compose (`docker-compose.yml`), truy cập qua `http://localhost:8080`.
 - Bật module JSON:API và HTTP Basic Authentication.
@@ -33,13 +37,15 @@ Bằng chứng: [output thật của `call_agent()`](evidence/smoke_test_ai_core
 
 ### 2.4. Khung Orchestrator (LangGraph, 8 node)
 
-`src/graph.py` triển khai đủ 8 node theo đúng sơ đồ kiến trúc: Fetch → Orchestrator/Dispatch → 4 agent (song song) → Aggregator → Write-back. Content Quality và SEO Agent chạy thật; Brand Consistency và Compliance Agent là **stub có chủ đích** (luôn trả điểm 100, chưa đánh giá gì) — đúng theo kế hoạch, vì 2 agent này cần brand guideline (Brand) và thuộc phạm vi Sprint 2.
+`src/graph.py` triển khai đủ 8 node theo đúng sơ đồ kiến trúc: Fetch → Orchestrator/Dispatch → 4 agent (song song) → Aggregator → Write-back. Content Quality và SEO Agent chạy thật; Brand Voice và Compliance Agent là **stub có chủ đích** (luôn trả điểm 100, chưa đánh giá gì) — đúng theo kế hoạch, vì 2 agent này thuộc phạm vi Sprint 2.
 
 ### 2.5. Content Quality Agent & SEO Agent
 
 Cả 2 agent triển khai thật (`src/agents/content_quality.py`, `src/agents/seo.py`), gọi LLM thật với system prompt và output schema riêng biệt, đã kiểm thử end-to-end (xem mục 3).
 
 ## 3. Kiểm thử thực tế
+
+> **Ghi chú scope (bổ sung sau Sprint 1):** 8 bài mẫu ở mục này là dữ liệu smoke-test dạng tin khuyến mãi/tin sản phẩm, dùng để kiểm tra nhanh chức năng agent ở thời điểm Sprint 1. Sau đó, phạm vi nội dung của đề tài được tinh chỉnh lại thành **bài cẩm nang / hướng dẫn xe điện** (xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`). Bộ mẫu kiểm thử đúng phạm vi (cẩm nang) đã được chuẩn bị dưới dạng script tái lập (`scripts/seed_sample_articles.py`, `scripts/run_all_samples.py`) và sẽ được trình bày trong tài liệu tiến độ tiếp theo. Mục này giữ nguyên làm bản ghi lịch sử của Sprint 1.
 
 Đã tạo 8 bài viết mẫu trên Drupal, cố ý bao phủ các loại lỗi khác nhau (bài tốt, lỗi chính tả, thiếu SEO, sai thuật ngữ thương hiệu, phóng đại/vi phạm compliance), theo đúng khuyến nghị bộ dữ liệu mẫu ở `docs/architecture.md` mục 8.1. Chạy toàn bộ pipeline thật (Fetch → 4 agent → Aggregator → Write-back) trên cả 8 bài:
 
@@ -90,7 +96,7 @@ Bằng chứng: [diff commit sửa lỗi](evidence/bugfix_vietnamese_output.diff
 
 ## 5. Giới hạn phạm vi hiện tại (có chủ đích, để lại cho Sprint 2/3)
 
-- Brand Consistency Agent và Compliance Agent còn là stub (Sprint 2, cần brand guideline + rule-based list).
+- Brand Voice Agent và Compliance Agent còn là stub (Sprint 2, cần brand guideline + rule-based list).
 - Chưa có retry/backoff khi LLM hoặc Drupal API lỗi (`docs/architecture.md` mục 7 mô tả nhưng chưa triển khai).
 - Chưa có test tự động (pytest); hiện dùng script test thủ công (`scripts/smoke_test_*.py`).
 - Chưa có UI báo cáo hiển thị đẹp trong `/admin/content` (mới hiển thị field thô khi mở từng bài viết) — Sprint 2.

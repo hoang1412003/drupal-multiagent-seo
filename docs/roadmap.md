@@ -4,7 +4,9 @@ Sau khi review 2 phần nghiên cứu trên, mentor đã duyệt hướng đi v�
 
 ## 1. Tiêu chí hoàn thành chung
 
-Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "Needs Review" được các agent tự động chấm điểm, với ngưỡng quyết định được tính toán từ gold set 30-50 mẫu (không phải số áng chừng - xem mục 8.2 trong architecture.md). Kết quả (lỗi/rủi ro theo từng field) hiển thị ngay trong giao diện editor của Drupal. Sản phẩm bàn giao gồm: Web App, slide thuyết trình, và demo.
+Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "Needs Review" được các agent tự động chấm điểm, với ngưỡng quyết định được tính toán từ gold set 30-50 mẫu (không phải số áng chừng - xem mục 8.2 trong architecture.md). Kết quả (lỗi/rủi ro theo từng field) hiển thị ngay trong giao diện editor của Drupal, dưới dạng *đề xuất* cho người duyệt - hệ thống không tự động xuất bản. Sản phẩm bàn giao gồm: Web App, slide thuyết trình, và demo.
+
+**Phạm vi nội dung:** bài cẩm nang / hướng dẫn tiếng Việt về xe điện (nguồn công khai vinfastauto.com), không dùng tài liệu nội bộ VF O2O. Đây là phạm vi tập trung có chủ đích, không set cứng - kiến trúc config-driven cho phép mở rộng loại nội dung/ngôn ngữ theo lộ trình phân tầng P0/P1/P2 (architecture.md mục 5.6). Định nghĩa đầy đủ: `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`.
 
 ## 2. Lộ trình 3 sprint
 
@@ -20,13 +22,15 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 ### Sprint 2
 
-- Xây Agent Brand Voice dùng kiến trúc RAG (cần có brand guideline từ mentor/phòng marketing - xem architecture.md, mục 5.3).
+- Xây Agent Brand Voice dùng kiến trúc RAG, với brand guideline **tự trích xuất từ corpus bài cẩm nang công khai** (không có tài liệu nội bộ - xem architecture.md, mục 5.3).
 
-- Xây Agent Compliance/Fact-check.
+- Xây Agent Compliance/Fact-check (nguồn đối chiếu: thông số sản phẩm công bố công khai + căn cứ pháp lý Luật Quảng cáo 2012, Luật Cạnh tranh 2018 - xem architecture.md, mục 5.4).
 
-- Hoàn thiện logic tổng hợp điểm của Orchestrator (Aggregator - xem architecture.md, mục 6).
+- Hoàn thiện logic tổng hợp điểm của Aggregator (module tất định, không gọi LLM - xem architecture.md, mục 6).
 
-- Bắt đầu thu thập và gán nhãn gold set (30-50 mẫu, chuẩn bị cho calibration ở Sprint 3).
+- Bắt đầu thu thập và gán nhãn gold set (30-50 mẫu bài cẩm nang công khai, ~60% bài thật + ~40% chèn lỗi có chủ đích, tự gán nhãn - chuẩn bị cho calibration ở Sprint 3).
+
+- Tự động hóa quy trình: bật Content Moderation ("Needs Review") + polling worker tự phát hiện bài cần chấm (architecture.md mục 9), thay cho chạy script thủ công.
 
 - Dựng UI báo cáo cơ bản (hiển thị kết quả đánh giá ngay trong giao diện editor Drupal).
 

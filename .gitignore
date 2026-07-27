@@ -4,3 +4,12 @@ __pycache__/
 .venv/
 venv/
 ~$*.docx
+
+# Project Drupal dựng bằng DDEV. Chỉ commit những gì cần để tái lập môi trường
+# (composer.json/lock ghim phiên bản, .ddev cấu hình, script tạo field);
+# phần tải về/sinh ra (web/, vendor/) không commit.
+drupal/*
+!drupal/.ddev/
+!drupal/composer.json
+!drupal/composer.lock
+!drupal/scripts/

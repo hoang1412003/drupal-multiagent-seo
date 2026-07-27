@@ -10,6 +10,14 @@
     {"text": "hiệu quả 100%", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ khoa học (Luật Quảng cáo)"},
     {"text": "an toàn tuyệt đối", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ (Luật Quảng cáo)"},
     {"text": "cam kết 100%", "severity": "critical", "rule": "Cam kết tuyệt đối không có căn cứ (Luật Quảng cáo)"},
-    {"text": "giảm giá không giới hạn", "severity": "critical", "rule": "Thông tin khuyến mãi gây hiểu nhầm - thiếu điều kiện/thời hạn rõ ràng"}
+    {"text": "giảm giá không giới hạn", "severity": "critical", "rule": "Thông tin khuyến mãi gây hiểu nhầm - thiếu điều kiện/thời hạn rõ ràng"},
+    {"text": "đi xa nhất", "severity": "critical", "rule": "So sánh tuyệt đối về tầm hoạt động không có căn cứ (Luật Quảng cáo)"},
+    {"text": "sạc nhanh nhất", "severity": "critical", "rule": "So sánh tuyệt đối về tốc độ sạc không có căn cứ (Luật Quảng cáo)"},
+    {"text": "an toàn nhất", "severity": "critical", "rule": "So sánh tuyệt đối về an toàn không có căn cứ (Luật Quảng cáo)"},
+    {"text": "bền nhất", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "rẻ nhất", "severity": "critical", "rule": "So sánh tuyệt đối về giá không có căn cứ (Luật Quảng cáo)"},
+    {"text": "hiện đại nhất", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "mạnh nhất", "severity": "critical", "rule": "So sánh tuyệt đối không có căn cứ (Luật Quảng cáo)"},
+    {"text": "pin trâu nhất", "severity": "critical", "rule": "So sánh tuyệt đối về dung lượng pin không có căn cứ (Luật Quảng cáo)"}
   ]
 }

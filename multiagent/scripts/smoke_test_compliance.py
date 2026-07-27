@@ -20,7 +20,8 @@ body = (
 )
 
 if __name__ == "__main__":
-    result = run(title, body)
+    fields = {"title": title, "body": body, "meta_description": ""}
+    result = run(fields)
     print(f"score={result['score']}")
     print(f"flags ({len(result['flags'])}):")
     for f in result["flags"]:

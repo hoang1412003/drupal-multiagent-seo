@@ -39,13 +39,29 @@ def _request_with_retry(method, url, **kwargs) -> requests.Response:
         time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)))
 
 
+def _extract_image_alt(resource: dict) -> str:
+    """Lấy alt text của ảnh chính (field_image) từ JSON:API resource.
+
+    Alt text nằm trong relationships.field_image.data.meta.alt. Đọc phòng thủ:
+    bài không có ảnh -> trả chuỗi rỗng, không lỗi.
+    """
+    rel = (resource.get("relationships") or {}).get("field_image") or {}
+    data = rel.get("data")
+    if isinstance(data, dict):
+        return (data.get("meta") or {}).get("alt") or ""
+    return ""
+
+
 def fetch_content(node_id: str) -> dict:
     """Lấy 1 bài viết (article) từ Drupal qua JSON:API.
 
-    Trả về {"title", "body", "raw_content"} - raw_content là toàn bộ
-    JSON:API resource object gốc. Tự retry khi Drupal không phản hồi
-    (docs/architecture.md mục 7); nếu hết retry vẫn lỗi, exception văng ra
-    ngoài để dừng pipeline, không chạy tiếp các agent.
+    Trả về {"fields", "raw_content"} - fields là dict 6 trường nội dung dùng
+    cho đánh giá theo từng field (docs/architecture.md mục 3); raw_content là
+    toàn bộ JSON:API resource object gốc. Đọc phòng thủ: trường nào chưa cấu
+    hình/để trống trên Drupal -> chuỗi rỗng, không làm sập pipeline.
+
+    Tự retry khi Drupal không phản hồi (docs/architecture.md mục 7); nếu hết
+    retry vẫn lỗi, exception văng ra ngoài để dừng pipeline.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     response = _request_with_retry(
@@ -53,11 +69,18 @@ def fetch_content(node_id: str) -> dict:
     )
     resource = response.json()["data"]
     attributes = resource["attributes"]
-    return {
-        "title": attributes["title"],
-        "body": attributes["body"]["value"],
-        "raw_content": resource,
+    body = attributes.get("body") or {}
+    path = attributes.get("path") or {}
+    fields = {
+        "title": attributes.get("title") or "",
+        "body": body.get("value") or "",
+        "summary": body.get("summary") or "",
+        "url_alias": path.get("alias") or "",
+        # custom field text (xem hướng dẫn setup) - production thật dùng Metatag
+        "meta_description": attributes.get("field_meta_description") or "",
+        "image_alt": _extract_image_alt(resource),
     }
+    return {"fields": fields, "raw_content": resource}
 
 
 def write_back(node_id: str, status: str, score: float, suggestions: str) -> None:

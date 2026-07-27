@@ -2,44 +2,71 @@
 
 Hệ thống Multi-Agent AI hỗ trợ kiểm duyệt, đánh giá và tối ưu nội dung Marketing trước khi xuất bản trên Drupal CMS.
 
+**Phạm vi:** bài cẩm nang / hướng dẫn tiếng Việt về xe điện (nguồn công khai vinfastauto.com); hệ thống chấm điểm và trả *đề xuất* theo từng field, không tự động xuất bản. Nguồn dữ liệu hoàn toàn công khai, không dùng tài liệu nội bộ VF O2O.
+
 Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
+- [`docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`](docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md) — định nghĩa phạm vi "nội dung Marketing" và kiến trúc đánh giá (tài liệu tham chiếu chuẩn)
 - [`docs/research.md`](docs/research.md) — nghiên cứu Drupal CMS (kiến trúc, SEO, JSON:API)
 - [`docs/architecture.md`](docs/architecture.md) — thiết kế hệ thống Multi-Agent (LangGraph, 4 agent, Aggregator, calibration, shadow-test)
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 
 ## Cấu trúc project
 
+Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc (Drupal CMS ↔ hệ Multi-Agent AI, nối qua JSON:API — xem sơ đồ ở `docs/architecture.md`):
+
 ```
 drupal-multiagent-seo/
-├── docker-compose.yml          # Drupal + MySQL local instance
-├── requirements.txt            # Python dependencies
-├── .env.example                 # copy thành .env và điền ANTHROPIC_API_KEY
-├── src/
-│   ├── ai_core.py               # gọi Claude API dùng chung cho cả 4 agent (structured output)
-│   ├── state.py                # ContentReviewState (đối tượng trạng thái dùng chung)
-│   ├── drupal_client.py        # gọi JSON:API Drupal (fetch/patch nội dung)
-│   ├── agents/
-│   │   ├── content_quality.py  # đã triển khai
-│   │   └── seo.py              # đã triển khai (Brand + Compliance: Sprint 2, hiện là stub trong graph.py)
-│   └── graph.py                # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
-└── docs/
-    ├── research.md             # nghiên cứu Drupal CMS
-    ├── architecture.md         # thiết kế hệ thống Multi-Agent
-    └── roadmap.md              # lộ trình 3 sprint
+├── drupal/                      # PHÍA DRUPAL - project Drupal 10 chạy qua DDEV
+│   ├── .ddev/                    # cấu hình DDEV (project-type=drupal10, docroot=web)
+│   └── web/                      # code Drupal (mở trực tiếp bằng VS Code)
+│
+├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
+│   ├── requirements.txt
+│   ├── .venv/
+│   ├── src/
+│   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
+│   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
+│   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
+│   │   ├── agents/
+│   │   │   ├── content_quality.py  # đã triển khai
+│   │   │   ├── seo.py              # đã triển khai
+│   │   │   ├── compliance.py       # đã triển khai (LLM + rule-based blacklist) - Sprint 2
+│   │   │   └── (brand voice)        # Sprint 2 - còn là stub trong graph.py
+│   │   └── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
+│   └── scripts/                  # seed dữ liệu mẫu + test thủ công
+│
+├── docs/                         # tài liệu chung, tham chiếu cả 2 phía
+│   ├── research.md               # nghiên cứu Drupal CMS
+│   ├── architecture.md           # thiết kế hệ thống Multi-Agent
+│   └── roadmap.md                # lộ trình 3 sprint
+│
+└── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY
 ```
 
 ## Setup
 
+**Phía Drupal** (dùng [DDEV](https://ddev.com) — công cụ local dev được Drupal.org khuyến nghị chính thức từ 6/2024):
+
 ```
-python -m venv .venv
-.venv\Scripts\pip install -r requirements.txt
-cp .env.example .env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD
-docker compose up -d   # khởi động Drupal + MySQL
+cd drupal
+ddev start
 ```
 
-Trong Drupal admin, cần bật thêm 2 thứ (tắt mặc định):
+Site chạy tại `http://drupal.ddev.site`. Nếu tạo project từ đầu, xem quy trình đầy đủ ở `docs/architecture.md` mục 2 (research.md có link tham khảo DDEV quickstart chính thức).
+
+Trong Drupal admin, cần bật thêm:
 - `/admin/config/services/jsonapi` — tick "Accept all JSON:API create, read, update, and delete operations"
 - `/admin/modules` — bật module "HTTP Basic Authentication"
+- Tạo field `field_meta_description` trên content type Article (`/admin/structure/types/manage/article/fields`) — kiểu "Text (plain, long)"
+
+**Phía Python:**
+
+```
+cd multiagent
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL
+```
 
 ## Trạng thái Sprint 1
 

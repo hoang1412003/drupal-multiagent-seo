@@ -4,8 +4,8 @@ Khớp thiết kế 8 node trong docs/architecture.md:
 Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
 
 Content Quality, SEO và Compliance gọi Claude thật (Sprint 1 + Compliance Agent).
-Brand Consistency vẫn là STUB - cần có brand guideline (Brand) và thuộc phạm vi
-Sprint 2 theo docs/roadmap.md.
+Brand Voice vẫn là STUB - thuộc phạm vi còn lại của Sprint 2 theo docs/roadmap.md.
+Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
 """
 from langgraph.graph import END, START, StateGraph
 
@@ -24,8 +24,7 @@ WEIGHTS = {
 def fetch_node(state: ContentReviewState) -> dict:
     content = fetch_content(state["node_id"])
     return {
-        "title": content["title"],
-        "body": content["body"],
+        "fields": content["fields"],
         "raw_content": content["raw_content"],
     }
 
@@ -46,7 +45,7 @@ def _stub_agent_result(name: str) -> dict:
 
 def content_quality_node(state: ContentReviewState) -> dict:
     try:
-        result = content_quality.run(state["title"], state["body"])
+        result = content_quality.run(state["fields"])
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"content_quality_result": result}
@@ -54,19 +53,19 @@ def content_quality_node(state: ContentReviewState) -> dict:
 
 def seo_node(state: ContentReviewState) -> dict:
     try:
-        result = seo.run(state["title"], state["body"])
+        result = seo.run(state["fields"])
     except Exception:
         result = None
     return {"seo_result": result}
 
 
 def brand_node(state: ContentReviewState) -> dict:
-    return {"brand_result": _stub_agent_result("Brand Consistency")}
+    return {"brand_result": _stub_agent_result("Brand Voice")}
 
 
 def compliance_node(state: ContentReviewState) -> dict:
     try:
-        result = compliance.run(state["title"], state["body"])
+        result = compliance.run(state["fields"])
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"compliance_result": result}
@@ -126,37 +125,72 @@ def aggregator_node(state: ContentReviewState) -> dict:
     return {"final_score": final_score, "decision": decision, "report": report}
 
 
-ISSUE_LIST_KEYS = ("issues", "meta_issues", "violations", "flags")
+# content_quality/seo dùng "issues", compliance dùng "flags" - đều là list dict
+# có gắn trường "field" (docs/architecture.md mục 3).
+ISSUE_LIST_KEYS = ("issues", "flags")
+
+# Thứ tự và nhãn hiển thị của từng field trong báo cáo
+FIELD_ORDER = ["title", "meta_description", "url_alias", "summary", "body", "image_alt"]
+FIELD_LABELS = {
+    "title": "Tiêu đề (title)",
+    "meta_description": "Meta description",
+    "url_alias": "Đường dẫn (URL alias)",
+    "summary": "Tóm tắt (summary)",
+    "body": "Nội dung (body)",
+    "image_alt": "Alt text ảnh",
+}
+AGENT_LABELS = {
+    "content_quality": "Chất lượng",
+    "seo": "SEO",
+    "brand": "Brand Voice",
+    "compliance": "Compliance",
+}
 
 
 def _format_issue(issue) -> str:
-    # issue có thể là string (VD: seo.meta_issues) hoặc dict với các trường
-    # khác nhau tùy agent (VD: content_quality {type, location, suggestion}) -
-    # in dict thô sẽ ra dạng {'key': 'value', ...} khó đọc, nên ghép lại thành
-    # chuỗi "key: value" thay vì để nguyên repr Python.
+    # issue là dict tùy agent (VD {field, type, suggestion} hoặc
+    # {field, severity, rule, excerpt}). Bỏ khóa "field" vì nó đã thành tiêu đề
+    # nhóm; ghép phần còn lại thành "key: value" cho dễ đọc.
     if not isinstance(issue, dict):
         return str(issue)
-    return "; ".join(f"{k}: {v}" for k, v in issue.items())
+    return "; ".join(f"{k}: {v}" for k, v in issue.items() if k != "field")
 
 
 def write_back_node(state: ContentReviewState) -> dict:
     report = state.get("report") or {}
-    suggestions_lines = []
+    by_field = {}      # field -> list dòng gợi ý
+    other_lines = []   # lý do veto, agent lỗi (không gắn field cụ thể)
+
     if report.get("veto_reason"):
-        suggestions_lines.append(f"[LÝ DO TỪ CHỐI] {report['veto_reason']}")
+        other_lines.append(f"[LÝ DO TỪ CHỐI] {report['veto_reason']}")
+
     for name, result in report.get("details", {}).items():
+        label = AGENT_LABELS.get(name, name)
         if result is None:
-            suggestions_lines.append(f"[{name}] Không có kết quả (agent lỗi/thiếu dữ liệu)")
+            other_lines.append(f"[{label}] Không có kết quả (agent lỗi/thiếu dữ liệu)")
             continue
         for key in ISSUE_LIST_KEYS:
             for issue in result.get(key, []):
-                suggestions_lines.append(f"[{name}] {_format_issue(issue)}")
+                field = issue.get("field") if isinstance(issue, dict) else None
+                line = f"[{label}] {_format_issue(issue)}"
+                if field:
+                    by_field.setdefault(field, []).append(line)
+                else:
+                    other_lines.append(line)
+
+    # Ghép báo cáo: phần chung trước, rồi từng field theo thứ tự
+    lines = list(other_lines)
+    ordered = FIELD_ORDER + [f for f in by_field if f not in FIELD_ORDER]
+    for field in ordered:
+        if by_field.get(field):
+            lines.append(f"── {FIELD_LABELS.get(field, field)} ──")
+            lines.extend(by_field[field])
 
     write_back(
         node_id=state["node_id"],
         status=state["decision"],
         score=state["final_score"] or 0,
-        suggestions="\n".join(suggestions_lines) or "Không có gợi ý sửa.",
+        suggestions="\n".join(lines) or "Không có gợi ý sửa.",
     )
     return {}
 

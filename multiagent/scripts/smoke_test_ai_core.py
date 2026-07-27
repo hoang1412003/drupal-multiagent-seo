@@ -50,5 +50,6 @@ output_schema = {
 }
 
 if __name__ == "__main__":
-    result = call_agent(system_prompt, title, body, output_schema)
+    content = f"[title] {title}\n\n[body] {body}"
+    result = call_agent(system_prompt, content, output_schema)
     print(json.dumps(result, ensure_ascii=False, indent=2))
