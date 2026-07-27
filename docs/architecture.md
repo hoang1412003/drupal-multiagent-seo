@@ -196,6 +196,8 @@ Vì brand guideline thường dài hàng chục trang, không thể đưa toàn 
 
 **Nguồn brand guideline - tự trích xuất từ corpus công khai:** dự án không được cấp tài liệu quy chuẩn thương hiệu nội bộ của VF O2O. Thay vào đó, brand guideline được **suy ra từ dữ liệu**: lấy tập bài cẩm nang đã publish (đã qua kiểm duyệt nên coi là đại diện cho chuẩn brand) rồi thống kê các quy ước lặp lại - cách xưng hô ("khách hàng"/"quý khách"/"bạn"), thuật ngữ chuẩn ("ô tô điện" hay "xe hơi điện"), cách viết tên model, độ dài câu, mức độ trang trọng. Kết quả ghi thành `brand_guideline.md` và nạp vào vector database. Mỗi quy tắc đều chứng minh được bằng số (ví dụ "92% bài dùng 'ô tô điện' → chọn làm thuật ngữ chuẩn"), nhất quán với nguyên tắc "không có ngưỡng nào là số ảo" của đề tài.
 
+Thiết kế RAG chi tiết (embedding tiếng Việt, vector DB, chunking, cách đo recall@k): `docs/rag-design.md`.
+
 **Corpus trích xuất guideline phải rời hẳn gold set.** Guideline được suy ra từ tập `BRAND` (10 bài), gold set lấy từ tập `GOLD`/`PERT` - hai tập không giao nhau, gán trước khi đọc nội dung (`docs/goldset/sources.md` mục 1.6). Nếu để giao nhau, Brand Voice Agent bị chấm trên đúng dữ liệu đã sinh ra quy tắc của nó (rò rỉ dữ liệu), điểm cao thu được không chứng minh được năng lực, và F1/Kappa của agent này ở Sprint 3 mất giá trị.
 
 Vector database được phân vùng theo `langcode` để guideline tiếng Việt không lẫn với ngôn ngữ khác khi mở rộng đa ngôn ngữ sau này.
@@ -217,6 +219,8 @@ Ngoài đánh giá bằng LLM và rule-based blacklist ở trên, Compliance Age
 Nguồn cho rule-based blacklist và đánh giá LLM cũng dựa trên căn cứ pháp lý công khai: Luật Quảng cáo 2012 (cấm "số 1", "tốt nhất", "duy nhất" khi không có tài liệu chứng minh), Luật Cạnh tranh 2018 (cấm so sánh trực tiếp với đối thủ), Luật Thương mại (khuyến mại phải có thời hạn/giới hạn rõ ràng) - đặc biệt phù hợp với claim xe điện (tầm hoạt động thiếu điều kiện đo, thời gian sạc thiếu loại trụ sạc).
 
 Như vậy Compliance Agent gồm 3 nguồn tạo flag độc lập, gộp chung vào 1 danh sách `flags`: (1) LLM đánh giá claim thổi phồng/nhạy cảm, (2) rule-based blacklist so khớp cứng, (3) RAG fact-check đối chiếu thông số sản phẩm công bố công khai.
+
+Thiết kế RAG chi tiết cho fact-check KB (chunk theo đơn vị "một model xe", ngưỡng similarity, xử lý khi không tra được): `docs/rag-design.md`. Điểm quan trọng: KB chỉ chứa thông số một số model, nên claim **không tra được** phải cho kết quả "không kiểm chứng được", **không** phải "sai" - nếu không, mọi bài nhắc model ngoài KB đều bị từ chối oan.
 
 **Trạng thái hiện tại (Sprint 2):** `compliance.py` đã triển khai nguồn (1) LLM và (2) rule-based blacklist (`compliance_rules.json`, dùng word-boundary regex). Nguồn (3) RAG fact-check **chưa triển khai** - là hạng mục còn lại của Sprint 2, cần thu thập trước tập thông số sản phẩm công bố công khai (xem `docs/goldset/sources.md` mục 2) làm tài liệu tham chiếu. Không phụ thuộc tài liệu nội bộ VF O2O.
 

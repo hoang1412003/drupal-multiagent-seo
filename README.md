@@ -9,6 +9,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/research.md`](docs/research.md) — nghiên cứu Drupal CMS (kiến trúc, SEO, JSON:API)
 - [`docs/architecture.md`](docs/architecture.md) — thiết kế hệ thống Multi-Agent (LangGraph, 4 agent, Aggregator, calibration, shadow-test)
 - [`docs/rubrics.md`](docs/rubrics.md) — rubric chấm điểm 4 agent (mức rời rạc + hàm tất định, thay cho điểm 0-100 do LLM tự đặt)
+- [`docs/rag-design.md`](docs/rag-design.md) — thiết kế RAG cho Brand Voice KB và Fact-check KB (embedding tiếng Việt, chunking, cách đo recall@k)
 - [`docs/goldset/annotation-guideline.md`](docs/goldset/annotation-guideline.md) — quy tắc gán nhãn gold set và cách đo độ tin cậy của nhãn
 - [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
