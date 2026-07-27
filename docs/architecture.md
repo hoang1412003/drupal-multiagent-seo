@@ -470,9 +470,15 @@ Theo yêu cầu Sprint 3 của mentor, các ngưỡng quyết định (mục 6.2
 
 **Điều kiện tiên quyết của cả quy trình trên:** bước nhảy 2 điểm chỉ có nghĩa nếu điểm số dao động dưới mức đó khi chấm lại cùng một bài. Vì vậy trước khi calibrate phải chạy thí nghiệm test-retest (chấm lặp cùng bài N lần, đo phương sai điểm) - nếu điểm dao động ±5 thì mọi ngưỡng chọn được đều là nhiễu. Đây cũng là lý do rubric tất định ở `docs/rubrics.md` là điều kiện cần cho Sprint 3, không phải cải tiến tùy chọn.
 
+Giao thức của thí nghiệm test-retest đó là **E1** trong `docs/evaluation-plan.md`, cùng với thứ tự phụ thuộc của toàn bộ 6 phép đo dự án cần chạy.
+
+**Quét ngưỡng không tốn thêm chi phí LLM:** chấm gold set một lần, lưu kết quả 4 agent, rồi quét ngưỡng bằng cách chạy lại Aggregator trên kết quả đã lưu - Aggregator là module tất định không gọi LLM (mục 6). Đây là một lợi ích cụ thể của quyết định thiết kế đó, đáng nêu khi bảo vệ.
+
 Ngưỡng chốt được chỉ có hiệu lực với đúng bộ **(rubric version, phiên bản prompt, model)** đã dùng khi calibrate; đổi model hay sửa prompt đều phải calibrate lại (`docs/rubrics.md` mục 10).
 
 ### 8.3. Shadow-test trước khi vận hành chính thức
+
+> ⚠️ **Kế hoạch mô tả dưới đây KHÔNG thực hiện được trong phạm vi dự án hiện tại** - nó cần quyền truy cập Drupal thật của VinFast, đội content thật và một luồng duyệt thật để chạy song song, mà dự án không được cấp (spec mục 6.1). Giữ nguyên mục này làm mô tả quy trình chuẩn ở môi trường production; **phương án thay thế khả thi (held-out test trên gold set) xem `docs/evaluation-plan.md` mục 4.6.**
 
 Trước khi cho hệ thống AI có quyền quyết định publish/từ chối thật, chạy giai đoạn shadow-test (đề xuất 2-4 tuần):
 
