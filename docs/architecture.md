@@ -166,6 +166,8 @@ Cả 4 agent có chung một cơ chế vận hành: nhận vào các field nội
 
 Các field mỗi agent đọc: Content Quality đọc `title/body/summary`; SEO đọc `title/meta_description/url_alias/body/image_alt`; Brand Voice (khi triển khai) đọc `title/body/summary`; Compliance đọc `title/body/meta_description`.
 
+**Cách chấm điểm: xem `docs/rubrics.md`.** Ở Sprint 1-2, mỗi agent trả thẳng `score: 0-100` do LLM tự đặt - nhưng không chỗ nào định nghĩa 85 khác 70 ở điểm gì, nên điểm không tái lập được và không calibrate được (chính lập luận đã dùng để bắt Aggregator phải tất định ở mục 6 cũng áp dụng cho từng agent). `rubrics.md` thay bằng: LLM (và một phần là code, với các tiêu chí đếm được) chỉ **phân loại mức từng tiêu chí** kèm trích dẫn nguyên văn làm bằng chứng, rồi một hàm tất định quy các mức đó ra điểm. Riêng Compliance, cả `score` lẫn `severity` đều chuyển sang tất định - severity tra bảng theo mã tiêu chí, không để LLM tự chọn, vì `critical` là thứ kích hoạt quyền phủ quyết. Rubric v1 **chưa triển khai vào code** (xem `rubrics.md` mục 8); các mục 5.1-5.4 dưới đây mô tả output ở dạng hiện tại.
+
 ### 5.1. Content Quality Agent
 
 **Tiêu chí đánh giá:** chính tả, ngữ pháp, văn phong, độ rõ ràng, câu quá dài/tối nghĩa, tính mạch lạc.
@@ -193,6 +195,8 @@ Các field mỗi agent đọc: Content Quality đọc `title/body/summary`; SEO 
 Vì brand guideline thường dài hàng chục trang, không thể đưa toàn bộ vào system prompt, agent sẽ dùng kiến trúc RAG (Retrieval-Augmented Generation): brand guideline được cắt nhỏ và lưu vào vector database; mỗi lần chấm 1 bài viết, hệ thống tự động truy vấn (retrieve) các đoạn guideline liên quan nhất tới nội dung đang chấm, rồi mới đưa các đoạn đó (không phải toàn bộ tài liệu) vào prompt gửi cho LLM. Cách này giảm chi phí gọi LLM và tăng độ chính xác khi guideline dài.
 
 **Nguồn brand guideline - tự trích xuất từ corpus công khai:** dự án không được cấp tài liệu quy chuẩn thương hiệu nội bộ của VF O2O. Thay vào đó, brand guideline được **suy ra từ dữ liệu**: lấy tập bài cẩm nang đã publish (đã qua kiểm duyệt nên coi là đại diện cho chuẩn brand) rồi thống kê các quy ước lặp lại - cách xưng hô ("khách hàng"/"quý khách"/"bạn"), thuật ngữ chuẩn ("ô tô điện" hay "xe hơi điện"), cách viết tên model, độ dài câu, mức độ trang trọng. Kết quả ghi thành `brand_guideline.md` và nạp vào vector database. Mỗi quy tắc đều chứng minh được bằng số (ví dụ "92% bài dùng 'ô tô điện' → chọn làm thuật ngữ chuẩn"), nhất quán với nguyên tắc "không có ngưỡng nào là số ảo" của đề tài.
+
+**Corpus trích xuất guideline phải rời hẳn gold set.** Guideline được suy ra từ tập `BRAND` (10 bài), gold set lấy từ tập `GOLD`/`PERT` - hai tập không giao nhau, gán trước khi đọc nội dung (`docs/goldset/sources.md` mục 1.6). Nếu để giao nhau, Brand Voice Agent bị chấm trên đúng dữ liệu đã sinh ra quy tắc của nó (rò rỉ dữ liệu), điểm cao thu được không chứng minh được năng lực, và F1/Kappa của agent này ở Sprint 3 mất giá trị.
 
 Vector database được phân vùng theo `langcode` để guideline tiếng Việt không lẫn với ngôn ngữ khác khi mở rộng đa ngôn ngữ sau này.
 
@@ -358,7 +362,7 @@ Tuy nhiên, giống như trọng số ở mục 6.1, **không có nguồn nào c
 }
 ```
 
-`missing_agents` liệt kê tên các agent không trả được kết quả (xem mục 6.4). `veto_reason` chỉ xuất hiện khi Compliance phủ quyết bằng flag `critical` trong khi điểm Compliance riêng vẫn từ 50 trở lên - tránh gây hiểu nhầm "điểm không thấp mà vẫn bị từ chối" (xem mục 6.2); nếu điểm Compliance đã dưới 50 thì tự bản thân điểm số đã giải thích được lý do, không cần field này.
+`missing_agents` liệt kê tên các agent không trả được kết quả, kèm `note` giải thích bằng chữ (xem mục 6.4). `veto_reason` chỉ xuất hiện khi Compliance phủ quyết bằng flag `critical` trong khi điểm Compliance riêng vẫn từ 50 trở lên - tránh gây hiểu nhầm "điểm không thấp mà vẫn bị từ chối" (xem mục 6.2); nếu điểm Compliance đã dưới 50 thì tự bản thân điểm số đã giải thích được lý do, không cần field này.
 
 Object này chỉ chứa dữ liệu thô để tính toán, chưa có sẵn 1 câu tóm tắt ngôn ngữ tự nhiên - phần gợi ý sửa hiển thị cho người dùng được Write-back Node build riêng từ `details`, **gom theo từng field** (mỗi lỗi mang trường `field`) rồi ghi vào `field_ai_suggestions` (mục 2.3). Đây chính là yêu cầu "báo cáo lỗi/rủi ro theo từng field" của đề bài.
 
@@ -373,8 +377,11 @@ Compliance là agent duy nhất có "quyền phủ quyết" (mục 6.2). Nếu n
 ```
 if compliance_result is None:
     decision = "needs_revision"   # không bao giờ tự động "publish"
-    report.note = "Không thể xác minh compliance - cần con người review thủ công"
+    final_score = None            # CHƯA chấm được - khác hẳn với 0 điểm
+    report["note"] = "Không thể xác minh Compliance - cần con người review thủ công."
 ```
+
+`final_score = None` (không phải 0) là điểm quan trọng: ghi 0 vào Drupal sẽ khiến người duyệt hiểu nhầm bài viết cực tệ, trong khi thực tế hệ thống chưa đánh giá được - đúng nguyên tắc "agent lỗi không bị cho điểm 0" (spec mục 5.1). Write-back Node ghi `null` để Drupal để trống field điểm.
 
 Áp dụng bất kể 3 agent còn lại chấm điểm cao thế nào - rủi ro pháp lý không xác minh được luôn được ưu tiên hơn lợi ích tự động hóa.
 
@@ -388,8 +395,10 @@ final_score = content_quality.score * (0.25/0.80)
             + compliance.score     * (0.30/0.80)
 # 0.80 = tổng trọng số 3 agent còn lại (0.25 + 0.25 + 0.30)
 
-report.summary += " (Lưu ý: SEO Agent không trả được kết quả, điểm số chưa bao gồm đánh giá SEO)"
+report["note"] = "Điểm số chưa đầy đủ: SEO không trả được kết quả, điểm đã chia lại theo các tiêu chí còn lại."
 ```
+
+Cả hai trường hợp, `note` được Write-back Node đưa lên đầu phần gợi ý ghi về Drupal (tiền tố `[LƯU Ý]`), để người duyệt thấy ngay cảnh báo trước khi đọc chi tiết theo từng field.
 
 ## 7. Xử lý lỗi (Error handling)
 
@@ -399,6 +408,15 @@ report.summary += " (Lưu ý: SEO Agent không trả được kết quả, đi�
 | LLM timeout/lỗi khi 1 agent đang chạy      | Thử lại agent đó; nếu vẫn lỗi, đánh dấu agent_status = "failed" thay vì làm sập cả pipeline, Aggregator sẽ biết thiếu dữ liệu agent nào. |
 | LLM trả về JSON sai định dạng              | Validate ngay khi nhận; nếu sai, gửi lại yêu cầu kèm thông báo lỗi để LLM tự sửa (1-2 lần), vẫn sai thì coi là agent lỗi.                |
 | Ghi ngược vào Drupal thất bại (Write-back) | Thử lại; nếu vẫn lỗi, ghi log cảnh báo để người quản trị biết bài viết đã được chấm nhưng chưa cập nhật lên CMS.                         |
+
+**Trạng thái triển khai (Sprint 1-2):**
+
+| Tình huống | Trạng thái |
+| --- | --- |
+| Drupal API không phản hồi | **Đã triển khai** - `drupal_client._request_with_retry()`, 3 lần thử, backoff lũy thừa 1s/2s, không retry lỗi 4xx |
+| Ghi ngược thất bại | **Đã triển khai** - cùng cơ chế trên, hết retry thì log cảnh báo, không raise |
+| LLM timeout/lỗi khi 1 agent đang chạy | **Chưa triển khai** - `ai_core.call_agent()` chưa có retry; `graph.py` bắt exception ngay lần đầu và đánh dấu agent lỗi (`result = None`), Aggregator xử lý theo mục 6.4 |
+| LLM trả về JSON sai định dạng | **Chưa triển khai** dưới dạng gửi lại cho LLM tự sửa. Hiện structured output (JSON Schema) của Claude đã ràng buộc định dạng ở phía API, nên rủi ro này thấp hơn thiết kế ban đầu giả định; nếu vẫn lỗi thì rơi vào nhánh "agent lỗi" ở trên |
 
 ## 8. Kế hoạch kiểm thử
 
@@ -418,15 +436,19 @@ Mục đích: kiểm tra tính đúng đắn về mặt chức năng (agent có 
 
 Theo yêu cầu Sprint 3 của mentor, các ngưỡng quyết định (mục 6.2) không được đặt tùy ý mà phải tính toán từ dữ liệu thực tế, theo quy trình sau:
 
-1. Thu thập gold set: tập hợp 30-50 bài cẩm nang từ nguồn công khai (vinfastauto.com), cấu tạo ~60% bài thật (đã publish) và ~40% bài chèn lỗi có chủ đích (perturbation - cố ý thêm claim vi phạm luật, bỏ điều kiện đo, xóa meta description...) để phủ đủ các loại lỗi kể cả loại hiếm gặp trong bài đã duyệt. Tác giả dự án tự gán nhãn thủ công theo 3 mức publish / needs_revision / rejected - đây là "đáp án chuẩn" để đối chiếu. Với bài perturbation, ground truth được biết chính xác vì lỗi do chính mình chèn vào. (Khi thu thập từ web, cần loại bỏ phần template dùng chung của trang - header, footer, khối CTA cuối bài - chỉ giữ nội dung chính; bước này chỉ cần ở khâu thu thập, không nằm trong pipeline chạy thật vì hệ thống đọc trực tiếp field `body` từ Drupal.)
+1. Thu thập gold set: tập hợp 30-50 bài cẩm nang từ nguồn công khai (vinfastauto.com), cấu tạo ~60% bài thật (đã publish) và ~40% bài chèn lỗi có chủ đích (perturbation - cố ý thêm claim vi phạm luật, bỏ điều kiện đo, xóa meta description...) để phủ đủ các loại lỗi kể cả loại hiếm gặp trong bài đã duyệt. Tác giả dự án tự gán nhãn thủ công theo 3 mức publish / needs_revision / rejected - đây là "đáp án chuẩn" để đối chiếu. Với bài perturbation, ground truth được biết chính xác vì lỗi do chính mình chèn vào. Việc gán nhãn tuân theo `docs/goldset/annotation-guideline.md`: nhãn suy ra từ bảng mã lỗi quan sát được (nhóm A chặn / B sửa tại chỗ / C bỏ qua), gán **mù với kết quả AI**, và tập nguồn tuân theo phân chia `BRAND`/`GOLD`/`PERT` ở `docs/goldset/sources.md` mục 1.6. (Khi thu thập từ web, cần loại bỏ phần template dùng chung của trang - header, footer, khối CTA cuối bài - chỉ giữ nội dung chính; bước này chỉ cần ở khâu thu thập, không nằm trong pipeline chạy thật vì hệ thống đọc trực tiếp field `body` từ Drupal.)
 
 2. Chạy hệ thống AI trên toàn bộ gold set, thu lại kết quả (điểm số + quyết định) của từng bài.
 
 3. Tính Recall và F1: với từng agent (đặc biệt Compliance Agent), đo AI có phát hiện đủ các lỗi mà người chấm đã xác nhận là lỗi thật hay không (Recall), và có báo động giả quá nhiều không (Precision, gộp lại thành F1).
 
-4. Tính Cohen's Kappa: đo mức độ đồng thuận giữa quyết định cuối cùng của AI và của người chấm, đã loại trừ phần trùng khớp ngẫu nhiên do phân bố lệch (ví dụ đa số bài đều "publish").
+4. Tính Cohen's Kappa: đo mức độ đồng thuận giữa quyết định cuối cùng của AI và của người chấm, đã loại trừ phần trùng khớp ngẫu nhiên do phân bố lệch (ví dụ đa số bài đều "publish"). **Phải báo cáo kèm Kappa người-người** (người thứ hai gán độc lập 20% mẫu) làm **trần trên** để diễn giải: nếu hai người chỉ đồng thuận 0.65 thì AI đạt 0.60 là rất tốt, còn AI đạt 0.85 lại là dấu hiệu đáng nghi cần kiểm tra rò rỉ dữ liệu. Kèm theo là Kappa test-retest của chính người gán (gán lại 10% mẫu sau ≥3 ngày, yêu cầu ≥ 0.80) để xác nhận nhãn không bị trôi giữa các phiên. Quy trình chi tiết: `docs/goldset/annotation-guideline.md` mục 8.
 
 5. Quét nhiều mức ngưỡng khác nhau (ví dụ final_score từ 70 đến 90, bước nhảy 2 điểm) và chọn ra ngưỡng cho kết quả Recall/F1/Kappa cao nhất khi so với gold set - đây mới là ngưỡng chính thức áp dụng, thay cho các số minh họa 80/50 ở mục 6.2.
+
+**Điều kiện tiên quyết của cả quy trình trên:** bước nhảy 2 điểm chỉ có nghĩa nếu điểm số dao động dưới mức đó khi chấm lại cùng một bài. Vì vậy trước khi calibrate phải chạy thí nghiệm test-retest (chấm lặp cùng bài N lần, đo phương sai điểm) - nếu điểm dao động ±5 thì mọi ngưỡng chọn được đều là nhiễu. Đây cũng là lý do rubric tất định ở `docs/rubrics.md` là điều kiện cần cho Sprint 3, không phải cải tiến tùy chọn.
+
+Ngưỡng chốt được chỉ có hiệu lực với đúng bộ **(rubric version, phiên bản prompt, model)** đã dùng khi calibrate; đổi model hay sửa prompt đều phải calibrate lại (`docs/rubrics.md` mục 10).
 
 ### 8.3. Shadow-test trước khi vận hành chính thức
 

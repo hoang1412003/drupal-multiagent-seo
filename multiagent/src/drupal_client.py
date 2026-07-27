@@ -1,6 +1,7 @@
 import logging
 import os
 import time
+from typing import Optional
 
 import requests
 from dotenv import load_dotenv
@@ -83,8 +84,14 @@ def fetch_content(node_id: str) -> dict:
     return {"fields": fields, "raw_content": resource}
 
 
-def write_back(node_id: str, status: str, score: float, suggestions: str) -> None:
+def write_back(
+    node_id: str, status: str, score: Optional[float], suggestions: str
+) -> None:
     """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH).
+
+    `score = None` nghĩa là hệ thống CHƯA chấm được (VD Compliance Agent lỗi
+    nên không có điểm tổng) - ghi null để Drupal để trống field, không quy
+    thành 0 điểm (docs/architecture.md mục 6.4).
 
     Tự retry khi Drupal lỗi mạng/5xx (docs/architecture.md mục 7). Nếu hết
     retry vẫn lỗi, KHÔNG raise - chỉ ghi log cảnh báo, vì ở bước này bài

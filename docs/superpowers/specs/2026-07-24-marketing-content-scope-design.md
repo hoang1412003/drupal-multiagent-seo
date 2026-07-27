@@ -167,7 +167,7 @@ Nguồn: bài cẩm nang công khai trên vinfastauto.com (URL phẳng `/vn_vi/<
 
 **Không lấy** bài thuộc mục "Công ty" trong `/tin-tuc` — đó là thông cáo báo chí, thuộc tầng P2, và sẽ kéo lệch gold set.
 
-Thành phần: **~60% bài thật / ~40% bài chèn lỗi có chủ đích** (perturbation).
+Thành phần: **~60% bài thật / ~40% bài chèn lỗi có chủ đích** (perturbation). Phân chia cụ thể `BRAND`/`GOLD`/`PERT` và quy tắc gán nhãn: `docs/goldset/sources.md` mục 1.6 và `docs/goldset/annotation-guideline.md`.
 
 Bài đã publish vẫn chứa lỗi tự nhiên — khảo sát thực tế đã tìm được:
 - Tiêu đề viết hoa toàn bộ: *"LƯU Ý SỬ DỤNG ĐỐI VỚI PIN CELL LFP/GOTION"*, *"ĐĂNG KÝ ĐẠI LÝ ỦY QUYỀN... CƠ HỘI VÀNG BỨT PHÁ DOANH THU"* → lỗi brand voice
@@ -198,6 +198,8 @@ Không có tài liệu nội bộ, nên brand guideline được **suy ra từ d
 - Độ dài câu trung bình, cấu trúc heading, mức độ trang trọng
 
 Kết quả ghi thành `brand_guideline.md`, nạp vào RAG.
+
+**Corpus này phải rời hẳn gold set** (tập `BRAND` vs `GOLD`/`PERT` - `docs/goldset/sources.md` mục 1.6). Dùng chung một tập cho cả hai việc là rò rỉ dữ liệu: Brand Voice Agent bị chấm trên chính dữ liệu đã sinh ra quy tắc của nó, điểm cao thu được không chứng minh được gì.
 
 Mỗi quy tắc **chứng minh được bằng số** — ví dụ *"92% bài dùng 'ô tô điện' → chọn làm thuật ngữ chuẩn"*. Áp dụng đúng tinh thần "không có ngưỡng nào là số ảo" cho cả brand guideline.
 
