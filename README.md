@@ -12,6 +12,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/rag-design.md`](docs/rag-design.md) — thiết kế RAG cho Brand Voice KB và Fact-check KB (embedding tiếng Việt, chunking, cách đo recall@k)
 - [`docs/editor-ui-design.md`](docs/editor-ui-design.md) — hiển thị báo cáo theo từng field trong giao diện soạn bài Drupal (module `vf_ai_review`)
 - [`docs/evaluation-plan.md`](docs/evaluation-plan.md) — 6 phép đo dự án phải chạy, thứ tự phụ thuộc, tiêu chí đạt và ngân sách
+- [`docs/prompt-injection.md`](docs/prompt-injection.md) — mô hình mối đe doạ khi LLM đọc nội dung do người ngoài soạn, và biện pháp giảm thiểu
 - [`docs/goldset/annotation-guideline.md`](docs/goldset/annotation-guideline.md) — quy tắc gán nhãn gold set và cách đo độ tin cậy của nhãn
 - [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao

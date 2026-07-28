@@ -168,6 +168,8 @@ Cả 4 agent có chung một cơ chế vận hành: nhận vào các field nội
 
 Các field mỗi agent đọc: Content Quality đọc `title/body/summary`; SEO đọc `title/meta_description/url_alias/body/image_alt`; Brand Voice (khi triển khai) đọc `title/body/summary`; Compliance đọc `title/body/meta_description`.
 
+**Cảnh báo an ninh về cách ghép nội dung:** cách ghép hiện tại dùng nhãn text thuần (`[title]`, `[body]`...) nên **người viết giả mạo được** - gõ đúng chuỗi đó vào body là xoá được ranh giới giữa dữ liệu và chỉ dẫn. Nguy hiểm hơn: field `body` của Drupal là HTML, nên chỉ dẫn giấu trong bình luận HTML hoặc phần tử `display:none` sẽ **vô hình với người duyệt nhưng hiển thị với LLM**. Phân tích đầy đủ và biện pháp: `docs/prompt-injection.md`.
+
 **Cách chấm điểm: xem `docs/rubrics.md`.** Ở Sprint 1-2, mỗi agent trả thẳng `score: 0-100` do LLM tự đặt - nhưng không chỗ nào định nghĩa 85 khác 70 ở điểm gì, nên điểm không tái lập được và không calibrate được (chính lập luận đã dùng để bắt Aggregator phải tất định ở mục 6 cũng áp dụng cho từng agent). `rubrics.md` thay bằng: LLM (và một phần là code, với các tiêu chí đếm được) chỉ **phân loại mức từng tiêu chí** kèm trích dẫn nguyên văn làm bằng chứng, rồi một hàm tất định quy các mức đó ra điểm. Riêng Compliance, cả `score` lẫn `severity` đều chuyển sang tất định - severity tra bảng theo mã tiêu chí, không để LLM tự chọn, vì `critical` là thứ kích hoạt quyền phủ quyết. Rubric v1 **chưa triển khai vào code** (xem `rubrics.md` mục 8); các mục 5.1-5.4 dưới đây mô tả output ở dạng hiện tại.
 
 ### 5.1. Content Quality Agent
