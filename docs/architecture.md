@@ -262,6 +262,8 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 **Chi phí thật của mở rộng nằm ở dữ liệu, không ở kiến trúc:** mỗi `(content_type, langcode)` mới cần gold set riêng và calibrate lại ngưỡng, vì ngưỡng **không chuyển giao được** giữa các loại/ngôn ngữ. Vì vậy việc code sẵn cho mọi phạm vi là vô nghĩa nếu chưa có dữ liệu - kiến trúc chỉ cần đảm bảo **không cản đường** mở rộng, và đó là điều 3 nguyên tắc trên bảo đảm. Bản thân việc code + calibrate cho loại/ngôn ngữ thứ hai nằm ngoài phạm vi dự án hiện tại.
 
+**Đặc tả file config cụ thể** (định dạng, cấu trúc khoá, đường chuyển đổi từ hard-code): `docs/config-spec.md`. Tài liệu đó cũng chỉ ra một vấn đề đã phát sinh: cùng một ngưỡng hiện tồn tại ở 4 nơi (`graph.py`, `label_helper.py`, `rubrics.md`, `annotation-guideline.md`) và đã trôi lệch một lần.
+
 **Trạng thái hiện tại (Sprint 1-2):** đây là *định hướng thiết kế*, chưa triển khai đầy đủ trong code. Hiện `graph.py` hard-code trọng số (`WEIGHTS`) và ngưỡng quyết định (80/50) cho một phạm vi duy nhất; chưa có file config theo `(content_type, langcode)`, chưa có trường `content_type`/`langcode` trong `state.py`. Việc tách trọng số/ngưỡng ra config là hạng mục của Sprint 2-3 (gắn với calibration). Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
@@ -416,6 +418,8 @@ Cả hai trường hợp, `note` được Write-back Node đưa lên đầu ph�
 | LLM timeout/lỗi khi 1 agent đang chạy      | Thử lại agent đó; nếu vẫn lỗi, đánh dấu agent_status = "failed" thay vì làm sập cả pipeline, Aggregator sẽ biết thiếu dữ liệu agent nào. |
 | LLM trả về JSON sai định dạng              | Validate ngay khi nhận; nếu sai, gửi lại yêu cầu kèm thông báo lỗi để LLM tự sửa (1-2 lần), vẫn sai thì coi là agent lỗi.                |
 | Ghi ngược vào Drupal thất bại (Write-back) | Thử lại; nếu vẫn lỗi, ghi log cảnh báo để người quản trị biết bài viết đã được chấm nhưng chưa cập nhật lên CMS.                         |
+
+**Nhật ký truy vết mỗi lần chấm** (khác với log lỗi ở bảng trên): mỗi lần chấm ghi một bản ghi append-only gồm kết quả 4 agent, quyết định, và bối cảnh cấu hình lúc chấm - để trả lời được *"bài này bị chặn hồi tháng trước, vì sao"*. Hiện `write_back()` ghi đè lên lần chấm trước nên lịch sử mất hẳn. Thiết kế: `docs/operations.md`.
 
 **Trạng thái triển khai (Sprint 1-2):**
 
