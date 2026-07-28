@@ -86,4 +86,16 @@ cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRU
 - [x] Khung Orchestrator (LangGraph, 8 node, 4 agent còn là stub)
 - [x] Agent SEO & Content Quality (thử nghiệm, chạy thật end-to-end)
 
-**Sprint 1 hoàn thành.** Tiếp theo: Sprint 2 (Brand Voice Agent với RAG, Compliance Agent, hoàn thiện Aggregator, thu thập gold set) — xem [`docs/roadmap.md`](docs/roadmap.md).
+**Sprint 1 hoàn thành.**
+
+## Trạng thái Sprint 2
+
+- [x] Compliance Agent — LLM + rule-based blacklist (`compliance_rules.json`); RAG fact-check chưa triển khai
+- [x] Hoàn thiện Aggregator — veto Compliance, fail-safe khi agent lỗi, chia lại trọng số
+- [x] Retry/backoff khi Drupal lỗi mạng/5xx (`docs/architecture.md` mục 7)
+- [ ] Brand Voice Agent dùng RAG — còn là stub trong `graph.py`
+- [ ] Thu thập & gán nhãn gold set — 33 mẫu đã chọn nguồn (`docs/goldset/labels.csv`), chưa gán nhãn
+- [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
+- [ ] UI báo cáo trong editor — đã thiết kế (`docs/editor-ui-design.md`), module `vf_ai_review` chưa viết
+
+Lộ trình đầy đủ: [`docs/roadmap.md`](docs/roadmap.md).
