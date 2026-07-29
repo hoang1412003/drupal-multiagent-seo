@@ -65,7 +65,9 @@ Hai khối nằm trong chính field body nhưng không phải chữ tác giả v
 | Mục lục tự sinh | `div.widget-toc` | Chứa đúng **13** thẻ `<a>` (đo được) → `label_helper.py` đếm thành internal link, đẩy tiêu chí SEO10 lên 2 điểm oan; cộng thêm ~150 từ vào số từ bài |
 | Banner CTA "ĐẶT CỌC NGAY" | `<img alt="dat-coc-xe-o-to-dien-vinfast">` bọc trong `<a href="https://reserve.vinfastauto.com/">` | Là khối template dùng chung, `annotation-guideline.md` mục 2 quy định "không thuộc quyền kiểm soát người viết"; alt dạng slug sẽ tạo mã B6 giả |
 
-Số đo trên `div.field-body` của G-001 (bằng parser, không phải regex): `h2=3, h3=10, p=32, a=30, img=6`. Sau khi loại 2 khối trên: **`a = 17`, `img = 5`** — 5 ảnh nội dung, tất cả đều có `alt` không rỗng.
+Số đo trên `div.field-body` của G-001 (bằng parser, không phải regex): `h2=3, h3=10, p=32, a=30, img=6`. Sau khi loại 2 khối trên: **`a = 16`, `img = 5`** — 5 ảnh nội dung, tất cả đều có `alt` không rỗng.
+
+Cách ra số 16: `30 − 13` (link mục lục) `− 1` (chính thẻ `<a>` bọc banner CTA) `= 16`.
 
 ### 3.2. Bẫy nếu quét ảnh trên toàn trang
 
@@ -123,7 +125,7 @@ Vì vậy script **in ra mọi thứ nó xoá** cho từng file:
 G-001.txt
   [xoa] div.widget-toc (13 link)
   [xoa] <a href="https://reserve.vinfastauto.com/"> boc <img alt="dat-coc-xe-o-to-dien-vinfast">
-  [giu] 5 anh noi dung, 17 link, 3 h2, 10 h3
+  [giu] 5 anh noi dung, 16 link, 3 h2, 10 h3
 ```
 
 Người dùng liếc dòng `[xoa]` là phát hiện ngay nếu ảnh nội dung bị xoá nhầm. Xoá âm thầm là thứ nguy hiểm nhất ở bước này: mất nội dung mà không ai biết, và sai lệch chỉ lộ ra ở Sprint 3 khi đã quá muộn.
@@ -236,7 +238,7 @@ Tiêu chí thành công đo được, chạy trên `G-001.html` (dữ liệu th�
 | 6 | Số thẻ `<h3>` trong body | 10 |
 | 7 | Số thẻ `<img>` trong body | 5 (banner CTA đã bị loại khỏi 6 ảnh gốc) |
 | 8 | Mọi `<img>` trong body có `alt` không rỗng | Đúng |
-| 9 | Số thẻ `<a>` trong body | 17 (đã loại 13 link mục lục khỏi 30 link gốc) |
+| 9 | Số thẻ `<a>` trong body | 16 (30 gốc − 13 link mục lục − 1 thẻ bọc banner CTA) |
 | 10 | Chuỗi `widget-toc` trong output | Không xuất hiện |
 | 11 | Chuỗi `dat-coc-xe-o-to-dien-vinfast` trong output | Không xuất hiện |
 | 12 | Chuỗi `class=` trong output | Không xuất hiện |
