@@ -120,7 +120,7 @@ def test_body() -> None:
     # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1)
     check("body h2", kept["h2"], 3)
     check("body h3", kept["h3"], 10)
-    check("body p", kept["p"], 32)
+    check("body p", kept["p"], 31)
     check("body img (đã loại banner CTA)", kept["img"], 5)
     check("body a (đã loại 13 link mục lục + 1 thẻ bọc CTA)", kept["a"], 16)
 
@@ -136,7 +136,9 @@ def test_body() -> None:
         "1. Lên kế hoạch hành trình" in body_html,
         True,
     )
-    check("mọi ảnh còn lại đều có alt không rỗng", body_html.count('<img alt="'), 5)
+    check("5 ảnh còn lại đều có thuộc tính alt", body_html.count('<img alt="'), 5)
+    check("không có alt rỗng", 'alt=""' in body_html, False)
+    check("không còn thẻ <p> rỗng", "<p></p>" in body_html, False)
 
     # Heuristic xoá CTA phải báo cáo được, không xoá âm thầm
     check("báo cáo đúng 2 thứ đã xoá", len(removed), 2)

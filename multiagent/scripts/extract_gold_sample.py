@@ -127,7 +127,13 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
                 f'<a href="{anchor.get("href", "")}"> bọc '
                 f'<img alt="{images[0].get("alt", "")}">'
             )
+            parent = anchor.parent
             anchor.decompose()
+            # Dọn thẻ cha nếu nó trở nên rỗng (không chữ và không có img)
+            while parent and parent != body and not parent.get_text(strip=True) and not parent.find_all("img"):
+                old_parent = parent
+                parent = parent.parent
+                old_parent.decompose()
 
     for tag in body.find_all(True):
         if tag.name not in KEEP_TAGS:
