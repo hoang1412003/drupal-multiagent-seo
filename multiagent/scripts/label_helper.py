@@ -51,7 +51,9 @@ REPEAT_THRESHOLD = 3                   # B9: "từ 3 lần trở lên"
 HEADING_REQUIRED_WORDS = 500           # B9
 
 # Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
-_ABBREVIATIONS = ("tp.", "tt.", "vd.", "vs.", "tr.", "st.", "q.", "p.")
+# Không có "st." (Street/Saint, viết tắt tiếng Anh): văn bản cẩm nang tiếng
+# Việt không dùng, và khi so khớp theo hậu tố chuỗi nó khớp nhầm cả "VinFast."
+_ABBREVIATIONS = ("tp.", "tt.", "vd.", "vs.", "tr.", "q.", "p.")
 
 
 def parse_sample(path: str) -> dict:
@@ -109,11 +111,13 @@ def split_sentences(text: str) -> list[str]:
         current += ch
         if ch not in ".!?":
             continue
-        before = text[max(0, i - 4):i + 1].lower()
         after = text[i + 1:i + 2]
         if ch == "." and text[i - 1:i].isdigit() and after.isdigit():
             continue                                  # 3.5
-        if any(before.endswith(a) for a in _ABBREVIATIONS):
+        # So khớp theo TỪ cuối cùng (ranh giới từ = khoảng trắng), không phải
+        # hậu tố chuỗi cố định - tránh khớp nhầm "st." vào cuối "VinFast."
+        last_word = re.search(r"(\S+)$", text[:i + 1])
+        if last_word and last_word.group(1).lower() in _ABBREVIATIONS:
             continue                                  # TP.HCM
         if after and after not in " \n":
             continue                                  # dính liền, chưa hết câu
