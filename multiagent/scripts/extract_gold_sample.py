@@ -20,6 +20,7 @@ import os
 import re
 import sys
 from collections import Counter
+from typing import NamedTuple
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup, Comment, NavigableString
@@ -43,6 +44,18 @@ KEEP_ATTRS = {"img": {"alt"}, "a": {"href"}}
 
 class ExtractError(Exception):
     """Thiếu phần cốt lõi của bài viết -> không ghi file, báo lỗi rõ ràng."""
+
+
+class CleanBodyResult(NamedTuple):
+    """Kết quả clean_body() - dùng NamedTuple để tránh gán nhầm âm thầm khi
+    có 5 phần tử vị trí (đổi thứ tự/thêm phần tử ở giữa sẽ không còn lỗi cú
+    pháp nhưng gán sai giá trị nếu dùng tuple thường)."""
+
+    body_html: str
+    removed: list[str]
+    kept: dict
+    unwrapped: Counter
+    alts: list[str]
 
 
 def _clean_text(value: str) -> str:
@@ -95,11 +108,11 @@ def _render_body(body) -> str:
     return "\n".join(lines)
 
 
-def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict, Counter, list[str]]:
+def clean_body(soup: BeautifulSoup) -> CleanBodyResult:
     """Bóc div.field-body và làm sạch.
 
-    Trả về (html đã sạch, danh sách thứ đã xoá, số đếm thẻ còn lại,
-    số đếm thẻ đã unwrap, danh sách alt của từng ảnh còn lại).
+    Trả về CleanBodyResult(body_html, removed, kept, unwrapped, alts) - vẫn
+    unpack được như tuple thường ở nơi gọi.
 
     Danh sách thứ đã xoá KHÔNG được bỏ đi: quy tắc nhận diện banner CTA là
     heuristic (thẻ <a> chỉ bọc 1 ảnh, không có chữ), mới xác minh trên 1 bài.
@@ -176,7 +189,7 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict, Counter, list
             "do JavaScript chèn nên file HTML lưu tĩnh không có (Ctrl+S chỉ "
             "lưu HTML gốc từ server)"
         )
-    return rendered, removed, kept, unwrapped, alts
+    return CleanBodyResult(rendered, removed, kept, unwrapped, alts)
 
 
 def render_txt(fields: dict, body_html: str) -> str:

@@ -116,9 +116,14 @@ def split_sentences(text: str) -> list[str]:
             continue                                  # 3.5
         # So khớp theo TỪ cuối cùng (ranh giới từ = khoảng trắng), không phải
         # hậu tố chuỗi cố định - tránh khớp nhầm "st." vào cuối "VinFast."
+        # Bỏ ký tự không phải chữ/số ở ĐẦU từ (dấu ngoặc/nháy mở kiểu
+        # "(tp." hay "“tp.") trước khi so khớp, nhưng giữ dấu chấm ở CUỐI vì
+        # _ABBREVIATIONS gồm cả dấu chấm.
         last_word = re.search(r"(\S+)$", text[:i + 1])
-        if last_word and last_word.group(1).lower() in _ABBREVIATIONS:
-            continue                                  # TP.HCM
+        if last_word:
+            candidate = re.sub(r"^\W+", "", last_word.group(1)).lower()
+            if candidate in _ABBREVIATIONS:
+                continue                              # TP.HCM, (tp. Thủ Đức)
         if after and after not in " \n":
             continue                                  # dính liền, chưa hết câu
         if after == " " and text[i + 2:i + 3].islower():

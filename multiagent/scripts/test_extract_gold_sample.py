@@ -203,6 +203,20 @@ def test_body() -> None:
     # D4: mỗi ảnh còn lại phải có 1 dòng alt riêng để người dùng liếc phát
     # hiện banner sống sót/ảnh bọc 2 lần - số alt phải khớp số ảnh giữ lại.
     check("số alt trả về khớp số ảnh giữ lại", len(alts), kept["img"])
+    # Ca trên chỉ so sánh SỐ LƯỢNG - len(alts) và kept["img"] cùng tính từ
+    # body.find_all("img") ngay cạnh nhau nên luôn khớp về số lượng bất kể
+    # nội dung alts đúng hay sai. Ca này so khớp NỘI DUNG thật để bảo vệ D4.
+    check(
+        "nội dung alts đúng thứ tự trên fixture G-001",
+        alts,
+        [
+            "kinh nghiệm chạy ô tô điện VinFast đường dài",
+            "kinh nghiệm chạy ô tô điện VinFast đường dài cần chuẩn bị gì",
+            "Lưu ý khi chạy ô tô điện VinFast đường dài",
+            "kinh nghiệm lái ô tô điện VinFast đường dài sử dụng phanh tái sinh",
+            "kinh nghiệm chạy ô tô điện VinFast đường dài VF e34 chinh phục Sa Vĩ",
+        ],
+    )
 
     # D5: 5 chú thích ảnh (trước đây là text node trần) giờ phải nằm trong
     # <p>, không còn là text node trần ở cấp cao nhất của body.
@@ -371,6 +385,15 @@ def test_split_sentences_abbreviations() -> None:
         "TP.HCM. vẫn không bị cắt câu giữa chừng -> đúng 2 câu",
         split_sentences("Tôi ở TP.HCM. Trời hôm nay đẹp."),
         ["Tôi ở TP.HCM.", "Trời hôm nay đẹp."],
+    )
+    # Ca hồi quy: cách khớp theo "từ cuối" (re.search(r"(\S+)$", ...)) ban đầu
+    # không bỏ dấu ngoặc/nháy mở đứng liền trước viết tắt, nên từ cuối lấy
+    # được là "(tp." thay vì "tp." -> không khớp danh sách -> cắt câu sai.
+    # Đã sửa bằng cách bỏ ký tự không phải chữ/số ở đầu từ trước khi so khớp.
+    check(
+        "viết tắt liền dấu ngoặc vẫn không cắt câu",
+        len(split_sentences("Khu vực (tp. Thủ Đức) có nhiều trạm sạc.")),
+        1,
     )
 
 
