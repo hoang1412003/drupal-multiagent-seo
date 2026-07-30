@@ -11,10 +11,18 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 
-from extract_gold_sample import ExtractError, clean_body, expected_url_for, extract_fields, render_txt, _clean_text
-from label_helper import analyze, parse_sample
+from extract_gold_sample import (
+    KEEP_TAGS,
+    ExtractError,
+    clean_body,
+    expected_url_for,
+    extract_fields,
+    render_txt,
+    _clean_text,
+)
+from label_helper import analyze, parse_sample, split_sentences
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -147,12 +155,14 @@ def test_extract_fields_with_nbsp() -> None:
 
 
 def test_body() -> None:
-    body_html, removed, kept = clean_body(load_soup())
+    body_html, removed, kept, unwrapped, alts = clean_body(load_soup())
 
-    # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1)
+    # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1).
+    # p = 36 (không phải 31): D5 bọc 5 chú thích ảnh (figcaption cũ) thành
+    # <p> - xem docs/superpowers/specs/2026-07-30-goldset-extraction-hardening-design.md
     check("body h2", kept["h2"], 3)
     check("body h3", kept["h3"], 10)
-    check("body p", kept["p"], 31)
+    check("body p", kept["p"], 36)
     check("body img (đã loại banner CTA)", kept["img"], 5)
     check("body a (đã loại 13 link mục lục + 1 thẻ bọc CTA)", kept["a"], 16)
 
@@ -185,11 +195,37 @@ def test_body() -> None:
         True,
     )
 
+    # D3: thẻ bị unwrap (div, figure, figcaption, span...) phải được báo cáo,
+    # không được mất âm thầm - fixture có figcaption (chú thích ảnh cũ).
+    check("có báo cáo thẻ đã unwrap", len(unwrapped) > 0, True)
+    check("báo cáo unwrap có figcaption", "figcaption" in unwrapped, True)
+
+    # D4: mỗi ảnh còn lại phải có 1 dòng alt riêng để người dùng liếc phát
+    # hiện banner sống sót/ảnh bọc 2 lần - số alt phải khớp số ảnh giữ lại.
+    check("số alt trả về khớp số ảnh giữ lại", len(alts), kept["img"])
+
+    # D5: 5 chú thích ảnh (trước đây là text node trần) giờ phải nằm trong
+    # <p>, không còn là text node trần ở cấp cao nhất của body.
+    reparsed = BeautifulSoup(body_html, "html.parser")
+    bare_text = [
+        node for node in reparsed.contents
+        if isinstance(node, NavigableString) and node.strip()
+    ]
+    check("không còn text node trần có chữ ở cấp cao nhất", bare_text, [])
+    check(
+        "chú thích ảnh đã thành <p>",
+        "<p>Ô tô điện VinFast VF e34 tự tin chinh phục Sa Vĩ</p>" in body_html,
+        True,
+    )
+
+    # D6: alt không còn khoảng trắng ở biên (do &nbsp; cuối chuỗi cũ)
+    check("không có alt còn khoảng trắng ở biên", any(a != a.strip() for a in alts), False)
+
 
 def test_render() -> None:
     soup = load_soup()
     fields = extract_fields(soup)
-    body_html, _, _ = clean_body(soup)
+    body_html, _, _, _, _ = clean_body(soup)
     text = render_txt(fields, body_html)
 
     head, sep, body = text.partition("\n---\n")
@@ -237,7 +273,7 @@ def test_render_roundtrip() -> None:
     """
     soup = load_soup()
     fields = extract_fields(soup)
-    body_html, _, _ = clean_body(soup)
+    body_html, _, _, _, _ = clean_body(soup)
     text = render_txt(fields, body_html)
 
     fd, tmp_path = tempfile.mkstemp(suffix=".txt")
@@ -289,7 +325,7 @@ def test_b6() -> None:
 
     # Trên fixture thật: 5 ảnh đều có alt -> không B6
     soup = load_soup()
-    body_html, _, _ = clean_body(soup)
+    body_html, _, _, _, _ = clean_body(soup)
     check("fixture G-001 không có B6", _b6_codes(body_html), [])
 
     # alt nháy đơn có nội dung -> KHÔNG tính là thiếu (finding 2a)
@@ -312,6 +348,52 @@ def test_b6() -> None:
     )
 
 
+def test_split_sentences_abbreviations() -> None:
+    """D1: khớp viết tắt theo TỪ cuối cùng, không phải hậu tố chuỗi cố định.
+
+    Trước khi sửa, "st." trong _ABBREVIATIONS khớp nhầm hậu tố "...nfast."
+    của "VinFast." (do so khớp bằng before.endswith(a) trên cửa sổ 5 ký tự
+    cố định), khiến câu bị dán làm một một cách có hệ thống trên toàn bộ
+    gold set (mọi bài đều nói về VinFast).
+    """
+    check(
+        "VinFast. không còn bị coi là viết tắt -> tách đúng 3 câu",
+        split_sentences("Đây là xe của VinFast. Xe này rất tốt. Giá hợp lý."),
+        [
+            "Đây là xe của VinFast.",
+            "Xe này rất tốt.",
+            "Giá hợp lý.",
+        ],
+    )
+    # Ca chốt: sửa D1 không được phá hành vi đúng vốn có - TP.HCM vẫn không
+    # bị cắt câu giữa chừng (dấu chấm dính giữa "TP." và "HCM" vẫn được giữ).
+    check(
+        "TP.HCM. vẫn không bị cắt câu giữa chừng -> đúng 2 câu",
+        split_sentences("Tôi ở TP.HCM. Trời hôm nay đẹp."),
+        ["Tôi ở TP.HCM.", "Trời hôm nay đẹp."],
+    )
+
+
+def test_keep_tags_and_br() -> None:
+    """D2: KEEP_TAGS phải có br, h1, h5, h6 - phòng ngừa cho 29 bài chưa thu."""
+    check("KEEP_TAGS có br", "br" in KEEP_TAGS, True)
+    check("KEEP_TAGS có h1", "h1" in KEEP_TAGS, True)
+    check("KEEP_TAGS có h5", "h5" in KEEP_TAGS, True)
+    check("KEEP_TAGS có h6", "h6" in KEEP_TAGS, True)
+
+    # <br> rỗng: nếu unwrap thì mất hẳn (không có nội dung để giữ lại),
+    # hai dòng dính thành một -> phải còn nguyên trong output.
+    soup = BeautifulSoup(
+        '<div class="node-detail"><div class="field-body">'
+        "<h5>Tiêu đề phụ</h5><p>Dòng một<br>Dòng hai</p>"
+        "</div></div>",
+        "html.parser",
+    )
+    body_html, _, _, _, _ = clean_body(soup)
+    check("giữ nguyên thẻ <h5>", "<h5>" in body_html, True)
+    check("giữ nguyên thẻ <br>", "<br" in body_html, True)
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
@@ -322,6 +404,8 @@ if __name__ == "__main__":
     test_render()
     test_render_roundtrip()
     test_b6()
+    test_split_sentences_abbreviations()
+    test_keep_tags_and_br()
 
     failed = False
     for name, ok, actual, expected in _results:

@@ -19,9 +19,10 @@ import glob
 import os
 import re
 import sys
+from collections import Counter
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, NavigableString
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
@@ -31,8 +32,8 @@ LABELS_CSV = os.path.join(REPO_ROOT, "docs", "goldset", "labels.csv")
 # Thẻ giữ lại trong body: đều mang ý nghĩa cấu trúc/nội dung mà label_helper.py
 # và các agent cần đọc (heading, đoạn văn, danh sách, ảnh, link).
 KEEP_TAGS = {
-    "h2", "h3", "h4", "p", "ul", "ol", "li", "img", "a",
-    "strong", "em", "blockquote", "table", "tr", "td", "th",
+    "h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li", "img", "a",
+    "strong", "em", "blockquote", "table", "tr", "td", "th", "br",
 }
 
 # Thuộc tính giữ lại theo từng thẻ. Mọi thứ khác (class/style/id/data-*/
@@ -94,15 +95,19 @@ def _render_body(body) -> str:
     return "\n".join(lines)
 
 
-def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
+def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict, Counter, list[str]]:
     """Bóc div.field-body và làm sạch.
 
-    Trả về (html đã sạch, danh sách thứ đã xoá, số đếm thẻ còn lại).
+    Trả về (html đã sạch, danh sách thứ đã xoá, số đếm thẻ còn lại,
+    số đếm thẻ đã unwrap, danh sách alt của từng ảnh còn lại).
 
     Danh sách thứ đã xoá KHÔNG được bỏ đi: quy tắc nhận diện banner CTA là
     heuristic (thẻ <a> chỉ bọc 1 ảnh, không có chữ), mới xác minh trên 1 bài.
     Bài khác có thể bọc ảnh nội dung trong <a> kiểu lightbox và bị xoá oan -
     in ra để người dùng phát hiện ngay, thay vì lộ ở Sprint 3 khi đã muộn.
+
+    Thẻ bị unwrap (không nằm trong KEEP_TAGS) cũng được đếm lại và trả về
+    thay vì âm thầm mất - bài nào có nhiều <h5>/<br>... người dùng cần biết.
     """
     node = soup.select_one("div.node-detail")
     body = node.select_one("div.field-body") if node else None
@@ -138,14 +143,32 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
                 parent = parent.parent
                 old_parent.decompose()
 
+    unwrapped = Counter()
     for tag in body.find_all(True):
         if tag.name not in KEEP_TAGS:
+            unwrapped[tag.name] += 1
             tag.unwrap()          # bỏ thẻ trình bày, giữ nội dung bên trong
         else:
             allowed = KEEP_ATTRS.get(tag.name, set())
-            tag.attrs = {k: v for k, v in tag.attrs.items() if k in allowed}
+            # alt bị unwrap từ figcaption có thể còn &nbsp; ở biên (D6) -
+            # .strip() xoá vì \xa0 cũng được Python coi là whitespace.
+            tag.attrs = {
+                k: (v.strip() if k == "alt" else v)
+                for k, v in tag.attrs.items() if k in allowed
+            }
+
+    # Chú thích ảnh (figcaption) vừa bị unwrap ở trên thành text node trần
+    # ngay cấp con của body -> bọc lại thành <p> để label_helper.py tính vào
+    # "số đoạn" (D5). Bọc TRƯỚC khi đếm kept để kept["p"] phản ánh đúng số
+    # <p> có trong output cuối, không phải số trước khi bọc.
+    for child in list(body.children):
+        if isinstance(child, NavigableString) and _clean_text(str(child)):
+            new_p = soup.new_tag("p")
+            new_p.string = str(child)
+            child.replace_with(new_p)
 
     kept = {name: len(body.find_all(name)) for name in ("h2", "h3", "p", "img", "a")}
+    alts = [img.get("alt", "") for img in body.find_all("img")]
     rendered = _render_body(body)
     if not rendered.strip():
         raise ExtractError(
@@ -153,7 +176,7 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
             "do JavaScript chèn nên file HTML lưu tĩnh không có (Ctrl+S chỉ "
             "lưu HTML gốc từ server)"
         )
-    return rendered, removed, kept
+    return rendered, removed, kept, unwrapped, alts
 
 
 def render_txt(fields: dict, body_html: str) -> str:
@@ -211,7 +234,7 @@ def process(path: str, table: dict) -> bool:
             soup = BeautifulSoup(f.read(), "html.parser")
 
         fields = extract_fields(soup)
-        body_html, removed, kept = clean_body(soup)
+        body_html, removed, kept, unwrapped, alts = clean_body(soup)
 
         warnings = []
         if not fields["url_alias"]:
@@ -242,10 +265,15 @@ def process(path: str, table: dict) -> bool:
     print(f"{sample_id}.txt")
     for item in removed:
         print(f"  [xoa] {item}")
+    if unwrapped:
+        parts = ", ".join(f"{name} x{count}" for name, count in unwrapped.most_common())
+        print(f"  [unwrap] {parts}")
     print(
         f"  [giu] {kept['img']} anh, {kept['a']} link, "
         f"{kept['h2']} h2, {kept['h3']} h3"
     )
+    for alt in alts:
+        print(f"    [anh] alt=\"{alt}\"")
     for warning in warnings:
         print(f"  [CANH BAO] {warning}")
     return True
