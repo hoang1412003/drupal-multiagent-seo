@@ -1,0 +1,3 @@
+# Thư viện CHỈ dùng cho script chuẩn bị dữ liệu (chạy một lần), không phải
+# phụ thuộc của hệ multi-agent chạy thật - xem requirements.txt cho phần đó.
+beautifulsoup4>=4.12.0
