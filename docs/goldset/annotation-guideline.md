@@ -1,6 +1,6 @@
 # Hướng dẫn gán nhãn gold set
 
-**Phiên bản:** v1.1 (2026-07-27)
+**Phiên bản:** v1.2 (2026-07-29)
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0 - xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`)
 
 ---
@@ -23,7 +23,7 @@ Nguyên tắc chung: **nhãn phải suy ra được từ các dấu hiệu quan 
 | Nguyên tắc | Lý do |
 |---|---|
 | **Gán nhãn mù với kết quả AI.** Gán trước khi chạy hệ thống, hoặc nếu đã chạy thì tuyệt đối không mở `field_ai_status` / `field_ai_score` trước khi chốt nhãn | Xem điểm AI trước sẽ bị neo (anchoring) → Kappa bị thổi phồng, không còn giá trị chứng minh |
-| **Chỉ đánh giá phần nội dung hệ thống thật sự đọc:** `title`, `body`, `summary`, `meta_description`, `url_alias`, `image_alt` | Khối CTA/header/footer là template dùng chung, không thuộc quyền kiểm soát người viết (spec mục 7.1) |
+| **Chỉ đánh giá phần nội dung hệ thống thật sự đọc:** `title`, `body`, `summary`, `meta_description`, `url_alias` | Khối CTA/header/footer là template dùng chung, không thuộc quyền kiểm soát người viết (spec mục 7.1); ảnh (`alt`) nằm trong `body` nên không liệt riêng |
 | **Gán theo bảng mã lỗi ở mục 4, không gán theo cảm nhận** | Bắt buộc để tái lập được; cũng là nguồn dữ liệu để đối chiếu AI bắt đúng loại lỗi hay không |
 | **Ghi lại mã lỗi, không chỉ ghi nhãn cuối** | Nhãn cuối chỉ có 3 giá trị nên rất dễ trùng nhau ngẫu nhiên; mã lỗi mới cho biết AI và người có đồng ý về *lý do* hay không |
 | **Tối đa 15 bài/phiên** | Chống mệt → trôi tiêu chuẩn |
@@ -65,7 +65,7 @@ Nhãn gán cho **một node Drupal** (một bài, ở trạng thái chưa xuất
 | **B3** | `meta_description` trống, hoặc độ dài ngoài khoảng **140-170** ký tự | Đếm ký tự |
 | **B4** | `title` ngoài khoảng **40-70** ký tự, **hoặc** viết hoa toàn bộ, **hoặc** gắn năm đã cũ | VD thật trên site: *"LƯU Ý SỬ DỤNG ĐỐI VỚI PIN CELL LFP/GOTION"*, *"...đúng cách 2024"* |
 | **B5** | Sai thuật ngữ/tên model so với chuẩn brand, hoặc xưng hô không nhất quán trong cùng bài | "VF8" thay vì "VF 8"; "xe hơi điện" thay vì "ô tô điện"; lẫn lộn "bạn"/"quý khách" |
-| **B6** | Thiếu `image_alt`, hoặc alt text không mô tả đúng ảnh | |
+| **B6** | Thiếu thuộc tính `alt` (hoặc `alt` rỗng) ở bất kỳ ảnh nào trong `body`, hoặc alt text không mô tả đúng ảnh | |
 | **B7** | `url_alias` còn dấu tiếng Việt, thiếu từ khóa chính, hoặc quá dài | |
 | **B8** | Lỗi chính tả hoặc ngữ pháp (từ 1 lỗi trở lên) | |
 | **B9** | Câu trên 30 từ hoặc đoạn trên 5 câu xuất hiện từ 3 lần trở lên; hoặc bài trên ~500 từ mà không có heading H2/H3 | |
@@ -212,3 +212,11 @@ Mọi thay đổi bảng mã lỗi (mục 4) hoặc quy tắc quy nhãn (mục 5
 | B4 | ngoài 50-60 ký tự | ngoài **40-70** | 50-60 là dải *lý tưởng* để chấm điểm (rubric SEO1 giữ nguyên), nhưng dùng nó làm ranh giới *nhãn* thì hầu hết bài thật đều dính B4 → mọi bài thành `needs_revision`, phân bố nhãn sụp đổ và Kappa mất ý nghĩa. Nhãn dùng dải "sai rõ ràng", rubric dùng dải "lý tưởng" - đúng tinh thần hai thang đo cố ý khác nhau (`rubrics.md` mục 7) |
 
 Tại thời điểm sửa **chưa có nhãn nào được gán theo v1**, nên không phải gán lại gì.
+
+**v1.2 (2026-07-29)** - đổi phạm vi xét mã B6:
+
+| Mã | v1.1 | v1.2 | Lý do |
+|---|---|---|---|
+| B6 | Thiếu `image_alt`, hoặc alt text không mô tả đúng ảnh | Thiếu thuộc tính `alt` (hoặc `alt` rỗng) ở bất kỳ ảnh nào trong `body`, hoặc alt text không mô tả đúng ảnh | Trang nguồn thật (vinfastauto.com) không có field ảnh đại diện riêng - mọi ảnh nằm trong `body` (xem `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 3.3). Trường `image_alt` không tồn tại nên định nghĩa cũ không đo được gì; B6 chuyển sang xét mọi thẻ `<img>` trong `body` |
+
+Tại thời điểm sửa **chưa có nhãn nào được gán** (cột `label` trong `labels.csv` còn trống toàn bộ), nên không phải gán lại gì.

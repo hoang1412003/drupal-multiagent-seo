@@ -90,7 +90,7 @@ Tìm-thay toàn bài, chọn **một** loại:
 - Đổi xưng hô ở nửa sau bài để tạo lẫn lộn trong cùng bài
 
 ### B6 - Thiếu alt text
-Để trống trường `image_alt`.
+Xoá thuộc tính `alt` của một thẻ `<img>` trong body (hoặc đổi thành `alt=""`). Mã B6 giờ tính trên **mọi ảnh trong body** (không còn trường `image_alt` riêng), nên chỉ cần làm với 1 ảnh là đủ tạo flag.
 
 ### B7 - Slug lỗi
 Đổi `url_alias` thành bản **còn dấu tiếng Việt**: `/vn_vi/huong-dan-sac-pin` → `/vn_vi/hướng-dẫn-sạc-pin`
