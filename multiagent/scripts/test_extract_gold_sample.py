@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bs4 import BeautifulSoup
 
-from extract_gold_sample import ExtractError, clean_body, extract_fields, _clean_text
+from extract_gold_sample import ExtractError, clean_body, expected_url_for, extract_fields, render_txt, _clean_text
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -154,12 +154,42 @@ def test_body() -> None:
     )
 
 
+def test_render() -> None:
+    soup = load_soup()
+    fields = extract_fields(soup)
+    body_html, _, _ = clean_body(soup)
+    text = render_txt(fields, body_html)
+
+    head, sep, body = text.partition("\n---\n")
+    check("có dấu phân cách ---", sep, "\n---\n")
+
+    keys = [line.split(":", 1)[0] for line in head.splitlines()]
+    check(
+        "đúng 4 dòng field theo thứ tự",
+        keys,
+        ["title", "url_alias", "meta_description", "summary"],
+    )
+    check("đã bỏ dòng image_alt", "image_alt" in head, False)
+    check("body giữ nguyên heading", "<h2>" in body, True)
+
+    # P-001.html ứng với P-001a/P-001b trong labels.csv -> khớp theo tiền tố
+    table = {"P-001a": "/vn_vi/cham-soc-xe-dien", "G-001": "/vn_vi/kinh-nghiem"}
+    check("khớp sample_id chính xác", expected_url_for("G-001", table), "/vn_vi/kinh-nghiem")
+    check(
+        "khớp sample_id theo tiền tố",
+        expected_url_for("P-001", table),
+        "/vn_vi/cham-soc-xe-dien",
+    )
+    check("không khớp thì trả None", expected_url_for("G-999", table), None)
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
     test_clean_text_with_nbsp()
     test_extract_fields_with_nbsp()
     test_body()
+    test_render()
 
     failed = False
     for name, ok, actual, expected in _results:

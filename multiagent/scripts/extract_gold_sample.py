@@ -14,8 +14,11 @@ Cách chạy:
     .venv\\Scripts\\python.exe scripts\\extract_gold_sample.py ..\\docs\\goldset\\raw_html\\G-001.html
     .venv\\Scripts\\python.exe scripts\\extract_gold_sample.py ..\\docs\\goldset\\raw_html\\*.html
 """
+import csv
+import glob
 import os
 import re
+import sys
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup, Comment
@@ -144,3 +147,101 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
 
     kept = {name: len(body.find_all(name)) for name in ("h2", "h3", "p", "img", "a")}
     return _render_body(body), removed, kept
+
+
+def render_txt(fields: dict, body_html: str) -> str:
+    """Ghép thành format scripts/label_helper.py đọc được.
+
+    Không còn dòng image_alt: site thật không có field ảnh đại diện riêng,
+    mọi ảnh nằm trong body (spec mục 3.3), nên mã B6 xét các thẻ <img> trong
+    body thay vì một field riêng.
+    """
+    return (
+        f"title: {fields['title']}\n"
+        f"url_alias: {fields['url_alias']}\n"
+        f"meta_description: {fields['meta_description']}\n"
+        f"summary: {fields['summary']}\n"
+        "---\n"
+        f"{body_html}\n"
+    )
+
+
+def load_expected_urls() -> dict:
+    """sample_id -> source_url lấy từ labels.csv, để phát hiện lưu nhầm bài."""
+    if not os.path.isfile(LABELS_CSV):
+        return {}
+    with open(LABELS_CSV, encoding="utf-8-sig") as f:
+        return {row["sample_id"]: row["source_url"] for row in csv.DictReader(f)}
+
+
+def expected_url_for(sample_id: str, table: dict):
+    """Khớp sample_id với labels.csv.
+
+    File P-001.html ứng với 2 dòng P-001a/P-001b trong labels.csv (cùng một
+    bài gốc, khác nhau ở lỗi sẽ chèn vào sau), nên phải khớp theo tiền tố.
+    """
+    if sample_id in table:
+        return table[sample_id]
+    for key, url in table.items():
+        if key.startswith(sample_id):
+            return url
+    return None
+
+
+def process(path: str, table: dict) -> bool:
+    """Bóc tách 1 file HTML và ghi file .txt. Trả về True nếu ghi thành công."""
+    sample_id = os.path.splitext(os.path.basename(path))[0]
+    with open(path, encoding="utf-8") as f:
+        soup = BeautifulSoup(f.read(), "html.parser")
+
+    try:
+        fields = extract_fields(soup)
+        body_html, removed, kept = clean_body(soup)
+    except ExtractError as error:
+        print(f"{sample_id}.html")
+        print(f"  [LOI] {error} - KHONG ghi file")
+        return False
+
+    warnings = []
+    if not fields["url_alias"]:
+        warnings.append("khong co <link rel=canonical> - url_alias de trong")
+    expected = expected_url_for(sample_id, table)
+    if expected and fields["url_alias"] and fields["url_alias"] != expected:
+        warnings.append(
+            f"canonical khac labels.csv: {fields['url_alias']} != {expected}"
+        )
+
+    os.makedirs(RAW_DIR, exist_ok=True)
+    with open(os.path.join(RAW_DIR, f"{sample_id}.txt"), "w", encoding="utf-8") as f:
+        f.write(render_txt(fields, body_html))
+
+    print(f"{sample_id}.txt")
+    for item in removed:
+        print(f"  [xoa] {item}")
+    print(
+        f"  [giu] {kept['img']} anh, {kept['a']} link, "
+        f"{kept['h2']} h2, {kept['h3']} h3"
+    )
+    for warning in warnings:
+        print(f"  [CANH BAO] {warning}")
+    return True
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(__doc__)
+        sys.exit(1)
+
+    paths = []
+    for arg in sys.argv[1:]:
+        paths.extend(sorted(glob.glob(arg)) or [arg])
+
+    missing = [p for p in paths if not os.path.isfile(p)]
+    if missing:
+        print(f"Khong tim thay file: {', '.join(missing)}")
+        sys.exit(1)
+
+    table = load_expected_urls()
+    written = sum(process(path, table) for path in paths)
+    print(f"\nDa ghi {written}/{len(paths)} file vao {RAW_DIR}")
+    sys.exit(0 if written == len(paths) else 1)
