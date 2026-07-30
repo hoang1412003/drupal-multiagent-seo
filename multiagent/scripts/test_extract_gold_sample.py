@@ -182,6 +182,19 @@ def test_render() -> None:
     )
     check("không khớp thì trả None", expected_url_for("G-999", table), None)
 
+    # Kiểm tra regex an toàn: không khớp nhầm vào ID dài hơn (P-0010 != P-001)
+    table_long = {"P-0010": "/url/P-0010", "P-001a": "/url/P-001"}
+    check(
+        "chặn khớp nhầm ID dài hơn: P-001 không khớp P-0010",
+        expected_url_for("P-001", table_long),
+        "/url/P-001",
+    )
+    check(
+        "regex không khớp ký tự số thêm: P-001 không khớp P-00100",
+        expected_url_for("P-001", {"P-00100": "/wrong-url"}),
+        None,
+    )
+
 
 if __name__ == "__main__":
     test_fields()

@@ -166,7 +166,7 @@ def render_txt(fields: dict, body_html: str) -> str:
     )
 
 
-def load_expected_urls() -> dict:
+def load_expected_urls() -> dict[str, str]:
     """sample_id -> source_url lấy từ labels.csv, để phát hiện lưu nhầm bài."""
     if not os.path.isfile(LABELS_CSV):
         return {}
@@ -174,16 +174,19 @@ def load_expected_urls() -> dict:
         return {row["sample_id"]: row["source_url"] for row in csv.DictReader(f)}
 
 
-def expected_url_for(sample_id: str, table: dict):
+def expected_url_for(sample_id: str, table: dict[str, str]) -> str | None:
     """Khớp sample_id với labels.csv.
 
     File P-001.html ứng với 2 dòng P-001a/P-001b trong labels.csv (cùng một
-    bài gốc, khác nhau ở lỗi sẽ chèn vào sau), nên phải khớp theo tiền tố.
+    bài gốc, khác nhau ở lỗi sẽ chèn vào sau), nên khớp theo tiền tố kèm hậu tố
+    biến thể. Dùng regex thay vì startswith để chống khớp nhầm vào ID dài hơn:
+    nếu có P-0010, query P-001 không được trả URL sai.
     """
     if sample_id in table:
         return table[sample_id]
+    pattern = re.compile(rf"^{re.escape(sample_id)}[a-z]?$")
     for key, url in table.items():
-        if key.startswith(sample_id):
+        if pattern.match(key):
             return url
     return None
 
