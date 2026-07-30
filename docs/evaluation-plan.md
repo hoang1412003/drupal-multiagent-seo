@@ -48,11 +48,13 @@ Sau khi dựng KB:              │
 Cuối cùng:                  E6  Shadow-test
 ```
 
-Ba điểm chặn quan trọng:
+Năm điểm chặn quan trọng:
 
 1. **E1 chặn E5.** Nếu điểm dao động ±5 thì việc quét ngưỡng theo bước nhảy 2 điểm là vô nghĩa - mọi ngưỡng chọn ra chỉ là nhiễu.
 2. **E1 cũng chặn việc implement rubric.** E1 là thí nghiệm quyết định số phận `rubrics.md`: nếu điểm 0-100 hiện tại đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi, và nên biết **trước** khi viết lại 4 prompt.
 3. **E2 chặn việc nối RAG vào agent** (`rag-design.md` mục 5).
+4. **Brand Voice Agent thật chặn E5.** Xem mục 4.5 - stub hiện tại tạo 25 điểm giả cho mọi bài.
+5. **SEO Agent đọc được alt của ảnh trong body chặn E5** (phần tiêu chí SEO9). Xem mục 4.5.
 
 **E1 và E4 chạy được ngay hôm nay** - không phụ thuộc gold set, không phụ thuộc rubric, không phụ thuộc KB. Đây là hai phép đo duy nhất trong danh sách không bị chặn bởi gì cả.
 
@@ -151,10 +153,32 @@ Con số này quan trọng vì nó **loại bỏ "tốn kém" khỏi danh sách 
 
 ### 4.5. E5 - Calibration ngưỡng
 
-Đã đặc tả đầy đủ ở `architecture.md` mục 8.2 (Recall/F1, Cohen's Kappa, quét ngưỡng theo Youden's Index). Hai điều kiện tiên quyết cần nhấn lại ở đây:
+Đã đặc tả đầy đủ ở `architecture.md` mục 8.2 (Recall/F1, Cohen's Kappa, quét ngưỡng theo Youden's Index). Bốn điều kiện tiên quyết cần nhấn lại ở đây:
 
 1. **E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.
 2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý.
+3. **Brand Voice Agent phải là agent thật, không còn stub.**
+4. **SEO Agent phải đọc được `alt` của ảnh nằm trong `body`.**
+
+Hai điều kiện cuối phát hiện ngày 2026-07-30 khi chạy pipeline thật lên `node/7` của Drupal local (bài đầu tiên có ảnh thật). Số liệu đo được, không phải suy luận:
+
+**Điều kiện 3 - stub tạo điểm sàn 55.** Bài `node/7` gần như rỗng (tiêu đề "test", body chỉ có chữ "test" + 1 ảnh, không meta description, không URL alias). Hai agent thật chấm rất thấp, nhưng điểm tổng vẫn 70:
+
+| Agent | Điểm | Trọng số | Đóng góp |
+| --- | --- | --- | --- |
+| Content Quality | 40 | 0.25 | 10 |
+| SEO | 25 | 0.20 | 5 |
+| **Brand (stub, luôn trả 100)** | **100** | 0.25 | **25** |
+| Compliance | 100 | 0.30 | 30 |
+| | | | **70.0** |
+
+`brand_node` trong `graph.py` luôn trả `score = 100`. Cộng với Compliance 100 (đúng - bài rỗng thì không vi phạm gì), mọi bài viết đều được **55 điểm sàn miễn phí**, không bài nào xuống dưới mức đó dù tệ đến đâu. Calibrate trên hệ thống này sẽ cho ra ngưỡng phản ánh 25 điểm giả, và ngưỡng đó sai hoàn toàn khi Brand Agent thật đi vào hoạt động. Đây là lý do định lượng cho việc Brand Voice Agent phải xong trước Sprint 3 - mạnh hơn nhiều so với lập luận "vì nó là stub".
+
+**Điều kiện 4 - tiêu chí SEO9 chỉ đo được một phần thực tế.** Cùng bài `node/7` có 2 ảnh: ảnh chính trong `field_image` (alt = "xe vf6") và 1 ảnh chèn trong `body` **không có alt**. Pipeline chỉ bắt được ảnh chính; ảnh thiếu alt trong body lọt lưới hoàn toàn.
+
+Nguyên nhân ở `drupal_client.py`: `image_alt` chỉ lấy từ `relationships.field_image.data.meta.alt`, còn ảnh trong body nằm lẫn trong chuỗi HTML của `attributes.body.value` và không được bóc ra. System prompt của `seo.py` cũng chỉ dặn LLM chấm field `[image_alt]`.
+
+Hệ quả cho calibration: Recall/F1 của tiêu chí SEO9 sẽ lệch có hệ thống, vì ground truth (mã lỗi B6 trong `annotation-guideline.md` v1.2) xét **mọi ảnh trong body** còn hệ thống chỉ xét **một ảnh đại diện**. Hai bên đo hai tập ảnh khác nhau. Chi tiết và bằng chứng thứ hai (bài G-001 của gold set): `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 6.
 
 ### 4.6. E6 - Shadow-test: phải viết lại cho khả thi
 
