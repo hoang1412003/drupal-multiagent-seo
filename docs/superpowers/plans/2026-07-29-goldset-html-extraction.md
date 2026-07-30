@@ -303,7 +303,7 @@ def test_body() -> None:
     # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1)
     check("body h2", kept["h2"], 3)
     check("body h3", kept["h3"], 10)
-    check("body p", kept["p"], 31)
+    check("body p", kept["p"], 36)
     check("body img (đã loại banner CTA)", kept["img"], 5)
     check("body a (đã loại 13 link mục lục + 1 thẻ bọc CTA)", kept["a"], 16)
 
