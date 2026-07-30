@@ -18,7 +18,7 @@ import os
 import re
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
@@ -79,3 +79,62 @@ def extract_fields(soup: BeautifulSoup) -> dict:
         ),
         "summary": _clean_text(desc.get_text()) if desc else "",
     }
+
+
+def _render_body(body) -> str:
+    """Mỗi thẻ khối một dòng, gộp khoảng trắng - để dễ đọc khi gán nhãn tay."""
+    lines = []
+    for child in body.children:
+        rendered = _clean_text(str(child))
+        if rendered:
+            lines.append(rendered)
+    return "\n".join(lines)
+
+
+def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
+    """Bóc div.field-body và làm sạch.
+
+    Trả về (html đã sạch, danh sách thứ đã xoá, số đếm thẻ còn lại).
+
+    Danh sách thứ đã xoá KHÔNG được bỏ đi: quy tắc nhận diện banner CTA là
+    heuristic (thẻ <a> chỉ bọc 1 ảnh, không có chữ), mới xác minh trên 1 bài.
+    Bài khác có thể bọc ảnh nội dung trong <a> kiểu lightbox và bị xoá oan -
+    in ra để người dùng phát hiện ngay, thay vì lộ ở Sprint 3 khi đã muộn.
+    """
+    node = soup.select_one("div.node-detail")
+    body = node.select_one("div.field-body") if node else None
+    if body is None:
+        raise ExtractError("không tìm thấy div.field-body trong div.node-detail")
+
+    removed = []
+
+    for tag in body.find_all(["script", "style", "iframe", "noscript"]):
+        tag.decompose()
+    for comment in body.find_all(string=lambda s: isinstance(s, Comment)):
+        comment.extract()
+
+    # Mục lục tự sinh: không phải chữ tác giả viết, và 13 thẻ <a> của nó sẽ bị
+    # label_helper.py đếm thành internal link (đẩy tiêu chí SEO10 lên oan).
+    for toc in body.select("div.widget-toc"):
+        removed.append(f"div.widget-toc ({len(toc.find_all('a'))} link)")
+        toc.decompose()
+
+    # Banner CTA: thẻ <a> mà toàn bộ nội dung chỉ là 1 <img>, không có chữ.
+    for anchor in body.find_all("a"):
+        images = anchor.find_all("img")
+        if len(images) == 1 and not anchor.get_text(strip=True):
+            removed.append(
+                f'<a href="{anchor.get("href", "")}"> bọc '
+                f'<img alt="{images[0].get("alt", "")}">'
+            )
+            anchor.decompose()
+
+    for tag in body.find_all(True):
+        if tag.name not in KEEP_TAGS:
+            tag.unwrap()          # bỏ thẻ trình bày, giữ nội dung bên trong
+        else:
+            allowed = KEEP_ATTRS.get(tag.name, set())
+            tag.attrs = {k: v for k, v in tag.attrs.items() if k in allowed}
+
+    kept = {name: len(body.find_all(name)) for name in ("h2", "h3", "p", "img", "a")}
+    return _render_body(body), removed, kept

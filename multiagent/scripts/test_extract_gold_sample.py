@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bs4 import BeautifulSoup
 
-from extract_gold_sample import ExtractError, extract_fields, _clean_text
+from extract_gold_sample import ExtractError, clean_body, extract_fields, _clean_text
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -114,11 +114,50 @@ def test_extract_fields_with_nbsp() -> None:
     check("title không còn \\xa0 (qua extract_fields)", "\xa0" in fields["title"], False)
 
 
+def test_body() -> None:
+    body_html, removed, kept = clean_body(load_soup())
+
+    # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1)
+    check("body h2", kept["h2"], 3)
+    check("body h3", kept["h3"], 10)
+    check("body p", kept["p"], 32)
+    check("body img (đã loại banner CTA)", kept["img"], 5)
+    check("body a (đã loại 13 link mục lục + 1 thẻ bọc CTA)", kept["a"], 16)
+
+    # Rác phải biến mất khỏi output
+    check("không còn widget-toc", "widget-toc" in body_html, False)
+    check("không còn alt banner CTA", "dat-coc-xe-o-to-dien-vinfast" in body_html, False)
+    check("không còn class=", "class=" in body_html, False)
+    check("không còn src=", "src=" in body_html, False)
+
+    # Nội dung thật phải còn nguyên
+    check(
+        "còn heading mục 1",
+        "1. Lên kế hoạch hành trình" in body_html,
+        True,
+    )
+    check("mọi ảnh còn lại đều có alt không rỗng", body_html.count('<img alt="'), 5)
+
+    # Heuristic xoá CTA phải báo cáo được, không xoá âm thầm
+    check("báo cáo đúng 2 thứ đã xoá", len(removed), 2)
+    check(
+        "có báo cáo xoá mục lục",
+        any("widget-toc" in item for item in removed),
+        True,
+    )
+    check(
+        "có báo cáo xoá banner CTA",
+        any("dat-coc-xe-o-to-dien-vinfast" in item for item in removed),
+        True,
+    )
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
     test_clean_text_with_nbsp()
     test_extract_fields_with_nbsp()
+    test_body()
 
     failed = False
     for name, ok, actual, expected in _results:
