@@ -133,7 +133,7 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
             parent = anchor.parent
             anchor.decompose()
             # Dọn thẻ cha nếu nó trở nên rỗng (không chữ và không có img)
-            while parent and parent != body and not parent.get_text(strip=True) and not parent.find_all("img"):
+            while parent and parent is not body and not parent.get_text(strip=True) and not parent.find_all("img"):
                 old_parent = parent
                 parent = parent.parent
                 old_parent.decompose()
@@ -146,7 +146,14 @@ def clean_body(soup: BeautifulSoup) -> tuple[str, list[str], dict]:
             tag.attrs = {k: v for k, v in tag.attrs.items() if k in allowed}
 
     kept = {name: len(body.find_all(name)) for name in ("h2", "h3", "p", "img", "a")}
-    return _render_body(body), removed, kept
+    rendered = _render_body(body)
+    if not rendered.strip():
+        raise ExtractError(
+            "div.field-body rỗng sau khi làm sạch - nhiều khả năng nội dung "
+            "do JavaScript chèn nên file HTML lưu tĩnh không có (Ctrl+S chỉ "
+            "lưu HTML gốc từ server)"
+        )
+    return rendered, removed, kept
 
 
 def render_txt(fields: dict, body_html: str) -> str:
@@ -192,31 +199,45 @@ def expected_url_for(sample_id: str, table: dict[str, str]) -> str | None:
 
 
 def process(path: str, table: dict) -> bool:
-    """Bóc tách 1 file HTML và ghi file .txt. Trả về True nếu ghi thành công."""
-    sample_id = os.path.splitext(os.path.basename(path))[0]
-    with open(path, encoding="utf-8") as f:
-        soup = BeautifulSoup(f.read(), "html.parser")
+    """Bóc tách 1 file HTML và ghi file .txt. Trả về True nếu ghi thành công.
 
+    Bắt cả ExtractError lẫn Exception bất kỳ: một file lệch encoding hay lỗi
+    bất ngờ khác không được phép làm hỏng cả lô 30 file (spec mục 4.4 - chạy
+    hết mọi file rồi in tổng kết).
+    """
+    sample_id = os.path.splitext(os.path.basename(path))[0]
     try:
+        with open(path, encoding="utf-8") as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+
         fields = extract_fields(soup)
         body_html, removed, kept = clean_body(soup)
+
+        warnings = []
+        if not fields["url_alias"]:
+            warnings.append("khong co <link rel=canonical> - url_alias de trong")
+        expected = expected_url_for(sample_id, table)
+        if expected is None:
+            warnings.append(
+                f"{sample_id} khong co trong labels.csv - "
+                "KHONG doi chieu duoc canonical"
+            )
+        elif fields["url_alias"] and fields["url_alias"] != expected:
+            warnings.append(
+                f"canonical khac labels.csv: {fields['url_alias']} != {expected}"
+            )
+
+        os.makedirs(RAW_DIR, exist_ok=True)
+        with open(os.path.join(RAW_DIR, f"{sample_id}.txt"), "w", encoding="utf-8") as f:
+            f.write(render_txt(fields, body_html))
     except ExtractError as error:
         print(f"{sample_id}.html")
         print(f"  [LOI] {error} - KHONG ghi file")
         return False
-
-    warnings = []
-    if not fields["url_alias"]:
-        warnings.append("khong co <link rel=canonical> - url_alias de trong")
-    expected = expected_url_for(sample_id, table)
-    if expected and fields["url_alias"] and fields["url_alias"] != expected:
-        warnings.append(
-            f"canonical khac labels.csv: {fields['url_alias']} != {expected}"
-        )
-
-    os.makedirs(RAW_DIR, exist_ok=True)
-    with open(os.path.join(RAW_DIR, f"{sample_id}.txt"), "w", encoding="utf-8") as f:
-        f.write(render_txt(fields, body_html))
+    except Exception as error:
+        print(f"{sample_id}.html")
+        print(f"  [LOI] {type(error).__name__}: {error} - KHONG ghi file")
+        return False
 
     print(f"{sample_id}.txt")
     for item in removed:

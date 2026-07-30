@@ -25,7 +25,7 @@ Quy ước 2 giá trị đặc biệt cho các field ngoài body:
     ?        = CHƯA THU (chưa lấy về) -> script báo "chưa thu", không kết luận
     (bỏ trống) = ĐÃ KIỂM TRA VÀ KHÔNG CÓ  -> script kết luận là lỗi
 
-Phân biệt này quan trọng: bỏ trống vì lười sẽ tạo ra lỗi B3/B6 giả.
+Phân biệt này quan trọng: bỏ trống vì lười sẽ tạo ra lỗi B3 giả.
 
 Cách chạy:
     .venv\\Scripts\\python.exe scripts\\label_helper.py ..\\docs\\goldset\\raw\\G-001.txt
@@ -190,7 +190,7 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             codes.append(f"B7 ({'; '.join(flags)})")
         measures.append("  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét")
 
-    # --- B9: cấu trúc body -------------------------------------------------
+    # --- B6 + B9: đọc từ body -----------------------------------------------
     body = fields.get("body", "")
     if body.strip():
         # --- B6: alt text của MỌI ảnh trong body ------------------------
@@ -199,9 +199,16 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
         # một field image_alt đơn lẻ.
         images = re.findall(r"<img[^>]*>", body, re.IGNORECASE)
         if images:
+            # Nhận cả 3 kiểu quote: alt="...", alt='...', alt=khong-quote.
+            # alt="" và alt='' (rỗng) vẫn phải tính là THIẾU nên không nằm
+            # trong các nhánh trên (mỗi nhánh đều yêu cầu nội dung khác rỗng).
             no_alt = [
                 img for img in images
-                if not re.search(r'\balt\s*=\s*"[^"]+"', img, re.IGNORECASE)
+                if not re.search(
+                    r"""\balt\s*=\s*(?:"[^"]+"|'[^']+'|[^\s>"']+)""",
+                    img,
+                    re.IGNORECASE,
+                )
             ]
             measures.append(
                 f"  số ảnh             {len(images)} (thiếu alt: {len(no_alt)})"

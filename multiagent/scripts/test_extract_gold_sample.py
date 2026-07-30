@@ -7,13 +7,14 @@ Cách chạy:
 """
 import os
 import sys
+import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bs4 import BeautifulSoup
 
 from extract_gold_sample import ExtractError, clean_body, expected_url_for, extract_fields, render_txt, _clean_text
-from label_helper import analyze
+from label_helper import analyze, parse_sample
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -73,6 +74,36 @@ def test_missing_node_detail() -> None:
     except ExtractError:
         raised = True
     check("thiếu div.node-detail -> raise ExtractError", raised, True)
+
+
+def test_clean_body_errors() -> None:
+    """clean_body phải raise ExtractError, không được ghi ra body rỗng/thiếu âm thầm."""
+    # Thiếu hẳn div.field-body trong div.node-detail
+    soup_missing = BeautifulSoup(
+        '<div class="node-detail"><h1 class="field-title">t</h1></div>',
+        "html.parser",
+    )
+    try:
+        clean_body(soup_missing)
+        raised_missing = False
+    except ExtractError:
+        raised_missing = True
+    check("thiếu div.field-body -> raise ExtractError", raised_missing, True)
+
+    # div.field-body có mặt nhưng render ra rỗng sau khi làm sạch (finding 1a:
+    # kịch bản thân bài do JavaScript chèn, HTML lưu tĩnh không có nội dung)
+    soup_empty = BeautifulSoup(
+        '<div class="node-detail">'
+        '<div class="field-body"><div id="lazy"></div></div>'
+        "</div>",
+        "html.parser",
+    )
+    try:
+        clean_body(soup_empty)
+        raised_empty = False
+    except ExtractError:
+        raised_empty = True
+    check("div.field-body rỗng sau khi làm sạch -> raise ExtractError", raised_empty, True)
 
 
 def test_clean_text_with_nbsp() -> None:
@@ -197,6 +228,37 @@ def test_render() -> None:
     )
 
 
+def test_render_roundtrip() -> None:
+    """render_txt -> label_helper.parse_sample phải đọc lại đúng cả 4 field + body.
+
+    Bẫy nếu không có ca này: đổi thứ tự/tên field trong render_txt vẫn để
+    test_render xanh (nó chỉ so khớp thứ tự key), nhưng parse_sample sẽ đọc
+    field đó ra None và label_helper báo "CHƯA THU" cho mọi bài - hỏng âm thầm.
+    """
+    soup = load_soup()
+    fields = extract_fields(soup)
+    body_html, _, _ = clean_body(soup)
+    text = render_txt(fields, body_html)
+
+    fd, tmp_path = tempfile.mkstemp(suffix=".txt")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        parsed = parse_sample(tmp_path)
+    finally:
+        os.remove(tmp_path)
+
+    check("round-trip title", parsed.get("title"), fields["title"])
+    check("round-trip url_alias", parsed.get("url_alias"), fields["url_alias"])
+    check(
+        "round-trip meta_description",
+        parsed.get("meta_description"),
+        fields["meta_description"],
+    )
+    check("round-trip summary", parsed.get("summary"), fields["summary"])
+    check("round-trip body không rỗng", bool(parsed.get("body", "").strip()), True)
+
+
 def _b6_codes(body: str) -> list:
     """Chạy analyze() trên body cho trước, trả về các mã B6 tìm được."""
     _, codes = analyze({"body": body})
@@ -230,14 +292,35 @@ def test_b6() -> None:
     body_html, _, _ = clean_body(soup)
     check("fixture G-001 không có B6", _b6_codes(body_html), [])
 
+    # alt nháy đơn có nội dung -> KHÔNG tính là thiếu (finding 2a)
+    check(
+        "alt nháy đơn có nội dung -> không B6",
+        _b6_codes("<img alt='mô tả ảnh'>"),
+        [],
+    )
+    # alt không quote có nội dung -> KHÔNG tính là thiếu
+    check(
+        "alt không quote có nội dung -> không B6",
+        _b6_codes("<img alt=mota>"),
+        [],
+    )
+    # alt nháy đơn rỗng -> vẫn tính là thiếu
+    check(
+        "alt nháy đơn rỗng vẫn tính là thiếu",
+        _b6_codes("<img alt=''>"),
+        ["B6 (1/1 ảnh thiếu alt text)"],
+    )
+
 
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
+    test_clean_body_errors()
     test_clean_text_with_nbsp()
     test_extract_fields_with_nbsp()
     test_body()
     test_render()
+    test_render_roundtrip()
     test_b6()
 
     failed = False
