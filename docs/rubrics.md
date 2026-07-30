@@ -116,6 +116,8 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 
 **Ghi chú SEO10:** annotation guideline xếp "ít internal link nhưng vẫn có" vào nhóm C (không bắt buộc sửa), trong khi rubric vẫn trừ điểm ở mức `1`. Đây là chênh lệch **có chủ đích** giữa điểm số và nhãn - xem mục 7.
 
+**Ghi chú SEO9 - phạm vi hiện tại KHÔNG khớp với mã lỗi B6:** rubric ghi `image_alt` (số ít, một ảnh đại diện) vì đó là những gì `drupal_client.py` đọc được từ `relationships.field_image`. Nhưng mã lỗi B6 trong `annotation-guideline.md` v1.2 xét **mọi ảnh trong `body`**. Hai bên đo hai tập ảnh khác nhau, nên Recall/F1 của SEO9 sẽ lệch có hệ thống nếu calibrate trước khi sửa. Đây **không** phải chênh lệch có chủ đích như SEO10 - đây là hạng mục còn thiếu, phải xong trước E5. Bằng chứng đo được (2026-07-30, bài `node/7` có 1 ảnh trong body thiếu alt lọt lưới hoàn toàn): `docs/evaluation-plan.md` mục 4.5 điều kiện 4.
+
 ---
 
 ## 5. Brand Voice Agent
