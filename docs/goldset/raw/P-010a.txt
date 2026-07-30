@@ -1,0 +1,145 @@
+title: Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện (Phần 2)
+url_alias: /vn_vi/huong-dan-su-dung-ung-dung-vinfast
+meta_description: Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện: quản lý pin và sạc, điều hoà, theo dõi hành trình, đặt dịch vụ sửa chữa - bảo dưỡng và khám phá tiện ích thông minh.
+summary: Với xe ô tô điện VinFast, người dùng sẽ được trải nghiệm những tiện ích thông minh và kết nối các dịch vụ thuộc hệ sinh thái VinFast. Tìm hiểu hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện trên thiết bị di động, khách hàng có thể tận hưởng những chuyến đi thuận lợi và dễ dàng hơn với chiếc xe xanh của mình.
+---
+<p> </p>
+<p>Sau khi <a href="https://vinfastauto.com/vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1">cài đặt hồ sơ và các tác vụ cá nhân trên Ứng dụng VinFast</a>, người dùng cần kích hoạt các tính năng, tiện ích trên xe để đảm bảo quá trình sử dụng thuận tiện. Ứng dụng VinFast cho ô tô điện sẽ theo dõi trạng thái của xe, mức pin theo thời gian thực, bảo dưỡng - sửa chữa, hỗ trợ tiện ích thông minh giúp quá trình điều khiển xe dễ dàng, thuận lợi hơn. </p>
+<h2>1. Hướng dẫn sử dụng các tính năng trên màn hình trang chủ Ứng dụng VinFast</h2>
+<p> </p>
+<p> </p>
+<p> </p>
+<p> </p>
+<p>Màn hình trang chủ của Ứng dụng VinFast cho phép truy cập các tính năng thường dùng cũng như các tiện ích nâng cao giúp người dùng theo dõi và cập nhật các thông báo, trạng thái của xe, tình trạng sạc pin, truy cập vào Bản đồ, Dịch vụ và Cài đặt.</p>
+<p>13 tính năng trên màn hình trang chủ của Ứng dụng VinFast gồm:</p>
+<ul> <li>VinFast ID</li> <li>Mức pin hiện tại</li> <li>Thông báo</li> <li>Đổi xe</li> <li>Hình ảnh xe</li> <li>Trạng thái của xe</li> <li>Thông tin Pin và Sạc</li> <li>Điều hòa</li> <li>Chế độ người lạ</li> <li>Tên xe và số ODO</li> <li>Bản đồ</li> <li>Dịch vụ</li> <li>Cài đặt</li> </ul>
+<img alt="Giao diện trang chủ Ứng dụng VinFast cho ô tô điện"/>
+<p>Hướng dẫn sử dụng ứng dụng VinFast cho ô tô điện với 13 tính năng cho phép truy cập nhanh chóng tại giao diện trang chủ</p>
+<h3><strong>1.1. Tính năng đổi xe VinFast</strong></h3>
+<p>Điểm đặc biệt của Ứng dụng VinFast là, người dùng có thể quản lý cùng lúc từ 2 xe điện trở lên với tính năng “Đổi xe VinFast”. Tuy nhiên, người dùng lưu ý, tác vụ này chỉ xuất hiện khi tài khoản được gắn với 2 xe trở lên, mang lại sự thuận tiện cho người dùng. Theo đó, để “Đổi xe VinFast”, người dùng thực hiện theo hướng dẫn sau:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm vào biểu tượng đổi xe trên góc bên phải màn hình;</li> <li><strong>Bước 2</strong>: Chọn xe muốn đổi, ứng dụng sẽ cập nhật thông tin và dữ liệu của xe vừa chọn để hiển thị.</li> </ul>
+<img alt="Hướng dẫn sử dụng ứng dụng VinFast cho ô tô điện - tính năng đổi xe"/>
+<p>Tính năng đổi xe chỉ hiển thị trên Ứng dụng VinFast khi tài khoản được gắn từ 2 xe trở lên</p>
+<h3>1.2. Cách xem thông báo màn hình xe VinFast</h3>
+<p>Để xem thông báo về hoạt động xe, giao dịch và thông tin chung, người dùng thực hiện theo 2 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm vào biểu tượng thông báo trên góc phải màn hình;</li> <li><strong>Bước 2</strong>: Chọn xem các loại thông báo.</li> </ul>
+<img alt="Cách dùng Ứng dụng VinFast cho ô tô điện - Cách xem thông tin"/>
+<p>2 bước xem thông báo trên Ứng dụng VinFast ô tô điện</p>
+<h2>2. Hướng dẫn chi tiết sử dụng ứng dụng VinFast cho ô tô điện với VinFast ID</h2>
+<p>VinFast ID là tính năng giúp người dùng quản lý tài khoản VinFast bao gồm: Thông tin cá nhân, thông tin tài khoản, phương thức thanh toán và các xe đang sử dụng.</p>
+<ul> <li><strong>Hồ sơ ứng dụng:</strong> Người dùng có thể xem/thay đổi thông tin tài khoản và mật khẩu: <ul> <li>Thông tin chung: Bao gồm các thông tin cá nhân như Họ tên, Số điện thoại và địa chỉ Email mà chủ xe đã đăng ký với VinFast.</li> <li>Mật khẩu và bảo mật: Tại đây, người dùng có thể thay đổi mật khẩu và bật tính năng mở khóa bằng vân tay/Face ID thay cho việc nhập mật khẩu truyền thống.</li> </ul> </li> </ul>
+<img alt="Cách thay đổi thông tin tài khoản và mật khẩu trên Ứng dụng VinFast cho ô tô điện"/>
+<p>Hồ sơ ứng dụng cho phép người dùng xem/thay đổi thông tin tài khoản và mật khẩu</p>
+<ul> <li><strong>Quản lý thanh toán:</strong> Cho phép quản lý thông tin thẻ, theo dõi hóa đơn: <ul> <li>Phương thức thanh toán: Người dùng có thể thêm/xóa các loại thẻ và đặt thẻ thanh toán chính.</li> <li>Danh sách hóa đơn: Người dùng theo dõi hóa đơn đã và chưa thanh toán tại đây, có thể tìm kiếm nhanh bằng cách lọc theo tên dịch vụ.</li> </ul> </li> </ul>
+<img alt="Cách quản lý thông tin thẻ và theo dõi hóa đơn trên Ứng dụng ô tô điện VinFast"/>
+<p>Quản lý thanh toán cho phép quản lý thông tin thẻ và theo dõi hóa đơn</p>
+<ul> <li><strong>Xe của tôi:</strong> <ul> <li>Người dùng có thể truy cập vào quản lý người lái bằng cách bấm vào xem chi tiết một xe hoặc vào từ Cài đặt. </li> <li>Chọn “Quản lý người lái”.</li> </ul> </li> </ul>
+<img alt="Cách theo dõi và cập nhật các thông tin quản lý xe trên ứng dụng ô tô điện VinFast"/>
+<p>Xe của tôi cho phép theo dõi và cập nhật các thông tin quản lý xe</p>
+<p>Cụ thể, thông tin chi tiết của xe bao gồm: </p>
+<ul> <li>Dữ liệu lái xe và các thông tin cơ bản của xe;</li> <li>Các vai trò trên xe gồm Chủ xe - Lái chính - Lái phụ;</li> <li>Gửi yêu cầu chuyển quyền điều khiển xe qua ứng dụng cho người khác; </li> <li>Thêm hoặc xóa tài khoản người lái khác.</li> </ul>
+<img alt="Cách quản lý vai trò trên xe và theo dõi dữ liệu lái xe trên ứng dụng ô tô điện VinFast"/>
+<p>Thông tin chi tiết của xe trong mục Xe của tôi giúp người dùng quản lý vai trò trên xe và theo dõi dữ liệu lái xe</p>
+<h2>3. Hướng dẫn sử dụng ứng dụng VinFast cho ô tô điện - quản lý tính năng pin và sạc</h2>
+<p>Tính năng Pin và Sạc trên Ứng dụng VinFast cho phép người dùng <a href="https://vinfastauto.com/vn_vi/cach-kiem-tinh-trang-pin-tren-ung-dung-vinfast">kiểm tra mức pin hiện tại, theo dõi trạng thái sạc</a> theo thời gian thực. Điều này giúp người dùng thuận tiện trong quản lý mức pin, tính toán quãng đường đi được còn lại và theo dõi thời gian sạc pin từ xa. </p>
+<img alt="Hướng dẫn theo dõi tính năng pin và sạc qua ứng dụng VinFast cho ô tô điện"/>
+<p>Tính năng pin và sạc bao gồm các tính năng liên quan tới pin để người dùng tiện theo dõi</p>
+<p>Người dùng bấm vào biểu tượng (...) để xem:</p>
+<ul> <li>Lịch sạc - các lịch sạc pin sắp diễn ra;</li> <li>Thuê pin: Thông tin gói pin đang sử dụng và lịch sử dùng pin hàng tháng;</li> <li>Lịch sử sạc - lịch sử các phiên sạc.</li> </ul>
+<p>Cách truy cập các tiện ích trong tính năng Sạc và Pin trên xe ô tô điện VinFast:</p>
+<ul> <li><strong>Kiểm tra trạng thái sạc</strong>: <ul> <li>Truy cập Pin và Sạc ở trang chủ;</li> <li>Hiển thị mức pin hiện tại của xe và danh sách trạm sạc gần nhất với vị trí hiện tại sẽ hiển thị để người dùng theo dõi, lựa chọn sử dụng dịch vụ.</li> </ul> </li> </ul>
+<img alt="Hướng dẫn theo dõi tình trạng sạc qua ứng dụng VinFast cho ô tô điện"/>
+<p>Theo dõi tình trạng pin và các trạm sạc gần nhất qua Ứng dụng VinFast</p>
+<h3>3.1. Kiểm tra trạng thái sạc:</h3>
+<p>Khi bắt đầu cắm sạc, trên ứng dụng sẽ hiển thị các trạng thái sau: </p>
+<ul> <li>Trạng thái khi xe đang được sạc;</li> <li>Trạng thái lỗi khi sạc;</li> <li>Trạng thái đã sạc xong.</li> </ul>
+<img alt="Hướng dẫn theo dõi và thông báo tình trạng khi đang sạc qua ứng dụng VinFast cho ô tô điện"/>
+<p>Theo dõi và thông báo tình trạng khi đang sạc xe trên Ứng dụng VinFast</p>
+<h3>3.2. Thanh toán phí sạc pin:</h3>
+<p>Người dùng tiến hành thanh toán phí sạc bằng truy cập vào VinFast ID và chọn Danh sách hóa đơn. Tại đây sẽ hiển thị phí sạc pin của lần sạc gần nhất, người dùng thanh toán bằng phương thức đã cài đặt từ trước.</p>
+<img alt="Hướng dẫn thanh toán chi phí sạc pin qua ứng dụng VinFast cho ô tô điện"/>
+<p>Người dùng có thể thanh toán chi phí sạc pin ngay trên Ứng dụng ô tô điện VinFast</p>
+<h3>3.3. Cách dùng ứng dụng VinFast cho ô tô điện để<strong> tra lịch sử sạc </strong></h3>
+<ul> <li><strong>Bước 1</strong>: Vào mục Lịch sử sạc để kiểm tra thông tin những lần sạc pin trước đó;</li> <li><strong>Bước 2</strong>: Tại đây, người dùng có thể xem lại danh sách lịch sử các phiên sạc theo thời gian;</li> <li><strong>Bước 3</strong>: Để xem chi tiết thời gian, địa điểm sạc, chi phí sạc, phụ phí sạc (nếu có), người dùng bấm chọn vào một lịch sạc cụ thể.</li> </ul>
+<img alt="Hướng dẫn kiểm tra thông tin các lần sạc qua ứng dụng VinFast"/>
+<p>Kiểm tra thông tin chi tiết những lần sạc pin trước trên Ứng dụng VinFast</p>
+<h3><strong>3.4. Cách chọn gói thuê pin</strong>:</h3>
+<p>Khách hàng mua xe sẽ được cung cấp 2 gói thuê pin Linh hoạt và Cố định để người dùng lựa chọn.<br/> </p>
+<img alt="Hướng dẫn chọn gói thuê pin thông qua ứng dụng VinFast ô tô điện"/>
+<p>Người dùng có thể chọn gói thuê pin phù hợp với nhu cầu sử dụng thông qua Ứng dụng VinFast</p>
+<h3><strong>3.5. Kiểm tra lịch sử dùng pin:</strong></h3>
+<p>Người dùng có thể kiểm tra thông tin các gói pin hàng tháng đã sử dụng bao gồm Thông tin gói thuê bao, số km đi được và Phí thuê pin.</p>
+<img alt="Hướng dẫn kiểm tra lịch sử dùng pin qua ứng dụng VinFast"/>
+<p>Kiểm tra lịch sử dùng pin gồm thông tin gói thuê bao, số km đi được và phí thuê pin</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: </p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/phi-sac-xe-dien-vinfast">Phí sạc xe điện VinFast tại trạm sạc công cộng và giá thuê pin</a></li> </ul>
+<h2>4. Cách dùng tính năng điều hoà trong xe qua Ứng dụng VinFast cho ô tô điện</h2>
+<p>Tính năng điều hòa cho phép người dùng theo dõi mức quạt và nhiệt độ thực tế trong xe để điều chỉnh <a href="https://vinfastauto.com/vn_vi/tim-hieu-chi-tiet-ve-he-thong-dieu-hoa-o">hệ thống điều hòa ô tô</a> phù hợp với nhu cầu sử dụng. Để truy cập và sử dụng tính năng này, người dùng thực hiện theo 2 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm chọn tính năng Điều hòa ở trang chủ;</li> <li><strong>Bước 2</strong>: Thông tin chi tiết về tốc độ quạt và nhiệt độ hiện tại trên xe được hiển thị trên màn hình. </li> </ul>
+<img alt="Hướng dẫn theo dõi tính năng điều hòa qua ứng dụng VinFast"/>
+<p>Tính năng điều hòa cho phép người dùng theo dõi mức quạt và nhiệt độ thực tế trong xe</p>
+<h2>5. Hướng dẫn kích hoạt chế độ người lạ trên ứng dụng VinFast</h2>
+<p>Chế độ người lạ đảm bảo các thông tin riêng tư, bảo mật và hạn chế rủi ro cho chủ phương tiện trong trường hợp cho mượn xe. Khi kích hoạt, người sử dụng chỉ có thể lái và bị hạn chế quyền truy cập/điều khiển các tính năng thông minh. </p>
+<p>Chế độ người lạ có thể bật/tắt ở trên xe, sau đó sẽ hiển thị trạng thái trên ứng dụng. Để bật/tắt chế độ này, chủ xe chỉ cần nhập mật khẩu xác nhận trên màn hình xe.</p>
+<img alt="Hướng dẫn sử dụng chế độ người lạ qua ứng dụng VinFast"/>
+<p>Chế độ người lạ giúp đảm bảo quyền riêng tư cho chủ xe</p>
+<h2>6. Hướng dẫn sử dụng bản đồ trên Ứng dụng VinFast cho ô tô điện</h2>
+<p>Tính năng Bản đồ hỗ trợ người dùng định vị tìm xe, tìm Trạm sạc/Xưởng dịch vụ gần nhất và các địa điểm dịch vụ khác như nhà hàng, khách sạn, bãi đỗ xe… Bên cạnh hướng dẫn tìm kiếm trạm sạc ứng dụng cũng gợi ý tuyến đường gần nhất và cung cấp thông tin liên quan đến mức pin của xe khi di chuyển trên lộ trình đó.</p>
+<img alt="Hướng dẫn sử dụng bản đồ trên xe điện qua ứng dụng VinFast cho ô tô điện"/>
+<p>Tính năng bản đồ trên xe điện VinFast hỗ trợ người định vị xe, tìm kiếm trạm sạc,... nhanh chóng</p>
+<h3>6.1. Sách dùng ứng dụng VinFast cho ô tô điện để tìm địa điểm và dẫn đường</h3>
+<p>Để thực hiện tìm kiếm địa điểm và dẫn đường, người điều khiển thực hiện theo 3 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm chọn địa điểm trên thanh gợi ý hoặc gõ vào thanh tìm kiếm/sử dụng giọng nói để tìm địa điểm;</li> <li><strong>Bước 2</strong>: Ứng dụng hiển thị danh sách các địa điểm gần nhất, chọn một địa điểm mong muốn;</li> <li><strong>Bước 3</strong>: Khi tìm kiếm trạm sạc, người dùng có thể xem thông tin các trụ sạc tại trạm cũng như thời gian và mức pin còn lại của xe khi đi tới đó.</li> </ul>
+<img alt="Hướng dẫn tìm kiếm địa điểm và dẫn đường qua ứng dụng ô tô điện VinFast"/>
+<p>Các bước thực hiện tìm kiếm địa điểm và dẫn đường trên Ứng dụng ô tô điện VinFast</p>
+<h3>6.2. Hướng dẫn lưu địa chỉ nhà/công ty/địa điểm yêu thích</h3>
+<p>Để thuận tiện, người dùng có thể lưu địa chỉ nhà, công ty, hoặc những địa điểm yêu thích và thường xuyên lui tới. Để lưu địa chỉ người dùng thực hiện theo 3 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Tìm kiếm địa điểm bằng cách nhập địa chỉ hoặc tìm trên bản đồ; </li> <li><strong>Bước 2</strong>: Xác định vị trí cụ thể;</li> <li><strong>Bước 3</strong>: Lưu địa điểm và dễ dàng tìm kiếm trong những lần sau.</li> </ul>
+<img alt="Hướng dẫn lưu địa điểm yêu thích qua ứng dụng ô tô điện VinFast"/>
+<p>3 bước lưu địa điểm yêu thích để dễ dàng tìm kiếm trong những lần sau</p>
+<h3>6.3. Hướng dẫn sử dụng ứng dụng VinFast định vị xe - thiết bị - lịch sử lái </h3>
+<p>Khi cho mượn hoặc thuê xe người dùng có thể định vị xe, thiết bị hoặc theo dõi lịch sử lái. Bên cạnh đó, tính năng này cũng giúp người dùng dễ dàng tìm xe ở bãi đỗ đông đúc. Cụ thể như sau:</p>
+<ul> <li><strong>Định vị xe:</strong> Xác định vị trí của xe ở thời điểm hiện tại. Người dùng có thể xem hình ảnh vị trí xung quanh xe và xem đường đi tới vị trí đó.</li> <li><strong>Định vị thiết bị:</strong> Xác định vị trí của thiết bị người dùng đang sử dụng.</li> <li><strong>Lịch sử hành trình: </strong>Chọn khoảng thời gian để xem lịch sử các chuyến đi.</li> </ul>
+<img alt="Hướng dẫn lưu định vị xe và thiết bị qua ứng dụng VinFas"/>
+<p>Định vị xe/thiết bị để dễ dàng theo dõi trong trường hợp cho thuê/mượn xe</p>
+<h3>6.4. Hướng dẫn dùng ứng dụng VinFast lên kế hoạch lái xe</h3>
+<p>Tính năng lên kế hoạch lái xe giúp người dùng lên lộ trình di chuyển thuận tiện, phù hợp với dung lượng pin còn lại của xe hoặc gợi ý quãng đường có đi qua các trạm sạc nếu cần nạp năng lượng. Để lên kế hoạch lái xe, người dùng thực hiện theo 2 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Khi chọn điểm đến mà mức pin xe không đủ để hoàn thành chuyến đi, ứng dụng sẽ tự động đề xuất lộ trình di chuyển đi qua các trạm sạc gần nhất trên đường;</li> <li><strong>Bước 2</strong>: Người dùng có thể đặt chỗ để sạc xe, kiểm tra tuyến đường và chia sẻ lộ trình trên xe.</li> </ul>
+<img alt="Hướng dẫn lên kế hoạch lộ trình qua ứng dụng VinFast cho ô tô điện"/>
+<p>Lên kế hoạch lái xe giúp người dùng có lộ trình di chuyển hợp lý với mức pin và địa điểm các trạm sạc</p>
+<h2>7. Hướng dẫn cài đặt trên ứng dụng VinFast: đặt lịch sửa chữa - bảo dưỡng</h2>
+<p>Ứng dụng VinFast cho phép người dùng <a href="https://shop.vinfastauto.com/vn_vi/dat-lich-dich-vu-bao-duong.html">đặt lịch bảo dưỡng</a>, sửa chữa hay gọi cứu hộ khi cần thiết. Ngoài ra, ứng dụng cũng cảnh báo các lỗi của xe để người dùng kịp thời sửa chữa. Sau khi đặt lịch, VinFast sẽ gửi báo giá cho khách hàng để xem xét và xác nhận để tiến hành dịch vụ.</p>
+<h3>7.1. Cách đặt lịch sửa chữa, bảo dưỡng</h3>
+<p>Chủ xe có thể đặt lịch sửa chữa, bảo dưỡng thông qua Ứng dụng VinFast. Theo đó thông qua ứng dụng này, người dùng có thể theo dõi chu kỳ bảo dưỡng hay dự toán chi phí thay thế phụ kiện, gợi ý trung tâm dịch vụ gần nhất và thanh toán chi phí dịch vụ, mang lại sự thuận tiện tối đa cho người dùng.</p>
+<p>Để đặt lịch bảo dưỡng, người dùng thực hiện qua 5 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm Đặt dịch vụ;</li> <li><strong>Bước 2</strong>: Chọn loại dịch vụ và thêm mô tả chi tiết về dịch vụ. Tùy theo vấn đề của xe, VinFast sẽ cung cấp một trong hai loại hình sửa chữa là sửa tại Xưởng hoặc lưu động với dịch vụ <a href="https://vinfastauto.com/vn_vi/vinfast-trien-khai-dich-vu-sua-chua-luu-dong-chinh-hang-dau-tien-tai-viet-nam">Mobile Service</a> để khách hàng lựa chọn;</li> </ul>
+<ul> <li><strong>Bước 3</strong>: Nếu đặt lịch tại Xưởng dịch vụ VinFast, ứng dụng sẽ hiển thị danh sách địa điểm các địa điểm phù hợp với khách. Trường hợp lựa chọn Mobile Service, khách hàng nhập địa chỉ của mình và VinFast sẽ kiểm tra xem dịch vụ có khả dụng tại địa điểm đó không;</li> <li><strong>Bước 4</strong>: Chọn thời gian mong muốn;</li> <li><strong>Bước 5</strong>: Kiểm tra lại thông tin và xác nhận đặt lịch.</li> </ul>
+<img alt="Hướng dẫn đặt lịch sửa chữa bảo dưỡng qua ứng dụng ô tô điện VinFast"/>
+<img alt="Hướng dẫn đặt lịch sửa chữa bảo dưỡng qua ứng dụng ô tô điện VinFast"/>
+<h3>7.2. Cách kiểm tra quá trình sửa chữa, bảo dưỡng qua Ứng dụng VinFast</h3>
+<p>Người dùng có thể theo dõi quá trình sửa chữa, <a href="https://vinfastauto.com/vn_vi/nhung-hang-muc-can-quan-tam-khi-bao-duong-o-to-dien">bảo dưỡng</a> xe ngay trên Ứng dụng VinFast. Thông tin về bảng báo giá, thời gian dự kiến hoàn thành, hóa đơn đều được hiển thị đầy đủ, rõ ràng. Sau khi hoàn thành, người dùng có thể thanh toán hóa đơn thông qua ứng dụng hoặc thanh toán trực tiếp khi nhận xe.</p>
+<p>Các bước kiểm tra quá trình sửa chữa, bảo dưỡng:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Dịch vụ, chọn Đặt dịch vụ, chọn lịch hẹn sắp tới để theo dõi quá trình sửa chữa, bảo dưỡng;</li> <li><strong>Bước 2</strong>: Xem chi tiết dịch vụ sau khi đặt lịch. Người dùng có thể hủy hoặc đặt lịch vào thời gian khác trước khi lịch hẹn diễn ra;</li> <li><strong>Bước 3</strong>: VinFast sẽ gửi bảng báo giá dịch vụ. Người dùng kiểm tra thông tin bảng báo giá và chọn Đồng ý để tiến hành dịch vụ. Nếu chọn dịch vụ Mobile Service, cần xác nhận báo giá tối thiểu 4 tiếng trước lịch hẹn đã đặt;</li> <li><strong>Bước 4</strong>: Khi xe đang sửa chữa, ứng dụng sẽ hiển thị thời gian hoàn thành dự kiến;</li> <li><strong>Bước 5</strong>: Khi dịch vụ hoàn thành, người dùng có thể xem hoá đơn và thanh toán bằng cách: <ul> <li>Thanh toán ngay qua ứng dụng;</li> <li>Thanh toán khi nhận xe tại xưởng;</li> <li>Thanh toán trực tiếp cho kỹ thuật viên VinFast.</li> </ul> </li> <li><strong>Bước 6</strong>: Xem lại các lịch hẹn trong mục Lịch sử dịch vụ.</li> </ul>
+<img alt="Hướng dẫn đặt lịch dịch vụ qua ứng dụng VinFast cho ô tô điện"/>
+<h3>7.3. Cách theo dõi tiến trình hỗ trợ trên đường</h3>
+<p>Chủ xe có thể tạo yêu cầu cứu hộ, VinFast sẽ cung cấp mã dịch vụ để sử dụng trong trường hợp xe gặp sự cố. Các bước tạo yêu cầu hỗ trợ như sau: </p>
+<ul> <li><strong>Bước 1</strong>: Chọn tạo yêu cầu để tạo yêu cầu cứu hộ;</li> <li><strong>Bước 2</strong>: Nhập các thông tin cần thiết và gửi yêu cầu;</li> <li><strong>Bước 3</strong>: Khi gửi yêu cầu thành công, VinFast cung cấp mã dịch vụ để khách hàng sử dụng trong trường hợp cần thiết;</li> <li><strong>Bước 4</strong>: Xem lại các lịch hẹn trong mục Lịch sử dịch vụ.</li> </ul>
+<img alt="Các tạo yêu cầu hỗ trợ sự cố qua ứng dụng VinFast cho ô tô điện"/>
+<p>Các bước tạo yêu cầu hỗ trợ đề phòng trường hợp xe gặp sự cố</p>
+<p>Các bước theo dõi quá trình hỗ trợ trên đường:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Dịch vụ, sau đó chọn Hỗ trợ trên đường và bấm vào chi tiết yêu cầu để theo dõi tiến trình;</li> <li><strong>Bước 2</strong>: Xem chi tiết yêu cầu. Người dùng có thể hủy yêu hỗ trợ cầu trong quá trình tiếp nhận này.</li> </ul>
+<img alt="Hướng dẫn tạo yêu cầu hỗ trợ sự cố qua ứng dụng VinFast ô tô điện"/>
+<p>Các bước theo dõi quá trình hỗ trợ trên đường nếu gặp sự cố </p>
+<h3>7.4. Hướng dẫn sử dụng ứng dụng VinFast cho ô tô điện để kiểm tra các cảnh báo lỗi</h3>
+<p>Trong quá trình vận hành xe VinFast, nếu phát hiện có lỗi, hệ thống điều khiển sẽ gửi thông báo cho người dùng. Truy cập vào ứng dụng để xem thông tin chi tiết về lỗi hoặc đường link tới bài viết phân tích cụ thể. Tính năng này hỗ trợ xử lý sự cố từ xa, đảm bảo người lái luôn vận hành an toàn.</p>
+<p>Các bước kiểm tra cảnh báo lỗi:</p>
+<ul> <li><strong>Bước 1</strong>: Khi hệ thống chẩn đoán tự động phát hiện ra lỗi của xe, ứng dụng sẽ gửi thông báo tới người dùng. Hoặc có thể truy cập vào mục Cảnh báo lỗi để kiểm tra;</li> <li><strong>Bước 2</strong>: Các lỗi sẽ chia thành 3 nhóm và hiển thị trên màn hình ứng dụng.</li> </ul>
+<img alt="Hướng dẫn kiểm tra cảnh báo lỗi trong quá trình vận hành xe trên ứng dụng VinFast"/>
+<p>2 bước kiểm tra cảnh báo lỗi trong quá trình vận hành xe</p>
+<p>Thông qua các hướng dẫn sử dụng ứng dụng VinFast cho ô tô điện trên đây khách hàng có thể sử dụng các tiện ích một cách nhanh chóng như nạp pin tại trạm sạc, tìm kiếm địa điểm và lên kế hoạch hành trình, đặt lịch bảo dưỡng xe định kỳ,... Quá trình vận hành xe sẽ trở nên dễ dàng hơn bao giờ hết, đồng thời, khách hàng sẽ được tận hưởng những hành trình hứng khởi, thoải mái nhất cùng xe ô tô điện của VinFast.</p>
+<p></p>
+<p>Để trải nghiệm <a href="https://vinfastauto.com/vn_vi/ung-dung-vinfast-cho-o-to-dien">ứng dụng VinFast</a> với nhiều tính năng ưu việt này, người dùng có thể <a href="https://shop.vinfastauto.com/vn_vi/car-vfe34.html">đặt cọc mua xe VinFast VF e34</a> hoặc <a href="https://shop.vinfastauto.com/vn_vi/car-vf8.html">VinFast VF 8</a> và <a href="https://shop.vinfastauto.com/vn_vi/car-vf9.html">VF 9</a> ngay hôm nay để trở thành khách hàng tiên phong sở hữu những mẫu xe ô tô điện thương hiệu Việt.</p>
+<p>Để tìm hiểu thêm thông hoặc cần hỗ trợ tư vấn về các sản phẩm và dịch vụ của VinFast vui lòng liên hệ với chúng tôi:</p>
+<ul> <li>Tổng đài tư vấn: 1900 23 23 89.</li> <li>Email chăm sóc khách hàng: <a href="support.vn@vinfastauto.com">[email protected]</a></li> </ul>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: </p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/bao-duong-xe-vinfast-dinh-ky">Bảo dưỡng xe VinFast: Các bộ phận cần kiểm tra định kỳ</a></li> <li><a href="https://vinfastauto.com/vn_vi/cai-dat-xe-vf-e34">Hướng dẫn sử dụng ứng dụng cài đặt xe VF e34 chi tiết</a></li> </ul>

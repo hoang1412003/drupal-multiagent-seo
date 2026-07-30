@@ -1,0 +1,78 @@
+title: Ứng dụng VinFast cho ô tô điện: Tính năng, lợi ích, cách sử dụng
+url_alias: /vn_vi/ung-dung-vinfast-cho-o-to-dien
+meta_description: Ứng dụng VinFast do đội ngũ VinFast phát triển giúp chủ phương tiện có thể dễ dàng kiểm soát ô tô điện từ xa chỉ với một vài thao tác trên điện thoại di động.
+summary: Ứng dụng VinFast giúp chủ phương tiện có thể dễ dàng kiểm soát xe ô tô điện từ xa chỉ với một vài thao tác trên điện thoại thông minh. Tham khảo bài viết sau để hiểu Ứng dụng VinFast là gì và tìm hiểu hoạt động của ứng dụng VinFast trên xe ô tô điện chi tiết hơn.
+---
+<p>Phần mềm hỗ trợ lái xe ô tô VinFast có 3 nhóm chức năng chính là quản lý thông tin, điều khiển xe và dịch vụ thông minh. Chủ phương tiện có thể kiểm soát tình trạng xe chỉ sau một vài thao tác.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm:</p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1">Hướng dẫn cài đặt Ứng dụng VinFast cho ô tô điện (Phần 1)</a></li> <li><a href="https://vinfastauto.com/vn_vi/huong-dan-su-dung-ung-dung-vinfast">Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện (phần 2)</a></li> </ul>
+<h2>1. Giới thiệu ứng dụng VinFast cho ô tô điện</h2>
+<p>Ứng dụng VinFast cho ô tô điện được nghiên cứu và phát triển giúp người dùng có thể kết nối và điều khiển ô tô từ bằng thiết bị di động. Người dùng có thể đăng nhập thông tin tài khoản, quản lý phần mềm, quản lý các dữ liệu cá nhân và vai trò người lái,... giúp cho quá trình điều khiển xe dễ dàng hơn. </p>
+<p>Bên cạnh đó, ứng dụng VinFast còn có nhiều tính năng thông minh, phù hợp với nhu cầu của nhiều người, từ đó nâng cao trải nghiệm người dùng. </p>
+<h2>2. Quản lý ô tô điện trong tầm tay qua ứng dụng VinFast</h2>
+<p>Một số tính năng quản lý ô tô điện được tích hợp trên ứng dụng VinFast như: Tự động định vị; Quản lý và theo dõi tình trạng sạc pin theo thời gian thực; Tự động cảnh báo xâm nhập; Quản lý người lái; Nhận diện sự cố va chạm.</p>
+<h3>2.1 Tự động định vị dễ dàng tìm kiếm xe</h3>
+<p>Bằng <a href="https://vinfastauto.com/vn_vi/huong-dan-cach-su-dung-thiet-bi-dinh-vi-gps-tren-xe-o-to-dien">tính năng định vị thông minh</a>, ứng dụng VinFast giúp chủ phương tiện nhanh chóng xác định vị trí đỗ dừng xe, tiết kiệm được thời gian tìm kiếm xe. </p>
+<img alt="Tính năng định vị GPS trên phần mềm VinFast giúp chủ phương tiện nhanh chóng tìm ra vị trí đỗ dừng xe, địa điểm trạm sạc pin gần nhất"/>
+<p>Tính năng định vị GPS trên ứng dụng VinFast giúp chủ phương tiện nhanh chóng tìm ra vị trí đỗ dừng xe, địa điểm trạm sạc pin gần nhất</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/huong-dan-cach-su-dung-thiet-bi-dinh-vi-gps-tren-xe-o-to-dien">Hướng dẫn cách sử dụng thiết bị định vị GPS trên xe ô tô điện</a></p>
+<h3>2.2 Quản lý và theo dõi tình trạng sạc pin theo thời gian thực</h3>
+<p><a href="https://vinfastauto.com/vn_vi/cach-kiem-tinh-trang-pin-tren-ung-dung-vinfast">Ứng dụng VinFast sẽ cảnh báo khi dung lượng pin thấp</a> và nhắc người dùng nhanh chóng sạc hoặc đổi pin. Sau khi nhập tên khu vực như quận, tỉnh, hoặc thành phố với <a href="https://vinfastauto.com/vn_vi/he-thong-dieu-khien-bang-giong-noi-tren-o-to-xu-the-cua-tuong-lai">công nghệ điều khiển bằng giọng nói</a>, hệ thống sẽ tự động gợi ý những địa điểm sạc phù hợp và gợi ý lộ trình, giúp người lái không mất tập trung. Ngoài ra, trong quá trình sạc năng lượng, ưu điểm app xe điện VinFast đồng bộ hóa với hệ thống của ô tô điện và thông báo cho người dùng tình trạng sạc pin.</p>
+<img alt="Tính năng theo dõi tình trạng sạc pin"/>
+<p>Tính năng theo dõi tình trạng sạc pin</p>
+<h3>2.3 Tự động cảnh báo xâm nhập trái phép</h3>
+<p>Trong nhiều trường hợp, chủ xe có thể không nghe thấy còi báo động hay đèn nháy có người xâm nhập trái phép vì ở cách xa vị trí xe đang đỗ. Khắc phục được điều này, camera 360 độ sẽ được kích hoạt, ghi lại toàn cảnh hình ảnh và gửi thông tin qua ứng dụng VinFast. Cảm biến chống trộm này là tính năng hữu ích giúp chủ phương tiện <a href="https://vinfastauto.com/vn_vi/canh-bao-chong-trom-thong-minh-uu-viet-tren-vf-e34">nhận được cảnh báo nhanh về mối nguy hiểm</a> và vô hiệu hóa hệ thống lái bằng điện thoại.</p>
+<img alt="Tính năng cảnh báo xâm nhập xe trái phép của ứng dụng VinFast"/>
+<p>Tính năng cảnh báo xâm nhập xe trái phép</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/he-thong-chong-trom-immobilizer-cau-tao-va-nguyen-ly-hoat-dong">Hệ thống chống trộm Immobilizer: Cấu tạo và nguyên lý hoạt động</a></p>
+<h3>2.4 Quản lý người lái trên ứng dụng VinFast ô tô điện</h3>
+<p>Tính năng quản lý người lái trên ứng dụng VinFast cho phép Chủ xe/Người lái chính có thêm tài khoản người lái. Hiểu đơn giản là chia sẻ quyền điều khiển xe qua ứng dụng cho một người khác. Điều này hữu dụng trong trường hợp chủ xe muốn giao xe cho chủ mới hoặc cho người khác mượn xe. </p>
+<p>Trên phần mềm VinFast sẽ cho phép chủ xe được cài đặt Lái chính và Lái phụ. Trong đó:</p>
+<ul> <li><strong>Lái chính</strong>: Tài khoản Lái chính được quản lý bởi chủ xe, được quyền điều khiển và sử dụng xe thông qua Ứng dụng VinFast.</li> <li><strong>Lái phụ</strong>: Tài khoản của Lái phụ được quản lý bởi Lái chính và chủ xe. được quyền điều khiển và sử dụng xe thông qua Ứng dụng VinFast. Tuy nhiên, tài khoản Lái phụ sẽ bị hạn chế ở một số tính năng nhất định. </li> </ul>
+<h3>2.5 Nhận diện sự cố va chạm, tự động đề xuất và gọi cứu hộ khẩn cấp</h3>
+<p>Emergency Call System là một hệ thống liên lạc không dây tự động liên hệ khẩn cấp tới trung tâm cứu hộ khi xe gặp tai nạn giao thông nghiêm trọng. Tính năng eCall trong ứng dụng VinFast giúp hạn chế thương vong cho những hành khách trên xe nhờ rút ngắn thời gian tìm kiếm cứu hộ.</p>
+<p>Hiện nay các mẫu xe điện của VinFast đều được được <a href="https://vinfastauto.com/vn_vi/ecall-giai-phap-tu-dong-lien-he-khi-co-su-co">trang bị hệ thống eCall</a> có khả năng kết nối với điện thoại thông minh theo tiêu chuẩn châu Âu. Ngoài cứu hộ y tế, chủ phương tiện còn có thể kích hoạt tính năng này khi xe gặp sự cố về động cơ, pin sạc hay lốp xe khi di chuyển để nhận hỗ trợ kịp thời từ nhân viên cứu hộ.</p>
+<img alt="Tính năng gọi cứu hộ khẩn cấp trên phần mềm xe điện VinFast"/>
+<p>Tính năng gọi cứu hộ khẩn cấp trên phần mềm xe điện VinFast</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: </p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/gia-cuu-ho-o-to-dien-vinfast">Giá cứu hộ ô tô điện VinFast và lợi ích khi sử dụng dịch vụ</a></li> <li><a href="https://vinfastauto.com/vn_vi/nhung-luu-y-tai-xe-can-biet-khi-goi-cuu-ho-o-to">Những lưu ý chủ xe cần nắm rõ khi gọi cứu hộ ô tô</a></li> </ul>
+<h2>3. Tính năng tra cứu ứng dụng VinFast cho ô tô điện</h2>
+<p>Tính năng tra cứu app VinFast cho ô tô điện cho phép người dùng có thể tra cứu các thông tin về ô tô điện của chủ xe. Đồng thời báo cáo lịch sử xe và thói quen của người lái. </p>
+<h3>3.1 Tra cứu tất tần tật thông tin về ô tô điện của chủ xe</h3>
+<p>Tính năng này được hiểu như cẩm nang hướng dẫn sử dụng phương tiện cho người dùng. Thông qua việc tải ứng dụng VinFast và kết nối với ô tô, người dùng tra cứu từ khoá và ứng dụng sẽ gợi ý các thông tin liên quan về xe như cách dùng, lưu ý… hoặc các chính sách của VinFast. Để tối ưu trải nghiệm thì người dùng có thể sử dụng tính năng bằng các chức năng hỗ trợ tìm kiếm bằng giọng nói. </p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cong-nghe-nhan-dien-giong-noi-tren-xe-vf-e34">Công nghệ nhận diện giọng nói trên xe VinFast VF e34</a></p>
+<h3>3.2 Báo cáo lịch sử xe và thói quen lái theo tuần hoặc tháng</h3>
+<p>Tính năng của ứng dụng VinFast dành cho ô tô điện là khả năng lưu trữ lịch sử hành trình xe đã di chuyển. Những địa điểm xe đã đỗ dừng, chặng đường đã đi sẽ được ghi nhớ lại giống như một cuốn nhật ký ghi chép tự động.</p>
+<img alt="Tính năng thống kê lịch sử hoạt động trên phần mềm VinFast giúp người dùng theo dõi địa điểm xe đã đỗ dừng, chặng đường đã đi"/>
+<p>Tính năng thống kê lịch sử hoạt động giúp người dùng theo dõi những địa điểm xe đã đỗ dừng, chặng đường đã đi</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/dien-toan-dam-may-va-ung-dung-trong-cong-nghiep-o-to">Điện toán đám mây và ứng dụng trong tương lai ngành ô tô điện</a></p>
+<h2>4. Điều hướng chỉ đường tìm kiếm trạm sạc và Showroom gần nhất</h2>
+<p>Khác với những mẫu xe ô tô sử dụng <a href="https://vinfastauto.com/vn_vi/gps-la-gi">định vị GPS</a> để tìm ra phương án di chuyển tới một địa điểm nhất định, ưu điểm ứng dụng VinFast là tổng hợp các dữ liệu về lộ trình đường đi, điều kiện giao thông, thông số pin, <a href="https://vinfastauto.com/vn_vi/tram-sac-xe-dien-vinfast-tren-toan-quoc">địa điểm trạm sạc pin gần nhất</a> và Showroom,... giúp tối ưu thời gian. Tham khảo thêm bài viết hướng dẫn thực hiện <a href="https://vinfastauto.com/vn_vi/tinh-nang-len-ke-hoach-hanh-trinh-tren-VF-e34">lên kế hoạch hành trình bằng ứng dụng thông minh</a> trên phần mềm xe điện VinFast..</p>
+<img alt="Tính năng lên lộ trình đường đi trên phần mềm vinfast giúp tối ưu thời gian di chuyển và tiết kiệm nhiên liệu"/>
+<p>Tính năng lên lộ trình đường đi giúp tối ưu thời gian di chuyển và tiết kiệm nhiên liệu</p>
+<h2>5. Quản lý đặt lịch bảo dưỡng ngay trên điện thoại</h2>
+<p>Hệ thống xe sẽ thực hiện thống kê và cập nhật những thông số kỹ thuật, lịch sử chuyến đi, tình trạng pin của xe từ đó gợi ý và nhắc <a href="https://shop.vinfastauto.com/vn_vi/dat-lich-dich-vu-bao-duong.html">lịch bảo dưỡng định kỳ</a>. Thông tin được đồng bộ trên ứng dụng VinFast, nhờ đó chủ phương tiện có thể biết được chu kỳ bảo dưỡng của linh kiện hay dự toán chi phí những loại nào cần thay thế, gợi ý địa điểm trung tâm dịch vụ gần nhất, đặt lịch hẹn và thanh toán tiện lợi.</p>
+<img alt="Tính năng quản lý lịch bảo dưỡng trên app xe điện vinfast hỗ trợ người dùng dự toán chi phí"/>
+<p>Tính năng quản lý lịch bảo dưỡng hỗ trợ người dùng dự toán chi phí những loại nào cần thay thế, gợi ý địa điểm trung tâm dịch vụ gần nhất</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/tim-hieu-cach-dat-lich-bao-duong-xe-vinfast-online">Tìm hiểu cách đặt lịch bảo dưỡng xe VinFast online</a></p>
+<h2>6. Điều khiển xe ô tô không giới hạn qua ứng dụng VinFast</h2>
+<p>Với khả năng kết nối nhanh chóng đồng bộ với mọi trạng thái, người dùng có thể dễ dàng hơn trong việc cập nhật phần mềm và quản lý, sử dụng các hệ thống trên ô tô điện.</p>
+<h3>6.1 Kết nối nhanh chóng đồng bộ mọi trạng thái</h3>
+<p>Ứng dụng VinFast kết nối và đồng bộ thông tin nhờ công nghệ trí tuệ nhân tạo (AI) tích hợp trên xe ô tô điện. Người dùng có thể <a href="https://vinfastauto.com/vn_vi/thong-so-ky-thuat-o-dien-vinfast-vf-e34-chi-tiet-nhat">dễ dàng theo dõi tình trạng của xe</a> trên điện thoại thông minh như mức năng lượng pin, số km quãng đường đã di chuyển, hành trình trong một khoảng thời gian nhất định,… Thông tin về các trạm sạc VinFast luôn được đồng bộ cả trên màn hình ô tô và ứng dụng VinFast, rất dễ dàng theo dõi dù ở bất kỳ vị trí nào.</p>
+<img alt="Ứng dụng VinFast kết nối và đồng bộ thông tin nhờ công nghệ trí tuệ nhân tạo"/>
+<p>Ứng dụng VinFast kết nối và đồng bộ thông tin nhờ công nghệ trí tuệ nhân tạo (AI) tích hợp trên xe ô tô điện </p>
+<h3>6.2 Cập nhật phần mềm xe chỉ với một chạm nhẹ</h3>
+<p>Chủ phương tiện tiết kiệm nhiều thời gian hơn, không cần tìm đến đại lý hay các xưởng dịch vụ mà có thể tự cài đặt phần mềm từ xa cho xe ô tô điện bằng ứng dụng VinFast.</p>
+<img alt="Tính năng cập nhật phần mềm từ xa qua phần mềm miễn phí FOTA và thu phí SOTA"/>
+<p>Tính năng cập nhật phần mềm từ xa qua phần mềm miễn phí FOTA và thu phí SOTA</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/xe-dien-co-kha-nang-tu-dong-cap-nhat-phan-mem-o-to-nhu-smartphone">Xe điện có khả năng tự động cập nhật phần mềm ô tô như smartphone</a></p>
+<h3>6.3 Giới hạn thời gian hoạt động xe</h3>
+<p>Tính năng này giúp cho chủ xe quản lý được thời gian sử dụng xe qua ứng dụng VinFast. Điều này khá hữu ích trong việc chủ xe cho thuê hoặc cho người khác mượn xe. Theo đó, nếu như xe có thời gian hoạt động vượt quá cho phép theo cài đặt, thì chủ xe sẽ nhận được thông báo. </p>
+<h3>6.4 Điều chỉnh tính năng điều hoà </h3>
+<p>Tính năng này cho phép người dùng sử dụng hệ thống điều hòa được dễ dàng và tiện lợi hơn. Theo đó, chủ xe có thể theo dõi mức quạt và nhiệt độ thực trong xe để điều chỉnh mức độ phù hợp với nhu cầu của người ngồi trong xe. </p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cach-su-dung-dieu-hoa-xe-o-to-vua-mat-vua-tiet-kiem-nhien-lieu">Cách sử dụng điều hòa xe ô tô vừa mát vừa tiết kiệm nhiên liệu</a><br/> <br/> Hiện nay các mẫu xe điện của VinFast đều cho phép người dùng quản lý và sử dụng xe thông qua ứng dụng VinFast. Khách hàng <a href="https://shop.vinfastauto.com/vn_vi/car-vfe34.html">đặt mua VF e34</a> và <a href="https://shop.vinfastauto.com/vn_vi/car-vf8.html">đặt cọc VF 8</a>, <a href="https://shop.vinfastauto.com/vn_vi/car-vf9.html">VF 9</a> online ngay để được trải nghiệm các công nghệ hiện đại, tính năng mạnh mẽ và thông minh được tích hợp trên xe.</p>
+<p>Những khách hàng đã đặt cọc xe điện VinFast VF 8 trước ngày 6/4/2022, có thể liên hệ Showroom để bổ sung cọc và ký hợp đồng chính thức. Hoặc truy cập <a href="https://shop.vinfastauto.com/vn_vi/ev-deposit">website</a> để <a href="https://vinfastauto.com/vn_vi/tra-cuu-dat-coc-bo-sung-vinfast-vf-8-online">bổ sung cọc VF 8 trực tuyến</a> một cách nhanh chóng. </p>
+<p>Khi có nhu cầu tìm hiểu hoặc sở hữu ô tô điện VinFast quý khách có thể tham khảo thêm thông tin tại website hoặc nhận tư vấn từ chúng tôi:</p>
+<ul> <li>Tổng đài tư vấn: 1900 23 23 89</li> <li>Email chăm sóc khách hàng: <a href="support.vn@vinfastauto.com">[email protected]</a></li> </ul>
+<p>&gt;&gt;&gt; Tìm hiểu thêm:</p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/cac-ung-dung-hay-cho-o-to">Các ứng dụng kết nối điện thoại với ô tô hữu ích, dễ sử dụng</a></li> <li><a href="https://vinfastauto.com/vn_vi/cai-dat-xe-vf-e34">Hướng dẫn sử dụng ứng dụng cài đặt xe VF e34 chi tiết</a></li> </ul>

@@ -1,0 +1,44 @@
+title: So sánh xe điện và xe xăng về chi phí vận hành
+url_alias: /vn_vi/so-sanh-chi-phi-van-hanh-xe-dien-va-xe-xang
+meta_description: So sánh xe điện và xe xăng về chi phí vận hành như giá xăng, phí thuê và sạc pin xe máy điện, ô tô điện, hình thức nào kiệm tiền hơn cho chủ xe?
+summary: Nhiên liệu hóa thạch khan hiếm, giá xăng dầu tăng cao khiến người tiêu dùng dành sự quan tâm tới xe điện. Tìm hiểu chi tiết so sánh xe điện và xe xăng về chi phí vận hành để trả lời cho câu hỏi liệu chi phí vận hành xe điện có thật sự rẻ hơn xe xăng?
+---
+<p>Thực tế, một số kết quả về chi phí bảo dưỡng khi <a href="https://vinfastauto.com/vn_vi/so-sanh-chi-phi-van-hanh-xe-dien-va-xe-xang"><strong>so sánh xe điện và xe xăng</strong></a> cho thấy, xe điện có chi phí vận hành khá tiết kiệm. Không chỉ vậy, chi phí bảo hành, bảo dưỡng của dòng xe này cũng được cho là tối ưu hơn bởi cấu tạo đơn giản hơn các dòng xe sử dụng động cơ đốt trong.</p>
+<img alt="so sánh chi phí vận hành xe điện và xe xăng"/>
+<em>Xe điện không chỉ thân thiện với môi trường mà còn tiết kiệm chi phí vận hành</em>
+<h2>1. So sánh xe điện và xe xăng: ô tô </h2>
+<p>Để so sánh xe ô tô điện và xe xăng về chi phí vận hành phụ thuộc nhiều yếu tố khác nhau. Tuy nhiên, có thể so sánh một cách tương đối dựa theo mức tiêu thụ trung bình của các xe có cùng phân khúc.</p>
+<p>Giả sử, mức tiêu hao nhiên liệu trung bình của xe xăng hạng C là 7,8 lít/100km. Công thức tính chi phí nhiên liệu tiêu thụ của 1 chiếc xe xăng cho quãng đường di chuyển 500km như sau:</p>
+<p> Giá xăng x 7,8 x 5 = Chi phí tiêu thụ</p>
+<p>Tính theo giá xăng ở thời điểm tháng 3/2022 cho quãng đường 500km, chi phí nhiên liệu cho 1 chiếc xe xăng hạng C, cụ thể như sau:</p>
+<table> <tr> <td> <p>Loại xăng sử dụng</p> </td> <td> <p>Đơn giá (VNĐ/lít)</p> </td> <td> <p>Chi phí nhiên liệu cho quãng đường 500km (VNĐ)</p> </td> </tr> <tr> <td> <p>Xăng RON 95-V</p> </td> <td> <p>30.320</p> </td> <td> <p>1.182.480</p> </td> </tr> <tr> <td> <p>Xăng RON 95-III</p> </td> <td> <p>29.820</p> </td> <td> <p>1.162.980</p> </td> </tr> <tr> <td> <p>Xăng E5 RON 92-II</p> </td> <td> <p>28.980</p> </td> <td> <p>1.130.220</p> </td> </tr> </table>
+<p><em>(Giá xăng dầu theo giá bán lẻ của Petrolimex tại vùng 1 ngày 17/3/2022)</em></p>
+<p>Trong khi đó, ví dụ cụ thể ô tô điện hạng C <a href="https://shop.vinfastauto.com/vn_vi/car-vfe34.html">VinFast VF e34</a> có công suất tiêu thụ là 13,4 kWh/100km. Tính toán theo giá điện bậc 5 do Bộ Công Thương công bố ngày 20/3/2019 là 3.117,4 đồng/kWh (đã bao gồm VAT), chi phí sạc xe điện cho quãng đường 500km là:</p>
+<p> 13,4 x 3.117,4 x 5 = 208.866 đồng</p>
+<p>Bên cạnh đó, thay vì mua pin kèm theo xe, VinFast áp dụng <a href="https://vinfastauto.com/vn_vi/gia-thue-pin-vf-e34">chính sách thuê pin</a> với gói 657.500 đồng cho quãng đường di chuyển 500km. Như vậy, tổng chi phí sử dụng ô tô điện VF e34 cho quãng đường 500km là:</p>
+<p> 657.500 + 208.839 = 866.339 đồng</p>
+<p>Với 2 ví dụ cụ thể, khách hàng có thể dễ dàng nhận thấy chi phí vận hành ô tô điện phần nào tiết kiệm hơn, đặc biệt là trong thời điểm xăng tăng giá.</p>
+<p>&gt;&gt;&gt; Xem thêm: </p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/so-sanh-chi-phi-mua-xe-o-to-dien-so-voi-xe-xang">So sánh chi phí mua xe ô tô điện so với xe chạy xăng</a></li> <li><a href="https://vinfastauto.com/vn_vi/o-to-dien-va-o-to-xang-co-gi-khac-nhau">Ô tô điện và ô tô xăng có gì khác nhau?</a></li> </ul>
+<p>Đặc biệt, khi chọn mua ô tô điện VinFast, khách hàng có cơ hội tiếp cận <a href="https://vinfastauto.com/vn_vi/chinh-sach-cho-thue-pin-va-doi-pin-o-to-dien-vinfast-nhieu-uu-dai">các gói thuê bao pin tiết kiệm</a> với nhiều lợi ích như tối ưu giá xe, tiết kiệm được chi phí vận hành, không phải chịu rủi ro về chất lượng pin. Chính sách thuê pin của VinFast được xây dựng trên nguyên tắc đảm bảo tổng chi phí thuê và sạc hàng tháng của xe điện VinFast luôn thấp hơn chi phí xe xăng cùng phân khúc. Thay vì điều chỉnh giá thuê bao pin tương ứng với giá xăng, dầu và giá điện thay đổi hàng năm, VinFast áp dụng cố định mức phí thuê pin trong suốt vòng đời sản phẩm cho tất cả các xe bán ra trong năm 2022 và 2023.</p>
+<p>Bên cạnh đó, VinFast còn triển khai nhiều ưu đãi hấp dẫn khi khách hàng đặt cọc mua các dòng ô tô điện thông minh VF e34, VF 8 và VF 9. Trước 6/4/2022, khách hàng <a href="https://vinfastauto.com/vn_vi/dat-coc-VF8-va-VF9-nhan-uu-dai">đặt cọc 2 mẫu xe VinFast VF 8 và VinFast VF 9</a> sẽ được nhận ưu đãi lên đến 250 triệu đồng.</p>
+<p>Riêng đối với VinFast VF 8, khách hàng đặt cọc từ ngày 7/4/2022 được sử dụng Voucher Vinhomes (không định danh) để thanh toán. Nếu tổng mệnh giá voucher được thanh toán lớn hơn 150 triệu đối với VF 8 Eco và 200 triệu đối với VF 8 Plus, khách hàng sẽ được VinFast hoàn lại khoản tiền có giá trị đúng bằng phần giá trị voucher vượt quá. Chính sách thanh toán và hoàn tiền độc đáo này được áp dụng song song với chính sách thanh toán bằng voucher “Sống Xanh” và chính sách “Thu cũ đổi mới”.</p>
+<img alt="Đặt cọc VinFast VF 8 và VF 9"/>
+<em>Đặt cọc VinFast VF 8 và VF 9 nhận voucher lên đến 250 triệu đồng, áp dụng đến 6/4/2022</em>
+<h2>2. So sánh xe điện và xe xăng: xe máy</h2>
+<p>Khi so sánh xe máy điện và xe xăng, trung bình một chiếc xe máy xăng sẽ tiêu thụ khoảng 2,5 lít xăng cho quãng đường di chuyển là 100km. Với giá xăng như đã nêu ở trên (khoảng 30.000 đồng/lít) thì <a href="https://vinfastauto.com/vn_vi/1-lit-xang-xe-may-di-duoc-bao-nhieu-km">chi phí vận hành xe máy xăng trong 1km</a> là:</p>
+<p> (30.000 x 2,5) / 100 = 750 đồng</p>
+<p>Trong khi đó, với xe máy điện có bình 22Ah sẽ tiêu tốn khoảng 3 số điện cho quãng đường di chuyển 80km. Lấy giá trung bình 1 số điện là 3.117,4 đồng (như đã nêu ở trên), chi phí di chuyển trong 1km của xe máy điện sẽ là:</p>
+<p> (3117,4 x 3) / 80 = 116,9 đồng</p>
+<p>Từ đó cho thấy, chi phí vận hành xe máy điện có phần tiết kiệm hơn. Trong thời điểm giá xăng trong nước đang tăng mạnh, xe máy điện được xem là một lựa chọn tối ưu.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/so-sanh-xe-may-dien-va-xe-may-xang-chi-phi-su-dung">So sánh chi phí sử dụng xe máy điện và xăng khách quan nhất</a></p>
+<p>Hiện nay, <a href="https://vinfastauto.com/vn_vi/chinh-sach-thue-bao-pin-lfp-moi-cho-xe-may-dien">chính sách thuê pin xe máy điện của VinFast</a> được đánh giá là ưu việt với <a href="https://vinfastauto.com/vn_vi/vinfast-se-phu-song-toan-quoc-he-thong-tram-sac-xe-dien-trong-nam-2021">hệ thống trạm sạc phủ rộng </a>cả nước. Ngoài ra, chính sách này cũng giúp người dùng tiết kiệm một khoản chi phí vận hành đáng kể và giảm thiểu nỗi lo về chất lượng pin trong suốt quá trình sử dụng. </p>
+<img alt="So sánh chi phí vận hành xe điện và xe xăng với chính sách thuê pin xe máy điện VinFast"/>
+<em>Chính sách thuê pin xe điện VinFast giúp khách hàng tiết kiệm chi phí vận hành xe điện</em>
+<p>VinFast áp dụng một gói thuê bao cố định với mức phí 350.000 đồng/tháng, (không giới hạn quãng đường di chuyển) cho các dòng xe Klara S (áp dụng gói thuê 02 pin), Theon, Vento và các xe thế hệ mới (Theon S, Vento S, Feliz S, Klara S 2022, Evo200 &amp; Evo200 Lite). Khách hàng mua xe máy điện thế hệ mới trước ngày 22/10/2022 và mua xe Klara S (áp dụng gói thuê 02 pin), Theon, Vento trước ngày 16/12/2022 có quyền lựa chọn chuyển sang chính sách thuê pin mới hoặc giữ nguyên chính sách cũ.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/phi-sac-xe-dien-vinfast">Phí sạc xe điện VinFast tại trạm sạc công cộng và giá thuê pin</a></p>
+<p>Sau khi <strong>so sánh xe điện và xe xăng</strong> về chi phí vận hành, có thể thấy sử dụng xe điện VinFast giúp khách hàng tối ưu chi phí vận hành khi dự báo giá xăng dầu còn tăng phi mã trong tương lai. Hãy nhanh tay <a href="https://shop.vinfastauto.com/vn_vi/dat-coc-o-to-dien-vinfast.html">đặt cọc xe điện VinFast</a> thông minh, đẳng cấp của VinFast ngay từ hôm nay để được nhận những ưu đãi cùng chính sách thuê pin ưu việt!</p>
+<p>Để có thêm thông hoặc cần hỗ trợ tư vấn về các sản phẩm xe điện của VinFast vui lòng liên hệ với chúng tôi:</p>
+<ul> <li>Tổng đài tư vấn: 1900 23 23 89.</li> <li>Email chăm sóc khách hàng: <a href="/cdn-cgi/l/email-protection">[email protected]</a> </li> </ul>
+<p>&gt;&gt;&gt; Tìm hiểu thêm:</p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/so-sanh-o-to-dien-va-o-to-xang">So sánh ô tô điện so với xe xăng và những hiểu lầm phổ biến</a></li> <li><a href="https://vinfastauto.com/vn_vi/so-sanh-o-to-dien-va-o-to-xang">So sánh ô tô điện và ô tô xăng cùng những hiểu lầm phổ biến</a></li> <li><a href="https://vinfastauto.com/vn_vi/so-sanh-o-to-dien-vf-e34-va-xe-xang">So sánh ô tô điện VF e34 và xe xăng chi tiết nhất</a></li> </ul>

@@ -1,0 +1,18 @@
+title: Hướng dẫn cách tìm trạm sạc bằng App VinFast E-Scooter
+url_alias: /vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter
+meta_description: Biết cách tìm trạm sạc bằng App VinFast E-Scooter sẽ giúp bạn xử lý sự cố hết xe hết pin khi đang vận hành trên đường.
+summary: Cách tìm trạm sạc bằng App VinFast E-Scooter rất đơn giản và tiện lợi. Ứng dụng này giúp bạn nhanh chóng tìm được trạm sạc gần nhất khi gặp tình huống như sắp hết điện và cần tiếp năng lượng.
+---
+<h2>1. Giới thiệu App VinFast E-Scooter</h2>
+<p><a href="https://shop.vinfastauto.com/vn_vi/vinfast-bike.html">Các dòng xe máy điện hiện đại của thương hiệu VinFast</a> có thể kết nối với smartphone thông qua ứng dụng VinFast E-Scooter. Thông qua ứng dụng, người dùng có thể quản lý phương tiện một cách dễ dàng. </p>
+<p>VinFast E-Scooter sẽ cập nhật cho người dùng các thông tin liên quan đến thời lượng pin, lịch sử hành trình, quãng đường,... và đặc biệt là tìm kiếm trạm sạc gần bạn nhất cực nhanh chóng.</p>
+<img alt="Thông qua App VinFast E-Scooter bạn có thể tìm trạm sạc gần nhất"/>
+<p>Thông qua ứng dụng E-Scooter bạn có thể tìm trạm sạc gần nhất</p>
+<h2>2. Cách tìm trạm sạc bằng App VinFast E-Scooter</h2>
+<p>Sau khi tải ứng dụng trên nền tảng App Store hoặc CH Play và có tài khoản VinFast E-Scooter kết nối xe máy điện VinFast, bạn có thể dễ dàng tìm kiếm trạm sạc gần mình nhất. Cụ thể: </p>
+<ul> <li>Bước 1: Mở <a href="https://vinfastauto.com/vn_vi/gioi-thieu-app-vinfast-e-scooter-cho-xe-may-dien-tinh-nang-loi-ich-cach-su-dung">App VinFast E-Scooter</a>. </li> <li>Bước 2: Chọn "Dịch vụ". Sau đó chọn "Trạm sạc".</li> <li>Bước 3: Hệ thống sẽ định vị vị trí của xe và hiển thị vị trí các điểm sạc gần bạn nhất. Thông tin được hiển thị dưới dạng bản đồ và danh sách các trạm sạc. (Lưu ý, bạn cần cấp quyền truy cập vị trí cho ứng dụng).</li> <li>Bước 4: Chọn điểm sạc gần bạn nhất và di chuyển đến theo chỉ dẫn của bản đồ.</li> <li>Bước 5: Đến trạm sạc và tiến hành sạc pin cho xe. </li> </ul>
+<h2>3. Hướng dẫn thực hiện sạc xe máy điện VinFast tại trạm sạc</h2>
+<p>Để sạc pin cho xe máy điện VinFast tại hệ thống các trạm sạc của VinFast, các bạn có thể tham khảo các bước sau: </p>
+<ul> <li>Bước 1: Lấy phích cắm từ bộ sạc để cắm vào ổ điện đang trống tại trụ sạc. (Bạn nên cắm sạc ở những trụ sạc có báo đèn led màu xanh lá cây sáng)</li> <li>Bước 2: Mở ứng dụng VinFast E-Scooter. Chọn mục "Dịch vụ". Chọn quét QR Code. </li> <li>Bước 3: Đưa camera điện thoại đến vị trí mã QR của trụ sạc để kết nối. </li> <li>Bước 4: Chọn ổ cắm tương ứng với ổ cắm sạc bạn chọn. </li> <li>Bước 5: Bạn có thể chọn hình thức sạc. Chọn trải nghiệm (miễn phí). </li> <li>Bước 6: Bắt đầu sạc: Ổ cắm được cấp điện, đèn LED trên ổ cắm sáng đỏ. </li> <li>Bước 7: Kết thúc sạc: Ấn dừng sạc trên App hoặc rút phích cắm ra khỏi ổ cắm. Một lưu ý nhỏ, khi sạc đầy hệ thống sẽ tự động ngắt điện. </li> <li>Bước 8: Xem tổng kết giao dịch sạc trên ứng dụng. </li> </ul>
+<img alt="Hướng dẫn cách tìm trạm sạc bằng App VinFast E-Scooter"/>
+<p>Cách tìm trạm sạc bằng App VinFast E-Scooter rất đơn giản, chi phí sạc pin xe cũng hoàn toàn miễn phí. Hiện nay <a href="https://vinfastauto.com/vn_vi/tim-hieu-he-sinh-thai-tram-sac-xe-dien-vinfast-tren-toan-quoc">hệ sinh thái trạm sạc VinFast được trải dài khắp toàn quốc</a> cùng dịch vụ cứu hộ pin linh động hỗ trợ khẩn cấp khi khách hàng gặp sự cố hết pin giữa đường. Do vậy, bạn có thể yên tâm sử dụng, lựa chọn thay thế xe xăng và các loại xe điện thông thường trên thị trường.</p>

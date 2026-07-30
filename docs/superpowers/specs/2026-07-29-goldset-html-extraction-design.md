@@ -256,6 +256,8 @@ Viết thành `scripts/test_extract_gold_sample.py`, cùng dạng script kiểm 
 
 `G-001.html` được commit vào repo làm fixture để test chạy lại được; các file HTML còn lại không commit (dung lượng lớn, không cần cho test).
 
+> **Đảo quyết định 2026-07-30 — commit TOÀN BỘ 33 file HTML.** Câu trên viết khi mới có 1 file, cân nhắc duy nhất là dung lượng repo. Sau khi thu đủ 33 bài, lý do quan trọng hơn xuất hiện: **các file này không tái tạo được**. Site chặn truy cập tự động (403) nên không tải lại bằng script được, và nội dung trang thay đổi theo thời gian — ngay trong phiên thu thập, URL của `P-005a` (`/vn_vi/huong-dan-dich-vu-sac-o-to-dien-vinfast`) đã trả 404 và phải thay bằng bài khác. Mất file HTML gốc nghĩa là gold set không dựng lại được và mọi số liệu F1/Kappa ở Sprint 3 mất khả năng kiểm chứng độc lập. Dung lượng thật đo được: 4.1 MB cho cả 33 file — không đáng kể. Đây là đánh đổi giữa 4 MB và khả năng tái lập của deliverable quan trọng nhất dự án.
+
 ## 9. Việc người dùng phải làm
 
 `labels.csv` có 33 dòng nhưng chỉ **30 URL duy nhất** — 3 URL sinh 2 biến thể perturbation:

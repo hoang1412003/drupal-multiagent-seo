@@ -121,6 +121,10 @@ def clean_body(soup: BeautifulSoup) -> CleanBodyResult:
 
     Thẻ bị unwrap (không nằm trong KEEP_TAGS) cũng được đếm lại và trả về
     thay vì âm thầm mất - bài nào có nhiều <h5>/<br>... người dùng cần biết.
+
+    Tương tự với thẻ nhúng (iframe/script/style/noscript): xoá cả nhánh nhưng
+    vẫn báo cáo. Video YouTube loại đi là đúng (không phải chữ tác giả), nhưng
+    iframe cũng có thể chứa nội dung thật nên không được im lặng.
     """
     node = soup.select_one("div.node-detail")
     body = node.select_one("div.field-body") if node else None
@@ -129,8 +133,22 @@ def clean_body(soup: BeautifulSoup) -> CleanBodyResult:
 
     removed = []
 
+    # Thẻ nhúng/kịch bản: xoá cả nhánh. Phải BÁO CÁO chứ không xoá âm thầm -
+    # phần lớn là video YouTube (không phải chữ tác giả, loại đi là đúng),
+    # nhưng iframe cũng có thể chứa nội dung thật (bản đồ, bảng nhúng). Không
+    # in ra thì nội dung biến mất mà không ai biết.
+    embedded = Counter()
     for tag in body.find_all(["script", "style", "iframe", "noscript"]):
+        if tag.name == "iframe":
+            src = tag.get("src") or tag.get("data-src") or ""
+            key = "iframe (youtube)" if "youtube" in src.lower() else "iframe"
+        else:
+            key = tag.name
+        embedded[key] += 1
         tag.decompose()
+    for name, count in sorted(embedded.items()):
+        removed.append(f"{name} x{count}")
+
     for comment in body.find_all(string=lambda s: isinstance(s, Comment)):
         comment.extract()
 
