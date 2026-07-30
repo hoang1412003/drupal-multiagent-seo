@@ -28,7 +28,7 @@
 | `url_alias` | `/vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai` |
 | `meta_description` bắt đầu bằng | `Kinh nghiệm chạy ô tô điện VinFast đường dài:` |
 | `summary` bắt đầu bằng | `Nhờ trang bị công nghệ pin tiên tiến` |
-| body sau làm sạch | `h2=3, h3=10, p=32, img=5, a=16` |
+| body sau làm sạch | `h2=3, h3=10, p=31, img=5, a=16` |
 | Số thứ bị xoá | 1 khối `div.widget-toc` (13 link) + 1 thẻ `<a>` bọc banner CTA |
 
 ---
@@ -303,7 +303,7 @@ def test_body() -> None:
     # Số đo đã xác minh bằng parser trên fixture thật (spec mục 3.1)
     check("body h2", kept["h2"], 3)
     check("body h3", kept["h3"], 10)
-    check("body p", kept["p"], 32)
+    check("body p", kept["p"], 31)
     check("body img (đã loại banner CTA)", kept["img"], 5)
     check("body a (đã loại 13 link mục lục + 1 thẻ bọc CTA)", kept["a"], 16)
 
