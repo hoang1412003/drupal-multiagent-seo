@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bs4 import BeautifulSoup
 
-from extract_gold_sample import ExtractError, extract_fields
+from extract_gold_sample import ExtractError, extract_fields, _clean_text
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -74,9 +74,51 @@ def test_missing_node_detail() -> None:
     check("thiếu div.node-detail -> raise ExtractError", raised, True)
 
 
+def test_clean_text_with_nbsp() -> None:
+    """Test _clean_text trực tiếp với chuỗi chứa ký tự \xa0 (&nbsp;).
+
+    Ca test này xác minh _clean_text thật sự thay \xa0 bằng dấu cách thường
+    và gộp mọi chuỗi khoảng trắng, không chỉ dựa trên fixture G-001.
+    """
+    # Input: chuỗi có \xa0 (non-breaking space) và nhiều whitespace liên tiếp
+    input_str = "Tiêu\xa0đề   có\n\nnbsp"
+    result = _clean_text(input_str)
+    # Kỳ vọng: \xa0 → dấu cách, whitespace gộp → 1 dấu cách
+    expected = "Tiêu đề có nbsp"
+    check("_clean_text xoá \\xa0 và gộp whitespace", result, expected)
+
+
+def test_extract_fields_with_nbsp() -> None:
+    """Test extract_fields với HTML tối giản có &nbsp; thật trong h1.field-title.
+
+    Ca test này xác minh đường đi extract_fields -> _clean_text xử lý được nbsp,
+    không chỉ dựa trên fixture G-001 (fixture không chứa nbsp trong title).
+    """
+    # HTML tối giản có đúng cấu trúc, với &nbsp; trong h1
+    html = """
+    <html>
+    <body>
+    <div class="node-detail">
+        <h1 class="field-title">Kinh nghiệm&nbsp;chạy&nbsp;xe</h1>
+        <div class="field-desc">Thử nghiệm thực tế</div>
+    </div>
+    </body>
+    </html>
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    fields = extract_fields(soup)
+
+    # Kỳ vọng: &nbsp; đã được thay → "Kinh nghiệm chạy xe"
+    expected_title = "Kinh nghiệm chạy xe"
+    check("extract_fields xoá \\xa0 trong h1.field-title", fields["title"], expected_title)
+    check("title không còn \\xa0 (qua extract_fields)", "\xa0" in fields["title"], False)
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
+    test_clean_text_with_nbsp()
+    test_extract_fields_with_nbsp()
 
     failed = False
     for name, ok, actual, expected in _results:
