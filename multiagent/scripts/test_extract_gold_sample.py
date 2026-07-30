@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from bs4 import BeautifulSoup
 
 from extract_gold_sample import ExtractError, clean_body, expected_url_for, extract_fields, render_txt, _clean_text
+from label_helper import analyze
 
 FIXTURE = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
@@ -196,6 +197,40 @@ def test_render() -> None:
     )
 
 
+def _b6_codes(body: str) -> list:
+    """Chạy analyze() trên body cho trước, trả về các mã B6 tìm được."""
+    _, codes = analyze({"body": body})
+    return [c for c in codes if c.startswith("B6")]
+
+
+def test_b6() -> None:
+    # Mọi ảnh có alt -> không có B6
+    check(
+        "mọi ảnh có alt -> không B6",
+        _b6_codes('<p>Nội dung</p><img alt="mô tả ảnh"><img alt="mô tả ảnh 2">'),
+        [],
+    )
+    # Có ảnh thiếu alt -> B6, kèm số lượng
+    check(
+        "1/2 ảnh thiếu alt -> B6",
+        _b6_codes('<img alt="có mô tả"><img src="x.png">'),
+        ["B6 (1/2 ảnh thiếu alt text)"],
+    )
+    # alt rỗng cũng tính là thiếu
+    check(
+        "alt rỗng tính là thiếu",
+        _b6_codes('<img alt="">'),
+        ["B6 (1/1 ảnh thiếu alt text)"],
+    )
+    # Bài không có ảnh -> KHÔNG kết luận B6 (không có ảnh không phải lỗi alt)
+    check("bài không ảnh -> không B6", _b6_codes("<p>Chỉ có chữ.</p>"), [])
+
+    # Trên fixture thật: 5 ảnh đều có alt -> không B6
+    soup = load_soup()
+    body_html, _, _ = clean_body(soup)
+    check("fixture G-001 không có B6", _b6_codes(body_html), [])
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
@@ -203,6 +238,7 @@ if __name__ == "__main__":
     test_extract_fields_with_nbsp()
     test_body()
     test_render()
+    test_b6()
 
     failed = False
     for name, ok, actual, expected in _results:

@@ -13,9 +13,13 @@ Script KHÔNG gọi LLM và KHÔNG đọc kết quả AI - gán nhãn phải mù
     title: Hướng dẫn sạc pin ô tô điện VinFast đúng cách
     url_alias: /vn_vi/huong-dan-sac-pin-o-to-dien-vinfast
     meta_description: ?
-    image_alt:
+    summary: Bài viết hướng dẫn các bước sạc pin an toàn...
     ---
-    <nội dung thân bài, HTML hoặc text thuần>
+    <nội dung thân bài, PHẢI là HTML - xem lưu ý dưới>
+
+Body phải giữ nguyên HTML (thẻ <h2>, <img alt>, <a href>). Nếu dán text
+thuần thì script đếm h2 = 0 và kết luận sai mã B9 cho mọi bài dài. Dùng
+scripts/extract_gold_sample.py để sinh file này thay vì gõ tay.
 
 Quy ước 2 giá trị đặc biệt cho các field ngoài body:
     ?        = CHƯA THU (chưa lấy về) -> script báo "chưa thu", không kết luận
@@ -186,18 +190,29 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             codes.append(f"B7 ({'; '.join(flags)})")
         measures.append("  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét")
 
-    # --- B6: image_alt -----------------------------------------------------
-    alt = check("image_alt", fields.get("image_alt"))
-    if alt is not None:
-        if not alt:
-            codes.append("B6 (thiếu alt text)")
-        else:
-            measures.append(f"  image_alt          có ({len(alt)} ký tự)")
-            measures.append("  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét")
-
     # --- B9: cấu trúc body -------------------------------------------------
     body = fields.get("body", "")
     if body.strip():
+        # --- B6: alt text của MỌI ảnh trong body ------------------------
+        # Site thật không có field ảnh đại diện riêng - mọi ảnh nằm trong
+        # body (spec 2026-07-29 mục 3.3), nên B6 xét tất cả ảnh thay vì
+        # một field image_alt đơn lẻ.
+        images = re.findall(r"<img[^>]*>", body, re.IGNORECASE)
+        if images:
+            no_alt = [
+                img for img in images
+                if not re.search(r'\balt\s*=\s*"[^"]+"', img, re.IGNORECASE)
+            ]
+            measures.append(
+                f"  số ảnh             {len(images)} (thiếu alt: {len(no_alt)})"
+            )
+            if no_alt:
+                codes.append(f"B6 ({len(no_alt)}/{len(images)} ảnh thiếu alt text)")
+            else:
+                measures.append("  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét")
+        else:
+            measures.append("  số ảnh             0 (bài không có ảnh - không xét B6)")
+
         plain = strip_html(body)
         words = len(plain.split())
         paragraphs = split_paragraphs(body)
