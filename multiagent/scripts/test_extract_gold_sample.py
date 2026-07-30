@@ -417,6 +417,43 @@ def test_keep_tags_and_br() -> None:
     check("giữ nguyên thẻ <br>", "<br" in body_html, True)
 
 
+def test_embedded_reported() -> None:
+    """Thẻ nhúng bị xoá phải được BÁO CÁO, không mất âm thầm.
+
+    Fixture G-001 không có iframe nào trong body nên phải dựng HTML riêng.
+    Thực tế 33 bài gold set: G-019 có 1 video, P-010a có 4 video - trước khi
+    sửa, chúng biến mất mà không một dòng báo nào.
+    """
+    soup = BeautifulSoup(
+        '<div class="node-detail"><div class="field-body">'
+        "<p>Đoạn văn thật.</p>"
+        '<iframe src="https://www.youtube.com/embed/abc123"></iframe>'
+        '<iframe src="https://example.com/bando"></iframe>'
+        "<script>var x = 1;</script>"
+        "</div></div>",
+        "html.parser",
+    )
+    body_html, removed, _, _, _ = clean_body(soup)
+
+    # Nội dung nhúng phải bị loại khỏi output
+    check("iframe bị xoá khỏi body", "iframe" in body_html, False)
+    check("script bị xoá khỏi body", "<script" in body_html, False)
+    check("chữ thật vẫn còn", "Đoạn văn thật." in body_html, True)
+
+    # ... nhưng phải được báo cáo, và phân biệt được video với iframe khác
+    check(
+        "báo cáo video youtube",
+        any("iframe (youtube) x1" in item for item in removed),
+        True,
+    )
+    check(
+        "báo cáo iframe không phải video (có thể là nội dung thật)",
+        any(item == "iframe x1" for item in removed),
+        True,
+    )
+    check("báo cáo script", any("script x1" in item for item in removed), True)
+
+
 if __name__ == "__main__":
     test_fields()
     test_missing_node_detail()
@@ -429,6 +466,7 @@ if __name__ == "__main__":
     test_b6()
     test_split_sentences_abbreviations()
     test_keep_tags_and_br()
+    test_embedded_reported()
 
     failed = False
     for name, ok, actual, expected in _results:
