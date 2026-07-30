@@ -2,7 +2,9 @@
 
 Danh sách URL thật thu thập từ nguồn công khai, dùng để (1) xây gold set và (2) làm knowledge base cho fact-check. Toàn bộ là nội dung công khai, không có tài liệu nội bộ VF O2O.
 
-**Cách dùng:** site có WAF chặn bot (HTTP 403), nên thu thủ công - mở từng URL, copy nội dung phần thân bài (bỏ header/footer/khối CTA cuối bài - xem architecture.md mục 8.2), lưu lại kèm gán nhãn. Việc đọc từng bài để gán nhãn là bắt buộc, nên thu thủ công không phát sinh chi phí thừa.
+**Cách dùng:** site có WAF chặn bot (HTTP 403), nên thu thủ công theo quy trình sau: mở từng URL trên trình duyệt, `Ctrl+S` chọn **"Webpage, HTML Only"**, lưu vào `docs/goldset/raw_html/<sample_id>.html`, rồi chạy `scripts/extract_gold_sample.py` để bóc tách tự động ra `docs/goldset/raw/<sample_id>.txt`. Việc đọc từng bài để gán nhãn vẫn là bắt buộc, nên thu thủ công không phát sinh chi phí thừa.
+
+**Không copy text thuần.** Copy nội dung bằng chuột từ trình duyệt sẽ mất hết thẻ HTML (`<h2>`, `<img alt>`, `<a href>`), khiến `scripts/label_helper.py` đếm heading = 0 và kết luận sai mã lỗi B9 ("không có h2") cho hầu hết bài dài - hỏng ground truth ngay từ khâu thu thập. Chi tiết xem `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 1.1.
 
 Danh sách này là **ứng viên**, chưa phải gold set cuối. Mục tiêu chốt 30-50 mẫu: ~60% giữ nguyên (nhãn theo chất lượng thật) + ~40% chèn lỗi có chủ đích (perturbation, ground truth biết trước).
 

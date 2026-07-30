@@ -13,15 +13,19 @@ Script KHÔNG gọi LLM và KHÔNG đọc kết quả AI - gán nhãn phải mù
     title: Hướng dẫn sạc pin ô tô điện VinFast đúng cách
     url_alias: /vn_vi/huong-dan-sac-pin-o-to-dien-vinfast
     meta_description: ?
-    image_alt:
+    summary: Bài viết hướng dẫn các bước sạc pin an toàn...
     ---
-    <nội dung thân bài, HTML hoặc text thuần>
+    <nội dung thân bài, PHẢI là HTML - xem lưu ý dưới>
+
+Body phải giữ nguyên HTML (thẻ <h2>, <img alt>, <a href>). Nếu dán text
+thuần thì script đếm h2 = 0 và kết luận sai mã B9 cho mọi bài dài. Dùng
+scripts/extract_gold_sample.py để sinh file này thay vì gõ tay.
 
 Quy ước 2 giá trị đặc biệt cho các field ngoài body:
     ?        = CHƯA THU (chưa lấy về) -> script báo "chưa thu", không kết luận
     (bỏ trống) = ĐÃ KIỂM TRA VÀ KHÔNG CÓ  -> script kết luận là lỗi
 
-Phân biệt này quan trọng: bỏ trống vì lười sẽ tạo ra lỗi B3/B6 giả.
+Phân biệt này quan trọng: bỏ trống vì lười sẽ tạo ra lỗi B3 giả.
 
 Cách chạy:
     .venv\\Scripts\\python.exe scripts\\label_helper.py ..\\docs\\goldset\\raw\\G-001.txt
@@ -47,7 +51,9 @@ REPEAT_THRESHOLD = 3                   # B9: "từ 3 lần trở lên"
 HEADING_REQUIRED_WORDS = 500           # B9
 
 # Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
-_ABBREVIATIONS = ("tp.", "tt.", "vd.", "vs.", "tr.", "st.", "q.", "p.")
+# Không có "st." (Street/Saint, viết tắt tiếng Anh): văn bản cẩm nang tiếng
+# Việt không dùng, và khi so khớp theo hậu tố chuỗi nó khớp nhầm cả "VinFast."
+_ABBREVIATIONS = ("tp.", "tt.", "vd.", "vs.", "tr.", "q.", "p.")
 
 
 def parse_sample(path: str) -> dict:
@@ -105,12 +111,19 @@ def split_sentences(text: str) -> list[str]:
         current += ch
         if ch not in ".!?":
             continue
-        before = text[max(0, i - 4):i + 1].lower()
         after = text[i + 1:i + 2]
         if ch == "." and text[i - 1:i].isdigit() and after.isdigit():
             continue                                  # 3.5
-        if any(before.endswith(a) for a in _ABBREVIATIONS):
-            continue                                  # TP.HCM
+        # So khớp theo TỪ cuối cùng (ranh giới từ = khoảng trắng), không phải
+        # hậu tố chuỗi cố định - tránh khớp nhầm "st." vào cuối "VinFast."
+        # Bỏ ký tự không phải chữ/số ở ĐẦU từ (dấu ngoặc/nháy mở kiểu
+        # "(tp." hay "“tp.") trước khi so khớp, nhưng giữ dấu chấm ở CUỐI vì
+        # _ABBREVIATIONS gồm cả dấu chấm.
+        last_word = re.search(r"(\S+)$", text[:i + 1])
+        if last_word:
+            candidate = re.sub(r"^\W+", "", last_word.group(1)).lower()
+            if candidate in _ABBREVIATIONS:
+                continue                              # TP.HCM, (tp. Thủ Đức)
         if after and after not in " \n":
             continue                                  # dính liền, chưa hết câu
         if after == " " and text[i + 2:i + 3].islower():
@@ -186,18 +199,36 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             codes.append(f"B7 ({'; '.join(flags)})")
         measures.append("  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét")
 
-    # --- B6: image_alt -----------------------------------------------------
-    alt = check("image_alt", fields.get("image_alt"))
-    if alt is not None:
-        if not alt:
-            codes.append("B6 (thiếu alt text)")
-        else:
-            measures.append(f"  image_alt          có ({len(alt)} ký tự)")
-            measures.append("  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét")
-
-    # --- B9: cấu trúc body -------------------------------------------------
+    # --- B6 + B9: đọc từ body -----------------------------------------------
     body = fields.get("body", "")
     if body.strip():
+        # --- B6: alt text của MỌI ảnh trong body ------------------------
+        # Site thật không có field ảnh đại diện riêng - mọi ảnh nằm trong
+        # body (spec 2026-07-29 mục 3.3), nên B6 xét tất cả ảnh thay vì
+        # một field image_alt đơn lẻ.
+        images = re.findall(r"<img[^>]*>", body, re.IGNORECASE)
+        if images:
+            # Nhận cả 3 kiểu quote: alt="...", alt='...', alt=khong-quote.
+            # alt="" và alt='' (rỗng) vẫn phải tính là THIẾU nên không nằm
+            # trong các nhánh trên (mỗi nhánh đều yêu cầu nội dung khác rỗng).
+            no_alt = [
+                img for img in images
+                if not re.search(
+                    r"""\balt\s*=\s*(?:"[^"]+"|'[^']+'|[^\s>"']+)""",
+                    img,
+                    re.IGNORECASE,
+                )
+            ]
+            measures.append(
+                f"  số ảnh             {len(images)} (thiếu alt: {len(no_alt)})"
+            )
+            if no_alt:
+                codes.append(f"B6 ({len(no_alt)}/{len(images)} ảnh thiếu alt text)")
+            else:
+                measures.append("  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét")
+        else:
+            measures.append("  số ảnh             0 (bài không có ảnh - không xét B6)")
+
         plain = strip_html(body)
         words = len(plain.split())
         paragraphs = split_paragraphs(body)
