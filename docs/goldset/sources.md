@@ -38,7 +38,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `BRAND` /vn_vi/luu-y-su-dung-doi-voi-pin-cell-lfp-gotion
 - [ ] `GOLD` /vn_vi/tim-hieu-cac-loai-pin-o-to-dien
 - [ ] `GOLD` /vn_vi/cach-sac-pin-xe-may-dien-vinfast
-- [ ] `PERT` /vn_vi/huong-dan-dich-vu-sac-o-to-dien-vinfast
+- [ ] `PERT` /vn_vi/sac-pin-luu-dong-24-7 <!-- 2026-07-30: URL cũ /vn_vi/huong-dan-dich-vu-sac-o-to-dien-vinfast trả 404, thay bằng bài này (cùng chủ đề dịch vụ sạc) -->
 
 ### 1.3. Bảo dưỡng & chi phí
 - [ ] `BRAND` /vn_vi/bao-duong-o-to-dien
