@@ -28,7 +28,7 @@
 | `url_alias` | `/vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai` |
 | `meta_description` bắt đầu bằng | `Kinh nghiệm chạy ô tô điện VinFast đường dài:` |
 | `summary` bắt đầu bằng | `Nhờ trang bị công nghệ pin tiên tiến` |
-| body sau làm sạch | `h2=3, h3=10, p=31, img=5, a=16` |
+| body sau làm sạch | `h2=3, h3=10, p=36, img=5, a=16` (p đổi từ 31 → 36 ở đợt làm chắc 2026-07-30, xem `docs/superpowers/specs/2026-07-30-goldset-extraction-hardening-design.md` mục D5) |
 | Số thứ bị xoá | 1 khối `div.widget-toc` (13 link) + 1 thẻ `<a>` bọc banner CTA |
 
 ---

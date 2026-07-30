@@ -69,6 +69,8 @@ Số đo trên `div.field-body` của G-001 (bằng parser, không phải regex)
 
 Cách ra số 16: `30 − 13` (link mục lục) `− 1` (chính thẻ `<a>` bọc banner CTA) `= 16`.
 
+> **Cập nhật 2026-07-30:** số thẻ `<p>` sau làm sạch đổi từ 31 thành **36** — chú thích ảnh (`figcaption`) trước đây bị unwrap thành text node trần nên không được tính là đoạn; nay được bọc thành `<p>`. Xem `docs/superpowers/specs/2026-07-30-goldset-extraction-hardening-design.md` mục D5.
+
 **Thẻ cha rỗng phải được dọn theo.** Banner CTA nằm trong `<p><a><img></a></p>`, nên xoá thẻ `<a>` để lại một `<p></p>` rỗng — và nó rơi đúng **dòng đầu tiên** của body, tức thứ đầu tiên người gán nhãn nhìn thấy ở cả 33 file. Vì vậy sau khi xoá CTA phải dọn luôn thẻ cha khi nó trở nên rỗng. Số thẻ `<p>` sau làm sạch vì thế là **31**, không phải 32 (đo trên fixture: đúng 1 thẻ rỗng, không có thẻ rỗng nào khác).
 
 ### 3.2. Bẫy nếu quét ảnh trên toàn trang
