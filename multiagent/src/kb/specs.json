@@ -1,0 +1,45 @@
+[
+  {
+    "model": "VF 9",
+    "content_type": "cam_nang",
+    "langcode": "vi",
+    "specs": {
+      "tam_hoat_dong": "438km (Eco) / 423km (Plus)",
+      "tieu_chuan_do": "cần xác nhận (NEDC/WLTP)"
+    },
+    "source_url": "/vn_vi/thong-so-ky-thuat-vinfast-vf9",
+    "verified": false
+  },
+  {
+    "model": "VF 8",
+    "content_type": "cam_nang",
+    "langcode": "vi",
+    "specs": {
+      "tam_hoat_dong": "420km (Eco) / 400km (Plus)",
+      "tieu_chuan_do": "cần xác nhận (NEDC/WLTP)"
+    },
+    "source_url": "/vn_vi/thong-so-ky-thuat-vf8-kich-thuoc-va-thiet-ke",
+    "verified": false
+  },
+  {
+    "model": "VF 5",
+    "content_type": "cam_nang",
+    "langcode": "vi",
+    "specs": {
+      "tam_hoat_dong": "326km",
+      "tieu_chuan_do": "NEDC"
+    },
+    "source_url": "/vn_vi/thong-so-vf-7",
+    "verified": false
+  },
+  {
+    "model": "Bảo dưỡng định kỳ",
+    "content_type": "cam_nang",
+    "langcode": "vi",
+    "specs": {
+      "chu_ky": "mỗi 12.000km hoặc 1 năm"
+    },
+    "source_url": "/vn_vi/lich-bao-duong-xe-vinfast",
+    "verified": false
+  }
+]

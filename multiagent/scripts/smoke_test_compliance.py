@@ -47,3 +47,21 @@ if __name__ == "__main__":
         f"Thieu: {expected_rules - actual_rules}"
     )
     print(f"PASS: {len(expected_rules)} rule-based rule(s) co mat trong ket qua merge")
+
+    # --- CP3 fact-check: claim VF 8 500km (cong bo that 420km) phai bi bat ---
+    print("\n--- CP3 fact-check ---")
+    fc_fields = {
+        "title": "Đánh giá VF 8",
+        "body": "Với một lần sạc đầy, VinFast VF 8 có thể đi tới 500km.",
+        "meta_description": "",
+    }
+    fc_result = run(fc_fields)
+    fc_flags = [f for f in fc_result["flags"] if "sai lệch" in f["rule"].lower()]
+    print(f"fact-check flags: {fc_flags}")
+    # Luu y: can chay src/kb/build_kb.py truoc. Neu KB chua dung, fact-check
+    # bo qua (khong flag) - khi do in canh bao thay vi assert cung.
+    if fc_flags:
+        print("PASS: CP3 bat duoc claim VF 8 500km sai lech")
+    else:
+        print("LUU Y: khong co flag CP3 - kiem tra da chay build_kb.py chua, "
+              "va so lieu KB da verify chua (sources.md muc 2)")

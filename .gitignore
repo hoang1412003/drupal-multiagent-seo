@@ -5,6 +5,9 @@ __pycache__/
 venv/
 ~$*.docx
 
+# KB fact-check Chroma sinh ra tu src/kb/build_kb.py - build lai duoc tu specs.json
+multiagent/src/kb/chroma/
+
 # Project Drupal dựng bằng DDEV. Chỉ commit những gì cần để tái lập môi trường
 # (composer.json/lock ghim phiên bản, .ddev cấu hình, script tạo field);
 # phần tải về/sinh ra (web/, vendor/) không commit.
