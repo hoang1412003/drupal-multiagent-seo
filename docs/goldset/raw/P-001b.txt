@@ -1,6 +1,6 @@
 title: Những lưu ý khi chăm sóc xe điện vào thời tiết hanh khô
 url_alias: /vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho
-meta_description: Chăm sóc xe điện vào thời tiết hanh khô, chủ xe cần chú ý đến việc kiểm tra lốp xe, sạc pin và lái xe đúng cách, để đảm bảo xe vận hành ổn định và an toàn.
+meta_description:
 summary: Để xe điện bền đẹp, người dùng cần hạn chế để xe tiếp xúc trực tiếp với nước mưa hoặc nắng trong thời gian dài. Độ bền của xe điện phụ thuộc nhiều vào cách sử dụng, chăm sóc và bảo quản xe hàng ngày. Bên cạnh đó, thời tiết cũng ảnh hưởng đến các bộ phận trên xe điện như pin/ắc quy, lốp xe, sơn xe,... Do đó, chủ xe cần quan tâm đến việc chăm sóc xe điện vào thời tiết hanh khô để đảm bảo khả năng vận hành và giúp nâng cao tuổi thọ xe.
 ---
 <p>Thời tiết hanh khô là kiểu thời tiết đặc trưng của mùa thu đông tại Việt Nam. Vì vậy, những ngày thời tiết hanh khô, nhiệt độ môi trường khá thấp. Và điều này có thể làm giảm hiệu suất vận hành của động cơ và pin, cũng như khiến xe tiêu tốn nhiều nhiên liệu hơn. Nếu không biết cách chăm sóc xe vào những ngày thời tiết như thế này, về lâu dài, sẽ làm giảm tuổi thọ của xe điện. Vậy cần chăm sóc xe điện vào thời tiết hanh khô như thế nào?</p>

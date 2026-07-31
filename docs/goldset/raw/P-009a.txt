@@ -1,10 +1,10 @@
 title: Hướng dẫn tìm trạm sạc và Showroom VinFast trên Website
-url_alias: /vn_vi/huong-dan-tim-tram-sac-va-showroom-vinfast-tren-website
+url_alias: /vn_vi/hướng-dẫn-tìm-trạm-sạc-và-showroom-vinfast-trên-website
 meta_description: Hướng dẫn tìm trạm sạc và showroom VinFast trên website chỉ với vài thao tác đơn giản, thuận tiện cho người dùng giúp tiết kiệm đáng kể thời gian.
 summary: Hệ thống trạm sạc và showroom VinFast đang được kiện toàn, “phủ sóng” khắp 63 tỉnh thành, đáp ứng tối đa nhu cầu của người dùng khi sử dụng phương tiện “xanh”. Theo đó, bên cạnh việc phát triển ứng dụng điện thoại, hướng dẫn tìm trạm sạc và showroom VinFast trên website thuận tiện, nhanh chóng và tiết kiệm thời gian. Sự đa dạng trong phương thức tìm kiếm phần nào giúp nâng cao trải nghiệm của người dùng khi sử dụng sản phẩm của VinFast.
 ---
 <p>Không chỉ đầu tư nghiên cứu, phát triển những sản sản phẩm mới, VinFast còn không ngừng hoàn thiện <a href="https://vinfastauto.com/vn_vi/he-thong-tram-sac-va-thiet-bi-sac">hệ thống trạm sạc</a> cho ô tô và xe máy điện nhằm giúp xe xanh đến gần hơn với người tiêu dùng Việt. Việc tiếp cận các dịch vụ của VinFast trở nên đơn giản hơn bao giờ hết khi chủ xe điện có thể tìm trạm sạc VinFast cũng như hệ thống showroom online thông qua bản đồ trên website. </p>
-<img alt="Hướng dẫn tìm trạm sạc và showroom VinFast trên website để đến trạm sạc VinFast gần nhất"/>
+<img alt=""/>
 <p>Bản đồ trạm sạc xe điện VinFast không ngừng được kiện toàn, mở rộng, mang đến sự thuận lợi cho người dùng</p>
 <h2>1. Hướng dẫn tìm trạm sạc và showroom VinFast trên website</h2>
 <p>Theo đó, khách hàng có thể tra cứu vị trí trạm sạc, và showroom VinFast online phù hợp trên website chính thức của VinFast qua các bước như sau:</p>

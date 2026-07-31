@@ -1,0 +1,1205 @@
+========================================================================
+G-001.txt
+========================================================================
+
+[SỐ ĐO]
+  title              53 ký tự
+  meta_description   220 ký tự
+  url_alias          51 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2136 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            36
+  số câu             103
+  câu > 30 từ         29
+  đoạn > 5 câu        0
+  heading            h2=3 h3=10
+  internal link      16
+  Câu dài nhất:
+    (54 từ) "Tính năng hỗ trợ an toàn: cho phép theo dõi thông tin tình trạng xe, chẩn đoán và cảnh báo lỗi, tự động gọi cứ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (220 ký tự, ngoài 140-170)
+  B9 (29 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-002.txt
+========================================================================
+
+[SỐ ĐO]
+  title              61 ký tự
+  meta_description   149 ký tự
+  url_alias          35 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             7 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2712 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            67
+  số câu             148
+  câu > 30 từ         20
+  đoạn > 5 câu        0
+  heading            h2=3 h3=0
+  internal link      12
+  Câu dài nhất:
+    (67 từ) "VF e34 được trang bị màn hình thông tin giải trí cảm ứng 10 inch hiển thị đầy đủ thông số về tình trạng pin, h..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (20 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-003.txt
+========================================================================
+
+[SỐ ĐO]
+  title              53 ký tự
+  meta_description   149 ký tự
+  url_alias          41 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             10 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2919 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            71
+  số câu             162
+  câu > 30 từ         23
+  đoạn > 5 câu        0
+  heading            h2=4 h3=7
+  internal link      14
+  Câu dài nhất:
+    (44 từ) "Hệ thống này sẽ được mã hóa và điều khiển bởi bộ điều khiển trung tâm ECU xe máy điện, do vậy cách khởi động c..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (23 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-004.txt
+========================================================================
+
+[SỐ ĐO]
+  title              60 ký tự
+  meta_description   186 ký tự
+  url_alias          37 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             4 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               971 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            20
+  số câu             65
+  câu > 30 từ         8
+  đoạn > 5 câu        0
+  heading            h2=4 h3=2
+  internal link      5
+  Câu dài nhất:
+    (48 từ) "Đèn (pha) Projector hay còn có tên gọi khác là đèn Bi/đèn thấu kính là loại đèn nơi tập trung ánh sáng tốt nhấ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (186 ký tự, ngoài 140-170)
+  B9 (8 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-005.txt
+========================================================================
+
+[SỐ ĐO]
+  title              51 ký tự
+  meta_description   143 ký tự
+  url_alias          58 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1266 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            17
+  số câu             74
+  câu > 30 từ         6
+  đoạn > 5 câu        1
+  heading            h2=2 h3=5
+  internal link      11
+  Câu dài nhất:
+    (40 từ) "Một vài kiến thức xung quanh vấn đề này mà khách hàng nên nắm rõ để đảm bảo sạc xe đúng cách, từ đó giúp xe vậ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (6 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-006.txt
+========================================================================
+
+[SỐ ĐO]
+  title              46 ký tự
+  meta_description   156 ký tự
+  url_alias          52 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1218 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            10
+  số câu             127
+  câu > 30 từ         10
+  đoạn > 5 câu        0
+  heading            h2=2 h3=0
+  internal link      10
+  Câu dài nhất:
+    (45 từ) "Bên cạnh đó, VinFast luôn không ngừng cải tiến, ứng dụng các công nghệ mới, tiên tiến nhằm rút ngắn thời gian ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (10 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-007.txt
+========================================================================
+
+[SỐ ĐO]
+  title              62 ký tự
+  meta_description   140 ký tự
+  url_alias          65 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2756 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            84
+  số câu             266
+  câu > 30 từ         13
+  đoạn > 5 câu        0
+  heading            h2=4 h3=11
+  internal link      12
+  Câu dài nhất:
+    (46 từ) "Pin lithium-ion trên xe máy điện VinFast được sản xuất dưới sự hợp tác của hãng với tập đoàn công nghệ pin hàn..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (13 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-008.txt
+========================================================================
+
+[SỐ ĐO]
+  title              56 ký tự
+  meta_description   160 ký tự
+  url_alias          34 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             6 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2538 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            46
+  số câu             131
+  câu > 30 từ         28
+  đoạn > 5 câu        0
+  heading            h2=5 h3=1
+  internal link      18
+  Câu dài nhất:
+    (46 từ) "Để khách hàng có thể yên tâm sử dụng xe điện, VinFast đã và đang triển khai kế hoạch “phủ xanh trạm sạc toàn q..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (28 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-009.txt
+========================================================================
+
+[SỐ ĐO]
+  title              31 ký tự
+  meta_description   165 ký tự
+  url_alias          38 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1427 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            31
+  số câu             81
+  câu > 30 từ         17
+  đoạn > 5 câu        0
+  heading            h2=3 h3=2
+  internal link      12
+  Câu dài nhất:
+    (74 từ) "Khi sở hữu VinFast VF e34, người dùng chỉ cần thuê pin cho xe ô tô điện theo tháng mới mức chi phí vô cùng hợp..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (ngoài 40-70)
+  B9 (17 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-010.txt
+========================================================================
+
+[SỐ ĐO]
+  title              55 ký tự
+  meta_description   159 ký tự
+  url_alias          39 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             8 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2338 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            28
+  số câu             128
+  câu > 30 từ         19
+  đoạn > 5 câu        0
+  heading            h2=5 h3=4
+  internal link      19
+  Câu dài nhất:
+    (50 từ) "Thiết kế thời thượng, động cơ mạnh mẽ, phạm vi di chuyển ấn tượng, tính năng thông minh công nghệ an toàn nổi ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (19 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-011.txt
+========================================================================
+
+[SỐ ĐO]
+  title              51 ký tự
+  meta_description   187 ký tự
+  url_alias          58 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             4 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2542 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            400
+  số câu             498
+  câu > 30 từ         18
+  đoạn > 5 câu        0
+  heading            h2=5 h3=17
+  internal link      8
+  Câu dài nhất:
+    (55 từ) "Để đăng ký trở thành đại lý phân phối xe máy điện VinFast, quý đối tác vui lòng truy cập website chính thức củ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (187 ký tự, ngoài 140-170)
+  B9 (18 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-012.txt
+========================================================================
+
+[SỐ ĐO]
+  title              45 ký tự
+  meta_description   158 ký tự
+  url_alias          30 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             7 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2834 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            45
+  số câu             150
+  câu > 30 từ         35
+  đoạn > 5 câu        0
+  heading            h2=3 h3=2
+  internal link      11
+  Câu dài nhất:
+    (54 từ) "Do cơ chế hoạt động của xe điện sử dụng hệ thống pin Lithium-ion và nguồn năng lượng điện xanh - sạch, có khả ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (35 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-013.txt
+========================================================================
+
+[SỐ ĐO]
+  title              46 ký tự
+  meta_description   144 ký tự
+  url_alias          54 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             7 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2076 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            41
+  số câu             89
+  câu > 30 từ         23
+  đoạn > 5 câu        0
+  heading            h2=2 h3=3
+  internal link      12
+  Câu dài nhất:
+    (70 từ) "Sau khi đánh giá chi phí nuôi xe điện VF e34 và xe xăng, với nhiều ưu điểm vượt trội về khả năng vận hành, tín..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (23 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-014.txt
+========================================================================
+
+[SỐ ĐO]
+  title              47 ký tự
+  meta_description   172 ký tự
+  url_alias          60 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             6 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2289 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            46
+  số câu             121
+  câu > 30 từ         22
+  đoạn > 5 câu        0
+  heading            h2=3 h3=3
+  internal link      25
+  Câu dài nhất:
+    (60 từ) "Đặc biệt, với các dòng xe điện bán ra trong năm 2022 và 2023, giá thuê bao pin sẽ được cố định trong suốt vòng..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (172 ký tự, ngoài 140-170)
+  B9 (22 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-015.txt
+========================================================================
+
+[SỐ ĐO]
+  title              58 ký tự
+  meta_description   158 ký tự
+  url_alias          36 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1523 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            28
+  số câu             75
+  câu > 30 từ         14
+  đoạn > 5 câu        0
+  heading            h2=3 h3=3
+  internal link      6
+  Câu dài nhất:
+    (58 từ) "Để có thể sở hữu những mẫu xe đang dẫn đầu xu hướng mới về nhiên liệu sạch và thân thiện với môi trường, khách..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (14 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-016.txt
+========================================================================
+
+[SỐ ĐO]
+  title              48 ký tự
+  meta_description   164 ký tự
+  url_alias          55 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1027 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            17
+  số câu             51
+  câu > 30 từ         8
+  đoạn > 5 câu        0
+  heading            h2=2 h3=2
+  internal link      7
+  Câu dài nhất:
+    (71 từ) "Ngoài ra, những chiếc ô tô điện cũng cần được nâng cấp phần mềm quản lý vận hành xe, bảo dưỡng các chi tiết kh..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (8 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-017.txt
+========================================================================
+
+[SỐ ĐO]
+  title              74 ký tự
+  meta_description   186 ký tự
+  url_alias          33 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2352 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            37
+  số câu             201
+  câu > 30 từ         20
+  đoạn > 5 câu        0
+  heading            h2=5 h3=11
+  internal link      81
+  Câu dài nhất:
+    (63 từ) "Cùng với sự ra mắt của các mẫu xe điện tiên phong và đẳng cấp, nhằm khuyến khích người dân sử dụng xe điện, từ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (ngoài 40-70)
+  B3 (186 ký tự, ngoài 140-170)
+  B9 (20 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-018.txt
+========================================================================
+
+[SỐ ĐO]
+  title              54 ký tự
+  meta_description   118 ký tự
+  url_alias          61 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             2 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               516 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            6
+  số câu             37
+  câu > 30 từ         3
+  đoạn > 5 câu        0
+  heading            h2=3 h3=0
+  internal link      3
+  Câu dài nhất:
+    (37 từ) "VinFast E-Scooter sẽ cập nhật cho người dùng các thông tin liên quan đến thời lượng pin, lịch sử hành trình, ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (118 ký tự, ngoài 140-170)
+  B9 (3 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-019.txt
+========================================================================
+
+[SỐ ĐO]
+  title              64 ký tự
+  meta_description   158 ký tự
+  url_alias          37 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             9 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2095 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            42
+  số câu             100
+  câu > 30 từ         22
+  đoạn > 5 câu        0
+  heading            h2=6 h3=11
+  internal link      29
+  Câu dài nhất:
+    (71 từ) "Người dùng có thể dễ dàng theo dõi tình trạng của xe trên điện thoại thông minh như mức năng lượng pin, số km ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (22 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+G-020.txt
+========================================================================
+
+[SỐ ĐO]
+  title              51 ký tự
+  meta_description   163 ký tự
+  url_alias          48 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             12 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2117 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            38
+  số câu             105
+  câu > 30 từ         20
+  đoạn > 5 câu        0
+  heading            h2=3 h3=5
+  internal link      18
+  Câu dài nhất:
+    (50 từ) "Ô tô điện là mẫu xe thông minh, được trang bị nhiều tính năng hiện đại, giúp người dùng lái xe an toàn, tuy nh..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (20 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-001a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              55 ký tự
+  meta_description   155 ký tự
+  url_alias          46 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             4 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1046 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            15
+  số câu             50
+  câu > 30 từ         8
+  đoạn > 5 câu        1
+  heading            h2=3 h3=0
+  internal link      7
+  Câu dài nhất:
+    (62 từ) "Và VinFast là đơn vị tiên phong tại Việt Nam trong sản xuất xe máy và ô tô điện, mang đến cho khách hàng những..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (8 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-001b.txt
+========================================================================
+
+[SỐ ĐO]
+  title              55 ký tự
+  meta_description   0 ký tự
+  url_alias          46 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             4 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1026 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            15
+  số câu             49
+  câu > 30 từ         8
+  đoạn > 5 câu        0
+  heading            h2=3 h3=0
+  internal link      7
+  Câu dài nhất:
+    (62 từ) "Và VinFast là đơn vị tiên phong tại Việt Nam trong sản xuất xe máy và ô tô điện, mang đến cho khách hàng những..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (trống)
+  B9 (8 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-002a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              44 ký tự
+  meta_description   131 ký tự
+  url_alias          42 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             22 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               2179 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            31
+  số câu             123
+  câu > 30 từ         20
+  đoạn > 5 câu        0
+  heading            h2=5 h3=9
+  internal link      3
+  Câu dài nhất:
+    (65 từ) "Bước 4: Khách hàng có thể kiểm tra các thông số hiện tại về tình trạng sạc và thông số sạc (trạng thái nhận sạ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (131 ký tự, ngoài 140-170)
+  B9 (20 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-003a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              42 ký tự
+  meta_description   149 ký tự
+  url_alias          43 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             6 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1461 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            18
+  số câu             75
+  câu > 30 từ         13
+  đoạn > 5 câu        0
+  heading            h2=3 h3=2
+  internal link      16
+  Câu dài nhất:
+    (52 từ) "Nhằm đem đến sự thuận lợi, xóa đi nỗi lo hết pin giữa đường, VinFast đang tiếp tục phủ sóng hệ thống trạm sạc ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (13 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-004a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              61 ký tự
+  meta_description   165 ký tự
+  url_alias          34 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1141 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            35
+  số câu             86
+  câu > 30 từ         5
+  đoạn > 5 câu        0
+  heading            h2=4 h3=2
+  internal link      11
+  Câu dài nhất:
+    (40 từ) "Nếu sạc trực tiếp thì kết nối dây sạc với nguồn điện và chú ý vào đèn báo hiệu khi chuyển sang màu đỏ nghĩa là..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (gắn năm 2024 - kiểm tra còn hợp lệ không)
+  B9 (5 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-004b.txt
+========================================================================
+
+[SỐ ĐO]
+  title              61 ký tự
+  meta_description   165 ký tự
+  url_alias          34 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1142 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            35
+  số câu             86
+  câu > 30 từ         5
+  đoạn > 5 câu        0
+  heading            h2=4 h3=2
+  internal link      11
+  Câu dài nhất:
+    (40 từ) "Nếu sạc trực tiếp thì kết nối dây sạc với nguồn điện và chú ý vào đèn báo hiệu khi chuyển sang màu đỏ nghĩa là..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (gắn năm 2024 - kiểm tra còn hợp lệ không)
+  B9 (5 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-005a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              66 ký tự
+  meta_description   137 ký tự
+  url_alias          28 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1186 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            13
+  số câu             52
+  câu > 30 từ         11
+  đoạn > 5 câu        0
+  heading            h2=4 h3=1
+  internal link      7
+  Câu dài nhất:
+    (63 từ) "Từ ngày 15/2/2023, VinFast công bố mở rộng triển khai dịch vụ này với 20 xe sạc trải dài khắp 14 tỉnh thành từ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B3 (137 ký tự, ngoài 140-170)
+  B9 (11 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-006a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              46 ký tự
+  meta_description   144 ký tự
+  url_alias          50 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             3 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1320 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            39
+  số câu             68
+  câu > 30 từ         15
+  đoạn > 5 câu        0
+  heading            h2=2 h3=0
+  internal link      17
+  Câu dài nhất:
+    (72 từ) "Chính sách thuê pin xe điện VinFast giúp khách hàng tiết kiệm chi phí vận hành xe điện 
+ VinFast áp dụng một g..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (15 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-007a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              39 ký tự
+  meta_description   144 ký tự
+  url_alias          45 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1694 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            34
+  số câu             97
+  câu > 30 từ         18
+  đoạn > 5 câu        0
+  heading            h2=2 h3=7
+  internal link      13
+  Câu dài nhất:
+    (47 từ) "Đặc biệt, VinFast cũng xây dựng hệ thống trạm sạc phủ sóng khắp toàn quốc, bao gồm trụ sạc nhanh cho phép xe s..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (ngoài 40-70)
+  B9 (18 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-007b.txt
+========================================================================
+
+[SỐ ĐO]
+  title              44 ký tự
+  meta_description   144 ký tự
+  url_alias          45 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1673 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            34
+  số câu             96
+  câu > 30 từ         18
+  đoạn > 5 câu        0
+  heading            h2=2 h3=7
+  internal link      13
+  Câu dài nhất:
+    (47 từ) "Đặc biệt, VinFast cũng xây dựng hệ thống trạm sạc phủ sóng khắp toàn quốc, bao gồm trụ sạc nhanh cho phép xe s..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B4 (gắn năm 2019 - kiểm tra còn hợp lệ không)
+  B9 (18 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-008a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              54 ký tự
+  meta_description   158 ký tự
+  url_alias          41 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             5 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               1895 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            28
+  số câu             82
+  câu > 30 từ         21
+  đoạn > 5 câu        0
+  heading            h2=5 h3=2
+  internal link      26
+  Câu dài nhất:
+    (57 từ) "Thông qua việc so sánh xe máy điện và xe máy xăng, người dùng sẽ thấy rằng việc sở hữu được chiếc xe máy điện ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (21 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-009a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              55 ký tự
+  meta_description   146 ký tự
+  url_alias          62 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             9 (thiếu alt: 1)
+  body               1629 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            28
+  số câu             89
+  câu > 30 từ         18
+  đoạn > 5 câu        0
+  heading            h2=3 h3=4
+  internal link      21
+  Câu dài nhất:
+    (50 từ) "Với những công cụ này, người dùng có thể dễ dàng tìm, dẫn đường đến showroom gần nhất để có thể trải nghiệm, s..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B7 (còn dấu tiếng Việt)
+  B6 (1/9 ảnh thiếu alt text)
+  B9 (18 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
+========================================================================
+P-010a.txt
+========================================================================
+
+[SỐ ĐO]
+  title              57 ký tự
+  meta_description   166 ký tự
+  url_alias          41 ký tự
+  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét
+  số ảnh             27 (thiếu alt: 0)
+  → B6 phần 'mô tả đúng ảnh không' CẦN NGƯỜI xét
+  body               3414 từ (đếm theo tiếng, chưa tách từ)
+  số đoạn            60
+  số câu             221
+  câu > 30 từ         19
+  đoạn > 5 câu        0
+  heading            h2=7 h3=15
+  internal link      14
+  Câu dài nhất:
+    (70 từ) "Tính năng Bản đồ hỗ trợ người dùng định vị tìm xe, tìm Trạm sạc/Xưởng dịch vụ gần nhất và các địa điểm dịch vụ..."
+
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+  B9 (19 câu > 30 từ)
+
+[CẦN NGƯỜI ĐỌC - script không đoán hộ]
+  A1 claim tuyệt đối/so sánh nhất   A2 so sánh đối thủ   A3 số liệu sai lệch
+  A4 khuyến mại thiếu thời hạn      A5 lạc đề >50%       A6 mất an toàn
+  B1 tầm hoạt động thiếu chuẩn đo   B2 sạc thiếu trụ/%   B5 thuật ngữ brand
+  B8 chính tả, ngữ pháp             B10 số liệu không nguồn
+
+[NHẮC]
+  - Có bất kỳ mã A nào  -> rejected
+  - Không A, có mã B    -> needs_revision
+  - Không A, không B    -> publish  (mã C không ảnh hưởng)
+  - Gán nhãn MÙ: không mở field_ai_status/field_ai_score trước khi chốt
+
