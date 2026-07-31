@@ -63,18 +63,20 @@ Guideline hiện vài trang. Thêm `content_type` hoặc ngôn ngữ (`architect
 
 | Model | Đặc điểm | Chi phí |
 |---|---|---|
+| **`BAAI/bge-m3`** | **Đa ngôn ngữ (100+ ngôn ngữ, gồm tiếng Việt), mạnh về multilingual retrieval, hỗ trợ dense+sparse** | Miễn phí, chạy local |
 | `dangvantuan/vietnamese-document-embedding` | Chuyên tiếng Việt, nền `gte-multilingual`, ngữ cảnh tới 8096 token | Miễn phí, chạy local |
 | `dangvantuan/vietnamese-embedding-LongContext` | Chuyên tiếng Việt, STS Spearman 82.10 | Miễn phí, chạy local |
-| **Voyage AI** (multilingual) | Nhà cung cấp Anthropic khuyến nghị | Trả phí, gọi API |
-| Cohere Embed v3 multilingual | 64.5 (EN) / 51.4 (multilingual) trên benchmark retrieval | Trả phí, gọi API |
+| **Voyage AI** / OpenAI / Cohere (multilingual) | Nhà cung cấp bên thứ ba, gọi API | Trả phí, gọi API |
 
-**Khuyến nghị v1: model tiếng Việt chạy local.** Ba lý do, theo thứ tự quan trọng:
+**Quyết định đã chốt (2026-07-31): `BAAI/bge-m3` - đa ngôn ngữ, self-host** (đổi so với khuyến nghị ban đầu là model *chuyên tiếng Việt*). Lý do, theo thứ tự quan trọng:
 
-1. **Đo được rẻ.** Chọn embedding phải dựa trên recall@k đo trên chính KB của dự án (mục 5), không dựa vào leaderboard. Model local cho phép thử đi thử lại không tốn tiền, không giới hạn rate.
-2. **Không gửi dữ liệu ra ngoài.** Dữ liệu ở đây là công khai nên không bắt buộc, nhưng ở môi trường VF O2O thật thì đây là khác biệt lớn - nêu được trong báo cáo.
-3. **Tách biến.** Giữ chi phí embedding = 0 làm phép đo chi phí toàn hệ thống chỉ còn một nguồn (LLM), dễ diễn giải hơn.
+1. **Tránh di trú KB khi mở rộng ngôn ngữ.** Đổi model embedding buộc **nhúng lại toàn bộ KB** (vector từ 2 model khác không gian, không so được). Chọn model đã sẵn sàng đa ngôn ngữ từ đầu để mở rộng ngôn ngữ (mục 4.2) chỉ là gắn thêm nhãn `langcode`, không phải re-embed. Model chuyên tiếng Việt là đơn ngôn ngữ - kém future-proof cho định hướng đa ngôn ngữ của dự án.
+2. **Không gửi dữ liệu ra ngoài.** Self-host giữ dữ liệu trong hạ tầng - đúng ràng buộc production VF O2O (dữ liệu hiện tại công khai nên không bắt buộc, nhưng nêu được khi bảo vệ).
+3. **Đo được rẻ + tách biến.** Chạy local: thử recall@k không tốn tiền/không giới hạn rate; giữ chi phí embedding = 0 làm phép đo chi phí toàn hệ thống chỉ còn một nguồn (LLM).
 
-Nếu còn thời gian, đo thêm Voyage làm baseline và báo cáo chênh lệch recall@k - đó là một kết quả nghiên cứu có giá trị, dù kết quả ra theo hướng nào.
+Đánh đổi phải nêu trung thực: model chuyên tiếng Việt **có thể** tra tiếng Việt tốt hơn model đa ngôn ngữ chung trên văn bản kỹ thuật do người Việt viết (mục cảnh báo VN-MTEB ở trên). Con số cuối chốt bằng **recall@k đo thật** (mục 5), không theo leaderboard. Nếu còn thời gian, đo thêm `dangvantuan/...` hoặc Voyage làm đối chiếu recall@k - kết quả nào cũng đáng đưa vào báo cáo.
+
+**Trạng thái triển khai (2026-07-31):** đã hiện thực trong `multiagent/src/embeddings.py` (`BGEM3Embedder` sau interface `Embedder`, `dim=1024`). Tách sau interface nên đổi sang Voyage/OpenAI/`dangvantuan` chỉ là thay 1 class. Đo E2 trên KB seed: **recall@1 = recall@3 = 1.00** (12 truy vấn, phân biệt đúng VF 8 vs VF 9) - xác nhận cơ chế đúng; sẽ đo lại nghiêm hơn khi KB có số thật đã verify + nhiều model (mục 5, `scripts/eval_retrieval.py`).
 
 ### 4.2. Vector database
 

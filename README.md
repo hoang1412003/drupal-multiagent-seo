@@ -36,10 +36,14 @@ drupal-multiagent-seo/
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
 │   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
+│   │   ├── embeddings.py         # interface Embedder + BGE-M3 self-host (cho RAG fact-check)
+│   │   ├── retrieval.py          # truy vấn KB Chroma theo (content_type, langcode)
+│   │   ├── kb/                   # KB fact-check: specs.json + build_kb.py (nạp vào Chroma)
 │   │   ├── agents/
 │   │   │   ├── content_quality.py  # đã triển khai
 │   │   │   ├── seo.py              # đã triển khai
-│   │   │   ├── compliance.py       # đã triển khai (LLM + rule-based blacklist) - Sprint 2
+│   │   │   ├── compliance.py       # đã triển khai (LLM + blacklist + RAG fact-check CP3) - Sprint 2
+│   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
 │   │   │   └── (brand voice)        # Sprint 2 - còn là stub trong graph.py
 │   │   └── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
 │   └── scripts/                  # seed dữ liệu mẫu + test thủ công
@@ -90,11 +94,11 @@ cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRU
 
 ## Trạng thái Sprint 2
 
-- [x] Compliance Agent — LLM + rule-based blacklist (`compliance_rules.json`); RAG fact-check chưa triển khai
+- [x] Compliance Agent — LLM + rule-based blacklist (`compliance_rules.json`) + **RAG fact-check (CP3)**: KB thông số → BGE-M3 self-host → Chroma; lệch số → flag `critical`, không tra được → không flag (E2 recall@3=1.00 trên KB seed). KB cần verify số thật (`docs/goldset/sources.md` mục 2)
 - [x] Hoàn thiện Aggregator — veto Compliance, fail-safe khi agent lỗi, chia lại trọng số
 - [x] Retry/backoff khi Drupal lỗi mạng/5xx (`docs/architecture.md` mục 7)
 - [ ] Brand Voice Agent dùng RAG — còn là stub trong `graph.py`
-- [ ] Thu thập & gán nhãn gold set — 33 mẫu đã chọn nguồn (`docs/goldset/labels.csv`), chưa gán nhãn
+- [ ] Thu thập & gán nhãn gold set — 33 mẫu đã thu + bóc tách + chèn perturbation (`docs/goldset/labels.csv`), đang gán nhãn
 - [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
 - [ ] UI báo cáo trong editor — đã thiết kế (`docs/editor-ui-design.md`), module `vf_ai_review` chưa viết
 
