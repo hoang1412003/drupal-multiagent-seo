@@ -3,6 +3,7 @@ import os
 import re
 
 from ai_core import call_agent
+from agents import fact_check
 
 _RULES_PATH = os.path.join(os.path.dirname(__file__), "compliance_rules.json")
 
@@ -100,7 +101,7 @@ OUTPUT_SCHEMA = {
 _RULE_FIELDS = ("title", "body", "meta_description")
 
 
-def run(fields: dict) -> dict:
+def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi") -> dict:
     content = (
         f"[title] {fields.get('title', '')}\n\n"
         f"[body] {fields.get('body', '')}\n\n"
@@ -115,7 +116,15 @@ def run(fields: dict) -> dict:
             flag["field"] = field_name
             rule_flags.append(flag)
 
+    # Nguồn thứ 3: RAG fact-check (CP3). Bọc try/except vì KB có thể chưa
+    # dựng (chạy src/kb/build_kb.py) - khi đó fact-check bỏ qua, KHÔNG làm
+    # sập cả Compliance Agent.
+    try:
+        fact_check_flags = fact_check.run(fields, content_type=content_type, langcode=langcode)
+    except Exception:
+        fact_check_flags = []
+
     return {
         "score": llm_result["score"],
-        "flags": llm_result["flags"] + rule_flags,
+        "flags": llm_result["flags"] + rule_flags + fact_check_flags,
     }
