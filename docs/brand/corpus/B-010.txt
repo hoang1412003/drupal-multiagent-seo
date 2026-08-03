@@ -1,0 +1,128 @@
+title: Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện (Phần 1)
+url_alias: /vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1
+meta_description: Hướng dẫn sử dụng Ứng dụng VinFast chi tiết cho ô tô điện. Cách đăng ký, đăng nhập tài khoản, kết nối với xe ô tô, cài đặt quản lý nâng cao.
+summary: Ứng dụng VinFast cho phép quản lý thông tin, điều khiển các tiện ích của xe thông qua một chạm, mang đến sự tiện lợi cho người dùng. Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện từ cơ bản đến nâng cao giúp chủ xe phát huy hiệu quả công năng của các tiện ích thông minh trên xe VinFast.
+---
+<p><a href="https://vinfastauto.com/vn_vi/ung-dung-vinfast">Ứng dụng VinFast</a> được phát triển bởi đội ngũ VinFast giúp người lái kết nối và điều khiển xe từ xa thông qua thiết bị di động. Ứng dụng này được tích hợp nhiều tính năng thông minh, tối ưu trải nghiệm cho người dùng. Theo đó, thông qua hướng dẫn sử dụng ứng dụng VinFast cho xe ô tô điện sau, khách hàng có thể đăng ký, đăng nhập tài khoản, cài đặt nâng cao, quản lý phần mềm và thay đổi vai trò của người lái trên xe giúp quá trình điều khiển xe dễ dàng, thuận lợi hơn.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/huong-dan-su-dung-ung-dung-vinfast">Hướng dẫn sử dụng Ứng dụng VinFast cho ô tô điện (Phần 2)</a></p>
+<img alt="cài đặt ứng dụng VinFast cho ô tô điện giúp người dùng quản lý xe dễ dàng, thuận tiện"/>
+<p>Ứng dụng VinFast giúp người dùng quản lý xe từ xa dễ dàng, thuận tiện</p>
+<h2>1. Hướng dẫn đăng ký, đăng nhập Ứng dụng VinFast cho ô tô điện</h2>
+<p>Sau khi tải Ứng dụng VinFast từ kho ứng dụng trên IOS (App Store) hoặc Android (CH Play), người dùng tiến hành Đăng ký/ Đăng nhập tài khoản để bắt đầu sử dụng.</p>
+<h3>1.1. Hướng dẫn đăng ký tài khoản Ứng dụng xe ô tô điện VinFast</h3>
+<p>Để tạo tài khoản cho ô tô điện VinFast, người dùng thực hiện theo các bước sau:</p>
+<ul> <li><strong>Bước 1</strong>: Chọn “Đăng ký ngay” trên màn hình chính của ứng dụng trong trường hợp chưa có tài khoản.</li> <li><strong>Bước 2</strong>: Nhập thông tin gồm Email và Họ tên người dùng, sau đó tạo mật khẩu.</li> <li><strong>Bước 3</strong>: VinFast gửi Email xác thực tài khoản qua Email người dùng đã đăng ký. Lúc này, người dùng kiểm tra hòm thư điện tử và làm theo các hướng dẫn kích hoạt tài khoản và sử dụng.</li> </ul>
+<p>Trong trường hợp Email đã đăng ký trên ứng dụng hoặc đăng ký tài khoản trên website VinFast, người dùng có thể đăng nhập vào ứng dụng bằng Email đó.</p>
+<img alt="3 bước đăng ký cài đặt ứng dụng VinFast cho ô tô điện"/>
+<p>3 bước đăng ký tài khoản trên Ứng dụng VinFast dễ dàng, nhanh chóng</p>
+<h3>1.2. Đăng nhập tài khoản ứng dụng VinFast bằng Face ID/ Vân tay</h3>
+<p>Để tăng tính bảo mật, bên cạnh mật khẩu, người dùng có thể sử dụng Face ID hoặc vân tay để đăng nhập vào tài khoản <a href="https://vinfastauto.com/vn_vi/ung-dung-vinfast-cho-o-to-dien">Ứng dụng VinFast cho ô tô điện</a>. Cụ thể như sau:</p>
+<ul> <li><strong>Đăng nhập bằng ID</strong>: <ul> <li>Bật đăng nhập bằng Face ID/ Vân tay</li> <li>Đăng nhập bằng mật khẩu, vào mục Mật khẩu và Bảo mật trong trang “VinFast ID”</li> </ul> </li> <li><strong>Kích hoạt vân tay/ Face ID</strong>: Bật nút “Đăng ký Face ID” hoặc “Đăng ký Vân tay”.</li> <li><strong>Đăng nhập Vân tay/ Face ID</strong>: Chạm vào biểu tượng “Vân tay” hoặc “Face ID” trên màn hình.</li> </ul>
+<img alt="hướng dẫn cài ứng dụng ô tô điện vinfast bằng Vân tay/Face ID"/>
+<p>Đăng nhập Ứng dụng VinFast nhanh chóng, tiện lợi bằng Vân tay/Face ID</p>
+<h3>1.3. Hướng dẫn đặt lại tài khoản trường hợp “quên mật khẩu”</h3>
+<p>Trong trường hợp đã đăng ký tài khoản VinFast nhưng quên mật khẩu và không đăng nhập được, người dùng thực hiện theo các bước sau để lấy lại mật khẩu:</p>
+<ul> <li><strong>Bước 1</strong>: Trên màn hình đăng nhập của Ứng dụng VinFast, chọn “Quên mật khẩu”;</li> <li><strong>Bước 2</strong>: Nhập thông tin Email đã sử dụng để đăng ký Ứng dụng VinFast trước đó;</li> <li><strong>Bước 3</strong>: Xác nhận lại địa chỉ Email để đặt lại mật khẩu;</li> <li><strong>Bước 4</strong>: Thực hiện đặt lại mật khẩu theo hướng dẫn được gửi tới Email đã đăng ký.</li> </ul>
+<img alt="4 bước lấy lại mật khẩu Ứng dụng ô tô điện VinFast thông qua Email"/>
+<p>4 bước lấy lại mật khẩu Ứng dụng ô tô điện VinFast thông qua Email</p>
+<h3>1.4. Đăng nhập tài khoản khi chưa có xe</h3>
+<p>Trong trường hợp chưa sở hữu xe VinFast, khách hàng vẫn có thể đăng ký tài khoản Ứng dụng và sử dụng để: </p>
+<ul> <li>Tìm hiểu, trải nghiệm Ứng dụng VinFast</li> <li>Tham khảo thông tin của các dòng xe VinFast</li> <li>Đặt lịch lái thử xe VinFast</li> </ul>
+<p>Nếu đã sở hữu xe VinFast nhưng chưa thực hiện liên kết tài khoản với xe, người dùng truy cập vào mục:</p>
+<ul> <li>Lái xe cùng VinFast</li> <li>Nhận quyền điều khiển để được hướng dẫn chi tiết</li> </ul>
+<img alt="hướng dẫn sử dụng tài khoản trên Ứng dụng VinFast cho ô tô điện khi chưa có xe"/>
+<p>Khách hàng chưa sở hữu VinFast vẫn có thể sở hữu, sử dụng tài khoản trên Ứng dụng VinFast</p>
+<h3>1.5. Hướng dẫn đăng xuất tài khoản ứng dụng VinFast cho ô tô điện</h3>
+<p>Khi muốn đăng xuất tài khoản, người dùng thực hiện theo 2 bước dưới đây:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm vào phần VinFast ID trên trang chủ;</li> <li><strong>Bước 2</strong>: Bấm “Đăng xuất” ở cuối màn hình.</li> </ul>
+<img alt="hướng dẫn đăng xuất Ứng dụng VinFast tại trang chủ"/>
+<p>2 bước đăng xuất Ứng dụng VinFast tại trang chủ</p>
+<p>Để đảm bảo tính bảo mật cho tài khoản, người dùng lưu ý Ứng dụng VinFast sẽ tự động đăng xuất trong các trường hợp sau:</p>
+<ul> <li>Tài khoản được đăng nhập trên thiết bị khác</li> <li>Tài khoản không hoạt động trên ứng dụng sau một khoảng thời gian.</li> </ul>
+<p>Sau khi bị đăng xuất, người dùng vẫn có thể sử dụng Face ID/Vân tay để đăng nhập lại ứng dụng nhanh chóng.</p>
+<h2>2. Hướng dẫn cài đặt các tính năng trên Ứng dụng VinFast cho ô tô điện</h2>
+<p>Cài đặt VinFast app cho phép người dùng tùy chỉnh các cài đặt chung của ứng dụng, vai trò trên xe và các tính năng thông minh, giúp chủ xe thuận tiện quản lý, kiểm soát tình trạng xe chỉ sau một vài thao tác.</p>
+<ul> <li>Mục cài đặt cho phép người dùng tùy chỉnh các cài đặt chung của ứng dụng, vai trò trên xe và các tính năng thông minh để điều khiển xe. </li> <li>Tại đây người dùng cũng có thể xem Hướng dẫn sử dụng, tra cứu các thông tin hữu ích về xe và ứng dụng tại phần trợ giúp.</li> </ul>
+<img alt="Màn hình cài đặt ứng dụng VinFast ô tô điện"/>
+<p>Màn hình cài đặt Ứng dụng ô tô điện VinFast</p>
+<h3>2.1. Cách cập nhật phần mềm xe</h3>
+<p>VinFast sẽ gửi thông báo trên ứng dụng khi có bản cập nhật phần mềm mới. Nếu lỡ thông báo, người dùng có thể kiểm tra lại tại mục Cập nhật phần mềm xe. </p>
+<p>Hướng dẫn sử dụng ứng dụng VinFast để cập nhật phần mềm theo 2 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Bấm tải xuống ngay để ra lệnh cho xe tải về bản cập nhật mới.</li> <li><strong>Bước 2</strong>: Sau khi hoàn tất tải về, bấm Cài đặt ngay để cài đặt phần mềm ngay lập tức hoặc chọn Đặt nhắc nhở để nhận lời nhắc cài đặt sau.</li> </ul>
+<img alt="Cách cập nhật phần mềm xe thông qua ứng dụng VinFast"/>
+<p>Các bước cập nhật phần mềm xe mới nhất trên ứng dụng ô tô điện VinFast</p>
+<h3>2.2. Cách cài đặt quản lý người lái trên ứng dụng VinFast ô tô điện</h3>
+<p>Tính năng Quản lý người lái cho phép Chủ xe/Lái chính có thể thêm tài khoản người lái nhằm chia sẻ quyền điều khiển xe qua Ứng dụng VinFast. Trong trường hợp giao xe cho chủ mới, khách hàng có thể gửi yêu cầu Chuyển quyền điều khiển Ứng dụng VinFast cho chủ xe mới và làm theo các bước dưới đây để hoàn tất thủ tục chuyển nhượng xe:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Cài đặt, chọn Quản lý người lái để quản lý các tài khoản đang điều khiển xe;</li> <li><strong>Bước 2</strong>: Màn hình hiển thị thông tin về các vai trò trên xe bao gồm Chủ xe, Lái chính và Lái phụ.</li> </ul>
+<img alt="Các bước cài đặt quản lý người lái để chia sẻ quyền điều khiển xe qua Ứng dụng ô tô điện VinFast"/>
+<p>Các bước cài đặt quản lý người lái để chia sẻ quyền điều khiển xe qua Ứng dụng VinFast</p>
+<ul> <li>Cài đặt Chủ xe/Lái chính: <ul> <li>Khi tài khoản của chủ xe được kết nối với Ứng dụng VinFast, chủ xe sẽ được cài đặt mặc định là Lái chính.</li> <li>Chủ xe có thể sử dụng tính năng Chuyển quyền điều khiển, hỗ trợ chủ xe chuyển quyền điều khiển ứng dụng cho chủ xe mới trong trường hợp mua bán hoặc chuyển nhượng xe.</li> </ul> </li> </ul>
+<img alt="Cài đặt quản lý người lái qua Ứng dụng VinFast cho ô tô điện"/>
+<p>Cài đặt chủ xe để quản lý các tính năng trên Ứng dụng VinFast cho ô tô điện</p>
+<ul> <li>Cài đặt lái chính: Lái chính có quyền điều khiển và sử dụng xe thông qua Ứng dụng VinFast. Tài khoản của Lái chính được quản lý bởi Chủ xe.</li> </ul>
+<img alt="Các bước cài đặt lái chính qua Ứng dụng ô tô điện VinFast"/>
+<p>Cài đặt lái chính để được toàn quyền điều khiển và sử dụng xe thông qua Ứng dụng VinFast</p>
+<ul> <li>Cài đặt lái phụ: Tài khoản của Lái phụ được quản lý bởi Lái chính. Lái phụ cũng có thể điều khiển và sử dụng xe thông qua Ứng dụng VinFast song song với lái chính, tuy nhiên sẽ bị hạn chế truy cập một số tính năng nhất định.</li> </ul>
+<img alt="Các bước cài đặt tài khoản lái phụ qua Ứng dụng ô tô điện VinFast"/>
+<p>Tài khoản Lái phụ sẽ được quản lý bởi Lái chính và bị hạn chế một số tính năng</p>
+<ul> <li>Thêm người lái: Việc thêm người lái được thực hiện bởi Chủ xe, qua đó chia sẻ các tính năng thú vị để Lái phụ cùng trải nghiệm. Khi được thêm vào, Chủ xe sẽ xác nhận để Lái phụ sử dụng các tính năng như đồng bộ hóa thông tin xe, nhận thông báo và điều khiển từ xa. Để thêm người lái, chủ xe thực hiện theo 3 bước dưới đây: <ul> <li><strong>Bước 1</strong>: Để thêm tài khoản người lái vào hồ sơ của xe và ứng dụng, bấm “Thêm”;</li> <li><strong>Bước 2</strong>: Nhập Email của Người lái sau đó bấm Thêm người lái để gửi yêu cầu tới Email của người đó;</li> <li><strong>Bước 3</strong>: Cung cấp mã các nhận cho Người lái để có thể chấp nhận yêu cầu.</li> </ul> </li> </ul>
+<img alt="Các bước cài đặt thêm người lái qua Ứng dụng VinFast cho ô tô điện"/>
+<p>Các bước cài đặt thêm người lái để cùng trải nghiệm các tính năng thú vị </p>
+<ul> <li>Chuyển quyền điều khiển: Khi chuyển nhượng lại phương tiện, chủ xe cũ sẽ chuyển quyền điều khiển cho chủ mới để chủ mới dễ dàng theo dõi tiếp thông tin của ô tô. Người dùng thực hiện theo các bước dưới đây: <ul> <li>Bước 1: Để gửi yêu cầu chuyển quyền điều khiển ứng dụng, bấm “Chuyển quyền”;</li> <li>Bước 2: Kiểm tra lại thông tin xe;</li> <li>Bước 3: Nhập địa chỉ Email của chủ xe mới;</li> <li>Bước 4: Xác nhận thông tin;</li> <li>Bước 5: Tài khoản sẽ bị giới hạn một số tính năng sau khi gửi yêu cầu chuyển quyền điều khiển.</li> </ul> </li> </ul>
+<p><strong>Lưu ý</strong>: Sau khi gửi yêu cầu Chuyển quyền, chủ xe cũ và chủ xe mới cần đến Showroom VinFast để hoàn tất thủ tục.</p>
+<img alt="Các bước chuyển quyền chủ xe trên Ứng dụng VinFast cho tô tô điện"/>
+<p>Các bước chuyển quyền điều khiển xe trong trường hợp bán hoặc nhượng lại xe cho người khác</p>
+<h3>2.3. Cài đặt Ứng dụng ô tô điện VinFast giới hạn thời gian hoạt động xe</h3>
+<p>Tính năng này giúp cài đặt thời gian hoạt động xe. Trong trường hợp cho mượn hoặc thuê xe, nếu xe hoạt động ngoài khung giờ đã cài đặt, chủ xe sẽ nhận được thông báo. Thực hiện cài đặt giới hạn thời gian theo 2 bước:</p>
+<ul> <li><strong>Bước 1</strong>: Mở Cài đặt, chọn Cài đặt xe, chọn Giới hạn thời gian và bật tính năng;</li> <li><strong>Bước 2</strong>: Đặt thời gian.</li> </ul>
+<img alt="Các bước cài đặt giới hạn thời gian trên Ứng dụng VinFast"/>
+<p>Các bước cài đặt giới hạn thời gian để theo dõi thời gian hoạt động của xe</p>
+<h3>2.4. Cách cài đặt cá nhân hoá trợ lý ảo trên Ứng dụng ô tô điện VinFast</h3>
+<p>Chỉ với 1 cụm từ hoặc 1 câu lệnh ngắn, <a href="https://vinfastauto.com/vn_vi/tro-ly-ao-vinfast-thong-minh'">trợ lý ảo VinFast</a> sẽ giúp khách hàng thực hiện một chuỗi các tính năng được cài sẵn. Cài đặt cá nhân hóa trợ lý ảo giúp người dùng dễ dàng thực hiện các hành động thường xuyên mà không cần nhiều thao tác. Các bước thực hiện cài đặt:</p>
+<ul> <li><strong>Bước 1</strong>: Truy cập vào Cài đặt, chọn Trợ lý ảo. Người dùng có thể thêm mới câu lệnh hoặc lựa chọn những câu lệnh với cài đặt có sẵn;</li> <li><strong>Bước 2</strong>: Người dùng tùy ý điều chỉnh câu lệnh và các hành động cần thực hiện một cách dễ dàng và tiện lợi.</li> </ul>
+<img alt="Các bước cài đặt giới hạn thời gian trên Ứng dụng VinFast"/>
+<p>Các bước cài đặt cá nhân hóa trợ lý ảo để thuận tiện khi sử dụng</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/hey-vinfast-tuong-tac-cung-tro-ly-ao">Hey VinFast – Tương tác cùng trợ lý ảo với hàng trăm tính năng tiện ích</a></p>
+<h3>2.5. Hướng dẫn sử dụng tính năng trên Ứng dụng VinFast cho ô tô điện</h3>
+<p>Tính năng hướng dẫn sử dụng cho phép người dùng tra cứu từ khoá và ứng dụng sẽ gợi ý các thông tin liên quan về xe, hoặc sử dụng chức năng hỗ trợ tìm kiếm bằng giọng nói. Các bước sử dụng tính năng:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Cài đặt, chọn mục Hướng dẫn sử dụng;</li> <li><strong>Bước 2</strong>: Người dùng có thể tra cứu thông tin bằng cách gõ từ khóa và ứng dụng sẽ gợi ý các thông tin liên quan</li> <li><strong>Bước 3</strong>: Chọn mục cần tìm hiểu để đọc thông tin chi tiết.</li> </ul>
+<img alt="Tra cứu hướng dẫn sử dụng để xem hướng dẫn sử dụng xe"/>
+<p>Tra cứu hướng dẫn sử dụng để xem hướng dẫn sử dụng xe</p>
+<h3>2.6. Hướng dẫn cài đặt chung Ứng dụng ô tô điện VinFast</h3>
+<p>Phần cài đặt chung cho phép người dùng thay đổi ngôn ngữ ứng dụng và bật/tắt thông báo cho từng tính năng. Để cài đặt, thực hiện theo 2 bước sau:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Cài đặt, chọn Cài đặt chung để xem các tùy chọn cài đặt chung cho ứng dụng;</li> <li><strong>Bước 2</strong>: Thay đổi các Cài đặt chung về ngôn ngữ và thông báo.</li> </ul>
+<img alt="Tra cứu hướng dẫn cài đặt chung cho ngôn ngữ và thông báo trên ứng dụng VinFast ô tô điện"/>
+<p>2 bước cài đặt chung cho ngôn ngữ và thông báo trên ứng dụng</p>
+<h3>2.7. Cách sử dụng Ứng dụng VinFast để nhắc nhở lịch cá nhân/lịch làm việc mỗi ngày</h3>
+<p>Khi bật tính năng Đồng bộ lịch, dữ liệu của lịch trên điện thoại trong 1 tháng gần nhất sẽ được đồng bộ lên màn hình xe, hỗ trợ hiển thị nhắc nhở/lịch hẹn đã có trong lịch cho người dùng.</p>
+<p>Để sử dụng tính năng này, người dùng cần bật Bluetooth và truy cập ứng dụng vào thời điểm đồng bộ dữ liệu để hệ thống cập nhật một cách chính xác nhất. Tính năng sẽ tự động tắt khi người dùng đăng nhập tài khoản vào thiết bị khác.</p>
+<p>Để cài đặt tính năng này, người dùng thực hiện theo các bước:</p>
+<ul> <li><strong>Bước 1</strong>: Vào Cài đặt, chọn Đồng bộ lịch trên xe;</li> <li><strong>Bước 2</strong>: Xác nhận “Cho phép Lịch truy cập vào lịch của bạn”;</li> <li><strong>Bước 3</strong>: Thực hiện và hoàn tất đồng bộ.</li> </ul>
+<img alt="Các bước cài đặt nhắc nhở lịch cá nhân/lịch làm việc hàng ngày trên ứng dụng VinFast"/>
+<p>Các bước cài đặt nhắc nhở lịch cá nhân/lịch làm việc hàng ngày</p>
+<h3>2.8. Hướng dẫn xem trợ giúp qua Ứng dụng VinFast ô tô điện</h3>
+<p>Mục Trợ giúp nằm trong phần Cài đặt, bao gồm:</p>
+<ul> <li><strong>Câu hỏi thường gặp</strong>: Tra cứu thông tin về chính sách của VinFast.</li> <li><strong>Yêu cầu hỗ trợ</strong>: Gửi yêu cầu hỗ trợ nếu không tìm thấy thông tin ở mục câu hỏi thường gặp.</li> <li><strong>Thông tin ứng dụn</strong>g: Thông tin chi tiết phiên bản ứng dụng và đơn vị phát triển ứng dụng.</li> <li><strong>Điều khoản và điều kiện</strong>: Đọc các nội dung đã cam kết khi đăng ký tài khoản.</li> </ul>
+<img alt="Hướng dẫn xem trợ giúp qua ứng dụng VinFast cho ô tô điện"/>
+<p>Cách truy cập trợ giúp trên Ứng dụng VinFast cho ô tô điện</p>
+<h2>3. Hướng dẫn cài đặt hệ thống an ninh - an toàn trên Ứng dụng VinFast</h2>
+<p>Cài đặt hệ thống an ninh - an toàn trên Ứng dụng VinFast giúp người dùng nhận diện các trường hợp khẩn cấp của xe như va chạm, tai nạn trên đường hay có đột nhập bất thường.</p>
+<img alt="Hướng dẫn cài đặt Hệ thống an ninh - an toàn trên Ứng dụng VinFast cho ô tô điện"/>
+<p>Hệ thống an ninh - an toàn trên Ứng dụng ô tô điện VinFast giúp người dùng nhận diện các trường hợp khẩn cấp</p>
+<h3>3.1. Cách cài đặt Ứng dụng ô tô điện VinFast thực hiện cuộc gọi khẩn cấp</h3>
+<p>Cuộc gọi khẩn cấp sẽ được kích hoạt tự động, hoặc người lái có thể chủ động bấm nút SOS trên xe nếu xảy ra sự cố. Khi đó, ứng dụng sẽ gửi thông báo cho người lái về tình trạng hiện tại. Tính năng này giúp hạn chế rủi ro cho những người ngồi trên xe nhờ rút ngắn thời gian cứu hộ. Trong trường hợp phương tiện gặp sự cố về động cơ, pin sạc hay lốp khi di chuyển, người dùng kích hoạt tính năng này để được hỗ trợ kịp thời. Các bước thực hiện:</p>
+<ul> <li><strong>Bước 1</strong>: Lái xe bấm SOS, ứng dụng sẽ gửi thông báo “Cuộc gọi khẩn cấp E-call đã được kích hoạt” và hiển thị trên điện thoại;</li> <li><strong>Bước 2</strong>: Bấm vào thông báo để xem chi tiết thông tin.</li> </ul>
+<img alt="Hướng dẫn cài đặt thực hiện cuộc gọi khẩn cấp qua Ứng dụng VinFast khi có sự cố"/>
+<p>Các bước thực hiện cuộc gọi khẩn cấp qua Ứng dụng VinFast ô tô điện khi có sự cố</p>
+<h3>3.2. Cài Ứng dụng ô tô điện VinFast - Tính năng cảnh báo trộm</h3>
+<p>Tính năng cảnh báo trộm sẽ gửi thông tin về điện thoại cho chủ xe qua Ứng dụng VinFast khi cảm biến trên ô tô phát hiện có đột nhập hoặc hoạt động bất thường. Để kích hoạt người dùng thực hiện 2 bước sau:</p>
+<ul> <li><strong>Bước 1</strong>: Ứng dụng gửi thông báo “Cảnh báo chống trộm” về điện thoại chủ xe;</li> <li><strong>Bước 2</strong>: Chủ xe xem thông tin chi tiết để đưa ra biện pháp xử lý hiệu quả nhất hoặc có thể lập tức thực hiện vô hiệu hóa hệ thống lái ngay trên điện thoại.</li> </ul>
+<img alt="Hướng dẫn cài đặt cảnh báo trộm trên xe ô tô điện VinFast khi có xâm nhập bất thường"/>
+<p>Tính năng cảnh báo trộm trên xe ô tô điện VinFast khi có xâm nhập bất thường</p>
+<p>Hướng dẫn sử dụng Ứng dụng VinFast giúp khách hàng hiểu rõ chức năng và cách dùng các tính năng thông minh được trang bị. Ứng dụng góp phần quan trọng hỗ trợ người dùng sử dụng hiệu quả các chức năng trên xe điện thông minh của VinFast.</p>
+<p>Để trải nghiệm công nghệ ưu việt này, người dùng có thể <a href="https://shop.vinfastauto.com/vn_vi/car-vfe34.html">đặt cọc mua xe VinFast VF e34</a> hoặc <a href="https://shop.vinfastauto.com/vn_vi/car-vf8.html">đặt cọc VinFast VF 8</a> và <a href="https://shop.vinfastauto.com/vn_vi/car-vf9.html">VF 9</a><a href="https://reserve.vinfastauto.com/"> </a>ngay hôm nay và trở thành khách hàng tiên phong sở hữu những mẫu xe ô tô điện thương hiệu Việt.</p>
+<p>Quý khách hàng có thể liên hệ với chúng tôi nếu cần cung cấp thêm thông tin về sản phẩm VinFast và dịch vụ: </p>
+<ul> <li>Tổng đài tư vấn: <strong>1900 23 23 89</strong>.</li> <li>Email chăm sóc khách hàng: <a href="/cdn-cgi/l/email-protection">[email protected]</a>.</li> </ul>
+<p></p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: </p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/ung-dung-vinfast">Ứng dụng VinFast: tiện tích giúp người dùng điều khiển xe điện VF e34 dễ dàng</a></li> <li><a href="https://vinfastauto.com/vn_vi/he-thong-chong-trom-immobilizer-cau-tao-va-nguyen-ly-hoat-dong">Hệ thống chống trộm Immobilizer: Cấu tạo và nguyên lý hoạt động</a></li> <li><a href="https://vinfastauto.com/vn_vi/cac-ung-dung-hay-cho-o-to">Các ứng dụng kết nối điện thoại với ô tô hữu ích, dễ sử dụng</a></li> </ul>

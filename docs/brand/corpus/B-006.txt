@@ -1,0 +1,58 @@
+title: Bảo dưỡng ô tô điện gồm gì? Quy trình và lịch bảo dưỡng định kỳ
+url_alias: /vn_vi/bao-duong-o-to-dien
+meta_description: Các bộ phần cần lưu ý khi đi bảo dưỡng ô tô điện là: Động cơ, phanh, má phanh, lốp, dầu hộp số, nước làm mát, gạt nước.
+summary: Bảo dưỡng ô tô điện gồm những gì là vấn đề mà không phải ai cũng nắm rõ. Về cơ bản, quy trình bảo dưỡng ô tô sẽ bao gồm: Bảo dưỡng động cơ, phanh, má phanh, lốp, dầu hộp số, nước làm mát, gạt nước. Thời gian bảo dưỡng xe ô tô định kỳ tùy thuộc theo quy định của từng hãng, từng chi tiết của xe.
+---
+<h2>1. Bảo dưỡng ô tô gồm những gì? 8 bộ phận cần kiểm tra định kỳ trên xe hơi điện</h2>
+<p>Để hoạt động, động cơ xăng cần có dầu nhưng động cơ điện thì không cần nên quy trình bảo dưỡng ô tô điện cũng đơn giản hơn rất nhiều so với xe ô tô chạy bằng xăng.</p>
+<p>Về cơ bản, ô tô điện chỉ cần sử dụng động cơ điện và pin để vận hành, không có van, pít tông động cơ hay bộ chuyển động phải bôi trơn nên việc thay dầu thường xuyên là không cần thiết,</p>
+<p>So với động cơ xăng, động cơ xe ô tô điện đã bỏ đi khoảng 20 bộ phận chuyển động nên việc bảo dưỡng sẽ đơn giản hơn, ít hơn, nhanh chóng hơn.</p>
+<p>Tuy nhiên, một số bộ phận của xe ô tô điện vẫn cần được bao dưỡng định kỳ như:</p>
+<ul> <li><strong>Động cơ điện</strong></li> </ul>
+<p>Động cơ điện chỉ có 2 chi tiết có thể hao mòn theo thời gian là cụm xoay và cụm đứng yên. Hơn thế nữa, động cơ điện không cần nước làm mát, chất bôi trơn, lọc nhớt, dây đai dẫn động và lọc gió… giống như động cơ xăng nên không cần bảo dưỡng, thay thế thường xuyên các chi tiết này.</p>
+<p>Việc bảo dưỡng động cơ điện đơn giản chỉ là vệ sinh, bôi trơn bạc đạn, kiểm tra hệ thống dây dẫn… </p>
+<ul> <li><strong>Chất làm mát pin</strong></li> </ul>
+<p>Để xe ô tô điện chạy ổn định cần kiểm soát, quản lý tốt nhiệt thoát ra từ pin nên nhà sản xuất đã cung cấp chất làm mát cho xe ô tô điện. Nước làm mát có thể sử dụng cho cả bộ kích điện và máy sưởi cabin. Và đây cũng là phần cần được kiểm tra, bảo dưỡng thường xuyên bởi nếu nhiệt độ tăng vượt mức cho phép sẽ dễ gây hư hại đến xe, cháy nổ.</p>
+<ul> <li><strong>Dầu hộp số </strong></li> </ul>
+<p>Đa số xe ô tô điện hiện tại không có hộp số nên cũng không có dầu hộp số. Một số ít mẫu xe điện có dầu hộp số, như mẫu xe điện Taycan của Porsche đã được trang bị hộp số hai cấp, và trong trường hợp này sẽ cần bảo dưỡng định kỳ dầu hộp số. Trong tương lai, nấu các mẫu xe điện được thiết kế hộp số thì chủ xe sẽ cần lưu ý đến vấn đề này.</p>
+<ul> <li><strong>Má phanh</strong></li> </ul>
+<p>Trên thực tế, các dòng xe điện thường dùng <a href="https://vinfastauto.com/vn_vi/cong-nghe-phanh-tai-tao-nang-luong-ung-dung-thong-minh-cho-xe-o-to-dien">hệ thống phanh tái sinh</a> có độ ăn mòn phanh thấp nên rất ít khi phải thay phanh. Tuy nhiên, chủ xe cần kiểm tra thường xuyên để phát hiện kịp thời các vấn đề liên quan đến má phanh, đảm bảo an toàn khi di chuyển.</p>
+<ul> <li><strong>Lốp xe</strong></li> </ul>
+<p>Chủ xe cần kiểm tra thường xuyên <a href="https://vinfastauto.com/vn_vi/ap-suat-lop-la-gi-tieu-chuan-va-cach-do-ap-suat-lop">áp suất lốp</a> cũng như độ ăn mòn của từng lốp xe để tiến hành sửa chữa, thay thế kịp thời. Việc lốp xe quá mòn có thể dẫn đến nhiều nguy hiểm khi xe di chuyển trên đường. </p>
+<ul> <li><strong>Cần gạt nước kính chắn gió</strong></li> </ul>
+<p><a href="https://vinfastauto.com/vn_vi/tim-hieu-cau-tao-va-cach-su-dung-can-gat-nuoc-o-to">Cần gạt nước của xe ô tô</a> điện có cơ chế hoạt động giống như động cơ chạy bằng xăng, dầu nên cần bảo dưỡng, thay lưỡi gạt định kỳ 2 lần/1 năm.</p>
+<ul> <li><strong>Phần mềm trong xe </strong></li> </ul>
+<p>Phần mềm hệ thống quản lý xe cũng cần được cập nhật thường xuyên để có thể kịp thời theo dõi, kiểm soát các thông số của xe, pin xe.</p>
+<ul> <li><strong>Pin </strong></li> </ul>
+<p>Là trái tim của xe điện, pin có thể lưu trữ và cung cấp năng lượng cho các bộ phận khác, giúp xe vận hành an toàn, hiệu quả. <a href="https://vinfastauto.com/vn_vi/tim-hieu-cac-loai-pin-o-to-dien">Các loại pin ô tô điện</a> cần được kiểm tra và bổ sung chất làm mát. Đây là khâu quan trọng vì khi pin xe không được làm mát có thể dẫn đến hiện tượng cháy nổ.</p>
+<p>Để đảm bảo pin được làm mát và hoạt động bình thường, không bị pin ảo, chai pin, hư hỏng… chủ xe cần đưa xe đến các trung tâm bảo dưỡng chuyên nghiệp để nhận tư vấn và theo dõi chất lượng pin định kỳ. </p>
+<p>Bên cạnh đó, chủ xe cần tiến hành bảo dưỡng các bộ phận khác như: Bộ lọc không khí, hệ thống túi khí, đèn chiếu sáng… Nếu bảo dưỡng ô tô đúng cách, sẽ đảm bảo cho quá trình vận hành của ô tô luôn trong trạng thái ổn định, di chuyển êm mượt, tiết kiệm nhiên liệu và duy trì tuổi thọ lâu dài. </p>
+<img alt="Động cơ ô tô điện ít chi tiết hơn rất nhiều so với động cơ chạy xăng"/>
+<p>Động cơ ô tô điện ít chi tiết hơn rất nhiều so với động cơ chạy xăng (Nguồn: Sưu tầm)</p>
+<h2>2. Quy trình bảo dưỡng xe ô tô điện</h2>
+<p>Việc bảo dưỡng ô tô điện giúp xe hoạt động ổn định, nâng cao tuổi thọ của các bộ phận, phát hiện sớm các chi tiết bị hư hỏng, có dấu hiệu hư hỏng để kịp thời sửa chữa giúp xe hoạt động ổn định và an toàn, đồng thời giúp tiết kiệm thời gian và chi phí cho chủ xe.</p>
+<p>Đa số các hãng xe ô tô điện trên thị trường đều áp dụng quy trình bảo hành gồm các bước như sau:</p>
+<ul> <li><strong>Bước 1</strong>: Nhắc nhở khách hàng về thời gian cần bảo dưỡng và cùng khách hàng lên lịch hẹn bảo dưỡng.</li> <li><strong>Bước 2</strong>: Tiếp nhận xe, kiểm tra và tư vấn về phương án bảo dưỡng, sửa chữa phù hợp.</li> <li><strong>Bước 3</strong>: Tiến hành bảo dưỡng, sửa chữa các chi tiết cần thiết.</li> <li><strong>Bước 4</strong>: Bàn giao xe đã được bảo dưỡng cho khách hàng.</li> <li><strong>Bước 5</strong>: Chăm sóc, tư vấn cho khách hàng sau khi xe được bảo dưỡng.</li> </ul>
+<img alt="Quy trình bảo dưỡng xe ô tô đúng sẽ cách được nhà sản xuất hướng dẫn cụ thể cho khách hàng khi mua xe."/>
+<p>Quy trình bảo dưỡng được nhà sản xuất hướng dẫn cụ thể cho khách hàng (Nguồn: Sưu tầm)</p>
+<h2>3. Các mốc bảo dưỡng ô tô điện</h2>
+<p>Hiện nay, các hãng ô tô điện sẽ đưa ra lịch bảo dưỡng định kỳ xe ô tô điện theo thời gian hoặc số km đã di chuyển. Mỗi chi tiết, mỗi bộ phận sẽ có thời gian cần bảo dưỡng khác nhau và được nhà sản xuất hướng dẫn về thời gian bảo dưỡng ngay khi mua xe. Khách hàng cần tuân thủ thời gian bảo dưỡng định kỳ xe ô tô mới mua để đảm bảo xe hoạt động ổn định và an toàn, hiệu quả.</p>
+<p>Ví dụ đối với dòng xe ô tô <a href="https://vinfastauto.com/vn_vi/tong-quan-o-to-dien-vinfast-vf-e34">VinFast VF e34</a> – một trong những ô tô điện nhận được sự quan tâm, yêu thích của người dùng hiện nay như sau:</p>
+<ul> <li><strong>Lọc gió điều hòa</strong>: Thay mới mỗi năm 1 lần kể từ khi mua xe hoặc cứ mỗi khi xe di chuyển quãng đường 12.000km tùy thuộc vào điều kiện đến trước.</li> <li><strong>Dầu phanh</strong>: Cần kiểm tra, điều chỉnh sau 1 năm sử dụng. Tiếp đó, khách hàng cần luân phiên thay mới, kiểm tra mỗi năm 1 lần hoặc mỗi khi xe di chuyển quãng đường 12.000km tùy thuộc vào điều kiện đến trước.</li> <li><strong>Bảo dưỡng điều hòa</strong>: Thay mới 5 năm 1 lần hoặc cứ mỗi khi xe di chuyển được quãng đường 60.000km tùy thuộc vào điều kiện đến trước.</li> <li><strong>Pin khóa điều khiển</strong>: Thay mới 2 năm một lần hoặc sau khi xe di chuyển quãng đường 24.000km tùy thuộc vào điều kiện đến trước.</li> <li><strong>Pin bộ T-box</strong>: Thay mới 6 năm một lần hoặc sau khi xe di chuyển quãng đường 72.00km tùy thuộc vào điều kiện đến trước.</li> <li><strong>Nước làm mát động cơ/pin</strong>: Kiểm tra, điều chỉnh và thay thế (nếu cần) mỗi năm 1 lần hoặc mỗi khi xe di chuyển được quãng đường 12.000km tùy thuộc vào điều kiện đến trước. Đến năm thứ 10 hoặc khi xe di chuyển được 120.000km cần thay mới nước làm mát động cơ/pin.</li> <li><strong>Các hạng mục khác như</strong>: Lốp, má phanh, đĩa phanh, đường ống, đầu nối hệ thống phanh, bộ dẫn động, hệ thống treo, trục truyền động, khớp cầu, thước lái, khớp nối cầu, đường ống làm mát, pin, dây cáp hệ thống điện áp cao, cổng sạc, ắc quy, gạt nước, nước rửa kính cần được kiểm tra, điều chỉnh và thay thế (nếu cần) mỗi năm một lần hoặc mỗi khi xe di chuyển 12.000km tùy thuộc vào điều kiện tới trước.</li> </ul>
+<p>Không chỉ VinFast VF e34, mà tất cả các dòng xe ô tô VinFast đều được dụng <a href="https://vinfastauto.com/vn_vi/bao-duong-dinh-ky">chính sách bảo dưỡng định kỳ</a> bài bản, chuyên nghiệp. Vì vậy, khách hàng khi sở hữu xe ô tô VinFast đều hoàn toàn có thể yên tâm trải nghiệm xe và các dịch vụ chăm sóc khách hàng, bảo hành, bảo dưỡng uy tín, chất lượng. </p>
+<img alt="Lịch bảo dưỡng ô tô điện sẽ được các hãng quy định cụ thể, rõ ràng."/>
+<p>Lịch bảo dưỡng ô tô điện được các hãng quy định cụ thể (Nguồn: Sưu tầm)</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cac-moc-bao-duong-xe-o-to-dinh-ky-quan-trong">7 mốc bảo dưỡng ô tô định kỳ theo số km và thời gian</a></p>
+<h2>4. Chi phí bảo dưỡng ô tô điện có tiết kiệm hơn xe xăng không? </h2>
+<p>Với số lượng các chi tiết cần bảo dưỡng ít hơn xe chạy động cơ đốt trong, không cần thay dầu cho các chi tiết thường xuyên xe điện vẫn hoạt động ổn định, an toàn và hiệu quả nên góp phần giảm thiểu chi phí bảo dưỡng xe ô tô điện. Theo một số báo cáo chuyên môn, trung bình một xe ô tô điện mất khoảng 0.061 đô la Mỹ chi phí bảo dưỡng cho 1.6km nhưng xe ô tô đốt trong cần đến 0.1 đô la Mỹ, tiết kiệm khoảng 40%.</p>
+<p>Hệ thống dẫn động ở xe ô tô điện đã rút gọn 20 bộ phận so với xe động cơ đốt trong nên chi phí và quy trình bảo dưỡng cũng đơn giản, tiết kiệm hơn.</p>
+<p>Bên cạnh đó, hiện nay các công nghệ hiện đại đang giúp tuổi thọ pin gia tăng đáng kể, từ đó có thể tối ưu chi phí thay mới pin, giúp chủ xe tiết kiệm chi phí vận hành tối đa. </p>
+<img alt="Chi phí bảo dưỡng xe điện thấp hơn nhiều so với động cơ đốt trong"/>
+<p>Chi phí bảo dưỡng xe điện thấp hơn nhiều so với động cơ đốt trong </p>
+<p>Bảo dưỡng ô tô điện gồm những gì phụ thuộc vào cấu tạo xe. Và những chia sẻ trên có thể thấy việc bảo dưỡng xe điện tối ưu, tiết kiệm và được xử lý nhanh gọn hơn so với các loại xe xăng. Đây cũng là một trong những lý do vì sao xe ô tô điện đang ngày càng trở nên phổ biến, được nhiều người tin tưởng lựa chọn.</p>
+<p>Nếu muốn trở thành một trong những khách hàng tiên phong sử dụng xe điện tại Việt Nam, quý khách có thể <a href="https://shop.vinfastauto.com/vn_vi/car-vf8.html">đặt cọc xe điện VinFast VF 8</a>, <a href="https://shop.vinfastauto.com/vn_vi/car-vf9.html">VF 9</a>, <a href="https://shop.vinfastauto.com/vn_vi/dat-coc-xe-dien-vf5.html">VF 5 Plus</a> và <a href="https://shop.vinfastauto.com/vn_vi/car-vfe34.html">VF e34</a> ngay hôm nay để được trải nghiệm mẫu ô tô điện đẳng cấp của người Việt. </p>
+<p>Khách hàng vui lòng liên hệ với chúng tôi khi cần hỗ trợ tư vấn về sản phẩm của VinFast: </p>
+<ul> <li>Tổng đài 24/7: <strong>1900 23 23 89</strong></li> <li>Email chăm sóc khách hàng: <a href="/cdn-cgi/l/email-protection#ef9c9a9f9f809d9bc19981af998681898e9c9b8e9a9b80c18c8082">[email protected]</a></li> </ul>
+<p>&gt;&gt; Xem thêm:</p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/tim-hieu-cach-dat-lich-bao-duong-xe-vinfast-online">Tìm hiểu cách đặt lịch bảo dưỡng xe VinFast online</a></li> <li><a href="https://vinfastauto.com/vn_vi/lich-bao-duong-xe-vinfast">Lịch bảo dưỡng xe VinFast định kỳ dành cho ô tô, xe máy điện</a></li> <li><a href="https://vinfastauto.com/vn_vi/dieu-can-biet-ve-bao-duong-va-bao-hanh-xe-o-to">3 điều quan trọng cần biết về bảo hành và bảo dưỡng ô tô</a></li> </ul>
+<p><em>* Thông tin trong bài mang tính chất tham khảo.</em></p>
