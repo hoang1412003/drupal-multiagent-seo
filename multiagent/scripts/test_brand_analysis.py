@@ -27,6 +27,14 @@ def test_strip_html_bo_the_va_thuoc_tinh():
     print("[PASS] strip_html bo the va khong lay thuoc tinh")
 
 
+def test_strip_html_giai_ma_thuc_the():
+    """Khong giai ma thi doan trich lam bang chung hien ra dang
+    '&gt;&gt;&gt; Tim hieu them' thay vi '>>> Tim hieu them'."""
+    assert ">>>" in strip_html("<p>&gt;&gt;&gt; Tìm hiểu thêm</p>")
+    assert "&" in strip_html("<p>Pin &amp; sạc</p>")
+    print("[PASS] strip_html giai ma thuc the HTML")
+
+
 def test_count_variants_uu_tien_bien_the_dai():
     # "xe ô tô điện" CHUA "ô tô điện" - neu khong uu tien dai truoc thi
     # mot lan xuat hien bi dem cho ca hai
