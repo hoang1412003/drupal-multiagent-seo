@@ -8,6 +8,7 @@ tất định (docs/rubrics.md mục 5); 3 agent còn lại vẫn để LLM tự
 Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
 """
 import hashlib
+from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
 
@@ -184,6 +185,69 @@ def _content_hash(fields: dict) -> str:
     """
     ghep = "\n".join(str(fields.get(k) or "") for k in _HASH_FIELDS)
     return hashlib.sha256(ghep.encode("utf-8")).hexdigest()
+
+
+def _issue_to_json(agent_key: str, issue: dict) -> dict:
+    """Một issue/flag của agent -> một mục trong báo cáo JSON.
+
+    Compliance có hình dạng khác 3 agent kia: nó dùng {rule, excerpt,
+    severity} và KHÔNG có trường gợi ý sửa, nên `message` để None. Đặt
+    message = rule sẽ khiến giao diện in cùng một câu hai lần.
+    """
+    if agent_key == "compliance":
+        return {
+            "agent": AGENT_LABELS[agent_key],
+            "label": issue.get("rule", ""),
+            "message": None,
+            "excerpt": issue.get("excerpt") or None,
+            "severity": issue.get("severity"),
+        }
+    return {
+        "agent": AGENT_LABELS.get(agent_key, agent_key),
+        "label": issue.get("type", ""),
+        "message": issue.get("suggestion") or None,
+        "excerpt": None,
+        # Chỉ Compliance định nghĩa mức nghiêm trọng. KHÔNG bịa cho 3 agent
+        # kia - docs/rubrics.md mục 6.1 chủ trương severity phải tra bảng
+        # tất định theo mã tiêu chí.
+        "severity": None,
+    }
+
+
+def _build_report_json(state: ContentReviewState) -> dict:
+    """Dựng báo cáo có cấu trúc cho module vf_ai_review render.
+
+    Chạy song song với chuỗi text ghi vào field_ai_suggestions - chuỗi đó
+    KHÔNG đổi, để khi module chưa bật thì vẫn đọc được (suy giảm mềm).
+    """
+    report = state.get("report") or {}
+    theo_field: dict = {}
+
+    for agent_key, result in (report.get("details") or {}).items():
+        if not isinstance(result, dict):
+            continue      # agent lỗi -> đã phản ánh ở missing_agents/note
+        for key in ISSUE_LIST_KEYS:
+            for issue in result.get(key, []):
+                if not isinstance(issue, dict):
+                    continue
+                field = issue.get("field")
+                if not field:
+                    continue      # không gắn field thì không hiện dưới widget nào
+                theo_field.setdefault(field, []).append(
+                    _issue_to_json(agent_key, issue)
+                )
+
+    return {
+        "version": 1,
+        "scored_at": datetime.now(timezone.utc).isoformat(),
+        "content_hash": _content_hash(state.get("fields") or {}),
+        "decision": report.get("decision"),
+        "final_score": report.get("final_score"),
+        "note": report.get("note"),
+        "veto_reason": report.get("veto_reason"),
+        "missing_agents": report.get("missing_agents", []),
+        "fields": theo_field,
+    }
 
 
 def write_back_node(state: ContentReviewState) -> dict:
