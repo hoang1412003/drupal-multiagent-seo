@@ -1,6 +1,6 @@
 sample_id,source_url,topic_group
 B-001,/vn_vi/cach-lai-xe-o-to-dien,lai_xe_an_toan
-B-002,/vn_vi/huong-dan-cach-di-xe-may-dien-an-toan-va-cach-tang-tuoi-tho-cho-xe,lai_xe_an_toan
+B-002,/vn_vi/cach-di-xe-may-dien-an-toan,lai_xe_an_toan
 B-003,/vn_vi/huong-dan-cach-sac-xe-dien-khong-chai-pin,sac_pin
 B-004,/vn_vi/sac-nhanh-o-to-dien-co-anh-huong-den-kha-nang-van-hanh-cua-xe-khong,sac_pin
 B-005,/vn_vi/luu-y-su-dung-doi-voi-pin-cell-lfp-gotion,sac_pin

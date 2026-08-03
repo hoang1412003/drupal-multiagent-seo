@@ -21,7 +21,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `GOLD` /vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai
 - [ ] `GOLD` /vn_vi/cach-cham-soc-xe-dien-vf-e34
 - [ ] `PERT` /vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho
-- [ ] `BRAND` /vn_vi/huong-dan-cach-di-xe-may-dien-an-toan-va-cach-tang-tuoi-tho-cho-xe
+- [ ] `BRAND` /vn_vi/cach-di-xe-may-dien-an-toan <!-- 2026-08-03: slug cũ /vn_vi/huong-dan-cach-di-xe-may-dien-an-toan-va-cach-tang-tuoi-tho-cho-xe trả 404. Vẫn ĐÚNG bài cũ (tiêu đề không đổi), site chỉ rút ngắn slug - không phải đổi sang bài khác nên không phát sinh thiên vị chọn mẫu. -->
 - [ ] `GOLD` /vn_vi/cach-khoi-dong-xe-may-dien-vinfast
 - [ ] `GOLD` /vn_vi/dinh-nghia-den-projector-la-gi
 
