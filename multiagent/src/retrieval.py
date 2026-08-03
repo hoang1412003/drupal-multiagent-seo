@@ -12,26 +12,31 @@ import os
 import chromadb
 
 _CHROMA_PATH = os.path.join(os.path.dirname(__file__), "kb", "chroma")
-COLLECTION = "kb_factcheck"
+
+# Hai KB, hai collection. Đổi tên từ COLLECTION (bản một collection) vì tên
+# trần không còn nghĩa xác định khi có hai cái.
+COLLECTION_FACTCHECK = "kb_factcheck"
+COLLECTION_BRAND = "kb_brand"
 
 _client = None
 
 
-def _get_collection(chroma_path: str = _CHROMA_PATH):
+def _get_collection(collection_name: str, chroma_path: str = _CHROMA_PATH):
     global _client
     if _client is None:
         _client = chromadb.PersistentClient(path=chroma_path)
-    return _client.get_collection(COLLECTION)
+    return _client.get_collection(collection_name)
 
 
 def retrieve(query: str, content_type: str, langcode: str, *, top_k: int = 3,
              min_similarity: "float | None" = None, embedder=None,
-             collection=None) -> list[dict]:
+             collection=None,
+             collection_name: str = COLLECTION_FACTCHECK) -> list[dict]:
     if embedder is None:
         from embeddings import get_default_embedder
 
         embedder = get_default_embedder()
-    col = collection if collection is not None else _get_collection()
+    col = collection if collection is not None else _get_collection(collection_name)
 
     qvec = embedder.embed([query])[0]
     res = col.query(
@@ -48,7 +53,11 @@ def retrieve(query: str, content_type: str, langcode: str, *, top_k: int = 3,
         hits.append(
             {
                 "text": doc,
-                "model": meta["model"],
+                # Đọc phòng thủ: KB brand không có khoá "model" (chỉ KB
+                # fact-check mới cắt theo đơn vị model xe), và ngược lại KB
+                # fact-check không có "topic_group".
+                "model": meta.get("model", ""),
+                "topic_group": meta.get("topic_group", ""),
                 "score": similarity,
                 "source_url": meta.get("source_url", ""),
             }
