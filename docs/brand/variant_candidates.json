@@ -1,0 +1,10 @@
+{
+  "_note": "Danh sách ỨNG VIÊN do người soạn. Biến thể nào là chuẩn hoàn toàn do thống kê corpus quyết định (build_brand_guideline.py), KHÔNG do thứ tự trong danh sách này.",
+  "model_names": ["VF 3", "VF 5", "VF 6", "VF 7", "VF 8", "VF 9", "VF e34"],
+  "term_pairs": [
+    ["ô tô điện", "xe hơi điện", "xe ô tô điện"],
+    ["xe máy điện", "xe gắn máy điện", "xe máy chạy điện"],
+    ["trạm sạc", "trụ sạc"]
+  ],
+  "address_forms": ["bạn", "quý khách", "khách hàng", "người dùng"]
+}
