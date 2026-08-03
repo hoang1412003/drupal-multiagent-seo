@@ -56,7 +56,12 @@ create_field('field_ai_score', 'float', 'article', 'AI Score');
 // (OUTPUT) Gợi ý sửa, gom theo từng field
 create_field('field_ai_suggestions', 'text_long', 'article', 'AI Suggestions');
 
+// (OUTPUT) Báo cáo có cấu trúc cho module vf_ai_review render.
+// Dùng string_long KHÔNG phải text_long: text_long chạy qua bộ lọc văn bản
+// của Drupal và sẽ bóp méo JSON (đổi ký tự, tự chèn <p>).
+create_field('field_ai_report_json', 'string_long', 'article', 'AI Report (JSON)');
+
 // (INPUT) Meta description để SEO/Compliance Agent chấm
 create_field('field_meta_description', 'string_long', 'article', 'Meta description');
 
-echo "\nHoan tat tao 4 field.\n";
+echo "\nHoan tat tao 5 field.\n";
