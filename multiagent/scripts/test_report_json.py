@@ -11,7 +11,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from graph import _content_hash
 
-FIXTURE = os.path.join(os.path.dirname(__file__), "content_hash_fixture.json")
+# Fixture nam trong drupal/scripts/ chu khong phai canh file nay, vi container
+# DDEV chi mount thu muc drupal/ - phia PHP khong doc duoc gi ben ngoai do.
+# Python chay tren host nen doc duoc ca hai noi, vay rang buoc quyet dinh vi
+# tri la phia PHP.
+FIXTURE = os.path.join(
+    os.path.dirname(__file__), "..", "..", "drupal", "scripts",
+    "content_hash_fixture.json",
+)
 
 
 def test_hash_khop_fixture():
