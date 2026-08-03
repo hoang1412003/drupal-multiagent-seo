@@ -45,8 +45,9 @@ check("field_image null -> alt rỗng",
 captured = {}
 
 
-def _fake_write_back(node_id, status, score, suggestions):
+def _fake_write_back(node_id, status, score, suggestions, report_json=None):
     captured["suggestions"] = suggestions
+    captured["report_json"] = report_json
 
 
 graph.write_back = _fake_write_back  # chặn gọi Drupal thật
@@ -92,5 +93,15 @@ check("lỗi title của SEO và Compliance cùng nằm dưới nhóm title",
 check("không in khóa 'field' thô trong dòng gợi ý", "field:" not in s)
 check("meta_description đứng trước body (đúng FIELD_ORDER)",
       s.index("── Meta description ──") < s.index("── Nội dung (body) ──"))
+
+# --- 3. Báo cáo JSON gom theo cùng bộ field như chuỗi text ----------------
+# Hai đầu ra dựng từ cùng một `report` nên phải nhất quán; lệch nhau nghĩa là
+# module UI và người đọc text thấy hai bức tranh khác nhau.
+rj = captured["report_json"]
+check("báo cáo JSON gom đúng các field như chuỗi text",
+      set(rj["fields"]) == {"title", "meta_description", "body"}, )
+check("mỗi mục trong JSON đều có đủ khóa agent/label/severity",
+      all({"agent", "label", "message", "excerpt", "severity"} <= set(m)
+          for ds in rj["fields"].values() for m in ds))
 
 sys.exit(1 if failed else 0)

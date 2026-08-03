@@ -241,8 +241,12 @@ def _build_report_json(state: ContentReviewState) -> dict:
         "version": 1,
         "scored_at": datetime.now(timezone.utc).isoformat(),
         "content_hash": _content_hash(state.get("fields") or {}),
-        "decision": report.get("decision"),
-        "final_score": report.get("final_score"),
+        # Lấy decision/final_score từ STATE chứ không từ report, vì đó đúng
+        # là nguồn write_back() ghi vào field_ai_status/field_ai_score. Đọc
+        # từ report là tạo nguồn thứ hai cho cùng một giá trị - lệch nhau thì
+        # giao diện và field điểm hiển thị hai con số khác nhau.
+        "decision": state.get("decision"),
+        "final_score": state.get("final_score"),
         "note": report.get("note"),
         "veto_reason": report.get("veto_reason"),
         "missing_agents": report.get("missing_agents", []),
@@ -290,6 +294,7 @@ def write_back_node(state: ContentReviewState) -> dict:
         status=state["decision"],
         score=state["final_score"],
         suggestions="\n".join(lines) or "Không có gợi ý sửa.",
+        report_json=_build_report_json(state),
     )
     return {}
 

@@ -57,6 +57,11 @@ from graph import _build_report_json
 
 STATE_MAU = {
     "node_id": "n1",
+    # State that luon co ca decision/final_score o cap ngoai (aggregator_node
+    # tra ra) LAN trong report. _build_report_json doc cap ngoai - dung nguon
+    # ma write_back() dung, de JSON va field diem khong bao gio lech nhau.
+    "decision": "needs_revision",
+    "final_score": 76.5,
     "fields": {"title": "Tiêu đề", "body": "<p>Nội dung</p>",
                "summary": "Tóm tắt", "meta_description": "Mô tả"},
     "report": {
@@ -131,6 +136,8 @@ def test_agent_thuong_khong_co_excerpt():
 def test_compliance_loi_thi_score_none():
     state = {
         "node_id": "n1",
+        "decision": "needs_revision",
+        "final_score": None,
         "fields": {"title": "T"},
         "report": {"final_score": None, "decision": "needs_revision",
                    "missing_agents": ["compliance"],
@@ -146,7 +153,8 @@ def test_compliance_loi_thi_score_none():
 
 def test_veto_reason_duoc_giu():
     state = {
-        "node_id": "n1", "fields": {"title": "T"},
+        "node_id": "n1", "decision": "rejected", "final_score": 90.0,
+        "fields": {"title": "T"},
         "report": {"final_score": 90.0, "decision": "rejected",
                    "missing_agents": [],
                    "veto_reason": "Bị từ chối do vi phạm Compliance",
@@ -179,6 +187,55 @@ def test_issue_khong_co_field_thi_bo_qua():
     print("[PASS] issue khong co field -> bo qua")
 
 
+def _bat_patch(report_json=None):
+    """Goi write_back() voi _request_with_retry gia, tra ve attributes da gui."""
+    import drupal_client
+
+    da_gui = {}
+
+    def patch_gia(method, url, **kwargs):
+        da_gui.update(kwargs["json"]["data"]["attributes"])
+
+        class R:
+            pass
+        return R()
+
+    that = drupal_client._request_with_retry
+    drupal_client._request_with_retry = patch_gia
+    try:
+        kw = {"node_id": "n1", "status": "publish", "score": 80.0,
+              "suggestions": "text"}
+        if report_json is not None:
+            kw["report_json"] = report_json
+        drupal_client.write_back(**kw)
+    finally:
+        drupal_client._request_with_retry = that
+    return da_gui
+
+
+def test_write_back_gui_ca_hai_field():
+    """write_back phai PATCH ca field_ai_suggestions lan field_ai_report_json."""
+    da_gui = _bat_patch({"version": 1, "fields": {}})
+    assert da_gui["field_ai_suggestions"] == "text"
+    assert "field_ai_report_json" in da_gui, da_gui
+    assert json.loads(da_gui["field_ai_report_json"])["version"] == 1
+    print("[PASS] write_back gui ca 2 field")
+
+
+def test_write_back_khong_co_report_json_van_chay():
+    """Loi goi cu (khong truyen report_json) khong duoc doi hanh vi."""
+    da_gui = _bat_patch(None)
+    assert "field_ai_report_json" not in da_gui, da_gui
+    print("[PASS] khong truyen report_json -> khong gui field do")
+
+
+def test_json_giu_dau_tieng_viet():
+    """ensure_ascii=False de JSON trong DB doc duoc bang mat khi debug."""
+    da_gui = _bat_patch({"x": "Tiêu đề"})
+    assert "Tiêu đề" in da_gui["field_ai_report_json"], da_gui["field_ai_report_json"]
+    print("[PASS] JSON giu nguyen dau tieng Viet")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -196,6 +253,9 @@ if __name__ == "__main__":
         test_veto_reason_duoc_giu,
         test_agent_loi_khong_lam_sap,
         test_issue_khong_co_field_thi_bo_qua,
+        test_write_back_gui_ca_hai_field,
+        test_write_back_khong_co_report_json_van_chay,
+        test_json_giu_dau_tieng_viet,
     ):
         try:
             fn()
