@@ -1,0 +1,10 @@
+{
+  "_note": "Du lieu mau cho test hop dong giua Python va PHP. Ca hai phai tinh ra cung expected_sha256. Ben nao troi lech thi test ben do do.",
+  "fields": {
+    "title": "Hướng dẫn sạc pin ô tô điện VinFast",
+    "body": "<p>Nội dung bài viết mẫu.</p>",
+    "summary": "Tóm tắt ngắn",
+    "meta_description": "Mô tả cho SEO"
+  },
+  "expected_sha256": "eaa72cddd3e11b26dde58e74b13c9f8bee7011a9f6706fdcb7595aab72f82536"
+}
