@@ -13,7 +13,7 @@ Tất cả các phép đo trong `evaluation-plan.md` đều là ảnh chụp t�
 
 | Hạng mục | Trả lời câu hỏi |
 |---|---|
-| **Nhật ký truy vết** | *"Bài này bị chặn hồi tháng trước, vì sao?"* |
+| **Nhật ký truy vết** | *"Bài này bị chặn hồi tháng trước, vì sao?"* — Drupal giữ được *điểm bao nhiêu*, nhưng không giữ *vì sao* (mục 2.1) |
 | **Vòng phản hồi** | *"Hệ thống có còn khớp với phán đoán của người không?"* |
 
 Cả hai đều rẻ nếu thiết kế từ đầu, và gần như không làm được nếu bỏ qua - vì dữ liệu đã mất.
@@ -22,15 +22,36 @@ Cả hai đều rẻ nếu thiết kế từ đầu, và gần như không làm 
 
 ## 2. Nhật ký truy vết
 
-### 2.1. Vấn đề: hiện đang ghi đè, không có lịch sử
+### 2.1. Vấn đề: mất bối cảnh chấm, không phải mất giá trị cũ
 
-`write_back()` PATCH thẳng vào 3 field của node. Lần chấm sau **ghi đè** lần trước. Hệ quả:
+**Đính chính (2026-08-03).** Bản v1 của mục này viết rằng lần chấm sau *"ghi đè"* lần trước nên lịch sử mất hẳn. **Điều đó sai** - kiểm chứng trực tiếp trên Drupal local cho thấy Drupal bật revision trên content type Article, nên mỗi lần `write_back()` PATCH là một revision mới và giá trị cũ được giữ lại:
 
-- Không biết bài từng bị chặn vì lý do gì, nếu sau đó nó được sửa và duyệt lại
-- Không tái dựng được quyết định cũ khi có tranh chấp
-- Không đo được hệ thống trôi theo thời gian
+```sql
+ddev mysql --table -e "SELECT r.entity_id AS nid, r.revision_id AS vid,
+  r.field_ai_score_value AS score, FROM_UNIXTIME(nr.revision_timestamp) AS thoi_diem
+  FROM node_revision__field_ai_score r
+  JOIN node_revision nr ON nr.vid = r.revision_id ORDER BY r.entity_id, r.revision_id;"
+```
 
-Với một hệ thống có **rủi ro pháp lý** - nó chặn nội dung vì lý do tuân thủ luật quảng cáo - việc không thể trả lời *"vì sao bài này bị chặn ngày đó"* là một lỗ hổng thật, không phải chi tiết kỹ thuật.
+```
+nid | vid | score  | thoi_diem
+  1 |   7 |  84.25 | 2026-07-27 03:37:09    <- thời stub (brand luôn = 100)
+  1 |  14 |  84.25 | 2026-07-27 04:52:26
+  1 |  19 | 81.125 | 2026-08-03 08:36:10    <- sau khi gỡ stub, BV6 chưa làm
+  1 |  21 |  81.75 | 2026-08-03 09:09:00    <- sau khi BV6 chạy thật
+```
+
+**Vấn đề thật nằm ở chỗ khác: revision chỉ giữ 3 field AI, không giữ bối cảnh sinh ra chúng.** Cụ thể mất:
+
+| Không được giữ | Hệ quả |
+|---|---|
+| Điểm + issues/flags riêng của từng agent trong 4 agent | Chỉ còn một chuỗi text đã gộp; không tách lại được agent nào chấm bao nhiêu |
+| Trọng số, ngưỡng, model, phiên bản rubric lúc chấm | Con số `84.25` vô nghĩa nếu không biết nó tính bằng công thức nào - xem mục 2.3 |
+| `input_tokens` / `output_tokens` | Không đối chiếu được chi phí thật với ước tính E4 |
+
+Với một hệ thống có **rủi ro pháp lý** - nó chặn nội dung vì lý do tuân thủ luật quảng cáo - biết bài từng bị chấm bao nhiêu điểm mà không tái dựng được *vì sao* vẫn là lỗ hổng thật.
+
+**Ảnh hưởng tới mức ưu tiên:** mục 4 xếp nhật ký truy vết là "Cao" với lý do *"dữ liệu không ghi lúc chạy là mất vĩnh viễn"*. Lý do đó không còn đúng với 3 field AI (Drupal giữ hộ), nhưng **vẫn đúng nguyên với `agent_results`, `config_meta` và `usage`** - ba thứ này không ai giữ hộ cả. Xem mục 4 đã hiệu chỉnh.
 
 ### 2.2. Ghi cái gì
 
@@ -142,8 +163,10 @@ Nếu phần Drupal chưa kịp, có thể thu thủ công trong giai đoạn de
 
 | Hạng mục | Ưu tiên | Vì sao |
 |---|---|---|
-| Nhật ký truy vết | **Cao** | Chỉ vài chục dòng code, và **dữ liệu không ghi lúc chạy là mất vĩnh viễn**. Bật sớm thì các lần chạy gold set ở E1/E3/E5 đã có sẵn log để phân tích |
+| Nhật ký truy vết | **Trung bình-cao** | Chỉ vài chục dòng code. **`agent_results` / `config_meta` / `usage` không ghi lúc chạy là mất vĩnh viễn** - không ai giữ hộ ba thứ này. Bật sớm thì các lần chạy gold set ở E1/E3/E5 đã có sẵn log để phân tích |
 | Vòng phản hồi | Trung bình | Cần module Drupal (`vf_ai_review`) xong trước. Không có nó vẫn demo được |
+
+**Hạ từ "Cao" xuống "Trung bình-cao" (2026-08-03)** sau khi mục 2.1 được đính chính: 3 field AI đã được Drupal giữ qua revision, nên rủi ro "mất trắng dữ liệu" nhỏ hơn bản v1 mô tả. Phần thật sự mất vĩnh viễn thu hẹp lại còn bối cảnh chấm. Hạng mục gấp hơn ở thời điểm này là **UI báo cáo trong editor** - deliverable bắt buộc của đề bài và chưa có dòng code nào (`docs/editor-ui-design.md` mục 1).
 
 **Nhật ký truy vết nên bật trước khi chạy các thí nghiệm**, không phải sau. E1 (chấm 10 bài × 5 lần) sinh ra đúng loại dữ liệu mà log này lưu - có log sẵn thì phân tích phương sai là đọc file, không có thì phải tự chế cách lưu riêng cho thí nghiệm.
 

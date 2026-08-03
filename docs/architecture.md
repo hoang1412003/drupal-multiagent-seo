@@ -429,7 +429,7 @@ Cả hai trường hợp, `note` được Write-back Node đưa lên đầu ph�
 | LLM trả về JSON sai định dạng              | Validate ngay khi nhận; nếu sai, gửi lại yêu cầu kèm thông báo lỗi để LLM tự sửa (1-2 lần), vẫn sai thì coi là agent lỗi.                |
 | Ghi ngược vào Drupal thất bại (Write-back) | Thử lại; nếu vẫn lỗi, ghi log cảnh báo để người quản trị biết bài viết đã được chấm nhưng chưa cập nhật lên CMS.                         |
 
-**Nhật ký truy vết mỗi lần chấm** (khác với log lỗi ở bảng trên): mỗi lần chấm ghi một bản ghi append-only gồm kết quả 4 agent, quyết định, và bối cảnh cấu hình lúc chấm - để trả lời được *"bài này bị chặn hồi tháng trước, vì sao"*. Hiện `write_back()` ghi đè lên lần chấm trước nên lịch sử mất hẳn. Thiết kế: `docs/operations.md`.
+**Nhật ký truy vết mỗi lần chấm** (khác với log lỗi ở bảng trên): mỗi lần chấm ghi một bản ghi append-only gồm kết quả 4 agent, quyết định, và bối cảnh cấu hình lúc chấm - để trả lời được *"bài này bị chặn hồi tháng trước, vì sao"*. Drupal có bật revision nên **3 field AI của lần chấm trước vẫn giữ được** (kiểm chứng 2026-08-03, `docs/operations.md` mục 2.1); thứ mất là **bối cảnh chấm** - kết quả riêng của từng agent, trọng số/ngưỡng/model lúc đó, và token đã dùng. Thiết kế: `docs/operations.md`.
 
 **Trạng thái triển khai (Sprint 1-2):**
 
