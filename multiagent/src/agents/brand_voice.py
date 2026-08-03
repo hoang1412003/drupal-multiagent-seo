@@ -1,0 +1,274 @@
+"""Brand Voice Agent - chấm theo rubric BV1-BV7 (docs/rubrics.md mục 5).
+
+Sáu tiêu chí (BV1-BV5, BV7) đo bằng regex, đối chiếu brand_rules.json sinh
+từ corpus BRAND. Chỉ BV6 (mức độ trang trọng) cần LLM + RAG.
+
+Điểm do src/scoring.py tính TẤT ĐỊNH từ các mức, KHÔNG để LLM tự cho điểm -
+lý do đầy đủ ở docs/rubrics.md mục 1.
+
+Quy tắc an toàn: quy ước nào corpus chưa đủ căn cứ để chốt (docs/brand/
+brand_guideline.md mục "Chưa đủ căn cứ") thì tiêu chí tương ứng trả NA, bị
+loại khỏi cả tử số lẫn mẫu số - KHÔNG cho 0 điểm. Đây không phải trường hợp
+lý thuyết: corpus 16 bài cho thấy VinFast không có quy ước xưng hô thống
+nhất, nên BV4 luôn NA ở phạm vi hiện tại.
+"""
+import json
+import os
+
+from brand_analysis import classify_title_case, count_model_name_usage, count_variants
+from scoring import score_from_criteria
+from text_utils import strip_html
+
+_RULES_PATH = os.path.join(os.path.dirname(__file__), "brand_rules.json")
+_rules_cache = None
+
+# Các field Brand Voice đọc (docs/rubrics.md mục 5)
+_FIELDS = ("title", "body", "summary")
+
+# Ngưỡng đếm lấy nguyên docs/rubrics.md mục 5 - giá trị TẠM chờ calibrate
+# Sprint 3. Từ ngưỡng trở lên là mức 0; từ 1 đến dưới ngưỡng là mức 1.
+_NGUONG_MUC_0 = 3
+
+# Ứng viên xưng hô để phát hiện lẫn lộn. Trùng danh sách trong
+# docs/brand/variant_candidates.json - giữ ở đây vì brand_rules.json chỉ lưu
+# kiểu CHUẨN, còn BV3 cần biết cả các kiểu khác để đếm số kiểu bị lẫn.
+_UNG_VIEN_XUNG_HO = ["bạn", "quý khách", "khách hàng", "người dùng"]
+
+_NHAN = {
+    "BV1": "Sai cách viết tên model (BV1)",
+    "BV2": "Dùng thuật ngữ không chuẩn (BV2)",
+    "BV3": "Xưng hô không nhất quán (BV3)",
+    "BV4": "Xưng hô khác chuẩn thương hiệu (BV4)",
+    "BV5": "Tiêu đề sai quy ước viết hoa (BV5)",
+    "BV6": "Giọng văn lệch chuẩn thương hiệu (BV6)",
+    "BV7": "Dùng từ bị guideline loại (BV7)",
+}
+
+
+def _load_rules() -> dict:
+    global _rules_cache
+    if _rules_cache is None:
+        with open(_RULES_PATH, encoding="utf-8") as f:
+            _rules_cache = json.load(f)
+    return _rules_cache
+
+
+def _muc_theo_so_cho(so_cho: int) -> int:
+    """Đếm được bao nhiêu chỗ sai -> mức. 0 chỗ = đạt, >=3 chỗ = không đạt."""
+    if so_cho == 0:
+        return 2
+    return 0 if so_cho >= _NGUONG_MUC_0 else 1
+
+
+def _tieu_chi(ma: str, level, occurrences=None, suggestion="") -> dict:
+    return {
+        "id": ma,
+        "level": level,
+        "occurrences": occurrences or [],
+        "suggestion": suggestion,
+        "reference": "",     # Task 10 đính đoạn trích corpus làm bằng chứng
+    }
+
+
+def _bv1_ten_model(text_theo_field: dict, rules: dict) -> dict:
+    tong_dung, sai = 0, []
+    for field, text in text_theo_field.items():
+        dung, cac_cho_sai = count_model_name_usage(text, rules["model_names"])
+        tong_dung += dung
+        sai.extend({"field": field, "text": t} for t in cac_cho_sai)
+    if tong_dung == 0 and not sai:
+        # Bài không nhắc model nào -> NA, KHÔNG phải mức 2 (mức 2 nghĩa là
+        # "có nhắc và viết đúng"), nếu không mọi bài không nhắc model đều
+        # được cộng điểm miễn phí.
+        return _tieu_chi("BV1", None)
+    chuan = ", ".join(f"'{m}'" for m in rules["model_names"])
+    return _tieu_chi(
+        "BV1", _muc_theo_so_cho(len(sai)), sai,
+        f"Viết tên model đúng dạng chuẩn ({chuan})." if sai else "",
+    )
+
+
+def _bv2_thuat_ngu(text_theo_field: dict, rules: dict) -> dict:
+    if not rules["terms"]:
+        return _tieu_chi("BV2", None)     # corpus chưa đủ căn cứ chốt thuật ngữ
+    sai, co_nhac, goi_y = [], False, []
+    for term in rules["terms"]:
+        bien_the = [term["standard"]] + term["non_standard"]
+        for field, text in text_theo_field.items():
+            dem = count_variants(text, bien_the)
+            if dem[term["standard"]]:
+                co_nhac = True
+            for v in term["non_standard"]:
+                if dem[v]:
+                    co_nhac = True
+                    sai.extend({"field": field, "text": v} for _ in range(dem[v]))
+                    so_bai, tong = term["docs"]
+                    goi_y.append(
+                        f"Dùng '{term['standard']}' thay cho '{v}' "
+                        f"({so_bai}/{tong} bài chuẩn dùng cách này)."
+                    )
+    if not co_nhac:
+        return _tieu_chi("BV2", None)
+    return _tieu_chi("BV2", _muc_theo_so_cho(len(sai)), sai, " ".join(dict.fromkeys(goi_y)))
+
+
+def _dem_xung_ho(text_theo_field: dict) -> dict[str, int]:
+    """Đếm mọi kiểu xưng hô xuất hiện trong bài.
+
+    Không phụ thuộc brand_rules.json: BV3 (nhất quán trong bài) đo được kể
+    cả khi corpus chưa chốt được chuẩn - đây là hai câu hỏi khác nhau.
+    """
+    tong = {v: 0 for v in _UNG_VIEN_XUNG_HO}
+    for text in text_theo_field.values():
+        for v, so in count_variants(text, _UNG_VIEN_XUNG_HO).items():
+            tong[v] += so
+    return {v: so for v, so in tong.items() if so}
+
+
+def _bv3_nhat_quan(dem: dict) -> dict:
+    if not dem:
+        return _tieu_chi("BV3", None)     # bài không xưng hô với người đọc
+    so_kieu = len(dem)
+    level = 2 if so_kieu == 1 else (1 if so_kieu == 2 else 0)
+    if level == 2:
+        return _tieu_chi("BV3", 2)
+    return _tieu_chi(
+        "BV3", level,
+        [{"field": "body", "text": v} for v in dem],
+        f"Bài lẫn {so_kieu} kiểu xưng hô ({', '.join(dem)}) - chọn một kiểu duy nhất.",
+    )
+
+
+def _bv4_khop_corpus(dem: dict, rules: dict) -> dict:
+    if not dem or not rules["address_form"]:
+        # address_form = None nghĩa là corpus KHÔNG có quy ước xưng hô thống
+        # nhất (trường hợp thật của dự án). Không có chuẩn thì không có gì để
+        # đối chiếu -> NA, không được quy thành lỗi của bài viết.
+        return _tieu_chi("BV4", None)
+    chuan = rules["address_form"]["standard"]
+    dung_nhieu_nhat = max(dem, key=lambda k: dem[k])
+    if dung_nhieu_nhat == chuan:
+        return _tieu_chi("BV4", 2)
+    so_bai, tong = rules["address_form"]["docs"]
+    return _tieu_chi(
+        "BV4", 0, [{"field": "body", "text": dung_nhieu_nhat}],
+        f"Bài xưng hô '{dung_nhieu_nhat}', chuẩn thương hiệu là '{chuan}' "
+        f"({so_bai}/{tong} bài).",
+    )
+
+
+def _bv5_viet_hoa_title(title: str, rules: dict) -> dict:
+    if not title.strip():
+        return _tieu_chi("BV5", None)
+    kieu = classify_title_case(title)
+    if kieu == "ALL_CAPS":
+        # Luôn là mức 0 kể cả khi corpus chưa chốt được quy ước - đây là mã
+        # lỗi B4 đã ghi trong docs/goldset/annotation-guideline.md.
+        return _tieu_chi(
+            "BV5", 0, [{"field": "title", "text": title}],
+            "Tiêu đề viết hoa toàn bộ - viết lại theo quy ước thường.",
+        )
+    if not rules["title_case"]:
+        return _tieu_chi("BV5", None)     # corpus chưa đủ căn cứ
+    if kieu == rules["title_case"]["standard"]:
+        return _tieu_chi("BV5", 2)
+    return _tieu_chi(
+        "BV5", 1, [{"field": "title", "text": title}],
+        f"Tiêu đề dùng kiểu {kieu}, chuẩn thương hiệu là "
+        f"{rules['title_case']['standard']}.",
+    )
+
+
+def _bv7_tu_bi_loai(text_theo_field: dict, rules: dict) -> dict:
+    bi_loai = rules["excluded_terms"]
+    if not bi_loai:
+        return _tieu_chi("BV7", None)
+    tim_thay = []
+    for field, text in text_theo_field.items():
+        for v, so in count_variants(text, bi_loai).items():
+            if so:
+                tim_thay.append({"field": field, "text": v})
+    if not tim_thay:
+        return _tieu_chi("BV7", 2)
+    return _tieu_chi(
+        "BV7", 0, tim_thay,
+        "Từ này không xuất hiện lần nào trong corpus chuẩn - dùng cách diễn "
+        "đạt khác.",
+    )
+
+
+def _bv6_giong_van(fields: dict, judge_bv6, content_type: str, langcode: str) -> dict:
+    """BV6 cần LLM + RAG. Chưa có bộ chấm -> NA, KHÔNG phải 0.
+
+    Task 10 thay bằng bản thật. Giữ NA để lỗi hạ tầng không biến thành hình
+    phạt lên nội dung (spec mục 7.2).
+    """
+    if judge_bv6 is None:
+        return _tieu_chi("BV6", None)
+    try:
+        return judge_bv6(fields, content_type=content_type, langcode=langcode)
+    except Exception:
+        return _tieu_chi("BV6", None)
+
+
+def _issues_from_criteria(criteria: list[dict]) -> list[dict]:
+    """Tiêu chí mức 0/1 -> issue. Mức 2 và NA không sinh gì.
+
+    Một tiêu chí lỗi ở nhiều field sinh MỘT issue cho MỖI field, để
+    write_back_node gom đúng nhóm field (docs/architecture.md mục 6.3).
+    """
+    issues = []
+    for c in criteria:
+        if c["level"] not in (0, 1):
+            continue
+        goi_y = c["suggestion"]
+        if c["reference"]:
+            goi_y = f"{goi_y} Ví dụ trong bài đã đăng: \"{c['reference']}\""
+        cac_field = list(dict.fromkeys(o["field"] for o in c["occurrences"])) or ["body"]
+        for field in cac_field:
+            trich = [o["text"] for o in c["occurrences"] if o["field"] == field]
+            issues.append({
+                "field": field,
+                "type": _NHAN[c["id"]] + (f" - tìm thấy: {', '.join(trich)}" if trich else ""),
+                "suggestion": goi_y,
+            })
+    return issues
+
+
+def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
+        rules: dict | None = None, judge_bv6=None) -> dict | None:
+    """Chấm Brand Voice. Trả None khi không tiêu chí nào áp dụng được.
+
+    `rules` và `judge_bv6` tiêm được để test không cần brand_rules.json thật
+    và không gọi LLM.
+    """
+    if rules is None:
+        rules = _load_rules()
+    text_theo_field = {f: strip_html(fields.get(f, "") or "") for f in _FIELDS}
+
+    if not any(text.strip() for text in text_theo_field.values()):
+        # Bài rỗng: không có chữ nào để đối chiếu. Phải chặn ở đây vì các
+        # tiêu chí dạng "không được có X" (BV7) sẽ trả mức 2 cho bài rỗng -
+        # đúng về mặt logic nhưng thành 100 điểm brand cho một bài không có
+        # nội dung. Trả None = CHƯA chấm được, Aggregator chia lại trọng số.
+        return None
+
+    dem_xung_ho = _dem_xung_ho(text_theo_field)
+    criteria = [
+        _bv1_ten_model(text_theo_field, rules),
+        _bv2_thuat_ngu(text_theo_field, rules),
+        _bv3_nhat_quan(dem_xung_ho),
+        _bv4_khop_corpus(dem_xung_ho, rules),
+        _bv5_viet_hoa_title(fields.get("title", "") or "", rules),
+        _bv6_giong_van(fields, judge_bv6, content_type, langcode),
+        _bv7_tu_bi_loai(text_theo_field, rules),
+    ]
+
+    score = score_from_criteria(criteria)
+    if score is None:
+        return None      # không tiêu chí nào áp dụng -> CHƯA chấm được
+    return {
+        "score": score,
+        "issues": _issues_from_criteria(criteria),
+        "criteria": criteria,
+    }
