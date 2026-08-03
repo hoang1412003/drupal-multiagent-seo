@@ -61,7 +61,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `PERT` /vn_vi/huong-dan-tim-tram-sac-va-showroom-vinfast-tren-website
 
 ### 1.5. Ứng dụng VinFast
-- [ ] `BRAND` /vn_vi/dieu-khien-o-to-dien-vinfast-qua-ung-dung-dien-thoai
+- [ ] `BRAND` /vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1 <!-- 2026-08-03: URL cũ /vn_vi/dieu-khien-o-to-dien-vinfast-qua-ung-dung-dien-thoai trả 403 "You are not authorized to access this page" (node còn tồn tại, bị gỡ xuất bản hoặc hạn chế truy cập), thử lại nhiều lần vẫn vậy. Thay bằng bài cùng nhóm chủ đề `ung_dung`, chọn theo quy tắc máy móc: kết quả đầu tiên cùng chủ đề KHÔNG thuộc GOLD/PERT, không đọc nội dung trước khi chọn. Không rút corpus xuống 9 bài vì `ung_dung` sẽ mất bài BRAND duy nhất, làm phép đo E2 trên G-019/G-020 không thể trúng. -->
 - [ ] `GOLD` /vn_vi/ung-dung-vinfast-cho-o-to-dien
 - [ ] `GOLD` /vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast
 - [ ] `PERT` /vn_vi/huong-dan-su-dung-ung-dung-vinfast
