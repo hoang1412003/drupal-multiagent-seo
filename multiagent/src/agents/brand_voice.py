@@ -179,6 +179,24 @@ def _bv5_viet_hoa_title(title: str, rules: dict) -> dict:
     )
 
 
+def _co_nhac_nhom_thuat_ngu(text_theo_field: dict, rules: dict) -> bool:
+    """Bài có nói tới khái niệm nào trong các nhóm thuật ngữ không?
+
+    Gộp cả dạng chuẩn, dạng thiểu số lẫn dạng bị loại - chỉ cần một trong số
+    đó xuất hiện là bài có bàn tới khái niệm ấy.
+    """
+    moi_dang = list(rules["excluded_terms"])
+    for term in rules["terms"]:
+        moi_dang.append(term["standard"])
+        moi_dang.extend(term["non_standard"])
+    if not moi_dang:
+        return False
+    return any(
+        sum(count_variants(text, moi_dang).values())
+        for text in text_theo_field.values()
+    )
+
+
 def _bv7_tu_bi_loai(text_theo_field: dict, rules: dict) -> dict:
     bi_loai = rules["excluded_terms"]
     if not bi_loai:
@@ -189,6 +207,13 @@ def _bv7_tu_bi_loai(text_theo_field: dict, rules: dict) -> dict:
             if so:
                 tim_thay.append({"field": field, "text": v})
     if not tim_thay:
+        # Không dùng từ bị loại. Nhưng chỉ tính là ĐẠT nếu bài có thật sự
+        # bàn tới khái niệm ấy - bài không nói gì về xe máy thì "không gọi
+        # sai tên xe máy" là thoả mãn RỖNG, không chứng minh được gì. Cho
+        # mức 2 ở đây chính là "tiêu chí thành hằng số" mà rubrics.md mục
+        # 2.2 cảnh báo: mọi bài ngắn/lạc chủ đề đều được cộng điểm miễn phí.
+        if not _co_nhac_nhom_thuat_ngu(text_theo_field, rules):
+            return _tieu_chi("BV7", None)
         return _tieu_chi("BV7", 2)
     return _tieu_chi(
         "BV7", 0, tim_thay,

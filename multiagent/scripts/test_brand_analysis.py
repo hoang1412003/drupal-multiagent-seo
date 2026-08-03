@@ -61,6 +61,15 @@ def test_classify_title_case():
     print("[PASS] classify_title_case phan 3 kieu")
 
 
+def test_title_toan_chu_thuong_khong_phai_sentence_case():
+    """Sentence case = viet hoa chu cai DAU roi phan con lai thuong. Tieu de
+    toan chu thuong khong thoa dieu do - neu gop chung thi tieu de 'test'
+    duoc cham dat quy uoc viet hoa (diem mien phi)."""
+    assert classify_title_case("test") == "LOWERCASE"
+    assert classify_title_case("hướng dẫn sạc pin") == "LOWERCASE"
+    print("[PASS] tieu de toan chu thuong -> LOWERCASE, khong phai SENTENCE_CASE")
+
+
 def test_binom_p_values():
     # Cac gia tri nay quyet dinh nguong ">=9/10" o build_brand_guideline
     cases = {10: 0.00195, 9: 0.02148, 8: 0.10938, 7: 0.34375, 5: 1.0}
@@ -84,6 +93,7 @@ if __name__ == "__main__":
     test_count_model_name_phan_biet_cach_viet()
     test_count_model_name_khong_khop_so_dai_hon()
     test_classify_title_case()
+    test_title_toan_chu_thuong_khong_phai_sentence_case()
     test_binom_p_values()
     test_binom_nguong_9_tren_10()
     print("OK")

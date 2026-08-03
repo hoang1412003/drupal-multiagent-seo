@@ -136,6 +136,31 @@ def test_tat_dinh_nam_lan():
     print(f"[PASS] cham 5 lan ra dung mot diem: {diem.pop()}")
 
 
+def test_bv7_thoa_man_rong_la_na():
+    """HOI QUY - loi that phat hien 2026-08-03 khi chay tren node/7.
+
+    Bai khong noi gi ve khai niem co tu bi loai thi "khong dung tu bi loai"
+    la thoa man RONG - khong chung minh duoc gi. Cho muc 2 o day khien moi
+    bai ngan/lac chu de duoc cong diem mien phi, dung loi "tieu chi thanh
+    hang so" ma rubrics.md muc 2.2 canh bao.
+    """
+    kq = brand_voice.run(
+        {"title": "test", "body": "<p>test</p>", "summary": ""}, rules=RULES
+    )
+    assert _muc(kq, "BV7") is None, kq["criteria"]
+    print("[PASS] bai khong nhac khai niem -> BV7 = NA (thoa man rong)")
+
+
+def test_bv7_dat_khi_bai_co_ban_toi_khai_niem():
+    """Nguoc lai: bai CO ban toi khai niem va dung dung tu -> muc 2 that."""
+    kq = brand_voice.run(
+        {"title": "Hướng dẫn", "body": "ô tô điện rất tiết kiệm.", "summary": ""},
+        rules=RULES,
+    )
+    assert _muc(kq, "BV7") == 2, kq["criteria"]
+    print("[PASS] bai co ban toi khai niem, dung dung tu -> BV7 muc 2")
+
+
 def test_corpus_khong_co_chuan_xung_ho_thi_bv4_na():
     """Truong hop THAT cua du an: 16 bai BRAND khong thong nhat xung ho nen
     brand_rules.json co address_form = None. BV4 phai tra NA, KHONG phai 0 -
@@ -164,6 +189,8 @@ if __name__ == "__main__":
         test_loi_o_hai_field_sinh_hai_issue,
         test_muc_2_va_na_khong_sinh_issue,
         test_tat_dinh_nam_lan,
+        test_bv7_thoa_man_rong_la_na,
+        test_bv7_dat_khi_bai_co_ban_toi_khai_niem,
         test_corpus_khong_co_chuan_xung_ho_thi_bv4_na,
     ):
         try:

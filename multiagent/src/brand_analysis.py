@@ -80,10 +80,17 @@ def _bo_dau(text: str) -> str:
 
 
 def classify_title_case(title: str) -> str:
-    """Phân loại kiểu viết hoa tiêu đề: ALL_CAPS / TITLE_CASE / SENTENCE_CASE.
+    """Phân loại kiểu viết hoa tiêu đề.
+
+    Trả một trong: ALL_CAPS / TITLE_CASE / SENTENCE_CASE / LOWERCASE / UNKNOWN.
 
     TITLE_CASE = quá nửa số từ viết hoa chữ đầu. Mốc "quá nửa" là điểm giữa
     tự nhiên giữa hai kiểu, không phải ngưỡng chọn tuỳ ý.
+
+    LOWERCASE tách riêng khỏi SENTENCE_CASE: sentence case theo định nghĩa là
+    viết hoa chữ cái ĐẦU rồi phần còn lại thường. Tiêu đề toàn chữ thường
+    không thoả điều đó. Gộp chung sẽ khiến tiêu đề kiểu "test" được chấm đạt
+    quy ước viết hoa - đúng loại điểm miễn phí cần tránh.
     """
     chu_cai = [c for c in title if c.isalpha()]
     if not chu_cai:
@@ -93,5 +100,7 @@ def classify_title_case(title: str) -> str:
     tu = [t for t in re.findall(r"\S+", title) if any(c.isalpha() for c in t)]
     if not tu:
         return "UNKNOWN"
+    if not _bo_dau(tu[0])[0].isupper():
+        return "LOWERCASE"
     viet_hoa = sum(1 for t in tu if _bo_dau(t)[0].isupper())
     return "TITLE_CASE" if viet_hoa * 2 > len(tu) else "SENTENCE_CASE"
