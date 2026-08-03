@@ -23,7 +23,7 @@ Tài liệu này chốt: đo cái gì, bằng cách nào, tiêu chí đạt là 
 | Mã | Đo cái gì | Cần có trước | Tiêu chí đạt |
 |---|---|---|---|
 | **E1** | Độ ổn định điểm của agent qua nhiều lần chấm | Agent hiện có (đã xong) | σ điểm < 2 |
-| **E2** | Retrieval lấy đúng đoạn không (recall@k) | KB đã dựng | recall@3 ≥ 0.9 (fact-check) |
+| **E2** | Retrieval lấy đúng đoạn không (recall@k) | KB đã dựng | recall@3 ≥ 0.9 (fact-check) — **đã đo: 1.00 (fact-check), 78,3% vs mốc 21,7% (brand)** |
 | **E3** | Multi-agent có hơn single-agent không | Gold set | (không có ngưỡng - là kết quả nghiên cứu) |
 | **E4** | Chi phí và độ trễ mỗi bài | Agent hiện có (đã xong) | (không có ngưỡng - là số liệu báo cáo) |
 | **E5** | Ngưỡng quyết định tối ưu (calibration) | Gold set + **E1 đạt** | Kappa cao nhất trong dải quét |
@@ -53,7 +53,7 @@ Năm điểm chặn quan trọng:
 1. **E1 chặn E5.** Nếu điểm dao động ±5 thì việc quét ngưỡng theo bước nhảy 2 điểm là vô nghĩa - mọi ngưỡng chọn ra chỉ là nhiễu.
 2. **E1 cũng chặn việc implement rubric.** E1 là thí nghiệm quyết định số phận `rubrics.md`: nếu điểm 0-100 hiện tại đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi, và nên biết **trước** khi viết lại 4 prompt.
 3. **E2 chặn việc nối RAG vào agent** (`rag-design.md` mục 5).
-4. **Brand Voice Agent thật chặn E5.** Xem mục 4.5 - stub hiện tại tạo 25 điểm giả cho mọi bài.
+4. ~~**Brand Voice Agent thật chặn E5.**~~ **ĐÃ GỠ (2026-08-03)** — `brand_voice.py` thay stub, không còn 25 điểm giả. Xem mục 4.5.
 5. **SEO Agent đọc được alt của ảnh trong body chặn E5** (phần tiêu chí SEO9). Xem mục 4.5.
 
 **E1 và E4 chạy được ngay hôm nay** - không phụ thuộc gold set, không phụ thuộc rubric, không phụ thuộc KB. Đây là hai phép đo duy nhất trong danh sách không bị chặn bởi gì cả.
@@ -84,6 +84,17 @@ Năm điểm chặn quan trọng:
 ### 4.2. E2 - recall@k của retrieval
 
 Đã đặc tả đầy đủ ở `rag-design.md` mục 5. Tóm tắt để đặt đúng vị trí trong chuỗi: ~20 cặp `(truy vấn, chunk đúng)` tự soạn, đo tỉ lệ chunk đúng nằm trong top-k, tiêu chí **recall@3 ≥ 0.9** cho KB fact-check. Không đạt thì **sửa chunking trước, đổi embedding sau**.
+
+**Đã chạy cho cả hai KB:**
+
+| KB | Cách đo | Kết quả |
+|---|---|---|
+| fact-check | recall@3 trên 12 truy vấn seed (`scripts/eval_retrieval.py`) | **1.00** |
+| brand | tỉ lệ top-3 cùng nhóm chủ đề vs mốc ngẫu nhiên (`scripts/eval_brand_retrieval.py`) | **78,3% vs 21,7% — gấp 3,6 lần** |
+
+KB brand không dùng recall@k được vì nhiều đoạn cùng chủ đề đều hợp lệ — không tồn tại "một đáp án đúng". Chi tiết cách đo thay thế: `rag-design.md` mục 5.
+
+**Con số 78,3% là chặn dưới, không phải tỉ lệ thật.** Ground truth chỉ gán một nhóm chủ đề mỗi bài, trong khi nhiều bài thuộc hai nhóm — ví dụ G-018 *"tìm trạm sạc bằng App"* bị tính trượt vì retrieval trả về nhóm `ung_dung`, dù các đoạn lấy về nói đúng về *"tìm kiếm trạm sạc bằng app"*. **Không** sửa nhãn để chữa các ca này: sửa sau khi đã nhìn kết quả là tự tạo thiên vị. Để nguyên và báo cáo con số bị đánh giá thấp — lệch về hướng an toàn.
 
 ### 4.3. E3 - Baseline single-agent
 
@@ -157,7 +168,7 @@ Con số này quan trọng vì nó **loại bỏ "tốn kém" khỏi danh sách 
 
 1. **E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.
 2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý.
-3. **Brand Voice Agent phải là agent thật, không còn stub.**
+3. ~~**Brand Voice Agent phải là agent thật, không còn stub.**~~ ✅ **đạt (2026-08-03)**
 4. **SEO Agent phải đọc được `alt` của ảnh nằm trong `body`.**
 
 Hai điều kiện cuối phát hiện ngày 2026-07-30 khi chạy pipeline thật lên `node/7` của Drupal local (bài đầu tiên có ảnh thật). Số liệu đo được, không phải suy luận:
@@ -173,6 +184,16 @@ Hai điều kiện cuối phát hiện ngày 2026-07-30 khi chạy pipeline th�
 | | | | **70.0** |
 
 `brand_node` trong `graph.py` luôn trả `score = 100`. Cộng với Compliance 100 (đúng - bài rỗng thì không vi phạm gì), mọi bài viết đều được **55 điểm sàn miễn phí**, không bài nào xuống dưới mức đó dù tệ đến đâu. Calibrate trên hệ thống này sẽ cho ra ngưỡng phản ánh 25 điểm giả, và ngưỡng đó sai hoàn toàn khi Brand Agent thật đi vào hoạt động. Đây là lý do định lượng cho việc Brand Voice Agent phải xong trước Sprint 3 - mạnh hơn nhiều so với lập luận "vì nó là stub".
+
+**ĐÃ XỬ LÝ (2026-08-03).** Stub được thay bằng agent thật (`docs/superpowers/specs/2026-08-03-brand-voice-agent-design.md`). Đo lại trên chính `node/7`: **70,0 → 57,5**. Nhưng con số đáng chú ý hơn nằm ở 20 bài `GOLD` thật:
+
+| | Stub | Agent thật |
+|---|---|---|
+| Điểm brand trên 20 bài `GOLD` | **một giá trị duy nhất: 100** | dải **75–90**, trung bình 83,5 |
+
+Đây mới là điều quyết định: stub **không phân biệt được bài nào với bài nào**, nên quét ngưỡng trên nó là quét trên một hằng số. Chạy thật end-to-end trên Drupal (`node d115f055`) cho `final_score` 84,25 → **81,75**, tức chỉ còn cách ngưỡng publish (80) đúng 1,75 điểm thay vì 4,25 — 25 điểm giả không chỉ làm điểm cao lên mà còn **đẩy các bài ra xa ranh giới quyết định**, đúng chỗ calibration cần độ nhạy nhất.
+
+**Hệ quả bắt buộc nêu khi báo cáo:** mọi số liệu chấm **trước** ngày 2026-08-03 không so trực tiếp được với số liệu sau, vì thang điểm đã đổi.
 
 **Điều kiện 4 - tiêu chí SEO9 chỉ đo được một phần thực tế.** Cùng bài `node/7` có 2 ảnh: ảnh chính trong `field_image` (alt = "xe vf6") và 1 ảnh chèn trong `body` **không có alt**. Pipeline chỉ bắt được ảnh chính; ảnh thiếu alt trong body lọt lưới hoàn toàn.
 

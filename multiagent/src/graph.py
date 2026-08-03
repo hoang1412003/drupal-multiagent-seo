@@ -3,13 +3,13 @@
 Khớp thiết kế 8 node trong docs/architecture.md:
 Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
 
-Content Quality, SEO và Compliance gọi Claude thật (Sprint 1 + Compliance Agent).
-Brand Voice vẫn là STUB - thuộc phạm vi còn lại của Sprint 2 theo docs/roadmap.md.
+Cả 4 agent đều chạy thật. Brand Voice chấm theo rubric BV1-BV7 và tính điểm
+tất định (docs/rubrics.md mục 5); 3 agent còn lại vẫn để LLM tự cho điểm.
 Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
 """
 from langgraph.graph import END, START, StateGraph
 
-from agents import compliance, content_quality, seo
+from agents import brand_voice, compliance, content_quality, seo
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
 
@@ -35,14 +35,6 @@ def orchestrator_node(state: ContentReviewState) -> dict:
     return {}
 
 
-def _stub_agent_result(name: str) -> dict:
-    return {
-        "score": 100,
-        "issues": [],
-        "note": f"STUB - {name} agent chưa triển khai (xem Sprint 1 tiếp theo)",
-    }
-
-
 def content_quality_node(state: ContentReviewState) -> dict:
     try:
         result = content_quality.run(state["fields"])
@@ -60,7 +52,11 @@ def seo_node(state: ContentReviewState) -> dict:
 
 
 def brand_node(state: ContentReviewState) -> dict:
-    return {"brand_result": _stub_agent_result("Brand Voice")}
+    try:
+        result = brand_voice.run(state["fields"])
+    except Exception:
+        result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
+    return {"brand_result": result}
 
 
 def compliance_node(state: ContentReviewState) -> dict:

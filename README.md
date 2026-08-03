@@ -17,6 +17,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/operations.md`](docs/operations.md) — nhật ký truy vết mỗi lần chấm và vòng phản hồi người duyệt
 - [`docs/goldset/annotation-guideline.md`](docs/goldset/annotation-guideline.md) — quy tắc gán nhãn gold set và cách đo độ tin cậy của nhãn
 - [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
+- [`docs/brand/brand_guideline.md`](docs/brand/brand_guideline.md) — brand guideline **sinh tự động** từ corpus 16 bài `BRAND`, mỗi quy tắc kèm số liệu và p-value chứng minh
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 
 ## Cấu trúc project
@@ -36,15 +37,18 @@ drupal-multiagent-seo/
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
 │   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
-│   │   ├── embeddings.py         # interface Embedder + BGE-M3 self-host (cho RAG fact-check)
+│   │   ├── embeddings.py         # interface Embedder + BGE-M3 self-host (cho cả 2 KB RAG)
 │   │   ├── retrieval.py          # truy vấn KB Chroma theo (content_type, langcode)
-│   │   ├── kb/                   # KB fact-check: specs.json + build_kb.py (nạp vào Chroma)
+│   │   ├── scoring.py            # quy mức rubric 0/1/2/NA ra điểm 0-100 (tất định)
+│   │   ├── brand_analysis.py     # đếm đặc trưng brand + kiểm định nhị thức (dùng chung)
+│   │   ├── text_utils.py         # strip_html dùng chung script offline và agent runtime
+│   │   ├── kb/                   # KB fact-check (specs.json) + KB brand (build_brand_kb.py)
 │   │   ├── agents/
 │   │   │   ├── content_quality.py  # đã triển khai
 │   │   │   ├── seo.py              # đã triển khai
 │   │   │   ├── compliance.py       # đã triển khai (LLM + blacklist + RAG fact-check CP3) - Sprint 2
 │   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
-│   │   │   └── (brand voice)        # Sprint 2 - còn là stub trong graph.py
+│   │   │   └── brand_voice.py       # đã triển khai (rubric BV1-BV7 + RAG) - Sprint 2
 │   │   └── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
 │   └── scripts/                  # seed dữ liệu mẫu + test thủ công
 │
@@ -97,7 +101,7 @@ cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRU
 - [x] Compliance Agent — LLM + rule-based blacklist (`compliance_rules.json`) + **RAG fact-check (CP3)**: KB thông số → BGE-M3 self-host → Chroma; lệch số → flag `critical`, không tra được → không flag (E2 recall@3=1.00 trên KB seed). KB cần verify số thật (`docs/goldset/sources.md` mục 2)
 - [x] Hoàn thiện Aggregator — veto Compliance, fail-safe khi agent lỗi, chia lại trọng số
 - [x] Retry/backoff khi Drupal lỗi mạng/5xx (`docs/architecture.md` mục 7)
-- [ ] Brand Voice Agent dùng RAG — còn là stub trong `graph.py`
+- [x] Brand Voice Agent dùng RAG — rubric BV1–BV7 (`docs/rubrics.md` mục 5), 6/7 tiêu chí đo bằng regex đối chiếu `brand_rules.json`, BV6 chấm giọng văn bằng LLM + RAG trên KB `kb_brand` (1128 chunk từ 16 bài `BRAND`). Điểm do `src/scoring.py` tính **tất định**, không để LLM tự cho điểm — agent đầu tiên áp dụng rubric v1. Brand guideline **tự trích xuất** từ corpus bằng kiểm định nhị thức (p < 0,05 → ngưỡng ≥9/10 tự rơi ra, không phải số tự đặt). E2 đo được 78,3% so với mốc ngẫu nhiên 21,7%
 - [ ] Thu thập & gán nhãn gold set — 33 mẫu đã thu + bóc tách + chèn perturbation (`docs/goldset/labels.csv`), đang gán nhãn
 - [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
 - [ ] UI báo cáo trong editor — đã thiết kế (`docs/editor-ui-design.md`), module `vf_ai_review` chưa viết

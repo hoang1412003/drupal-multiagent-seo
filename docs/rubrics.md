@@ -2,7 +2,7 @@
 
 **Phiên bản:** rubric v1 (2026-07-27)
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0)
-**Trạng thái:** thiết kế - chưa triển khai vào code (xem mục 8)
+**Trạng thái:** đã triển khai cho **Brand Voice Agent** (2026-08-03); 3 agent còn lại chưa (xem mục 8.1)
 
 ---
 
@@ -209,6 +209,25 @@ Rubric v1 chưa vào code. Khi triển khai, các chỗ phải sửa:
 | `scripts/` | Test cho `scoring.py`: cùng bộ `criteria` phải luôn ra cùng điểm; `NA` bị loại khỏi mẫu số |
 
 Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức trọng số Aggregator, cách ghi ngược Drupal.
+
+### 8.1. Trạng thái triển khai (2026-08-03)
+
+Rubric **đã vào code cho Brand Voice Agent** — agent đầu tiên chấm theo mức `0/1/2/NA` và tính điểm tất định:
+
+| File | Trạng thái |
+|---|---|
+| `src/scoring.py` | ✅ `score_from_criteria()` theo đúng công thức mục 2.2. Phần "tra bảng severity cho Compliance" **chưa làm** |
+| `src/agents/brand_voice.py` | ✅ BV1–BV7, output `criteria: [{id, level, occurrences, suggestion, reference}]` |
+| `src/brand_analysis.py`, `src/text_utils.py` | ✅ phần "đo bằng máy" của BV1–BV5, BV7 (thay cho `src/analyzers/` dự kiến) |
+| `src/agents/{content_quality,seo,compliance}.py` | ❌ **vẫn để LLM tự cho `score`** |
+| `src/graph.py` | ✅ Aggregator nhận `score` đã tính sẵn, logic trọng số và veto không đổi — đúng như dự kiến |
+
+**Số liệu đầu tiên cho mục 9.** 6/7 tiêu chí Brand Voice là regex nên chấm lại cùng bài **luôn ra cùng điểm** — kiểm bằng `scripts/test_brand_voice.py` (chạy 5 lần, σ = 0). Chưa so được với thang 0-100 vì Brand Voice không có bản cũ; phép so sánh phương sai đầy đủ cần E1 trên 3 agent còn lại.
+
+**Hai lỗi "điểm miễn phí" phát hiện khi triển khai**, đều là biến thể của đúng vấn đề mục 2.2 cảnh báo, đáng ghi lại vì dễ tái diễn khi làm 3 agent kia:
+
+1. **Thoả mãn rỗng.** BV7 ("không dùng từ bị loại") cho mức `2` với bài không hề bàn tới khái niệm ấy — mọi bài ngắn/lạc chủ đề được cộng điểm miễn phí. Sửa: không nhắc khái niệm → `NA`. **Quy tắc rút ra: tiêu chí dạng phủ định chỉ được tính ĐẠT khi bài thật sự có cơ hội vi phạm.**
+2. **Phân loại quá rộng.** Hàm phân loại kiểu viết hoa xếp tiêu đề toàn chữ thường vào `SENTENCE_CASE`, khiến tiêu đề `"test"` được chấm đạt quy ước. Sửa: tách lớp `LOWERCASE`.
 
 ---
 

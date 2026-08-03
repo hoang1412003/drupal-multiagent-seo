@@ -1,0 +1,17 @@
+sample_id,source_url,topic_group
+B-001,/vn_vi/cach-lai-xe-o-to-dien,lai_xe_an_toan
+B-002,/vn_vi/cach-di-xe-may-dien-an-toan,lai_xe_an_toan
+B-003,/vn_vi/huong-dan-cach-sac-xe-dien-khong-chai-pin,sac_pin
+B-004,/vn_vi/sac-nhanh-o-to-dien-co-anh-huong-den-kha-nang-van-hanh-cua-xe-khong,sac_pin
+B-005,/vn_vi/luu-y-su-dung-doi-voi-pin-cell-lfp-gotion,sac_pin
+B-006,/vn_vi/bao-duong-o-to-dien,bao_duong_chi_phi
+B-007,/vn_vi/so-sanh-xe-may-dien-va-xe-may-xang-chi-phi-su-dung,bao_duong_chi_phi
+B-008,/vn_vi/chi-phi-su-dung-o-to-hang-thang-can-biet,bao_duong_chi_phi
+B-009,/vn_vi/cach-tim-tram-sac-vinfast,tram_sac
+B-010,/vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1,ung_dung
+B-011,/vn_vi/huong-dan-su-dung-xe-may-dien-vinfast-vento-s,lai_xe_an_toan
+B-012,/vn_vi/meo-tiet-kiem-dien-khi-su-dung-xe-may-dien-vinfast,bao_duong_chi_phi
+B-013,/vn_vi/huong-dan-cach-sac-xe-may-dien-moi-mua-dam-bao-tuoi-tho-pin,sac_pin
+B-014,/vn_vi/cach-sac-pin-o-to-dien-VinFast,sac_pin
+B-015,/vn_vi/gioi-thieu-app-vinfast-e-scooter-cho-xe-may-dien-tinh-nang-loi-ich-cach-su-dung,ung_dung
+B-016,/vn_vi/huong-dan-ket-noi-app-vinfast-e-scooter-voi-xe-may-dien-don-gian,ung_dung

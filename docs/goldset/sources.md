@@ -21,7 +21,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `GOLD` /vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai
 - [ ] `GOLD` /vn_vi/cach-cham-soc-xe-dien-vf-e34
 - [ ] `PERT` /vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho
-- [ ] `BRAND` /vn_vi/huong-dan-cach-di-xe-may-dien-an-toan-va-cach-tang-tuoi-tho-cho-xe
+- [ ] `BRAND` /vn_vi/cach-di-xe-may-dien-an-toan <!-- 2026-08-03: slug cũ /vn_vi/huong-dan-cach-di-xe-may-dien-an-toan-va-cach-tang-tuoi-tho-cho-xe trả 404. Vẫn ĐÚNG bài cũ (tiêu đề không đổi), site chỉ rút ngắn slug - không phải đổi sang bài khác nên không phát sinh thiên vị chọn mẫu. -->
 - [ ] `GOLD` /vn_vi/cach-khoi-dong-xe-may-dien-vinfast
 - [ ] `GOLD` /vn_vi/dinh-nghia-den-projector-la-gi
 
@@ -61,7 +61,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `PERT` /vn_vi/huong-dan-tim-tram-sac-va-showroom-vinfast-tren-website
 
 ### 1.5. Ứng dụng VinFast
-- [ ] `BRAND` /vn_vi/dieu-khien-o-to-dien-vinfast-qua-ung-dung-dien-thoai
+- [ ] `BRAND` /vn_vi/huong-dan-cai-dat-ung-dung-vinfast-cho-o-to-dien-p1 <!-- 2026-08-03: URL cũ /vn_vi/dieu-khien-o-to-dien-vinfast-qua-ung-dung-dien-thoai trả 403 "You are not authorized to access this page" (node còn tồn tại, bị gỡ xuất bản hoặc hạn chế truy cập), thử lại nhiều lần vẫn vậy. Thay bằng bài cùng nhóm chủ đề `ung_dung`, chọn theo quy tắc máy móc: kết quả đầu tiên cùng chủ đề KHÔNG thuộc GOLD/PERT, không đọc nội dung trước khi chọn. Không rút corpus xuống 9 bài vì `ung_dung` sẽ mất bài BRAND duy nhất, làm phép đo E2 trên G-019/G-020 không thể trúng. -->
 - [ ] `GOLD` /vn_vi/ung-dung-vinfast-cho-o-to-dien
 - [ ] `GOLD` /vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast
 - [ ] `PERT` /vn_vi/huong-dan-su-dung-ung-dung-vinfast
@@ -87,6 +87,16 @@ Tách thêm `PERT` khỏi `GOLD` (thay vì chèn lỗi vào chính 20 bài `GOLD
 **Cách gán (quyết định trước khi đọc nội dung, để không thiên vị).** Duyệt danh sách theo đúng thứ tự đã liệt kê, chu kỳ 4 bài: bài 1 → `BRAND`, bài 2 → `GOLD`, bài 3 → `GOLD`, bài 4 → `PERT`. Vì các bài được nhóm sẵn theo chủ đề (1.1-1.5), chu kỳ này tự động trải đều cả 3 tập trên mọi chủ đề - không tập nào bị lệch về một mảng nội dung.
 
 **Việc cần làm thêm:** 10 bài `BRAND` là mức tối thiểu để thống kê tần suất. Muốn phát biểu kiểu *"92% bài dùng 'ô tô điện'"* đủ vững thì nên thu thêm ~10 URL nữa cho riêng tập `BRAND` (bằng Google search như trên) - thu thêm cho `BRAND` **không** làm giảm gold set, vì hai tập rời nhau.
+
+### 1.7. Trạng thái thu thập tập `BRAND` (2026-08-03)
+
+**Đã thu 16 bài**, bóc tách sang `docs/brand/corpus/`, manifest ở `docs/brand/corpus_index.csv`. Guideline sinh ra tại `docs/brand/brand_guideline.md`.
+
+Mở rộng từ 10 lên 16 bài **có căn cứ định lượng, không phải cảm tính**: với 10 bài, nhóm "xe máy điện" chỉ được bàn trong 4 bài nên dù đồng thuận tuyệt đối 4/4 vẫn chỉ cho p = 0,125 — đó là **thiếu phủ sóng chủ đề**, không phải bất đồng thật. 6 bài bổ sung nhắm đúng chủ đề xe máy điện và sạc pin, chọn **mù với cách bài đó dùng thuật ngữ nào** (không thể biết trước khi thu). Kết quả: nhóm đó lên 10/10, p = 0,002.
+
+**Không thu thêm nữa** dù nhóm "trạm sạc" đang ở 9/11 (p = 0,065), chỉ thiếu chút là đạt. Lý do: lần mở rộng vừa rồi chính đáng vì lý do là *thiếu phủ sóng*, biết trước khi nhìn kết quả; còn thu thêm bây giờ thì lý do là *"p đang gần 0,05"* — tức thu đến khi nào có ý nghĩa thì dừng, đúng lỗi thống kê **optional stopping**, làm mọi con số p mất giá trị.
+
+Hai URL phải đổi trong quá trình thu, đã ghi chú ngay tại dòng tương ứng ở mục 1.1 và 1.5.
 
 ---
 

@@ -1,0 +1,17 @@
+{
+  "_note": "Danh sách ỨNG VIÊN do người soạn. Biến thể nào là chuẩn hoàn toàn do thống kê corpus quyết định (build_brand_guideline.py), KHÔNG do thứ tự trong danh sách này.",
+  "_removed": [
+    {
+      "candidate": "xe ô tô điện",
+      "removed_on": "2026-08-03",
+      "reason": "KHÔNG phải biến thể cạnh tranh của 'ô tô điện' mà là chính cụm đó có thêm danh từ loại thể 'xe' đứng trước. Bằng chứng đo trên corpus: 40 lần xuất hiện, trong đó 13 lần ngay sau 'lái' ('lái xe ô tô điện'), còn lại sau 'mẫu', 'dòng', 'hãng', 'bảo dưỡng', 'sử dụng', 'cho', 'của' - mọi trường hợp 'xe' đều thuộc cụm đứng trước, không thuộc tên gọi. Giữ lại thì B-001 bị tính là 'bỏ phiếu cho xe ô tô điện' trong khi tác giả chỉ đang viết 'cách lái xe ô tô điện' bình thường. Đây là sửa LỖI CỦA DANH SÁCH ỨNG VIÊN, không phải chọn kết quả theo ý muốn - phần phán quyết biến thể nào chuẩn vẫn do dữ liệu."
+    }
+  ],
+  "model_names": ["VF 3", "VF 5", "VF 6", "VF 7", "VF 8", "VF 9", "VF e34"],
+  "term_pairs": [
+    ["ô tô điện", "xe hơi điện"],
+    ["xe máy điện", "xe gắn máy điện", "xe máy chạy điện"],
+    ["trạm sạc", "trụ sạc"]
+  ],
+  "address_forms": ["bạn", "quý khách", "khách hàng", "người dùng"]
+}

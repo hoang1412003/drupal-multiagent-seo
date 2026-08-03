@@ -1,0 +1,28 @@
+title: LƯU Ý SỬ DỤNG ĐỐI VỚI PIN CELL LFP/GOTION
+url_alias: /vn_vi/luu-y-su-dung-doi-voi-pin-cell-lfp-gotion
+meta_description: 
+summary: Xuất phát từ những phản hồi thực tế của khách hàng trong quá trình sử dụng, đồng thời nhằm hỗ trợ Quý khách vận hành xe hiệu quả, ổn định và bền bỉ theo thời gian, VinFast xin chia sẻ các lưu ý quan trọng giúp tối ưu hiệu năng và kéo dài tuổi thọ pin LFP/Gotion trên các dòng xe VinFast.
+---
+<img alt="lưu ý sử dụng pin"/>
+<p> </p>
+<p>Quý khách vui lòng tham khảo và áp dụng các lưu ý dưới đây để đảm bảo trải nghiệm sử dụng xe luôn an tâm và tối ưu nhất.</p>
+<p><strong>1. Dải hoạt động tối ưu của BMS (Battery Management System)</strong></p>
+<p>Pin LFP/Gotion hoạt động tốt nhất trong khoảng <strong>20% – 100% SoC (State of Charge).</strong></p>
+<p>Quý khách nên duy trì mức pin trong khoảng này. Khi pin dưới 20%, <strong>nên sạc ngay.</strong></p>
+<p><strong>2. Sạc đầy định kỳ</strong></p>
+<p>Theo khuyến cáo từ VinFast, <strong>ít nhất 1 lần/tháng cần sạc pin đầy 100%.</strong></p>
+<p>Trước khi sạc đầy:</p>
+<ul> <li>Chạy xe để SoC xuống <strong>20%.</strong></li> <li>Sau đó để xe ở trạng thái <strong>ngủ ít nhất 2 giờ </strong>trước khi sạc.</li> <li><strong>Mục đích: </strong>BMS cân bằng cell, đảm bảo các cell hoạt động chuẩn và đồng đều. (Điều này rất quan trọng để duy trì tuổi thọ và hiệu suất pin).</li> </ul>
+<p><strong>3. Tránh giữ pin ở mức 100% quá lâu</strong></p>
+<p>Không nên để xe ở trạng thái <strong>pin đầy 100% trong thời gian dài mà không sử dụng.</strong></p>
+<p><strong>4. Hạn chế sạc siêu nhanh liên tục</strong></p>
+<p>Nếu không cần thiết, <strong>không nên sử dụng liên tục các trạm sạc nhanh (≥120 kW).</strong></p>
+<p>Sạc nhanh thường xuyên có thể ảnh hưởng đến tuổi thọ pin.</p>
+<p>*<strong>Thông tin thêm:</strong> Ngoài ra, VinFast có ghi nhận một số phản ánh về hiện tượng <strong>giảm SoC bất thường </strong>và <strong>quãng đường dự kiến không đúng thực tế</strong>. Chúng tôi xin giải thích và khuyến cáo như sau:</p>
+<p><strong>Nguyên nhân:</strong></p>
+<ul> <li>Thuật toán hiệu chỉnh SoC để tính toán chính xác với thực tế vận hành.</li> <li>Quãng đường dự kiến được tính theo điều kiện di chuyển hỗn hợp. Khi chạy cao tốc, mức tiêu hao năng lượng sẽ cao hơn, hệ thống BMS sẽ điều chỉnh lại công suất dòng điện trong pin.</li> </ul>
+<p><strong>Khuyến cáo:</strong></p>
+<ul> <li>SoC có sai số khoảng 5%, nên hạn chế di chuyển khi SoC <strong>&lt;5%.</strong></li> <li>Nếu có hiện tượng giảm SoC bất thường về khoảng 10-20%, Quý khách vận hành xe bình thường. Khi có bản phần mềm mới nhất ban hành, Quý khách vui lòng cập nhật để khắc phục tình trạng này.</li> <li>Nếu SoC về 0%, <strong>không cố di chuyển xe</strong>. Hãy đánh xe vào lề, tắt máy, bật cảnh báo dừng khẩn cấp (Dùng điện ắc quy 12V, không ảnh hưởng pin cao áp).</li> <li>Nếu có hiện tượng giảm SoC bất thường về 0%, Quý khách vui lòng mang xe đến <strong>Xưởng dịch vụ VinFast</strong> để kiểm tra.</li> </ul>
+<p><strong>*Lưu ý:</strong></p>
+<p>Đây là những khuyến cáo chính thức từ VinFast nhằm giúp Quý khách vận hành xe điện an toàn và hiệu quả.</p>
+<p>Nếu gặp bất kỳ vấn đề nào về xe, xin vui lòng liên hệ Hotline 1900 23 23 89 hoặc đến Xưởng dịch vụ VinFast gần nhất để được hỗ trợ.</p>
