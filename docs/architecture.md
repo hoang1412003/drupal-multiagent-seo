@@ -206,11 +206,21 @@ Thiết kế RAG chi tiết (embedding tiếng Việt, vector DB, chunking, các
 
 Vector database được phân vùng theo `langcode` để guideline tiếng Việt không lẫn với ngôn ngữ khác khi mở rộng đa ngôn ngữ sau này.
 
+**Trạng thái hiện tại (Sprint 2):** `brand_voice.py` **đã triển khai (2026-08-03)** — thiết kế đầy đủ ở `docs/superpowers/specs/2026-08-03-brand-voice-agent-design.md`.
+
+Đây là agent **đầu tiên áp dụng rubric v1**: chấm theo 7 tiêu chí BV1–BV7 với mức `0/1/2/NA` (`docs/rubrics.md` mục 5), rồi `src/scoring.py` quy các mức đó ra điểm bằng **hàm tất định** — không để LLM tự đặt `score` như 3 agent còn lại. 6/7 tiêu chí đo bằng regex; chỉ BV6 (mức độ trang trọng) gọi LLM + RAG, nên Claude lỗi hay KB chưa dựng thì agent vẫn chấm được 6 tiêu chí kia thay vì mất trắng.
+
+Brand guideline **tự trích xuất từ corpus 16 bài `BRAND`**: người nêu danh sách ứng viên biến thể, **dữ liệu quyết định** biến thể nào chuẩn. Một quy ước chỉ thành quy tắc khi lệch khỏi 50-50 ở mức có ý nghĩa thống kê (kiểm định nhị thức, p < 0,05) — với 10 bài thì ngưỡng **≥9/10 tự rơi ra từ phép kiểm định**, không phải con số ai đặt. Quy ước chưa đủ căn cứ → tiêu chí trả `NA` (loại khỏi cả tử số lẫn mẫu số), **không** cho 0 điểm.
+
+Kết quả thực tế trên corpus: 2 quy tắc thuật ngữ + quy ước viết hoa tiêu đề + 2 từ bị loại đạt mức ý nghĩa; **xưng hô KHÔNG đạt** — 16 bài chia phiếu `người dùng` 8 / `bạn` 4 / `khách hàng` 3 / `quý khách` 1, tức VinFast không có quy ước xưng hô thống nhất, nên BV4 luôn `NA` ở phạm vi hiện tại.
+
 **Output:**
 
 ```
-{ "score": 0-100, "issues": [{"field","rule","found_text","expected"}] }
+{ "score": 0-100, "issues": [{"field","type","suggestion"}], "criteria": [...] }
 ```
+
+`criteria` là phần thêm vào so với 3 agent kia: mỗi tiêu chí kèm mức, trích dẫn nguyên văn và đoạn corpus làm bằng chứng. Sprint 3 nhờ đó so được **cả lý do** chứ không chỉ nhãn (`docs/rubrics.md` mục 7).
 
 ### 5.4. Compliance Agent
 

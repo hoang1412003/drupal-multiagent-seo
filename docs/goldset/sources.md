@@ -88,6 +88,16 @@ Tách thêm `PERT` khỏi `GOLD` (thay vì chèn lỗi vào chính 20 bài `GOLD
 
 **Việc cần làm thêm:** 10 bài `BRAND` là mức tối thiểu để thống kê tần suất. Muốn phát biểu kiểu *"92% bài dùng 'ô tô điện'"* đủ vững thì nên thu thêm ~10 URL nữa cho riêng tập `BRAND` (bằng Google search như trên) - thu thêm cho `BRAND` **không** làm giảm gold set, vì hai tập rời nhau.
 
+### 1.7. Trạng thái thu thập tập `BRAND` (2026-08-03)
+
+**Đã thu 16 bài**, bóc tách sang `docs/brand/corpus/`, manifest ở `docs/brand/corpus_index.csv`. Guideline sinh ra tại `docs/brand/brand_guideline.md`.
+
+Mở rộng từ 10 lên 16 bài **có căn cứ định lượng, không phải cảm tính**: với 10 bài, nhóm "xe máy điện" chỉ được bàn trong 4 bài nên dù đồng thuận tuyệt đối 4/4 vẫn chỉ cho p = 0,125 — đó là **thiếu phủ sóng chủ đề**, không phải bất đồng thật. 6 bài bổ sung nhắm đúng chủ đề xe máy điện và sạc pin, chọn **mù với cách bài đó dùng thuật ngữ nào** (không thể biết trước khi thu). Kết quả: nhóm đó lên 10/10, p = 0,002.
+
+**Không thu thêm nữa** dù nhóm "trạm sạc" đang ở 9/11 (p = 0,065), chỉ thiếu chút là đạt. Lý do: lần mở rộng vừa rồi chính đáng vì lý do là *thiếu phủ sóng*, biết trước khi nhìn kết quả; còn thu thêm bây giờ thì lý do là *"p đang gần 0,05"* — tức thu đến khi nào có ý nghĩa thì dừng, đúng lỗi thống kê **optional stopping**, làm mọi con số p mất giá trị.
+
+Hai URL phải đổi trong quá trình thu, đã ghi chú ngay tại dòng tương ứng ở mục 1.1 và 1.5.
+
 ---
 
 ## 2. Trang thông số model - knowledge base cho fact-check

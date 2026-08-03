@@ -1,7 +1,7 @@
 # Thiết kế RAG: Brand Voice KB và Fact-check KB
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** thiết kế - chưa triển khai vào code
+**Trạng thái:** **đã triển khai cả hai KB** — fact-check 2026-07-31 (CP3), brand 2026-08-03
 **Liên quan:** `docs/architecture.md` mục 5.3 (Brand Voice) và 5.4 (Compliance fact-check); `docs/rubrics.md` mục 5-6
 
 ---
@@ -122,6 +122,23 @@ Không thể đánh giá retrieval bằng cảm nhận. Nếu retrieval trả v�
 
 Đây cũng là chỗ so sánh embedding local với Voyage nếu làm - cùng một bộ eval, hai con số recall@k.
 
+### 5.1. Cách đo thực tế đã dùng cho KB brand (2026-08-03)
+
+Recall@k với "một chunk đúng" **không áp dụng được cho KB brand**: fact-check có đúng một đáp án (khối thông số VF 8), còn ở đây nhiều đoạn cùng chủ đề đều hợp lệ. Thay bằng:
+
+```
+Truy vấn : title của 20 bài GOLD (đã biết thuộc nhóm chủ đề nào)
+Đo       : trong top-3 trả về, bao nhiêu đoạn đến từ bài BRAND CÙNG nhóm chủ đề
+Mốc so   : tỉ trọng SỐ CHUNK của nhóm đó trong KB (không phải số bài - bài dài
+           góp hàng trăm chunk nên xác suất bốc trúng cao hơn hẳn)
+```
+
+Ground truth lấy sẵn từ nhóm chủ đề đã có ở `docs/goldset/sources.md` mục 1.1–1.5 và `docs/brand/corpus_index.csv` — **không phải soạn 20 cặp bằng tay** như mục 5 dự kiến. Script: `scripts/eval_brand_retrieval.py`.
+
+**Kết quả: 78,3% (47/60) so với mốc ngẫu nhiên 21,7% — cao gấp 3,6 lần.** Theo nhóm: `ung_dung` 100%, `bao_duong_chi_phi` 94%, `sac_pin` 83%, `lai_xe_an_toan` 50% (mốc 30%), `tram_sac` 50% (mốc 6%).
+
+**Đây là chặn dưới.** Ground truth một nhãn/bài, trong khi nhiều bài thuộc hai nhóm — kiểm chứng cụ thể: G-002 *"chăm sóc xe VF e34"* bị tính trượt vì retrieval trả về `bao_duong_chi_phi`, nhưng "chăm sóc xe" **đúng** là bảo dưỡng; G-018 *"tìm trạm sạc bằng App"* bị tính trượt vì trả về `ung_dung`, nhưng bài đó thuộc cả hai nhóm. Không sửa nhãn để chữa: sửa sau khi đã nhìn kết quả là tự tạo thiên vị.
+
 ---
 
 ## 6. Chi phí và độ trễ
@@ -157,9 +174,9 @@ Số liệu API hiện hành (model đang dùng: `claude-haiku-4-5`, xem `multia
 
 | File | Thay đổi |
 |---|---|
-| `src/kb/` *(mới)* | Nạp KB: đọc nguồn → Contextual Retrieval → chunk → embed → ghi Chroma. Chạy offline, không nằm trong pipeline chấm |
-| `src/retrieval.py` *(mới)* | Truy vấn theo `(content_type, langcode)`, trả top-k kèm điểm similarity; dưới ngưỡng → trả rỗng |
-| `src/agents/brand_voice.py` *(mới)* | BV1-BV5, BV7 bằng regex; BV6 dùng đoạn truy xuất làm ví dụ đối chiếu; đính đoạn trích làm bằng chứng cho gợi ý sửa |
+| `src/kb/` *(mới)* | Nạp KB: đọc nguồn → Contextual Retrieval → chunk → embed → ghi Chroma. Chạy offline, không nằm trong pipeline chấm. **Đã triển khai:** `build_kb.py` (fact-check) + `build_brand_kb.py` (brand, 1128 chunk từ 16 bài) |
+| `src/retrieval.py` *(mới)* | Truy vấn theo `(content_type, langcode)`, trả top-k kèm điểm similarity; dưới ngưỡng → trả rỗng. **Đã triển khai**, nhận thêm `collection_name` để phục vụ cả 2 KB |
+| `src/agents/brand_voice.py` *(mới)* | BV1-BV5, BV7 bằng regex; BV6 dùng đoạn truy xuất làm ví dụ đối chiếu; đính đoạn trích làm bằng chứng cho gợi ý sửa. **Đã triển khai (2026-08-03)** |
 | `src/agents/compliance.py` | CP3: trích claim định lượng → truy vấn KB → so sánh. Không tìm thấy → mức `1`, không phải `0` |
 | `requirements.txt` | `chromadb`, `sentence-transformers` (hoặc `voyageai` nếu chọn API) |
 | `scripts/` | Test bộ eval retrieval: recall@k trên ~20 cặp |
