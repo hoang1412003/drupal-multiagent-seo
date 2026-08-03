@@ -1,0 +1,46 @@
+title: Hướng dẫn kết nối app VinFast E-Scooter với xe máy điện đơn giản
+url_alias: /vn_vi/huong-dan-ket-noi-app-vinfast-e-scooter-voi-xe-may-dien-don-gian
+meta_description: Chỉ với 5 bước đơn giản giúp người dùng kết nối app VinFast E-Scooter với xe máy điện nhanh chóng để trải nghiệm các tiện ích vượt trội như: tra cứu thông tin xe, chống trộm, tìm điểm đổi pin,...
+summary: Nắm vững hướng dẫn kết nối app VinFast E-Scooter với xe máy điện giúp bạn dễ dàng trải nghiệm các tiện ích thông minh thông qua smartphone, từ tra cứu thông tin, định vị phương tiện, cho đến kích hoạt tính năng chống trộm, tìm điểm đổi/sạc pin...
+---
+<h2>1. Hướng dẫn kết nối app VinFast E-Scooter với xe máy điện cực đơn giản với 5 bước</h2>
+<p>Ứng dụng E-Scooter là 1 trong 7 công nghệ nổi bật được tích hợp trên xe máy điện VinFast giúp người dùng theo dõi, giám sát và quản lý phương tiện tiện lợi. </p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/7-dinh-cao-cong-nghe-tren-xe-may-dien-vinfast">7 đỉnh cao công nghệ trên xe máy điện VinFast</a></p>
+<p>Để kết nối xe máy điện VinFast với app E-Scooter, trước tiên cần cài đặt và đăng ký thành công tài khoản trên app qua các bước đơn giản dưới đây: </p>
+<p>Bước 1: Truy cập ứng dụng App Store (đối với hệ điều hành IOS) hoặc CH Play (đối với hệ điều hành Android) để tải và cài đặt ứng dụng VinFast E-Scooter cho điện thoại.</p>
+<p>Bước 2: Mở app E-Scooter. Nếu đã có tài khoản thì tiến hành “Đăng nhập”. Trường hợp chưa có tài khoản, cần đăng ký bằng cách chọn “Tạo tài khoản”.</p>
+<p>Bước 3: Nhập số điện thoại đã đăng ký xe và đặt Password cho tài khoản. </p>
+<p>Bước 4: Nhập mã OTP hệ thống gửi về tin nhắn của số điện thoại đã đăng ký tài khoản E-Scooter.</p>
+<p>Bước 5: Tài khoản đã được tạo thành công, chọn “Bắt đầu” để có thể sử dụng ứng dụng. </p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/gioi-thieu-app-vinfast-e-scooter-cho-xe-may-dien-tinh-nang-loi-ich-cach-su-dung">Giới thiệu app VinFast E-Scooter: Tính năng, lợi ích, cách sử dụng</a></p>
+<img alt="Hướng dẫn kết nối app VinFast E-Scooter với xe máy điện"/>
+<p>Ứng dụng E-Scooter mang lại nhiều tiện ích thông minh cho chủ phương tiện xe máy điện VinFast </p>
+<p>Sau khi cài đặt ứng dụng E-Scooter thành công, hãy thực hiện các bước hướng dẫn kết nối app VinFast với xe máy điện sau để có thể sử dụng những tính năng thông minh mà VinFast đã trang bị cho <a href="https://shop.vinfastauto.com/vn_vi/vinfast-bike.html">những mẫu xe máy điện hiện đại bậc nhất</a> của mình. Lưu ý, việc kết nối Bluetooth chỉ có ở các dòng xe Theon, Vento, Theon S, Vento S và Klara S. <br/> </p>
+<p><strong>Bước 1: </strong>Ứng dụng đã được VinFast ghép sẵn với xe, người dùng có thể kiểm tra thông tin xe trên Ứng dụng. Để chuẩn bị kết nối, người dùng cần bật xe, bật Ứng dụng và cầm sẵn khoá điều khiển từ xa hoặc Smart key trong tay. <br/> </p>
+<p><strong>Bước 2: </strong>Người dùng nhấn vào biểu tượng Bluetooth trên hình xe, một trang hướng dẫn hiện ra. Sau đó, người dùng cần đọc kỹ hướng dẫn và làm bước tiếp theo. <br/> </p>
+<p><strong>Bước 3: </strong>Để lấy mã bảo mật, người dùng cần nhấn giữ nút Tìm xe trên khóa điều khiển từ xa hoặc Smart key khoảng 5 giây. Mã bảo mật gồm 6 chữ số sẽ xuất hiện trên vùng hiển thị ODO của xe.<br/> </p>
+<p><strong>Bước 4:</strong> Bước cuối cùng là thao tác nhập mã bảo mật và hoàn thành kết nối. Người dùng chọn “Enter code” - “Nhập mã” ở trên Ứng dụng và nhập mã bảo mật trên màn hình vào Ứng dụng. Sau đó Ứng dụng mất vài giây để kết nối với xe. Khi quá trình đã hoàn thành, biểu tượng Bluetooth trên Ứng dụng sáng màu xanh, trên màn hình xe hiển thị biểu tượng Bluetooth.</p>
+<h2>2. Tiện ích thông minh từ app VinFast E-scooter</h2>
+<p>Thực hiện theo hướng dẫn kết nối app VinFast với xe máy điện thành công là bạn có thể làm chủ phương tiện của mình chỉ bằng smartphone với nhiều tiện ích thông minh dưới đây: </p>
+<h3>2.1. Tra cứu thông tin về xe</h3>
+<p>Thông qua ứng dụng E-Scooter, bạn có thể nắm bắt mọi thông tin của phương tiện. Các thông tin về xe như lịch sử hành trình, dung lượng pin, quãng đường đã di chuyển,... </p>
+<img alt="Hướng dẫn kết nối tính năng app VinFast E-Scooter với xe máy điện nhanh chóng"/>
+<p>App E-Scooter cho phép người dùng tra cứu lịch sử hành trình của xe máy điện VinFast nhanh chóng </p>
+<h3>2.2. Chống trộm ưu việt</h3>
+<p>Sau khi kết nối xe với ứng dụng E-Scooter trên điện thoại, bạn sẽ dễ dàng bảo vệ phương tiện dù bất cứ ở đâu nhờ được cảnh báo chống trộm nhanh chóng ngay khi hệ thống phát hiện xe bị ai đó dịch chuyển, tác động. </p>
+<img alt="Hướng dẫn kết nối app VinFast E-Scooter với xe máy điện có khả năng cảnh báo chống trộm nhạy bén"/>
+<p>E-Scooter có khả năng cảnh báo chống trộm nhạy bén </p>
+<h3>2.3. Tìm xe trong bãi đơn giản và nhanh chóng</h3>
+<p>Giữa bãi đậu xe rộng lớn, thật khó khăn để tìm thấy chiếc xe của bạn nằm ở vị trí nào. Tuy nhiên với app VinFast E-Scooter, bạn không cần mệt mỏi để tìm xe bởi tính năng định vị toàn cầu sẽ giúp bạn xác định chính xác vị trí của xe, tìm được xe nhanh chóng.</p>
+<img alt="định vị vị trí xe thông qua và hướng dẫn kết nối app VinFast E-Scooter với xe máy điện"/>
+<p>Người dùng có thể định vị vị trí của xe thông qua ứng dụng E-Scooter</p>
+<h3>2.4. Tìm điểm đổi pin, trạm sạc gần nhất</h3>
+<p>Người dùng có thể dễ dàng tìm kiếm trạm sạc, trạm đổi pin của VinFast bằng app E-Scooter gần mình nhất. Nhờ đó “đi xe điện tiện như đi xe xăng”, mỗi khi di chuyển trên đường nếu không may xe hết pin, bạn có thể đến trạm sạc hay trạm đổi pin gần nhất để “nạp năng lượng” cho xe. </p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter">Hướng dẫn cách tìm trạm sạc bằng app VinFast E-Scooter</a></p>
+<img alt="tiện ích hướng dẫn kết nối app VinFast E-Scooter với xe máy điện"/>
+<p>Tìm trạm sạc, trạm đổi pin dễ dàng nhờ ứng dụng E-Scooter</p>
+<h3>2.5. Cảnh báo và xác định lỗi</h3>
+<p>Xe máy điện VinFast có khả năng tự chẩn đoán và phát hiện lỗi, sau đó gửi thông báo đến ứng dụng E-Scooter và hiển thị cảnh báo lỗi trên cụm đồng hồ đa năng HMI. Do vậy, người dùng dễ dàng nắm bắt mọi sự cố, trục trặc xe gặp phải kèm hướng dẫn xử lý từ xa chỉ cần xem thông báo hoặc vào mục “chẩn đoán” trên app.</p>
+<h3>2.6. Cho mượn xe tiện lợi</h3>
+<p>Nếu bạn cho người thân hay bạn bè mượn xe chỉ cần chuyển chế độ người sử dụng trên ứng dụng E-Scooter. Không cần mất nhiều thời gian, chỉ với một vài thao tác đơn giản, bạn có thể cho mượn nhanh chóng.</p>
+<p>Thực hiện hướng dẫn kết nối app VinFast E-Scooter với xe máy điện ngay từ bây giờ để sử dụng những tiện ích thông minh giúp bạn dễ dàng quản lý, theo dõi, giám sát và bảo vệ xe tốt nhất. Nếu có thắc mắc hay khó khăn gì trong quá trình kết nối, quý khách hàng vui lòng liên hệ theo số điện thoại tổng đài: 1900232389 để được tư vấn hỗ trợ.</p>

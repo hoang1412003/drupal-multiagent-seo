@@ -3,7 +3,7 @@
   "generated_at": "2026-08-03",
   "significance_level": 0.05,
   "corpus": {
-    "n_docs": 10,
+    "n_docs": 16,
     "sample_ids": [
       "B-001",
       "B-002",
@@ -14,7 +14,13 @@
       "B-007",
       "B-008",
       "B-009",
-      "B-010"
+      "B-010",
+      "B-011",
+      "B-012",
+      "B-013",
+      "B-014",
+      "B-015",
+      "B-016"
     ]
   },
   "model_names": [
@@ -27,7 +33,7 @@
     "VF e34"
   ],
   "model_name_stats": {
-    "correct": 28,
+    "correct": 37,
     "wrong_examples": []
   },
   "terms": [
@@ -37,40 +43,43 @@
         "xe hơi điện"
       ],
       "docs": [
-        6,
-        6
+        7,
+        7
       ],
       "occurrences": [
-        129,
-        130
+        156,
+        157
       ],
-      "p_value": 0.03125
+      "p_value": 0.01562
+    },
+    {
+      "standard": "xe máy điện",
+      "non_standard": [],
+      "docs": [
+        10,
+        10
+      ],
+      "occurrences": [
+        194,
+        194
+      ],
+      "p_value": 0.00195
     }
   ],
-  "excluded_terms": [],
+  "excluded_terms": [
+    "xe gắn máy điện",
+    "xe máy chạy điện"
+  ],
   "address_form": null,
   "title_case": {
     "standard": "SENTENCE_CASE",
     "docs": [
-      9,
-      10
+      15,
+      16
     ],
-    "p_value": 0.02148
+    "p_value": 0.00052
   },
   "undecided": [
-    {
-      "kind": "term",
-      "candidates": [
-        "xe máy điện",
-        "xe gắn máy điện",
-        "xe máy chạy điện"
-      ],
-      "docs": [
-        4,
-        4
-      ],
-      "p_value": 0.125
-    },
     {
       "kind": "term",
       "candidates": [
@@ -78,10 +87,10 @@
         "trụ sạc"
       ],
       "docs": [
-        5,
-        5
+        9,
+        11
       ],
-      "p_value": 0.0625
+      "p_value": 0.06543
     },
     {
       "kind": "address_form",
@@ -92,8 +101,8 @@
         "người dùng"
       ],
       "docs": [
-        5,
-        10
+        8,
+        16
       ],
       "p_value": 1.0
     }
