@@ -16,3 +16,13 @@ drupal/*
 !drupal/composer.json
 !drupal/composer.lock
 !drupal/scripts/
+
+# Module tự viết (vf_ai_review) là code của dự án, KHÔNG phải thứ composer
+# tải về, nên phải commit. Git không cho un-ignore một file khi thư mục cha
+# còn bị ignore, vì vậy phải mở lại từng cấp rồi chặn lại phần còn lại -
+# web/core, web/sites, các module contrib... vẫn nằm ngoài repo như cũ.
+!drupal/web/
+drupal/web/*
+!drupal/web/modules/
+drupal/web/modules/*
+!drupal/web/modules/custom/

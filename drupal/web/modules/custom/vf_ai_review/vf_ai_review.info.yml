@@ -1,0 +1,5 @@
+name: 'VF AI Review'
+type: module
+description: 'Hiển thị kết quả đánh giá của hệ Multi-Agent AI trong giao diện soạn bài.'
+core_version_requirement: ^10 || ^11
+package: 'VF O2O'
