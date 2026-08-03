@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-03",
+  "significance_level": 0.05,
+  "corpus": {
+    "n_docs": 10,
+    "sample_ids": [
+      "B-001",
+      "B-002",
+      "B-003",
+      "B-004",
+      "B-005",
+      "B-006",
+      "B-007",
+      "B-008",
+      "B-009",
+      "B-010"
+    ]
+  },
+  "model_names": [
+    "VF 3",
+    "VF 5",
+    "VF 6",
+    "VF 7",
+    "VF 8",
+    "VF 9",
+    "VF e34"
+  ],
+  "model_name_stats": {
+    "correct": 28,
+    "wrong_examples": []
+  },
+  "terms": [
+    {
+      "standard": "ô tô điện",
+      "non_standard": [
+        "xe hơi điện"
+      ],
+      "docs": [
+        6,
+        6
+      ],
+      "occurrences": [
+        129,
+        130
+      ],
+      "p_value": 0.03125
+    }
+  ],
+  "excluded_terms": [],
+  "address_form": null,
+  "title_case": {
+    "standard": "SENTENCE_CASE",
+    "docs": [
+      9,
+      10
+    ],
+    "p_value": 0.02148
+  },
+  "undecided": [
+    {
+      "kind": "term",
+      "candidates": [
+        "xe máy điện",
+        "xe gắn máy điện",
+        "xe máy chạy điện"
+      ],
+      "docs": [
+        4,
+        4
+      ],
+      "p_value": 0.125
+    },
+    {
+      "kind": "term",
+      "candidates": [
+        "trạm sạc",
+        "trụ sạc"
+      ],
+      "docs": [
+        5,
+        5
+      ],
+      "p_value": 0.0625
+    },
+    {
+      "kind": "address_form",
+      "candidates": [
+        "bạn",
+        "quý khách",
+        "khách hàng",
+        "người dùng"
+      ],
+      "docs": [
+        5,
+        10
+      ],
+      "p_value": 1.0
+    }
+  ]
+}
