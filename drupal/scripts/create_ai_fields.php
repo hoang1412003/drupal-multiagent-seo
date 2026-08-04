@@ -10,6 +10,7 @@
  * Chạy: ddev drush php:script scripts/create_ai_fields.php
  */
 
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -63,5 +64,29 @@ create_field('field_ai_report_json', 'string_long', 'article', 'AI Report (JSON)
 
 // (INPUT) Meta description để SEO/Compliance Agent chấm
 create_field('field_meta_description', 'string_long', 'article', 'Meta description');
+
+// --- Cấu hình hiển thị trên form soạn bài ---------------------------------
+// Drupal KHÔNG tự thêm field mới vào form display, nên field tạo bằng script
+// mặc định bị ẩn. Với 4 field OUTPUT thì ẩn là đúng (module vf_ai_review
+// render lại thành báo cáo). Nhưng field_meta_description là INPUT - người
+// viết phải nhập được, nếu ẩn thì SEO Agent báo "thiếu meta description" mà
+// người viết không tìm đâu ra ô để thêm.
+$display = EntityFormDisplay::load('node.article.default');
+if ($display) {
+  $display->setComponent('field_meta_description', [
+    'type' => 'string_textarea',
+    'weight' => 5,
+    'settings' => ['rows' => 3],
+  ]);
+  // Giữ 4 field OUTPUT ở trạng thái ẩn, phòng khi ai đó lỡ kéo chúng vào.
+  foreach (['field_ai_status', 'field_ai_score', 'field_ai_suggestions', 'field_ai_report_json'] as $an) {
+    $display->removeComponent($an);
+  }
+  $display->save();
+  echo "Da hien field_meta_description tren form, giu 4 field AI an\n";
+}
+else {
+  echo "[CANH BAO] Khong tim thay form display node.article.default\n";
+}
 
 echo "\nHoan tat tao 5 field.\n";

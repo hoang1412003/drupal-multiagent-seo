@@ -1,0 +1,45 @@
+<?php
+
+/**
+ * @file
+ * Hiển thị kết quả đánh giá Multi-Agent AI trong giao diện soạn bài.
+ *
+ * Module CHỈ ĐỌC: không tính điểm, không gọi API, không sửa dữ liệu node.
+ * Hỏng thì cùng lắm không thấy báo cáo, không thể làm sai dữ liệu đánh giá.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\vf_ai_review\AiReportRenderer;
+
+/**
+ * Bốn field do hệ Multi-Agent ghi vào, người soạn không được sửa.
+ */
+const VF_AI_REVIEW_FIELDS = [
+  'field_ai_status',
+  'field_ai_score',
+  'field_ai_suggestions',
+  'field_ai_report_json',
+];
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Tên hàm CHÍNH LÀ phần khai báo: Drupal thấy hàm tên
+ * <ten_module>_form_node_form_alter thì tự gọi mỗi khi dựng form node.
+ * Dấu & trước $form nghĩa là sửa trực tiếp vào mảng gốc.
+ */
+function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'article') {
+    return;
+  }
+
+  // Ẩn hẳn 4 field AI. Dùng #access = FALSE chứ KHÔNG dùng
+  // '#attributes' => ['readonly' => 'readonly'] - cái đó chỉ là thuộc tính
+  // HTML, chặn ở trình duyệt nhưng người dùng vẫn gửi giá trị lên server.
+  foreach (VF_AI_REVIEW_FIELDS as $ten) {
+    if (isset($form[$ten])) {
+      $form[$ten]['#access'] = FALSE;
+    }
+  }
+}
