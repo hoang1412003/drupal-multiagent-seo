@@ -5,9 +5,9 @@
   {"query": "VF 9 quãng đường tối đa", "expected_model": "VF 9"},
   {"query": "VF 9 đi được bao nhiêu km", "expected_model": "VF 9"},
   {"query": "phạm vi di chuyển VF 9", "expected_model": "VF 9"},
-  {"query": "VF 5 tầm hoạt động theo NEDC", "expected_model": "VF 5"},
-  {"query": "VF 5 chạy bao nhiêu km", "expected_model": "VF 5"},
-  {"query": "quãng đường một lần sạc VF 5", "expected_model": "VF 5"},
+  {"query": "VF 5 tầm hoạt động theo NEDC", "expected_model": "VF 5 Plus"},
+  {"query": "VF 5 chạy bao nhiêu km", "expected_model": "VF 5 Plus"},
+  {"query": "quãng đường một lần sạc VF 5", "expected_model": "VF 5 Plus"},
   {"query": "chu kỳ bảo dưỡng định kỳ xe điện", "expected_model": "Bảo dưỡng định kỳ"},
   {"query": "bao lâu bảo dưỡng xe một lần", "expected_model": "Bảo dưỡng định kỳ"},
   {"query": "bao nhiêu km thì bảo dưỡng", "expected_model": "Bảo dưỡng định kỳ"}

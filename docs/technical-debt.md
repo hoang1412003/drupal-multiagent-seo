@@ -96,23 +96,29 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 **Lỗi thật mà nó phòng (giữ lại để tra cứu):** cùng một tập số từng nằm ở **4 nơi** và **đã trôi lệch một lần** — mã B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170`. Phát hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
 
-### B2. Ba agent còn ghép prompt bằng nhãn text thuần
+### B2. Ba agent còn ghép prompt bằng nhãn text thuần — ✅ ĐÃ XONG (2026-08-04)
 
-**Bằng chứng:** `content_quality.py`, `seo.py`, `compliance.py`, `fact_check.py` đều còn ghép chuỗi dạng `[title] ... [body] ...`.
+`src/prompt_builder.py` (mới) dùng chung cho **cả 5 chỗ gọi LLM**. Không còn chỗ nào ghép chuỗi `[title] ... [body] ...`.
+
+**Một lỗ hổng thật phát hiện khi nối M3 vào Compliance:** `strip_html()` khớp trọn `<!-- xe này tốt nhất -->` bằng regex `<[^>]+>` và xoá luôn chữ bên trong, nên **cụm từ cấm giấu trong bình luận HTML đi qua blacklist CP1 mà không bị bắt lần nào**. Người duyệt cũng không thấy vì họ đọc bài đã render. Tệ hơn dự kiến ở chỗ: không phải LLM bị lừa, mà chính *phần tất định* — thứ `prompt-injection.md` mục 4 liệt kê là "miễn nhiễm hoàn toàn" — bị mù. Đã sửa, có test khoá cả hai chiều.
+
+**M2 (CP9) cũng xong.** Phát hiện chỉ dẫn ẩn nhắm vào hệ thống đánh giá tự động → flag `critical` → veto. **Đứng ngoài công thức tính điểm**: thêm một tiêu chí gần như luôn ở mức 2 sẽ cộng điểm miễn phí cho mọi bài (trên G-004 thật: 50,0 → 62,5 mà bài không đổi một chữ) và làm σ đẹp lên bằng cách pha loãng mẫu số. Chi tiết + hai giới hạn đã biết: `prompt-injection.md` mục 5 M2.
+
+**Biện pháp duy nhất không làm là M5** (lọc bằng danh sách từ khoá) — tài liệu đã lập luận nó dễ vòng tránh và tạo cảm giác an toàn giả.
+
+**Bằng chứng của vấn đề gốc (giữ để tra cứu):** trước đây `content_quality.py`, `seo.py`, `fact_check.py` ghép chuỗi dạng `[title] ... [body] ...`.
 
 **Rủi ro:** nhãn đó **giả mạo được** — người viết gõ đúng chuỗi vào body là xoá ranh giới giữa dữ liệu và chỉ dẫn. Nguy hiểm hơn: `body` là HTML nên chỉ dẫn giấu trong bình luận HTML **vô hình với người duyệt nhưng LLM vẫn đọc**. Phân tích đầy đủ: `docs/prompt-injection.md` mục 2–3.
 
-**Đã làm được phần nào:** BV6 (`brand_voice.py`) dùng thẻ có hậu tố ngẫu nhiên — biện pháp **M1**. Ba agent kia chưa. **M3** (bóc phần ẩn trước khi đưa vào prompt) và **M2** (tiêu chí CP9 phát hiện chỉ dẫn ẩn) chưa làm.
+**Vì sao Compliance là chỗ đáng làm nhất:** nó là agent duy nhất có quyền phủ quyết, nên một câu chèn thành công ở đó đổi được kết luận "chặn xuất bản" thành "cho qua".
 
 **Giảm nhẹ sẵn có:** `docs/prompt-injection.md` mục 4 nêu ba thứ đang hạn chế hậu quả — structured output ràng buộc hình dạng đầu ra, hệ thống không tự xuất bản, và phần tất định (blacklist regex, Aggregator) miễn nhiễm hoàn toàn.
 
-### B3. `score` của Compliance độc lập với `flags`
+### B3. `score` của Compliance độc lập với `flags` — ✅ ĐÃ SỬA (2026-08-04)
 
-**Bằng chứng:** `src/agents/compliance.py` lấy `score` nguyên từ LLM, còn flag rule-based cộng thêm vào sau. Một bài dính 3 flag `critical` từ blacklist vẫn có thể mang `score = 95`.
+Giải quyết luôn khi chuyển Compliance sang rubric CP1–CP8 (A1). Điểm và flag giờ sinh từ **cùng một bộ `criteria`**: điểm qua `scoring.score_from_criteria()`, flag qua `_flags_from_criteria()` với severity tra bảng `scoring.severity_for()`. Không còn đường nào để một bài mang 3 flag `critical` mà vẫn 95 điểm — có test khoá lại (`test_diem_va_flag_khong_con_mau_thuan`).
 
-**Vì sao quan trọng:** Compliance là agent duy nhất có quyền phủ quyết. `docs/rubrics.md` mục 6.1 chủ trương cả `score` lẫn `severity` phải tất định — severity tra bảng theo mã tiêu chí, không để LLM tự chọn, vì `critical` là thứ kích hoạt chặn xuất bản.
-
-**Giảm nhẹ:** veto vẫn hoạt động độc lập với điểm, nên bài có flag `critical` vẫn bị chặn dù điểm cao. Nợ này ảnh hưởng *tính nhất quán của điểm*, không ảnh hưởng *quyết định chặn*.
+**Bằng chứng của vấn đề gốc (giữ để tra cứu):** `compliance.py` trước đây lấy `score` nguyên từ LLM, còn flag rule-based cộng thêm vào sau, nên hai thứ không liên quan gì nhau. Compliance là agent duy nhất có quyền phủ quyết nên đây là chỗ nguy hiểm nhất để có hai nguồn sự thật.
 
 ---
 
@@ -123,7 +129,7 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 | Polling worker + Content Moderation "Needs Review" | `architecture.md` mục 9 | Sprint 2 còn lại. Không chặn gì |
 | Nhật ký truy vết JSONL | `operations.md` mục 2 | Đã **hạ ưu tiên** 2026-08-03 sau khi phát hiện Drupal giữ revision — 3 field AI không mất, chỉ mất bối cảnh chấm |
 | Vòng phản hồi người duyệt | `operations.md` mục 3 | Cần nhật ký truy vết xong trước mới khớp được `(node_id, scored_at)` |
-| KB fact-check chưa verify số thật | `sources.md` mục 2.1 | **4/4 entry còn `verified: false`**. Cần mở trang thật đối chiếu |
+| ~~KB fact-check chưa verify số thật~~ | `sources.md` mục 2.1 | ✅ **xong 2026-08-04** — 4/4 entry `verified: true`. Tìm ra 3 chỗ sai, trong đó `sources.md` nói **ngược** sự thật về chuẩn đo. Còn một rủi ro không khử được: VinFast công bố **ba** con số khác nhau cho VF 5 Plus |
 | Mở rộng corpus `BRAND` | `sources.md` mục 1.7 | Chỉ làm nếu có quy ước rơi vào vùng chưa đủ căn cứ. Hiện "trạm sạc" ở 9/11 (p = 0,065) — **cố ý không thu thêm** vì đó là *optional stopping* |
 
 ---

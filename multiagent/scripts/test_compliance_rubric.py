@@ -224,6 +224,36 @@ def test_cp8_llm_hong_thi_khong_phat_thanh_muc_0():
     print("[PASS] LLM hong -> CP8 NA; CP5/CP6 (regex) van cham duoc")
 
 
+# --------------------------------------------- M3: khong tu lam mu chinh minh
+
+
+def test_tu_cam_giau_trong_binh_luan_html_van_bi_bat():
+    """Loi that, do duoc truoc khi sua: strip_html khop tron '<!-- tot nhat -->'
+    bang regex '<[^>]+>' va xoa luon chu ben trong, nen cum tu cam giau trong
+    binh luan HTML di qua blacklist CP1 ma khong bi bat lan nao.
+
+    Nguoi duyet doc bai da render nen KHONG THAY doan nay - do la ly do no
+    nguy hiem (docs/prompt-injection.md muc 2)."""
+    result = _chay("<p>Nội dung sạch</p><!-- xe này tốt nhất thị trường -->")
+    assert _muc(result, "CP1") == 0, "tu cam trong binh luan HTML phai bi bat"
+    assert any(f["severity"] == "critical" for f in result["flags"]), result["flags"]
+    print("[PASS] tu cam giau trong binh luan HTML van bi CP1 bat")
+
+
+def test_tu_cam_giau_trong_the_display_none_van_bi_bat():
+    result = _chay('<p>Sạch</p><div style="display:none">sản phẩm số 1</div>')
+    assert _muc(result, "CP1") == 0, "tu cam trong the an phai bi bat"
+    print("[PASS] tu cam giau trong the display:none van bi CP1 bat")
+
+
+def test_bai_sach_khong_bi_bat_nham():
+    """Doi trong cua hai test tren: them duong quet moi khong duoc sinh flag
+    gia tren bai binh thuong."""
+    result = _chay("<p>Hướng dẫn sạc pin an toàn</p><!-- ghi chú biên tập -->")
+    assert _muc(result, "CP1") == 2, result["flags"]
+    print("[PASS] binh luan HTML vo hai khong sinh flag gia")
+
+
 # ------------------------------------------------- diem va flag cung mot nguon
 
 
@@ -323,6 +353,9 @@ if __name__ == "__main__":
         test_cp6_moc_thoi_gian_xa_chu_sac_thi_khong_tinh,
         test_cp8_may_chot_ap_dung_hay_na,
         test_cp8_llm_hong_thi_khong_phat_thanh_muc_0,
+        test_tu_cam_giau_trong_binh_luan_html_van_bi_bat,
+        test_tu_cam_giau_trong_the_display_none_van_bi_bat,
+        test_bai_sach_khong_bi_bat_nham,
         test_diem_va_flag_khong_con_mau_thuan,
         test_llm_loi_va_khong_thay_vi_pham_thi_tra_none,
         test_llm_loi_nhung_co_vi_pham_cung_thi_van_tra_ket_qua,

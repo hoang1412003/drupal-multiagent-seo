@@ -5,10 +5,11 @@
     "langcode": "vi",
     "specs": {
       "tam_hoat_dong": "438km (Eco) / 423km (Plus)",
-      "tieu_chuan_do": "cần xác nhận (NEDC/WLTP)"
+      "tieu_chuan_do": "WLTP (dự kiến)"
     },
     "source_url": "/vn_vi/thong-so-ky-thuat-vinfast-vf9",
-    "verified": false
+    "verified": true,
+    "nguon_kiem": "Kiem 2026-08-04. Bang thong so trong bai G-009 (docs/goldset/raw/G-009.txt), tai tu vinfastauto.com. Nguyen van: '438km (Eco) / 423km (Plus) (Du kien theo chuan WLTP)'. Truoc do KB ghi tieu_chuan_do = 'can xac nhan' - SAI, trang co neu chuan."
   },
   {
     "model": "VF 8",
@@ -16,30 +17,33 @@
     "langcode": "vi",
     "specs": {
       "tam_hoat_dong": "420km (Eco) / 400km (Plus)",
-      "tieu_chuan_do": "cần xác nhận (NEDC/WLTP)"
+      "tieu_chuan_do": "WLTP (dự kiến)"
     },
     "source_url": "/vn_vi/thong-so-ky-thuat-vf8-kich-thuoc-va-thiet-ke",
-    "verified": false
+    "verified": true,
+    "nguon_kiem": "Kiem 2026-08-04. Bang thong so trong bai G-009 (docs/goldset/raw/G-009.txt), tai tu vinfastauto.com. Nguyen van: '420km (Eco) / 400km (Plus) (Du kien theo chuan WLTP)'. Truoc do KB ghi tieu_chuan_do = 'can xac nhan' - SAI, trang co neu chuan."
   },
   {
-    "model": "VF 5",
+    "model": "VF 5 Plus",
     "content_type": "cam_nang",
     "langcode": "vi",
     "specs": {
-      "tam_hoat_dong": "326km",
+      "tam_hoat_dong": "326,4km theo trang thông số; VinFast còn công bố '>300km' và '>320km' ở trang khác",
       "tieu_chuan_do": "NEDC"
     },
-    "source_url": "/vn_vi/thong-so-vf-7",
-    "verified": false
+    "source_url": "/vn_vi/tong-quan-xe-o-to-dien-vinfast-vf-5-plus",
+    "verified": true,
+    "nguon_kiem": "Kiem 2026-08-04. CANH BAO: chinh VinFast cong bo BA con so khac nhau - bang thong so trong G-009 ghi '>300km', trang tong quan ghi '>320km', trang thong so chi tiet ghi '326,4km (NEDC)'. Ghi ca ba vao specs de CP3 khong gan co oan bai trich con so thap hon. Ten model sua tu 'VF 5' thanh 'VF 5 Plus' (ban thuong mai tai VN); source_url sua tu /vn_vi/thong-so-vf-7 vi URL do tro nham sang trang VF 7."
   },
   {
     "model": "Bảo dưỡng định kỳ",
     "content_type": "cam_nang",
     "langcode": "vi",
     "specs": {
-      "chu_ky": "mỗi 12.000km hoặc 1 năm"
+      "chu_ky": "mỗi 12.000km hoặc 12 tháng, tùy điều kiện nào đến trước"
     },
     "source_url": "/vn_vi/lich-bao-duong-xe-vinfast",
-    "verified": false
+    "verified": true,
+    "nguon_kiem": "Kiem 2026-08-04, khop trang lich-bao-duong-xe-vinfast: 'bao duong sau 12 thang hoac sau van hanh 12.000 km'. Bo sung ve 'tuy dieu kien nao den truoc' von bi thieu. So lieu nay danh cho O TO dien; xe may dien co chu ky khac (1.000km/1 thang lan dau, sau do 5.000km/6 thang) - chua dua vao KB vi pham vi P0 la o to."
   }
 ]
