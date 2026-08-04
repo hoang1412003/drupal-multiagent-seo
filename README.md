@@ -19,6 +19,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
 - [`docs/brand/brand_guideline.md`](docs/brand/brand_guideline.md) — brand guideline **sinh tự động** từ corpus 16 bài `BRAND`, mỗi quy tắc kèm số liệu và p-value chứng minh
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
+- [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
 
 ## Cấu trúc project
 
