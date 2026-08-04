@@ -109,7 +109,7 @@ Nghĩa là dù LLM bị lừa hoàn toàn, `match_blacklist()` vẫn quét và v
 
 Xếp theo tỉ lệ hiệu quả trên chi phí.
 
-### M1 - Bọc nội dung bằng thẻ có hậu tố ngẫu nhiên *(ưu tiên cao nhất, rẻ nhất)*
+### M1 - Bọc nội dung bằng thẻ có hậu tố ngẫu nhiên *(ưu tiên cao nhất, rẻ nhất)* ✅ **đã triển khai (2026-08-04)**
 
 Thay nối chuỗi bằng nhãn cố định bằng thẻ mang **hậu tố ngẫu nhiên sinh mỗi lần gọi**:
 
@@ -138,7 +138,7 @@ Vế cuối của M1 đáng tách ra thành một quyết định thiết kế r
 
 Không phải phòng vệ đơn thuần mà là **mở rộng đúng nghiệp vụ**. Một người viết cố tình giấu chỉ dẫn để qua mặt kiểm duyệt là hành vi cần chặn, không phải chỉ cần lọc bỏ.
 
-### M3 - Bóc phần văn bản ẩn trước khi đưa vào prompt
+### M3 - Bóc phần văn bản ẩn trước khi đưa vào prompt ✅ **đã triển khai (2026-08-04)**
 
 Trước khi ghép prompt, loại khỏi `body`:
 
@@ -153,6 +153,23 @@ body gốc ──┬── bóc phần ẩn ──> đưa vào prompt LLM
 ```
 
 Bóc rồi vứt là tự làm mù chính mình.
+
+**Triển khai:** `src/prompt_builder.py`, dùng chung cho cả 5 chỗ gọi LLM (`content_quality`, `seo`, `brand_voice` BV6, `compliance`, `fact_check`). Hàm `boc_noi_dung()` trả về **cả hai**: khối nội dung đã bóc để đưa vào prompt, và danh sách đoạn bị bóc để người gọi quét tiếp.
+
+**Một lỗ hổng thật phát hiện khi nối M3 vào Compliance.** `text_utils.strip_html()` bóc thẻ bằng regex `<[^>]+>`, và regex đó khớp **trọn** `<!-- xe này tốt nhất -->` rồi xoá luôn chữ bên trong. Đo được:
+
+```python
+strip_html('<p>Nội dung sạch</p><!-- xe này tốt nhất thị trường -->')
+# -> ' Nội dung sạch.
+ '
+match_blacklist(...)  # -> 0 flag
+```
+
+Nghĩa là **trước khi có M3, cụm từ cấm giấu trong bình luận HTML đi qua blacklist CP1 mà không bị bắt lần nào** — và người duyệt cũng không thấy vì họ đọc bài đã render. Đúng bất đối xứng ở mục 2, nhưng theo hướng tệ hơn dự kiến: không phải LLM bị lừa, mà là *phần tất định* — thứ mục 4 liệt kê là "miễn nhiễm hoàn toàn" — bị mù.
+
+Sửa: `compliance.run()` cộng phần chữ của các đoạn đã bóc vào văn bản đem quét CP1, qua `prompt_builder.chu_trong_doan_an()` (hàm này bỏ dấu `<!--`/`-->` **trước** rồi mới bỏ thẻ). Có test khoá cả hai chiều: từ cấm giấu trong bình luận và trong `display:none` đều bị bắt, còn bình luận vô hại không sinh flag giả.
+
+**Ba agent còn lại cố ý KHÔNG dùng phần đoạn ẩn trả về.** `content_quality` chấm chính tả/văn phong, `seo` chấm từ khoá — không agent nào trong đó có thẩm quyền kết luận về chỉ dẫn ẩn. Đó là việc của Compliance, và là lý do M2/CP9 thuộc về rubric Compliance chứ không rải khắp nơi.
 
 ### M4 - Escape khi render báo cáo trong Drupal ✅ **đã triển khai (2026-08-04)**
 

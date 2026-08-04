@@ -96,15 +96,19 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 **Lỗi thật mà nó phòng (giữ lại để tra cứu):** cùng một tập số từng nằm ở **4 nơi** và **đã trôi lệch một lần** — mã B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170`. Phát hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
 
-### B2. Ba agent còn ghép prompt bằng nhãn text thuần
+### B2. Ba agent còn ghép prompt bằng nhãn text thuần — ✅ M1 + M3 ĐÃ XONG (2026-08-04)
 
-**Bằng chứng:** `content_quality.py`, `seo.py`, `fact_check.py` còn ghép chuỗi dạng `[title] ... [body] ...`. (`compliance.py` đã chuyển sang M1 ngày 2026-08-04.)
+`src/prompt_builder.py` (mới) dùng chung cho **cả 5 chỗ gọi LLM**. Không còn chỗ nào ghép chuỗi `[title] ... [body] ...`.
+
+**Một lỗ hổng thật phát hiện khi nối M3 vào Compliance:** `strip_html()` khớp trọn `<!-- xe này tốt nhất -->` bằng regex `<[^>]+>` và xoá luôn chữ bên trong, nên **cụm từ cấm giấu trong bình luận HTML đi qua blacklist CP1 mà không bị bắt lần nào**. Người duyệt cũng không thấy vì họ đọc bài đã render. Tệ hơn dự kiến ở chỗ: không phải LLM bị lừa, mà chính *phần tất định* — thứ `prompt-injection.md` mục 4 liệt kê là "miễn nhiễm hoàn toàn" — bị mù. Đã sửa, có test khoá cả hai chiều.
+
+**Còn lại: M2 (CP9).** `prompt-injection.md` mục 8 xếp nó cuối cùng, sau khi rubric ổn định — rubric Compliance giờ đã ổn định nên đây là việc làm được. Cân nhắc trước khi làm: thêm CP9 là thêm một tiêu chí gần như **luôn ở mức 2**, tức cộng đều điểm cho mọi bài; cần nghĩ xem nó vào mẫu số như CP2 hay đứng ngoài công thức.
+
+**Bằng chứng của vấn đề gốc (giữ để tra cứu):** trước đây `content_quality.py`, `seo.py`, `fact_check.py` ghép chuỗi dạng `[title] ... [body] ...`.
 
 **Rủi ro:** nhãn đó **giả mạo được** — người viết gõ đúng chuỗi vào body là xoá ranh giới giữa dữ liệu và chỉ dẫn. Nguy hiểm hơn: `body` là HTML nên chỉ dẫn giấu trong bình luận HTML **vô hình với người duyệt nhưng LLM vẫn đọc**. Phân tích đầy đủ: `docs/prompt-injection.md` mục 2–3.
 
-**Đã làm được phần nào:** BV6 (`brand_voice.py`) và Compliance (`compliance.py`, từ 2026-08-04) dùng thẻ có hậu tố ngẫu nhiên — biện pháp **M1**. Compliance được ưu tiên vì nó là agent duy nhất có quyền phủ quyết: một câu chèn thành công ở đó đổi được kết luận "chặn xuất bản" thành "cho qua".
-
-`content_quality.py`, `seo.py`, `fact_check.py` chưa. **M3** (bóc phần ẩn trước khi đưa vào prompt) và **M2** (tiêu chí phát hiện chỉ dẫn ẩn) chưa làm.
+**Vì sao Compliance là chỗ đáng làm nhất:** nó là agent duy nhất có quyền phủ quyết, nên một câu chèn thành công ở đó đổi được kết luận "chặn xuất bản" thành "cho qua".
 
 **Giảm nhẹ sẵn có:** `docs/prompt-injection.md` mục 4 nêu ba thứ đang hạn chế hậu quả — structured output ràng buộc hình dạng đầu ra, hệ thống không tự xuất bản, và phần tất định (blacklist regex, Aggregator) miễn nhiễm hoàn toàn.
 

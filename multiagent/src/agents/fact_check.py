@@ -13,7 +13,10 @@ kết luận; (2) compare LLM chỉ trả 'mismatch' khi CÙNG model và số m�
 còn lại trả 'unverifiable'.
 """
 from ai_core import call_agent
+from prompt_builder import boc_noi_dung
 from retrieval import retrieve
+
+_FIELDS = ("title", "body", "meta_description")
 
 _RULE = "Thông tin sai lệch so với thông số công bố chính thức"
 
@@ -94,11 +97,11 @@ _COMPARE_SCHEMA = {
 
 
 def _extract_claims(fields: dict) -> list[dict]:
-    content = (
-        f"[title] {fields.get('title', '')}\n\n"
-        f"[body] {fields.get('body', '')}\n\n"
-        f"[meta_description] {fields.get('meta_description', '')}"
-    )
+    # M1 + M3 (docs/prompt-injection.md mục 5). Đáng làm ở đây vì claim trích
+    # ra được đem đối chiếu KB rồi sinh flag `critical` - một claim giả cấy
+    # vào bình luận HTML sẽ thành một cáo buộc "sai lệch thông số" với người
+    # duyệt.
+    content, _ = boc_noi_dung(fields, _FIELDS)
     return call_agent(_EXTRACT_PROMPT, content, _EXTRACT_SCHEMA)["claims"]
 
 
