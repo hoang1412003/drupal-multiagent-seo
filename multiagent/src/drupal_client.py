@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import time
@@ -85,7 +86,8 @@ def fetch_content(node_id: str) -> dict:
 
 
 def write_back(
-    node_id: str, status: str, score: Optional[float], suggestions: str
+    node_id: str, status: str, score: Optional[float], suggestions: str,
+    report_json: Optional[dict] = None,
 ) -> None:
     """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH).
 
@@ -93,21 +95,30 @@ def write_back(
     nên không có điểm tổng) - ghi null để Drupal để trống field, không quy
     thành 0 điểm (docs/architecture.md mục 6.4).
 
+    `report_json` là báo cáo có cấu trúc cho module vf_ai_review render
+    (docs/superpowers/specs/2026-08-03-vf-ai-review-module-design.md).
+    Mặc định None để lời gọi cũ không đổi hành vi.
+
     Tự retry khi Drupal lỗi mạng/5xx (docs/architecture.md mục 7). Nếu hết
     retry vẫn lỗi, KHÔNG raise - chỉ ghi log cảnh báo, vì ở bước này bài
     viết đã được 4 agent chấm điểm xong (tốn API call thật); để lỗi ghi-ngược
     làm sập cả script sẽ lãng phí toàn bộ công việc đã làm.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
+    attributes = {
+        "field_ai_status": status,
+        "field_ai_score": score,
+        "field_ai_suggestions": suggestions,
+    }
+    if report_json is not None:
+        # ensure_ascii=False để JSON trong DB đọc được bằng mắt khi debug.
+        attributes["field_ai_report_json"] = json.dumps(report_json, ensure_ascii=False)
+
     payload = {
         "data": {
             "type": "node--article",
             "id": node_id,
-            "attributes": {
-                "field_ai_status": status,
-                "field_ai_score": score,
-                "field_ai_suggestions": suggestions,
-            },
+            "attributes": attributes,
         }
     }
     try:

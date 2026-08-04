@@ -70,6 +70,7 @@ Content type "Bài viết" mặc định của Drupal không có sẵn field đ�
 | field_ai_status      | Danh sách chọn (List text) | (OUTPUT) Lưu 1 trong 3 giá trị: publish / needs_revision / rejected |
 | field_ai_score       | Số (Number)                | (OUTPUT) Lưu điểm tổng (0-100) do Aggregator tính                   |
 | field_ai_suggestions | Văn bản dài (Long text)    | (OUTPUT) Gợi ý sửa, gom theo từng field                            |
+| field_ai_report_json | Văn bản (string_long) | (OUTPUT) Báo cáo có cấu trúc để module `vf_ai_review` render theo từng field. Giữ song song `field_ai_suggestions` dạng text để dữ liệu vẫn đọc được khi không có module. Dùng `string_long` chứ **không** phải `text_long` — `text_long` chạy qua bộ lọc văn bản của Drupal và sẽ bóp méo JSON |
 | field_meta_description | Văn bản (Text plain, dài ~160) | (INPUT) Meta description để SEO/Compliance Agent chấm. Trong production thật ánh xạ sang module Metatag; dùng custom field cho đơn giản/chắc chắn |
 
 Ngoài ra, các field input khác mà agent đọc đã có sẵn trong Drupal core: `title`, `body` (kèm `summary`/teaser), URL alias (module Pathauto, đọc qua `path.alias`), và alt text ảnh (trên field ảnh, đọc qua relationships). Chỉ `meta_description` cần tạo thêm.

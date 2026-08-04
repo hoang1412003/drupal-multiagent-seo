@@ -76,9 +76,10 @@ check("SEO lỗi -> report có note nêu rõ điểm chưa đầy đủ",
 captured = {}
 
 
-def _fake_write_back(node_id, status, score, suggestions):
+def _fake_write_back(node_id, status, score, suggestions, report_json=None):
     captured["score"] = score
     captured["suggestions"] = suggestions
+    captured["report_json"] = report_json
 
 
 graph.write_back = _fake_write_back  # chặn gọi Drupal thật
@@ -109,5 +110,20 @@ graph.write_back_node({
 })
 check("điểm 0.0 thật (bài quá tệ) vẫn ghi 0.0, không nhầm thành None",
       captured["score"] == 0.0)
+
+# --- 5. Nguyên tắc None != 0 phải đúng ở CẢ báo cáo JSON -------------------
+# Module vf_ai_review đọc JSON chứ không đọc field điểm, nên nếu JSON quy
+# None thành 0 thì giao diện vẫn hiển thị sai dù field điểm đúng.
+check("báo cáo JSON của bài điểm 0.0 ghi 0.0",
+      captured["report_json"]["final_score"] == 0.0)
+
+graph.write_back_node({
+    "node_id": "n-compliance-loi",
+    "decision": report["decision"],
+    "final_score": report["final_score"],
+    "report": report,
+})
+check("báo cáo JSON khi Compliance lỗi ghi final_score = None",
+      captured["report_json"]["final_score"] is None)
 
 sys.exit(1 if failed else 0)

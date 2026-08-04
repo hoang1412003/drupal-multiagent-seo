@@ -7,6 +7,9 @@ Cả 4 agent đều chạy thật. Brand Voice chấm theo rubric BV1-BV7 và t�
 tất định (docs/rubrics.md mục 5); 3 agent còn lại vẫn để LLM tự cho điểm.
 Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
 """
+import hashlib
+from datetime import datetime, timezone
+
 from langgraph.graph import END, START, StateGraph
 
 from agents import brand_voice, compliance, content_quality, seo
@@ -165,6 +168,94 @@ def _format_issue(issue) -> str:
     return "; ".join(f"{k}: {v}" for k, v in issue.items() if k != "field")
 
 
+# Các field tham gia tính content_hash, ĐÚNG THỨ TỰ NÀY. Phía PHP
+# (AiReportRenderer::contentHash) phải ghép y hệt, nếu lệch thì băng cảnh báo
+# "nội dung đã thay đổi" hiện sai vĩnh viễn. Có test hợp đồng dùng chung file
+# scripts/content_hash_fixture.json để bắt sai lệch này.
+_HASH_FIELDS = ("title", "body", "summary", "meta_description")
+
+
+def _content_hash(fields: dict) -> str:
+    """Băm nội dung đã chấm, để sau này biết bài có bị sửa sau khi chấm không.
+
+    Dùng hash chứ KHÔNG dùng mốc thời gian `changed` của node: chính lệnh
+    PATCH của write_back() làm `changed` nhảy, nên so mốc đó sẽ luôn báo
+    "nội dung đã đổi" ngay sau khi chấm (spec mục 4.3, có bằng chứng đo trên
+    DB). Hash chỉ đổi khi nội dung thật sự đổi.
+    """
+    ghep = "\n".join(str(fields.get(k) or "") for k in _HASH_FIELDS)
+    return hashlib.sha256(ghep.encode("utf-8")).hexdigest()
+
+
+def _issue_to_json(agent_key: str, issue: dict) -> dict:
+    """Một issue/flag của agent -> một mục trong báo cáo JSON.
+
+    Compliance có hình dạng khác 3 agent kia: nó dùng {rule, excerpt,
+    severity} và KHÔNG có trường gợi ý sửa, nên `message` để None. Đặt
+    message = rule sẽ khiến giao diện in cùng một câu hai lần.
+    """
+    if agent_key == "compliance":
+        return {
+            "agent": AGENT_LABELS[agent_key],
+            "label": issue.get("rule", ""),
+            "message": None,
+            "excerpt": issue.get("excerpt") or None,
+            "severity": issue.get("severity"),
+        }
+    return {
+        "agent": AGENT_LABELS.get(agent_key, agent_key),
+        "label": issue.get("type", ""),
+        "message": issue.get("suggestion") or None,
+        # Brand Voice có trích dẫn nguyên văn (chỗ nó tìm thấy lỗi); Content
+        # Quality và SEO thì không - .get() nên cả ba dùng chung nhánh này.
+        "excerpt": issue.get("excerpt") or None,
+        # Chỉ Compliance định nghĩa mức nghiêm trọng. KHÔNG bịa cho 3 agent
+        # kia - docs/rubrics.md mục 6.1 chủ trương severity phải tra bảng
+        # tất định theo mã tiêu chí.
+        "severity": None,
+    }
+
+
+def _build_report_json(state: ContentReviewState) -> dict:
+    """Dựng báo cáo có cấu trúc cho module vf_ai_review render.
+
+    Chạy song song với chuỗi text ghi vào field_ai_suggestions - chuỗi đó
+    KHÔNG đổi, để khi module chưa bật thì vẫn đọc được (suy giảm mềm).
+    """
+    report = state.get("report") or {}
+    theo_field: dict = {}
+
+    for agent_key, result in (report.get("details") or {}).items():
+        if not isinstance(result, dict):
+            continue      # agent lỗi -> đã phản ánh ở missing_agents/note
+        for key in ISSUE_LIST_KEYS:
+            for issue in result.get(key, []):
+                if not isinstance(issue, dict):
+                    continue
+                field = issue.get("field")
+                if not field:
+                    continue      # không gắn field thì không hiện dưới widget nào
+                theo_field.setdefault(field, []).append(
+                    _issue_to_json(agent_key, issue)
+                )
+
+    return {
+        "version": 1,
+        "scored_at": datetime.now(timezone.utc).isoformat(),
+        "content_hash": _content_hash(state.get("fields") or {}),
+        # Lấy decision/final_score từ STATE chứ không từ report, vì đó đúng
+        # là nguồn write_back() ghi vào field_ai_status/field_ai_score. Đọc
+        # từ report là tạo nguồn thứ hai cho cùng một giá trị - lệch nhau thì
+        # giao diện và field điểm hiển thị hai con số khác nhau.
+        "decision": state.get("decision"),
+        "final_score": state.get("final_score"),
+        "note": report.get("note"),
+        "veto_reason": report.get("veto_reason"),
+        "missing_agents": report.get("missing_agents", []),
+        "fields": theo_field,
+    }
+
+
 def write_back_node(state: ContentReviewState) -> dict:
     report = state.get("report") or {}
     by_field = {}      # field -> list dòng gợi ý
@@ -205,6 +296,7 @@ def write_back_node(state: ContentReviewState) -> dict:
         status=state["decision"],
         score=state["final_score"],
         suggestions="\n".join(lines) or "Không có gợi ý sửa.",
+        report_json=_build_report_json(state),
     )
     return {}
 

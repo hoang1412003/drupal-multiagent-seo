@@ -1,0 +1,129 @@
+<?php
+
+/**
+ * @file
+ * Hiển thị kết quả đánh giá Multi-Agent AI trong giao diện soạn bài.
+ *
+ * Module CHỈ ĐỌC: không tính điểm, không gọi API, không sửa dữ liệu node.
+ * Hỏng thì cùng lắm không thấy báo cáo, không thể làm sai dữ liệu đánh giá.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\vf_ai_review\AiReportRenderer;
+
+/**
+ * Bốn field do hệ Multi-Agent ghi vào, người soạn không được sửa.
+ */
+const VF_AI_REVIEW_FIELDS = [
+  'field_ai_status',
+  'field_ai_score',
+  'field_ai_suggestions',
+  'field_ai_report_json',
+];
+
+/**
+ * Ánh xạ khoá field trong báo cáo -> tên phần tử trên form soạn bài.
+ *
+ * Để MỘT CHỖ DUY NHẤT. Tên nào không tồn tại trên form thì bỏ qua field đó
+ * chứ không đổ lỗi - sai một tên không được làm trắng trang form soạn bài
+ * (docs/editor-ui-design.md mục 8).
+ *
+ * `body` và `summary` cùng trỏ về widget 'body' vì summary là teaser nằm
+ * trong chính widget đó - chú thích của hai khoá này được ghép lại.
+ */
+const VF_AI_REVIEW_FIELD_MAP = [
+  'title' => 'title',
+  'body' => 'body',
+  'summary' => 'body',
+  'meta_description' => 'field_meta_description',
+  'url_alias' => 'path',
+  'image_alt' => 'field_image',
+];
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Tên hàm CHÍNH LÀ phần khai báo: Drupal thấy hàm tên
+ * <ten_module>_form_node_form_alter thì tự gọi mỗi khi dựng form node.
+ * Dấu & trước $form nghĩa là sửa trực tiếp vào mảng gốc.
+ */
+function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'article') {
+    return;
+  }
+
+  // Ẩn hẳn 4 field AI. Dùng #access = FALSE chứ KHÔNG dùng
+  // '#attributes' => ['readonly' => 'readonly'] - cái đó chỉ là thuộc tính
+  // HTML, chặn ở trình duyệt nhưng người dùng vẫn gửi giá trị lên server.
+  foreach (VF_AI_REVIEW_FIELDS as $ten) {
+    if (isset($form[$ten])) {
+      $form[$ten]['#access'] = FALSE;
+    }
+  }
+
+  $renderer = new AiReportRenderer();
+  $tho = _vf_ai_review_gia_tri($node, 'field_ai_report_json');
+  $report = $renderer->decode($tho);
+  // Có dữ liệu nhưng giải mã không được -> trạng thái "JSON hỏng", khác hẳn
+  // "chưa chấm" (field trống). Phải phân biệt để lỗi dữ liệu không bị hiểu
+  // nhầm thành tình trạng bình thường.
+  $loi_json = ($tho !== '' && $report === NULL);
+
+  // So hash để biết bài có bị sửa sau khi chấm không. Dùng hash chứ KHÔNG
+  // dùng mốc `changed` của node: chính lệnh PATCH của write_back() làm mốc
+  // đó nhảy, nên so nó sẽ luôn báo "đã thay đổi" ngay sau khi chấm.
+  $stale = FALSE;
+  if ($report !== NULL && !empty($report['content_hash'])) {
+    $hien_tai = AiReportRenderer::contentHash([
+      'title' => (string) $node->label(),
+      'body' => _vf_ai_review_gia_tri($node, 'body'),
+      'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
+      'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
+    ]);
+    $stale = ($hien_tai !== $report['content_hash']);
+  }
+
+  $form['vf_ai_review'] = [
+    '#type' => 'details',
+    '#title' => 'Đánh giá AI',
+    '#group' => 'advanced',
+    '#open' => TRUE,
+    '#weight' => -10,
+    'noi_dung' => [
+      // Chuỗi này đã được AiReportRenderer escape toàn bộ phần động.
+      '#markup' => $renderer->overviewHtml($report, $stale, $loi_json),
+    ],
+  ];
+
+  // Gom chú thích theo widget đích TRƯỚC, vì body và summary cùng trỏ về
+  // widget 'body' - gắn thẳng thì cái sau đè mất cái trước.
+  $theo_widget = [];
+  foreach (VF_AI_REVIEW_FIELD_MAP as $khoa_bao_cao => $ten_form) {
+    $html = $renderer->fieldNotesHtml($report, $khoa_bao_cao);
+    if ($html !== '') {
+      $theo_widget[$ten_form] = ($theo_widget[$ten_form] ?? '') . $html;
+    }
+  }
+
+  foreach ($theo_widget as $ten_form => $html) {
+    if (isset($form[$ten_form])) {
+      $form[$ten_form]['#suffix'] = ($form[$ten_form]['#suffix'] ?? '') . $html;
+    }
+  }
+
+  $form['#attached']['library'][] = 'vf_ai_review/report';
+}
+
+/**
+ * Đọc giá trị một field của node, trả chuỗi rỗng nếu không có.
+ *
+ * Đọc phòng thủ giống fetch_content() bên Python: field chưa cấu hình hoặc
+ * để trống thì trả rỗng, không làm sập form soạn bài.
+ */
+function _vf_ai_review_gia_tri($node, string $ten_field, string $thuoc_tinh = 'value'): string {
+  if (!$node->hasField($ten_field) || $node->get($ten_field)->isEmpty()) {
+    return '';
+  }
+  return (string) ($node->get($ten_field)->{$thuoc_tinh} ?? '');
+}

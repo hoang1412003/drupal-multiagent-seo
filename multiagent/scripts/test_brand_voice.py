@@ -131,6 +131,22 @@ def test_loi_o_hai_field_sinh_hai_issue():
     print("[PASS] loi o 2 field -> 2 issue, moi cai dung field")
 
 
+def test_trich_dan_de_rieng_khong_gop_vao_type():
+    """Trich dan phai o truong `excerpt` rieng, KHONG gop vao `type`.
+
+    Gop vao khien dong tieu de dai le the khi trich dan la ca mot cau (BV6
+    trich nguyen cau van), trong khi Compliance von da tach excerpt ra khung
+    rieng. De hai agent nhat quan.
+    """
+    kq = _run(
+        {"title": "Đánh giá VF8", "body": "VF8 tốt lắm.", "summary": ""},
+    )
+    bv1 = next(i for i in kq["issues"] if "BV1" in i["type"])
+    assert "tìm thấy" not in bv1["type"], bv1["type"]
+    assert bv1["excerpt"] == "VF8", bv1
+    print("[PASS] trich dan o truong excerpt rieng, khong gop vao type")
+
+
 def test_muc_2_va_na_khong_sinh_issue():
     kq = _run(
         {"title": "Hướng dẫn sạc pin", "body": "bạn nên sạc ô tô điện đúng cách.",
@@ -270,6 +286,7 @@ if __name__ == "__main__":
         test_bv6_khong_co_judge_la_na,
         test_bai_rong_tra_none,
         test_loi_o_hai_field_sinh_hai_issue,
+        test_trich_dan_de_rieng_khong_gop_vao_type,
         test_muc_2_va_na_khong_sinh_issue,
         test_tat_dinh_nam_lan,
         test_bv7_thoa_man_rong_la_na,

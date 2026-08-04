@@ -399,8 +399,13 @@ def _issues_from_criteria(criteria: list[dict]) -> list[dict]:
             trich = [o["text"] for o in c["occurrences"] if o["field"] == field]
             issues.append({
                 "field": field,
-                "type": _NHAN[c["id"]] + (f" - tìm thấy: {', '.join(trich)}" if trich else ""),
+                "type": _NHAN[c["id"]],
                 "suggestion": goi_y,
+                # Trích dẫn để RIÊNG, không gộp vào `type`. Gộp vào khiến dòng
+                # tiêu đề dài lê thê khi trích dẫn là cả một câu (BV6 trích
+                # nguyên câu văn), trong khi Compliance vốn đã tách `excerpt`
+                # ra khung riêng và đọc dễ hơn hẳn - để hai agent nhất quán.
+                "excerpt": ", ".join(trich),
             })
     return issues
 

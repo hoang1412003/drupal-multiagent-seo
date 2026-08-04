@@ -28,7 +28,9 @@ Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc 
 drupal-multiagent-seo/
 ├── drupal/                      # PHÍA DRUPAL - project Drupal 10 chạy qua DDEV
 │   ├── .ddev/                    # cấu hình DDEV (project-type=drupal10, docroot=web)
-│   └── web/                      # code Drupal (mở trực tiếp bằng VS Code)
+│   ├── scripts/                  # tạo field + test lớp render (PHP thuần)
+│   └── web/modules/custom/
+│       └── vf_ai_review/         # module hiển thị báo cáo AI trong giao diện soạn bài
 │
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
@@ -104,6 +106,6 @@ cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRU
 - [x] Brand Voice Agent dùng RAG — rubric BV1–BV7 (`docs/rubrics.md` mục 5), 6/7 tiêu chí đo bằng regex đối chiếu `brand_rules.json`, BV6 chấm giọng văn bằng LLM + RAG trên KB `kb_brand` (1128 chunk từ 16 bài `BRAND`). Điểm do `src/scoring.py` tính **tất định**, không để LLM tự cho điểm — agent đầu tiên áp dụng rubric v1. Brand guideline **tự trích xuất** từ corpus bằng kiểm định nhị thức (p < 0,05 → ngưỡng ≥9/10 tự rơi ra, không phải số tự đặt). E2 đo được 78,3% so với mốc ngẫu nhiên 21,7%
 - [ ] Thu thập & gán nhãn gold set — 33 mẫu đã thu + bóc tách + chèn perturbation (`docs/goldset/labels.csv`), đang gán nhãn
 - [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
-- [ ] UI báo cáo trong editor — đã thiết kế (`docs/editor-ui-design.md`), module `vf_ai_review` chưa viết
+- [x] UI báo cáo trong editor — module `vf_ai_review`: khối tổng quan ở cột phải + **chú thích lỗi ngay dưới từng field** (phần đáp ứng đúng chữ đề bài). Python ghi thêm `field_ai_report_json` (báo cáo có cấu trúc), module chỉ đọc và render. Escape chống XSS theo `docs/prompt-injection.md` M4. Phát hiện nội dung sửa sau khi chấm bằng **hash nội dung**, không phải mốc `changed`
 
 Lộ trình đầy đủ: [`docs/roadmap.md`](docs/roadmap.md).
