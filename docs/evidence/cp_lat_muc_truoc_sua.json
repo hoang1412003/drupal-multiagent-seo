@@ -1,0 +1,480 @@
+{
+ "G-004": [
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9189,
+   "output_tokens": 459
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9195,
+   "output_tokens": 452
+  },
+  {
+   "diem": 33.3,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 9186,
+   "output_tokens": 485
+  },
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Bóng tiêu thụ 35W, tiết kiệm 20W so với halogen, lượng sáng gấp 5 lần (100 lumen/W). Tuổi thọ cao hơn 5 lần so với đèn H"
+    }
+   ],
+   "input_tokens": 9186,
+   "output_tokens": 556
+  },
+  {
+   "diem": 33.3,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 9198,
+   "output_tokens": 511
+  }
+ ],
+ "G-003": [
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 2,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19949,
+   "output_tokens": 457
+  },
+  {
+   "diem": 62.5,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 2,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 19946,
+   "output_tokens": 542
+  },
+  {
+   "diem": 25.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 0,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19949,
+   "output_tokens": 506
+  },
+  {
+   "diem": 25.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 0,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19943,
+   "output_tokens": 520
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 2,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19943,
+   "output_tokens": 504
+  }
+ ],
+ "G-008": [
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": "NA",
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP4",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng kh"
+    },
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%. Đây là bộ sạc cho phép người dùng nạp đầ"
+    }
+   ],
+   "input_tokens": 19831,
+   "output_tokens": 2590
+  },
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": "NA",
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP4",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng kh"
+    },
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%. Đây là bộ sạc cho phép người dùng nạp đầ"
+    }
+   ],
+   "input_tokens": 20085,
+   "output_tokens": 3017
+  },
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": "NA",
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP4",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng kh"
+    },
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%. Đây là bộ sạc cho phép người dùng nạp đầ"
+    }
+   ],
+   "input_tokens": 19846,
+   "output_tokens": 2635
+  },
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": "NA",
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP4",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%. Đây là bộ sạc cho phép người dùng nạp đầ"
+    }
+   ],
+   "input_tokens": 21129,
+   "output_tokens": 4768
+  },
+  {
+   "diem": 66.7,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": "NA",
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP4",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến"
+    },
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng kh"
+    },
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%. Đây là bộ sạc cho phép người dùng nạp đầ"
+    }
+   ],
+   "input_tokens": 20088,
+   "output_tokens": 3159
+  }
+ ],
+ "G-001": [
+  {
+   "diem": 58.3,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 1,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "Phạm vi di chuyển của VF e34 đạt tới khoảng 285km sau 1 lần sạc đầy; hành trình xuyên Việt dài hơn 1.000 km với 11 lần n"
+    }
+   ],
+   "input_tokens": 16411,
+   "output_tokens": 1546
+  },
+  {
+   "diem": 58.3,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 1,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "\"phạm vi di chuyển của VF e34 đạt tới khoảng 285km sau 1 lần sạc đầy\" và \"Hành trình dài hơn 1.00 km từ Hà Nội vào Thành"
+    }
+   ],
+   "input_tokens": 16411,
+   "output_tokens": 1534
+  },
+  {
+   "diem": 58.3,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 1,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "\"phạm vi di chuyển của VF e34 đạt tới khoảng 285km sau 1 lần sạc đầy\" và \"Hành trình dài hơn 1.00 km từ Hà Nội vào Thành"
+    }
+   ],
+   "input_tokens": 16417,
+   "output_tokens": 1187
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 16405,
+   "output_tokens": 1112
+  },
+  {
+   "diem": 58.3,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 2
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 0,
+     "muc_sau": 2,
+     "trich_dan_khop": false,
+     "evidence": "phạm vi di chuyển của VF e34 đạt tới khoảng 285km sau 1 lần sạc đầy; Hành trình dài hơn 1.00 km từ Hà Nội vào Thành phố "
+    }
+   ],
+   "input_tokens": 16408,
+   "output_tokens": 1145
+  }
+ ]
+}
