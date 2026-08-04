@@ -111,6 +111,8 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
       $form[$ten_form]['#suffix'] = ($form[$ten_form]['#suffix'] ?? '') . $html;
     }
   }
+
+  $form['#attached']['library'][] = 'vf_ai_review/report';
 }
 
 /**

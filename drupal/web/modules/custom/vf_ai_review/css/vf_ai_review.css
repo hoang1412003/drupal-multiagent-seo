@@ -1,0 +1,40 @@
+/* Báo cáo đánh giá AI trong form soạn bài.
+   Màu lấy theo bảng màu Claro (admin theme mặc định của Drupal 10) để không
+   lệch khỏi giao diện quản trị. */
+
+.vf-ai-review { font-size: 0.9em; line-height: 1.5; }
+.vf-ai-review .vf-ai-meta { margin: 0 0 0.75em; }
+.vf-ai-review .vf-ai-meta dt { font-weight: 600; margin-top: 0.4em; }
+.vf-ai-review .vf-ai-meta dd { margin: 0 0 0.2em; }
+.vf-ai-review ul { margin: 0.3em 0 0; padding-left: 1.2em; }
+.vf-ai-empty { color: #545560; font-style: italic; }
+
+.vf-ai-veto {
+  background: #fcf4f2; border-left: 4px solid #e34f4f;
+  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+}
+.vf-ai-stale {
+  background: #fdf8ed; border-left: 4px solid #e5a83b;
+  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+}
+.vf-ai-warn {
+  background: #f3f4f9; border-left: 4px solid #4d4d4d;
+  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+}
+
+/* Chú thích dưới từng field */
+.vf-ai-notes { margin: 0.4em 0 1em; }
+.vf-ai-note {
+  border-left: 3px solid #ccc; padding: 0.4em 0.7em;
+  margin-bottom: 0.4em; background: #fafafa; font-size: 0.9em;
+}
+.vf-ai-note .vf-ai-msg { margin-top: 0.25em; color: #454545; }
+.vf-ai-note blockquote {
+  margin: 0.35em 0 0; padding: 0.3em 0.6em;
+  border-left: 2px solid #ddd; color: #666; font-style: italic;
+}
+
+.vf-ai-sev-critical { border-left-color: #e34f4f; background: #fcf4f2; }
+.vf-ai-sev-medium   { border-left-color: #e5a83b; background: #fdf8ed; }
+.vf-ai-sev-low      { border-left-color: #73b355; background: #f3faef; }
+.vf-ai-sev-none     { border-left-color: #8e929c; }
