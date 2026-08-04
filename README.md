@@ -20,6 +20,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/brand/brand_guideline.md`](docs/brand/brand_guideline.md) — brand guideline **sinh tự động** từ corpus 16 bài `BRAND`, mỗi quy tắc kèm số liệu và p-value chứng minh
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 - [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
+- [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) — việc phải làm trước khi demo/bàn giao: cấu hình dev quên tắt, KB phải dựng lại trên máy mới, và cách nói đúng về ngưỡng chưa calibrate
 
 ## Cấu trúc project
 
