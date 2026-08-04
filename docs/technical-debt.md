@@ -123,7 +123,7 @@ Giải quyết luôn khi chuyển Compliance sang rubric CP1–CP8 (A1). Điểm
 | Polling worker + Content Moderation "Needs Review" | `architecture.md` mục 9 | Sprint 2 còn lại. Không chặn gì |
 | Nhật ký truy vết JSONL | `operations.md` mục 2 | Đã **hạ ưu tiên** 2026-08-03 sau khi phát hiện Drupal giữ revision — 3 field AI không mất, chỉ mất bối cảnh chấm |
 | Vòng phản hồi người duyệt | `operations.md` mục 3 | Cần nhật ký truy vết xong trước mới khớp được `(node_id, scored_at)` |
-| KB fact-check chưa verify số thật | `sources.md` mục 2.1 | **4/4 entry còn `verified: false`**. Cần mở trang thật đối chiếu |
+| ~~KB fact-check chưa verify số thật~~ | `sources.md` mục 2.1 | ✅ **xong 2026-08-04** — 4/4 entry `verified: true`. Tìm ra 3 chỗ sai, trong đó `sources.md` nói **ngược** sự thật về chuẩn đo. Còn một rủi ro không khử được: VinFast công bố **ba** con số khác nhau cho VF 5 Plus |
 | Mở rộng corpus `BRAND` | `sources.md` mục 1.7 | Chỉ làm nếu có quy ước rơi vào vùng chưa đủ căn cứ. Hiện "trạm sạc" ở 9/11 (p = 0,065) — **cố ý không thu thêm** vì đó là *optional stopping* |
 
 ---

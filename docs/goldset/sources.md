@@ -112,16 +112,48 @@ Nguồn đối chiếu claim định lượng (tầm hoạt động, thời gian
 - [ ] /vn_vi/o-to-dien-chay-xa-nhat
 - [ ] /vn_vi/tong-quan-vinfast-vf-9
 
-### 2.1. Số liệu đã thu (cần verify lại khi mở trang thật)
+### 2.1. Số liệu đã verify (2026-08-04)
 
-| Model | Tầm hoạt động/lần sạc | Tiêu chuẩn đo | Ghi chú |
+| Model | Tầm hoạt động/lần sạc | Tiêu chuẩn đo | Nguồn kiểm |
 |---|---|---|---|
-| VF 9 | 438km (Eco) / 423km (Plus) | (cần xác nhận) | |
-| VF 8 | 420km (Eco) / 400km (Plus) | (cần xác nhận) | |
-| VF 5 | 326km | **NEDC** (nêu rõ) | |
-| Bảo dưỡng định kỳ | mỗi 12.000km hoặc 1 năm | | dùng cho claim bảo dưỡng |
+| VF 9 | 438km (Eco) / 423km (Plus) | **WLTP (dự kiến)** | bảng thông số trong bài G-009 |
+| VF 8 | 420km (Eco) / 400km (Plus) | **WLTP (dự kiến)** | bảng thông số trong bài G-009 |
+| VF 5 Plus | 326,4km — **nhưng xem cảnh báo dưới** | NEDC | trang tổng quan VF 5 Plus |
+| Bảo dưỡng định kỳ | mỗi 12.000km **hoặc 12 tháng, tùy điều kiện nào đến trước** | | trang `lich-bao-duong-xe-vinfast` |
 
-**Điểm mấu chốt cho Compliance:** VF 5 nêu rõ "theo NEDC", các model khác trong kết quả search chưa thấy nêu tiêu chuẩn đo. Đây chính là loại lỗi Compliance Agent cần bắt: **claim tầm hoạt động thiếu điều kiện đo (NEDC/WLTP)**. Một bài viết ghi "chạy 420km" mà không nói chuẩn đo là claim chưa đầy đủ → flag. Đây là ví dụ thật, verify được, để đưa vào demo.
+Bảng thông số nằm sẵn trong corpus (`docs/goldset/raw/G-009.txt`), tải từ vinfastauto.com. Nguyên văn:
+
+```
+VF 8       | 420km (Eco) / 400km (Plus) | (Dự kiến theo chuẩn WLTP)
+VF 9       | 438km (Eco) / 423km (Plus) | (Dự kiến theo chuẩn WLTP)
+VF 5 Plus  | >300km                     | (không nêu chuẩn)
+```
+
+#### Ba chỗ sai đã sửa
+
+1. **Bản trước của mục này nói ngược sự thật.** Nó ghi *"VF 5 nêu rõ theo NEDC, các model khác chưa thấy nêu tiêu chuẩn đo. Đây chính là loại lỗi Compliance Agent cần bắt … để đưa vào demo."* Thực tế **VF 8 và VF 9 có nêu chuẩn** (WLTP dự kiến), còn bảng thông số cho **VF 5 Plus lại không nêu**. Ví dụ định mang đi demo dựng trên tiền đề sai.
+2. **`source_url` của mục VF 5 trỏ sang trang VF 7** (`/vn_vi/thong-so-vf-7`). Đã sửa sang trang tổng quan VF 5 Plus.
+3. **Tên model thiếu chính xác:** bản thương mại tại VN là **VF 5 Plus**, không phải "VF 5". Quan trọng vì `fact_check` truy vấn KB bằng chuỗi `"{model} {metric}"` — sai tên model là retrieve trượt.
+
+#### ⚠️ Cảnh báo phải nhớ khi đọc kết quả CP3
+
+**Chính VinFast công bố ba con số khác nhau cho VF 5 Plus:**
+
+| Con số | Trang |
+|---|---|
+| `>300 km` | bảng thông số trong G-009 |
+| `>320 km` | trang tổng quan VF 5 Plus |
+| `326,4 km (NEDC)` | trang thông số chi tiết |
+
+CP3 gắn cờ `critical` với nội dung *"sai lệch so với thông số công bố chính thức"*. Một bài viết **đúng**, trích `">300km"`, đối chiếu với `326km` trong KB thì **có thể bị flag oan**. Đã ghi cả ba con số vào trường `tam_hoat_dong` của `specs.json` để giảm rủi ro đó, nhưng **không khử được hoàn toàn** — "thông số công bố chính thức" ở đây không phải một giá trị duy nhất.
+
+Đây cũng là lý do thiết kế CP3 chọn "không tra được → mức 1, không phải mức 0" (`rubrics.md` mục 6.2): nguồn sự thật của bài toán này vốn không sạch.
+
+#### Ví dụ demo thay thế cho Compliance
+
+Ví dụ cũ hỏng, dùng ví dụ này thay:
+
+> Bảng thông số ghi rõ **"(Dự kiến theo chuẩn WLTP)"** cạnh con số 420km. Một bài marketing trích lại **"VF 8 đi được 420km một lần sạc"** mà bỏ mất vế chuẩn đo → đúng là mã lỗi **B1**, và CP5 bắt được bằng máy (`compliance_analysis.py`). Ví dụ này verify được, và mạnh hơn ví dụ cũ vì nó cho thấy **thông tin bị lược mất trong quá trình viết lại**, chứ không phải hãng không công bố.
 
 ---
 
