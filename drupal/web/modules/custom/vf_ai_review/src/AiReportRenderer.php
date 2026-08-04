@@ -140,7 +140,8 @@ class AiReportRenderer {
       $tong += is_array($ds) ? count($ds) : 0;
     }
     if ($tong > 0) {
-      $out .= '<p class="vf-ai-count">' . $tong . ' vấn đề trên ' . count($fields) . ' trường:</p><ul>';
+      $out .= '<p class="vf-ai-count">' . $tong . ' vấn đề trên ' . count($fields)
+        . ' trường:</p><ul class="vf-ai-fields">';
       foreach ($fields as $khoa => $ds) {
         $ten = self::FIELD_LABELS[$khoa] ?? $this->esc($khoa);
         $out .= '<li>' . $ten . ' (' . count($ds) . ')</li>';

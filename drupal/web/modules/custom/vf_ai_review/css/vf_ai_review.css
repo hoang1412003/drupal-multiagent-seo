@@ -6,10 +6,10 @@
 .vf-ai-review .vf-ai-meta { margin: 0 0 0.75em; }
 .vf-ai-review .vf-ai-meta dt { font-weight: 600; margin-top: 0.4em; }
 .vf-ai-review .vf-ai-meta dd { margin: 0 0 0.2em; }
-/* Đặt màu chữ tường minh: Claro tô xanh cho <li> trong vùng sidebar, khiến
-   danh sách đếm trông như link bấm được trong khi nó không phải. */
-.vf-ai-review ul { margin: 0.3em 0 0; padding-left: 1.2em; }
-.vf-ai-review ul li { color: #232429; }
+/* Danh sách đếm vấn đề theo trường. KHÔNG đặt màu chữ ở đây: màu xanh nhìn
+   thấy khi khối đang mở là trạng thái focus của Drupal, ép màu sẽ đè mất một
+   chỉ dấu hỗ trợ tiếp cận. */
+.vf-ai-review ul.vf-ai-fields { margin: 0.3em 0 0; padding-left: 1.2em; }
 .vf-ai-empty { color: #545560; font-style: italic; }
 
 .vf-ai-veto {
