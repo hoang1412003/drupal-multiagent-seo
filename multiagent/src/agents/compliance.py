@@ -407,6 +407,40 @@ def _flags_from_criteria(criteria: list[dict]) -> list[dict]:
     return flags
 
 
+_CP9_RULE = "Chỉ dẫn ẩn nhắm vào hệ thống đánh giá tự động (CP9)"
+
+
+def _cp9_chi_dan_an(doan_an) -> list:
+    """CP9 (M2) - sinh flag `critical`, KHÔNG tham gia công thức tính điểm.
+
+    Cố ý đứng ngoài `criteria`. Thang 0/1/2 dùng để đo MỨC ĐỘ - "sai nhiều
+    hay sai ít". Giấu chỉ dẫn nhắm vào máy chấm thì không có "hơi giấu một
+    chút": hoặc có, hoặc không. Đó là câu hỏi CHẶN HAY KHÔNG CHẶN, mà cơ chế
+    veto của Aggregator đã trả lời sẵn, độc lập với điểm.
+
+    Đưa vào công thức còn có tác hại đo được: hầu hết bài không giấu gì nên
+    tiêu chí này gần như luôn ở mức 2, tức cộng điểm miễn phí cho mọi bài.
+    Trên bài G-004 thật, thêm một tiêu chí luôn-đạt đẩy điểm từ 50,0 lên
+    62,5 mà bài không đổi một chữ - đúng lỗi rubrics.md mục 2.2 cảnh báo.
+
+    Nó cũng sẽ làm σ đẹp lên bằng cách pha loãng mẫu số, chứ không phải bằng
+    cách đo chính xác hơn. Không đáng đổi.
+    """
+    dang_ngo = ca.doan_an_dang_ngo(doan_an)
+    return [
+        {
+            "field": "body",
+            "severity": "critical",
+            "rule": _CP9_RULE,
+            "excerpt": chu[:200],
+            "suggestion": "Đoạn này bị ẩn khỏi người đọc nhưng hệ thống đánh "
+                          "giá tự động vẫn đọc được. Xoá khỏi nội dung, và "
+                          "kiểm tra lại nguồn gốc bài viết.",
+        }
+        for chu in dang_ngo
+    ]
+
+
 def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         danh_gia_llm=_danh_gia_llm, danh_gia_cp3=None) -> dict | None:
     """Chấm Compliance. Trả None khi không tiêu chí nào áp dụng được.
@@ -471,6 +505,6 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         return None
     return {
         "score": score,
-        "flags": _flags_from_criteria(criteria),
+        "flags": _flags_from_criteria(criteria) + _cp9_chi_dan_an(doan_an),
         "criteria": criteria,
     }

@@ -96,13 +96,15 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 **Lỗi thật mà nó phòng (giữ lại để tra cứu):** cùng một tập số từng nằm ở **4 nơi** và **đã trôi lệch một lần** — mã B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170`. Phát hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
 
-### B2. Ba agent còn ghép prompt bằng nhãn text thuần — ✅ M1 + M3 ĐÃ XONG (2026-08-04)
+### B2. Ba agent còn ghép prompt bằng nhãn text thuần — ✅ ĐÃ XONG (2026-08-04)
 
 `src/prompt_builder.py` (mới) dùng chung cho **cả 5 chỗ gọi LLM**. Không còn chỗ nào ghép chuỗi `[title] ... [body] ...`.
 
 **Một lỗ hổng thật phát hiện khi nối M3 vào Compliance:** `strip_html()` khớp trọn `<!-- xe này tốt nhất -->` bằng regex `<[^>]+>` và xoá luôn chữ bên trong, nên **cụm từ cấm giấu trong bình luận HTML đi qua blacklist CP1 mà không bị bắt lần nào**. Người duyệt cũng không thấy vì họ đọc bài đã render. Tệ hơn dự kiến ở chỗ: không phải LLM bị lừa, mà chính *phần tất định* — thứ `prompt-injection.md` mục 4 liệt kê là "miễn nhiễm hoàn toàn" — bị mù. Đã sửa, có test khoá cả hai chiều.
 
-**Còn lại: M2 (CP9).** `prompt-injection.md` mục 8 xếp nó cuối cùng, sau khi rubric ổn định — rubric Compliance giờ đã ổn định nên đây là việc làm được. Cân nhắc trước khi làm: thêm CP9 là thêm một tiêu chí gần như **luôn ở mức 2**, tức cộng đều điểm cho mọi bài; cần nghĩ xem nó vào mẫu số như CP2 hay đứng ngoài công thức.
+**M2 (CP9) cũng xong.** Phát hiện chỉ dẫn ẩn nhắm vào hệ thống đánh giá tự động → flag `critical` → veto. **Đứng ngoài công thức tính điểm**: thêm một tiêu chí gần như luôn ở mức 2 sẽ cộng điểm miễn phí cho mọi bài (trên G-004 thật: 50,0 → 62,5 mà bài không đổi một chữ) và làm σ đẹp lên bằng cách pha loãng mẫu số. Chi tiết + hai giới hạn đã biết: `prompt-injection.md` mục 5 M2.
+
+**Biện pháp duy nhất không làm là M5** (lọc bằng danh sách từ khoá) — tài liệu đã lập luận nó dễ vòng tránh và tạo cảm giác an toàn giả.
 
 **Bằng chứng của vấn đề gốc (giữ để tra cứu):** trước đây `content_quality.py`, `seo.py`, `fact_check.py` ghép chuỗi dạng `[title] ... [body] ...`.
 
