@@ -98,21 +98,21 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 ### B2. Ba agent còn ghép prompt bằng nhãn text thuần
 
-**Bằng chứng:** `content_quality.py`, `seo.py`, `compliance.py`, `fact_check.py` đều còn ghép chuỗi dạng `[title] ... [body] ...`.
+**Bằng chứng:** `content_quality.py`, `seo.py`, `fact_check.py` còn ghép chuỗi dạng `[title] ... [body] ...`. (`compliance.py` đã chuyển sang M1 ngày 2026-08-04.)
 
 **Rủi ro:** nhãn đó **giả mạo được** — người viết gõ đúng chuỗi vào body là xoá ranh giới giữa dữ liệu và chỉ dẫn. Nguy hiểm hơn: `body` là HTML nên chỉ dẫn giấu trong bình luận HTML **vô hình với người duyệt nhưng LLM vẫn đọc**. Phân tích đầy đủ: `docs/prompt-injection.md` mục 2–3.
 
-**Đã làm được phần nào:** BV6 (`brand_voice.py`) dùng thẻ có hậu tố ngẫu nhiên — biện pháp **M1**. Ba agent kia chưa. **M3** (bóc phần ẩn trước khi đưa vào prompt) và **M2** (tiêu chí CP9 phát hiện chỉ dẫn ẩn) chưa làm.
+**Đã làm được phần nào:** BV6 (`brand_voice.py`) và Compliance (`compliance.py`, từ 2026-08-04) dùng thẻ có hậu tố ngẫu nhiên — biện pháp **M1**. Compliance được ưu tiên vì nó là agent duy nhất có quyền phủ quyết: một câu chèn thành công ở đó đổi được kết luận "chặn xuất bản" thành "cho qua".
+
+`content_quality.py`, `seo.py`, `fact_check.py` chưa. **M3** (bóc phần ẩn trước khi đưa vào prompt) và **M2** (tiêu chí phát hiện chỉ dẫn ẩn) chưa làm.
 
 **Giảm nhẹ sẵn có:** `docs/prompt-injection.md` mục 4 nêu ba thứ đang hạn chế hậu quả — structured output ràng buộc hình dạng đầu ra, hệ thống không tự xuất bản, và phần tất định (blacklist regex, Aggregator) miễn nhiễm hoàn toàn.
 
-### B3. `score` của Compliance độc lập với `flags`
+### B3. `score` của Compliance độc lập với `flags` — ✅ ĐÃ SỬA (2026-08-04)
 
-**Bằng chứng:** `src/agents/compliance.py` lấy `score` nguyên từ LLM, còn flag rule-based cộng thêm vào sau. Một bài dính 3 flag `critical` từ blacklist vẫn có thể mang `score = 95`.
+Giải quyết luôn khi chuyển Compliance sang rubric CP1–CP8 (A1). Điểm và flag giờ sinh từ **cùng một bộ `criteria`**: điểm qua `scoring.score_from_criteria()`, flag qua `_flags_from_criteria()` với severity tra bảng `scoring.severity_for()`. Không còn đường nào để một bài mang 3 flag `critical` mà vẫn 95 điểm — có test khoá lại (`test_diem_va_flag_khong_con_mau_thuan`).
 
-**Vì sao quan trọng:** Compliance là agent duy nhất có quyền phủ quyết. `docs/rubrics.md` mục 6.1 chủ trương cả `score` lẫn `severity` phải tất định — severity tra bảng theo mã tiêu chí, không để LLM tự chọn, vì `critical` là thứ kích hoạt chặn xuất bản.
-
-**Giảm nhẹ:** veto vẫn hoạt động độc lập với điểm, nên bài có flag `critical` vẫn bị chặn dù điểm cao. Nợ này ảnh hưởng *tính nhất quán của điểm*, không ảnh hưởng *quyết định chặn*.
+**Bằng chứng của vấn đề gốc (giữ để tra cứu):** `compliance.py` trước đây lấy `score` nguyên từ LLM, còn flag rule-based cộng thêm vào sau, nên hai thứ không liên quan gì nhau. Compliance là agent duy nhất có quyền phủ quyết nên đây là chỗ nguy hiểm nhất để có hai nguồn sự thật.
 
 ---
 
