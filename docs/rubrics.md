@@ -220,7 +220,8 @@ Rubric đã vào code cho **Brand Voice** (2026-08-03) và **Compliance** (2026-
 |---|---|
 | `src/scoring.py` | ✅ `score_from_criteria()` theo công thức mục 2.2 **và** `severity_for()` tra bảng cho Compliance |
 | `src/agents/brand_voice.py` | ✅ BV1–BV7, output `criteria: [{id, level, occurrences, suggestion, reference}]` |
-| `src/agents/compliance.py` | ✅ CP1–CP8. CP1 đo bằng máy, CP3 bằng RAG, sáu tiêu chí còn lại gộp vào **một** lần gọi LLM |
+| `src/agents/compliance.py` | ✅ CP1–CP8. CP1/CP5/CP6 đo bằng máy, CP3 bằng RAG, bốn tiêu chí còn lại gộp vào **một** lần gọi LLM |
+| `src/compliance_analysis.py` | ✅ phần "đo bằng máy" của CP5, CP6 và cổng áp dụng của CP8 |
 | `src/agents/fact_check.py` | ✅ `danh_gia()` trả mức 0/1/2/NA cho CP3 thay vì trả list flag |
 | `src/brand_analysis.py`, `src/text_utils.py` | ✅ phần "đo bằng máy" của BV1–BV5, BV7 (thay cho `src/analyzers/` dự kiến) |
 | `src/agents/{content_quality,seo}.py` | ❌ **vẫn để LLM tự cho `score`** — E1 hạ ưu tiên, xem `docs/technical-debt.md` A1 |
