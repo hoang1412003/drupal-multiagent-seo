@@ -15,6 +15,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from agents import compliance
 from scoring import score_from_criteria, severity_for
+from text_utils import strip_html
 
 # Bai co so lieu: kich hoat CP5 (km), CP8 (so + don vi). Khong kich hoat CP6
 # vi khong co moc thoi gian nao di kem "sac".
@@ -212,6 +213,75 @@ def test_cp8_may_chot_ap_dung_hay_na():
     print("[PASS] CP8 may chot ap dung; LLM tra NA tren bai co so lieu -> muc 0")
 
 
+# ------------------------------------------ trich dan nhieu manh (do 2026-08-04)
+
+# Hai cau nam o HAI THE HTML khac nhau. strip_html chen ".\n" vao giua nen
+# chung khong bao gio lien mach trong text da boc - day la truong hop that,
+# do duoc tren G-008 (docs/evidence/cp_lat_muc_raw.json).
+BODY_HAI_KHOI = "<p>Sạc được từ 0 lên 10% mỗi giờ.</p><p>Đây là bộ sạc chậm.</p>"
+_TT_HAI_KHOI = {"title": "", "body": strip_html(BODY_HAI_KHOI), "meta_description": ""}
+
+
+def test_trich_dan_ghep_hai_cau_khac_khoi_van_duoc_chap_nhan():
+    """Loi that: 10/20 luot bi loai oan vi doi trich dan phai LIEN MACH.
+    Kiem lai tung manh thi ca hai deu co nguyen van trong bai."""
+    ev = "Sạc được từ 0 lên 10% mỗi giờ. Đây là bộ sạc chậm."
+    assert compliance._trich_dan_co_that(ev, _TT_HAI_KHOI), \
+        "hai cau that o hai khoi HTML phai duoc chap nhan"
+    print("[PASS] trich dan ghep 2 cau khac khoi HTML -> chap nhan")
+
+
+def test_trich_dan_noi_bang_va_van_duoc_chap_nhan():
+    """Dang thu hai do duoc: LLM noi hai trich dan bang ' va ' (G-001)."""
+    ev = '"Sạc được từ 0 lên 10% mỗi giờ" và "Đây là bộ sạc chậm"'
+    assert compliance._trich_dan_co_that(ev, _TT_HAI_KHOI)
+    print("[PASS] trich dan noi bang ' va ' -> chap nhan")
+
+
+def test_mot_manh_bia_thi_ca_doan_trich_bi_loai():
+    """Doi trong: noi long theo manh KHONG duoc bien thanh cho qua. MOI manh
+    phai khop, bia nua cau van truot."""
+    ev = "Sạc được từ 0 lên 10% mỗi giờ. Xe này tốt nhất thị trường."
+    assert not compliance._trich_dan_co_that(ev, _TT_HAI_KHOI), \
+        "mot manh bia -> phai loai ca doan trich"
+    print("[PASS] mot manh bia -> loai ca doan trich")
+
+
+def test_so_thap_phan_khong_bi_cat_thanh_hai_manh():
+    """`1.000 km` co dau cham nhung sau no la CHU SO, khong phai khoang trang
+    - lookbehind trong _TACH_MANH phai giu nguyen no lam mot manh."""
+    tt = {"title": "", "body": "Hành trình dài hơn 1.000 km từ Hà Nội.",
+          "meta_description": ""}
+    assert compliance._trich_dan_co_that("dài hơn 1.000 km", tt)
+    print("[PASS] so thap phan khong bi cat thanh hai manh")
+
+
+def test_cp8_ha_muc_ma_khong_trich_duoc_thi_khong_thanh_muc_2():
+    """B5 (docs/technical-debt.md): bai CO so lieu, LLM cham CP8 = 0, nhung
+    trich mot cau khong co trong bai.
+
+    Sai theo huong nguy hiem nhat neu tra muc 2: tieu chi vua bi nghi vi pham
+    lai duoc cong DIEM TOI DA, va `occurrences` rong theo nen dau ra trong y
+    het mot bai that su dat - nhin `criteria` khong phat hien duoc.
+
+    Muc 0 moi dung, va dung theo chinh lap luan cua _chot_cp8: may da xac nhan
+    bai co so lieu, LLM khong chi ra duoc nguon nao -> do la dinh nghia cua
+    muc 0. Day KHONG phai truong hop cua CP4/CP7 (-> NA), vi voi CP8 thi cau
+    hoi 'bai co ban toi chu de nay khong' da do MAY chot, khong con phu thuoc
+    vao viec LLM trich dan duoc hay khong."""
+    result = compliance.run(
+        {"title": "", "body": BODY, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP8": 0},
+                          evidence="cau nay hoan toan khong co trong bai"),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP8") == 0, (
+        f"CP8 ha muc ma khong trich duoc -> phai la muc 0, "
+        f"dang la {_muc(result, 'CP8')}"
+    )
+    print("[PASS] CP8 ha muc ma khong trich duoc -> muc 0 (khong phai muc 2)")
+
+
 def test_cp8_llm_hong_thi_khong_phat_thanh_muc_0():
     """Ranh gioi quan trong: 'LLM tra NA' khac 'LLM chua chay'. Loi ha tang
     khong duoc bien thanh muc 0."""
@@ -352,6 +422,11 @@ if __name__ == "__main__":
         test_cp6_theo_ba_muc,
         test_cp6_moc_thoi_gian_xa_chu_sac_thi_khong_tinh,
         test_cp8_may_chot_ap_dung_hay_na,
+        test_trich_dan_ghep_hai_cau_khac_khoi_van_duoc_chap_nhan,
+        test_trich_dan_noi_bang_va_van_duoc_chap_nhan,
+        test_mot_manh_bia_thi_ca_doan_trich_bi_loai,
+        test_so_thap_phan_khong_bi_cat_thanh_hai_manh,
+        test_cp8_ha_muc_ma_khong_trich_duoc_thi_khong_thanh_muc_2,
         test_cp8_llm_hong_thi_khong_phat_thanh_muc_0,
         test_tu_cam_giau_trong_binh_luan_html_van_bi_bat,
         test_tu_cam_giau_trong_the_display_none_van_bi_bat,
