@@ -9,7 +9,7 @@
 /* Danh sách đếm vấn đề theo trường. KHÔNG đặt màu chữ ở đây: màu xanh nhìn
    thấy khi khối đang mở là trạng thái focus của Drupal, ép màu sẽ đè mất một
    chỉ dấu hỗ trợ tiếp cận. */
-.vf-ai-review ul.vf-ai-fields { margin: 0.3em 0 0; padding-left: 1.2em; }
+.vf-ai-review ul { margin: 0.3em 0 0; padding-left: 1.2em; }
 .vf-ai-empty { color: #545560; font-style: italic; }
 
 .vf-ai-veto {
