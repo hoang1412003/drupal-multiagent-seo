@@ -42,4 +42,51 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
       $form[$ten]['#access'] = FALSE;
     }
   }
+
+  $renderer = new AiReportRenderer();
+  $tho = _vf_ai_review_gia_tri($node, 'field_ai_report_json');
+  $report = $renderer->decode($tho);
+  // Có dữ liệu nhưng giải mã không được -> trạng thái "JSON hỏng", khác hẳn
+  // "chưa chấm" (field trống). Phải phân biệt để lỗi dữ liệu không bị hiểu
+  // nhầm thành tình trạng bình thường.
+  $loi_json = ($tho !== '' && $report === NULL);
+
+  // So hash để biết bài có bị sửa sau khi chấm không. Dùng hash chứ KHÔNG
+  // dùng mốc `changed` của node: chính lệnh PATCH của write_back() làm mốc
+  // đó nhảy, nên so nó sẽ luôn báo "đã thay đổi" ngay sau khi chấm.
+  $stale = FALSE;
+  if ($report !== NULL && !empty($report['content_hash'])) {
+    $hien_tai = AiReportRenderer::contentHash([
+      'title' => (string) $node->label(),
+      'body' => _vf_ai_review_gia_tri($node, 'body'),
+      'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
+      'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
+    ]);
+    $stale = ($hien_tai !== $report['content_hash']);
+  }
+
+  $form['vf_ai_review'] = [
+    '#type' => 'details',
+    '#title' => 'Đánh giá AI',
+    '#group' => 'advanced',
+    '#open' => TRUE,
+    '#weight' => -10,
+    'noi_dung' => [
+      // Chuỗi này đã được AiReportRenderer escape toàn bộ phần động.
+      '#markup' => $renderer->overviewHtml($report, $stale, $loi_json),
+    ],
+  ];
+}
+
+/**
+ * Đọc giá trị một field của node, trả chuỗi rỗng nếu không có.
+ *
+ * Đọc phòng thủ giống fetch_content() bên Python: field chưa cấu hình hoặc
+ * để trống thì trả rỗng, không làm sập form soạn bài.
+ */
+function _vf_ai_review_gia_tri($node, string $ten_field, string $thuoc_tinh = 'value'): string {
+  if (!$node->hasField($ten_field) || $node->get($ten_field)->isEmpty()) {
+    return '';
+  }
+  return (string) ($node->get($ten_field)->{$thuoc_tinh} ?? '');
 }
