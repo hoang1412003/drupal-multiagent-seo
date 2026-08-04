@@ -197,9 +197,9 @@ Cột "Mã lỗi" trong mọi bảng rubric ánh xạ về bảng mã lỗi ở 
 
 ---
 
-## 8. Ảnh hưởng lên code (chưa triển khai)
+## 8. Ảnh hưởng lên code
 
-Rubric v1 chưa vào code. Khi triển khai, các chỗ phải sửa:
+Bảng dưới đây là **dự kiến ban đầu**, giữ nguyên để đối chiếu với thực tế đã làm ở mục 8.1. Rubric v1 nay đã vào code cho **Brand Voice** và **Compliance**; `content_quality` và `seo` chưa.
 
 | File | Thay đổi |
 |---|---|

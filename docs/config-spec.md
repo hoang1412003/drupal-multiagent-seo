@@ -1,14 +1,14 @@
 # Đặc tả file cấu hình
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** đặc tả - chưa triển khai
+**Trạng thái:** **đã triển khai bước 1-4** (2026-08-04) - xem mục 7. Bước 5 (khối `scoring` cho rubric) chờ A1.
 **Hiện thực hoá:** `docs/architecture.md` mục 5.6 (thiết kế config-driven)
 
 ---
 
 ## 1. Vấn đề: cùng một con số đang nằm ở 4 nơi
 
-`architecture.md` mục 5.6 cam kết rubric và ngưỡng lưu theo khoá `(content_type, langcode)` trong config, và tự thừa nhận chưa triển khai. Nhưng vấn đề đã lớn hơn "chưa triển khai": **các ngưỡng đang bị chép ra nhiều bản, và đã trôi lệch một lần.**
+`architecture.md` mục 5.6 cam kết rubric và ngưỡng lưu theo khoá `(content_type, langcode)` trong config, và ở thời điểm viết tài liệu này thì chưa triển khai. Nhưng vấn đề khi đó đã lớn hơn "chưa triển khai": **các ngưỡng đang bị chép ra nhiều bản, và đã trôi lệch một lần.**
 
 Hiện trạng:
 
@@ -203,14 +203,14 @@ Hai tài liệu `rubrics.md` và `annotation-guideline.md` **vẫn giữ các co
 
 | File | Thay đổi |
 |---|---|
-| `multiagent/config/scoring.yaml` *(mới)* | Toàn bộ cấu hình |
-| `src/config.py` *(mới)* | Nạp YAML, tra theo `(content_type, langcode)`, fallback `default`, phát cảnh báo mục 5a |
-| `src/graph.py` | Bỏ hằng số `WEIGHTS` và 80/50, đọc từ config |
-| `src/state.py` | Thêm `content_type`, `langcode` - hiện chưa có, mà thiếu chúng thì không tra config được |
-| `scripts/label_helper.py` | Đọc khối `labelling` thay vì hằng số riêng |
+| `multiagent/config/scoring.yaml` *(mới)* | ✅ Toàn bộ cấu hình |
+| `src/config.py` *(mới)* | ✅ Nạp YAML, tra theo `(content_type, langcode)`, fallback `default`, phát cảnh báo mục 5a |
+| `src/graph.py` | ✅ Bỏ hằng số `WEIGHTS` và 80/50, đọc từ config |
+| `src/state.py` | ✅ Đã thêm `content_type`, `langcode` |
+| `scripts/label_helper.py` | ✅ Đọc khối `labelling` thay vì hằng số riêng |
 | `scripts/` | Test: tra khoá đúng, fallback `default` hoạt động, cảnh báo bắn khi model lệch |
 
-`state.py` thiếu `content_type`/`langcode` là điểm chặn thật: `architecture.md` mục 5.6 đã ghi nhận, và nó chặn toàn bộ cơ chế tra config. Phải thêm ở bước 2.
+`state.py` thiếu `content_type`/`langcode` từng là điểm chặn thật - `architecture.md` mục 5.6 đã ghi nhận, và nó chặn toàn bộ cơ chế tra config. Đã thêm ở bước 2 (2026-08-04).
 
 ---
 

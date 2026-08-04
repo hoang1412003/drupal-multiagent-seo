@@ -1,7 +1,7 @@
 # Prompt injection: mô hình mối đe doạ và biện pháp
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** phân tích - biện pháp chưa triển khai
+**Trạng thái:** **M1, M3, M4, M2/CP9 đã triển khai** (2026-08-04). M5 cố ý không làm - xem mục 5.
 **Áp dụng cho:** `multiagent/src/ai_core.py`, `multiagent/src/agents/*.py`
 
 ---

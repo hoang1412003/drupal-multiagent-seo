@@ -170,16 +170,18 @@ Số liệu API hiện hành (model đang dùng: `claude-haiku-4-5`, xem `multia
 
 ---
 
-## 8. Ảnh hưởng lên code (chưa triển khai)
+## 8. Ảnh hưởng lên code
+
+Toàn bộ đã triển khai tính đến 2026-08-04.
 
 | File | Thay đổi |
 |---|---|
 | `src/kb/` *(mới)* | Nạp KB: đọc nguồn → Contextual Retrieval → chunk → embed → ghi Chroma. Chạy offline, không nằm trong pipeline chấm. **Đã triển khai:** `build_kb.py` (fact-check) + `build_brand_kb.py` (brand, 1128 chunk từ 16 bài) |
 | `src/retrieval.py` *(mới)* | Truy vấn theo `(content_type, langcode)`, trả top-k kèm điểm similarity; dưới ngưỡng → trả rỗng. **Đã triển khai**, nhận thêm `collection_name` để phục vụ cả 2 KB |
 | `src/agents/brand_voice.py` *(mới)* | BV1-BV5, BV7 bằng regex; BV6 dùng đoạn truy xuất làm ví dụ đối chiếu; đính đoạn trích làm bằng chứng cho gợi ý sửa. **Đã triển khai (2026-08-03)** |
-| `src/agents/compliance.py` | CP3: trích claim định lượng → truy vấn KB → so sánh. Không tìm thấy → mức `1`, không phải `0` |
-| `requirements.txt` | `chromadb`, `sentence-transformers` (hoặc `voyageai` nếu chọn API) |
-| `scripts/` | Test bộ eval retrieval: recall@k trên ~20 cặp |
+| `src/agents/compliance.py`, `src/agents/fact_check.py` | CP3: trích claim định lượng → truy vấn KB → so sánh. Không tìm thấy → mức `1`, không phải `0`. **Đã triển khai (2026-08-04)** qua `fact_check.danh_gia()` trả thẳng mức 0/1/2/NA |
+| `requirements.txt` | `chromadb`, `sentence-transformers`. **Đã triển khai** - dùng BGE-M3 tự host, không gọi API embedding |
+| `scripts/` | Test bộ eval retrieval: recall@k trên ~20 cặp. **Đã triển khai:** `eval_retrieval.py` (recall@3 = 1.00) + `eval_brand_retrieval.py` (78,3% vs mốc ngẫu nhiên 21,7%) |
 
 Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức Aggregator, cách ghi ngược Drupal.
 
