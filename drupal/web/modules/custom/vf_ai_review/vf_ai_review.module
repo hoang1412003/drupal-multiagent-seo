@@ -22,6 +22,25 @@ const VF_AI_REVIEW_FIELDS = [
 ];
 
 /**
+ * Ánh xạ khoá field trong báo cáo -> tên phần tử trên form soạn bài.
+ *
+ * Để MỘT CHỖ DUY NHẤT. Tên nào không tồn tại trên form thì bỏ qua field đó
+ * chứ không đổ lỗi - sai một tên không được làm trắng trang form soạn bài
+ * (docs/editor-ui-design.md mục 8).
+ *
+ * `body` và `summary` cùng trỏ về widget 'body' vì summary là teaser nằm
+ * trong chính widget đó - chú thích của hai khoá này được ghép lại.
+ */
+const VF_AI_REVIEW_FIELD_MAP = [
+  'title' => 'title',
+  'body' => 'body',
+  'summary' => 'body',
+  'meta_description' => 'field_meta_description',
+  'url_alias' => 'path',
+  'image_alt' => 'field_image',
+];
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter() for node_form.
  *
  * Tên hàm CHÍNH LÀ phần khai báo: Drupal thấy hàm tên
@@ -76,6 +95,22 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
       '#markup' => $renderer->overviewHtml($report, $stale, $loi_json),
     ],
   ];
+
+  // Gom chú thích theo widget đích TRƯỚC, vì body và summary cùng trỏ về
+  // widget 'body' - gắn thẳng thì cái sau đè mất cái trước.
+  $theo_widget = [];
+  foreach (VF_AI_REVIEW_FIELD_MAP as $khoa_bao_cao => $ten_form) {
+    $html = $renderer->fieldNotesHtml($report, $khoa_bao_cao);
+    if ($html !== '') {
+      $theo_widget[$ten_form] = ($theo_widget[$ten_form] ?? '') . $html;
+    }
+  }
+
+  foreach ($theo_widget as $ten_form => $html) {
+    if (isset($form[$ten_form])) {
+      $form[$ten_form]['#suffix'] = ($form[$ten_form]['#suffix'] ?? '') . $html;
+    }
+  }
 }
 
 /**
