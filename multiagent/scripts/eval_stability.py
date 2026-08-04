@@ -28,6 +28,10 @@ Chay (tu multiagent/):
     HF_HUB_OFFLINE=1 .venv\\Scripts\\python.exe scripts\\eval_stability.py
     HF_HUB_OFFLINE=1 .venv\\Scripts\\python.exe scripts\\eval_stability.py --bao-cao
         (chi in bao cao tu ket qua da co, khong goi LLM)
+    ... --ket-qua e1_stability_rubric.json
+        (ghi sang file khac, de do lai sau khi doi cach cham ma KHONG de len
+         so do cu - phep so sanh phuong sai o evaluation-plan.md muc 9 can
+         giu duoc ca hai ban tren CUNG bo mau)
 """
 import json
 import os
@@ -244,6 +248,9 @@ def in_bao_cao(data: dict) -> None:
 
 
 if __name__ == "__main__":
+    if "--ket-qua" in sys.argv:
+        KET_QUA = os.path.join(REPO_ROOT, "docs", "evidence",
+                               sys.argv[sys.argv.index("--ket-qua") + 1])
     if "--bao-cao" in sys.argv:
         in_bao_cao(nap_ket_qua())
     else:

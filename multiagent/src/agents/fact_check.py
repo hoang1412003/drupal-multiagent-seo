@@ -1,21 +1,26 @@
 """CP3 - RAG fact-check: đối chiếu claim định lượng trong bài với thông số
 VinFast công bố công khai (docs/architecture.md mục 5.4, docs/rubrics.md CP3).
 
-Là nguồn flag THỨ 3 của Compliance Agent (bên cạnh LLM tự do + blacklist).
-Luồng: trích claim định lượng (LLM) -> truy vấn KB -> so sánh (LLM) -> lệch
-thì sinh flag critical (mã A3).
+Đây là cách ĐO của tiêu chí CP3 trong rubric Compliance. Luồng: trích claim
+định lượng (LLM) -> truy vấn KB -> so sánh (LLM) -> quy ra mức 0/1/2/NA.
 
 AN TOÀN (quan trọng nhất): claim KHÔNG tra được, hoặc thông số tra về thuộc
-MODEL KHÁC -> KHÔNG sinh flag. KB chỉ có thông số một số model; "không tra
-được" != "sai" (docs/rubrics.md mục 6.2). Coi nó là sai sẽ chặn oan mọi bài
-nhắc model ngoài KB. Hai lớp chặn: (1) retrieve rỗng -> bỏ qua claim;
-(2) compare LLM chỉ trả 'mismatch' khi CÙNG model và số mâu thuẫn, còn lại
-trả 'unverifiable'.
+MODEL KHÁC -> KHÔNG bao giờ ra mức 0. KB chỉ có thông số của một số model;
+"không tra được" != "sai" (docs/rubrics.md mục 6.2), nên trường hợp đó là
+mức 1 và severity `low`, không phải critical. Coi nó là sai sẽ chặn oan mọi
+bài nhắc model ngoài KB. Hai lớp chặn: (1) retrieve rỗng -> claim không được
+kết luận; (2) compare LLM chỉ trả 'mismatch' khi CÙNG model và số mâu thuẫn,
+còn lại trả 'unverifiable'.
 """
 from ai_core import call_agent
 from retrieval import retrieve
 
 _RULE = "Thông tin sai lệch so với thông số công bố chính thức"
+
+# Nhãn RIÊNG cho mức 1. Dùng chung nhãn với mức 0 sẽ báo cho người duyệt rằng
+# số liệu đã sai, trong khi thực tế chỉ là chưa tra được - đúng chỗ mà
+# rubrics.md mục 6.2 cảnh báo không được nhầm.
+_RULE_KHONG_TRA = "Số liệu chưa kiểm chứng được bằng thông số công bố"
 
 _EXTRACT_PROMPT = (
     "Bạn trích các CLAIM ĐỊNH LƯỢNG có thể kiểm chứng bằng thông số kỹ thuật "
@@ -108,34 +113,67 @@ def _compare(pairs: list) -> list[dict]:
     return call_agent(_COMPARE_PROMPT, "\n\n".join(lines), _COMPARE_SCHEMA)["verdicts"]
 
 
-def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
-        extract_fn=_extract_claims, compare_fn=_compare, retriever=retrieve,
-        embedder=None) -> list[dict]:
+def danh_gia(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
+             extract_fn=_extract_claims, compare_fn=_compare, retriever=retrieve,
+             embedder=None) -> dict:
+    """Chấm CP3 -> {"level", "occurrences", "reason"}.
+
+    Bốn kết cục, và việc phân biệt được chúng chính là lý do hàm này thay cho
+    bản cũ trả list flag: bản cũ trả `[]` cho CẢ BA trường hợp "không có
+    claim", "không tra được" và "mọi số liệu khớp" - ba tình huống phải ra ba
+    mức khác nhau thì không thể gộp vào một danh sách rỗng.
+
+        NA  bài không có claim định lượng nào -> không có gì để đối chiếu
+        1   có claim nhưng ít nhất một claim không kết luận được
+        2   mọi claim đều tra được và khớp thông số công bố
+        0   có claim mâu thuẫn với thông số công bố (mã lỗi A3)
+    """
     claims = extract_fn(fields)
     if not claims:
-        return []
+        return {"level": None, "occurrences": [],
+                "reason": "Bài không có claim định lượng để đối chiếu."}
 
-    pairs = []  # (claim, hit) - chỉ giữ claim tra được thông số
+    pairs = []            # (claim, hit) - chỉ giữ claim tra được thông số
+    khong_tra_duoc = []   # claim không có đoạn thông số nào để đối chiếu
     for claim in claims:
         query = f"{claim['model']} {claim['metric']}"
         hits = retriever(query, content_type, langcode, embedder=embedder)
         if hits:
             pairs.append((claim, hits[0]))
+        else:
+            khong_tra_duoc.append(claim)
     if not pairs:
-        return []
+        return {
+            "level": 1,
+            "occurrences": [{"field": c["field"], "text": c["excerpt"], "rule": _RULE_KHONG_TRA}
+                            for c in khong_tra_duoc],
+            "reason": "Không tìm thấy thông số công bố tương ứng trong knowledge "
+                      "base - cần người kiểm chứng thủ công.",
+        }
 
     verdicts = compare_fn(pairs)
-    flags = []
+    lech, chua_ket_luan = [], list(khong_tra_duoc)
     for v in verdicts:
-        if v.get("verdict") != "mismatch":
-            continue
         claim = pairs[v["index"]][0]
-        flags.append(
-            {
-                "field": claim["field"],
-                "severity": "critical",
-                "rule": _RULE,
-                "excerpt": claim["excerpt"],
-            }
-        )
-    return flags
+        if v.get("verdict") == "mismatch":
+            lech.append(claim)
+        elif v.get("verdict") != "match":
+            chua_ket_luan.append(claim)
+
+    if lech:
+        return {
+            "level": 0,
+            "occurrences": [{"field": c["field"], "text": c["excerpt"], "rule": _RULE}
+                            for c in lech],
+            "reason": "Đối chiếu với thông số công bố chính thức thấy số liệu "
+                      "mâu thuẫn - sửa lại theo nguồn chính thức.",
+        }
+    if chua_ket_luan:
+        return {
+            "level": 1,
+            "occurrences": [{"field": c["field"], "text": c["excerpt"], "rule": _RULE_KHONG_TRA}
+                            for c in chua_ket_luan],
+            "reason": "Không kiểm chứng được bằng knowledge base - cần người "
+                      "kiểm chứng thủ công.",
+        }
+    return {"level": 2, "occurrences": [], "reason": ""}

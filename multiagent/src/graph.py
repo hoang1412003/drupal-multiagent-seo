@@ -209,14 +209,15 @@ def _issue_to_json(agent_key: str, issue: dict) -> dict:
     """Một issue/flag của agent -> một mục trong báo cáo JSON.
 
     Compliance có hình dạng khác 3 agent kia: nó dùng {rule, excerpt,
-    severity} và KHÔNG có trường gợi ý sửa, nên `message` để None. Đặt
-    message = rule sẽ khiến giao diện in cùng một câu hai lần.
+    severity}. Từ khi chuyển sang rubric CP1-CP8 nó có thêm `suggestion` -
+    trước đó LLM chỉ trả tên điều khoản nên `message` luôn None. Vẫn KHÔNG
+    đặt message = rule khi thiếu suggestion: in cùng một câu hai lần.
     """
     if agent_key == "compliance":
         return {
             "agent": AGENT_LABELS[agent_key],
             "label": issue.get("rule", ""),
-            "message": None,
+            "message": issue.get("suggestion") or None,
             "excerpt": issue.get("excerpt") or None,
             "severity": issue.get("severity"),
         }

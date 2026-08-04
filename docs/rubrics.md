@@ -212,17 +212,27 @@ Rubric v1 chưa vào code. Khi triển khai, các chỗ phải sửa:
 
 Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức trọng số Aggregator, cách ghi ngược Drupal.
 
-### 8.1. Trạng thái triển khai (2026-08-03)
+### 8.1. Trạng thái triển khai (cập nhật 2026-08-04)
 
-Rubric **đã vào code cho Brand Voice Agent** — agent đầu tiên chấm theo mức `0/1/2/NA` và tính điểm tất định:
+Rubric đã vào code cho **Brand Voice** (2026-08-03) và **Compliance** (2026-08-04):
 
 | File | Trạng thái |
 |---|---|
-| `src/scoring.py` | ✅ `score_from_criteria()` theo đúng công thức mục 2.2. Phần "tra bảng severity cho Compliance" **chưa làm** |
+| `src/scoring.py` | ✅ `score_from_criteria()` theo công thức mục 2.2 **và** `severity_for()` tra bảng cho Compliance |
 | `src/agents/brand_voice.py` | ✅ BV1–BV7, output `criteria: [{id, level, occurrences, suggestion, reference}]` |
+| `src/agents/compliance.py` | ✅ CP1–CP8. CP1 đo bằng máy, CP3 bằng RAG, sáu tiêu chí còn lại gộp vào **một** lần gọi LLM |
+| `src/agents/fact_check.py` | ✅ `danh_gia()` trả mức 0/1/2/NA cho CP3 thay vì trả list flag |
 | `src/brand_analysis.py`, `src/text_utils.py` | ✅ phần "đo bằng máy" của BV1–BV5, BV7 (thay cho `src/analyzers/` dự kiến) |
-| `src/agents/{content_quality,seo,compliance}.py` | ❌ **vẫn để LLM tự cho `score`** |
+| `src/agents/{content_quality,seo}.py` | ❌ **vẫn để LLM tự cho `score`** — E1 hạ ưu tiên, xem `docs/technical-debt.md` A1 |
 | `src/graph.py` | ✅ Aggregator nhận `score` đã tính sẵn, logic trọng số và veto không đổi — đúng như dự kiến |
+
+**Ba thứ Compliance làm mà Brand Voice không cần tới**, đáng ghi vì chúng sẽ dùng lại cho hai agent còn lại:
+
+1. **Kiểm đoạn trích có thật.** Mục 2.5 yêu cầu trích nguyên văn, nhưng nếu chỉ dặn trong prompt thì LLM bịa một câu nghe hợp lý là qua được — E1 đã bắt được đúng kiểu bịa này ở trường `rule` của bản cũ. `compliance.py` so đoạn trích với thân bài (bỏ HTML, gộp khoảng trắng, hạ chữ thường) và **hạ mức không được chấp nhận nếu đoạn trích không có thật**.
+2. **Hai hướng sửa khác nhau khi không trích được.** CP2 (vô điều kiện) → quay về mức `2`, vì mức 2 của nó đúng nghĩa "không tìm thấy vi phạm". CP4–CP8 (có điều kiện) → `NA`, **tuyệt đối không phải mức 2**: không chứng minh được bài có bàn tới chủ đề thì cũng không có căn cứ nói bài làm đúng chủ đề đó. Chọn nhầm hướng ở đây chính là lỗi "điểm miễn phí" số 1 dưới đây.
+3. **Từ chối chấm khi phần đo được không đủ.** Xem mục 8.2.
+
+**Hai lỗi "điểm miễn phí" phát hiện khi triển khai Brand Voice**, đều là biến thể của đúng vấn đề mục 2.2 cảnh báo, đáng ghi lại vì dễ tái diễn:
 
 **Số liệu đầu tiên cho mục 9.** 6/7 tiêu chí Brand Voice là regex nên chấm lại cùng bài **luôn ra cùng điểm** — kiểm bằng `scripts/test_brand_voice.py` (chạy 5 lần, σ = 0). Chưa so được với thang 0-100 vì Brand Voice không có bản cũ; phép so sánh phương sai đầy đủ cần E1 trên 3 agent còn lại.
 
@@ -230,6 +240,23 @@ Rubric **đã vào code cho Brand Voice Agent** — agent đầu tiên chấm th
 
 1. **Thoả mãn rỗng.** BV7 ("không dùng từ bị loại") cho mức `2` với bài không hề bàn tới khái niệm ấy — mọi bài ngắn/lạc chủ đề được cộng điểm miễn phí. Sửa: không nhắc khái niệm → `NA`. **Quy tắc rút ra: tiêu chí dạng phủ định chỉ được tính ĐẠT khi bài thật sự có cơ hội vi phạm.**
 2. **Phân loại quá rộng.** Hàm phân loại kiểu viết hoa xếp tiêu đề toàn chữ thường vào `SENTENCE_CASE`, khiến tiêu đề `"test"` được chấm đạt quy ước. Sửa: tách lớp `LOWERCASE`.
+
+### 8.2. Rubric làm lộ ra một lỗi mà cách chấm cũ giấu đi
+
+Khi Compliance để LLM tự cho điểm, lỗi API làm cả agent văng exception → `graph.py` bắt được → `compliance_result = None` → Aggregator không bao giờ tự động publish. Đúng.
+
+Rubric chia agent thành 8 tiêu chí đo bằng 3 cách khác nhau, nên lỗi LLM **không còn làm sập cả agent**: CP1 (regex) vẫn chạy. Kết quả đo được ngày 2026-08-04, khi hạn mức API hết giữa chừng phép đo E1:
+
+```
+6/7 bài:  Compliance = 0.0    (CP1 khớp từ cấm, 7 tiêu chí kia NA)
+1/7 bài:  Compliance = 100.0  (CP1 sạch, 7 tiêu chí kia NA)
+```
+
+Con số `100.0` đó là **báo bài tuân thủ hoàn toàn dựa trên mỗi một lần dò từ khoá**. Nguy hiểm hơn hẳn con số cũ, vì nó trông như một phép đo đầy đủ.
+
+Sửa trong `compliance.py`: LLM hỏng **và** phần đo được không tìm thấy vi phạm nào → trả `None` (chưa xác minh được). Có vi phạm cứng (mức `0`) thì **vẫn trả kết quả** — bằng chứng đã đủ để từ chối, và đánh mất một veto nguy hiểm hơn nhiều so với việc báo "chưa xác minh được".
+
+**Quy tắc rút ra cho hai agent còn lại:** khi tách một agent thành nhiều cách đo, phải hỏi thêm *"phần đo được có đủ để kết luận không"* — suy giảm có kiểm soát chỉ đúng khi phần còn sống đủ đại diện. Với Brand Voice là 6/7 tiêu chí regex nên đủ; với Compliance là 1/8 nên không.
 
 ---
 
