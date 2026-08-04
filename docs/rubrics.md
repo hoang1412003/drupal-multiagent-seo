@@ -4,6 +4,8 @@
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0)
 **Trạng thái:** đã triển khai cho **Brand Voice Agent** (2026-08-03); 3 agent còn lại chưa (xem mục 8.1)
 
+> **Nguồn thi hành các con số là `multiagent/config/scoring.yaml`** (khối `scoring`), không phải tài liệu này. Bảng dưới đây giữ nguyên con số để đọc tại chỗ, nhưng khi hai bên lệch nhau thì file config đúng - và đó là lỗi cần sửa ngay, xem `docs/config-spec.md`.
+
 ---
 
 ## 1. Vấn đề tài liệu này giải quyết

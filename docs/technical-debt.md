@@ -30,21 +30,33 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **Vì sao chặn:** `docs/rubrics.md` mục 1 lập luận điểm không định nghĩa thì không tái lập được, nên calibrate ngưỡng trên nó cho ra ngưỡng trôi nổi.
 
-**Số đo thực nghiệm sơ bộ (2026-08-04):** cùng bài `node/1`, chấm 3 lần trong một ngày, cùng code, cùng model:
+**Đã đo bằng E1 (2026-08-04) — 7 bài × 5 lần = 35 lượt chấm.** Kết quả đảo ngược một phần giả thuyết ban đầu:
 
-```
-81.75  ->  79.25  ->  81.75
-```
+| Agent | σ điểm | σ lớn nhất trên 1 bài |
+|---|---|---|
+| content_quality | 0.38 | — |
+| seo | 0.19 | — |
+| brand *(đã có rubric)* | **0.00** | 0.00 |
+| **compliance** | **0.78** | **5.48** |
+| **điểm tổng** | **0.28** | — |
 
-Dao động **2.5 điểm**. `docs/architecture.md` mục 8.2 dự kiến quét ngưỡng theo **bước nhảy 2 điểm** — dao động lớn hơn bước nhảy thì mọi ngưỡng chọn được đều là nhiễu.
+**100% số bài giữ nguyên quyết định qua cả 5 lần.** Báo cáo đầy đủ: `docs/evidence/e1_e4_report.txt`, số liệu thô: `docs/evidence/e1_stability_raw.json`.
 
-**Cảnh báo khi trích số này:** đây là quan sát tình cờ trên **một bài, ba lần**, không phải phép đo có thiết kế. Chưa tách được dao động đến từ agent nào (BV6 cũng gọi LLM). Nó là *giả thuyết cần kiểm*, không phải kết luận — E1 (mục D1) mới là phép đo tử tế.
+**Kết luận, thay cho quan sát sơ bộ cũ:**
 
-**Việc phải làm:** chuyển 3 agent sang rubric như Brand Voice — `docs/rubrics.md` mục 8 liệt kê chi tiết. Hai bẫy đã gặp khi làm Brand Voice, ghi ở mục 8.1 tài liệu đó: *thoả mãn rỗng* và *phân loại quá rộng*.
+- Quan sát tình cờ trước đó (`81.75 → 79.25 → 81.75`, dao động 2.5 điểm trên một bài ba lần) **không đại diện**. Nguyên nhân dao động ở lần đó nhiều khả năng là **mức BV6 lật**, không phải nhiễu LLM nói chung — vì brand giờ đã có rubric và đo được σ = 0.00.
+- **Ưu tiên A1 với `content_quality` và `seo` hạ xuống.** σ = 0.38 và 0.19 đều nhỏ hơn nhiều so với bước nhảy 2 điểm của E5, nên viết lại rubric cho hai agent này **không còn là điều kiện chặn calibration**.
+- **Ưu tiên A1 với `compliance` giữ nguyên mức cao.** σ = 5.48 trên bài G-002 lớn gấp đôi bước nhảy quét ngưỡng. Điều tra nguyên nhân: LLM **tự nghĩ ra nội dung trường `rule`** và **chọn `severity` tuỳ ý** — trên G-002 nó lật giữa "0 flag, score 95" và "2-3 flag mức low, score 85". Đây đúng là loại bất định mà `rubrics.md` mục 1 mô tả.
 
-### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body`
+**Việc phải làm (đã sắp lại theo E1):** làm rubric cho **Compliance trước**, giống Brand Voice — `docs/rubrics.md` mục 8. Hai bẫy đã gặp khi làm Brand Voice, ghi ở mục 8.1 tài liệu đó: *thoả mãn rỗng* và *phân loại quá rộng*. `content_quality` và `seo` chuyển xuống nhóm "nên làm, không chặn".
 
-**Bằng chứng:** `src/drupal_client.py:44` — `_extract_image_alt()` chỉ đọc `relationships.field_image.data.meta.alt`. Ảnh nhúng trong chuỗi HTML của `body` không được bóc ra.
+### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body` — ✅ ĐÃ SỬA (2026-08-04)
+
+`_extract_image_alt()` giờ nhận thêm `body_html` và bóc mọi thẻ `<img>` trong thân bài, trả về danh sách nhiều dòng (`Ảnh đại diện: …` / `Ảnh N trong bài: …`); dòng trống sau dấu hai chấm nghĩa là thiếu `alt`. Test: `scripts/test_image_alt.py`.
+
+Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `label_helper.py`: `\balt` khớp nhầm cả `data-alt`, tức một ảnh **thiếu** `alt` nhưng có `data-alt` sẽ bị coi là có — bỏ sót lỗi B6. Đổi sang `(?<![\w-])`. Đã kiểm: 0 ảnh trong corpus hiện tại bị ảnh hưởng, nên **không có nhãn nào phải gán lại**.
+
+**Bằng chứng của vấn đề gốc (giữ lại để tra cứu):** `_extract_image_alt()` trước đây chỉ đọc `relationships.field_image.data.meta.alt`. Ảnh nhúng trong chuỗi HTML của `body` không được bóc ra.
 
 **Vì sao chặn:** mã lỗi **B6** trong `docs/goldset/annotation-guideline.md` v1.2 xét **mọi thẻ `<img>` trong `body`**, còn hệ thống chỉ xét **một ảnh đại diện**. Hai bên đo hai tập ảnh khác nhau → Recall/F1 của tiêu chí SEO9 lệch có hệ thống.
 
@@ -62,13 +74,15 @@ Dao động **2.5 điểm**. `docs/architecture.md` mục 8.2 dự kiến quét 
 
 ## 3. Nhóm B — Nợ thật
 
-### B1. Ngưỡng và trọng số chưa tách ra config
+### B1. Ngưỡng và trọng số chưa tách ra config — ✅ ĐÃ SỬA (2026-08-04)
 
-**Bằng chứng:** `src/graph.py:19` còn `WEIGHTS = {...}`; dòng 101–112 còn hard-code `< 50`, `>= 80`, `>= 50`. Thư mục `multiagent/config/` chưa tồn tại.
+`multiagent/config/scoring.yaml` + `src/config.py`. `graph.py` đọc `weights`/`decision` từ config, `label_helper.py` đọc khối `labelling`, `state.py` có `content_type`/`langcode`. Bước 1–4 của `docs/config-spec.md` mục 7 xong; bước 5 (khối `scoring` cho rubric) chờ A1.
 
-**Đã gây lỗi thật:** `docs/config-spec.md` mục 1 ghi cùng một tập số nằm ở **4 nơi** (`graph.py`, `label_helper.py`, `rubrics.md`, `annotation-guideline.md`) và **đã trôi lệch một lần** — mã B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170`. Phát hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
+**Bằng chứng đây là refactor thuần:** 22/22 bộ test cũ xanh, không sửa test nào; `label_helper.py` chạy lại trên 33 mẫu gold set cho ra file **giống hệt từng byte** với báo cáo đã commit.
 
-**Điểm chặn kèm theo:** `src/state.py` chưa có `content_type`/`langcode` (kiểm 2026-08-04: 0 lần xuất hiện). Thiếu hai trường này thì không tra config theo khoá `(content_type, langcode)` được.
+**Có thêm cảnh báo lúc chạy** (`config-spec.md` mục 5a): khối `meta.calibrated = false` → log cảnh báo mỗi lần chạy, để không lỡ trình bày kết quả chạy bằng ngưỡng minh hoạ như thể đã calibrate; `meta.model` lệch `ANTHROPIC_MODEL` → cảnh báo riêng, vì model đọc từ biến môi trường nên đổi `.env` là ngưỡng calibrate mất hiệu lực mà không có dấu hiệu gì.
+
+**Lỗi thật mà nó phòng (giữ lại để tra cứu):** cùng một tập số từng nằm ở **4 nơi** và **đã trôi lệch một lần** — mã B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170`. Phát hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
 
 ### B2. Ba agent còn ghép prompt bằng nhãn text thuần
 
@@ -106,14 +120,16 @@ Dao động **2.5 điểm**. `docs/architecture.md` mục 8.2 dự kiến quét 
 
 | Mã | Đo gì | Trạng thái |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | ❌ **chưa** — chặn E5 |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt** (2026-08-04) — điểm tổng σ = 0,28; 100% giữ nguyên quyết định |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
-| **E4** | Chi phí và độ trễ mỗi bài | ❌ chưa — chạy được ngay |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — cần gold set + E1 đạt |
+| **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — $0,042–0,052/bài, ~28–38k token vào |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — cần gold set (E1 đã đạt, không còn chặn) |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
-`evaluation-plan.md` mục 6 khuyến nghị thứ tự: **E1 + E4 trước tiên**, vì chúng chạy được ngay và E1 quyết định có phải viết lại 3 system prompt hay không.
+**E4 làm lộ một sai số trong tài liệu:** `evaluation-plan.md` mục 4.4 ước tính $0,025/bài và ~12k token. Số đo thật gấp khoảng **2×** — cần sửa lại con số trong tài liệu đó.
+
+**Một phát hiện ngoài dự kiến trong lúc chạy E1:** khi API Anthropic hết hạn mức giữa chừng, **chỉ Brand Voice còn chấm được** (6/7 tiêu chí của nó là regex, không cần LLM); 3 agent kia hỏng hoàn toàn. Đây là kiểm chứng ngoài đời thật cho thiết kế *suy giảm có kiểm soát* ở `architecture.md` mục 6.4 — không phải thí nghiệm có chủ đích, nhưng đáng ghi.
 
 ---
 
@@ -135,16 +151,18 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 ## 7. Thứ tự đề xuất
 
 ```
-1. E1  (độ ổn định)     <- rẻ (~$1.25), chạy ngay, quyết định có phải viết lại 3 prompt
-2. A2  (SEO đọc alt trong body)   <- nhỏ, độc lập, gỡ điều kiện 4 của E5
-3. A1  (rubric cho 3 agent)       <- lớn, làm sau khi E1 cho số liệu
-4. B1  (tách config)              <- nên xong TRƯỚC E5 vì E5 phải quét nhiều bộ ngưỡng
-5. E4  (chi phí/độ trễ)           <- rẻ, ghép vào lúc chạy E1
+[x] 1. E1 + E4  (độ ổn định, chi phí)   <- xong 2026-08-04
+[x] 2. A2  (SEO đọc alt trong body)     <- xong 2026-08-04
+[x] 3. B1  (tách config)                <- xong 2026-08-04
+--------- sắp lại sau khi có số liệu E1 ---------
+    4. A1-compliance  (rubric cho Compliance)  <- σ = 5,48, VẪN chặn E5
+    5. Sửa con số chi phí sai ở evaluation-plan.md mục 4.4
 ---- chờ mentor ----
-6. A3  (gán nhãn gold set)
-7. E3, E5, E6
+    6. A3  (gán nhãn gold set)
+    7. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
-8. Polling worker, nhật ký truy vết, B2 (prompt injection M1/M3), B3
+    8. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
+    9. Polling worker, nhật ký truy vết, B2 (prompt injection M1/M3), B3
 ```
 
-Lý do E1 đứng đầu: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm hiện tại đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2).
+Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.

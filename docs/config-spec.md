@@ -170,20 +170,28 @@ Ranh giới: **config chứa những con số calibrate được; mọi thứ kh
 Làm được ngay, không cần chờ calibration:
 
 ```
-Bước 1  Tạo scoring.yaml, chép nguyên giá trị đang hard-code vào,
-        đặt meta.calibrated = false
-        → Hành vi hệ thống KHÔNG đổi. Đây là refactor thuần.
+[x] Bước 1  Tạo scoring.yaml, chép nguyên giá trị đang hard-code vào,
+            đặt meta.calibrated = false
+            → Hành vi hệ thống KHÔNG đổi. Đây là refactor thuần.
 
-Bước 2  graph.py đọc weights + decision từ config thay vì hằng số module
+[x] Bước 2  graph.py đọc weights + decision từ config thay vì hằng số module
+            (kèm content_type/langcode vào state.py)
 
-Bước 3  label_helper.py đọc khối labelling thay vì hằng số của riêng nó
-        → Xoá bản chép thứ hai
+[x] Bước 3  label_helper.py đọc khối labelling thay vì hằng số của riêng nó
+            → Xoá bản chép thứ hai
 
-Bước 4  Thêm cảnh báo lúc chạy (mục 5a)
+[x] Bước 4  Thêm cảnh báo lúc chạy (mục 5a)
 
-Bước 5  Khi implement rubric: đọc khối scoring từ config ngay từ đầu,
-        không hard-code rồi tách sau
+[ ] Bước 5  Khi implement rubric: đọc khối scoring từ config ngay từ đầu,
+            không hard-code rồi tách sau
 ```
+
+**Bước 1-4 hoàn tất 2026-08-04.** Bằng chứng đây là refactor thuần, không phải lời hứa:
+
+- 22/22 bộ test cũ vẫn xanh, không sửa test nào.
+- `label_helper.py` chạy lại trên toàn bộ 33 mẫu gold set cho ra file **giống hệt từng byte** với `docs/goldset/label_helper_report.txt` đã commit trước đó (`diff` rỗng). Nghĩa là không mẫu nào đổi mã lỗi khi chuyển sang đọc config.
+
+Khối `scoring` (ngưỡng chấm điểm) hiện **chưa có ai đọc** - đó là bước 5, sẽ dùng khi viết rubric cho 3 agent còn lại. Để sẵn trong file vì viết cùng lúc thì chắc chắn cùng bộ số; thêm sau thì lại phải đối chiếu thủ công lần nữa.
 
 Bước 1-2 nên làm **trước** E5, vì E5 phải quét nhiều bộ ngưỡng - có config sẵn thì đó là vòng lặp đọc file, còn hard-code thì phải sửa code mỗi lần quét.
 

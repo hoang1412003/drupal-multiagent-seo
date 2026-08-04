@@ -37,18 +37,28 @@ import re
 import sys
 import unicodedata
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+
+import config
+
 NOT_COLLECTED = "?"
 
-# Ngưỡng lấy từ annotation-guideline.md v1.1 mục 4.2. Đều là giá trị TẠM,
-# chờ calibrate ở Sprint 3 - script in ra số đo thô bên cạnh kết luận để khi
-# ngưỡng đổi thì không phải đo lại.
-TITLE_MIN, TITLE_MAX = 40, 70          # B4
-META_MIN, META_MAX = 140, 170          # B3
-URL_MAX = 75                           # B7
-LONG_SENTENCE_WORDS = 30               # B9
-LONG_PARAGRAPH_SENTENCES = 5           # B9
-REPEAT_THRESHOLD = 3                   # B9: "từ 3 lần trở lên"
-HEADING_REQUIRED_WORDS = 500           # B9
+# Ngưỡng lấy từ khối `labelling` của config/scoring.yaml (diễn giải ở
+# annotation-guideline.md v1.1 mục 4.2). Đều là giá trị TẠM, chờ calibrate ở
+# Sprint 3 - script in ra số đo thô bên cạnh kết luận để khi ngưỡng đổi thì
+# không phải đo lại.
+#
+# Trước đây đây là bản CHÉP thứ hai của cùng bộ số nằm trong graph.py và hai
+# tài liệu. Bản chép đó đã trôi lệch một lần (mã B3 ghi 150-160 ở guideline
+# trong khi rubric ghi 140-170) - đọc từ config để chuyện đó không lặp lại.
+_LB = config.load()["labelling"]
+TITLE_MIN, TITLE_MAX = _LB["title_ok"]          # B4
+META_MIN, META_MAX = _LB["meta_ok"]             # B3
+URL_MAX = _LB["url_max_chars"]                  # B7
+LONG_SENTENCE_WORDS = _LB["long_sentence_words"]        # B9
+LONG_PARAGRAPH_SENTENCES = _LB["long_paragraph_sentences"]  # B9
+REPEAT_THRESHOLD = _LB["repeat_threshold"]      # B9: "từ 3 lần trở lên"
+HEADING_REQUIRED_WORDS = _LB["heading_required_words"]  # B9
 
 # Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
 # Không có "st." (Street/Saint, viết tắt tiếng Anh): văn bản cẩm nang tiếng

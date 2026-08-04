@@ -199,6 +199,20 @@
       "input_tokens": 47768,
       "output_tokens": 2303,
       "giay": 32.6
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 85
+      },
+      "final_score": 78.65,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47929,
+      "output_tokens": 2956,
+      "giay": 47.0
     }
   ],
   "G-004": [
@@ -431,6 +445,62 @@
       "input_tokens": 56793,
       "output_tokens": 6140,
       "giay": 55.1
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 56948,
+      "output_tokens": 6187,
+      "giay": 63.5
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 56951,
+      "output_tokens": 7035,
+      "giay": 67.9
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 56951,
+      "output_tokens": 6144,
+      "giay": 56.1
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 56951,
+      "output_tokens": 6383,
+      "giay": 60.9
     }
   ]
 }

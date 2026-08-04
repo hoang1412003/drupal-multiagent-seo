@@ -12,16 +12,29 @@ from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
 
+import ai_core
+import config
 from agents import brand_voice, compliance, content_quality, seo
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
 
-WEIGHTS = {
-    "content_quality": 0.25,
-    "seo": 0.20,
-    "brand": 0.25,
-    "compliance": 0.30,
-}
+DEFAULT_CONTENT_TYPE = "cam_nang"
+DEFAULT_LANGCODE = "vi"
+
+
+def _config_cua(state: ContentReviewState) -> dict:
+    """Lấy khối config theo (content_type, langcode) của state.
+
+    Trọng số và ngưỡng KHÔNG còn là hằng số module - chúng nằm ở
+    config/scoring.yaml để con số chỉ tồn tại ở một chỗ (docs/config-spec.md
+    mục 1: cùng tập số này từng nằm ở 4 nơi và đã trôi lệch một lần).
+    """
+    khoi = config.load(
+        state.get("content_type") or DEFAULT_CONTENT_TYPE,
+        state.get("langcode") or DEFAULT_LANGCODE,
+    )
+    config.canh_bao_mot_lan(khoi, ai_core.MODEL)
+    return khoi
 
 
 def fetch_node(state: ContentReviewState) -> dict:
@@ -82,6 +95,10 @@ def aggregator_node(state: ContentReviewState) -> dict:
     veto_reason = None
     note = None
 
+    khoi = _config_cua(state)
+    weights = khoi["weights"]
+    nguong = khoi["decision"]
+
     if compliance_result is None:
         # Compliance có quyền phủ quyết (docs/architecture.md mục 6.4) - không bao
         # giờ tự động publish khi không xác minh được rủi ro pháp lý.
@@ -93,23 +110,24 @@ def aggregator_node(state: ContentReviewState) -> dict:
             f.get("severity") == "critical" for f in compliance_result.get("flags", [])
         )
         available = {k: v for k, v in results.items() if v is not None}
-        total_weight = sum(WEIGHTS[k] for k in available)
+        total_weight = sum(weights[k] for k in available)
         final_score = (
-            sum(WEIGHTS[k] * v["score"] for k, v in available.items())
+            sum(weights[k] * v["score"] for k, v in available.items())
             / total_weight
         )
-        if compliance_result["score"] < 50 or has_critical_flag:
+        veto = nguong["compliance_veto_below"]
+        if compliance_result["score"] < veto or has_critical_flag:
             decision = "rejected"
-            if has_critical_flag and compliance_result["score"] >= 50:
+            if has_critical_flag and compliance_result["score"] >= veto:
                 # Score không phản ánh vi phạm (xem spec mục 4) - ghi rõ lý do
                 # thật để tránh gây hiểu nhầm khi điểm cao nhưng vẫn bị từ chối.
                 veto_reason = (
                     "Bị từ chối do vi phạm Compliance (severity: critical), "
                     "độc lập với điểm tổng."
                 )
-        elif final_score >= 80:
+        elif final_score >= nguong["publish_min"]:
             decision = "publish"
-        elif final_score >= 50:
+        elif final_score >= nguong["needs_revision_min"]:
             decision = "needs_revision"
         else:
             decision = "rejected"
