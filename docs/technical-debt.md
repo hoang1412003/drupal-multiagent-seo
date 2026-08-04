@@ -60,6 +60,10 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **Cảnh báo bắt buộc khi trích bất kỳ σ nào trong dự án này:** σ Brand Voice đi từ `0.00` lên `1.27` giữa hai lần đo **trong khi code Brand không đổi một dòng**. σ = 0 đo trên 5 lượt là may, không phải tính chất.
 
+**Cảnh báo thứ hai, thêm 2026-08-04 sau khi sửa B5:** σ thấp cũng có thể là **triệu chứng của lỗi**, không phải bằng chứng của chất lượng. Bài G-008 có σ = 0,00 và điểm cố định 66,7 qua 5/5 lượt — trông ổn định nhất bộ — nhưng đó là vì một phép kiểm hỏng đang kẹp cứng các tiêu chí về cùng giá trị ở mọi lượt; sửa xong điểm rải 42,9–57,1. Trước khi khoe một σ thấp, phải trả lời được nó đến từ đo chính xác hay từ vứt bỏ thông tin.
+
+**σ = 4,18 đã loại trừ được một nghi phạm (2026-08-04):** B5 không phải nguyên nhân — sửa xong σ trên 4 bài xấu nhất chỉ đi từ 7,70 xuống 7,29 (mục B5, có số đo trước/sau). Nguồn dao động còn lại nằm ở CP2/CP4/CP7/CP8, bốn tiêu chí LLM chấm, đúng như hướng đã ghi ở trên.
+
 `content_quality` và `seo`: **vẫn để LLM tự cho điểm** — có chủ ý, xem lại số σ ở bảng trên.
 
 ### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body` — ✅ ĐÃ SỬA (2026-08-04)
@@ -120,6 +124,138 @@ Giải quyết luôn khi chuyển Compliance sang rubric CP1–CP8 (A1). Điểm
 
 **Bằng chứng của vấn đề gốc (giữ để tra cứu):** `compliance.py` trước đây lấy `score` nguyên từ LLM, còn flag rule-based cộng thêm vào sau, nên hai thứ không liên quan gì nhau. Compliance là agent duy nhất có quyền phủ quyết nên đây là chỗ nguy hiểm nhất để có hai nguồn sự thật.
 
+### B4. Ngưỡng trong system prompt của SEO Agent đã trôi lệch khỏi `scoring.yaml` — ✅ ĐÃ SỬA (2026-08-04)
+
+**Đây là bản chép thứ NĂM của cùng tập số, và nó đã lệch.** `config-spec.md` mục 1 đếm bốn bản (`graph.py`, `label_helper.py`, `rubrics.md`, `annotation-guideline.md`) và B1 đã gộp chúng về một chỗ — nhưng bỏ sót một bản: các ngưỡng nằm **trong chuỗi system prompt** của SEO Agent. Chúng không trông giống hằng số nên không ai đi tìm ở đó.
+
+**Bằng chứng:**
+
+| Ngưỡng | `scoring.yaml` | `seo.py` (prompt) | Lệch? |
+|---|---|---|---|
+| `title` | `scoring.title_ideal` = 50-60 | `seo.py:10` — "50-60 ký tự" | không |
+| `meta_description` | `scoring.meta_ideal` = **140-170**<br>`labelling.meta_ok` = **140-170** | `seo.py:11` — "**150-160** ký tự" | **có** |
+| độ dài `body` | `scoring.body_min_words` = **600** | `seo.py:16` — "tối thiểu **~300** từ" | **có** |
+
+`title` khớp `title_ideal` nên không phải sửa — ghi vào bảng để lần sau khỏi kiểm lại. Lưu ý `meta` là trường hợp hiếm khi hai họ ngưỡng (`scoring` và `labelling`, `config-spec.md` mục 2) **trùng giá trị**, nên con số trong prompt lệch khỏi **cả hai**.
+
+**Vì sao là nợ thật chứ không phải "chưa tới lượt":**
+
+- **Meta — lệch sống, ảnh hưởng ground truth.** `label_helper.py:54-56` đọc `labelling.meta_ok` và sinh mã **B3** khi độ dài ra ngoài 140-170 (`label_helper.py:192-193`). Bài có meta dài 145 hoặc 165 ký tự thì **ground truth nói không lỗi**, còn SEO Agent được dặn dải lý tưởng là 150-160 nên nhiều khả năng vẫn báo lỗi. Hai bên đo hai thang khác nhau → Recall/F1 của tiêu chí **SEO3 lệch có hệ thống**, đúng hình dạng của A2 (nơi hệ thống xét một ảnh còn nhãn xét mọi ảnh).
+- **Body — lệch ngầm, sẽ nổ ở bước 5.** Khối `scoring` hiện chưa có ai đọc (B1, `config-spec.md` mục 7 bước 5), nên `600` chưa va vào `~300` lần nào. Nhưng khi viết rubric cho SEO thì đây đúng là chỗ "hard-code rồi tách sau" mà bước 5 dặn tránh — chênh gấp đôi, không phải sai số làm tròn.
+
+**Đã sửa:** `seo.py` giờ ghi `140-170 ký tự` (meta) và `đạt là từ ~600 từ trở lên` (body).
+
+Con số body đổi từ `~300` sang `600` chứ không phải chỉ sửa lỗi chép: rubric **SEO7** định nghĩa `<300 từ` = mức 0, `300-599` = mức 1, `≥600` = mức 2. Bản cũ đưa cho LLM **mốc "quá tệ" làm mục tiêu**, nên một bài 350 từ được prompt coi là đủ dài trong khi rubric xếp nó ở mức 1.
+
+**Chặn tái diễn bằng test, không bằng lời dặn:** `scripts/test_seo_prompt.py` (mới) đọc khối `scoring` từ `scoring.yaml` rồi assert prompt có đúng các con số đó, cộng một test chặn riêng chuỗi `150-160` / `~300 từ` quay lại qua một lần copy-paste. Đã kiểm test **thật sự đỏ** khi hoàn nguyên con số cũ, chứ không phải xanh vì không kiểm gì.
+
+**Còn lại (không chặn gì):** khi làm A1-seo thì ghép prompt **thẳng từ config**, bỏ hẳn bản chép này — lúc đó `test_seo_prompt.py` thành thừa và xoá được.
+
+**Bài học ghi lại vì nó sẽ tái diễn:** con số nằm trong prompt là hằng số như mọi hằng số khác, chỉ khác ở chỗ `grep` theo tên biến không thấy.
+
+**Đã rà nốt ba prompt còn lại (2026-08-04) — sạch, không có bản chép thứ sáu:**
+
+| Prompt | Con số bên trong | Kết luận |
+|---|---|---|
+| `content_quality.SYSTEM_PROMPT` | *(không có con số nào)* | sạch |
+| `compliance._LLM_PROMPT` | mã tiêu chí CP2/4/7/8, mức 0/1/2, "Luật Cạnh tranh 2018" | sạch — không phải ngưỡng chấm điểm |
+| `brand_voice._BV6_PROMPT` | mức 0/1/2 | sạch |
+
+Một ngưỡng thật còn nằm ngoài config, nhưng **không phải nợ mới**: `brand_voice._NGUONG_MUC_0 = 3` (từ 3 chỗ sai trở lên → mức 0) hiện chép tay từ `rubrics.md` mục 5. Nó thuộc đúng **bước 5** của `config-spec.md` mục 7 (đọc khối `scoring` từ config khi implement rubric), đã ghi ở B1. Tương tự, `scoring.long_sentence_words` và `long_paragraph_sentences` trong `scoring.yaml` hiện **chưa có ai đọc** — chúng chờ A1-content_quality, và `content_quality.SYSTEM_PROMPT` hiện không nêu con số nào nên LLM tự định nghĩa thế nào là "câu quá dài".
+
+### B5. CP8 trả mức **2** khi LLM chấm 0/1 mà không trích dẫn được — ✅ ĐÃ SỬA (2026-08-04)
+
+**Bằng chứng (đường đi trong code):** CP8 nằm trong `_MAY_QUYET_AP_DUNG`, nên nhánh hợp thức hoá của nó là `compliance.py:306-309`:
+
+```python
+if ma in _MAY_QUYET_AP_DUNG:
+    return muc if (muc == 2 or _trich_dan_co_that(evidence, text_theo_field)) else 2
+```
+
+LLM chấm mức 0 hoặc 1 nhưng `evidence` không khớp nguyên văn trong bài → hàm trả **2**, tức **điểm tối đa**. `_chot_cp8()` sau đó chỉ ghi đè khi `level is None` (`compliance.py:372`), nên mức 2 đó đi thẳng vào công thức tính điểm.
+
+**Vì sao là nợ chứ không phải lựa chọn:** cùng một tình huống — "LLM không chứng minh được điều nó vừa nói" — hiện cho **ba** kết cục khác nhau:
+
+| Tiêu chí | Không trích được thì thành | Hiệu ứng lên điểm |
+|---|---|---|
+| CP2 | mức 2 | đúng thiết kế — mức 2 của CP2 nghĩa là "không tìm thấy vi phạm" |
+| CP4, CP7 | NA | bị loại khỏi cả tử số lẫn mẫu số |
+| **CP8** | **mức 2** | **cộng điểm tối đa cho tiêu chí vừa bị nghi là vi phạm** |
+
+Kết cục của CP8 ngược với chính lập luận trong docstring `_chot_cp8`: *"bài CÓ số liệu mà LLM vẫn trả NA → mức 0, vì mức 0 của CP8 định nghĩa đúng là 'có số liệu nhưng không nêu nguồn nào'"*. Theo đúng lập luận đó, "máy đã xác nhận bài có số liệu, LLM không chỉ ra được nguồn nào" cũng phải là mức 0 — không thể là mức 2. Đây là mẫu **điểm miễn phí** mà `rubrics.md` mục 2.2 cảnh báo, cùng loại với lỗi *thoả mãn rỗng* đã sửa ở BV7.
+
+**Đã đo (2026-08-04), 2 × 20 lượt, $0,92.** Script `scripts/chan_doan_lat_muc.py` (mới) chạy lặp trên 4 bài có σ Compliance lớn nhất và ghi **nhật ký mỗi lần `_hop_thuc_hoa` ghi đè mức LLM chấm** — thứ mà nhìn `criteria` ở đầu ra không thấy được. Số liệu thô: `docs/evidence/cp_lat_muc_truoc_sua.json` và `cp_lat_muc_sau_sua.json`.
+
+**Kết quả 1 — B5 có thật và rất thường xuyên:** CP8 bị đẩy lên mức 2 ở **10/20 lượt** (LLM chấm 0 → 2: 7 lần; 1 → 2: 3 lần).
+
+**Kết quả 2 — nguyên nhân gốc nằm sâu hơn một tầng, và KHÔNG phải LLM bịa.** `_trich_dan_co_that()` đòi đoạn trích là **một chuỗi liền mạch**, trong khi LLM trả về bằng chứng thật nhưng nhiều mảnh. Kiểm lại từng mảnh thì **không có lần nào LLM bịa** — ví dụ G-008:
+
+```
+đoạn trích bị loại : "Trong khoảng 1 giờ ... từ 0 lên tới 10%.
+                      Đây là bộ sạc cho phép người dùng..."
+khớp nguyên khối   : False
+mảnh 1 / mảnh 2    : True / True     <- cả hai đều có nguyên văn trong bài
+```
+
+Hai câu nằm ở hai thẻ HTML khác nhau; `strip_html` chèn `".\n"` vào giữa nên chúng **không bao giờ liền mạch được**. Dạng còn lại: LLM nối hai trích dẫn bằng `" và "` hoặc `;`. Việc loại oan này không chỉ chạm CP8 — **6/10** lần CP4/CP7 bị đẩy về NA cũng là loại oan y hệt, tức rút tiêu chí khỏi **mẫu số**.
+
+**Đã sửa cả hai:** CP8 không trích được → **mức 0** (không phải 2); và `_trich_dan_co_that()` xét **theo mảnh** — tách ở `" và "`, `;`, `". "`, **mọi** mảnh phải khớp nguyên văn. Phép kiểm mới chỉ nhận THÊM, không bao giờ loại đi thứ bản cũ đã chấp nhận, nên nó không phải là nới lỏng cơ chế chống bịa: bịa nửa câu vẫn trượt (có test khoá cả hai chiều).
+
+**Kết quả 3 — và đây là phần quan trọng nhất, ngược hẳn dự đoán ban đầu:**
+
+| | TRƯỚC | SAU |
+|---|---|---|
+| Số lần ghi đè oan | **20** | **4** |
+| Mẫu số trung bình (/8) | 4,75 | **5,10** |
+| σ trung bình 4 bài | 7,70 | **7,29** |
+
+Số lần ghi đè oan giảm 80% và mẫu số lớn lên, **nhưng σ gần như không đổi**. Giả thuyết ban đầu — rằng sửa khâu trích dẫn sẽ kéo σ xuống mạnh — **là sai**, và dữ liệu bác bỏ nó.
+
+**Lý do, đo được trên G-008:** trước khi sửa nó có σ = **0,00**, điểm cố định 66,7 qua cả 5 lượt — con số trông ổn định nhất trong cả bộ. Sau khi sửa, điểm rải **42,9–57,1** và σ = 6,16. Nghĩa là **σ cũ thấp không phải vì hệ thống chấm ổn định, mà vì một phép kiểm hỏng đang kẹp cứng các tiêu chí về cùng một giá trị ở mọi lượt.** Nó cũng có nghĩa điểm 66,7 của G-008 là **sai một cách nhất quán** — và sai kiểu đó nguy hiểm hơn dao động, vì σ = 0 làm nó trông đáng tin.
+
+**Bài học cho cách đọc mọi σ trong dự án này:** σ thấp chỉ đáng mừng khi biết chắc nó không đến từ việc vứt bỏ thông tin. Ghi thêm vào cảnh báo σ đã có ở mục A1.
+
+**Hệ quả cho A1/E5:** B5 **không phải** nguyên nhân của σ Compliance = 4,18, và giờ đã loại trừ được bằng số. Nguồn dao động còn lại là CP2/CP4/CP7/CP8 — bốn tiêu chí LLM chấm. Hướng duy nhất còn lại vẫn là hướng A1 đã ghi: chuyển thêm tiêu chí sang đo bằng máy.
+
+*(Ghi nhận về phương pháp: mô phỏng offline trên dữ liệu đã đo dự đoán σ = 7,35, đo thật ra 7,29. Mô phỏng lại Aggregator/rubric trên kết quả đã lưu là cách rẻ và đủ chính xác để thử một thay đổi trước khi trả tiền chạy lại — cùng lợi ích mà `architecture.md` mục 8.2 nêu cho việc quét ngưỡng.)*
+
+### B6. `graph.py` không truyền `content_type`/`langcode` xuống agent
+
+**Ảnh hưởng lên kết quả hiện tại: KHÔNG có.** Xếp vào nhóm B chứ không phải C vì thứ đang sai là **một khẳng định trong tài liệu**, và người chấm kiểm được bằng cách mở đúng hai file.
+
+**Bằng chứng:** `graph.py:72` và `graph.py:80` gọi `brand_voice.run(state["fields"])` và `compliance.run(state["fields"])` — không truyền tham số nào, nên rơi vào default `content_type="cam_nang"`, `langcode="vi"` trong chữ ký hàm. Default đó chảy tiếp xuống `retrieve()` của BV6 và `fact_check.danh_gia()` của CP3, tức **hai truy vấn RAG luôn lọc Chroma theo hằng số**.
+
+Trong khi đó `aggregator_node` **có** đọc đúng từ state (`graph.py:98` → `_config_cua`). Cùng một lần chấm: Aggregator tra config theo state, hai agent RAG dùng hằng số.
+
+**Vì sao vẫn tính là nợ:**
+
+- `state.py:6-9` viết: *"Không hard-code 'vi' ở đâu trong logic agent - đây là một trong ba điểm giữ sẵn để mở rộng ngôn ngữ/loại nội dung mà không đập đi làm lại"*.
+- `architecture.md` mục 5.6 trục 2 điểm (1): *"`langcode` là tham số đầu vào của Orchestrator và mọi agent, không hard-code 'vi'"*.
+- Đọc code thì điều đó **chưa đúng**. Hai field trong `ContentReviewState` được thêm vào đúng vì mục đích này nhưng chưa đi hết đường xuống agent.
+
+**Vì sao chưa gây lỗi lần nào:** `scoring.yaml` mới có một khoá thật (`cam_nang:vi`), và cả hai KB đều nạp với đúng cặp giá trị đó (`build_brand_kb.py:77-78`, `kb/build_kb.py`), nên hằng số hard-code **trùng khớp** giá trị đúng. Thêm khoá thứ hai là lỗi hiện ra ngay — và hiện ra ở dạng khó chẩn đoán: điểm vẫn tính được, chỉ là RAG lấy về đoạn của sai phân vùng.
+
+**Việc phải làm:** truyền `content_type` và `langcode` từ state ở hai node (dùng lại `DEFAULT_CONTENT_TYPE`/`DEFAULT_LANGCODE` đã có sẵn ở `graph.py:21-22`). Hai dòng, không đổi hành vi hiện tại. Khoá lại bằng test tiêm `retriever` giả rồi kiểm tham số nó nhận được — nếu không có test thì lần refactor sau lại trôi về như cũ mà không ai biết.
+
+### B7. BV6 không hề kiểm trích dẫn — comment nói một đằng, code làm một nẻo
+
+**Bằng chứng:** `brand_voice.py:301-304`
+
+```python
+# rubrics.md mục 2.5: hạ mức mà không trích được nguyên văn thì không
+# được hạ. Đây là cơ chế chống bịa lỗi.
+if level in (0, 1) and not kq["evidence"].strip():
+    level = 2
+```
+
+Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **khác rỗng**. LLM trả về bất kỳ ký tự nào là qua — kể cả một câu hoàn toàn bịa. Cơ chế chống bịa thật (`_trich_dan_co_that`) chỉ tồn tại ở Compliance.
+
+**Vì sao đáng sửa:** BV6 là tiêu chí LLM **duy nhất** của Brand Voice (6/7 tiêu chí kia là regex), nên nó là toàn bộ bề mặt bịa lỗi của agent này. Và `rubrics.md` mục 2.5 đặt quy tắc trích dẫn cho **mọi** tiêu chí, không riêng Compliance.
+
+**Việc phải làm:** dùng lại `_trich_dan_co_that` (đã xét theo mảnh sau B5) — nhưng phải chuyển nó ra chỗ dùng chung trước, vì hiện nó nằm trong `agents/compliance.py`. Chỗ hợp lý là `text_utils.py`, đúng lý do file đó tồn tại (dùng chung giữa các phía để hai bên không đo bằng hai cách khác nhau).
+
+**Cảnh báo trước khi làm:** siết BV6 sẽ đổi điểm Brand Voice trên các bài đã đo, nên **phải đo lại σ Brand** sau khi sửa. Đừng trích lẫn số σ Brand cũ với mới.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -142,11 +278,18 @@ Giải quyết luôn khi chuyển Compliance sang rubric CP1–CP8 (A1). Điểm
 | **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt** (2026-08-04) — điểm tổng σ = 0,28; 100% giữ nguyên quyết định |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
-| **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — $0,042–0,052/bài, ~28–38k token vào |
+| **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
 | **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — cần gold set (E1 đã đạt, không còn chặn) |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
-**E4 làm lộ một sai số trong tài liệu:** `evaluation-plan.md` mục 4.4 ước tính $0,025/bài và ~12k token. Số đo thật gấp khoảng **2×** — cần sửa lại con số trong tài liệu đó.
+**E4 làm lộ hai sai số trong tài liệu — ✅ đã sửa cả hai (2026-08-04), `evaluation-plan.md` mục 4.4:**
+
+1. Ước tính ban đầu $0,025/bài và ~12k token — **hụt khoảng 2×** so với số đo thật. Nguyên nhân: phép nhân "4 agent × 3k token" bỏ sót đoạn KB mà RAG nhét thêm vào prompt của Compliance và Brand Voice.
+2. Bản sửa lần đầu lại ghi dải `$0,042–0,052` và `28–38k token`, tức **lấy giá trị trung bình làm cận trên** — trung bình thật ($0,0565 và 37.894 token) nằm *ngoài* dải đó, nên nó không thể đúng về mặt số học. Đã tính lại trực tiếp từ `e1_stability_raw.json`: TB **$0,057**, dải theo bài **$0,033–0,089** (chênh 2,7× giữa bài ngắn nhất và dài nhất, gần như hoàn toàn do độ dài bài).
+
+Bảng ngân sách trong mục đó cũng đã đổi từ *ước tính* sang **số thật cộng từ `usage`**: đã tiêu $8,33 cho 165 lượt chấm, dự kiến cả chương trình ~$11.
+
+**Bài học chung của cả hai lần:** con số nào trong tài liệu cũng phải **tính ra được từ một file trong `docs/evidence/`**. Cả hai lần sai đều đến từ việc chép tay một con số thay vì tính lại từ dữ liệu — đúng loại lỗi mà `scoring.yaml` sinh ra để chặn, nhưng ở tài liệu thì chưa có cơ chế tương đương.
 
 **Một phát hiện ngoài dự kiến trong lúc chạy E1:** khi API Anthropic hết hạn mức giữa chừng, **chỉ Brand Voice còn chấm được** (6/7 tiêu chí của nó là regex, không cần LLM); 3 agent kia hỏng hoàn toàn. Đây là kiểm chứng ngoài đời thật cho thiết kế *suy giảm có kiểm soát* ở `architecture.md` mục 6.4 — không phải thí nghiệm có chủ đích, nhưng đáng ghi.
 
@@ -174,14 +317,25 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 [x] 2. A2  (SEO đọc alt trong body)     <- xong 2026-08-04
 [x] 3. B1  (tách config)                <- xong 2026-08-04
 --------- sắp lại sau khi có số liệu E1 ---------
-    4. A1-compliance  (rubric cho Compliance)  <- σ = 5,48, VẪN chặn E5
-    5. Sửa con số chi phí sai ở evaluation-plan.md mục 4.4
+[x] 4. A1-compliance  (rubric CP1–CP8)  <- xong 2026-08-04: σ tổng 1,33 ĐẠT,
+                                           σ Compliance 4,18 còn nợ (mục A1)
+[x] 5. B5  (CP8 mức 2 + trích dẫn nhiều mảnh)  <- xong 2026-08-04, $0,92:
+                                                  ghi đè oan 20 -> 4, nhưng
+                                                  σ 7,70 -> 7,29. B5 KHÔNG
+                                                  phải nguyên nhân của σ
+[x] 6. B4  (ngưỡng meta/body trong prompt SEO)  <- xong 2026-08-04, có test
+                                                  hợp đồng khoá lại
+[x] 7. Con số chi phí ở evaluation-plan.md mục 4.4  <- xong 2026-08-04; tìm
+                                                      thêm 1 sai số thứ hai
+                                                      (dải lấy TB làm cận trên)
 ---- chờ mentor ----
-    6. A3  (gán nhãn gold set)
-    7. E3, E5, E6
+    8. A3  (gán nhãn gold set)
+    9. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
-    8. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
-    9. Polling worker, nhật ký truy vết, B2 (prompt injection M1/M3), B3
+   10. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
+   11. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
+   12. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
+   13. Polling worker, nhật ký truy vết
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.

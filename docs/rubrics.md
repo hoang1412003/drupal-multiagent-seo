@@ -72,6 +72,8 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 
 Đây là cơ chế chống bịa: LLM khó khẳng định khống một lỗi khi buộc phải chỉ ra nó nằm ở đâu, và người gán nhãn kiểm chứng được ngay bằng Ctrl+F.
 
+**"Nguyên văn" xét theo MẢNH, không phải một chuỗi liền mạch (sửa 2026-08-04).** Đo trên 20 lượt chấm: LLM thường xuyên trả về bằng chứng thật nhưng gồm nhiều mảnh - nối hai trích dẫn bằng `" và "` / `;`, hoặc trích hai câu nằm ở hai thẻ HTML khác nhau (`strip_html` chèn `".\n"` vào giữa nên chúng không bao giờ liền mạch được). Đòi liền mạch làm **10/20 lượt bị loại oan, và không lần nào trong số đó LLM bịa**. Nay đoạn trích được tách ở ba ranh giới trên và **mọi** mảnh phải khớp nguyên văn thì mới đạt - vẫn chặt như cũ với bằng chứng bịa (bịa nửa câu là trượt), chỉ thôi loại oan bằng chứng thật. Bằng chứng: `docs/technical-debt.md` B5.
+
 ---
 
 ## 3. Content Quality Agent
@@ -229,8 +231,16 @@ Rubric đã vào code cho **Brand Voice** (2026-08-03) và **Compliance** (2026-
 
 **Ba thứ Compliance làm mà Brand Voice không cần tới**, đáng ghi vì chúng sẽ dùng lại cho hai agent còn lại:
 
-1. **Kiểm đoạn trích có thật.** Mục 2.5 yêu cầu trích nguyên văn, nhưng nếu chỉ dặn trong prompt thì LLM bịa một câu nghe hợp lý là qua được — E1 đã bắt được đúng kiểu bịa này ở trường `rule` của bản cũ. `compliance.py` so đoạn trích với thân bài (bỏ HTML, gộp khoảng trắng, hạ chữ thường) và **hạ mức không được chấp nhận nếu đoạn trích không có thật**.
-2. **Hai hướng sửa khác nhau khi không trích được.** CP2 (vô điều kiện) → quay về mức `2`, vì mức 2 của nó đúng nghĩa "không tìm thấy vi phạm". CP4–CP8 (có điều kiện) → `NA`, **tuyệt đối không phải mức 2**: không chứng minh được bài có bàn tới chủ đề thì cũng không có căn cứ nói bài làm đúng chủ đề đó. Chọn nhầm hướng ở đây chính là lỗi "điểm miễn phí" số 1 dưới đây.
+1. **Kiểm đoạn trích có thật.** Mục 2.5 yêu cầu trích nguyên văn, nhưng nếu chỉ dặn trong prompt thì LLM bịa một câu nghe hợp lý là qua được — E1 đã bắt được đúng kiểu bịa này ở trường `rule` của bản cũ. `compliance.py` so đoạn trích với thân bài (bỏ HTML, gộp khoảng trắng, hạ chữ thường), **tách theo mảnh** rồi đòi mọi mảnh khớp (mục 2.5), và **hạ mức không được chấp nhận nếu đoạn trích không có thật**.
+2. **BA hướng sửa khác nhau khi không trích được** — khác nhau vì câu hỏi "tiêu chí này có áp dụng cho bài không" do ba bên khác nhau trả lời:
+
+   | | Không trích được thì | Vì sao |
+   |---|---|---|
+   | CP2 | → mức `2` | mức 2 của CP2 đúng nghĩa "không tìm thấy vi phạm", không có gì để trích |
+   | CP4–CP7 | → `NA` | **LLM** là bên duy nhất nói bài có bàn tới chủ đề; nó không chứng minh được thì không có căn cứ nào để nói bài làm đúng chủ đề đó |
+   | CP8 | → mức `0` | **MÁY** đã chốt bài có số liệu định lượng, độc lập với LLM. Vậy "có số liệu mà không chỉ ra được nguồn nào" chính là định nghĩa mức 0 |
+
+   `NA` và mức `0` đều **tuyệt đối không được là mức 2**. Chọn nhầm hướng ở đây chính là lỗi "điểm miễn phí" số 1 dưới đây — và CP8 đã từng nhầm đúng kiểu đó: trước 2026-08-04 nó trả mức 2, tức cộng điểm tối đa cho tiêu chí vừa bị nghi vi phạm (`technical-debt.md` B5, đo được 10/20 lượt dính).
 3. **Từ chối chấm khi phần đo được không đủ.** Xem mục 8.2.
 
 **Hai lỗi "điểm miễn phí" phát hiện khi triển khai Brand Voice**, đều là biến thể của đúng vấn đề mục 2.2 cảnh báo, đáng ghi lại vì dễ tái diễn:

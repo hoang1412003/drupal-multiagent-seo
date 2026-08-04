@@ -1,0 +1,362 @@
+{
+ "G-004": [
+  {
+   "diem": 33.3,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 9189,
+   "output_tokens": 556
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9192,
+   "output_tokens": 714
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9195,
+   "output_tokens": 610
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9198,
+   "output_tokens": 458
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": "NA",
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 9195,
+   "output_tokens": 711
+  }
+ ],
+ "G-003": [
+  {
+   "diem": 25.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 0,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19946,
+   "output_tokens": 460
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 2,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19943,
+   "output_tokens": 483
+  },
+  {
+   "diem": 25.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 0,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19949,
+   "output_tokens": 544
+  },
+  {
+   "diem": 25.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 0,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19949,
+   "output_tokens": 509
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": "NA",
+    "CP4": 2,
+    "CP5": "NA",
+    "CP6": "NA",
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 19949,
+   "output_tokens": 470
+  }
+ ],
+ "G-008": [
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": 0,
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": 2,
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 20085,
+   "output_tokens": 2712
+  },
+  {
+   "diem": 42.9,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": 0,
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến mại thì HĐTP tự động chuyển sang gói 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng"
+    }
+   ],
+   "input_tokens": 20061,
+   "output_tokens": 2827
+  },
+  {
+   "diem": 57.1,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": 2,
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng. Sau 3 tháng khuyến mại thì HĐTP tự động chuyển sang gói 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng. Nếu khách hàng di chuyển quá "
+    }
+   ],
+   "input_tokens": 20064,
+   "output_tokens": 2858
+  },
+  {
+   "diem": 43.8,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": 0,
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": 1,
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 20076,
+   "output_tokens": 2679
+  },
+  {
+   "diem": 57.1,
+   "muc": {
+    "CP1": 0,
+    "CP2": 2,
+    "CP3": 1,
+    "CP4": 2,
+    "CP5": 1,
+    "CP6": 2,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [
+    {
+     "ma": "CP7",
+     "muc_llm": 2,
+     "muc_sau": null,
+     "trich_dan_khop": false,
+     "evidence": "Chính sách cho thuê pin với xe máy điện VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023: Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP. Sau 3 tháng khuyến mại thì HĐTP tự động chuyển sang gói 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng"
+    }
+   ],
+   "input_tokens": 19711,
+   "output_tokens": 2445
+  }
+ ],
+ "G-001": [
+  {
+   "diem": 41.7,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 16411,
+   "output_tokens": 950
+  },
+  {
+   "diem": 41.7,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [],
+   "input_tokens": 16411,
+   "output_tokens": 1026
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 16411,
+   "output_tokens": 972
+  },
+  {
+   "diem": 50.0,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 1
+   },
+   "ghi_de": [],
+   "input_tokens": 16411,
+   "output_tokens": 1051
+  },
+  {
+   "diem": 41.7,
+   "muc": {
+    "CP1": 2,
+    "CP2": 2,
+    "CP3": 0,
+    "CP4": "NA",
+    "CP5": 0,
+    "CP6": 1,
+    "CP7": "NA",
+    "CP8": 0
+   },
+   "ghi_de": [
+    {
+     "ma": "CP8",
+     "muc_llm": 1,
+     "muc_sau": 0,
+     "trich_dan_khop": false,
+     "evidence": "Phạm vi di chuyển của VF e34 đạt tới khoảng 285km sau 1 lần sạc đầy; hành trình xuyên Việt dài hơn 1.000 km với 11 lần nạp pin; hành trình chinh phục Sa Vĩ có chiều dài 220km. Tuy nhiên, các số liệu này không có dẫn nguồn cụ thể ngoài \"Sưu tầm\" cho hình ảnh phanh tái sinh."
+    }
+   ],
+   "input_tokens": 16414,
+   "output_tokens": 1370
+  }
+ ]
+}
