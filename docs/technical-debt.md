@@ -50,6 +50,18 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **Việc phải làm (đã sắp lại theo E1):** làm rubric cho **Compliance trước**, giống Brand Voice — `docs/rubrics.md` mục 8. Hai bẫy đã gặp khi làm Brand Voice, ghi ở mục 8.1 tài liệu đó: *thoả mãn rỗng* và *phân loại quá rộng*. `content_quality` và `seo` chuyển xuống nhóm "nên làm, không chặn".
 
+**Compliance: ✅ đã chuyển sang rubric CP1–CP8 (2026-08-04).** `src/agents/compliance.py` + `src/compliance_analysis.py` + `scoring.severity_for()` + `fact_check.danh_gia()`. LLM không còn tự cho `score`, không còn tự chọn `severity`. Chi tiết ở `rubrics.md` mục 8.1.
+
+**Đo lại sau khi chuyển (50 lượt sạch):** σ `final_score` = **1.33, đạt ngưỡng 2.0** → điều kiện 1 của E5 đạt. Nhưng σ Compliance = **4.18, trượt** — đây là **nợ còn lại**, ghi rõ chứ không giấu:
+
+- Bài nào Compliance dao động mạnh thì ngưỡng E5 calibrate ra kém tin cậy hơn ở vùng đó.
+- Nguyên nhân đã chẩn đoán bằng số, không phải đoán: mẫu số trung bình 4.6/8 nên một tiêu chí nhích một bậc là ±16.7 điểm (`rubrics.md` mục 9.1).
+- Hướng giảm tiếp đã kiểm chứng được: chuyển thêm tiêu chí sang đo bằng máy. CP2/CP4/CP7 hiện vẫn do LLM chấm và đều cần đọc hiểu, nên không rẻ như CP5/CP6.
+
+**Cảnh báo bắt buộc khi trích bất kỳ σ nào trong dự án này:** σ Brand Voice đi từ `0.00` lên `1.27` giữa hai lần đo **trong khi code Brand không đổi một dòng**. σ = 0 đo trên 5 lượt là may, không phải tính chất.
+
+`content_quality` và `seo`: **vẫn để LLM tự cho điểm** — có chủ ý, xem lại số σ ở bảng trên.
+
 ### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body` — ✅ ĐÃ SỬA (2026-08-04)
 
 `_extract_image_alt()` giờ nhận thêm `body_html` và bóc mọi thẻ `<img>` trong thân bài, trả về danh sách nhiều dòng (`Ảnh đại diện: …` / `Ảnh N trong bài: …`); dòng trống sau dấu hai chấm nghĩa là thiếu `alt`. Test: `scripts/test_image_alt.py`.

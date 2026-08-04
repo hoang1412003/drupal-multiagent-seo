@@ -270,9 +270,32 @@ Rubric này chốt **cấu trúc và cách chấm**, không chốt các con số
 | Ngưỡng đếm trong rubric (30 từ/câu, 5 câu/đoạn, 3 chỗ sai, 140-170 ký tự...) | Calibration từ gold set, Sprint 3 |
 | Trọng số giữa các tiêu chí trong cùng agent | Calibration - hiện bằng nhau (mục 2.3) |
 | Độ ổn định thực tế của mức LLM chấm | Thí nghiệm test-retest: chạy cùng bài N lần, đo tỉ lệ mức trùng nhau. **Phải làm trước khi tin bất kỳ điểm nào** |
-| Rubric có thật sự ổn định hơn thang 0-100 không | So sánh phương sai điểm giữa rubric v1 và cách chấm hiện tại, trên cùng bộ mẫu |
+| Rubric có thật sự ổn định hơn thang 0-100 không | ✅ **đã đo 2026-08-04** - xem mục 9.1 |
 
-Mục cuối đáng nhấn: rubric này được thiết kế theo lập luận, **chưa được chứng minh bằng số liệu là tốt hơn**. Thí nghiệm so sánh phương sai là bước xác nhận, và cũng là một kết quả nghiên cứu đáng đưa vào báo cáo cuối - dù kết quả ra theo hướng nào.
+### 9.1. Kết quả: rubric KHÔNG ổn định hơn thang 0-100
+
+Đo bằng `scripts/so_sanh_phuong_sai.py`, 7 bài có ở cả hai lần chạy, mỗi bài 5 lượt, cả hai lần đều sạch 5/5:
+
+| Agent | σ thang 0-100 | σ rubric v1 | σ rubric v2 |
+|---|---|---|---|
+| compliance | **0.78** | 7.39 | 4.69 |
+| `final_score` | **0.28** | 2.26 | 1.43 |
+
+**Rubric thua rõ ràng ở tiêu chí này.** Ghi lại nguyên văn vì mục 9 đã cam kết báo cáo "dù kết quả ra theo hướng nào".
+
+**Nhưng nguyên nhân không phải cái người ta tưởng.** Chẩn đoán bằng số (`docs/evidence/cp_phan_bo_muc.txt`):
+
+1. **Dao động nền của LLM gần như không đổi giữa hai cách chấm.** Bằng chứng độc lập: σ của Brand Voice đi từ `0.00` lên `1.27` giữa hai lần đo **trong khi code Brand không đổi một dòng nào**. `temperature=0` giảm dao động chứ không khử được nó. σ = 0.00 ở lần đo đầu là **may**, không phải tính chất - mọi σ đo trên 5 lượt đều phải đọc kèm cảnh báo này.
+
+2. **Cái thay đổi là cách khuếch đại dao động đó thành điểm.** Thang 0-100 tự do *nuốt* chỗ LLM lưỡng lự (85 → 85). Rubric lượng tử hoá thành mức 0/1/2 rồi chia cho mẫu số: mẫu số 3 thì một tiêu chí nhích một bậc là **±16,7 điểm**; mẫu số 8 thì chỉ ±6,25.
+
+Ví dụ sạch nhất, G-004: `[50.0, 66.7, 33.3, 50.0, 66.7]` - mẫu số giữ nguyên 3, chỉ tổng mức đổi ±1. Đúng **một** tiêu chí nhích một bậc mỗi lần.
+
+**Cách đọc đúng: rubric không tạo ra dao động, nó làm dao động hiện ra.** Thang cũ ổn định vì nó làm mờ chỗ LLM lưỡng lự, không phải vì LLM chắc chắn hơn. Một thang đo che mất sự thiếu chắc chắn của chính nó không phải là thang đo tốt hơn - đó là lập luận ở mục 1, và nó vẫn đứng vững sau phép đo này.
+
+**Hướng giảm σ đã kiểm chứng được:** tăng mẫu số bằng cách chuyển tiêu chí sang đo bằng máy. Chuyển CP5/CP6 sang regex và để máy quyết định cổng áp dụng của CP8 làm mẫu số trung bình đi từ 3,25 lên 4,6/8 và kéo σ `final_score` từ 1,98 (trượt) xuống 1,25 (đạt).
+
+**Điều kiện E5 vẫn đạt.** `evaluation-plan.md` mục 4.5 điều kiện 1 quét bước nhảy 2 điểm trên `final_score`, và `final_score` σ = 1,33 trên toàn bộ 10 bài. σ Compliance 4,18 không làm hỏng điều kiện đó vì nó vào điểm tổng với trọng số 0,30 rồi bị trung bình với 3 agent ổn định - **nhưng đây là hạn chế đã biết phải nêu**: ở những bài Compliance dao động mạnh, ngưỡng calibrate ra kém tin cậy hơn.
 
 ---
 
