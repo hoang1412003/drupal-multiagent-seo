@@ -6,7 +6,7 @@
 
 ---
 
-## 1. Vấn đề: cùng một con số đang nằm ở 4 nơi
+## 1. Vấn đề: cùng một con số đang nằm ở 5 nơi
 
 `architecture.md` mục 5.6 cam kết rubric và ngưỡng lưu theo khoá `(content_type, langcode)` trong config, và ở thời điểm viết tài liệu này thì chưa triển khai. Nhưng vấn đề khi đó đã lớn hơn "chưa triển khai": **các ngưỡng đang bị chép ra nhiều bản, và đã trôi lệch một lần.**
 
@@ -18,8 +18,14 @@ Hiện trạng:
 | `multiagent/scripts/label_helper.py` | `TITLE_MIN/MAX = 40, 70`, `META_MIN/MAX = 140, 170`, `LONG_SENTENCE_WORDS = 30`... |
 | `docs/rubrics.md` | Ngưỡng chấm điểm từng tiêu chí |
 | `docs/goldset/annotation-guideline.md` | Ngưỡng gán nhãn từng mã lỗi |
+| `multiagent/src/agents/seo.py` | **(phát hiện muộn, 2026-08-04)** ngưỡng nằm *trong chuỗi* system prompt: độ dài `title`, `meta_description`, `body` |
 
-Bốn bản chép tay của cùng một tập số. Hậu quả đã xảy ra thật: B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170` - lệch do sơ suất, phát hiện tình cờ khi đối chiếu, phải sửa và tăng version guideline lên v1.1. Nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
+**Năm** bản chép tay của cùng một tập số. Hậu quả đã xảy ra thật **hai lần**:
+
+1. B3 từng ghi `150-160` trong guideline trong khi rubric ghi `140-170` - lệch do sơ suất, phát hiện tình cờ khi đối chiếu, phải sửa và tăng version guideline lên v1.1. Nếu phát hiện sau khi đã gán 33 nhãn thì phải gán lại toàn bộ.
+2. Bản thứ năm - prompt SEO - **cũng ghi `150-160`**, tức nó giữ lại đúng con số sai của lần 1 và sống sót qua cả đợt tách config (bước 1-4 mục 7). Chỉ phát hiện ngày 2026-08-04 (`docs/technical-debt.md` B4).
+
+**Bài học từ bản thứ năm:** ngưỡng nằm trong chuỗi prompt là hằng số như mọi hằng số khác, chỉ khác ở chỗ **`grep` theo tên biến không thấy** - đó là lý do đợt tách config đầu tiên bỏ sót nó. Đã rà nốt ba prompt còn lại (`content_quality`, `compliance`, `brand_voice._BV6_PROMPT`): sạch, không có bản thứ sáu. Chỗ này giờ có `scripts/test_seo_prompt.py` khoá lại - sửa `scoring.yaml` mà quên sửa prompt thì test đỏ.
 
 Config không phải để "cho có kiến trúc đẹp". Nó là để **con số chỉ tồn tại ở một chỗ**.
 

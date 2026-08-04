@@ -2,12 +2,14 @@
 #
 # Đặc tả đầy đủ: docs/config-spec.md
 #
-# LÝ DO FILE NÀY TỒN TẠI: cùng một con số từng nằm ở 4 nơi (graph.py,
-# label_helper.py, rubrics.md, annotation-guideline.md) và ĐÃ TRÔI LỆCH một
-# lần - mã B3 ghi 150-160 trong guideline trong khi rubric ghi 140-170. Phát
-# hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải
-# gán lại toàn bộ. Config không phải để "cho có kiến trúc đẹp" mà để CON SỐ
-# CHỈ TỒN TẠI Ở MỘT CHỖ.
+# LÝ DO FILE NÀY TỒN TẠI: cùng một con số từng nằm ở 5 nơi (graph.py,
+# label_helper.py, rubrics.md, annotation-guideline.md, và - phát hiện muộn -
+# ngay trong chuỗi system prompt của agents/seo.py) và ĐÃ TRÔI LỆCH hai lần,
+# cả hai lần đều ở cùng con số: mã B3 ghi 150-160 trong khi rubric ghi
+# 140-170. Bản trong prompt SEO giữ lại đúng con số sai đó và sống sót qua cả
+# đợt tách config, vì grep theo tên biến không thấy ngưỡng nằm trong chuỗi.
+# Config không phải để "cho có kiến trúc đẹp" mà để CON SỐ CHỈ TỒN TẠI Ở MỘT
+# CHỖ - và scripts/test_seo_prompt.py khoá nốt bản chép cuối cùng còn lại.
 #
 # Dùng YAML thay vì JSON vì những con số này CẦN CHÚ THÍCH: "tại sao 30 từ",
 # "giá trị tạm chờ calibrate". JSON không có comment, mà mất phần giải thích

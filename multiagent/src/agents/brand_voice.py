@@ -299,8 +299,15 @@ def _judge_formality(fields: dict, *, content_type: str = "cam_nang",
     kq = call_agent(_BV6_PROMPT, f"{doan_mau}\n\n{khoi}", _BV6_SCHEMA)
 
     level = kq["level"]
-    # rubrics.md mục 2.5: hạ mức mà không trích được nguyên văn thì không
-    # được hạ. Đây là cơ chế chống bịa lỗi.
+    # rubrics.md mục 2.5 đòi trích dẫn NGUYÊN VĂN, nhưng chỗ này mới chỉ kiểm
+    # chuỗi KHÁC RỖNG - tức LLM trả về bất kỳ ký tự nào cũng qua, kể cả một
+    # câu bịa hoàn toàn. Đừng đọc nhầm nó thành cơ chế chống bịa đầy đủ.
+    #
+    # Phép kiểm thật là compliance._trich_dan_co_that() (so nguyên văn, xét
+    # theo mảnh). Dùng lại được ở đây, nhưng phải chuyển nó ra chỗ dùng chung
+    # trước - nợ B7 trong docs/technical-debt.md. BV6 là tiêu chí LLM DUY NHẤT
+    # của agent này (6/7 tiêu chí kia là regex), nên nó là toàn bộ bề mặt bịa
+    # lỗi của Brand Voice.
     if level in (0, 1) and not kq["evidence"].strip():
         level = 2
     if level == 2:

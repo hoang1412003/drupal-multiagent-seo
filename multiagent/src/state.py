@@ -7,6 +7,12 @@ class ContentReviewState(TypedDict):
     # hard-code "vi" ở đâu trong logic agent - đây là một trong ba điểm giữ
     # sẵn để mở rộng ngôn ngữ/loại nội dung mà không đập đi làm lại
     # (docs/architecture.md mục 5.6). Thiếu chúng thì không tra config được.
+    #
+    # CHÚ Ý - hai field này hiện MỚI ĐI ĐƯỢC NỬA ĐƯỜNG: aggregator_node đọc
+    # đúng từ state, nhưng graph.py không truyền chúng xuống brand_voice.run()
+    # và compliance.run(), nên hai truy vấn RAG vẫn lọc theo hằng số mặc định
+    # (nợ B6 trong docs/technical-debt.md). Chưa sai kết quả vì mới có một
+    # khoá thật, nhưng đừng đọc đoạn trên như thể nó đã đúng hoàn toàn.
     content_type: str
     langcode: str
     # 6 trường nội dung để đánh giá theo từng field (docs/architecture.md mục 3):
