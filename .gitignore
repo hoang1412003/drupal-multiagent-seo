@@ -1,5 +1,9 @@
 .env
 __pycache__/
+
+# Ảnh chụp màn hình đưa cho AI xem trong lúc làm việc - chỗ tạm, không phải
+# nội dung dự án. Ảnh nào đáng giữ làm bằng chứng thì chuyển vào docs/evidence/
+img-for-ai-see/
 *.pyc
 .venv/
 venv/
