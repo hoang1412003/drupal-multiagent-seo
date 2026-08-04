@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** kế hoạch - chưa thí nghiệm nào được chạy
+**Trạng thái:** **E1, E2, E4 đã chạy** (2026-08-04). E3, E5, E6 chờ gold set gán nhãn.
 
 ---
 
@@ -77,7 +77,11 @@ Năm điểm chặn quan trọng:
 
 **Tiêu chí:** σ < 2 điểm. Ngưỡng này không tùy tiện - `architecture.md` mục 8.2 dự kiến quét ngưỡng theo bước nhảy 2 điểm, nên dao động phải nhỏ hơn bước nhảy thì việc quét mới có nghĩa.
 
-**Biến thể quan trọng - so rubric với cách hiện tại:** sau khi implement rubric v1, chạy lại E1 trên **cùng 10 bài đó** và so σ giữa hai cách chấm. Đây là bằng chứng thực nghiệm duy nhất cho luận điểm trung tâm của `rubrics.md` - và mục 9 của tài liệu đó đã ghi rõ rubric "chưa được chứng minh bằng số liệu là ổn định hơn". Dù kết quả ra hướng nào cũng là một kết quả nghiên cứu đáng đưa vào báo cáo.
+**Biến thể quan trọng - so rubric với cách hiện tại:** ✅ **đã chạy 2026-08-04**, kết quả đầy đủ ở `docs/rubrics.md` mục 9.1 và `docs/evidence/e1_rubric_v2_report.txt`.
+
+Kết quả **âm**: rubric KHÔNG ổn định hơn thang 0-100 (σ `final_score` 0,28 → 1,43 trên 7 bài chung). Ghi lại nguyên văn đúng như đã cam kết. Chẩn đoán: rubric không tạo ra dao động mà làm dao động hiện ra - thang 0-100 tự do nuốt chỗ LLM lưỡng lự, còn rubric lượng tử hoá 0/1/2 rồi chia mẫu số nên khuếch đại lên. Điều kiện E5 vẫn đạt vì σ `final_score` = 1,33 < 2.
+
+So sánh lại được nhờ `scripts/so_sanh_phuong_sai.py`, chạy trên **cùng bộ mẫu** - so trên tập khác nhau thì chênh lệch đến từ đổi mẫu chứ không phải đổi cách chấm.
 
 **Quy mô:** 10 bài × 5 lần × 4 agent = 200 lần gọi LLM.
 
