@@ -214,7 +214,12 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             no_alt = [
                 img for img in images
                 if not re.search(
-                    r"""\balt\s*=\s*(?:"[^"]+"|'[^']+'|[^\s>"']+)""",
+                    # (?<![\w-]) chứ KHÔNG phải \b: \b khớp ngay giữa dấu
+                    # gạch và chữ nên data-alt="x" bị đọc nhầm thành alt,
+                    # khiến ảnh thiếu alt thật bị coi là có alt (bỏ sót B6).
+                    # Kiểm 2026-08-04: 0 ảnh trong corpus hiện tại dính lỗi
+                    # này, nên báo cáo đã sinh không bị ảnh hưởng.
+                    r"""(?<![\w-])alt\s*=\s*(?:"[^"]+"|'[^']+'|[^\s>"']+)""",
                     img,
                     re.IGNORECASE,
                 )
