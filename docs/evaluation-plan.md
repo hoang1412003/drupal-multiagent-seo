@@ -136,14 +136,18 @@ Muốn tính trước khi gọi thì dùng endpoint `count_tokens` với đúng 
 | Haiku 4.5 | $1.00 / 1M token | $5.00 / 1M token | 200K |
 | Sonnet 5 | $3.00 / 1M token | $15.00 / 1M token | 1M |
 
-**Số đo thật (2026-08-04, E1 - 7 bài × 5 lần):**
+**Số đo thật (2026-08-04, E1 - 7 bài × 5 lần = 35 lượt):**
 
 ```
-$0,042 – $0,052 / bài   (~1.100 – 1.350 VNĐ)
-~28.000 – 38.000 token input / bài
+Trung bình : $0,057 / bài   (~1.500 VNĐ),  ~37.900 token input
+Dải theo bài: $0,033 – $0,089           ~20.800 – 56.900 token input
 ```
 
 Số liệu thô: `docs/evidence/e1_stability_raw.json`; báo cáo: `docs/evidence/e1_e4_report.txt`.
+
+**Chênh lệch giữa bài rẻ nhất và đắt nhất là 2,7×** (G-004 so với G-007), gần như hoàn toàn do độ dài bài. Vì vậy trích *một* con số chi phí mà không kèm dải là gây hiểu nhầm - chi phí thật phụ thuộc bài, không phải hằng số của hệ thống.
+
+> ⚠️ **Sửa 2026-08-04:** bản trước ghi dải `$0,042 – $0,052` và `28.000 – 38.000 token`. **Cả hai đều lấy giá trị TRUNG BÌNH làm cận trên** - trung bình thật ($0,0565 và 37.894 token) nằm *ngoài* dải đã ghi, tức dải đó không thể đúng về mặt số học. Tính lại trực tiếp từ `e1_stability_raw.json`. Đây là lần thứ hai cùng một mục này sai số: lần đầu là ước tính hụt 2× (dưới đây), lần này là dải bịa hẹp lại. Bài học chung cho cả hai: **con số nào trong tài liệu cũng phải tính ra được từ một file trong `docs/evidence/`**, không chép tay từ trí nhớ.
 
 **Ước tính sơ bộ trước đó SAI khoảng 2×** — giữ lại ở đây vì chỗ sai có ích:
 
@@ -159,15 +163,20 @@ Chi phí/bài ≈ ~$0,025
 
 **Ngân sách toàn bộ chương trình thí nghiệm:**
 
-| Phép đo | Số lần chấm bài | Chi phí ước tính |
-|---|---|---|
-| E1 (7 bài × 5 lần) | 35 | **~$1,60 (số thật)** |
-| E1 biến thể (rubric) | 35 | ~$1,60 |
-| E3 baseline (33 mẫu, 1 agent) | 33 | ~$0,50 |
-| E5 chấm gold set (33 mẫu) | 33 | ~$1,55 |
-| **Tổng** | | **dưới $6** |
+| Phép đo | Số lượt chấm | Chi phí | Nguồn |
+|---|---|---|---|
+| E1 thang 0-100 | 35 | **$1,98** | `e1_stability_raw.json` |
+| E1 rubric v1 | 40 | **$2,39** | `e1_stability_rubric.json` |
+| E1 rubric v2 | 50 | **$3,04** | `e1_stability_rubric_v2.json` |
+| Chẩn đoán lật mức (B5) trước/sau | 40 | **$0,92** | `cp_lat_muc_{truoc,sau}_sua.json` |
+| **Đã tiêu, số thật** | **165** | **$8,33** | |
+| E3 baseline (33 mẫu, 1 agent) | 33 | ~$0,60 *(ước)* | |
+| E5 chấm gold set (33 mẫu) | 33 | ~$1,90 *(ước)* | |
+| **Tổng dự kiến cả chương trình** | | **~$11** | |
 
-Bảng này đã tính lại theo đơn giá thật $0,047/bài (trước đây tính theo ước tính hụt $0,025). Con số vẫn nhỏ, và điều đó mới là ý chính: nó **loại bỏ "tốn kém" khỏi danh sách lý do không đo**. Toàn bộ chương trình đo lường rẻ hơn một bữa trưa.
+Bốn dòng đầu là **số thật cộng từ `usage` của từng lần gọi**, không phải ước tính; hai dòng E3/E5 tính theo đơn giá thật $0,057/bài. Con số vẫn nhỏ, và điều đó mới là ý chính: nó **loại bỏ "tốn kém" khỏi danh sách lý do không đo**. Toàn bộ chương trình đo lường rẻ hơn một bữa trưa.
+
+Lưu ý khi đọc bảng: hai dòng chẩn đoán B5 rẻ hơn hẳn ($0,023/lượt) vì chúng **chỉ chạy Compliance**, không chạy cả 4 agent - không so trực tiếp với các dòng E1 được.
 
 **Một điểm dễ hiểu nhầm về E5:** quét nhiều mức ngưỡng **không tốn thêm tiền**. Chấm gold set một lần, lưu lại kết quả 4 agent, rồi quét ngưỡng bằng cách chạy lại **Aggregator** trên kết quả đã lưu - mà Aggregator là module tất định không gọi LLM (`architecture.md` mục 6). Đây chính là một lợi ích cụ thể của thiết kế Aggregator tất định, đáng nêu khi bảo vệ.
 
