@@ -1,7 +1,7 @@
 # Thiết kế UI báo cáo trong giao diện soạn bài Drupal
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** thiết kế - chưa triển khai
+**Trạng thái:** **đã triển khai (2026-08-04)** — mức P1, xem `docs/superpowers/specs/2026-08-03-vf-ai-review-module-design.md`. Ba chỗ trong tài liệu này đã được đính chính sau khi chạy thật: mục 2 (field vốn không hiện trên form), mục 4.4 (cơ chế `changed` hỏng), mục 5 (suy giảm mềm không tự động)
 **Liên quan:** `docs/architecture.md` mục 2.3 (write-back) và mục 9 (tự động hóa); `docs/roadmap.md` Sprint 2 ("Dựng UI báo cáo cơ bản")
 
 ---
@@ -35,6 +35,12 @@ Hiện `write_back()` ghi 3 field ([`drupal/scripts/create_ai_fields.php`](../dr
 - Không phân biệt được mức nghiêm trọng, không nhóm được theo agent
 
 Nó *chạy*, và về mặt chữ nghĩa thì "báo cáo có hiện trong editor". Nhưng không đạt tinh thần yêu cầu.
+
+**Đính chính (2026-08-04).** Đoạn trên **mô tả sai tình trạng thực tế**. Kiểm tra `core.entity_form_display.node.article.default` cho thấy cả 4 field AI đều nằm trong danh sách `hidden` — Drupal **không tự thêm** field mới vào form display, mà `create_ai_fields.php` chỉ tạo field chứ không cấu hình hiển thị. Nghĩa là người soạn bài **chưa bao giờ nhìn thấy** chúng, cũng không sửa được. Rủi ro "người soạn ghi đè dữ liệu đánh giá" không tồn tại như tài liệu mô tả.
+
+Việc ẩn 4 field bằng `#access => FALSE` trong module vẫn được giữ, nhưng vai trò đổi từ *sửa một lỗ hổng đang có* thành *lớp bảo vệ phòng khi ai đó kéo field vào form qua giao diện admin*.
+
+**Vấn đề thật phát hiện cùng lúc:** `field_meta_description` cũng bị ẩn — nhưng đó là field **đầu vào**, người viết phải nhập được. Ẩn nó thì SEO Agent báo *"thiếu meta description"* mà người viết không tìm đâu ra ô để thêm, phá vỡ chính vòng lặp mà module này xây. Đã bổ sung phần cấu hình form display vào `drupal/scripts/create_ai_fields.php` để môi trường dựng lại từ đầu cũng ra kết quả đúng.
 
 ---
 
@@ -122,6 +128,14 @@ Nếu changed_hiện_tại > changed_lúc_chấm:
 
 Cần thêm một field cho việc này - xem mục 5.
 
+**Đính chính (2026-08-04): cơ chế so mốc `changed` ở trên HỎNG.** Chính lệnh PATCH của `write_back()` làm `changed` nhảy, nên so mốc đó sẽ **luôn** báo "nội dung đã thay đổi" ngay sau khi chấm — cảnh báo báo sai mọi lúc thì người duyệt học cách phớt lờ, tệ hơn là không có.
+
+Bằng chứng đo trên DB: `changed` của nid 2/3/4 đúng bằng thời điểm chạy smoke test chấm lại (09:45:17 / 09:45:24 / 09:45:32).
+
+**Đã thay bằng hash nội dung:** lúc chấm lưu `sha256(title + "\n" + body + "\n" + summary + "\n" + meta_description)`; lúc render tính lại từ giá trị hiện tại rồi so. Hash chỉ đổi khi nội dung **thật sự** đổi, vì PATCH không đụng 4 field đó.
+
+Kiểm chứng thực tế sau khi triển khai: sửa tiêu đề → cảnh báo hiện; sửa trả lại như cũ → cảnh báo biến mất, dù `changed` lúc này đã muộn hơn `scored_at` 13 tiếng. Cơ chế cũ sẽ báo sai ở đúng tình huống này. Chi tiết: spec `2026-08-03-vf-ai-review-module-design.md` mục 4.3.
+
 ### 4.5. Không được trông như AI đã duyệt
 
 Hệ thống chỉ **đề xuất**; nút Publish vẫn của người (`architecture.md` mục 2.3). UI phải phản ánh đúng điều đó bằng từ ngữ:
@@ -148,6 +162,12 @@ Hiện `field_ai_suggestions` là **một chuỗi text** nối bằng `── Ti
 | `field_ai_report_json` *(thêm)* | Báo cáo có cấu trúc: `{field, agent, severity, message}[]` + `note`, `veto_reason`, `changed_at` | Module PHP - để render |
 
 Ưu điểm của cách này là **suy giảm mềm (graceful degradation)**: không có module thì vẫn đọc được text; có module thì render đẹp từ JSON. Và không có coupling ngầm qua định dạng chuỗi.
+
+**Đính chính (2026-08-04): suy giảm mềm KHÔNG tự động như câu trên hàm ý.** Vì 4 field AI bị ẩn trong form display (xem đính chính mục 2), tắt module đi thì người dùng **không thấy gì cả** chứ không phải "vẫn đọc được text".
+
+Kiểm chứng thực tế: `ddev drush pmu vf_ai_review` → khối tổng quan và chú thích biến mất, form vẫn dùng bình thường không lỗi, **dữ liệu còn nguyên** (`field_ai_score` 79.25, `field_ai_suggestions` 2304 ký tự, `field_ai_report_json` 3081 ký tự).
+
+Phát biểu đúng phải là: **tắt module mất phần hiển thị, không mất dữ liệu.** Muốn đọc lại mà không có module thì vào *Quản lý hiển thị form* kéo `field_ai_suggestions` ra — đúng là phương án lùi P0 ở mục 3, chỉ khác là nó cần một thao tác cấu hình chứ không tự có.
 
 Chi phí: thêm một field vào `create_ai_fields.php`, và `write_back()` ghi 2 field thay vì 1. `field_ai_report_json` ẩn khỏi form (`'#access' => FALSE`), người dùng không bao giờ thấy JSON thô.
 

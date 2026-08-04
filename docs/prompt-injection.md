@@ -154,11 +154,15 @@ body gốc ──┬── bóc phần ẩn ──> đưa vào prompt LLM
 
 Bóc rồi vứt là tự làm mù chính mình.
 
-### M4 - Escape khi render báo cáo trong Drupal
+### M4 - Escape khi render báo cáo trong Drupal ✅ **đã triển khai (2026-08-04)**
 
 Nội dung `issues[].suggestion` do LLM sinh ra, chứa **trích dẫn từ bài viết**, và sẽ được module `vf_ai_review` render vào trang admin (`editor-ui-design.md`). Nếu render thành markup thô thì có đường XSS: người viết chèn thẻ vào bài → LLM trích lại vào suggestion → thẻ chạy trong trang admin của người duyệt.
 
 Bắt buộc escape khi render. Đây là XSS kinh điển, chỉ khác ở chỗ payload đi vòng qua LLM.
+
+**Triển khai:** `AiReportRenderer::esc()` escape mọi chuỗi động bằng `htmlspecialchars($s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')` — tương đương `Html::escape()` của Drupal nhưng không kéo theo phụ thuộc, nhờ đó lớp render test được bằng script PHP thuần.
+
+Có test riêng trong `drupal/scripts/test_ai_report_renderer.php`: nhét `<script>alert(1)</script>` vào `message` và `"><img src=x onerror=alert(1)>` vào `excerpt`, kiểm tra chuỗi render ra **không còn thẻ nào chạy được** mà vẫn hiện dưới dạng chữ để người duyệt đọc được — thấy được nội dung khả nghi chính là mục đích, không phải xoá nó đi.
 
 ### M5 - Không dùng: lọc bằng danh sách từ khoá
 

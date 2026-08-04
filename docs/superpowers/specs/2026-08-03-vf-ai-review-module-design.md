@@ -433,10 +433,10 @@ Dòng cuối chốt rằng phần suy giảm mềm còn nguyên và không phả
 
 Chỗ dễ vỡ nhất: **Python và PHP phải tính ra cùng `content_hash`**. Lệch một quy tắc ghép chuỗi là băng cảnh báo hiện sai mãi mãi.
 
-Một file dữ liệu mẫu dùng chung, hai bên cùng đọc:
+Một file dữ liệu mẫu dùng chung, hai bên cùng đọc. **File phải nằm trong `drupal/`** — container DDEV chỉ mount thư mục đó nên phía PHP không đọc được gì bên ngoài; Python chạy trên host đọc được cả hai nơi, nên ràng buộc quyết định vị trí là phía PHP (phát hiện khi chạy thật 2026-08-04):
 
 ```
-multiagent/scripts/content_hash_fixture.json
+drupal/scripts/content_hash_fixture.json
 {
   "fields": {"title": "...", "body": "...", "summary": "...", "meta_description": "..."},
   "expected_sha256": "3f2a..."
@@ -487,7 +487,7 @@ Bước 9 kiểm chứng cơ chế hash — dễ sai nhất nên phải thử th
 | `multiagent/src/drupal_client.py` | `write_back()` nhận thêm `report_json`, PATCH thêm 1 field |
 | `multiagent/src/graph.py` | `write_back_node` dựng dict JSON + tính `content_hash` |
 | `multiagent/scripts/test_report_json.py` *(mới)* | Test cấu trúc JSON + hash |
-| `multiagent/scripts/content_hash_fixture.json` *(mới)* | Dữ liệu mẫu cho test hợp đồng |
+| `drupal/scripts/content_hash_fixture.json` *(mới)* | Dữ liệu mẫu cho test hợp đồng |
 
 **Không thay đổi:** kiến trúc 8 node, 4 agent, Aggregator, cơ chế veto, `state.py`, chuỗi `field_ai_suggestions`.
 
