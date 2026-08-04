@@ -16,7 +16,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from agents import compliance
 from scoring import score_from_criteria, severity_for
 
-BODY = "VF 8 chay duoc 420 km moi lan sac theo chuan NEDC."
+# Bai co so lieu: kich hoat CP5 (km), CP8 (so + don vi). Khong kich hoat CP6
+# vi khong co moc thoi gian nao di kem "sac".
+BODY = "VF 8 chạy được 420 km mỗi lần sạc theo chuẩn NEDC."
+
+# Bai khong co con so nao: CP5, CP6, CP8 deu NA do MAY ket luan.
+BODY_KHONG_SO = "Hướng dẫn sạc pin an toàn cho xe điện đúng cách."
 
 
 def _llm(muc_theo_ma: dict, evidence: str = BODY):
@@ -95,11 +100,11 @@ def test_khong_trich_dan_duoc_thi_tieu_chi_co_dieu_kien_thanh_na():
     """
     result = compliance.run(
         {"title": "", "body": BODY, "meta_description": ""},
-        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP5": 2, "CP6": 2, "CP7": 2, "CP8": 2},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": 2},
                           evidence="cau nay hoan toan khong co trong bai"),
         danh_gia_cp3=_cp3_na,
     )
-    for ma in ("CP4", "CP5", "CP6", "CP7", "CP8"):
+    for ma in ("CP4", "CP7"):
         assert _muc(result, ma) is None, f"{ma} phai la NA, dang la {_muc(result, ma)}"
     print("[PASS] muc 2 khong trich dan duoc -> NA (khong phai muc 2)")
 
@@ -109,7 +114,7 @@ def test_cp2_khong_trich_dan_duoc_thi_ve_muc_2():
     co gi de trich. Nguoc lai, ha muc ma khong trich duoc thi khong duoc ha."""
     result = compliance.run(
         {"title": "", "body": BODY, "meta_description": ""},
-        danh_gia_llm=_llm({"CP2": 0, "CP4": 2, "CP5": 2, "CP6": 2, "CP7": 2, "CP8": 2},
+        danh_gia_llm=_llm({"CP2": 0, "CP4": 2, "CP7": 2},
                           evidence="Tesla thua xa VinFast"),   # khong co trong bai
         danh_gia_cp3=_cp3_na,
     )
@@ -120,11 +125,11 @@ def test_cp2_khong_trich_dan_duoc_thi_ve_muc_2():
 def test_trich_dan_co_that_thi_giu_nguyen_muc():
     result = compliance.run(
         {"title": "", "body": BODY, "meta_description": ""},
-        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP5": 1, "CP6": 2, "CP7": 2, "CP8": 2},
-                          evidence="chay duoc 420 km"),        # co that trong bai
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": 1},
+                          evidence="chạy được 420 km"),        # co that trong bai
         danh_gia_cp3=_cp3_na,
     )
-    assert _muc(result, "CP5") == 1, "trich dan co that thi giu nguyen muc"
+    assert _muc(result, "CP7") == 1, "trich dan co that thi giu nguyen muc"
     assert _muc(result, "CP4") == 2
     print("[PASS] trich dan nguyen van co that -> giu nguyen muc LLM cham")
 
@@ -147,13 +152,76 @@ def test_cp1_bat_tu_cam_va_sinh_flag_critical():
 
 def test_cp1_sach_thi_muc_2():
     result = compliance.run(
-        {"title": "Huong dan sac pin", "body": BODY, "meta_description": ""},
+        {"title": "Huong dan sac pin", "body": BODY_KHONG_SO, "meta_description": ""},
         danh_gia_llm=_llm({ma: None for ma in compliance._MA_LLM}),
         danh_gia_cp3=_cp3_na,
     )
     assert _muc(result, "CP1") == 2
-    assert result["score"] == 100.0, "chi CP1 ap dung, dat -> 100"
+    assert result["score"] == 100.0, f"chi CP1 ap dung, dat -> 100, got {result['score']}"
     print("[PASS] CP1 sach -> muc 2")
+
+
+# ------------------------------------------- CP5, CP6, CP8: may quyet dinh NA
+#
+# Ba tieu chi nay chuyen sang may ngay 2026-08-04 vi E1 do duoc chung la nguon
+# dao dong chinh: cau hoi "bai co ban toi chu de nay khong" do LLM tra loi thi
+# moi lan mot khac -> mau so nhay -> diem nhay
+# (docs/evidence/cp_phan_bo_muc.txt).
+
+
+def _chay(body, title="", **k):
+    return compliance.run(
+        {"title": title, "body": body, "meta_description": ""},
+        danh_gia_llm=_llm({ma: None for ma in compliance._MA_LLM}),
+        danh_gia_cp3=_cp3_na, **k)
+
+
+def test_cp5_theo_ba_muc():
+    assert _muc(_chay("VF 8 đi được 420 km theo chuẩn WLTP."), "CP5") == 2
+    assert _muc(_chay("VF 8 đi được 420 km, thực tế có thể khác."), "CP5") == 1
+    assert _muc(_chay("VF 8 đi được 420 km một lần sạc."), "CP5") == 0
+    print("[PASS] CP5 chuan do -> 2, luu y chung -> 1, khong gi -> 0")
+
+
+def test_cp5_na_khi_bai_khong_co_claim_km():
+    assert _muc(_chay(BODY_KHONG_SO), "CP5") is None
+    print("[PASS] CP5 khong co claim km -> NA (may ket luan, khong doi giua cac lan)")
+
+
+def test_cp6_theo_ba_muc():
+    assert _muc(_chay("Sạc DC từ 10% lên 70% mất 30 phút."), "CP6") == 2
+    assert _muc(_chay("Sạc bằng trụ DC mất 30 phút."), "CP6") == 1
+    assert _muc(_chay("Sạc đầy pin mất 30 phút."), "CP6") == 0
+    print("[PASS] CP6 du tru+dai% -> 2, mot trong hai -> 1, khong gi -> 0")
+
+
+def test_cp6_moc_thoi_gian_xa_chu_sac_thi_khong_tinh():
+    """Moc thoi gian phai nam gan chu 'sac'. Bai noi 'bao duong moi 12 thang'
+    khong phai claim thoi gian sac."""
+    xa = "Bảo dưỡng định kỳ mỗi 12 tháng. " + "x " * 200 + "Trạm sạc phủ toàn quốc."
+    assert _muc(_chay(xa), "CP6") is None
+    print("[PASS] CP6 moc thoi gian xa chu 'sac' -> khong tinh la claim")
+
+
+def test_cp8_may_chot_ap_dung_hay_na():
+    """Hai chieu ghi de. Bai khong co so lieu -> NA du LLM cham gi. Bai co so
+    lieu ma LLM tra NA -> muc 0, vi muc 0 cua CP8 dinh nghia dung la 'co so
+    lieu nhung khong neu nguon nao'. G-007 co 66 so lieu ma LLM cham NA."""
+    assert _muc(_chay(BODY_KHONG_SO), "CP8") is None, "khong co so lieu -> NA"
+    assert _muc(_chay(BODY), "CP8") == 0, "co so lieu ma LLM tra NA -> muc 0"
+    print("[PASS] CP8 may chot ap dung; LLM tra NA tren bai co so lieu -> muc 0")
+
+
+def test_cp8_llm_hong_thi_khong_phat_thanh_muc_0():
+    """Ranh gioi quan trong: 'LLM tra NA' khac 'LLM chua chay'. Loi ha tang
+    khong duoc bien thanh muc 0."""
+    result = compliance.run(
+        {"title": "VF 3 tốt nhất phân khúc", "body": BODY, "meta_description": ""},
+        danh_gia_llm=_boom, danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP8") is None, f"LLM hong -> CP8 phai NA, got {_muc(result,'CP8')}"
+    assert _muc(result, "CP5") == 2, "CP5 la regex nen van cham duoc khi LLM hong"
+    print("[PASS] LLM hong -> CP8 NA; CP5/CP6 (regex) van cham duoc")
 
 
 # ------------------------------------------------- diem va flag cung mot nguon
@@ -164,7 +232,7 @@ def test_diem_va_flag_khong_con_mau_thuan():
     them tu blacklist, nen mot bai dinh 3 flag critical van co the mang
     score = 95. Gio ca hai deu sinh tu cung bo criteria."""
     result = compliance.run(
-        {"title": "VF 3 tốt nhất, số 1, không đối thủ", "body": BODY,
+        {"title": "VF 3 tốt nhất, số 1, không đối thủ", "body": BODY_KHONG_SO,
          "meta_description": ""},
         danh_gia_llm=_llm({ma: None for ma in compliance._MA_LLM}),
         danh_gia_cp3=_cp3_na,
@@ -249,6 +317,12 @@ if __name__ == "__main__":
         test_trich_dan_co_that_thi_giu_nguyen_muc,
         test_cp1_bat_tu_cam_va_sinh_flag_critical,
         test_cp1_sach_thi_muc_2,
+        test_cp5_theo_ba_muc,
+        test_cp5_na_khi_bai_khong_co_claim_km,
+        test_cp6_theo_ba_muc,
+        test_cp6_moc_thoi_gian_xa_chu_sac_thi_khong_tinh,
+        test_cp8_may_chot_ap_dung_hay_na,
+        test_cp8_llm_hong_thi_khong_phat_thanh_muc_0,
         test_diem_va_flag_khong_con_mau_thuan,
         test_llm_loi_va_khong_thay_vi_pham_thi_tra_none,
         test_llm_loi_nhung_co_vi_pham_cung_thi_van_tra_ket_qua,

@@ -1,9 +1,13 @@
 """Compliance Agent - chấm theo rubric CP1-CP8 (docs/rubrics.md mục 6).
 
 Ba cách đo, không phải ba nguồn flag song song:
-  CP1          máy    - blacklist compliance_rules.json
-  CP3          RAG    - fact_check.danh_gia(), đối chiếu thông số công bố
-  CP2, CP4-CP8 LLM    - MỘT lần gọi, LLM chỉ chấm MỨC, không cho điểm
+  CP1, CP5, CP6      máy  - blacklist + regex (compliance_analysis.py)
+  CP3                RAG  - fact_check.danh_gia(), đối chiếu thông số công bố
+  CP2, CP4, CP7, CP8 LLM  - MỘT lần gọi, LLM chỉ chấm MỨC, không cho điểm
+
+CP8 đặc biệt: MÁY quyết định tiêu chí có áp dụng hay NA (bài có số liệu định
+lượng nào không - đếm được), LLM chỉ chấm mức khi đã áp dụng ("có dẫn nguồn
+không" thì cần đọc hiểu).
 
 Điểm do scoring.score_from_criteria() tính tất định; severity tra bảng
 scoring.severity_for() theo mã tiêu chí. LLM không còn tự cho `score`, cũng
@@ -20,6 +24,7 @@ import os
 import re
 import secrets
 
+import compliance_analysis as ca
 from ai_core import call_agent
 from agents import fact_check
 from scoring import score_from_criteria, severity_for
@@ -32,8 +37,16 @@ _rules_cache = None
 # Các field Compliance đọc (docs/rubrics.md mục 6)
 _FIELDS = ("title", "body", "meta_description")
 
-# Sáu tiêu chí do LLM chấm trong cùng một lần gọi.
-_MA_LLM = ("CP2", "CP4", "CP5", "CP6", "CP7", "CP8")
+# Bốn tiêu chí do LLM chấm trong cùng một lần gọi.
+#
+# CP5 và CP6 ĐÃ RỜI danh sách này ngày 2026-08-04: E1 đo được chúng là nguồn
+# dao động chính (docs/evidence/cp_phan_bo_muc.txt), và cả hai đo được bằng
+# regex nên không có lý do gì để LLM chấm. CP8 vẫn ở đây nhưng phần "có áp
+# dụng không" đã giao cho máy - chỉ phần "có dẫn nguồn không" cần đọc hiểu.
+_MA_LLM = ("CP2", "CP4", "CP7", "CP8")
+
+# Tiêu chí mà MÁY quyết định áp dụng hay NA, LLM chỉ chấm mức khi đã áp dụng.
+_MAY_QUYET_AP_DUNG = ("CP8",)
 
 _NHAN = {
     "CP1": "Claim tuyệt đối/so sánh nhất (CP1)",
@@ -115,6 +128,53 @@ def _cp1_claim_tuyet_doi(text_theo_field: dict) -> dict:
     )
 
 
+# ------------------------------------------------------- CP5, CP6: máy
+
+
+def _cp5_tam_hoat_dong(text_theo_field: dict) -> dict:
+    """Claim quãng đường có nêu điều kiện đo không (mã lỗi B1).
+
+    Không có claim km nào -> NA. Đây là NA đúng nghĩa "bài không bàn tới",
+    và giờ do máy kết luận nên nó không đổi giữa các lần chấm.
+    """
+    claims = ca.claim_tam_hoat_dong(text_theo_field)
+    if not claims:
+        return _tieu_chi("CP5", None)
+    if ca.co_chuan_do(text_theo_field):
+        return _tieu_chi("CP5", 2)
+    if ca.co_luu_y_chung(text_theo_field):
+        return _tieu_chi(
+            "CP5", 1, claims,
+            "Bài có lưu ý con số chỉ mang tính tham khảo nhưng chưa nêu chuẩn "
+            "đo. Ghi rõ chuẩn (NEDC, WLTP, EPA hoặc CLTC) ngay cạnh con số.",
+        )
+    return _tieu_chi(
+        "CP5", 0, claims,
+        "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo "
+        "(NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay "
+        "đổi theo điều kiện vận hành.",
+    )
+
+
+def _cp6_thoi_gian_sac(text_theo_field: dict) -> dict:
+    """Claim thời gian sạc có nêu loại trụ và dải % không (mã lỗi B2)."""
+    claims = ca.claim_thoi_gian_sac(text_theo_field)
+    if not claims:
+        return _tieu_chi("CP6", None)
+    du = [ca.co_loai_tru_sac(text_theo_field), ca.co_dai_phan_tram(text_theo_field)]
+    if all(du):
+        return _tieu_chi("CP6", 2)
+    thieu = "dải phần trăm (ví dụ 10-70%)" if du[0] else "loại trụ sạc (AC/DC, công suất kW)"
+    if any(du):
+        return _tieu_chi("CP6", 1, claims,
+                         f"Claim thời gian sạc còn thiếu {thieu}.")
+    return _tieu_chi(
+        "CP6", 0, claims,
+        "Claim thời gian sạc không nêu loại trụ sạc lẫn dải phần trăm. "
+        "Thiếu cả hai thì con số thời gian không so sánh được.",
+    )
+
+
 # ---------------------------------------------------------------- CP3: RAG
 
 
@@ -140,7 +200,7 @@ _LLM_PROMPT = (
     "Bạn KHÔNG cho điểm và KHÔNG chọn mức nghiêm trọng. Bạn chỉ chấm MỨC cho "
     "từng tiêu chí dưới đây. Điểm số và mức nghiêm trọng do hệ thống tính tất "
     "định từ các mức bạn chấm.\n\n"
-    "Chấm đúng 6 tiêu chí sau, mỗi tiêu chí một lần:\n\n"
+    "Chấm đúng 4 tiêu chí sau, mỗi tiêu chí một lần:\n\n"
     "CP2 - So sánh trực tiếp với đối thủ cụ thể (Tesla, BYD, Toyota, Honda, "
     "Yamaha...) theo hướng hơn hẳn. Nguy cơ vi phạm Luật Cạnh tranh 2018.\n"
     "  0 = có so sánh như vậy\n"
@@ -150,18 +210,6 @@ _LLM_PROMPT = (
     "  0 = có khuyến mại nhưng thiếu thời hạn hoặc thiếu điều kiện\n"
     "  2 = có khuyến mại và nêu đủ cả hai\n"
     "  NA = bài không nhắc tới khuyến mại nào\n\n"
-    "CP5 - Claim tầm hoạt động/quãng đường (ví dụ 'đi được 420 km một lần "
-    "sạc') nêu điều kiện đo.\n"
-    "  0 = có claim nhưng không có bất kỳ lưu ý nào\n"
-    "  1 = có lưu ý chung ('thực tế có thể khác') nhưng không nêu chuẩn đo\n"
-    "  2 = nêu rõ chuẩn đo (NEDC, WLTP, EPA...)\n"
-    "  NA = bài không có claim tầm hoạt động\n\n"
-    "CP6 - Claim thời gian sạc (ví dụ 'sạc đầy 30 phút') nêu LOẠI TRỤ SẠC và "
-    "DẢI PHẦN TRĂM (ví dụ 10-70%).\n"
-    "  0 = thiếu cả hai\n"
-    "  1 = nêu một trong hai\n"
-    "  2 = nêu đủ cả hai\n"
-    "  NA = bài không có claim thời gian sạc\n\n"
     "CP7 - Chính sách pin / thuê pin nêu đủ ĐIỀU KIỆN, PHÍ và THỜI HẠN.\n"
     "  0 = thiếu từ 2 yếu tố trở lên\n"
     "  1 = thiếu 1 yếu tố\n"
@@ -171,7 +219,9 @@ _LLM_PROMPT = (
     "  0 = có số liệu nhưng không nêu nguồn nào\n"
     "  1 = một phần số liệu có nguồn\n"
     "  2 = mọi số liệu đều có nguồn\n"
-    "  NA = bài không có số liệu định lượng nào\n\n"
+    "  NA = bài không có số liệu định lượng nào\n"
+    "  (CP8: hệ thống đã tự kiểm bài có số liệu hay không, nên nếu bạn chấm "
+    "NA mà bài thật sự có số liệu thì kết luận NA sẽ bị bỏ qua)\n\n"
     "QUY TẮC BẮT BUỘC:\n\n"
     "1. NA nghĩa là 'bài không hề bàn tới chuyện này', KHÔNG phải 'bài làm "
     "đúng'. Chấm NA thành mức 2 sẽ cộng điểm miễn phí cho mọi bài không nhắc "
@@ -276,6 +326,10 @@ def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
         return None
     if ma == "CP2":
         return muc if (muc == 2 or _trich_dan_co_that(evidence, text_theo_field)) else 2
+    if ma in _MAY_QUYET_AP_DUNG:
+        # Máy mới là bên chốt NA cho các mã này (xem _chot_cp8), nên ở đây
+        # chỉ áp quy tắc trích dẫn cho việc HẠ mức, không đẩy về NA.
+        return muc if (muc == 2 or _trich_dan_co_that(evidence, text_theo_field)) else 2
     return muc if _trich_dan_co_that(evidence, text_theo_field) else None
 
 
@@ -317,6 +371,33 @@ def _cac_tieu_chi_llm(fields: dict, text_theo_field: dict, danh_gia_llm) -> tupl
         return {ma: _tieu_chi(ma, None) for ma in _MA_LLM}, True
     # Mã LLM không trả về cũng coi là NA - không suy đoán hộ.
     return {ma: theo_ma.get(ma) or _tieu_chi(ma, None) for ma in _MA_LLM}, False
+
+
+def _chot_cp8(tu_llm: dict, text_theo_field: dict, llm_hong: bool) -> dict:
+    """Máy chốt CP8 có áp dụng hay không; LLM chỉ chấm mức.
+
+    Hai chiều ghi đè, cả hai đều nhằm chặn mẫu số nhảy:
+
+    - Bài KHÔNG có số liệu định lượng nào -> NA, bất kể LLM chấm gì.
+    - Bài CÓ số liệu mà LLM vẫn trả NA -> mức 0. Không phải suy đoán hộ: mức
+      0 của CP8 định nghĩa đúng là "có số liệu nhưng không nêu nguồn nào", và
+      LLM không chỉ ra được nguồn nào chính là trạng thái đó. Đo được trên
+      corpus: G-007 có 66 số liệu định lượng mà LLM chấm NA.
+    """
+    so_lieu = ca.so_lieu_dinh_luong(text_theo_field)
+    if not so_lieu:
+        return _tieu_chi("CP8", None)
+    if llm_hong:
+        # LLM chưa chạy thì "không chỉ ra được nguồn nào" không nói lên điều
+        # gì về bài viết. Lỗi hạ tầng không được biến thành mức 0.
+        return _tieu_chi("CP8", None)
+    if tu_llm["level"] is None:
+        return _tieu_chi(
+            "CP8", 0, so_lieu[:5],
+            "Bài có số liệu định lượng nhưng không dẫn nguồn. Ghi rõ nguồn "
+            "(thông cáo VinFast, trang thông số chính thức) ngay cạnh số liệu.",
+        )
+    return tu_llm
 
 
 # ------------------------------------------------------------------- ghép
@@ -375,7 +456,11 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         _cp1_claim_tuyet_doi(text_theo_field),
         llm["CP2"],
         _cp3_so_lieu(fields, content_type, langcode, danh_gia_cp3),
-        llm["CP4"], llm["CP5"], llm["CP6"], llm["CP7"], llm["CP8"],
+        llm["CP4"],
+        _cp5_tam_hoat_dong(text_theo_field),
+        _cp6_thoi_gian_sac(text_theo_field),
+        llm["CP7"],
+        _chot_cp8(llm["CP8"], text_theo_field, llm_hong),
     ]
 
     if llm_hong and not any(c["level"] == 0 for c in criteria):
