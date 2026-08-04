@@ -206,7 +206,9 @@ def _issue_to_json(agent_key: str, issue: dict) -> dict:
         "agent": AGENT_LABELS.get(agent_key, agent_key),
         "label": issue.get("type", ""),
         "message": issue.get("suggestion") or None,
-        "excerpt": None,
+        # Brand Voice có trích dẫn nguyên văn (chỗ nó tìm thấy lỗi); Content
+        # Quality và SEO thì không - .get() nên cả ba dùng chung nhánh này.
+        "excerpt": issue.get("excerpt") or None,
         # Chỉ Compliance định nghĩa mức nghiêm trọng. KHÔNG bịa cho 3 agent
         # kia - docs/rubrics.md mục 6.1 chủ trương severity phải tra bảng
         # tất định theo mã tiêu chí.

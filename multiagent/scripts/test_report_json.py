@@ -140,6 +140,27 @@ def test_agent_thuong_khong_co_excerpt():
     print("[PASS] agent thuong: label + message, khong excerpt")
 
 
+def test_brand_voice_co_excerpt():
+    """Brand Voice co trich dan nguyen van (cho no tim thay loi) - phai vao
+    truong excerpt de giao dien hien trong khung rieng nhu Compliance, khong
+    gop vao label."""
+    state = {
+        "node_id": "n1", "decision": "needs_revision", "final_score": 80.0,
+        "fields": {"title": "T"},
+        "report": {"final_score": 80.0, "decision": "needs_revision",
+                   "missing_agents": [],
+                   "details": {"brand": {"score": 80.0, "issues": [
+                       {"field": "body", "type": "Xưng hô không nhất quán (BV3)",
+                        "suggestion": "Chọn một kiểu duy nhất.",
+                        "excerpt": "khách hàng, người dùng"}]}}},
+    }
+    muc = _build_report_json(state)["fields"]["body"][0]
+    assert muc["label"] == "Xưng hô không nhất quán (BV3)", muc
+    assert muc["excerpt"] == "khách hàng, người dùng", muc
+    assert muc["severity"] is None, "chi Compliance moi co severity"
+    print("[PASS] Brand Voice: trich dan vao excerpt, khong gop vao label")
+
+
 def test_compliance_loi_thi_score_none():
     state = {
         "node_id": "n1",
@@ -256,6 +277,7 @@ if __name__ == "__main__":
         test_severity_chi_tu_compliance,
         test_compliance_message_la_none,
         test_agent_thuong_khong_co_excerpt,
+        test_brand_voice_co_excerpt,
         test_compliance_loi_thi_score_none,
         test_veto_reason_duoc_giu,
         test_agent_loi_khong_lam_sap,
