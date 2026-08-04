@@ -3,6 +3,8 @@
 **Phiên bản:** v1.2 (2026-07-29)
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0 - xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`)
 
+> **Nguồn thi hành các ngưỡng gán nhãn là `multiagent/config/scoring.yaml`** (khối `labelling`) - `label_helper.py` đọc thẳng từ đó. Tài liệu này giữ con số để đọc tại chỗ, nhưng khi lệch nhau thì file config đúng. Lưu ý ngưỡng gán nhãn **cố ý khác** ngưỡng chấm điểm ở `rubrics.md`; lý do ở `docs/config-spec.md` mục 2.
+
 ---
 
 ## 1. Vì sao cần tài liệu này

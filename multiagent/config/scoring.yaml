@@ -1,0 +1,128 @@
+# Trọng số và ngưỡng của hệ Multi-Agent, khoá theo (content_type, langcode).
+#
+# Đặc tả đầy đủ: docs/config-spec.md
+#
+# LÝ DO FILE NÀY TỒN TẠI: cùng một con số từng nằm ở 4 nơi (graph.py,
+# label_helper.py, rubrics.md, annotation-guideline.md) và ĐÃ TRÔI LỆCH một
+# lần - mã B3 ghi 150-160 trong guideline trong khi rubric ghi 140-170. Phát
+# hiện tình cờ khi đối chiếu; nếu phát hiện sau khi đã gán 33 nhãn thì phải
+# gán lại toàn bộ. Config không phải để "cho có kiến trúc đẹp" mà để CON SỐ
+# CHỈ TỒN TẠI Ở MỘT CHỖ.
+#
+# Dùng YAML thay vì JSON vì những con số này CẦN CHÚ THÍCH: "tại sao 30 từ",
+# "giá trị tạm chờ calibrate". JSON không có comment, mà mất phần giải thích
+# là mất gần hết giá trị.
+#
+# KHÔNG SỬA TAY khối đã calibrate. Muốn đổi ngưỡng thì chạy lại calibration
+# (docs/evaluation-plan.md E5) - sửa tay làm mất mối liên hệ giữa con số và
+# bằng chứng sinh ra nó.
+
+version: 1
+
+# Tra cứu theo khoá "<content_type>:<langcode>". Không có khoá khớp -> dùng
+# "default". KHÔNG kế thừa/gộp từng phần: mỗi khoá là một khối đầy đủ, để
+# đọc file là biết chắc hệ thống đang chạy bằng số nào.
+default:
+
+  # --- Xuất xứ: khối này do calibration (evaluation-plan.md E5) ghi ra -----
+  meta:
+    calibrated: false            # false = đang dùng giá trị minh hoạ
+    calibrated_at: null
+    gold_set: null               # ví dụ "labels.csv @ 1ceeb2f"
+    guideline_version: null      # v1.2
+    rubric_version: null         # v1
+    prompt_version: null         # hash/tag của bộ system prompt
+    model: null                  # model đã dùng khi calibrate
+    kappa: null                  # Kappa đạt được, để đối chiếu về sau
+
+  # --- Aggregator ---------------------------------------------------------
+  # Trọng số phản ánh mức nghiêm trọng của hậu quả khi tiêu chí bị vi phạm
+  # (docs/architecture.md mục 6.1). Compliance cao nhất vì hậu quả pháp lý;
+  # SEO thấp nhất vì phần lớn sửa được sau khi đăng.
+  # GIÁ TRỊ TẠM - Sprint 3 calibrate lại từ gold set.
+  weights:
+    content_quality: 0.25
+    seo: 0.20
+    brand: 0.25
+    compliance: 0.30
+
+  decision:
+    publish_min: 80              # >= -> publish
+    needs_revision_min: 50       # >= -> needs_revision, dưới -> rejected
+    compliance_veto_below: 50    # điểm Compliance dưới mức này -> rejected
+
+  # --- Ngưỡng CHẤM ĐIỂM (docs/rubrics.md) --------------------------------
+  # Dải "lý tưởng", dùng để cho điểm từng phần.
+  scoring:
+    title_ideal: [50, 60]        # ký tự
+    title_acceptable: [40, 70]
+    meta_ideal: [140, 170]
+    body_min_words: 600
+    long_sentence_words: 30
+    long_paragraph_sentences: 5
+
+  # --- Ngưỡng GÁN NHÃN (docs/goldset/annotation-guideline.md) ------------
+  # CỐ Ý khác họ scoring - đọc docs/config-spec.md mục 2 TRƯỚC KHI SỬA.
+  # Lý do khác nhau: nếu dùng dải lý tưởng 50-60 làm ranh giới NHÃN thì gần
+  # như mọi bài thật đều dính lỗi -> tất cả thành needs_revision -> phân bố
+  # nhãn sụp đổ -> Kappa mất ý nghĩa. Nhãn dùng dải "sai rõ ràng".
+  labelling:
+    title_ok: [40, 70]           # ngoài dải -> B4
+    meta_ok: [140, 170]          # ngoài dải -> B3
+    url_max_chars: 75            # -> B7
+    long_sentence_words: 30      # -> B9
+    long_paragraph_sentences: 5  # -> B9
+    repeat_threshold: 3          # số lần lặp mới tính là lỗi
+    heading_required_words: 500  # -> B9
+
+  # --- Retrieval (docs/rag-design.md mục 4.4) ----------------------------
+  retrieval:
+    top_k_factcheck: 3
+    top_k_brand: 3
+    min_similarity: null         # chốt từ bộ eval E2
+
+# Khoá thật của phạm vi hiện tại. Trước khi calibrate, để y hệt default.
+"cam_nang:vi":
+
+  meta:
+    calibrated: false
+    calibrated_at: null
+    gold_set: null
+    guideline_version: null
+    rubric_version: null
+    prompt_version: null
+    model: null
+    kappa: null
+
+  weights:
+    content_quality: 0.25
+    seo: 0.20
+    brand: 0.25
+    compliance: 0.30
+
+  decision:
+    publish_min: 80
+    needs_revision_min: 50
+    compliance_veto_below: 50
+
+  scoring:
+    title_ideal: [50, 60]
+    title_acceptable: [40, 70]
+    meta_ideal: [140, 170]
+    body_min_words: 600
+    long_sentence_words: 30
+    long_paragraph_sentences: 5
+
+  labelling:
+    title_ok: [40, 70]
+    meta_ok: [140, 170]
+    url_max_chars: 75
+    long_sentence_words: 30
+    long_paragraph_sentences: 5
+    repeat_threshold: 3
+    heading_required_words: 500
+
+  retrieval:
+    top_k_factcheck: 3
+    top_k_brand: 3
+    min_similarity: null

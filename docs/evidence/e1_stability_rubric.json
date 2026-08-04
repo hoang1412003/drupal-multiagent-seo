@@ -1,0 +1,578 @@
+{
+  "G-001": [
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 83.3,
+        "compliance": 75.0
+      },
+      "final_score": 75.725,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 38503,
+      "output_tokens": 3593,
+      "giay": 85.4
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 83.3,
+        "compliance": 80.0
+      },
+      "final_score": 77.225,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 38497,
+      "output_tokens": 3191,
+      "giay": 40.7
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 83.3,
+        "compliance": 75.0
+      },
+      "final_score": 75.725,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 38503,
+      "output_tokens": 3445,
+      "giay": 54.3
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 83.3,
+        "compliance": 75.0
+      },
+      "final_score": 75.725,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 38503,
+      "output_tokens": 3635,
+      "giay": 44.8
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 83.3,
+        "compliance": 80.0
+      },
+      "final_score": 77.225,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 38491,
+      "output_tokens": 3586,
+      "giay": 41.1
+    }
+  ],
+  "G-002": [
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 75.935,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 46465,
+      "output_tokens": 2239,
+      "giay": 41.9
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 85.325,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 46465,
+      "output_tokens": 2321,
+      "giay": 28.8
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 85.325,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 46471,
+      "output_tokens": 2433,
+      "giay": 32.1
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 75,
+        "brand": 83.3,
+        "compliance": 66.7
+      },
+      "final_score": 74.58500000000001,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 46474,
+      "output_tokens": 2494,
+      "giay": 30.7
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 75.935,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 46471,
+      "output_tokens": 2397,
+      "giay": 28.7
+    }
+  ],
+  "G-003": [
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 63.14,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48761,
+      "output_tokens": 2604,
+      "giay": 33.7
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 63.14,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48764,
+      "output_tokens": 2747,
+      "giay": 32.4
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 62.39,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48755,
+      "output_tokens": 2962,
+      "giay": 31.8
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 67.4,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48767,
+      "output_tokens": 2603,
+      "giay": 28.6
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 63.14,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48761,
+      "output_tokens": 2354,
+      "giay": 29.3
+    }
+  ],
+  "G-004": [
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 62.39,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 21839,
+      "output_tokens": 2262,
+      "giay": 28.7
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 67.4,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 21839,
+      "output_tokens": 2084,
+      "giay": 26.1
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 67.4,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 21836,
+      "output_tokens": 2204,
+      "giay": 28.1
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 62.39,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 21833,
+      "output_tokens": 2319,
+      "giay": 29.5
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 80.0,
+        "compliance": 33.3
+      },
+      "final_score": 62.39,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 21839,
+      "output_tokens": 2188,
+      "giay": 31.8
+    }
+  ],
+  "G-005": [
+    {
+      "diem": {
+        "content_quality": 78,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 50.0
+      },
+      "final_score": 72.425,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 25751,
+      "output_tokens": 3380,
+      "giay": 39.4
+    },
+    {
+      "diem": {
+        "content_quality": 78,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 50.0
+      },
+      "final_score": 72.425,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 25748,
+      "output_tokens": 3265,
+      "giay": 36.8
+    },
+    {
+      "diem": {
+        "content_quality": 78,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 50.0
+      },
+      "final_score": 72.425,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 25748,
+      "output_tokens": 3235,
+      "giay": 36.4
+    },
+    {
+      "diem": {
+        "content_quality": 78,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 50.0
+      },
+      "final_score": 72.425,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 25745,
+      "output_tokens": 3528,
+      "giay": 45.8
+    },
+    {
+      "diem": {
+        "content_quality": 78,
+        "seo": 75,
+        "brand": 91.7,
+        "compliance": 50.0
+      },
+      "final_score": 72.425,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 25751,
+      "output_tokens": 3685,
+      "giay": 39.3
+    }
+  ],
+  "G-006": [
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 72,
+        "brand": 90.0,
+        "compliance": 50.0
+      },
+      "final_score": 70.65,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32933,
+      "output_tokens": 7359,
+      "giay": 60.1
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 75,
+        "brand": 90.0,
+        "compliance": 50.0
+      },
+      "final_score": 71.25,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32936,
+      "output_tokens": 7181,
+      "giay": 65.7
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 75,
+        "brand": 90.0,
+        "compliance": 50.0
+      },
+      "final_score": 71.25,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32933,
+      "output_tokens": 7882,
+      "giay": 61.9
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 68.75,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32942,
+      "output_tokens": 7266,
+      "giay": 56.9
+    },
+    {
+      "diem": {
+        "content_quality": 75,
+        "seo": 75,
+        "brand": 90.0,
+        "compliance": 62.5
+      },
+      "final_score": 75.0,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32942,
+      "output_tokens": 7403,
+      "giay": 62.9
+    }
+  ],
+  "G-007": [
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 83.3
+      },
+      "final_score": 77.99,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 57782,
+      "output_tokens": 6559,
+      "giay": 76.9
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75.0
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 57804,
+      "output_tokens": 6901,
+      "giay": 62.3
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 75.0
+      },
+      "final_score": 75.5,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 58494,
+      "output_tokens": 7627,
+      "giay": 67.3
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 70.0
+      },
+      "final_score": 74.0,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 58494,
+      "output_tokens": 8101,
+      "giay": 73.3
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 75,
+        "brand": 80.0,
+        "compliance": 60.0
+      },
+      "final_score": 71.0,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 57785,
+      "output_tokens": 6806,
+      "giay": 60.2
+    }
+  ],
+  "G-010": [
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 70.0,
+        "compliance": 33.3
+      },
+      "final_score": 59.89,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 44340,
+      "output_tokens": 3221,
+      "giay": 36.3
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 70.0,
+        "compliance": 33.3
+      },
+      "final_score": 59.89,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 44331,
+      "output_tokens": 3257,
+      "giay": 36.6
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 70.0,
+        "compliance": 33.3
+      },
+      "final_score": 59.89,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 44343,
+      "output_tokens": 4085,
+      "giay": 48.4
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 70.0,
+        "compliance": 33.3
+      },
+      "final_score": 59.89,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 44337,
+      "output_tokens": 3259,
+      "giay": 35.7
+    },
+    {
+      "diem": {
+        "content_quality": 72,
+        "seo": 72,
+        "brand": 70.0,
+        "compliance": 33.3
+      },
+      "final_score": 59.89,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 44331,
+      "output_tokens": 4205,
+      "giay": 40.3
+    }
+  ]
+}

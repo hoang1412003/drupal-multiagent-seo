@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import time
 from typing import Optional
 
@@ -41,17 +42,53 @@ def _request_with_retry(method, url, **kwargs) -> requests.Response:
         time.sleep(BACKOFF_BASE_SECONDS * (2 ** (attempt - 1)))
 
 
-def _extract_image_alt(resource: dict) -> str:
-    """Lấy alt text của ảnh chính (field_image) từ JSON:API resource.
+_IMG_TAG = re.compile(r"<img[^>]*>", re.IGNORECASE)
+# (?<![\w-]) chứ KHÔNG phải \b: \b khớp ngay giữa dấu gạch và chữ, nên
+# data-alt="x" bị đọc nhầm thành alt. Sai theo hướng nguy hiểm - ảnh THIẾU
+# alt thật nhưng có data-alt sẽ bị coi là có alt, tức bỏ sót lỗi B6.
+_ALT_ATTR = re.compile(
+    r"""(?<![\w-])alt\s*=\s*("([^"]*)"|'([^']*)'|([^\s>"']+))""", re.IGNORECASE
+)
 
-    Alt text nằm trong relationships.field_image.data.meta.alt. Đọc phòng thủ:
-    bài không có ảnh -> trả chuỗi rỗng, không lỗi.
+
+def _alt_cua_the_img(the: str) -> str:
+    """Lấy giá trị alt của một thẻ <img>. Không có hoặc rỗng -> chuỗi rỗng."""
+    khop = _ALT_ATTR.search(the)
+    if not khop:
+        return ""
+    return (khop.group(2) or khop.group(3) or khop.group(4) or "").strip()
+
+
+def _extract_image_alt(resource: dict, body_html: str = "") -> str:
+    """Liệt kê alt text của ẢNH ĐẠI DIỆN và MỌI ẢNH TRONG BODY.
+
+    Trước đây hàm này chỉ đọc relationships.field_image, nên ảnh nhúng trong
+    body lọt lưới hoàn toàn. Đó là lệch có hệ thống so với ground truth: mã
+    lỗi B6 (docs/goldset/annotation-guideline.md v1.2) xét MỌI thẻ <img>
+    trong body, còn hệ thống chỉ xét một ảnh đại diện - hai bên đo hai tập
+    ảnh khác nhau nên Recall/F1 của tiêu chí SEO9 không so được
+    (docs/evaluation-plan.md mục 4.5 điều kiện 4).
+
+    Bóc bằng regex ở đây thay vì để LLM tự đếm trong HTML: đếm ảnh là việc
+    máy làm chính xác và miễn phí, đúng chủ trương của docs/rubrics.md mục
+    2.4 - chỉ giao cho LLM phần cần hiểu ngữ nghĩa (alt có mô tả đúng ảnh
+    không), không giao phần đếm được.
+
+    Định dạng trả về: mỗi ảnh một dòng, alt nằm sau dấu hai chấm. Dòng nào
+    trống sau dấu hai chấm nghĩa là ảnh đó THIẾU alt. Bài không có ảnh nào ->
+    chuỗi rỗng.
     """
+    dong = []
+
     rel = (resource.get("relationships") or {}).get("field_image") or {}
     data = rel.get("data")
     if isinstance(data, dict):
-        return (data.get("meta") or {}).get("alt") or ""
-    return ""
+        dong.append(f"Ảnh đại diện: {(data.get('meta') or {}).get('alt') or ''}")
+
+    for i, the in enumerate(_IMG_TAG.findall(body_html or ""), start=1):
+        dong.append(f"Ảnh {i} trong bài: {_alt_cua_the_img(the)}")
+
+    return "\n".join(dong)
 
 
 def fetch_content(node_id: str) -> dict:
@@ -80,7 +117,7 @@ def fetch_content(node_id: str) -> dict:
         "url_alias": path.get("alias") or "",
         # custom field text (xem hướng dẫn setup) - production thật dùng Metatag
         "meta_description": attributes.get("field_meta_description") or "",
-        "image_alt": _extract_image_alt(resource),
+        "image_alt": _extract_image_alt(resource, body.get("value") or ""),
     }
     return {"fields": fields, "raw_content": resource}
 

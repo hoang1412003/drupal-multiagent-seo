@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** kế hoạch - chưa thí nghiệm nào được chạy
+**Trạng thái:** **E1, E2, E4 đã chạy** (2026-08-04). E3, E5, E6 chờ gold set gán nhãn.
 
 ---
 
@@ -77,7 +77,11 @@ Năm điểm chặn quan trọng:
 
 **Tiêu chí:** σ < 2 điểm. Ngưỡng này không tùy tiện - `architecture.md` mục 8.2 dự kiến quét ngưỡng theo bước nhảy 2 điểm, nên dao động phải nhỏ hơn bước nhảy thì việc quét mới có nghĩa.
 
-**Biến thể quan trọng - so rubric với cách hiện tại:** sau khi implement rubric v1, chạy lại E1 trên **cùng 10 bài đó** và so σ giữa hai cách chấm. Đây là bằng chứng thực nghiệm duy nhất cho luận điểm trung tâm của `rubrics.md` - và mục 9 của tài liệu đó đã ghi rõ rubric "chưa được chứng minh bằng số liệu là ổn định hơn". Dù kết quả ra hướng nào cũng là một kết quả nghiên cứu đáng đưa vào báo cáo.
+**Biến thể quan trọng - so rubric với cách hiện tại:** ✅ **đã chạy 2026-08-04**, kết quả đầy đủ ở `docs/rubrics.md` mục 9.1 và `docs/evidence/e1_rubric_v2_report.txt`.
+
+Kết quả **âm**: rubric KHÔNG ổn định hơn thang 0-100 (σ `final_score` 0,28 → 1,43 trên 7 bài chung). Ghi lại nguyên văn đúng như đã cam kết. Chẩn đoán: rubric không tạo ra dao động mà làm dao động hiện ra - thang 0-100 tự do nuốt chỗ LLM lưỡng lự, còn rubric lượng tử hoá 0/1/2 rồi chia mẫu số nên khuếch đại lên. Điều kiện E5 vẫn đạt vì σ `final_score` = 1,33 < 2.
+
+So sánh lại được nhờ `scripts/so_sanh_phuong_sai.py`, chạy trên **cùng bộ mẫu** - so trên tập khác nhau thì chênh lệch đến từ đổi mẫu chứ không phải đổi cách chấm.
 
 **Quy mô:** 10 bài × 5 lần × 4 agent = 200 lần gọi LLM.
 
@@ -132,29 +136,38 @@ Muốn tính trước khi gọi thì dùng endpoint `count_tokens` với đúng 
 | Haiku 4.5 | $1.00 / 1M token | $5.00 / 1M token | 200K |
 | Sonnet 5 | $3.00 / 1M token | $15.00 / 1M token | 1M |
 
-**Ước tính sơ bộ** (phải thay bằng số đo thật):
+**Số đo thật (2026-08-04, E1 - 7 bài × 5 lần):**
+
+```
+$0,042 – $0,052 / bài   (~1.100 – 1.350 VNĐ)
+~28.000 – 38.000 token input / bài
+```
+
+Số liệu thô: `docs/evidence/e1_stability_raw.json`; báo cáo: `docs/evidence/e1_e4_report.txt`.
+
+**Ước tính sơ bộ trước đó SAI khoảng 2×** — giữ lại ở đây vì chỗ sai có ích:
 
 ```
 Một bài cẩm nang ~1.200 từ tiếng Việt
   → mỗi agent nhận ~3.000 token input (gồm system prompt)
   → 4 agent = ~12.000 token input
   → output JSON ~600 token/agent = ~2.400 token output
-
-Chi phí/bài ≈ 12.000/1M × $1  +  2.400/1M × $5
-            ≈ $0,012 + $0,012 = ~$0,025  (~650 VNĐ)
+Chi phí/bài ≈ ~$0,025
 ```
+
+Ước tính trên hụt vì hai thứ không có trong phép nhân: (1) bài cẩm nang thật dài hơn 1.200 từ nhiều — mẫu gold set có bài 2.136 từ; (2) Compliance và Brand Voice **nhét thêm đoạn KB lấy từ RAG** vào prompt, phần này không tồn tại lúc viết ước tính. Kết luận rút ra: ước tính token bằng cách nhân đầu người luôn thiếu phần retrieval — phải đo.
 
 **Ngân sách toàn bộ chương trình thí nghiệm:**
 
 | Phép đo | Số lần chấm bài | Chi phí ước tính |
 |---|---|---|
-| E1 (10 bài × 5 lần) | 50 | ~$1,25 |
-| E1 biến thể (rubric) | 50 | ~$1,25 |
-| E3 baseline (33 mẫu, 1 agent) | 33 | ~$0,40 |
-| E5 chấm gold set (33 mẫu) | 33 | ~$0,82 |
-| **Tổng** | | **dưới $5** |
+| E1 (7 bài × 5 lần) | 35 | **~$1,60 (số thật)** |
+| E1 biến thể (rubric) | 35 | ~$1,60 |
+| E3 baseline (33 mẫu, 1 agent) | 33 | ~$0,50 |
+| E5 chấm gold set (33 mẫu) | 33 | ~$1,55 |
+| **Tổng** | | **dưới $6** |
 
-Con số này quan trọng vì nó **loại bỏ "tốn kém" khỏi danh sách lý do không đo**. Toàn bộ chương trình đo lường rẻ hơn một bữa trưa.
+Bảng này đã tính lại theo đơn giá thật $0,047/bài (trước đây tính theo ước tính hụt $0,025). Con số vẫn nhỏ, và điều đó mới là ý chính: nó **loại bỏ "tốn kém" khỏi danh sách lý do không đo**. Toàn bộ chương trình đo lường rẻ hơn một bữa trưa.
 
 **Một điểm dễ hiểu nhầm về E5:** quét nhiều mức ngưỡng **không tốn thêm tiền**. Chấm gold set một lần, lưu lại kết quả 4 agent, rồi quét ngưỡng bằng cách chạy lại **Aggregator** trên kết quả đã lưu - mà Aggregator là module tất định không gọi LLM (`architecture.md` mục 6). Đây chính là một lợi ích cụ thể của thiết kế Aggregator tất định, đáng nêu khi bảo vệ.
 
@@ -166,10 +179,10 @@ Con số này quan trọng vì nó **loại bỏ "tốn kém" khỏi danh sách 
 
 Đã đặc tả đầy đủ ở `architecture.md` mục 8.2 (Recall/F1, Cohen's Kappa, quét ngưỡng theo Youden's Index). Bốn điều kiện tiên quyết cần nhấn lại ở đây:
 
-1. **E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.
-2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý.
+1. ~~**E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.~~ ✅ **đạt (2026-08-04)** — điểm tổng σ = 1,33 sau khi Compliance chuyển sang rubric (σ = 0,28 với cách chấm cũ). **Nhưng có một lưu ý phải mang theo:** riêng Compliance đạt σ = 5,48 trên bài G-002. Điểm tổng ổn định vì trọng số làm loãng dao động đó, không phải vì nó không tồn tại — nên ngưỡng calibrate ra sẽ kém ổn định hơn với các bài mà Compliance dao động mạnh. Làm rubric Compliance trước sẽ cho ngưỡng đáng tin hơn.
+2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý. ✅ **đã có cảnh báo tự động (2026-08-04)**: `src/config.py` so `meta.model` trong `scoring.yaml` với model đang chạy và log cảnh báo khi lệch.
 3. ~~**Brand Voice Agent phải là agent thật, không còn stub.**~~ ✅ **đạt (2026-08-03)**
-4. **SEO Agent phải đọc được `alt` của ảnh nằm trong `body`.**
+4. ~~**SEO Agent phải đọc được `alt` của ảnh nằm trong `body`.**~~ ✅ **đạt (2026-08-04)** — `_extract_image_alt()` bóc mọi thẻ `<img>` trong body; test `scripts/test_image_alt.py`.
 
 Hai điều kiện cuối phát hiện ngày 2026-07-30 khi chạy pipeline thật lên `node/7` của Drupal local (bài đầu tiên có ảnh thật). Số liệu đo được, không phải suy luận:
 

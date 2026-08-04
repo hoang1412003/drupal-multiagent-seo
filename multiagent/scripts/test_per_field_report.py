@@ -1,7 +1,9 @@
 """Test thủ công (offline, không gọi LLM/Drupal) cho 2 phần của tính năng
 báo cáo theo từng field:
 
-1. drupal_client._extract_image_alt() - lấy alt text ảnh từ JSON:API resource.
+1. drupal_client._extract_image_alt() - liệt kê alt text của ảnh đại diện và
+   mọi ảnh trong body. Trả về nhiều dòng, mỗi ảnh một dòng; chi tiết và các
+   ca biên nằm ở scripts/test_image_alt.py.
 2. graph.write_back_node() - gom gợi ý sửa theo từng field.
 
 Cách chạy:
@@ -34,7 +36,7 @@ res_no_image = {"relationships": {}}
 res_null_image = {"relationships": {"field_image": {"data": None}}}
 
 check("alt text đọc đúng khi có ảnh",
-      drupal_client._extract_image_alt(res_with_alt) == "VF 8 màu trắng")
+      drupal_client._extract_image_alt(res_with_alt) == "Ảnh đại diện: VF 8 màu trắng")
 check("không có ảnh -> alt rỗng",
       drupal_client._extract_image_alt(res_no_image) == "")
 check("field_image null -> alt rỗng",
