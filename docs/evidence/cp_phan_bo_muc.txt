@@ -1,0 +1,57 @@
+CHAN DOAN: PHAN BO MUC CUA 8 TIEU CHI COMPLIANCE
+Ngay do   : 2026-08-04
+Sinh boi  : multiagent/scripts/chan_doan_compliance.py
+Model     : claude-haiku-4-5-20251001, temperature=0
+Mau       : 8 bai GOLD chay sach trong E1 rubric (G-001..G-007, G-010)
+Chay 1 lan/bai (~$0.15). GIU LAI FILE NAY - khong can chay lai de doc so.
+
+Muc dich: E1 do duoc Compliance sigma = 6.47, TRUOT nguong 2.0. Diem chi
+nhan cac gia tri 33.3 / 50 / 66.7 / 83.3 / 100 - dau hieu MAU SO rat nho.
+File nay do thang mau so do thay vi suy doan.
+
+------------------------------------------------------------------------
+Bai     Diem   So tieu chi ap dung   Muc tung tieu chi
+------------------------------------------------------------------------
+G-001   75.0   4/8   CP1=2 CP2=2 CP3=1 CP4=NA CP5=1  CP6=NA CP7=NA CP8=NA
+G-002   66.7   3/8   CP1=2 CP2=2 CP3=NA CP4=NA CP5=NA CP6=NA CP7=NA CP8=0
+G-003   33.3   3/8   CP1=0 CP2=2 CP3=NA CP4=NA CP5=NA CP6=NA CP7=NA CP8=0
+G-004   33.3   3/8   CP1=0 CP2=2 CP3=NA CP4=NA CP5=NA CP6=NA CP7=NA CP8=0
+G-005   50.0   4/8   CP1=0 CP2=2 CP3=1  CP4=NA CP5=NA CP6=1  CP7=NA CP8=NA
+G-006   50.0   4/8   CP1=0 CP2=2 CP3=1  CP4=NA CP5=1  CP6=NA CP7=NA CP8=NA
+G-007   83.3   3/8   CP1=2 CP2=2 CP3=1  CP4=NA CP5=NA CP6=NA CP7=NA CP8=NA
+G-010   50.0   2/8   CP1=0 CP2=2 CP3=NA CP4=NA CP5=NA CP6=NA CP7=NA CP8=NA
+------------------------------------------------------------------------
+Mau so trung binh: 3.25 / 8
+
+PHAN BO THEO TIEU CHI (tren 8 bai)
+  CP1  muc 0: 5   muc 2: 3                 <- may do (blacklist), on dinh
+  CP2  muc 2: 8                            <- luon dat, chua bai nao vi pham
+  CP3  muc 1: 4   NA: 4
+  CP4  NA: 8                               <- khong bai nao nhac khuyen mai
+  CP5  muc 1: 2   NA: 6
+  CP6  muc 1: 1   NA: 7
+  CP7  NA: 8                               <- khong bai nao nhac chinh sach pin
+  CP8  muc 0: 3   NA: 5
+
+------------------------------------------------------------------------
+KET LUAN
+------------------------------------------------------------------------
+1. Mau so trung binh 3.25/8. Voi n = 3, mot tieu chi lat giua NA va muc 2
+   lam diem nhay 16.7 diem. Do chinh la sigma do duoc, khong phai LLM cham
+   "lung tung" trong cung mot thang.
+
+2. CP4 va CP7 NA 8/8 la DUNG va khong phai van de: bai cam nang xe dien
+   khong noi ve khuyen mai hay chinh sach thue pin. Chung chi lam mau so
+   nho di, khong lam no DAO DONG.
+
+3. Cho dao dong that nam o CP5, CP6, CP8 - ba tieu chi ma "chu de co xuat
+   hien trong bai khong" DO LLM QUYET DINH. G-001 co claim "420 km" nen
+   CP5 phai ap dung, nhung CP8 (so lieu co nguon) lai NA du bai day so.
+   Cung mot bai, lan chay khac LLM lai ket luan khac -> mau so nhay ->
+   diem nhay.
+
+4. Huong sua: cau hoi "bai co ban toi chu de nay khong" la cau hoi DEM
+   DUOC BANG MAY (co con so kem 'km'? co tu 'sac' kem don vi thoi gian?
+   co chu so nao khong?), khong phai cau hoi ngu nghia. Giao cho may quyet
+   dinh AP DUNG hay NA, chi de LLM cham MUC 0/1/2 khi da ap dung.
+   Lam vay dong thoi lam mau so lon hon -> diem min hon.
