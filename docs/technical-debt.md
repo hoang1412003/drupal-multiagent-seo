@@ -325,6 +325,8 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 **Đã sửa:** cả hai cache khoá theo đường dẫn. 2 test mới, mỗi test kiểm cả hai chiều (file mới đọc đúng, file cũ không bị đè).
 
+> **Ghi chú 2026-08-05:** `retrieval._get_collection()` nói ở trên **không còn tồn tại** — kho vector đã chuyển sang Postgres + pgvector (`rag-design.md` mục 4.2a). Phép kiểm không bị mất theo: nó chuyển sang `db.get_conn()` (cache khoá theo **DSN** thay vì theo đường dẫn thư mục), và test khoá lại nằm ở `scripts/test_retrieval.py::test_ket_noi_cache_theo_dsn`. Giữ nguyên đoạn trên làm bản ghi của lỗi gốc.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
