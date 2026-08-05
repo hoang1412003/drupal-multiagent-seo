@@ -113,7 +113,7 @@ cd multiagent
 for f in scripts/test_*.py; do .venv/Scripts/python.exe "$f" > /dev/null || echo "FAIL $f"; done
 ```
 
-25/25 bộ tính đến 2026-08-04. Test không cần API key, không cần Drupal, không
+27/27 bộ tính đến 2026-08-05. Test không cần API key, không cần Drupal, không
 cần KB — chạy được ở bất cứ đâu, mất vài giây.
 
 Riêng test hợp đồng phía PHP chạy trong container:

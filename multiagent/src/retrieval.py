@@ -18,14 +18,16 @@ _CHROMA_PATH = os.path.join(os.path.dirname(__file__), "kb", "chroma")
 COLLECTION_FACTCHECK = "kb_factcheck"
 COLLECTION_BRAND = "kb_brand"
 
-_client = None
+# Cache khoá theo ĐƯỜNG DẪN, cùng lý do với config._cache: bản cũ giữ một
+# client duy nhất và bỏ qua `chroma_path`, nên KB thứ hai mở ra vẫn là KB thứ
+# nhất.
+_clients: dict = {}
 
 
 def _get_collection(collection_name: str, chroma_path: str = _CHROMA_PATH):
-    global _client
-    if _client is None:
-        _client = chromadb.PersistentClient(path=chroma_path)
-    return _client.get_collection(collection_name)
+    if chroma_path not in _clients:
+        _clients[chroma_path] = chromadb.PersistentClient(path=chroma_path)
+    return _clients[chroma_path].get_collection(collection_name)
 
 
 def retrieve(query: str, content_type: str, langcode: str, *, top_k: int = 3,

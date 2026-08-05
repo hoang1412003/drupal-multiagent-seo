@@ -75,7 +75,33 @@ def test_min_similarity_filters():
     print("[PASS] min_similarity loc ket qua duoi nguong")
 
 
+def test_client_tach_theo_chroma_path():
+    """`_get_collection(..., chroma_path=...)` phai mo dung KB duoc chi.
+
+    Ban cu cache PersistentClient vao mot bien global va BO QUA `chroma_path`,
+    nen lan goi thu hai voi thu muc khac van tra collection cua KB dau tien.
+    Cung loai bay voi config._nap_file."""
+    import chromadb
+
+    from retrieval import _get_collection
+
+    d1, d2 = tempfile.mkdtemp(), tempfile.mkdtemp()
+    try:
+        for d, ten in ((d1, "kb_mot"), (d2, "kb_hai")):
+            chromadb.PersistentClient(path=d).create_collection(ten)
+
+        assert _get_collection("kb_mot", chroma_path=d1).name == "kb_mot"
+        # KB thu hai: neu client bi cache theo KB dau thi day se ném exception
+        # "collection kb_hai does not exist".
+        assert _get_collection("kb_hai", chroma_path=d2).name == "kb_hai"
+    finally:
+        shutil.rmtree(d1, ignore_errors=True)
+        shutil.rmtree(d2, ignore_errors=True)
+    print("[PASS] client tach theo chroma_path, khong lan giua hai KB")
+
+
 if __name__ == "__main__":
     test_retrieves_right_model_and_lang()
     test_min_similarity_filters()
+    test_client_tach_theo_chroma_path()
     print("OK")

@@ -107,6 +107,50 @@ def test_mot_claim_khop_mot_claim_khong_tra_duoc_ra_muc_1():
     print("[PASS] mot claim chua tra duoc -> muc 1 (khong len muc 2)")
 
 
+def test_index_ngoai_bien_khong_lam_sap():
+    """`index` la so do LLM tu dien, khong duoc tin. Bản cũ tra thang
+    pairs[v["index"]] -> IndexError -> bi try/except cua _cp3_so_lieu nuot ->
+    CP3 am tham thanh NA, tuc mat han tieu chi fact-check ma khong ai biet."""
+    kq = fact_check.danh_gia(
+        {"body": "VF 8 chạy 500km"},
+        extract_fn=lambda f: [CLAIM_VF8],
+        retriever=lambda q, ct, lc, **k: [{"text": "VF 8: 420km", "model": "VF 8", "score": 0.9, "source_url": "u"}],
+        compare_fn=lambda pairs: [{"index": 7, "verdict": "mismatch", "reason": "index bia"}],
+    )
+    assert kq["level"] == 1, f"index la -> claim chua ket luan -> muc 1, got {kq}"
+    print("[PASS] index ngoai bien -> muc 1, khong sap")
+
+
+def test_thieu_verdict_khong_duoc_len_muc_2():
+    """LLM tra thieu verdict cho mot pair. Bản cũ bo qua pair do, nen bai chi
+    con toan 'match' -> muc 2. Claim khong duoc ket luan phai keo ve muc 1."""
+    claim_2 = {"model": "VF 9", "metric": "tam_hoat_dong", "value": "438km",
+               "field": "body", "excerpt": "VF 9 chạy 438km"}
+    kq = fact_check.danh_gia(
+        {"body": "VF 8 chạy 420km. VF 9 chạy 438km"},
+        extract_fn=lambda f: [dict(CLAIM_VF8, value="420km"), claim_2],
+        retriever=lambda q, ct, lc, **k: [{"text": "thông số", "model": "x", "score": 0.9, "source_url": "u"}],
+        compare_fn=lambda pairs: [{"index": 0, "verdict": "match", "reason": "khop"}],
+    )
+    assert kq["level"] == 1, f"pair thieu verdict -> muc 1, got {kq}"
+    assert len(kq["occurrences"]) == 1, kq["occurrences"]
+    print("[PASS] thieu verdict -> muc 1 (khong tu dong len muc 2)")
+
+
+def test_verdict_trung_index_giu_lan_dau():
+    kq = fact_check.danh_gia(
+        {"body": "VF 8 chạy 420km"},
+        extract_fn=lambda f: [dict(CLAIM_VF8, value="420km")],
+        retriever=lambda q, ct, lc, **k: [{"text": "VF 8: 420km", "model": "VF 8", "score": 0.9, "source_url": "u"}],
+        compare_fn=lambda pairs: [
+            {"index": 0, "verdict": "match", "reason": "khop"},
+            {"index": 0, "verdict": "mismatch", "reason": "cham trung"},
+        ],
+    )
+    assert kq["level"] == 2, f"cham trung -> giu lan dau (match), got {kq}"
+    print("[PASS] verdict trung index -> giu lan dau")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -116,6 +160,9 @@ if __name__ == "__main__":
         test_match_ra_muc_2,
         test_khong_co_claim_ra_na,
         test_mot_claim_khop_mot_claim_khong_tra_duoc_ra_muc_1,
+        test_index_ngoai_bien_khong_lam_sap,
+        test_thieu_verdict_khong_duoc_len_muc_2,
+        test_verdict_trung_index_giu_lan_dau,
     ):
         try:
             fn()

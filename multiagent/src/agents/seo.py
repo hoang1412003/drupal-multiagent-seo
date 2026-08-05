@@ -1,5 +1,6 @@
 from ai_core import call_agent
 from prompt_builder import boc_noi_dung
+from scoring import kiem_diem_llm
 
 _FIELDS = ("title", "meta_description", "url_alias", "body", "image_alt")
 
@@ -65,4 +66,8 @@ def run(fields: dict) -> dict:
     # `image_alt`: chuỗi đó do drupal_client dựng sẵn theo dòng, không phải
     # HTML của người viết.
     content, _ = boc_noi_dung(fields, _FIELDS, boc_an_o=("body",))
-    return call_agent(SYSTEM_PROMPT, content, OUTPUT_SCHEMA)
+    kq = call_agent(SYSTEM_PROMPT, content, OUTPUT_SCHEMA)
+    # Agent này để LLM tự cho điểm (nợ A1) và không có gì ràng buộc dải -
+    # xem scoring.kiem_diem_llm. Kiểm ngay khi nhận (architecture.md mục 7).
+    kiem_diem_llm(kq["score"], "SEO")
+    return kq
