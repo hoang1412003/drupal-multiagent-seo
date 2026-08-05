@@ -110,4 +110,6 @@ cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRU
 - [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
 - [x] UI báo cáo trong editor — module `vf_ai_review`: khối tổng quan ở cột phải + **chú thích lỗi ngay dưới từng field** (phần đáp ứng đúng chữ đề bài). Python ghi thêm `field_ai_report_json` (báo cáo có cấu trúc), module chỉ đọc và render. Escape chống XSS theo `docs/prompt-injection.md` M4. Phát hiện nội dung sửa sau khi chấm bằng **hash nội dung**, không phải mốc `changed`
 
+Báo cáo Sprint 2 đầy đủ (kết quả, phép đo, việc còn vướng): [`docs/sprint2-report.md`](docs/sprint2-report.md).
+
 Lộ trình đầy đủ: [`docs/roadmap.md`](docs/roadmap.md).
