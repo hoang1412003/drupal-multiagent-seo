@@ -39,7 +39,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-import chromadb
+import db
 
 from retrieval import COLLECTION_BRAND, retrieve
 
@@ -48,7 +48,6 @@ from label_helper import parse_sample
 _HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
 GOLD_DIR = os.path.join(REPO_ROOT, "docs", "goldset", "raw")
-CHROMA_PATH = os.path.join(REPO_ROOT, "multiagent", "src", "kb", "chroma")
 
 # Nhom chu de cua tung bai GOLD, chep tu docs/goldset/sources.md muc 1.1-1.5
 # (cung he nhan voi docs/brand/corpus_index.csv).
@@ -72,10 +71,17 @@ def ti_trong_chunk() -> dict[str, float]:
     Tinh theo chunk chu khong theo bai: mot bai dai gop hang tram chunk nen
     xac suat boc trung nhom cua no cao hon han, dung ti trong so bai lam moc
     se so lech.
+
+    Tu 2026-08-05 dem bang GROUP BY thay vi keo toan bo metadata ve Python roi
+    dem tay - mot vi du nho cua viec doi sang Postgres.
     """
-    col = chromadb.PersistentClient(path=CHROMA_PATH).get_collection(COLLECTION_BRAND)
-    metas = col.get(include=["metadatas"])["metadatas"]
-    dem = collections.Counter(m["topic_group"] for m in metas)
+    with db.get_conn().cursor() as cur:
+        cur.execute(
+            f"SELECT meta->>'topic_group', count(*) FROM {db.TEN_BANG} "
+            "WHERE collection = %s GROUP BY 1",
+            (COLLECTION_BRAND,),
+        )
+        dem = dict(cur.fetchall())
     tong = sum(dem.values())
     return {g: n / tong for g, n in dem.items()}
 

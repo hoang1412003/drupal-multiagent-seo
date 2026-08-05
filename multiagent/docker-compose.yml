@@ -1,0 +1,37 @@
+# Postgres + pgvector - kho vector cua he Multi-Agent (KB brand + KB fact-check).
+#
+# TACH HAN khoi container Drupal (drupal/.ddev/), co y: phia Multi-Agent la mot
+# service rieng nen phai tu so huu du lieu cua no. De KB trong DB cua Drupal thi
+# `ddev delete` ben kia se xoa luon KB, va hai he khong con restart/backup doc
+# lap duoc nua.
+#
+# Chay (tu multiagent/):
+#     docker compose up -d          # dung
+#     docker compose down           # dung lai, GIU du lieu
+#     docker compose down -v        # xoa ca du lieu (KB dung lai duoc tu specs.json)
+#
+# Cong 5433 tren may that (khong phai 5432) de khong dam vao Postgres nao dang
+# cai san tren may.
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: vf-agent-db
+    restart: unless-stopped
+    environment:
+      # Mat khau de trong file nay la CO Y: day la DB dev chay local, chi lang
+      # nghe tren 127.0.0.1. Khi deploy that thi doc tu bien moi truong.
+      POSTGRES_DB: vf_agent
+      POSTGRES_USER: vf_agent
+      POSTGRES_PASSWORD: vf_agent
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vf_agent -d vf_agent"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

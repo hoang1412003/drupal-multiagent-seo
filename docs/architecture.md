@@ -237,7 +237,7 @@ Như vậy Compliance Agent gồm 3 nguồn tạo flag độc lập, gộp chung
 
 Thiết kế RAG chi tiết cho fact-check KB (chunk theo đơn vị "một model xe", ngưỡng similarity, xử lý khi không tra được): `docs/rag-design.md`. Điểm quan trọng: KB chỉ chứa thông số một số model, nên claim **không tra được** phải cho kết quả "không kiểm chứng được", **không** phải "sai" - nếu không, mọi bài nhắc model ngoài KB đều bị từ chối oan.
 
-**Trạng thái hiện tại (Sprint 2):** `compliance.py` đã triển khai **cả 3 nguồn**: (1) LLM, (2) rule-based blacklist (`compliance_rules.json`, dùng word-boundary regex), và (3) **RAG fact-check (CP3) - đã triển khai (2026-07-31)**. Kiến trúc CP3: KB thông số (`multiagent/src/kb/specs.json`, seed từ `sources.md` mục 2.1, đánh dấu `verified=false` chờ verify số thật) → chunk theo đơn vị "một model xe" + câu ngữ cảnh (Contextual Retrieval bản tất định) → embedding **BGE-M3 self-host** (`src/embeddings.py`, sau interface `Embedder`) → **Chroma một collection lọc `(content_type, langcode)`** (`src/retrieval.py`). Khi chấm: LLM trích claim định lượng → truy vấn KB → LLM so sánh; **lệch số (cùng model) → flag `critical`**; **không tra được hoặc khác model → KHÔNG flag** (mức "không kiểm chứng được", tránh veto oan). fact-check là nguồn flag độc lập, gộp vào `compliance.run()` và bọc `try/except` để KB chưa dựng không làm sập agent. Đo E2 recall@3 = 1.00 trên KB seed (`scripts/eval_retrieval.py`); smoke test bắt được claim "VF 8 500km" sai lệch (thật 420km). **Việc còn lại (dữ liệu, ngoài code):** thu số thật cho KB từ `sources.md` mục 2 (WAF chặn bot → thủ công), verify từng số, đổi `verified=true`. Không phụ thuộc tài liệu nội bộ VF O2O.
+**Trạng thái hiện tại (Sprint 2):** `compliance.py` đã triển khai **cả 3 nguồn**: (1) LLM, (2) rule-based blacklist (`compliance_rules.json`, dùng word-boundary regex), và (3) **RAG fact-check (CP3) - đã triển khai (2026-07-31)**. Kiến trúc CP3: KB thông số (`multiagent/src/kb/specs.json`, seed từ `sources.md` mục 2.1, đánh dấu `verified=false` chờ verify số thật) → chunk theo đơn vị "một model xe" + câu ngữ cảnh (Contextual Retrieval bản tất định) → embedding **BGE-M3 self-host** (`src/embeddings.py`, sau interface `Embedder`) → **Postgres + pgvector, lọc `(content_type, langcode)` bằng `WHERE`** (`src/retrieval.py`, `src/db.py` — trước 2026-08-05 là Chroma, lý do đổi ở `docs/rag-design.md` mục 4.2a). Khi chấm: LLM trích claim định lượng → truy vấn KB → LLM so sánh; **lệch số (cùng model) → flag `critical`**; **không tra được hoặc khác model → KHÔNG flag** (mức "không kiểm chứng được", tránh veto oan). fact-check là nguồn flag độc lập, gộp vào `compliance.run()` và bọc `try/except` để KB chưa dựng không làm sập agent. Đo E2 recall@3 = 1.00 trên KB seed (`scripts/eval_retrieval.py`); smoke test bắt được claim "VF 8 500km" sai lệch (thật 420km). **Việc còn lại (dữ liệu, ngoài code):** thu số thật cho KB từ `sources.md` mục 2 (WAF chặn bot → thủ công), verify từng số, đổi `verified=true`. Không phụ thuộc tài liệu nội bộ VF O2O.
 
 **Output:**
 
@@ -269,13 +269,45 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 **Trục 1 - loại nội dung.** Rubric và ngưỡng của mỗi tiêu chí lưu theo khóa `(content_type, langcode)` trong config, không nhúng cứng trong code agent. Thêm một loại nội dung mới (landing page, thông cáo báo chí, case study) = thêm một bộ rubric/ngưỡng trong config + thu gold set cho loại đó, **không phải sửa logic 4 agent**. Sở dĩ phạm vi hiện tại chỉ tập trung một loại là để gold set 30-50 mẫu đủ dày cho calibration có ý nghĩa thống kê (chia mẫu cho nhiều loại sẽ làm mỗi loại quá ít mẫu). Lộ trình mở rộng phân tầng P0 (cẩm nang) / P1 (landing page) / P2 (PR, case study) - chi tiết xem spec mục 2.
 
-**Trục 2 - ngôn ngữ.** Ba điểm giữ sẵn để mở rộng mà không đập đi làm lại: (1) `langcode` là tham số đầu vào của Orchestrator và mọi agent, không hard-code "vi" — ✅ **đúng trong code từ 2026-08-05**: `graph._khoa_cua(state)` là chỗ duy nhất suy ra cặp `(content_type, langcode)`, dùng chung cho Aggregator và cho hai node agent, nên hai truy vấn RAG (BV6, CP3) lọc Chroma theo đúng khoá của state. Trước đó chúng rơi về hằng số mặc định trong chữ ký hàm — nợ B6, đã đóng, có test khoá lại (`scripts/test_graph_truyen_khoa.py`); (2) cùng cơ chế config `(content_type, langcode)` ở trục 1 đã bao luôn trục này; (3) lớp phân tích ngôn ngữ (tách từ, đếm câu, readability - mục 5.5) tách sau một interface chung, hiện chỉ implement cho tiếng Việt, thêm ngôn ngữ mới = thêm một class, không đụng 4 agent.
+**Trục 2 - ngôn ngữ.** Ba điểm giữ sẵn để mở rộng mà không đập đi làm lại: (1) `langcode` là tham số đầu vào của Orchestrator và mọi agent, không hard-code "vi" — ✅ **đúng trong code từ 2026-08-05**: `graph._khoa_cua(state)` là chỗ duy nhất suy ra cặp `(content_type, langcode)`, dùng chung cho Aggregator và cho hai node agent, nên hai truy vấn RAG (BV6, CP3) lọc KB theo đúng khoá của state. Trước đó chúng rơi về hằng số mặc định trong chữ ký hàm — nợ B6, đã đóng, có test khoá lại (`scripts/test_graph_truyen_khoa.py`); (2) cùng cơ chế config `(content_type, langcode)` ở trục 1 đã bao luôn trục này; (3) lớp phân tích ngôn ngữ (tách từ, đếm câu, readability - mục 5.5) tách sau một interface chung, hiện chỉ implement cho tiếng Việt, thêm ngôn ngữ mới = thêm một class, không đụng 4 agent.
 
 **Chi phí thật của mở rộng nằm ở dữ liệu, không ở kiến trúc:** mỗi `(content_type, langcode)` mới cần gold set riêng và calibrate lại ngưỡng, vì ngưỡng **không chuyển giao được** giữa các loại/ngôn ngữ. Vì vậy việc code sẵn cho mọi phạm vi là vô nghĩa nếu chưa có dữ liệu - kiến trúc chỉ cần đảm bảo **không cản đường** mở rộng, và đó là điều 3 nguyên tắc trên bảo đảm. Bản thân việc code + calibrate cho loại/ngôn ngữ thứ hai nằm ngoài phạm vi dự án hiện tại.
 
 **Đặc tả file config cụ thể** (định dạng, cấu trúc khoá, đường chuyển đổi từ hard-code): `docs/config-spec.md`. Tài liệu đó cũng chỉ ra một vấn đề đã phát sinh: cùng một ngưỡng hiện tồn tại ở 4 nơi (`graph.py`, `label_helper.py`, `rubrics.md`, `annotation-guideline.md`) và đã trôi lệch một lần.
 
 **Trạng thái (cập nhật 2026-08-04): đã triển khai.** `multiagent/config/scoring.yaml` giữ trọng số và ngưỡng, tra theo khoá `(content_type, langcode)`; `src/config.py` nạp và phát cảnh báo lúc chạy; `graph.py` đọc từ config thay vì hằng số `WEIGHTS`; `state.py` đã có `content_type`/`langcode`. Bằng chứng đây là refactor thuần: `label_helper.py` chạy lại trên 33 mẫu gold set cho ra file giống hệt từng byte với báo cáo đã commit. Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
+
+### 5.7. Trang quản lý agent + tách service — ghi nhận, CHƯA làm
+
+Cùng loại với hai hướng mở rộng ở mục 4.2 (GEO Optimizer Agent, Visual Consistency Agent) và hai trục ở mục 5.6: **có thiết kế, cố ý chưa làm trong phạm vi dự án hiện tại.** Lý do hoãn giống hệt: roadmap Sprint 3 mentor giao là calibration → shadow-test/held-out → hoàn thiện UI → demo, và việc đang chặn Sprint 3 là **gán nhãn gold set**. Thêm một trang quản lý lúc này là mở rộng phạm vi, không phải hoàn thành phạm vi.
+
+**Ai dùng.** Không phải biên tập viên — họ đã có báo cáo theo từng field ngay trong màn soạn bài (module `vf_ai_review`, mục 2.3). Trang này phục vụ **trưởng nhóm content** (nhiều bài: tuần này bao nhiêu bài bị chặn, lỗi nào hay gặp) và **người vận hành** (service sống không, chi phí bao nhiêu, KB có gì).
+
+**Màn hình dự kiến**, mỗi màn đều đã có dữ liệu thật đứng sau:
+
+| Màn | Nguồn dữ liệu |
+|---|---|
+| Tổng quan: số bài, phân bố quyết định, chi phí/token, độ trễ | `run_log` |
+| Lịch sử chấm + chi tiết một lần chấm (mức từng tiêu chí CP1–CP9 / BV1–BV7, trích dẫn, đoạn KB, `veto_reason`) | `run_log` — đây chính là **nhật ký truy vết** ở `operations.md` mục 2 |
+| Soi KB: duyệt chunk, lọc metadata, ô thử truy vấn chạy đúng `retrieve()` | bảng `kb_chunk` |
+| Cấu hình — **chỉ đọc** | `config/scoring.yaml` |
+| Chấm lại thủ công một node | gọi `build_graph().invoke()` |
+
+**Cấu hình để CHỈ ĐỌC là ràng buộc thiết kế, không phải thiếu tính năng.** `scoring.yaml` ghi rõ *"KHÔNG SỬA TAY khối đã calibrate"*; một nút Lưu trên web sẽ cắt đứt mối liên hệ giữa con số và bằng chứng calibration sinh ra nó. Trang chỉ hiển thị `meta.calibrated / gold_set / kappa / model` để người xem biết ngưỡng đang dùng từ đâu ra.
+
+**Đăng nhập: Drupal là nhà cung cấp danh tính duy nhất.** Tuyệt đối không dựng kho tài khoản thứ hai — hai kho nghĩa là một người hai mật khẩu, và khi ai đó nghỉ việc phải nhớ khoá ở hai chỗ. Cần phân biệt:
+
+- **Danh tính máy** (service ↔ service): service account / API key. Đã có sẵn `DRUPAL_USER`/`DRUPAL_PASSWORD`.
+- **Danh tính người**: tài khoản Drupal. Đề xuất 2 role (`ai_service` cho máy, `ai_admin` cho người) và 3 permission — `xem bao cao ai` (cho `content_editor`), `xem quan tri ai`, `dieu khien ai`. Tách `xem` khỏi `dieu khien` vì bấm "chấm lại" là **tiêu tiền API thật**.
+
+Hai cách đặt trang, và chúng khác nhau hẳn về khối lượng việc:
+
+1. **Trang nằm trong Drupal**, gọi API của service → **0 việc về auth**. Đây là cách nên làm cho v1.
+2. **UI riêng của service** → phải cho service tin token Drupal qua `simple_oauth` (Drupal làm OAuth2 provider). Là một hạng mục riêng, không làm kèm.
+
+Điều kiện để không phải viết lại khi đổi ý: **service expose API sạch ngay từ đầu, Drupal chỉ là một client của API đó.** Khi ấy chọn (1) không khoá đường sang (2).
+
+**Một tiền đề đã sẵn sàng:** việc chuyển kho vector sang Postgres (2026-08-05, `rag-design.md` mục 4.2a) chính là bước hạ tầng của hướng này — `run_log` và `review_state` nằm cùng một DB với `kb_chunk`, nên trang quản lý không cần thêm kho dữ liệu nào nữa.
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 

@@ -1,107 +1,192 @@
-"""Test retrieval: dung Chroma tam + FakeEmbedder. Kiem loc (content_type,
-langcode), top_k, va truy van dung model. Khong tai model that.
+"""Test retrieval tren Postgres + pgvector, dung ket noi GIA.
+
+VI SAO KHONG DUNG POSTGRES THAT: ca bo test cua du an chay duoc "khong can API
+key, khong can Drupal, khong can KB" (docs/pre-demo-checklist.md muc 5). Ban
+Chroma giu duoc tinh chat do vi Chroma nhung duoc vao tien trinh; Postgres thi
+khong. Neu de test doi mot server that thi ai clone repo ve cung khong chay
+duoc test - mat dung thu dang gia nhat cua bo test nay.
+
+Doi lai, tiem ket noi gia con do DUNG phan code cua minh (cau SQL, quy doi
+distance -> similarity, loc nguong, doc metadata phong thu) thay vi do
+Postgres co chay dung khong - Postgres thi khong can minh kiem.
+
+Phan "chay that co ra dung khong" do bang scripts/eval_retrieval.py (E2).
 Chay: .venv\\Scripts\\python.exe scripts\\test_retrieval.py
 """
 import os
-import shutil
 import sys
-import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-import chromadb
+import db
+import retrieval
 from retrieval import retrieve
 
 
-class FakeEmbedder:
-    _VOCAB = ["VF 5", "VF 8", "VF 9", "bảo dưỡng"]
+class _FakeCursor:
+    def __init__(self, rows, nhat_ky):
+        self._rows = rows
+        self._nhat_ky = nhat_ky
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def execute(self, sql, params=None):
+        self._nhat_ky.append((sql, params))
+
+    def fetchall(self):
+        return self._rows
+
+
+class FakeConn:
+    """Ket noi gia: tra ve dung cac dong duoc dat truoc, ghi lai cau SQL."""
+
+    def __init__(self, rows):
+        self.rows = rows
+        self.nhat_ky = []
+
+    def cursor(self):
+        return _FakeCursor(self.rows, self.nhat_ky)
+
+
+class FakeEmbedder:
     def embed(self, texts):
-        out = []
-        for t in texts:
-            v = [1.0 if x.lower() in t.lower() else 0.0 for x in self._VOCAB]
-            if sum(v) == 0:
-                v = [1.0] + [0.0] * (len(self._VOCAB) - 1)
-            out.append(v)
-        return out
+        return [[0.1, 0.2, 0.3] for _ in texts]
 
     @property
     def dim(self):
-        return len(self._VOCAB)
+        return 3
 
 
-def _make_collection(path):
-    emb = FakeEmbedder()
-    client = chromadb.PersistentClient(path=path)
-    col = client.create_collection("kb_factcheck", metadata={"hnsw:space": "cosine"})
-    docs = ["thông số VF 8: 420km", "thông số VF 9: 438km", "thông số VF 8 tiếng Anh"]
-    col.add(
-        ids=["vi:vf8", "vi:vf9", "en:vf8"],
-        embeddings=emb.embed(docs),
-        documents=docs,
-        metadatas=[
-            {"model": "VF 8", "content_type": "cam_nang", "langcode": "vi", "source_url": "u1"},
-            {"model": "VF 9", "content_type": "cam_nang", "langcode": "vi", "source_url": "u2"},
-            {"model": "VF 8", "content_type": "cam_nang", "langcode": "en", "source_url": "u3"},
-        ],
-    )
-    return col, emb
+# (document, meta, similarity) - dung thu tu cot cua cau SELECT trong retrieval
+_ROWS = [
+    ("thông số VF 8: 420km",
+     {"model": "VF 8", "source_url": "u1", "verified": True}, 0.91),
+    ("thông số VF 9: 438km",
+     {"model": "VF 9", "source_url": "u2", "verified": True}, 0.62),
+]
 
 
-def test_retrieves_right_model_and_lang():
-    d = tempfile.mkdtemp()
+def test_loc_dung_collection_va_khoa():
+    """Cau SQL phai loc theo ca collection LAN (content_type, langcode).
+
+    Day dung la cho no B6 tung hong o tang tren: hai truy van RAG loc bang
+    hang so trong khi Aggregator tra config theo state. Khoa xuong toi day thi
+    phai di vao menh de WHERE, khong duoc roi rung giua duong.
+    """
+    conn = FakeConn(_ROWS)
+    retrieve("VF 8", "cam_nang", "vi", embedder=FakeEmbedder(), conn=conn,
+             top_k=5, collection_name=retrieval.COLLECTION_BRAND)
+
+    sql, params = conn.nhat_ky[0]
+    assert "WHERE collection = %s" in sql, sql
+    assert "content_type = %s" in sql and "langcode = %s" in sql, sql
+    assert params[1] == "kb_brand", params
+    assert params[2] == "cam_nang" and params[3] == "vi", params
+    assert params[5] == 5, f"top_k phai xuong LIMIT, got {params}"
+    print("[PASS] SQL loc dung collection + content_type + langcode + top_k")
+
+
+def test_hinh_dang_hit_giu_nguyen():
+    """Hinh dang tra ve phai y het ban Chroma - 4 agent doc theo hinh dang do."""
+    hits = retrieve("VF 8", "cam_nang", "vi", embedder=FakeEmbedder(),
+                    conn=FakeConn(_ROWS))
+    assert len(hits) == 2, hits
+    assert hits[0]["text"] == "thông số VF 8: 420km", hits[0]
+    assert hits[0]["model"] == "VF 8", hits[0]
+    assert hits[0]["score"] == 0.91, hits[0]
+    assert hits[0]["source_url"] == "u1", hits[0]
+    assert set(hits[0]) == {"text", "model", "topic_group", "score", "source_url"}
+    print("[PASS] hinh dang hit giu nguyen nhu ban Chroma")
+
+
+def test_min_similarity_loc():
+    hits = retrieve("VF 8", "cam_nang", "vi", embedder=FakeEmbedder(),
+                    conn=FakeConn(_ROWS), min_similarity=0.9)
+    assert len(hits) == 1, hits
+    assert hits[0]["model"] == "VF 8", hits
+    print("[PASS] min_similarity loai dong duoi nguong")
+
+
+def test_min_similarity_none_thi_khong_loc_gi():
+    """Mac dinh None = chua chot nguong -> KHONG duoc am tham loc bot."""
+    hits = retrieve("VF 8", "cam_nang", "vi", embedder=FakeEmbedder(),
+                    conn=FakeConn(_ROWS))
+    assert len(hits) == 2, hits
+    print("[PASS] min_similarity=None khong loc gi")
+
+
+def test_meta_thieu_khoa_khong_sap():
+    """KB brand khong co khoa 'model', KB fact-check khong co 'topic_group'."""
+    rows = [("doan mau", {"sample_id": "B-001", "topic_group": "sac_pin"}, 0.8)]
+    hits = retrieve("sạc pin", "cam_nang", "vi", embedder=FakeEmbedder(),
+                    conn=FakeConn(rows))
+    assert hits[0]["model"] == "", hits
+    assert hits[0]["topic_group"] == "sac_pin", hits
+    print("[PASS] metadata thieu khoa -> chuoi rong, khong loi")
+
+
+def test_meta_null_khong_sap():
+    """jsonb NULL tu DB -> None. Khong duoc nem AttributeError."""
+    hits = retrieve("x", "cam_nang", "vi", embedder=FakeEmbedder(),
+                    conn=FakeConn([("doan", None, 0.5)]))
+    assert hits[0]["model"] == "" and hits[0]["topic_group"] == "", hits
+    print("[PASS] meta = None khong lam sap")
+
+
+def test_ket_noi_cache_theo_dsn():
+    """`db.get_conn` phai cache theo DSN, khong phai mot bien toan cuc duy nhat.
+
+    Giu lai phep kiem cua no B11 sau khi doi tu Chroma sang Postgres: ban cu
+    cua retrieval._get_collection bo qua tham so `chroma_path` nen mo KB thu
+    hai van ra KB thu nhat. Loi do khong duoc phep tai sinh duoi hinh dang moi.
+
+    Thay psycopg.connect bang ham gia de khong can server that.
+    """
+    that = db.psycopg.connect
+    da_mo = []
+
+    class _ConnGia:
+        closed = False
+
+        def __init__(self, dsn):
+            self.dsn = dsn
+
+    db.psycopg.connect = lambda d, **kw: (da_mo.append(d), _ConnGia(d))[1]
+    cu = dict(db._conns)
     try:
-        col, emb = _make_collection(d)
-        hits = retrieve("VF 8", "cam_nang", "vi", embedder=emb, collection=col)
-        assert hits, "phai co ket qua"
-        assert hits[0]["model"] == "VF 8", f"top1 phai la VF 8, got {hits[0]['model']}"
-        # loc langcode: khong duoc tra ban tieng Anh (en:vf8)
-        assert all(h["source_url"] != "u3" for h in hits), "khong duoc tra ban langcode khac"
+        db._conns.clear()
+        a = db.get_conn("postgresql://x/mot")
+        b = db.get_conn("postgresql://x/hai")
+        assert a.dsn.endswith("mot") and b.dsn.endswith("hai"), (a.dsn, b.dsn)
+        # DSN thu hai KHONG duoc de len DSN thu nhat
+        assert db.get_conn("postgresql://x/mot") is a, "DSN dau bi de mat"
+        assert len(da_mo) == 2, da_mo
     finally:
-        shutil.rmtree(d, ignore_errors=True)
-    print("[PASS] truy van dung model + loc langcode")
-
-
-def test_min_similarity_filters():
-    d = tempfile.mkdtemp()
-    try:
-        col, emb = _make_collection(d)
-        # truy van khong khop token nao -> vector [1,0,0,0], similarity thap
-        hits = retrieve("xe tay ga", "cam_nang", "vi", embedder=emb,
-                        collection=col, min_similarity=0.99)
-        assert hits == [], "duoi nguong similarity phai loc het"
-    finally:
-        shutil.rmtree(d, ignore_errors=True)
-    print("[PASS] min_similarity loc ket qua duoi nguong")
-
-
-def test_client_tach_theo_chroma_path():
-    """`_get_collection(..., chroma_path=...)` phai mo dung KB duoc chi.
-
-    Ban cu cache PersistentClient vao mot bien global va BO QUA `chroma_path`,
-    nen lan goi thu hai voi thu muc khac van tra collection cua KB dau tien.
-    Cung loai bay voi config._nap_file."""
-    import chromadb
-
-    from retrieval import _get_collection
-
-    d1, d2 = tempfile.mkdtemp(), tempfile.mkdtemp()
-    try:
-        for d, ten in ((d1, "kb_mot"), (d2, "kb_hai")):
-            chromadb.PersistentClient(path=d).create_collection(ten)
-
-        assert _get_collection("kb_mot", chroma_path=d1).name == "kb_mot"
-        # KB thu hai: neu client bi cache theo KB dau thi day se ném exception
-        # "collection kb_hai does not exist".
-        assert _get_collection("kb_hai", chroma_path=d2).name == "kb_hai"
-    finally:
-        shutil.rmtree(d1, ignore_errors=True)
-        shutil.rmtree(d2, ignore_errors=True)
-    print("[PASS] client tach theo chroma_path, khong lan giua hai KB")
+        db.psycopg.connect = that
+        db._conns.clear()
+        db._conns.update(cu)
+    print("[PASS] ket noi cache theo DSN, hai DSN khong lan nhau")
 
 
 if __name__ == "__main__":
-    test_retrieves_right_model_and_lang()
-    test_min_similarity_filters()
-    test_client_tach_theo_chroma_path()
-    print("OK")
+    failed = False
+    for fn in (
+        test_loc_dung_collection_va_khoa,
+        test_hinh_dang_hit_giu_nguyen,
+        test_min_similarity_loc,
+        test_min_similarity_none_thi_khong_loc_gi,
+        test_meta_thieu_khoa_khong_sap,
+        test_meta_null_khong_sap,
+        test_ket_noi_cache_theo_dsn,
+    ):
+        try:
+            fn()
+        except AssertionError as e:
+            failed = True
+            print(f"[FAIL] {fn.__name__}: {e}")
+    print("OK" if not failed else "CO TEST DO")
+    sys.exit(1 if failed else 0)

@@ -1,6 +1,6 @@
 """Test cat doan KB brand + tham so collection_name cua retrieval.
 
-Dung embedder GIA va collection GIA - khong tai model 2GB, khong dung Chroma
+Dung embedder GIA va ket noi GIA - khong tai model 2GB, khong can Postgres
 that. Chay: .venv\\Scripts\\python.exe scripts\\test_brand_kb.py
 """
 import os
@@ -44,17 +44,30 @@ def test_chunk_bo_qua_doan_rong():
     print("[PASS] doan rong khong thanh chunk")
 
 
-class _FakeCollection:
-    def __init__(self):
-        self.da_goi = None
+class _FakeCursor:
+    def __init__(self, rows):
+        self._rows = rows
 
-    def query(self, **kwargs):
-        self.da_goi = kwargs
-        return {
-            "documents": [["doan mau"]],
-            "metadatas": [[{"sample_id": "B-001", "topic_group": "sac_pin"}]],
-            "distances": [[0.1]],
-        }
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def execute(self, sql, params=None):
+        pass
+
+    def fetchall(self):
+        return self._rows
+
+
+class _FakeConn:
+    """Ket noi Postgres gia. Doi tu _FakeCollection (Chroma) ngay 2026-08-05."""
+
+    _ROWS = [("doan mau", {"sample_id": "B-001", "topic_group": "sac_pin"}, 0.9)]
+
+    def cursor(self):
+        return _FakeCursor(self._ROWS)
 
 
 class _FakeEmbedder:
@@ -62,22 +75,21 @@ class _FakeEmbedder:
         return [[0.0, 1.0] for _ in texts]
 
 
-def test_retrieve_chay_voi_collection_tiem_vao():
-    col = _FakeCollection()
+def test_retrieve_chay_voi_conn_tiem_vao():
     hits = retrieval.retrieve(
         "VF 8 tầm hoạt động", "cam_nang", "vi",
-        embedder=_FakeEmbedder(), collection=col,
+        embedder=_FakeEmbedder(), conn=_FakeConn(),
     )
     assert len(hits) == 1, hits
     assert hits[0]["text"] == "doan mau"
-    print("[PASS] retrieve chay voi collection tiem vao")
+    print("[PASS] retrieve chay voi conn tiem vao")
 
 
 def test_retrieve_tra_them_topic_group():
     """Task 9 (do E2) can topic_group de biet doan lay ve co cung chu de."""
     hits = retrieval.retrieve(
         "sạc pin", "cam_nang", "vi",
-        embedder=_FakeEmbedder(), collection=_FakeCollection(),
+        embedder=_FakeEmbedder(), conn=_FakeConn(),
     )
     assert hits[0]["topic_group"] == "sac_pin", hits
     print("[PASS] retrieve tra them topic_group")
@@ -87,10 +99,24 @@ def test_metadata_thieu_model_khong_lam_sap():
     """KB brand khong co khoa 'model' (chi KB fact-check moi co)."""
     hits = retrieval.retrieve(
         "sạc pin", "cam_nang", "vi",
-        embedder=_FakeEmbedder(), collection=_FakeCollection(),
+        embedder=_FakeEmbedder(), conn=_FakeConn(),
     )
     assert hits[0]["model"] == "", hits
     print("[PASS] metadata thieu 'model' -> chuoi rong, khong loi")
+
+
+def test_chuan_bi_rows_moi_doan_mot_dong():
+    """chunk_doc -> chuan_bi_rows giu dung so doan, va gan dung topic_group."""
+    from kb.build_brand_kb import chuan_bi_rows
+
+    rows = chuan_bi_rows([DOC], _FakeEmbedder())
+    assert len(rows) == 3, rows
+    collection, cid, _doc, _vec, content_type, langcode, meta = rows[0]
+    assert collection == "kb_brand", collection
+    assert cid.startswith("B-001:"), cid
+    assert content_type == "cam_nang" and langcode == "vi", (content_type, langcode)
+    assert "lai_xe_an_toan" in meta, meta
+    print("[PASS] chuan_bi_rows: moi doan mot dong, co topic_group")
 
 
 def test_hai_hang_so_collection_ton_tai():
@@ -115,7 +141,8 @@ if __name__ == "__main__":
         test_chunk_co_prefix_ngu_canh,
         test_chunk_bo_the_html,
         test_chunk_bo_qua_doan_rong,
-        test_retrieve_chay_voi_collection_tiem_vao,
+        test_chuan_bi_rows_moi_doan_mot_dong,
+        test_retrieve_chay_voi_conn_tiem_vao,
         test_retrieve_tra_them_topic_group,
         test_metadata_thieu_model_khong_lam_sap,
         test_hai_hang_so_collection_ton_tai,
