@@ -201,6 +201,74 @@ def test_bv6_judge_tra_muc():
     print("[PASS] judge BV6 tra muc -> vao criteria")
 
 
+_BAI_BV6 = {
+    "title": "Kinh nghiệm sạc xe điện",
+    "body": "<p>Quý vị vui lòng lưu tâm tới quy trình sạc.</p>"
+            "<p>Đây là bộ sạc cho phép người dùng nạp nhanh.</p>",
+    "summary": "",
+}
+
+
+def _judge_that(fields, ket_qua_llm, hits=None):
+    """Goi _judge_formality THAT (co phep kiem trich dan) voi LLM gia.
+
+    Cac test BV6 khac tiem `judge_bv6` rieng nen khong di qua phep kiem nay -
+    phai goi thang _judge_formality moi kiem duoc no.
+    """
+    goc = brand_voice.call_agent
+    brand_voice.call_agent = lambda *a, **k: ket_qua_llm
+    try:
+        return brand_voice._judge_formality(
+            fields,
+            retriever=lambda *a, **k: (
+                hits if hits is not None else [{"text": "ngữ cảnh\nĐoạn mẫu."}]
+            ),
+        )
+    finally:
+        brand_voice.call_agent = goc
+
+
+def test_bv6_bia_trich_dan_thi_khong_duoc_ha_muc():
+    """rubrics.md muc 2.5: ha muc ma khong trich duoc NGUYEN VAN thi khong
+    duoc ha. Ban cu chi kiem chuoi KHAC RONG, nen LLM tra bat ky ky tu nao
+    cung qua - ke ca mot cau bia hoan toan. BV6 la tieu chi LLM DUY NHAT cua
+    agent nay (6/7 con lai la regex), nen no la toan bo be mat bia loi."""
+    kq = _judge_that(_BAI_BV6, {
+        "level": 0,
+        "evidence": "Bài viết dùng giọng văn suồng sã, thiếu chuyên nghiệp",
+        "reason": "Giọng văn lệch.",
+    })
+    assert kq["level"] == 2, f"trich dan bia -> phai quay ve muc 2, got {kq}"
+    print("[PASS] BV6 bia trich dan -> khong duoc ha muc")
+
+
+def test_bv6_trich_dan_that_thi_giu_nguyen_muc():
+    """Chieu nguoc lai: khong duoc lam BV6 mat tac dung."""
+    kq = _judge_that(_BAI_BV6, {
+        "level": 0,
+        "evidence": "Quý vị vui lòng lưu tâm",
+        "reason": "Trang trọng hơn hẳn corpus.",
+    })
+    assert kq["level"] == 0, f"trich dan that -> giu nguyen muc 0, got {kq}"
+    assert kq["occurrences"][0]["text"] == "Quý vị vui lòng lưu tâm"
+    print("[PASS] BV6 trich dan that -> giu nguyen muc")
+
+
+def test_bv6_trich_dan_nhieu_manh_van_duoc_chap_nhan():
+    """Dung chung phep kiem da sua o B5: hai cau o hai the HTML khac nhau
+    khong bao gio lien mach duoc (strip_html chen '.\\n' vao giua), nhung tung
+    manh deu co nguyen van -> phai chap nhan. Neu BV6 dung mot phep kiem rieng
+    thi no se loai oan dung kieu nay."""
+    kq = _judge_that(_BAI_BV6, {
+        "level": 1,
+        "evidence": "Quý vị vui lòng lưu tâm tới quy trình sạc. "
+                    "Đây là bộ sạc cho phép người dùng",
+        "reason": "Lech vai cho.",
+    })
+    assert kq["level"] == 1, f"trich dan nhieu manh deu that -> giu muc, got {kq}"
+    print("[PASS] BV6 trich dan nhieu manh -> chap nhan (dung chung phep kiem B5)")
+
+
 def test_bv6_judge_loi_thi_na_khong_phai_0():
     def judge_loi(fields, **kwargs):
         raise RuntimeError("LLM timeout")
@@ -292,6 +360,9 @@ if __name__ == "__main__":
         test_bv7_thoa_man_rong_la_na,
         test_bv7_dat_khi_bai_co_ban_toi_khai_niem,
         test_bv6_judge_tra_muc,
+        test_bv6_bia_trich_dan_thi_khong_duoc_ha_muc,
+        test_bv6_trich_dan_that_thi_giu_nguyen_muc,
+        test_bv6_trich_dan_nhieu_manh_van_duoc_chap_nhan,
         test_bv6_judge_loi_thi_na_khong_phai_0,
         test_bang_chung_duoc_dinh_vao_suggestion,
         test_retriever_loi_khong_lam_sap_agent,

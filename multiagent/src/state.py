@@ -8,11 +8,10 @@ class ContentReviewState(TypedDict):
     # sẵn để mở rộng ngôn ngữ/loại nội dung mà không đập đi làm lại
     # (docs/architecture.md mục 5.6). Thiếu chúng thì không tra config được.
     #
-    # CHÚ Ý - hai field này hiện MỚI ĐI ĐƯỢC NỬA ĐƯỜNG: aggregator_node đọc
-    # đúng từ state, nhưng graph.py không truyền chúng xuống brand_voice.run()
-    # và compliance.run(), nên hai truy vấn RAG vẫn lọc theo hằng số mặc định
-    # (nợ B6 trong docs/technical-debt.md). Chưa sai kết quả vì mới có một
-    # khoá thật, nhưng đừng đọc đoạn trên như thể nó đã đúng hoàn toàn.
+    # Hai field này đi hết đường xuống agent từ 2026-08-05 (nợ B6 đã đóng):
+    # graph._khoa_cua() suy ra cặp khoá MỘT lần rồi dùng chung cho Aggregator
+    # lẫn hai node agent, nên không còn cảnh Aggregator tra theo state trong
+    # khi BV6/CP3 lọc Chroma bằng hằng số.
     content_type: str
     langcode: str
     # 6 trường nội dung để đánh giá theo từng field (docs/architecture.md mục 3):

@@ -1,6 +1,6 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04, cập nhật 2026-08-05: thêm B8–B11)
+**Phiên bản:** v1 (2026-08-04, cập nhật 2026-08-05: thêm B8–B11; đóng B6, B7)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
@@ -36,7 +36,7 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 |---|---|---|
 | content_quality | 0.38 | — |
 | seo | 0.19 | — |
-| brand *(đã có rubric)* | **0.00** | 0.00 |
+| brand *(đã có rubric)* | **0.00** ⚠️ | 0.00 ⚠️ |
 | **compliance** | **0.78** | **5.48** |
 | **điểm tổng** | **0.28** | — |
 
@@ -57,6 +57,8 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 - Bài nào Compliance dao động mạnh thì ngưỡng E5 calibrate ra kém tin cậy hơn ở vùng đó.
 - Nguyên nhân đã chẩn đoán bằng số, không phải đoán: mẫu số trung bình 4.6/8 nên một tiêu chí nhích một bậc là ±16.7 điểm (`rubrics.md` mục 9.1).
 - Hướng giảm tiếp đã kiểm chứng được: chuyển thêm tiêu chí sang đo bằng máy. CP2/CP4/CP7 hiện vẫn do LLM chấm và đều cần đọc hiểu, nên không rẻ như CP5/CP6.
+
+⚠️ **Hai ô σ brand ở trên đã HẾT HIỆU LỰC từ 2026-08-05** — code Brand Voice đã đổi ở B7 (BV6 siết kiểm trích dẫn). Giữ lại làm bản ghi của lần đo đó, **không** trích như số của hệ thống đang chạy. Xem mục B7.
 
 **Cảnh báo bắt buộc khi trích bất kỳ σ nào trong dự án này:** σ Brand Voice đi từ `0.00` lên `1.27` giữa hai lần đo **trong khi code Brand không đổi một dòng**. σ = 0 đo trên 5 lượt là may, không phải tính chất.
 
@@ -219,7 +221,11 @@ Số lần ghi đè oan giảm 80% và mẫu số lớn lên, **nhưng σ gần 
 
 *(Ghi nhận về phương pháp: mô phỏng offline trên dữ liệu đã đo dự đoán σ = 7,35, đo thật ra 7,29. Mô phỏng lại Aggregator/rubric trên kết quả đã lưu là cách rẻ và đủ chính xác để thử một thay đổi trước khi trả tiền chạy lại — cùng lợi ích mà `architecture.md` mục 8.2 nêu cho việc quét ngưỡng.)*
 
-### B6. `graph.py` không truyền `content_type`/`langcode` xuống agent
+### B6. `graph.py` không truyền `content_type`/`langcode` xuống agent — ✅ ĐÃ SỬA (2026-08-05)
+
+**Đã sửa:** thêm `graph._khoa_cua(state)` — **một chỗ duy nhất** suy ra cặp khoá, dùng cho cả `_config_cua` lẫn hai node agent. Gộp về một chỗ chứ không chép hai dòng vào mỗi node, vì thứ hỏng ở đây đúng là *Aggregator và agent tra theo hai giá trị khác nhau trong cùng một lần chấm*; để hai đường suy ra riêng là chừa nguyên khả năng đó.
+
+**Refactor thuần, không đổi hành vi hiện tại** — có test khoá cả hai chiều: khoá từ state được truyền xuống, và state thiếu/rỗng khoá vẫn ra `cam_nang`/`vi` như trước (`scripts/test_graph_truyen_khoa.py`). Test ghi ở đúng ranh giới `graph → agent`, tức đúng chỗ đã hỏng.
 
 **Ảnh hưởng lên kết quả hiện tại: KHÔNG có.** Xếp vào nhóm B chứ không phải C vì thứ đang sai là **một khẳng định trong tài liệu**, và người chấm kiểm được bằng cách mở đúng hai file.
 
@@ -235,9 +241,20 @@ Trong khi đó `aggregator_node` **có** đọc đúng từ state (`graph.py:98`
 
 **Vì sao chưa gây lỗi lần nào:** `scoring.yaml` mới có một khoá thật (`cam_nang:vi`), và cả hai KB đều nạp với đúng cặp giá trị đó (`build_brand_kb.py:77-78`, `kb/build_kb.py`), nên hằng số hard-code **trùng khớp** giá trị đúng. Thêm khoá thứ hai là lỗi hiện ra ngay — và hiện ra ở dạng khó chẩn đoán: điểm vẫn tính được, chỉ là RAG lấy về đoạn của sai phân vùng.
 
-**Việc phải làm:** truyền `content_type` và `langcode` từ state ở hai node (dùng lại `DEFAULT_CONTENT_TYPE`/`DEFAULT_LANGCODE` đã có sẵn ở `graph.py:21-22`). Hai dòng, không đổi hành vi hiện tại. Khoá lại bằng test tiêm `retriever` giả rồi kiểm tham số nó nhận được — nếu không có test thì lần refactor sau lại trôi về như cũ mà không ai biết.
+### B7. BV6 không hề kiểm trích dẫn — comment nói một đằng, code làm một nẻo — ✅ ĐÃ SỬA (2026-08-05)
 
-### B7. BV6 không hề kiểm trích dẫn — comment nói một đằng, code làm một nẻo
+**Đã sửa:** `_trich_dan_co_that` chuyển ra `text_utils.trich_dan_co_that` (đúng chỗ tài liệu này đề xuất), Compliance và Brand Voice giờ dùng **chung một phép kiểm**. BV6 hạ mức mà không trích được nguyên văn → quay về mức 2.
+
+Mức 2 chứ không phải NA, cùng hướng với CP2: mức 2 của BV6 nghĩa là "không thấy lệch chuẩn", nên đó là kết luận đúng khi không có bằng chứng. Khác CP4/CP7 (→ NA) vì hai tiêu chí đó còn phải chứng minh bài **có** bàn tới chủ đề, còn bài nào cũng có giọng văn để so.
+
+3 test mới, gồm một test khoá đúng ca mà B5 đã sửa (trích dẫn nhiều mảnh ở hai thẻ HTML khác nhau vẫn được chấp nhận) — nếu BV6 dùng phép kiểm riêng thì nó sẽ loại oan đúng kiểu đó.
+
+> ⚠️ **HỆ QUẢ ĐO LƯỜNG — ĐỌC TRƯỚC KHI TRÍCH BẤT KỲ σ BRAND NÀO.**
+> Sửa này **đổi điểm Brand Voice** trên các bài đã đo. Mọi số σ Brand trong tài liệu (`0.00`, `1.27`, và bảng ở mục A1) đo trên code **trước** B7 và **không còn áp dụng cho code hiện tại**. E1 chưa chạy lại — chưa chạy thì không được trình bày số cũ như số của hệ thống đang chạy.
+>
+> Hướng dao động cũng **chưa biết trước**: siết trích dẫn đẩy một số lượt BV6 từ mức 0/1 lên mức 2, nên nó vừa có thể làm σ giảm (bớt lật mức) vừa có thể làm σ tăng (mức lật ở tập bài khác). Đúng bài học B5: đừng đoán, đo.
+
+### B7 — bằng chứng của vấn đề gốc (giữ để tra cứu)
 
 **Bằng chứng:** `brand_voice.py:301-304`
 
@@ -252,9 +269,7 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 **Vì sao đáng sửa:** BV6 là tiêu chí LLM **duy nhất** của Brand Voice (6/7 tiêu chí kia là regex), nên nó là toàn bộ bề mặt bịa lỗi của agent này. Và `rubrics.md` mục 2.5 đặt quy tắc trích dẫn cho **mọi** tiêu chí, không riêng Compliance.
 
-**Việc phải làm:** dùng lại `_trich_dan_co_that` (đã xét theo mảnh sau B5) — nhưng phải chuyển nó ra chỗ dùng chung trước, vì hiện nó nằm trong `agents/compliance.py`. Chỗ hợp lý là `text_utils.py`, đúng lý do file đó tồn tại (dùng chung giữa các phía để hai bên không đo bằng hai cách khác nhau).
-
-**Cảnh báo trước khi làm:** siết BV6 sẽ đổi điểm Brand Voice trên các bài đã đo, nên **phải đo lại σ Brand** sau khi sửa. Đừng trích lẫn số σ Brand cũ với mới.
+**Chỗ đặt đã chọn:** `text_utils.py`, đúng lý do file đó tồn tại — dùng chung giữa các phía để hai bên không đo bằng hai cách khác nhau.
 
 ### B8. Hai cụm blacklist `critical` chưa từng khớp lần nào — ✅ ĐÃ SỬA (2026-08-05)
 
@@ -329,7 +344,7 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 | Mã | Đo gì | Trạng thái |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt** (2026-08-04) — điểm tổng σ = 0,28; 100% giữ nguyên quyết định |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt** (2026-08-04) — điểm tổng σ = 0,28; 100% giữ nguyên quyết định. ⚠️ **Cần chạy lại phần Brand** sau B7 (2026-08-05): số σ Brand hiện có đo trên code cũ |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
@@ -390,14 +405,18 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
                                                 <- xong 2026-08-05, không tốn
                                                    API; B9 làm lộ thêm lỗi
                                                    "thiếu verdict -> mức 2"
+[x] 10. B7  (BV6 kiểm trích dẫn)  <- xong 2026-08-05: tách
+                                     text_utils.trich_dan_co_that dùng chung.
+                                     SINH RA việc mới: E1-Brand phải đo lại
+[x] 11. B6  (graph.py truyền content_type/langcode)  <- xong 2026-08-05, gộp
+                                                       về _khoa_cua(), có test
 ---- chờ mentor ----
-   10. A3  (gán nhãn gold set)
-   11. E3, E5, E6
+   12. A3  (gán nhãn gold set)
+   13. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
-   12. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
-   13. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
-   14. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
-   15. Polling worker, nhật ký truy vết
+   14. Đo lại E1-Brand sau B7  <- tốn API, chưa chạy
+   15. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
+   16. Polling worker, nhật ký truy vết
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.
