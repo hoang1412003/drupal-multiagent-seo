@@ -28,7 +28,7 @@ from ai_core import call_agent
 from agents import fact_check
 from prompt_builder import boc_noi_dung, boc_phan_an, chu_trong_doan_an
 from scoring import score_from_criteria, severity_for
-from text_utils import strip_html
+from text_utils import strip_html, trich_dan_co_that
 
 _RULES_PATH = os.path.join(os.path.dirname(__file__), "compliance_rules.json")
 
@@ -290,63 +290,6 @@ _LLM_SCHEMA = {
 }
 
 
-def _chuan_hoa(s: str) -> str:
-    return re.sub(r"\s+", " ", s or "").strip().lower()
-
-
-# Ranh giới giữa các MẢNH của một đoạn trích. Ba dạng đo được trên dữ liệu
-# thật (docs/evidence/cp_lat_muc_raw.json), không phải phòng xa:
-#   " và "   LLM nối hai trích dẫn:  "...285km..." và "Hành trình dài hơn..."
-#   ;        cùng mục đích, dấu khác
-#   ". "     hai câu nằm ở HAI THẺ HTML khác nhau - strip_html chèn ".\n" vào
-#            giữa nên chúng KHÔNG BAO GIỜ liền mạch được trong text đã bóc
-#
-# `(?<=[.%])\s+` cần lookbehind để không cắt nhầm số thập phân ("1.000 km",
-# "326,4km"): ở đó sau dấu chấm là chữ số chứ không phải khoảng trắng.
-_TACH_MANH = re.compile(r"\s+và\s+|[;\n]|(?<=[.%])\s+")
-
-
-def _trich_dan_co_that(evidence: str, text_theo_field: dict) -> bool:
-    """MỌI mảnh của đoạn trích có nằm nguyên văn trong bài không?
-
-    Không có bước này thì quy tắc "bắt buộc trích dẫn" (rubrics.md mục 2.5)
-    chỉ là lời dặn trong prompt - LLM bịa một câu nghe hợp lý là qua được.
-    E1 đã bắt được đúng kiểu bịa này ở trường `rule` của bản cũ.
-
-    So sánh sau khi bỏ HTML, gộp khoảng trắng và hạ chữ thường - đủ lỏng để
-    không loại nhầm khi LLM chuẩn hoá khoảng trắng, đủ chặt để loại câu bịa.
-
-    VÌ SAO XÉT THEO MẢNH (sửa 2026-08-04). Bản cũ đòi đoạn trích là MỘT chuỗi
-    liền mạch, nhưng LLM trả về bằng chứng THẬT mà không liền mạch. Đo trên
-    20 lượt chấm: 10/20 lượt bị loại oan, và kiểm lại từng đoạn thì **không
-    có lần nào LLM bịa** - ví dụ G-008:
-
-        đoạn trích bị loại : "Trong khoảng 1 giờ ... từ 0 lên tới 10%.
-                              Đây là bộ sạc cho phép người dùng..."
-        khớp nguyên khối   : False
-        mảnh 1 / mảnh 2    : True / True   <- cả hai đều có nguyên văn
-
-    Hậu quả của việc loại oan không dừng ở một tiêu chí: nó đẩy CP4/CP7 về NA,
-    tức rút chúng khỏi MẪU SỐ, mà mẫu số nhỏ đúng là nguyên nhân σ Compliance
-    cao (rubrics.md mục 9.1 - mẫu số 4,6/8 thì một bậc là ±16,7 điểm).
-
-    Vẫn là phép kiểm CHẶT, không phải nới lỏng có tính đầu hàng: **mọi** mảnh
-    đều phải khớp nguyên văn thì mới đạt. Bịa nửa câu vẫn trượt. Và với đoạn
-    trích liền mạch, kết quả không đổi so với bản cũ - một chuỗi đã khớp trọn
-    thì từng mảnh của nó cũng khớp, nên phép kiểm mới chỉ nhận THÊM, không
-    bao giờ loại đi thứ bản cũ đã chấp nhận.
-    """
-    kho = [_chuan_hoa(t) for t in text_theo_field.values()]
-    manh = [
-        _chuan_hoa(m).strip(" \"'“”…-")
-        for m in _TACH_MANH.split(evidence or "")
-    ]
-    manh = [m for m in manh if m]
-    if not manh:
-        return False
-    return all(any(m in t for t in kho) for m in manh)
-
-
 def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
     """Áp quy tắc bằng chứng lên mức LLM vừa chấm.
 
@@ -363,7 +306,7 @@ def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
     if muc is None:
         return None
     if ma == "CP2":
-        return muc if (muc == 2 or _trich_dan_co_that(evidence, text_theo_field)) else 2
+        return muc if (muc == 2 or trich_dan_co_that(evidence, text_theo_field)) else 2
     if ma in _MAY_QUYET_AP_DUNG:
         # Máy mới là bên chốt NA cho các mã này (xem _chot_cp8), nên ở đây
         # chỉ áp quy tắc trích dẫn cho việc HẠ mức, không đẩy về NA.
@@ -380,8 +323,8 @@ def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
         # có số liệu, LLM không chỉ ra được nguồn nào - đó là định nghĩa của
         # mức 0. Khác CP4/CP7 (-> NA) vì với CP8 câu hỏi "bài có bàn tới chủ
         # đề này không" do MÁY chốt, không phụ thuộc LLM trích được hay không.
-        return muc if (muc == 2 or _trich_dan_co_that(evidence, text_theo_field)) else 0
-    return muc if _trich_dan_co_that(evidence, text_theo_field) else None
+        return muc if (muc == 2 or trich_dan_co_that(evidence, text_theo_field)) else 0
+    return muc if trich_dan_co_that(evidence, text_theo_field) else None
 
 
 def _danh_gia_llm(fields: dict, text_theo_field: dict) -> dict:

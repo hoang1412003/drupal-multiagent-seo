@@ -22,6 +22,20 @@ DEFAULT_CONTENT_TYPE = "cam_nang"
 DEFAULT_LANGCODE = "vi"
 
 
+def _khoa_cua(state: ContentReviewState) -> dict:
+    """(content_type, langcode) của state, kèm mặc định.
+
+    MỘT chỗ duy nhất suy ra cặp khoá này, để Aggregator và các agent không thể
+    tra theo hai giá trị khác nhau trong cùng một lần chấm - đó đúng là điều
+    đã xảy ra ở nợ B6: `aggregator_node` đọc từ state, còn hai agent RAG rơi
+    về hằng số trong chữ ký hàm.
+    """
+    return {
+        "content_type": state.get("content_type") or DEFAULT_CONTENT_TYPE,
+        "langcode": state.get("langcode") or DEFAULT_LANGCODE,
+    }
+
+
 def _config_cua(state: ContentReviewState) -> dict:
     """Lấy khối config theo (content_type, langcode) của state.
 
@@ -29,10 +43,7 @@ def _config_cua(state: ContentReviewState) -> dict:
     config/scoring.yaml để con số chỉ tồn tại ở một chỗ (docs/config-spec.md
     mục 1: cùng tập số này từng nằm ở 4 nơi và đã trôi lệch một lần).
     """
-    khoi = config.load(
-        state.get("content_type") or DEFAULT_CONTENT_TYPE,
-        state.get("langcode") or DEFAULT_LANGCODE,
-    )
+    khoi = config.load(**_khoa_cua(state))
     config.canh_bao_mot_lan(khoi, ai_core.MODEL)
     return khoi
 
@@ -69,7 +80,9 @@ def seo_node(state: ContentReviewState) -> dict:
 
 def brand_node(state: ContentReviewState) -> dict:
     try:
-        result = brand_voice.run(state["fields"])
+        # Truyền khoá xuống: BV6 truy vấn KB brand theo (content_type,
+        # langcode), không được để nó lọc bằng hằng số (nợ B6).
+        result = brand_voice.run(state["fields"], **_khoa_cua(state))
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"brand_result": result}
@@ -77,7 +90,9 @@ def brand_node(state: ContentReviewState) -> dict:
 
 def compliance_node(state: ContentReviewState) -> dict:
     try:
-        result = compliance.run(state["fields"])
+        # Truyền khoá xuống: CP3 truy vấn KB fact-check theo (content_type,
+        # langcode), không được để nó lọc bằng hằng số (nợ B6).
+        result = compliance.run(state["fields"], **_khoa_cua(state))
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"compliance_result": result}

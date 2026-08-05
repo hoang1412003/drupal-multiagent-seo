@@ -20,7 +20,7 @@ from brand_analysis import classify_title_case, count_model_name_usage, count_va
 from prompt_builder import boc_noi_dung
 from retrieval import COLLECTION_BRAND, retrieve
 from scoring import score_from_criteria
-from text_utils import strip_html
+from text_utils import strip_html, trich_dan_co_that
 
 _RULES_PATH = os.path.join(os.path.dirname(__file__), "brand_rules.json")
 _rules_cache = None
@@ -299,16 +299,24 @@ def _judge_formality(fields: dict, *, content_type: str = "cam_nang",
     kq = call_agent(_BV6_PROMPT, f"{doan_mau}\n\n{khoi}", _BV6_SCHEMA)
 
     level = kq["level"]
-    # rubrics.md mục 2.5 đòi trích dẫn NGUYÊN VĂN, nhưng chỗ này mới chỉ kiểm
-    # chuỗi KHÁC RỖNG - tức LLM trả về bất kỳ ký tự nào cũng qua, kể cả một
-    # câu bịa hoàn toàn. Đừng đọc nhầm nó thành cơ chế chống bịa đầy đủ.
+    # rubrics.md mục 2.5: hạ mức mà không trích được NGUYÊN VĂN thì không được
+    # hạ. Dùng chung `text_utils.trich_dan_co_that` với Compliance - bản cũ ở
+    # đây chỉ kiểm chuỗi KHÁC RỖNG, tức LLM trả bất kỳ ký tự nào cũng qua, kể
+    # cả một câu bịa hoàn toàn (nợ B7).
     #
-    # Phép kiểm thật là compliance._trich_dan_co_that() (so nguyên văn, xét
-    # theo mảnh). Dùng lại được ở đây, nhưng phải chuyển nó ra chỗ dùng chung
-    # trước - nợ B7 trong docs/technical-debt.md. BV6 là tiêu chí LLM DUY NHẤT
-    # của agent này (6/7 tiêu chí kia là regex), nên nó là toàn bộ bề mặt bịa
-    # lỗi của Brand Voice.
-    if level in (0, 1) and not kq["evidence"].strip():
+    # Đáng làm vì BV6 là tiêu chí LLM DUY NHẤT của agent này (6/7 tiêu chí kia
+    # là regex), nên nó là toàn bộ bề mặt bịa lỗi của Brand Voice.
+    #
+    # Không trích được -> mức 2, cùng hướng với CP2: mức 2 của BV6 nghĩa là
+    # "không thấy lệch chuẩn", nên đó là kết luận đúng khi không có bằng chứng.
+    # (Khác CP4/CP7 -> NA, vì hai tiêu chí đó còn phải chứng minh bài CÓ bàn
+    # tới chủ đề; BV6 thì bài nào cũng có giọng văn để so.)
+    #
+    # `text_theo_field` dựng tại chỗ chứ không nhận từ run(): judge_bv6 là
+    # interface tiêm được từ ngoài, thêm tham số bắt buộc sẽ ràng mọi bản cài
+    # đặt khác vào trạng thái nội bộ của run().
+    text_theo_field = {f: strip_html(fields.get(f) or "") for f in _FIELDS}
+    if level in (0, 1) and not trich_dan_co_that(kq["evidence"], text_theo_field):
         level = 2
     if level == 2:
         return _tieu_chi("BV6", 2)

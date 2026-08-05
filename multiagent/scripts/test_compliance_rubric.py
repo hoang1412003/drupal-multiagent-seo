@@ -13,6 +13,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+import text_utils
 from agents import compliance
 from scoring import score_from_criteria, severity_for
 from text_utils import strip_html
@@ -226,7 +227,7 @@ def test_trich_dan_ghep_hai_cau_khac_khoi_van_duoc_chap_nhan():
     """Loi that: 10/20 luot bi loai oan vi doi trich dan phai LIEN MACH.
     Kiem lai tung manh thi ca hai deu co nguyen van trong bai."""
     ev = "Sạc được từ 0 lên 10% mỗi giờ. Đây là bộ sạc chậm."
-    assert compliance._trich_dan_co_that(ev, _TT_HAI_KHOI), \
+    assert text_utils.trich_dan_co_that(ev, _TT_HAI_KHOI), \
         "hai cau that o hai khoi HTML phai duoc chap nhan"
     print("[PASS] trich dan ghep 2 cau khac khoi HTML -> chap nhan")
 
@@ -234,7 +235,7 @@ def test_trich_dan_ghep_hai_cau_khac_khoi_van_duoc_chap_nhan():
 def test_trich_dan_noi_bang_va_van_duoc_chap_nhan():
     """Dang thu hai do duoc: LLM noi hai trich dan bang ' va ' (G-001)."""
     ev = '"Sạc được từ 0 lên 10% mỗi giờ" và "Đây là bộ sạc chậm"'
-    assert compliance._trich_dan_co_that(ev, _TT_HAI_KHOI)
+    assert text_utils.trich_dan_co_that(ev, _TT_HAI_KHOI)
     print("[PASS] trich dan noi bang ' va ' -> chap nhan")
 
 
@@ -242,7 +243,7 @@ def test_mot_manh_bia_thi_ca_doan_trich_bi_loai():
     """Doi trong: noi long theo manh KHONG duoc bien thanh cho qua. MOI manh
     phai khop, bia nua cau van truot."""
     ev = "Sạc được từ 0 lên 10% mỗi giờ. Xe này tốt nhất thị trường."
-    assert not compliance._trich_dan_co_that(ev, _TT_HAI_KHOI), \
+    assert not text_utils.trich_dan_co_that(ev, _TT_HAI_KHOI), \
         "mot manh bia -> phai loai ca doan trich"
     print("[PASS] mot manh bia -> loai ca doan trich")
 
@@ -252,7 +253,7 @@ def test_so_thap_phan_khong_bi_cat_thanh_hai_manh():
     - lookbehind trong _TACH_MANH phai giu nguyen no lam mot manh."""
     tt = {"title": "", "body": "Hành trình dài hơn 1.000 km từ Hà Nội.",
           "meta_description": ""}
-    assert compliance._trich_dan_co_that("dài hơn 1.000 km", tt)
+    assert text_utils.trich_dan_co_that("dài hơn 1.000 km", tt)
     print("[PASS] so thap phan khong bi cat thanh hai manh")
 
 

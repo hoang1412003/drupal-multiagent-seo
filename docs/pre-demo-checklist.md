@@ -113,7 +113,7 @@ cd multiagent
 for f in scripts/test_*.py; do .venv/Scripts/python.exe "$f" > /dev/null || echo "FAIL $f"; done
 ```
 
-27/27 bộ tính đến 2026-08-05. Test không cần API key, không cần Drupal, không
+28/28 bộ tính đến 2026-08-05. Test không cần API key, không cần Drupal, không
 cần KB — chạy được ở bất cứ đâu, mất vài giây.
 
 Riêng test hợp đồng phía PHP chạy trong container:
@@ -138,6 +138,13 @@ chạy lại để lấy số cho báo cáo**:
 | `docs/evidence/e1_rubric_v2_report.txt` | báo cáo + 2 bảng so sánh |
 | `docs/evidence/cp_phan_bo_muc.txt` | phân bố mức từng tiêu chí Compliance |
 | `docs/goldset/label_helper_report.txt` | mã lỗi máy kết luận được, 33 mẫu |
+
+⚠️ **Ngoại lệ từ 2026-08-05 — phần Brand Voice của ba file E1 đo trên code cũ.**
+Nợ B7 (BV6 siết kiểm trích dẫn nguyên văn) **đổi cách chấm Brand Voice**, nên σ
+Brand và điểm Brand trong các file trên không còn là số của hệ thống đang chạy.
+Khi demo: hoặc chạy lại E1 rồi dùng số mới, hoặc nói rõ "số này đo trước khi
+siết BV6". Ba agent còn lại không bị ảnh hưởng. Chi tiết: `technical-debt.md`
+mục B7.
 
 In lại báo cáo mà không gọi LLM:
 

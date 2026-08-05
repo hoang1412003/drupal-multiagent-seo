@@ -41,6 +41,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(__file__))
 
 import ai_core
+import text_utils
 from agents import compliance
 from eval_stability import GIA_INPUT, GIA_OUTPUT
 from label_helper import parse_sample
@@ -80,7 +81,7 @@ def gan_theo_doi() -> None:
                     "ma": ma,
                     "muc_llm": muc,
                     "muc_sau": sau,
-                    "trich_dan_khop": compliance._trich_dan_co_that(
+                    "trich_dan_khop": text_utils.trich_dan_co_that(
                         evidence, text_theo_field
                     ),
                     # 300 chứ không phải 120: cắt ngắn làm mảnh cuối đứt giữa
