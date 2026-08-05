@@ -1,6 +1,6 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04)
+**Phiên bản:** v1 (2026-08-04, cập nhật 2026-08-05: thêm B8)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
@@ -256,6 +256,29 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 **Cảnh báo trước khi làm:** siết BV6 sẽ đổi điểm Brand Voice trên các bài đã đo, nên **phải đo lại σ Brand** sau khi sửa. Đừng trích lẫn số σ Brand cũ với mới.
 
+### B8. Hai cụm blacklist `critical` chưa từng khớp lần nào — ✅ ĐÃ SỬA (2026-08-05)
+
+**Bằng chứng (chạy được, không phải suy luận):** `match_blacklist()` ghép pattern `\b + re.escape(cụm) + \b` cho **mọi** cụm. `\b` là ranh giới giữa ký tự chữ/số và ký tự không phải chữ/số, nên `\b` đặt sau `%` đòi hỏi ngay sau đó phải có chữ/số — mà trong văn bản thật, sau `%` luôn là dấu cách hoặc dấu câu.
+
+```
+'hiệu quả 100%'  -> False      <- không bắt được
+'cam kết 100%'   -> False      <- không bắt được
+'số 1'           -> True
+'tốt nhất'       -> True
+```
+
+**Ảnh hưởng: 2/19 cụm cấm chết, cả hai đều `severity: critical`.** Nghĩa là một bài quảng cáo "cam kết 100%" đi qua CP1 sạch sẽ, không sinh flag, không kích hoạt veto.
+
+**Vì sao là nợ thật chứ không phải sai sót nhỏ:**
+
+- Blacklist là **cách đo duy nhất của CP1**, không còn nguồn flag song song nào bù lại sau khi A1-compliance gộp về một bộ `criteria`.
+- Nó là phần **vẫn chạy khi LLM bị lừa hoàn toàn** (`prompt-injection.md` mục 4c). "Miễn nhiễm với injection" **không có nghĩa là đúng** — đây là lần thứ hai đúng lớp phòng vệ đó bị mù vì lỗi của chính nó, sau B2 (`strip_html` xoá luôn chữ trong bình luận HTML).
+- **Test cũ không phủ.** 8 case trong `test_compliance_rules.py` đều dùng cụm kết thúc bằng chữ, nên bộ test xanh suốt trong khi hai cụm chết.
+
+**Đã sửa:** thêm `_mau_khop()` — chỉ đặt `\b` ở đầu/cuối khi ký tự ở đó là chữ/số. Không nới lỏng thành so khớp chuỗi con thô: `"số 1"` vẫn không khớp `"số 10"` (có test khoá cả hai chiều, 5 case mới).
+
+**Bài học, cùng họ với B4:** con số/ký tự đặc biệt trong **dữ liệu cấu hình** cũng là hằng số như hằng số trong code, chỉ khác ở chỗ lỗi không nằm ở giá trị mà ở **giả định của đoạn code đọc nó** — ở đây là giả định ngầm "mọi cụm cấm đều bắt đầu và kết thúc bằng chữ". Cách chặn tái diễn là test phủ đúng **hình dạng** khác thường của dữ liệu, không phải đọc lại danh sách bằng mắt.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -328,14 +351,18 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 [x] 7. Con số chi phí ở evaluation-plan.md mục 4.4  <- xong 2026-08-04; tìm
                                                       thêm 1 sai số thứ hai
                                                       (dải lấy TB làm cận trên)
+[x] 8. B8  (2 cụm blacklist critical chết vì \b)   <- xong 2026-08-05, không
+                                                      tốn API; test cũ xanh
+                                                      suốt vì không phủ hình
+                                                      dạng cụm kết thúc bằng '%'
 ---- chờ mentor ----
-    8. A3  (gán nhãn gold set)
-    9. E3, E5, E6
+    9. A3  (gán nhãn gold set)
+   10. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
-   10. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
-   11. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
-   12. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
-   13. Polling worker, nhật ký truy vết
+   11. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
+   12. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
+   13. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
+   14. Polling worker, nhật ký truy vết
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.

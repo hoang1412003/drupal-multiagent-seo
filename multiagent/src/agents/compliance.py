@@ -68,6 +68,28 @@ def _load_rules() -> list[dict]:
     return _rules_cache
 
 
+_KY_TU_TU = re.compile(r"\w", re.UNICODE)
+
+
+def _mau_khop(cum: str) -> str:
+    """Regex cho một cụm cấm: chỉ đặt \\b ở đầu/cuối khi ký tự ở đó là chữ/số.
+
+    Đặt \\b vô điều kiện là SAI và đã làm chết hai cụm. \\b là ranh giới giữa
+    ký tự chữ/số và ký tự không phải chữ/số, nên \\b sau '%' đòi ngay sau đó
+    phải có chữ/số - mà sau '%' thực tế luôn là dấu cách hoặc dấu câu. Hệ quả
+    đo được: "cam kết 100%" và "hiệu quả 100%", cả hai đều severity
+    `critical`, chưa từng khớp lần nào.
+
+    Đây là chỗ nguy hiểm để mù, vì blacklist là cách đo DUY NHẤT của CP1 và
+    là thứ vẫn chạy khi LLM bị lừa hoàn toàn (docs/prompt-injection.md mục
+    4c). Nhưng "miễn nhiễm với injection" không có nghĩa là "đúng" - lỗi ở
+    đây tự nó làm hỏng lớp phòng vệ đó, cùng bài học với nợ B2.
+    """
+    truoc = r"\b" if _KY_TU_TU.match(cum[0]) else ""
+    sau = r"\b" if _KY_TU_TU.match(cum[-1]) else ""
+    return truoc + re.escape(cum) + sau
+
+
 def match_blacklist(text: str) -> list[dict]:
     """So khớp cứng (không phân biệt hoa/thường) với danh sách từ cấm.
 
@@ -79,11 +101,12 @@ def match_blacklist(text: str) -> list[dict]:
     (không đếm các lần lặp lại).
 
     Dùng \\b (word boundary) thay vì so khớp chuỗi con thô, để tránh khớp
-    nhầm vào số dài hơn (VD cụm "số 1" khớp nhầm vào "số 10", "số 100").
+    nhầm vào số dài hơn (VD cụm "số 1" khớp nhầm vào "số 10", "số 100") -
+    nhưng chỉ ở đầu/cuối là chữ/số, xem `_mau_khop`.
     """
     flags = []
     for rule in _load_rules():
-        pattern = r"\b" + re.escape(rule["text"]) + r"\b"
+        pattern = _mau_khop(rule["text"])
         match = re.search(pattern, text, re.IGNORECASE)
         if not match:
             continue
