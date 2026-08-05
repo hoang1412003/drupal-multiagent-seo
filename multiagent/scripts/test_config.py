@@ -90,6 +90,29 @@ def test_khoi_default_va_khoa_that_giong_nhau():
     print("[PASS] khoi cam_nang:vi giong het default (chua calibrate)")
 
 
+def test_cache_khong_lan_giua_hai_file():
+    """`load(path=...)` phai doc dung file duoc chi.
+
+    Ban cu cache vao mot bien global va BO QUA tham so `path`, nen lan goi thu
+    hai voi file khac van tra noi dung file da nap truoc do - tham so hua mot
+    dang, ham lam mot neo. Chua gay loi that vi production chi co mot file,
+    nhung day dung la loai bay im lang ma du an von phong."""
+    import tempfile
+
+    thu_muc = tempfile.mkdtemp()
+    khac = os.path.join(thu_muc, "scoring_khac.yaml")
+    with open(khac, "w", encoding="utf-8") as f:
+        f.write("default:\n  weights:\n    compliance: 0.99\n")
+
+    config.load()                      # lam am cache bang file that
+    c = config.load(path=khac)
+    assert c["weights"]["compliance"] == 0.99, c["weights"]
+
+    # va chieu nguoc lai: file that khong bi file tam de len
+    assert config.load()["weights"]["compliance"] == 0.30
+    print("[PASS] cache tach theo duong dan, khong lan giua hai file")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -102,6 +125,7 @@ if __name__ == "__main__":
         test_canh_bao_khi_model_lech,
         test_khong_canh_bao_khi_moi_thu_khop,
         test_khoi_default_va_khoa_that_giong_nhau,
+        test_cache_khong_lan_giua_hai_file,
     ):
         try:
             fn()

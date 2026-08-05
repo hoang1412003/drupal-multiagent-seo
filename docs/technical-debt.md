@@ -1,6 +1,6 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04)
+**Phiên bản:** v1 (2026-08-04, cập nhật 2026-08-05: thêm B8–B11)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
@@ -64,7 +64,7 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **σ = 4,18 đã loại trừ được một nghi phạm (2026-08-04):** B5 không phải nguyên nhân — sửa xong σ trên 4 bài xấu nhất chỉ đi từ 7,70 xuống 7,29 (mục B5, có số đo trước/sau). Nguồn dao động còn lại nằm ở CP2/CP4/CP7/CP8, bốn tiêu chí LLM chấm, đúng như hướng đã ghi ở trên.
 
-`content_quality` và `seo`: **vẫn để LLM tự cho điểm** — có chủ ý, xem lại số σ ở bảng trên.
+`content_quality` và `seo`: **vẫn để LLM tự cho điểm** — có chủ ý, xem lại số σ ở bảng trên. *(Từ 2026-08-05 điểm hai agent này bị chặn trong dải 0-100 khi nhận — mục B10. Đó là kiểm giá trị vô lý, **không** phải rubric: nó không làm điểm tái lập được, nên không thay thế được gì của A1.)*
 
 ### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body` — ✅ ĐÃ SỬA (2026-08-04)
 
@@ -256,13 +256,67 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 **Cảnh báo trước khi làm:** siết BV6 sẽ đổi điểm Brand Voice trên các bài đã đo, nên **phải đo lại σ Brand** sau khi sửa. Đừng trích lẫn số σ Brand cũ với mới.
 
+### B8. Hai cụm blacklist `critical` chưa từng khớp lần nào — ✅ ĐÃ SỬA (2026-08-05)
+
+**Bằng chứng (chạy được, không phải suy luận):** `match_blacklist()` ghép pattern `\b + re.escape(cụm) + \b` cho **mọi** cụm. `\b` là ranh giới giữa ký tự chữ/số và ký tự không phải chữ/số, nên `\b` đặt sau `%` đòi hỏi ngay sau đó phải có chữ/số — mà trong văn bản thật, sau `%` luôn là dấu cách hoặc dấu câu.
+
+```
+'hiệu quả 100%'  -> False      <- không bắt được
+'cam kết 100%'   -> False      <- không bắt được
+'số 1'           -> True
+'tốt nhất'       -> True
+```
+
+**Ảnh hưởng: 2/19 cụm cấm chết, cả hai đều `severity: critical`.** Nghĩa là một bài quảng cáo "cam kết 100%" đi qua CP1 sạch sẽ, không sinh flag, không kích hoạt veto.
+
+**Vì sao là nợ thật chứ không phải sai sót nhỏ:**
+
+- Blacklist là **cách đo duy nhất của CP1**, không còn nguồn flag song song nào bù lại sau khi A1-compliance gộp về một bộ `criteria`.
+- Nó là phần **vẫn chạy khi LLM bị lừa hoàn toàn** (`prompt-injection.md` mục 4c). "Miễn nhiễm với injection" **không có nghĩa là đúng** — đây là lần thứ hai đúng lớp phòng vệ đó bị mù vì lỗi của chính nó, sau B2 (`strip_html` xoá luôn chữ trong bình luận HTML).
+- **Test cũ không phủ.** 8 case trong `test_compliance_rules.py` đều dùng cụm kết thúc bằng chữ, nên bộ test xanh suốt trong khi hai cụm chết.
+
+**Đã sửa:** thêm `_mau_khop()` — chỉ đặt `\b` ở đầu/cuối khi ký tự ở đó là chữ/số. Không nới lỏng thành so khớp chuỗi con thô: `"số 1"` vẫn không khớp `"số 10"` (có test khoá cả hai chiều, 5 case mới).
+
+**Bài học, cùng họ với B4:** con số/ký tự đặc biệt trong **dữ liệu cấu hình** cũng là hằng số như hằng số trong code, chỉ khác ở chỗ lỗi không nằm ở giá trị mà ở **giả định của đoạn code đọc nó** — ở đây là giả định ngầm "mọi cụm cấm đều bắt đầu và kết thúc bằng chữ". Cách chặn tái diễn là test phủ đúng **hình dạng** khác thường của dữ liệu, không phải đọc lại danh sách bằng mắt.
+
+### B9. CP3 tin `index` do LLM tự điền — ✅ ĐÃ SỬA (2026-08-05)
+
+**Bằng chứng:** `fact_check.danh_gia()` tra ngược `pairs[v["index"]][0]` với `index` là số LLM tự sinh trong `_COMPARE_SCHEMA`. Chạy thử với `index = 7` trên một pair: `IndexError: list index out of range`.
+
+**Vì sao nguy hiểm hơn một exception bình thường:** lỗi đó không nổ ra ngoài. `compliance._cp3_so_lieu()` bọc `try/except` để KB chưa dựng không làm sập agent, nên nó **nuốt luôn** IndexError và **CP3 âm thầm thành NA** — mất hẳn tiêu chí fact-check, trên đúng đường CP3 → `critical` → veto, mà không có dấu hiệu gì. Đây là mặt trái của một quyết định đúng: `try/except` bảo vệ đường hạ tầng lại che luôn lỗi logic.
+
+**Lỗi thứ hai tìm ra khi viết test:** LLM trả **thiếu** verdict cho một pair thì bản cũ bỏ qua pair đó, nên bài chỉ còn toàn `match` → **mức 2** ("mọi claim đều khớp") trong khi có claim chưa hề được đối chiếu. Cùng họ *điểm miễn phí* với B5.
+
+**Đã sửa:** gom verdict theo **vị trí** (`verdicts_hop_le()` lọc index ngoài biên, chấm trùng giữ lần đầu — cùng quy ước với `compliance._danh_gia_llm`), rồi duyệt `pairs`; pair không có verdict hợp lệ → *chưa kết luận* → mức 1. 3 test mới.
+
+### B10. `score` của Content Quality/SEO không có chặn biên — ✅ ĐÃ SỬA (2026-08-05)
+
+**Bằng chứng:** output schema của hai agent chỉ ghi `"score": {"type": "integer"}`. Hai điều kiện cộng lại làm chỗ này hở:
+
+1. **Không chỗ nào nói cho LLM biết thang điểm là gì.** Cả `content_quality.SYSTEM_PROMPT` lẫn `seo.SYSTEM_PROMPT` đều không nhắc "0-100" — LLM chỉ suy ra từ tên trường `score`.
+2. **Structured outputs không chặn hộ.** `minimum`/`maximum` nằm trong nhóm ràng buộc JSON Schema mà Anthropic **không hỗ trợ** (kiểu `integer` thì có hiệu lực). Nên thêm hai khoá đó vào schema là để cho có — kiểm tra trước khi tin là bước bắt buộc, không phải chi tiết.
+
+Điểm ngoài dải đi thẳng vào trung bình có trọng số của Aggregator và vỡ thang điểm của cả hệ thống.
+
+**Đã sửa:** `scoring.kiem_diem_llm()`, gọi ngay khi nhận ở cả hai agent (`architecture.md` mục 7 "validate ngay khi nhận"). **Ném ValueError chứ không kẹp về biên**: `graph.py` bắt exception → agent lỗi → Aggregator chia lại trọng số và ghi `note`, nên người duyệt thấy "điểm chưa đầy đủ". Kẹp biên là sửa lặng lẽ một con số bất thường.
+
+**Không sửa cái này thay cho A1.** Nó chỉ chặn giá trị vô lý, không làm điểm tái lập được — A1 vẫn nguyên như bảng σ ở trên.
+
+### B11. Cache toàn cục bỏ qua tham số đường dẫn — ✅ ĐÃ SỬA (2026-08-05)
+
+**Bằng chứng:** `config._nap_file()` cache vào một biến duy nhất và bỏ qua tham số `path`; `retrieval._get_collection()` giữ một `PersistentClient` và bỏ qua `chroma_path`. Lần gọi thứ hai với đường dẫn khác vẫn trả dữ liệu cũ — tham số hứa một đằng, hàm làm một nẻo.
+
+**Ảnh hưởng lên kết quả hiện tại: KHÔNG có** — production chỉ có một `scoring.yaml` và một thư mục Chroma, còn test `retrieve()` thì tiêm `collection=` nên không đi qua chỗ hỏng. Ghi vào nhóm B chứ không phải C vì nó cùng loại **bẫy im lặng** với B6: không sai gì cho tới lúc có khoá/KB thứ hai, và lúc đó hiện ra ở dạng khó chẩn đoán nhất — đọc đúng file, ra sai nội dung.
+
+**Đã sửa:** cả hai cache khoá theo đường dẫn. 2 test mới, mỗi test kiểm cả hai chiều (file mới đọc đúng, file cũ không bị đè).
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
 
 | Hạng mục | Ghi ở đâu | Ghi chú |
 |---|---|---|
-| Polling worker + Content Moderation "Needs Review" | `architecture.md` mục 9 | Sprint 2 còn lại. Không chặn gì |
+| Polling worker + Content Moderation "Needs Review" | `architecture.md` mục 9 | Sprint 2 còn lại. Không chặn gì. **Lưu ý khi làm:** `ai_core.USAGE_LOG` là list ở mức module, cố ý không tự xoá (E4 cộng cả list để tính chi phí). Script chạy một lần thì vô hại; worker chạy nền vô hạn thì nó phình mãi — worker phải **tự reset sau mỗi bài**, đừng chặn cứng kích thước list vì làm thế là phá phép đo E4 |
 | Nhật ký truy vết JSONL | `operations.md` mục 2 | Đã **hạ ưu tiên** 2026-08-03 sau khi phát hiện Drupal giữ revision — 3 field AI không mất, chỉ mất bối cảnh chấm |
 | Vòng phản hồi người duyệt | `operations.md` mục 3 | Cần nhật ký truy vết xong trước mới khớp được `(node_id, scored_at)` |
 | ~~KB fact-check chưa verify số thật~~ | `sources.md` mục 2.1 | ✅ **xong 2026-08-04** — 4/4 entry `verified: true`. Tìm ra 3 chỗ sai, trong đó `sources.md` nói **ngược** sự thật về chuẩn đo. Còn một rủi ro không khử được: VinFast công bố **ba** con số khác nhau cho VF 5 Plus |
@@ -328,14 +382,22 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 [x] 7. Con số chi phí ở evaluation-plan.md mục 4.4  <- xong 2026-08-04; tìm
                                                       thêm 1 sai số thứ hai
                                                       (dải lấy TB làm cận trên)
+[x] 8. B8  (2 cụm blacklist critical chết vì \b)   <- xong 2026-08-05, không
+                                                      tốn API; test cũ xanh
+                                                      suốt vì không phủ hình
+                                                      dạng cụm kết thúc bằng '%'
+[x] 9. B9 + B10 + B11  (index CP3, chặn biên score, cache theo path)
+                                                <- xong 2026-08-05, không tốn
+                                                   API; B9 làm lộ thêm lỗi
+                                                   "thiếu verdict -> mức 2"
 ---- chờ mentor ----
-    8. A3  (gán nhãn gold set)
-    9. E3, E5, E6
+   10. A3  (gán nhãn gold set)
+   11. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
-   10. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
-   11. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
-   12. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
-   13. Polling worker, nhật ký truy vết
+   12. B7  (BV6 không kiểm trích dẫn)  <- tách _trich_dan_co_that ra dùng chung
+   13. B6  (graph.py truyền content_type/langcode)  <- 2 dòng, không đổi hành vi
+   14. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
+   15. Polling worker, nhật ký truy vết
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.

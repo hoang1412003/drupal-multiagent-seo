@@ -19,7 +19,10 @@ _CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", "scoring.yaml"
 )
 
-_cache = None
+# Cache khoá theo ĐƯỜNG DẪN. Bản cũ dùng một biến duy nhất và bỏ qua tham số
+# `path`, nên lần gọi thứ hai với file khác vẫn trả nội dung file đã nạp trước
+# - tham số hứa một đằng, hàm làm một nẻo.
+_cache: dict = {}
 
 # Cảnh báo đã in rồi thì không in lại - pipeline gọi load() nhiều lần trong
 # một lần chấm, in mỗi lần sẽ thành nhiễu và người ta bắt đầu phớt lờ.
@@ -27,11 +30,10 @@ _da_canh_bao: set = set()
 
 
 def _nap_file(path: str) -> dict:
-    global _cache
-    if _cache is None:
+    if path not in _cache:
         with open(path, encoding="utf-8") as f:
-            _cache = yaml.safe_load(f)
-    return _cache
+            _cache[path] = yaml.safe_load(f)
+    return _cache[path]
 
 
 def load(content_type: str = "cam_nang", langcode: str = "vi",

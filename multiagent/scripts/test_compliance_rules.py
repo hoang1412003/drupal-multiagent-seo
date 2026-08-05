@@ -20,6 +20,15 @@ CASES = [
     ("Đây là mẫu số 10 trong catalogue", 0),
     ("VF9 đi xa nhất phân khúc, sạc nhanh nhất Việt Nam", 2),
     ("VF5 có quãng đường 326km theo chuẩn NEDC", 0),
+    # Cụm KẾT THÚC bằng ký tự không phải chữ/số ('%'). \b sau '%' đòi ngay sau
+    # đó phải là chữ/số, mà thực tế sau '%' luôn là dấu cách hoặc dấu câu -
+    # nên hai cụm này chưa từng bị bắt lần nào dù đều là severity critical.
+    ("VinFast cam kết 100% chất lượng cho mọi xe", 1),
+    ("Sản phẩm đạt hiệu quả 100%.", 1),
+    ("Chính sách bảo hành cam kết 100%", 1),
+    # Chiều ngược lại: không được nới lỏng thành so khớp chuỗi con thô.
+    ("Đây là mẫu số 10 trong catalogue", 0),
+    ("Pin còn 100% dung lượng sau 1000 chu kỳ", 0),
 ]
 
 if __name__ == "__main__":

@@ -116,6 +116,14 @@ def _compare(pairs: list) -> list[dict]:
     return call_agent(_COMPARE_PROMPT, "\n\n".join(lines), _COMPARE_SCHEMA)["verdicts"]
 
 
+def verdicts_hop_le(verdicts, so_pair: int):
+    """Lọc verdict có `index` là số nguyên nằm trong biên của `pairs`."""
+    return [
+        v for v in verdicts
+        if isinstance(v.get("index"), int) and 0 <= v["index"] < so_pair
+    ]
+
+
 def danh_gia(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
              extract_fn=_extract_claims, compare_fn=_compare, retriever=retrieve,
              embedder=None) -> dict:
@@ -154,13 +162,27 @@ def danh_gia(fields: dict, *, content_type: str = "cam_nang", langcode: str = "v
                       "base - cần người kiểm chứng thủ công.",
         }
 
-    verdicts = compare_fn(pairs)
+    # `index` là số do LLM tự điền, không được tin: nó có thể ngoài biên,
+    # trùng nhau, hoặc thiếu hẳn cho một pair. Vì vậy gom verdict theo VỊ TRÍ
+    # rồi duyệt `pairs`, thay vì tra ngược `pairs[v["index"]]`.
+    #
+    # Bản cũ tra ngược và văng IndexError, nhưng lỗi đó bị `try/except` của
+    # `compliance._cp3_so_lieu` nuốt, nên CP3 âm thầm thành NA - mất hẳn tiêu
+    # chí fact-check mà không có dấu hiệu gì. Chấm trùng thì giữ lần đầu, cùng
+    # quy ước với `compliance._danh_gia_llm`.
+    theo_vi_tri = {}
+    for v in verdicts_hop_le(compare_fn(pairs), len(pairs)):
+        theo_vi_tri.setdefault(v["index"], v.get("verdict"))
+
     lech, chua_ket_luan = [], list(khong_tra_duoc)
-    for v in verdicts:
-        claim = pairs[v["index"]][0]
-        if v.get("verdict") == "mismatch":
+    for i, (claim, _) in enumerate(pairs):
+        verdict = theo_vi_tri.get(i)
+        if verdict == "mismatch":
             lech.append(claim)
-        elif v.get("verdict") != "match":
+        elif verdict != "match":
+            # Gộp cả "unverifiable" LẪN pair không có verdict nào. Bỏ qua pair
+            # thiếu verdict sẽ đẩy bài lên mức 2 ("mọi claim đều khớp") trong
+            # khi có claim chưa hề được đối chiếu.
             chua_ket_luan.append(claim)
 
     if lech:
