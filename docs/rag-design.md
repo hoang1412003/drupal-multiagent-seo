@@ -80,11 +80,36 @@ Guideline hiện vài trang. Thêm `content_type` hoặc ngôn ngữ (`architect
 
 ### 4.2. Vector database
 
-**Chroma.** Nhúng trong process Python, persist ra đĩa, không cần dựng server. Quy mô KB ở đây là **hàng trăm chunk**, không phải hàng triệu - dựng pgvector hay Qdrant lúc này là over-engineering đúng nghĩa, và sẽ bị hỏi tại sao.
+**PostgreSQL + pgvector** (từ 2026-08-05; trước đó là Chroma - xem 4.2a).
 
-Phân vùng bằng metadata filter theo `(content_type, langcode)` - trùng đúng cơ chế config ở `architecture.md` mục 5.6, nên không phát sinh trục cấu hình mới.
+Chạy bằng container riêng của phía Multi-Agent (`multiagent/docker-compose.yml`, image `pgvector/pgvector:pg17`), **tách hẳn** khỏi MariaDB của Drupal.
 
-FAISS cũng đủ nhanh nhưng không có metadata filter tiện dụng, mà phân vùng lại là yêu cầu đã cam kết.
+Phân vùng bằng cột `content_type` và `langcode` trong mệnh đề `WHERE` - trùng đúng cơ chế config ở `architecture.md` mục 5.6, nên không phát sinh trục cấu hình mới.
+
+**Không tạo index vector.** Ở 1.132 chunk, Postgres quét toàn bộ trong vài mili giây, nên `ORDER BY embedding <=> $1` cho **láng giềng gần nhất chính xác**, không phải xấp xỉ như HNSW. Ngưỡng cần xem lại: **~100.000 chunk** - dưới mức đó không có lý do kỹ thuật nào để thêm index.
+
+### 4.2a. Vì sao đổi từ Chroma sang pgvector
+
+Bản trước của mục này viết: *"dựng pgvector hay Qdrant lúc này là over-engineering đúng nghĩa, và sẽ bị hỏi tại sao"*. **Lập luận đó vẫn đúng ở chỗ nó nói** - quy mô KB không đòi hỏi gì hơn Chroma, và tốc độ chưa bao giờ là vấn đề. Thứ thay đổi là **tiền đề**, không phải kết luận về quy mô:
+
+Phía Multi-Agent trở thành **một service riêng**, và service riêng thì phải tự giữ:
+
+- `run_log` - nhật ký mỗi lần chấm (quyết định, điểm từng agent, token, chi phí, model, phiên bản ngưỡng). Đây vừa là thứ `operations.md` mục 2 thiết kế, vừa thay cho `ai_core.USAGE_LOG` (list trong RAM, phình vô hạn khi chạy nền).
+- `review_state` - node nào đã chấm, hash nội dung lúc chấm, để worker không chấm lặp.
+
+Đó là **dữ liệu quan hệ**, và trang quản lý sau này phải lọc/sắp xếp/phân trang trên nó. Chroma và Qdrant đều không làm được việc đó, nên giữ Chroma nghĩa là service sẽ có **hai** kho dữ liệu. Một Postgres phục vụ cả hai vai trò.
+
+Nói rõ để không tự khen quá: **nếu kho này chỉ chứa vector thì Qdrant là lựa chọn tốt hơn pgvector** (có sẵn dashboard duyệt vector bằng chuột). Lý do chọn Postgres không phải "nó lưu vector giỏi nhất", mà là "nó là DB **duy nhất** service cần".
+
+Ba thứ thu được thêm, đều là hệ quả chứ không phải mục tiêu:
+
+1. **Xem được bằng SQL.** Trước đây không có cách nào nhìn vào KB ngoài viết script Python - đó là điều đã khởi đầu cuộc rà soát này.
+2. **Tìm kiếm chính xác** thay vì xấp xỉ (xem 4.2 trên).
+3. **Mở đường hybrid search.** Postgres có `tsvector` trong lõi, nên nâng recall bằng BM25 + vector về sau **không cần thêm hạ tầng**. Chưa làm; ghi lại vì đó là hướng chuẩn khi vector đơn thuần trượt truy vấn nặng từ khoá (liên quan mục 5, con số brand 78,3%).
+
+**Kiểm chứng migration không đổi hành vi (2026-08-05):** nạp lại đúng **1.128 + 4 chunk**; E2 fact-check **recall@1 = recall@3 = 1.00**; E2 brand **78,3% (47/60)** - **trùng khít** con số đo trên Chroma. Chữ ký `retrieve()` và hình dạng kết quả trả về giữ nguyên nên 4 agent không phải sửa một dòng.
+
+FAISS đã loại từ đầu vì không có metadata filter tiện dụng, mà phân vùng lại là yêu cầu đã cam kết.
 
 ### 4.3. Chunking - khác nhau theo KB
 
@@ -176,11 +201,13 @@ Toàn bộ đã triển khai tính đến 2026-08-04.
 
 | File | Thay đổi |
 |---|---|
-| `src/kb/` *(mới)* | Nạp KB: đọc nguồn → Contextual Retrieval → chunk → embed → ghi Chroma. Chạy offline, không nằm trong pipeline chấm. **Đã triển khai:** `build_kb.py` (fact-check) + `build_brand_kb.py` (brand, 1128 chunk từ 16 bài) |
-| `src/retrieval.py` *(mới)* | Truy vấn theo `(content_type, langcode)`, trả top-k kèm điểm similarity; dưới ngưỡng → trả rỗng. **Đã triển khai**, nhận thêm `collection_name` để phục vụ cả 2 KB |
+| `src/kb/` *(mới)* | Nạp KB: đọc nguồn → Contextual Retrieval → chunk → embed → ghi Postgres. Chạy offline, không nằm trong pipeline chấm. **Đã triển khai:** `build_kb.py` (fact-check) + `build_brand_kb.py` (brand, 1128 chunk từ 16 bài) |
+| `src/db.py` *(mới, 2026-08-05)* | Kết nối Postgres (cache theo DSN) + tạo bảng `kb_chunk`. Ghim số chiều vector vào kiểu cột nên đổi model embedding mà quên dựng lại KB thì **Postgres chặn**, không âm thầm trộn hai không gian vector |
+| `src/retrieval.py` *(mới)* | Truy vấn theo `(content_type, langcode)`, trả top-k kèm điểm similarity; dưới ngưỡng → trả rỗng. **Đã triển khai**, nhận thêm `collection_name` để phục vụ cả 2 KB. Đổi nền sang pgvector 2026-08-05, **chữ ký giữ nguyên** |
 | `src/agents/brand_voice.py` *(mới)* | BV1-BV5, BV7 bằng regex; BV6 dùng đoạn truy xuất làm ví dụ đối chiếu; đính đoạn trích làm bằng chứng cho gợi ý sửa. **Đã triển khai (2026-08-03)** |
 | `src/agents/compliance.py`, `src/agents/fact_check.py` | CP3: trích claim định lượng → truy vấn KB → so sánh. Không tìm thấy → mức `1`, không phải `0`. **Đã triển khai (2026-08-04)** qua `fact_check.danh_gia()` trả thẳng mức 0/1/2/NA |
-| `requirements.txt` | `chromadb`, `sentence-transformers`. **Đã triển khai** - dùng BGE-M3 tự host, không gọi API embedding |
+| `requirements.txt` | `psycopg[binary]`, `sentence-transformers`, `PyYAML`. **Đã triển khai** - dùng BGE-M3 tự host, không gọi API embedding. *(`PyYAML` phải khai báo tường minh khi gỡ `chromadb`: trước đó nó chỉ có mặt nhờ chromadb kéo theo, mà `config.load()` — đường đi của mọi lần chấm — lại cần nó.)* |
+| `docker-compose.yml` *(mới, 2026-08-05)* | Container Postgres + pgvector của riêng phía Multi-Agent, cổng `127.0.0.1:5433` |
 | `scripts/` | Test bộ eval retrieval: recall@k trên ~20 cặp. **Đã triển khai:** `eval_retrieval.py` (recall@3 = 1.00) + `eval_brand_retrieval.py` (78,3% vs mốc ngẫu nhiên 21,7%) |
 
 Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức Aggregator, cách ghi ngược Drupal.

@@ -30,8 +30,8 @@ def _run(fields, **kwargs):
     """Goi brand_voice.run() voi mac dinh AN TOAN cho test.
 
     Bat buoc phai co helper nay: tu Task 10, judge_bv6 mac dinh la ham THAT
-    (goi Claude) va retriever mac dinh doc Chroma that. Goi run() tran trong
-    test se ton tien API va phu thuoc KB da dung hay chua.
+    (goi Claude) va retriever mac dinh doc KB that (Postgres + pgvector). Goi
+    run() tran trong test se ton tien API va phu thuoc KB da dung hay chua.
     """
     kwargs.setdefault("rules", RULES)
     kwargs.setdefault("judge_bv6", None)

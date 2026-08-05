@@ -45,28 +45,36 @@ thì lại rơi vào đúng cái bẫy cache ở trên.
 
 ## 2. Dựng lại knowledge base nếu chạy trên máy khác
 
-`multiagent/src/kb/chroma/` **bị `.gitignore` chặn** (dòng 13) — cố ý, vì KB là
-dữ liệu dẫn xuất, dựng lại được từ `specs.json` và `docs/brand/corpus/`. Commit
-file nhị phân 9,3 MB vào git thì mỗi lần nạp lại KB sinh một bản mới trong
-lịch sử.
+Từ 2026-08-05 KB nằm trong **Postgres + pgvector** (container riêng của phía
+Multi-Agent), không còn là thư mục Chroma. KB vẫn là **dữ liệu dẫn xuất**,
+dựng lại được từ `specs.json` và `docs/brand/corpus/` — nên nó không nằm trong
+git, đúng như trước.
 
-**Hệ quả: máy mới clone repo về sẽ KHÔNG có KB.**
+**Hệ quả: máy mới clone repo về sẽ KHÔNG có KB, và còn phải dựng DB trước.**
 
 ```bash
 cd multiagent
-.venv/Scripts/python.exe src/kb/build_kb.py
-.venv/Scripts/python.exe src/kb/build_brand_kb.py
+docker compose up -d                              # dựng Postgres + pgvector
+.venv/Scripts/python.exe src/kb/build_kb.py       # 4 chunk
+.venv/Scripts/python.exe src/kb/build_brand_kb.py # 1128 chunk, mất vài phút
 ```
 
-**Nếu quên:** hệ thống **không sập** — `retrieve()` ném exception, CP3 và BV6
-trả `NA` (không phải 0), pipeline vẫn chạy với các tiêu chí còn lại. Đó là
-nhánh `try/except` trong `_cp3_so_lieu()` và `_bv6_giong_van()`. Nhưng demo mà
-thiếu hai tiêu chí RAG thì mất đúng phần đáng khoe nhất.
+⚠️ Nếu máy đó **chưa tải BGE-M3** thì bước nạp KB cần mạng (~2GB, một lần).
+Máy đã có cache rồi thì thêm `HF_HUB_OFFLINE=1` để khỏi phụ thuộc mạng —
+đã gặp thật: HuggingFace ngắt kết nối giữa chừng làm script chết dù model có sẵn.
 
-**Kiểm nhanh KB có sẵn chưa:**
+**Nếu quên** (dù là quên `docker compose up` hay quên nạp KB): hệ thống **không
+sập** — `retrieve()` ném exception, CP3 và BV6 trả `NA` (không phải 0), pipeline
+vẫn chạy với các tiêu chí còn lại. Đó là nhánh `try/except` trong
+`_cp3_so_lieu()` và `_bv6_giong_van()`. Nhưng demo mà thiếu hai tiêu chí RAG thì
+mất đúng phần đáng khoe nhất — và nó **hỏng lặng lẽ**, không có thông báo nào.
+
+**Kiểm nhanh, theo đúng thứ tự:**
 
 ```bash
-.venv/Scripts/python.exe scripts/eval_retrieval.py     # phải ra recall@3 = 1.00
+cd multiagent
+docker compose ps                                   # container `vf-agent-db` phải chạy
+.venv/Scripts/python.exe scripts/eval_retrieval.py  # phải ra recall@3 = 1.00
 ```
 
 ---

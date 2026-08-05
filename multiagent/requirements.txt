@@ -2,5 +2,14 @@ langgraph>=1.2.5
 anthropic>=0.40.0
 python-dotenv>=1.0.0
 requests>=2.31.0
-chromadb>=0.5.0
 sentence-transformers>=3.0.0
+
+# Kho vector: Postgres + pgvector (thay Chroma tu 2026-08-05). Xem
+# multiagent/docker-compose.yml va src/db.py.
+psycopg[binary]>=3.2.0
+
+# PyYAML phai khai bao TUONG MINH. Truoc day no khong co trong file nay ma
+# src/config.py van chay duoc, vi chromadb keo no theo. Go chromadb ra la
+# config.load() te - ma do la duong di cua MOI lan cham. Dung de phu thuoc an
+# ma khong ai thay, cho toi luc no bien mat.
+PyYAML>=6.0

@@ -20,7 +20,7 @@ class Embedder(Protocol):
 class BGEM3Embedder:
     """BGE-M3 chạy local qua sentence-transformers. Nạp model lần đầu tốn
     vài giây + tải ~2GB (một lần). Vector đã chuẩn hoá (normalize) để dùng
-    cosine trong Chroma."""
+    cosine (toán tử `<=>` của pgvector)."""
 
     def __init__(self, model_name: str = "BAAI/bge-m3"):
         from sentence_transformers import SentenceTransformer

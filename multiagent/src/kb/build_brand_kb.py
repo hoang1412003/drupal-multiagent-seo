@@ -1,33 +1,41 @@
-"""Nạp KB brand: corpus BRAND -> chunk theo đoạn -> embed -> Chroma.
+"""Nap KB brand: corpus BRAND -> chunk theo doan -> embed -> Postgres.
 
-Chạy OFFLINE, KHÔNG nằm trong pipeline chấm (docs/rag-design.md mục 8).
+Chay OFFLINE, KHONG nam trong pipeline cham (docs/rag-design.md muc 8).
 
-Cắt theo ĐOẠN, giữ nguyên câu (docs/rag-design.md mục 4.3) - khác KB
-fact-check vốn cắt theo đơn vị "một model xe". Lý do: KB này dùng làm VÍ DỤ
-GIỌNG VĂN, nên đơn vị tự nhiên là đoạn văn tác giả viết.
+Cat theo DOAN, giu nguyen cau (docs/rag-design.md muc 4.3) - khac KB
+fact-check von cat theo don vi "mot model xe". Ly do: KB nay dung lam VI DU
+GIONG VAN, nen don vi tu nhien la doan van tac gia viet.
 
-Giữ mọi đoạn, không lọc theo độ dài: bước bóc tách đã loại boilerplate
-(menu, CTA, mục lục tự sinh) nên đoạn còn lại đều là chữ tác giả. Đặt ngưỡng
-"đoạn phải dài hơn N câu" lúc này là thêm một số ảo; nếu eval_brand_retrieval
-cho thấy nhiễu thì mới xử lý, khi đó có căn cứ.
+Giu moi doan, khong loc theo do dai: buoc boc tach da loai boilerplate
+(menu, CTA, muc luc tu sinh) nen doan con lai deu la chu tac gia. Dat nguong
+"doan phai dai hon N cau" luc nay la them mot so ao; neu eval_brand_retrieval
+cho thay nhieu thi moi xu ly, khi do co can cu.
 
-Chạy (từ multiagent/):
+Chay (tu multiagent/):
     .venv\\Scripts\\python.exe src\\kb\\build_brand_kb.py
 """
 import csv
 import glob
+import json
 import os
 import re
 import sys
 
-import chromadb
-
 _KB_DIR = os.path.dirname(os.path.abspath(__file__))
 _SRC_DIR = os.path.dirname(_KB_DIR)
 REPO_ROOT = os.path.normpath(os.path.join(_SRC_DIR, "..", ".."))
+
+# Them src/ va scripts/ vao path TRUOC cac import cua du an (`db` o src/,
+# `label_helper` o scripts/). Phai o day chu khong o trong khoi __main__:
+# khoi do chay sau cac import o dau file.
+for _p in (_SRC_DIR, os.path.join(REPO_ROOT, "multiagent", "scripts")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+import db  # noqa: E402  (phai dung sau khoi sua sys.path o tren)
+
 CORPUS_DIR = os.path.join(REPO_ROOT, "docs", "brand", "corpus")
 INDEX_CSV = os.path.join(REPO_ROOT, "docs", "brand", "corpus_index.csv")
-CHROMA_PATH = os.path.join(_KB_DIR, "chroma")
 COLLECTION = "kb_brand"
 
 _KHOI = re.compile(
@@ -35,14 +43,20 @@ _KHOI = re.compile(
     re.DOTALL | re.IGNORECASE,
 )
 
+_SQL_INSERT = (
+    f"INSERT INTO {db.TEN_BANG} "
+    "(collection, chunk_id, document, embedding, content_type, langcode, meta) "
+    "VALUES (%s, %s, %s, %s::vector, %s, %s, %s::jsonb)"
+)
+
 
 def chunk_doc(doc: dict) -> list[str]:
-    """Một đoạn = một chunk, kèm câu ngữ cảnh cố định ở đầu.
+    """Mot doan = mot chunk, kem cau ngu canh co dinh o dau.
 
-    Câu ngữ cảnh dùng prefix TẤT ĐỊNH (không gọi LLM) - giống cách
-    kb/build_kb.py làm cho KB fact-check. Đoạn văn trần đứng một mình khó
-    truy vấn đúng chủ đề; thêm tiêu đề bài thì truy vấn theo chủ đề khớp hẳn
-    lên (Contextual Retrieval bản tất định, docs/rag-design.md mục 4.3).
+    Cau ngu canh dung prefix TAT DINH (khong goi LLM) - giong cach
+    kb/build_kb.py lam cho KB fact-check. Doan van tran dung mot minh kho
+    truy van dung chu de; them tieu de bai thi truy van theo chu de khop han
+    len (Contextual Retrieval ban tat dinh, docs/rag-design.md muc 4.3).
     """
     from text_utils import strip_html
 
@@ -55,7 +69,7 @@ def chunk_doc(doc: dict) -> list[str]:
 
 
 def load_docs() -> list[dict]:
-    """Đọc corpus + gắn topic_group từ corpus_index.csv (nguồn duy nhất)."""
+    """Doc corpus + gan topic_group tu corpus_index.csv (nguon duy nhat)."""
     from label_helper import parse_sample
 
     with open(INDEX_CSV, encoding="utf-8-sig") as f:
@@ -74,43 +88,57 @@ def load_docs() -> list[dict]:
     return docs
 
 
-def build(docs: "list[dict] | None" = None, chroma_path: str = CHROMA_PATH,
-          embedder=None, content_type: str = "cam_nang", langcode: str = "vi") -> int:
-    """Nạp lại KB từ đầu (xoá collection cũ để không lẫn đoạn cũ). Trả số
-    chunk đã nạp."""
-    if embedder is None:
-        from embeddings import get_default_embedder
+def chuan_bi_rows(docs: list[dict], embedder, content_type: str = "cam_nang",
+                  langcode: str = "vi") -> list[tuple]:
+    """docs -> cac dong san de INSERT. Ham THUAN, khong cham DB.
 
-        embedder = get_default_embedder()
-    if docs is None:
-        docs = load_docs()
-
+    Tach ra khoi build() cung ly do voi build_kb.chuan_bi_rows: test dem duoc
+    so chunk ma khong can Postgres.
+    """
     ids, texts, metas = [], [], []
     for doc in docs:
         for i, chunk in enumerate(chunk_doc(doc)):
             ids.append(f"{doc['sample_id']}:{i}")
             texts.append(chunk)
-            metas.append({
-                "sample_id": doc["sample_id"],
-                "topic_group": doc["topic_group"],
-                "content_type": content_type,
-                "langcode": langcode,
-            })
+            metas.append({"sample_id": doc["sample_id"],
+                          "topic_group": doc["topic_group"]})
 
-    client = chromadb.PersistentClient(path=chroma_path)
-    try:
-        client.delete_collection(COLLECTION)
-    except Exception:
-        pass      # chưa có -> bỏ qua
-    col = client.create_collection(COLLECTION, metadata={"hnsw:space": "cosine"})
-    col.add(ids=ids, embeddings=embedder.embed(texts), documents=texts, metadatas=metas)
-    return col.count()
+    vecs = embedder.embed(texts) if texts else []
+    return [
+        (COLLECTION, cid, text, db.vector_literal(vec), content_type, langcode,
+         json.dumps(meta, ensure_ascii=False))
+        for cid, text, vec, meta in zip(ids, texts, vecs, metas)
+    ]
+
+
+def build(docs: "list[dict] | None" = None, conn=None, embedder=None,
+          content_type: str = "cam_nang", langcode: str = "vi") -> int:
+    """Nap lai KB tu dau. Tra so chunk da nap."""
+    if embedder is None:
+        from embeddings import get_default_embedder
+
+        embedder = get_default_embedder()
+    if conn is None:
+        conn = db.get_conn()
+    if docs is None:
+        docs = load_docs()
+
+    rows = chuan_bi_rows(docs, embedder, content_type, langcode)
+    db.dam_bao_bang(conn, embedder.dim)
+
+    # Xoa + chen trong CUNG mot giao dich - xem ly do o build_kb.build().
+    with conn.transaction():
+        with conn.cursor() as cur:
+            cur.execute(f"DELETE FROM {db.TEN_BANG} WHERE collection = %s", (COLLECTION,))
+            cur.executemany(_SQL_INSERT, rows)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT count(*) FROM {db.TEN_BANG} WHERE collection = %s", (COLLECTION,)
+        )
+        return cur.fetchone()[0]
 
 
 if __name__ == "__main__":
-    # Chạy trực tiếp: thêm src/ và scripts/ vào path để import được
-    # text_utils, embeddings và label_helper.
-    sys.path.insert(0, _SRC_DIR)
-    sys.path.insert(0, os.path.join(REPO_ROOT, "multiagent", "scripts"))
     n = build()
-    print(f"Da nap {n} chunk vao KB brand ({CHROMA_PATH})")
+    print(f"Da nap {n} chunk vao KB brand ({db.dsn()})")

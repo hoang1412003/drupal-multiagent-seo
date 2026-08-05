@@ -36,13 +36,15 @@ drupal-multiagent-seo/
 │
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
+│   ├── docker-compose.yml        # Postgres + pgvector (kho vector, tách khỏi Drupal)
 │   ├── .venv/
 │   ├── src/
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
 │   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
 │   │   ├── embeddings.py         # interface Embedder + BGE-M3 self-host (cho cả 2 KB RAG)
-│   │   ├── retrieval.py          # truy vấn KB Chroma theo (content_type, langcode)
+│   │   ├── db.py                 # kết nối Postgres + pgvector, tạo bảng kb_chunk
+│   │   ├── retrieval.py          # truy vấn KB theo (content_type, langcode)
 │   │   ├── scoring.py            # quy mức rubric 0/1/2/NA ra điểm 0-100 (tất định)
 │   │   ├── brand_analysis.py     # đếm đặc trưng brand + kiểm định nhị thức (dùng chung)
 │   │   ├── text_utils.py         # strip_html dùng chung script offline và agent runtime
@@ -87,7 +89,14 @@ cd multiagent
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL
+
+docker compose up -d                                # Postgres + pgvector (kho vector)
+.venv\Scripts\python.exe src\kb\build_kb.py         # KB fact-check (4 chunk)
+.venv\Scripts\python.exe src\kb\build_brand_kb.py   # KB brand (1128 chunk, vài phút)
 ```
+
+KB là **dữ liệu dẫn xuất** — không nằm trong git, dựng lại từ `specs.json` và
+`docs/brand/corpus/`. Chi tiết: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục 2.
 
 ## Trạng thái Sprint 1
 
