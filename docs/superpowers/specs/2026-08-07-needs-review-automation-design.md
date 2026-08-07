@@ -78,10 +78,18 @@ Hai lợi ích cụ thể của việc đổi:
 
 | Module | Vai trò | Hỏng thì sao |
 |---|---|---|
-| `vf_ai_review` *(đã có)* | **Chỉ đọc** — render báo cáo, render khối "đang chấm" | Không thấy báo cáo. Dữ liệu đánh giá vẫn đúng |
-| `vf_ai_trigger` *(mới)* | **Chỉ gọi ra ngoài** — EventSubscriber, 2 route, permission, config | Bài không được gửi qua đường event. Đường đối soát vẫn bắt được, chỉ chậm hơn |
+| `vf_ai_review` *(đã có)* | **Chỉ đọc** — render báo cáo từ `field_ai_report_json` | Không thấy báo cáo. Dữ liệu đánh giá vẫn đúng |
+| `vf_ai_trigger` *(mới)* | **Toàn bộ phần nói chuyện với service** — hook bắn job, 2 route, khối "đang chấm" + JS, permission, config | Bài không được gửi qua đường event, không thấy khối "đang chấm". Đường đối soát vẫn bắt được, chỉ chậm hơn |
 
-Phụ thuộc **một chiều**: `vf_ai_trigger.info.yml` khai `dependencies: vf_ai_review` (cần chỗ gắn khối "đang chấm"). Ngược lại không — tắt `vf_ai_trigger`, `vf_ai_review` vẫn render bình thường, hệ thống quay về chạy tay.
+Phụ thuộc **một chiều**: `vf_ai_trigger.info.yml` khai `dependencies: vf_ai_review` (cần chỗ gắn khối "đang chấm" vào khối báo cáo có sẵn). Ngược lại không — tắt `vf_ai_trigger`, `vf_ai_review` vẫn render bình thường, hệ thống quay về chạy tay.
+
+**Khối "đang chấm" và JS thuộc `vf_ai_trigger`, không thuộc `vf_ai_review`.** Chúng poll route trạng thái, mà route đó do `vf_ai_trigger` định nghĩa — để JS ở module kia là tạo phụ thuộc ngược. Nhờ vậy `vf_ai_review` chỉ đổi **đúng một chỗ**: tách hàm `vf_ai_review_hash_fields()` (mục 6.1).
+
+### 3.2.1. Đính chính thuật ngữ: Drupal dùng HOOK, không phải EventSubscriber
+
+Drupal core phát **hook** cho vòng đời entity, không phát sự kiện Symfony. Nên cơ chế bắt "node vừa được lưu" là `hook_ENTITY_TYPE_insert` / `hook_ENTITY_TYPE_update` trong file `.module`, cụ thể là `vf_ai_trigger_node_insert()` và `vf_ai_trigger_node_update()` — **không** phải một class `EventSubscriber` đăng ký trong `services.yml`.
+
+Ghi lại đính chính này thay vì sửa im lặng, vì "event-driven" ở mức kiến trúc không đổi; chỉ tên cơ chế trong Drupal là khác, và gọi sai tên sẽ dẫn người triển khai đi tìm nhầm chỗ.
 
 ### 3.3. Vì sao API và worker là hai tiến trình riêng
 
@@ -159,6 +167,8 @@ CREATE UNIQUE INDEX review_job_dedup
 CREATE INDEX review_job_claim ON review_job (status, run_after);
 ```
 
+**`node_id` LUÔN là UUID của node, không phải `nid`.** Pipeline gọi `/jsonapi/node/article/{uuid}`, nên toàn bộ hàng đợi phải nói cùng một thứ tiếng với nó. Phía Drupal lấy bằng `$node->uuid()`; route nào nhận `nid` từ URL thì tự đổi sang UUID trước khi gọi service. Trộn hai loại định danh là lỗi kinh điển và im lặng — job vẫn tạo được, chỉ là `fetch_content` trả 404.
+
 **Index bộ phận là trái tim của idempotency.** Điều kiện `WHERE` cố ý loại hai trạng thái:
 
 - Loại `failed` — job thất bại phải xếp hàng lại được.
@@ -182,7 +192,8 @@ CREATE TABLE run_log (
   agent_results  jsonb NOT NULL,
   config_meta    jsonb NOT NULL,
   usage          jsonb NOT NULL,
-  model          text  NOT NULL
+  model          text  NOT NULL,
+  payload        jsonb NOT NULL   -- đúng 4 giá trị đã PATCH sang Drupal
 );
 
 CREATE INDEX run_log_tra_cuu ON run_log (node_id, content_hash);
@@ -336,6 +347,8 @@ Nhưng với worker thì im lặng là bẫy: job báo `done` trong khi Drupal k
 **Sửa:** `write_back()` trả `bool` — vẫn không raise, nhưng người gọi biết được. Worker nhận `False` → job về `queued`.
 
 **Chốt chặn tiền đi kèm:** trước khi gọi LLM, worker tra `run_log` cho `(node_id, content_hash)`. Đã có bản ghi → **chỉ ghi lại kết quả cũ về Drupal, không chạy lại pipeline**. Lỗi write-back vì thế tốn thêm 0 đồng. Khoảng 10 dòng, chặn đúng một đường mất tiền có thật.
+
+Đây là lý do `run_log` có cột `payload` (mục 5.2) — nó lưu **đúng bốn giá trị đã PATCH** (`status`, `score`, `suggestions`, `report_json`). Không có cột này thì lần ghi lại phải *dựng lại* payload từ `agent_results`, tức chép lại logic của `graph.write_back_node` sang worker — hai chỗ dựng cùng một chuỗi là đúng loại trùng lặp mà `config-spec.md` mục 1 ghi lại như một lỗi đã trả giá. Cột này còn trả lời được một câu hỏi kiểm toán mà `agent_results` không trả lời được: *"hệ thống đã ghi chính xác cái gì sang Drupal?"*
 
 ---
 
