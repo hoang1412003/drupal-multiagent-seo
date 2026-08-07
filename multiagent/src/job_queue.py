@@ -20,7 +20,7 @@ FAILED = "failed"
 SUPERSEDED = "superseded"
 
 MAX_ATTEMPTS = 3
-BACKOFF_GIAY = (60, 300, 900)
+BACKOFF_GIAY = (60, 300)
 KET_SAU_PHUT = 15
 
 
@@ -65,24 +65,49 @@ def enqueue(conn, node_id: str, content_hash: str, source: str,
     `force=True` (nut "Cham lai" thu cong): danh dau job `done` cua dung cap
     (node_id, content_hash) thanh `superseded` de no roi khoi index dedup,
     roi chen job moi. KHONG xoa ban ghi cu - lich su van tra duoc.
+
+    UPDATE (superseded) va INSERT (job moi) o nhanh force PHAI nguyen tu:
+    bao trong `conn.transaction()` de neu gian doan giua chung (crash, mat
+    ket noi) thi Postgres tu rollback - khong de lai job cu da `superseded`
+    ma khong co job thay the (nut "Cham lai" mat job im lang).
     """
     if force:
+        with conn.transaction():
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
+                    f"WHERE node_id=%s AND content_hash=%s AND status=%s",
+                    (SUPERSEDED, node_id, content_hash, DONE),
+                )
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO {TEN_BANG} (node_id, content_hash, status, source) "
+                    f"VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING id",
+                    (node_id, content_hash, QUEUED, source),
+                )
+                row = cur.fetchone()
+    else:
         with conn.cursor() as cur:
             cur.execute(
-                f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
-                f"WHERE node_id=%s AND content_hash=%s AND status=%s",
-                (SUPERSEDED, node_id, content_hash, DONE),
+                f"INSERT INTO {TEN_BANG} (node_id, content_hash, status, source) "
+                f"VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING id",
+                (node_id, content_hash, QUEUED, source),
             )
-    with conn.cursor() as cur:
-        cur.execute(
-            f"INSERT INTO {TEN_BANG} (node_id, content_hash, status, source) "
-            f"VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING id",
-            (node_id, content_hash, QUEUED, source),
-        )
-        row = cur.fetchone()
+            row = cur.fetchone()
     if row is None:
-        cu = job_moi_nhat(conn, node_id)
-        return {"status": "duplicate", "job_id": cu["id"] if cu else None}
+        # PHAI loc ca content_hash, khong chi node_id: job_moi_nhat() tra ve
+        # job MOI NHAT CUA NODE (ngu nghia rieng, Task 8 dung cho API
+        # /jobs/by-node), khac voi "job dang trung dedup voi cap nay" - mot
+        # node co nhieu job active khac hash thi hai cau hoi tra ve hai id
+        # khac nhau.
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT id FROM {TEN_BANG} WHERE node_id=%s AND content_hash=%s "
+                f"AND status IN (%s, %s, %s) ORDER BY created_at DESC LIMIT 1",
+                (node_id, content_hash, QUEUED, RUNNING, DONE),
+            )
+            trung = cur.fetchone()
+        return {"status": "duplicate", "job_id": trung[0] if trung else None}
     return {"status": QUEUED, "job_id": row[0]}
 
 
@@ -143,15 +168,39 @@ def fail(conn, job_id: int, loi: str, attempts: int) -> str:
     return QUEUED
 
 
-def reclaim_stuck(conn) -> int:
-    """Thu hoi job ket o `running` vi worker chet giua chung."""
+def reclaim_stuck(conn) -> dict:
+    """Thu hoi job ket o `running` vi worker chet giua chung (OOM, kill -9).
+
+    Worker chet cung khong kip goi fail(), nen truoc day ham nay chi day job
+    ve `queued` - KHONG co tran nao, nen claim -> worker chet -> thu hoi ->
+    claim... lap vo han: `attempts` cu tang ma `status` khong bao gio toi
+    `failed`. Day chinh la vong lap tieu tien API vo han ma spec muc 6.3.1
+    dung co_job_that_bai() de chan, nhung co_job_that_bai() chi co tac dung
+    khi job da TOI DUOC `failed` - duong nay truoc day khong bao gio toi.
+
+    Nen o day ap luon tran MAX_ATTEMPTS: vuot nguong thi vao thang `failed`
+    (dead-letter) thay vi `queued`. CASE WHEN trong CUNG mot UPDATE de giu
+    tinh nguyen tu (khong tach hai cau UPDATE roi tu quyet dinh o Python).
+    """
     with conn.cursor() as cur:
         cur.execute(
-            f"UPDATE {TEN_BANG} SET status=%s, run_after=now(), updated_at=now() "
-            f"WHERE status=%s AND claimed_at < now() - interval '{KET_SAU_PHUT} minutes'",
-            (QUEUED, RUNNING),
+            f"UPDATE {TEN_BANG} SET "
+            f"  status = CASE WHEN attempts >= %s THEN %s ELSE %s END, "
+            f"  last_error = CASE WHEN attempts >= %s THEN %s ELSE last_error END, "
+            f"  run_after = CASE WHEN attempts >= %s THEN run_after ELSE now() END, "
+            f"  updated_at = now() "
+            f"WHERE status=%s AND claimed_at < now() - interval '{KET_SAU_PHUT} minutes' "
+            f"RETURNING status",
+            (MAX_ATTEMPTS, FAILED, QUEUED,
+             MAX_ATTEMPTS, "worker chet giua chung (khong kip goi fail), vuot MAX_ATTEMPTS",
+             MAX_ATTEMPTS,
+             RUNNING),
         )
-        return cur.rowcount
+        rows = cur.fetchall()
+    return {
+        "queued": sum(1 for (s,) in rows if s == QUEUED),
+        "failed": sum(1 for (s,) in rows if s == FAILED),
+    }
 
 
 def co_job_that_bai(conn, node_id: str, content_hash: str) -> bool:
