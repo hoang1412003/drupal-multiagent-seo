@@ -19,7 +19,7 @@
 - **Test:** script Python thuần trong `multiagent/scripts/`, tên `test_*.py`, in `[PASS]` / `[FAIL]`, kết thúc bằng `sys.exit(1 if failed else 0)`. Không dùng pytest. Chạy bằng `.venv/Scripts/python.exe scripts/test_x.py` từ thư mục `multiagent/`.
 - **Trạng thái job:** đúng 5 giá trị `queued` / `running` / `done` / `failed` / `superseded`.
 - **Không đặt tên file trong `src/` trùng module chuẩn Python.** Repo chèn `src/` vào `sys.path[0]` nên file trùng tên sẽ che module chuẩn — đã xảy ra thật với `queue.py` (xem hộp cảnh báo ở Task 3), làm sập cả tầng DB vì `psycopg` cần `queue` chuẩn.
-- **Backoff:** 60s → 300s → 900s; `MAX_ATTEMPTS = 3` rồi dead-letter.
+- **Backoff:** 60s → 300s, rồi dead-letter ở lần thất bại thứ 3 (`MAX_ATTEMPTS = 3`). *(Bản đầu ghi "60s → 300s → 900s" — sai: với `MAX_ATTEMPTS = 3` thì giá trị thứ ba không bao giờ tới lượt, vì lần fail thứ 3 rơi thẳng vào dead-letter. Sửa tài liệu cho khớp hành vi mà test đã khoá, không đổi hành vi.)*
 - **Thu hồi job kẹt:** sau 15 phút ở `running`.
 - **Chu kỳ đối soát:** 300 giây.
 - **Cổng service:** `127.0.0.1:8900`.
