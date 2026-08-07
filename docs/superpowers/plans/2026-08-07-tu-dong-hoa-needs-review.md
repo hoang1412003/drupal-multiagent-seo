@@ -2584,6 +2584,18 @@ function vf_ai_trigger_node_update(NodeInterface $node): void {
  *
  * Lưu mà không sửa gì thì không tốn đồng nào: content_hash không đổi nên
  * index dedup bên service chặn ở tầng INSERT.
+ *
+ * ĐIỀU KIỆN NGẦM PHẢI GIỮ — đọc trước khi sửa index dedup bên Python.
+ * Hook này cũng bắn khi chính hệ Multi-Agent PATCH 4 field AI về (write_back
+ * đi qua JSON:API, tức cũng là một lần lưu node). Lúc đó node vẫn ở
+ * needs_review nên hook lại gọi POST /jobs.
+ *
+ * Nó KHÔNG thành vòng lặp tự chấm vô hạn, nhưng chỉ nhờ hai điều cộng lại:
+ *   1. write_back chỉ đụng field_ai_*, không nằm trong 4 field của
+ *      content_hash -> hash không đổi.
+ *   2. Index dedup bên Python phủ cả trạng thái `running`, mà lúc PATCH thì
+ *      job đang chính là `running`.
+ * Bỏ `running` khỏi index dedup là mở lại vòng lặp đó ngay lập tức.
  */
 function _vf_ai_trigger_ban_job(NodeInterface $node): void {
   if ($node->bundle() !== 'article') {
@@ -2775,6 +2787,13 @@ trang_thai:
       els.forEach(function (el) {
         var url = el.getAttribute('data-vf-ai-status-url');
         var lan = 0;
+        // CHỈ tải lại trang khi ĐÃ THẤY job đang chạy rồi mới thấy nó xong.
+        //
+        // Không có cờ này thì bài đã chấm xong từ trước cũng trả 'done' ngay
+        // lần poll đầu -> reload -> JS chạy lại -> 'done' -> reload... tức
+        // MỌI bài đã có kết quả đều không mở ra sửa được. Đây là lỗi đã bắt
+        // được khi rà kế hoạch, không phải phòng xa.
+        var da_thay_dang_chay = false;
 
         function ve(trangThai) {
           if (trangThai === 'queued') {
@@ -2796,9 +2815,15 @@ trang_thai:
           fetch(url, { credentials: 'same-origin' })
             .then(function (r) { return r.json(); })
             .then(function (d) {
+              if (d.status === 'queued' || d.status === 'running') {
+                da_thay_dang_chay = true;
+              }
               if (d.status === 'done') {
-                // Nạp lại để khối báo cáo hiện dữ liệu mới.
-                window.location.reload();
+                // Chỉ nạp lại nếu ta ĐÃ chứng kiến job chạy trong chính lần
+                // mở trang này. Bài đã chấm từ trước thì không làm gì cả.
+                if (da_thay_dang_chay) {
+                  window.location.reload();
+                }
                 return;
               }
               ve(d.status);
@@ -2960,7 +2985,14 @@ Trong `vf_ai_trigger_form_node_form_alter()`, ngay sau khối `vf_ai_trang_thai`
   if (\Drupal::currentUser()->hasPermission('dieu khien ai')) {
     $url_cham_lai = Url::fromRoute('vf_ai_trigger.cham_lai', ['node' => $node->id()])
       ->toString();
-    $token = \Drupal::csrfToken()->get($url_cham_lai);
+    // ltrim BẮT BUỘC: CsrfAccessCheck::access() xác thực token theo
+    // `ltrim($route->getPath(), '/')` đã thay tham số, tức "vf-ai/rescore/2"
+    // KHÔNG có gạch chéo đầu. Sinh token từ chuỗi có gạch chéo thì token
+    // không bao giờ khớp và route luôn trả 403 — mà thông báo lỗi chỉ nói
+    // "'csrf_token' URL query argument is invalid", không hề gợi ý nguyên
+    // nhân là một ký tự thừa. Kiểm chứng 2026-08-07 tại
+    // web/core/lib/Drupal/Core/Access/CsrfAccessCheck.php:59.
+    $token = \Drupal::csrfToken()->get(ltrim($url_cham_lai, '/'));
     $form['vf_ai_review']['vf_ai_cham_lai'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
@@ -3174,3 +3206,6 @@ Mở PR bằng URL (repo này chưa cài `gh`):
 | `USAGE_LOG` không reset | Worker chạy nền phình bộ nhớ, chi phí cộng dồn sai | `test_worker.py::test_usage_log_duoc_reset` |
 | Hash PHP lệch hash Python | Đối soát chấm lại vô hạn mọi bài | Fixture dùng chung ở cả hai phía |
 | Token đặt vào config entity | Lộ secret vào git khi export config | Rà `config:export` trước khi commit |
+| JS reload khi thấy `done` mà không nhớ đã thấy `running` | **Mọi bài đã chấm đều tự tải lại vô hạn**, không mở ra sửa được | Mở form một bài đã có báo cáo, trang phải đứng yên |
+| Bỏ `running` khỏi index dedup | write_back PATCH → hook bắn lại → job mới → chấm lại → PATCH… vòng lặp tự chấm vô hạn | Chấm một bài, đếm `review_job` của node đó phải đúng 1 |
+| Token CSRF sinh từ đường dẫn có `/` đầu | Nút "Chấm lại" **luôn** trả 403, thông báo lỗi không gợi ý nguyên nhân | Bấm nút thật, phải ra 202 |
