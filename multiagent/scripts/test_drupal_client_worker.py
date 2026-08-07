@@ -131,6 +131,8 @@ if __name__ == "__main__":
         test_liet_ke_tinh_dung_hash_hien_tai,
         test_liet_ke_doc_duoc_hash_da_cham,
         test_report_json_hong_khong_lam_sap,
+        test_loai_node_khong_o_needs_review,
+        test_url_khong_dung_filter_moderation_state,
     ):
         try:
             fn()
