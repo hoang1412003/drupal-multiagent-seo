@@ -36,6 +36,15 @@ def _khoa_cua(state: ContentReviewState) -> dict:
     }
 
 
+# Alias công khai: worker.py cần suy đúng cặp khoá này để tra config_meta ghi
+# vào run_log (audit.ghi), thay vì tự gọi config.load() không tham số - việc
+# đó rơi về mặc định của config.load() chứ không phải khoá state đang dùng,
+# hai hằng số DEFAULT_* nằm ở hai file độc lập nên "tình cờ" trùng hôm nay
+# không đảm bảo mãi trùng. Dùng alias thay vì import thẳng tên có gạch dưới
+# đầu để không phá quy ước "gạch dưới đầu = nội bộ module".
+khoa_cua = _khoa_cua
+
+
 def _config_cua(state: ContentReviewState) -> dict:
     """Lấy khối config theo (content_type, langcode) của state.
 

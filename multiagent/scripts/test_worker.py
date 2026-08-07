@@ -136,6 +136,91 @@ def test_1_agent_loi_van_chap_nhan(conn):
     print("[PASS] 1 agent loi -> chap nhan ket qua, khong tra tien lan hai")
 
 
+def test_usage_log_duoc_don_khi_invoke_nem_loi(conn):
+    """USAGE_LOG phai rong sau khi chay_mot_job() tra ve, KE CA nhanh thoat
+    som (invoke() nem loi giua chung) - khong duoc de lai cho job SAU tu
+    clear() ho, vi tien LLM da tieu cua lan hong nay se bien mat khong dau
+    vet (khong co run_log cho ca nay)."""
+    import ai_core
+
+    def _no(state):
+        ai_core.USAGE_LOG.append({"model": "x", "input_tokens": 5, "output_tokens": 1})
+        raise RuntimeError("mo phong loi giua chung, da goi 1 agent truoc do")
+
+    job = _job(conn, "uuid-8", "h8")
+    ket = worker.chay_mot_job(conn, job, invoke=_no, write_back_fn=lambda **kw: True)
+    assert ket == "queued", ket
+    assert ai_core.USAGE_LOG == [], ai_core.USAGE_LOG
+    print("[PASS] invoke() nem loi -> USAGE_LOG van duoc don ngay, khong de lai")
+
+
+def test_usage_log_duoc_don_khi_ca_4_agent_loi(conn):
+    """Nhanh thoat som con lai (4/4 agent thieu) cung phai don USAGE_LOG."""
+    import ai_core
+
+    def _4_loi(state):
+        ai_core.USAGE_LOG.append({"model": "x", "input_tokens": 3, "output_tokens": 1})
+        return dict(_STATE_XONG, final_score=None, report=dict(
+            _STATE_XONG["report"], missing_agents=[
+                "content_quality", "seo", "brand", "compliance"]))
+
+    job = _job(conn, "uuid-9", "h9")
+    ket = worker.chay_mot_job(conn, job, invoke=_4_loi, write_back_fn=lambda **kw: True)
+    assert ket == "queued", ket
+    assert ai_core.USAGE_LOG == [], ai_core.USAGE_LOG
+    print("[PASS] 4/4 agent loi -> USAGE_LOG van duoc don")
+
+
+def test_loi_bat_ngo_khong_lam_chet_vong_lap(conn):
+    """audit.ghi() nem loi SAU khi pipeline da chay ton tien nhung TRUOC khi
+    ghi xong run_log - _xu_ly_tiep_theo() phai bat duoc, dua job ve
+    queued/failed, KHONG duoc de ngoai le thoat ra ngoai (se giet vong_lap)."""
+    q.enqueue(conn, "uuid-10", "h10", "event")
+    ghi_that = audit.ghi
+    audit.ghi = lambda *a, **kw: (_ for _ in ()).throw(
+        RuntimeError("mat ket noi Postgres giua chung"))
+    try:
+        ket = worker._xu_ly_tiep_theo(conn, "test-vonglap", invoke=lambda s: _STATE_XONG,
+                                      write_back_fn=lambda **kw: True)
+    finally:
+        audit.ghi = ghi_that
+    assert ket in (q.QUEUED, q.FAILED), ket
+    with conn.cursor() as cur:
+        cur.execute("SELECT status, last_error FROM review_job WHERE node_id='uuid-10'")
+        status, loi = cur.fetchone()
+    assert status in (q.QUEUED, q.FAILED), status
+    assert "RuntimeError" in loi, loi
+    print("[PASS] loi bat ngo trong chay_mot_job -> vong_lap khong chet, job duoc fail")
+
+
+def test_config_meta_theo_dung_khoa_cua_state(conn):
+    """config_meta ghi vao run_log phai theo (content_type, langcode) CUA
+    STATE dang cham, khong phai mac dinh cung cua config.load() khong tham
+    so (hai hang so DEFAULT_* nam o hai file doc lap, khong dam bao mai
+    trung nhau)."""
+    import config
+
+    state = dict(_STATE_XONG, content_type="tin_tuc", langcode="en")
+    load_that = config.load
+
+    def _load_gia(content_type="cam_nang", langcode="vi", **kw):
+        return {"meta": {"content_type": content_type, "langcode": langcode}}
+
+    config.load = _load_gia
+    try:
+        job = _job(conn, "uuid-11", "h11")
+        ket = worker.chay_mot_job(conn, job, invoke=lambda s: state,
+                                  write_back_fn=lambda **kw: True)
+    finally:
+        config.load = load_that
+    assert ket == "done", ket
+    with conn.cursor() as cur:
+        cur.execute("SELECT config_meta FROM run_log WHERE node_id='uuid-11'")
+        meta = cur.fetchone()[0]
+    assert meta == {"content_type": "tin_tuc", "langcode": "en"}, meta
+    print("[PASS] config_meta ghi dung khoa cua state, khong phai mac dinh cung")
+
+
 def test_usage_log_duoc_reset(conn):
     """USAGE_LOG la list muc module, co y khong tu xoa - worker chay nen
     vo han thi no phinh mai (technical-debt.md nhom C)."""
@@ -164,6 +249,10 @@ if __name__ == "__main__":
         test_pipeline_nem_loi_thi_job_that_bai,
         test_ca_4_agent_loi_thi_KHONG_ghi_log_ma_retry,
         test_1_agent_loi_van_chap_nhan,
+        test_usage_log_duoc_don_khi_invoke_nem_loi,
+        test_usage_log_duoc_don_khi_ca_4_agent_loi,
+        test_loi_bat_ngo_khong_lam_chet_vong_lap,
+        test_config_meta_theo_dung_khoa_cua_state,
         test_usage_log_duoc_reset,
     ):
         try:

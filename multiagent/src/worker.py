@@ -93,36 +93,88 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         invoke = build_graph().invoke
 
     ai_core.USAGE_LOG.clear()
+    da_ghi_usage = False
     bat_dau = time.monotonic()
     try:
-        # CHI truyen node_id. content_type/langcode do graph._khoa_cua() suy ra
-        # - do la CHO DUY NHAT duoc phep suy ra cap khoa nay (no B6). Worker
-        # dat them mot duong thu hai la dung lai dung cai bay vua dep.
-        state = invoke({"node_id": node_id})
+        try:
+            # CHI truyen node_id. content_type/langcode do graph._khoa_cua() suy
+            # ra - do la CHO DUY NHAT duoc phep suy ra cap khoa nay (no B6).
+            # Worker dat them mot duong thu hai la dung lai dung cai bay vua dep.
+            state = invoke({"node_id": node_id})
+        except Exception as e:
+            return q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}",
+                          job["attempts"])
+        duration_ms = int((time.monotonic() - bat_dau) * 1000)
+
+        report = state.get("report") or {}
+        if len(report.get("missing_agents") or []) >= _SO_AGENT:
+            return q.fail(conn, job["id"],
+                          "ca 4 agent khong tra ket qua - nghi hong ha tang",
+                          job["attempts"])
+
+        payload = _payload_tu_state(state)
+        # config_meta phai tra theo DUNG cap khoa ma chinh lan cham nay dung -
+        # goi graph.khoa_cua(state) chu KHONG duoc tu goi config.load() khong
+        # tham so: cai do roi ve mac dinh CUA config.load(), tinh co trung
+        # DEFAULT_CONTENT_TYPE/DEFAULT_LANGCODE cua graph.py hom nay nhung la
+        # hai hang so doc lap o hai file, dung loai "mot con so nhieu noi" ma
+        # scoring.yaml duoc dung ra de chan (config-spec.md muc 1).
+        import graph
+
+        khoa = graph.khoa_cua(state)
+        audit.ghi(
+            conn, job_id=job["id"], node_id=node_id, content_hash=chash,
+            duration_ms=duration_ms, report=report,
+            config_meta=config.load(**khoa).get("meta") or {},
+            usage=list(ai_core.USAGE_LOG), model=ai_core.MODEL, payload=payload,
+        )
+        da_ghi_usage = True
+
+        if write_back_fn(node_id=node_id, **payload):
+            q.complete(conn, job["id"])
+            return q.DONE
+        return q.fail(conn, job["id"], "write-back that bai", job["attempts"])
+    finally:
+        # USAGE_LOG la list muc module, KHONG tu xoa (ai_core.py). Luon dam
+        # bao no rong khi ra khoi ham, ke ca hai nhanh thoat som (invoke() nem
+        # loi, ca 4 agent thieu): khong lam vay thi tien LLM da tieu o lan
+        # chay hong do khong duoc ghi vao dau (khong co run_log cho ca nay) va
+        # bien mat lang le khi job KE TIEP tu clear() dau ham.
+        if ai_core.USAGE_LOG and not da_ghi_usage:
+            logging.warning(
+                "[worker] job %s (node %s) that bai truoc khi ghi duoc "
+                "run_log nhung da tieu %d lan goi LLM: %s",
+                job["id"], node_id, len(ai_core.USAGE_LOG), ai_core.USAGE_LOG,
+            )
+        ai_core.USAGE_LOG.clear()
+
+
+def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
+    """Nhan va xu ly MOT job, neu hang doi con viec. Rong -> tra None.
+
+    Loi bat ngo trong chay_mot_job() (audit.ghi, q.complete, q.fail,
+    write_back_fn tu no rieng nem loi ...) KHONG duoc de thoat ra ngoai va
+    giet ca vong_lap(): mot job hong khong duoc keo theo ca tien trinh, va
+    job dang ket o `running` phai doi toi 15 phut moi duoc reclaim_stuck()
+    thu hoi. Kich ban te nhat: audit.ghi() nem loi SAU khi pipeline da chay
+    ton tien nhung TRUOC khi INSERT xong run_log - khong dua job ve
+    queued/failed ngay o day thi lan sau da_cham() khong thay ban ghi, goi
+    lai LLM, tra tien lan hai - dung thu chot chan tien duoc dung ra de ngan.
+    """
+    job = q.claim(conn, ten)
+    if job is None:
+        return None
+    logging.info("[worker %s] cham node %s (lan %d)", ten, job["node_id"],
+                 job["attempts"])
+    try:
+        ket = chay_mot_job(conn, job, invoke=invoke, write_back_fn=write_back_fn)
     except Exception as e:
-        return q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}",
-                      job["attempts"])
-    duration_ms = int((time.monotonic() - bat_dau) * 1000)
-
-    report = state.get("report") or {}
-    if len(report.get("missing_agents") or []) >= _SO_AGENT:
-        return q.fail(conn, job["id"],
-                      "ca 4 agent khong tra ket qua - nghi hong ha tang",
-                      job["attempts"])
-
-    payload = _payload_tu_state(state)
-    audit.ghi(
-        conn, job_id=job["id"], node_id=node_id, content_hash=chash,
-        duration_ms=duration_ms, report=report,
-        config_meta=config.load().get("meta") or {},
-        usage=list(ai_core.USAGE_LOG), model=ai_core.MODEL, payload=payload,
-    )
-    ai_core.USAGE_LOG.clear()
-
-    if write_back_fn(node_id=node_id, **payload):
-        q.complete(conn, job["id"])
-        return q.DONE
-    return q.fail(conn, job["id"], "write-back that bai", job["attempts"])
+        logging.error("[worker %s] job %s (node %s) loi ngoai y muon: %s",
+                      ten, job["id"], job["node_id"], e)
+        ket = q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}",
+                     job["attempts"])
+    logging.info("[worker %s] node %s -> %s", ten, job["node_id"], ket)
+    return ket
 
 
 def vong_lap(conn=None, ten: str = "") -> None:
@@ -153,14 +205,8 @@ def vong_lap(conn=None, ten: str = "") -> None:
                 # Doi soat hong KHONG duoc lam chet worker - duong event van chay
                 logging.warning("[worker %s] doi soat loi: %s", ten, e)
 
-        job = q.claim(conn, ten)
-        if job is None:
+        if _xu_ly_tiep_theo(conn, ten) is None:
             time.sleep(NGU_KHI_RONG_GIAY)
-            continue
-        logging.info("[worker %s] cham node %s (lan %d)", ten, job["node_id"],
-                     job["attempts"])
-        ket = chay_mot_job(conn, job)
-        logging.info("[worker %s] node %s -> %s", ten, job["node_id"], ket)
 
 
 if __name__ == "__main__":
