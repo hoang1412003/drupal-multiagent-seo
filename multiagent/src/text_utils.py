@@ -4,6 +4,7 @@ Tách riêng vì cả script offline (sinh brand guideline) lẫn agent runtime
 (chấm bài) đều phải bóc HTML theo ĐÚNG một cách - nếu hai bên bóc khác nhau
 thì tần suất thống kê được sẽ không khớp với tần suất đếm lúc chấm.
 """
+import hashlib
 import html
 import re
 
@@ -90,3 +91,25 @@ def trich_dan_co_that(evidence: str, text_theo_field: dict) -> bool:
     if not manh:
         return False
     return all(any(m in t for t in kho) for m in manh)
+
+# Các field tham gia content_hash, ĐÚNG thứ tự này. Phía PHP
+# (AiReportRenderer::HASH_FIELDS) phải ghép y hệt, nếu lệch thì bảng cảnh báo
+# "nội dung đã thay đổi" hiện sai vĩnh viễn. Có test hợp đồng dùng chung file
+# drupal/scripts/content_hash_fixture.json để bắt sai lệch này.
+_HASH_FIELDS = ("title", "body", "summary", "meta_description")
+
+
+def content_hash(fields: dict) -> str:
+    """Băm nội dung đã chấm, để biết bài có bị sửa sau khi chấm không.
+
+    Dùng hash chứ KHÔNG dùng mốc thời gian `changed` của node: chính lệnh
+    PATCH của write_back() làm `changed` nhảy, nên số mốc đó sẽ luôn báo
+    "nội dung đã đổi" ngay sau khi chấm. Hash chỉ đổi khi nội dung thật sự đổi.
+
+    Ở đây chứ không ở graph.py vì từ 2026-08-07 có BA người dùng: graph
+    (dùng báo cáo), reconcile (so với hash đã chấm), worker (trả run_log).
+    Để private trong graph thì hai chỗ kia phải chép lại công thức - dùng loại
+    trùng lặp mà config-spec.md mục 1 ghi lại như một lời đã trả giá.
+    """
+    ghep = "\n".join(str(fields.get(k) or "") for k in _HASH_FIELDS)
+    return hashlib.sha256(ghep.encode("utf-8")).hexdigest()

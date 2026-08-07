@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from graph import _content_hash
+from text_utils import content_hash
 
 # Fixture nam trong drupal/scripts/ chu khong phai canh file nay, vi container
 # DDEV chi mount thu muc drupal/ - phia PHP khong doc duoc gi ben ngoai do.
@@ -30,25 +30,25 @@ def test_hash_khop_fixture():
     """
     with open(FIXTURE, encoding="utf-8") as f:
         fx = json.load(f)
-    assert _content_hash(fx["fields"]) == fx["expected_sha256"], _content_hash(fx["fields"])
+    assert content_hash(fx["fields"]) == fx["expected_sha256"], content_hash(fx["fields"])
     print("[PASS] hash khop fixture (hop dong voi phia PHP)")
 
 
 def test_hash_tat_dinh():
     fields = {"title": "A", "body": "B", "summary": "C", "meta_description": "D"}
-    assert len({_content_hash(fields) for _ in range(20)}) == 1
+    assert len({content_hash(fields) for _ in range(20)}) == 1
     print("[PASS] cung dau vao -> cung hash")
 
 
 def test_doi_mot_ky_tu_thi_hash_doi():
     a = {"title": "A", "body": "B", "summary": "C", "meta_description": "D"}
     b = {"title": "A", "body": "B.", "summary": "C", "meta_description": "D"}
-    assert _content_hash(a) != _content_hash(b)
+    assert content_hash(a) != content_hash(b)
     print("[PASS] doi 1 ky tu trong body -> hash doi")
 
 
 def test_field_thieu_coi_nhu_rong():
-    assert _content_hash({"title": "A"}) == _content_hash(
+    assert content_hash({"title": "A"}) == content_hash(
         {"title": "A", "body": "", "summary": "", "meta_description": ""}
     )
     print("[PASS] field thieu = chuoi rong, khong loi")
@@ -56,7 +56,7 @@ def test_field_thieu_coi_nhu_rong():
 
 def test_field_none_coi_nhu_rong():
     """fetch_content tra chuoi rong, nhung phong thu voi None de chac chan."""
-    assert _content_hash({"title": "A", "body": None}) == _content_hash({"title": "A"})
+    assert content_hash({"title": "A", "body": None}) == content_hash({"title": "A"})
     print("[PASS] field None = chuoi rong, khong loi")
 
 
