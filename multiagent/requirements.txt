@@ -13,3 +13,8 @@ psycopg[binary]>=3.2.0
 # config.load() te - ma do la duong di cua MOI lan cham. Dung de phu thuoc an
 # ma khong ai thay, cho toi luc no bien mat.
 PyYAML>=6.0
+
+# Service HTTP nhan job tu Drupal (spec 2026-08-07). uvicorn la server ASGI
+# chay app cua fastapi - khong co no thi `python -m uvicorn` te ngay.
+fastapi>=0.115
+uvicorn>=0.30
