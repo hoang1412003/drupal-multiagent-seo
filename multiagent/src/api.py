@@ -10,6 +10,7 @@ Chay (tu multiagent/):
 """
 import hmac
 import os
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -20,7 +21,20 @@ import job_queue as q
 
 load_dotenv()
 
-app = FastAPI(title="VF O2O Multi-Agent")
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI):
+    """Dam bao bang MOT LAN luc khoi dong, giong worker.vong_lap() - khong
+    phai moi request. Truoc day _conn() goi q.dam_bao_bang() tren MOI request
+    (ke ca GET /health): DDL (CREATE TABLE/INDEX IF NOT EXISTS) tuy idempotent
+    nhung ngang huong "tra loi trong vai ms" o docstring module nay, va
+    handler dong bo cua FastAPI chay trong threadpool nen nhieu request dong
+    thoi se cung phat DDL vao Postgres."""
+    q.dam_bao_bang(db.get_conn())
+    yield
+
+
+app = FastAPI(title="VF O2O Multi-Agent", lifespan=_lifespan)
 
 
 class JobIn(BaseModel):
@@ -43,9 +57,7 @@ def kiem_token(authorization: str = Header(default="")) -> None:
 
 
 def _conn():
-    conn = db.get_conn()
-    q.dam_bao_bang(conn)
-    return conn
+    return db.get_conn()
 
 
 def tao_job(body: JobIn, conn) -> dict:

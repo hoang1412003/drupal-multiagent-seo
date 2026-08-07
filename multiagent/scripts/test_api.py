@@ -24,6 +24,33 @@ import job_queue as q
 SCHEMA = "vf_test_api"
 
 
+class _FakeCursorDDL:
+    """Con tro gia: khong tra du lieu gi, chi ghi lai cau SQL da chay."""
+
+    def __init__(self, nhat_ky):
+        self._nhat_ky = nhat_ky
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+    def execute(self, sql, params=None):
+        self._nhat_ky.append(sql)
+
+
+class _FakeConnDDL:
+    """Ket noi gia CHI de dem so cau SQL da chay - dung khoa lai chuyen
+    _conn() khong duoc tu phat DDL nua (xem test_conn_khong_phat_ddl_moi_lan)."""
+
+    def __init__(self):
+        self.nhat_ky = []
+
+    def cursor(self):
+        return _FakeCursorDDL(self.nhat_ky)
+
+
 def _dung_schema_sach():
     conn = db.psycopg.connect(db.dsn(), autocommit=True)
     with conn.cursor() as cur:
@@ -101,6 +128,29 @@ def test_health_dem_theo_trang_thai(conn):
     print("[PASS] health tra so job theo tung trang thai")
 
 
+def test_conn_khong_phat_ddl_moi_lan_goi(conn):
+    """Khoa lai: _conn() TRUOC DAY goi q.dam_bao_bang() tren MOI request (ke
+    ca GET /health) - 3 cau DDL idempotent nhung ngang huong "tra loi trong
+    vai ms" o docstring api.py, va handler dong bo cua FastAPI chay trong
+    threadpool nen nhieu request dong thoi se cung phat DDL vao Postgres.
+
+    Sua: dam_bao_bang() chi chay MOT LAN o lifespan luc app khoi dong (giong
+    worker.vong_lap()), _conn() gio chi lay ket noi. Test nay khong di qua
+    lifespan (goi thang ham, khong qua TestClient/uvicorn - xem docstring
+    dau file), nen dung ket noi gia de dem: goi _conn() hai lan, xac nhan
+    khong co cau SQL nao duoc phat ra."""
+    fake = _FakeConnDDL()
+    that = db.get_conn
+    db.get_conn = lambda: fake
+    try:
+        api._conn()
+        api._conn()
+    finally:
+        db.get_conn = that
+    assert fake.nhat_ky == [], fake.nhat_ky
+    print("[PASS] _conn() khong con tu phat DDL - dam_bao_bang() chi chay o lifespan")
+
+
 if __name__ == "__main__":
     try:
         conn = _dung_schema_sach()
@@ -120,6 +170,7 @@ if __name__ == "__main__":
         test_trang_thai_node_chua_co_job,
         test_trang_thai_tra_job_moi_nhat,
         test_health_dem_theo_trang_thai,
+        test_conn_khong_phat_ddl_moi_lan_goi,
     ):
         try:
             fn(conn)
