@@ -1048,7 +1048,25 @@ git commit -m "feat: nhat ky truy vet run_log ghi vao Postgres"
   - `drupal_client.liet_ke_can_cham(limit: int = 50) -> list[dict]` → mỗi phần tử `{"node_id", "content_hash", "hash_da_cham"}`
   - `drupal_client._fields_tu_resource(resource: dict) -> dict`
 
-**Lưu ý bắt buộc:** nếu Task 1 kết luận JSON:API **không** lọc được `moderation_state`, thay `_URL_CAN_CHAM` bằng `filter[status]=0` và thêm bước lọc `moderation_state` trong `liet_ke_can_cham`.
+**KẾT LUẬN CỦA TASK 1 — đã kiểm chứng thật, không còn là giả định:**
+
+`filter[moderation_state]=needs_review` **KHÔNG dùng được**: JSON:API trả **HTTP 500** kèm `QueryException: 'moderation_state' not found`, vì đó là *computed field* nên không có cột để truy vấn. (Task 1 dự đoán 400 hoặc "trả về mọi bài" — thực tế là 500, cùng nhóm "không lọc được".)
+
+**Nhưng `moderation_state` CÓ mặt trong `attributes` của response** (kiểm 2026-08-07: `attributes.moderation_state == 'draft'`). Nên cách làm là:
+
+```
+GET /jsonapi/node/article?filter[status]=0&page[limit]=50
+rồi lọc phía Python: attributes.moderation_state == 'needs_review'
+```
+
+`filter[status]=0` lấy các node **chưa xuất bản** — bao trọn `draft`, `needs_review`, `archived` — rồi Python lọc tiếp. Lọc thô ở tầng HTTP, lọc tinh ở tầng Python.
+
+> **GIỚI HẠN ĐÃ BIẾT của đường đối soát, phải ghi vào tài liệu ở Task 12 chứ không được giấu:**
+> Với một bài **đã xuất bản** rồi tạo bản nháp mới đưa sang `needs_review`, revision mặc định vẫn là bản đã xuất bản (`needs_review` có `default_revision = false`). JSON:API trả revision mặc định, nên node đó có `status = 1` và `moderation_state = 'published'` — **đường đối soát không nhìn thấy nó**.
+>
+> Ảnh hưởng thật: **đường event vẫn bắt được** (hook đọc `moderation_state` của revision vừa lưu), nên bài vẫn được chấm bình thường. Chỉ mất lớp lưới an toàn cho đúng trường hợp *bài đã xuất bản đang được sửa lại*. Với phạm vi hiện tại (bài mới đi `draft → needs_review → published`) thì không chạm tới.
+>
+> Muốn đóng hẳn thì phải đọc revision mới nhất chứ không phải revision mặc định — JSON:API core không expose sẵn đường đó. Ghi nhận là hướng mở rộng, **không** làm trong task này.
 
 - [ ] **Step 1: Viết test**
 
@@ -1112,6 +1130,7 @@ _RESOURCE = {
         "path": {"alias": "/bai-viet"},
         "field_meta_description": "Mo ta",
         "field_ai_report_json": None,
+        "moderation_state": "needs_review",
     },
     "relationships": {},
 }
@@ -1148,6 +1167,34 @@ def test_report_json_hong_khong_lam_sap():
     dc.requests.get = lambda *a, **kw: _Resp({"data": [res]})
     assert dc.liet_ke_can_cham()[0]["hash_da_cham"] is None
     print("[PASS] JSON hong -> hash_da_cham None, khong sap")
+
+
+def test_loai_node_khong_o_needs_review():
+    """filter[status]=0 con bao ca draft va archived - phai loc tinh phia Python.
+
+    Khong loc thi vong doi soat se cham MOI ban nhap trong site, tuc tieu tien
+    API cho nhung bai chua ai gui duyet.
+    """
+    draft = dict(_RESOURCE)
+    draft["attributes"] = dict(_RESOURCE["attributes"], moderation_state="draft")
+    dc.requests.get = lambda *a, **kw: _Resp({"data": [draft, _RESOURCE]})
+    ds = dc.liet_ke_can_cham()
+    assert len(ds) == 1 and ds[0]["node_id"] == "uuid-aaa", ds
+    print("[PASS] node o draft/archived bi loai, chi giu needs_review")
+
+
+def test_url_khong_dung_filter_moderation_state():
+    """filter[moderation_state] lam JSON:API tra HTTP 500 (computed field).
+
+    Khoa lai bang test vi day la thu de bi 'sua cho gon' ma khong biet no hong
+    - va no hong o dang kho chan doan: ca vong doi soat chet lang le.
+    """
+    da_goi = []
+    dc.requests.get = lambda url, **kw: (da_goi.append(url), _Resp({"data": []}))[1]
+    dc.liet_ke_can_cham()
+    assert "moderation_state" not in da_goi[0], da_goi[0]
+    assert "filter%5Bstatus%5D=0" in da_goi[0], da_goi[0]
+    print("[PASS] URL loc bang status=0, khong dung filter moderation_state")
 
 
 if __name__ == "__main__":
@@ -1245,9 +1292,15 @@ và thay khối `try/except` cuối hàm bằng:
 Thêm vào cuối file:
 
 ```python
-# Neu Task 1 ket luan JSON:API KHONG loc duoc moderation_state thi doi thanh
-# "filter[status]=0" va loc them phia Python trong liet_ke_can_cham().
-_LOC_CAN_CHAM = "filter%5Bmoderation_state%5D=needs_review"
+# KHONG dung filter[moderation_state]: do la computed field, JSON:API tra
+# HTTP 500 "QueryException: 'moderation_state' not found" (kiem chung
+# 2026-08-07, docs/evidence/needs_review_jsonapi_kiem_chung.txt).
+#
+# Thay bang: loc THO o tang HTTP theo status=0 (chua xuat ban - bao tron
+# draft/needs_review/archived), roi loc TINH phia Python theo attribute
+# `moderation_state` VAN CO trong response.
+_LOC_CAN_CHAM = "filter%5Bstatus%5D=0"
+_STATE_CAN_CHAM = "needs_review"
 
 
 def liet_ke_can_cham(limit: int = 50) -> list:
@@ -1256,6 +1309,12 @@ def liet_ke_can_cham(limit: int = 50) -> list:
     Dung cho vong doi soat (spec muc 6.3). Tra list
     {node_id, content_hash, hash_da_cham}; `hash_da_cham` = None nghia la
     chua cham bao gio hoac bao cao doc khong duoc.
+
+    GIOI HAN DA BIET: bai DA XUAT BAN roi tao ban nhap moi dua sang
+    needs_review se khong hien o day, vi JSON:API tra revision MAC DINH (van
+    la ban da xuat ban, do needs_review co default_revision = false). Duong
+    event van bat duoc truong hop do, nen chi mat lop luoi an toan chu khong
+    mat bai. Chi tiet o ke hoach Task 5.
     """
     url = (f"{BASE_URL}/jsonapi/node/article?{_LOC_CAN_CHAM}"
            f"&page%5Blimit%5D={limit}")
@@ -1265,6 +1324,8 @@ def liet_ke_can_cham(limit: int = 50) -> list:
     )
     ra = []
     for resource in response.json().get("data", []):
+        if resource["attributes"].get("moderation_state") != _STATE_CAN_CHAM:
+            continue      # loc tinh: status=0 con bao ca draft va archived
         fields = _fields_tu_resource(resource)
         tho = resource["attributes"].get("field_ai_report_json")
         try:
