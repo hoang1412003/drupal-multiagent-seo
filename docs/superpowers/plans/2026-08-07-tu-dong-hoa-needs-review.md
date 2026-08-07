@@ -18,6 +18,7 @@
 - **Hệ thống không bao giờ tự đổi moderation state của node.** Chỉ ghi 4 field AI.
 - **Test:** script Python thuần trong `multiagent/scripts/`, tên `test_*.py`, in `[PASS]` / `[FAIL]`, kết thúc bằng `sys.exit(1 if failed else 0)`. Không dùng pytest. Chạy bằng `.venv/Scripts/python.exe scripts/test_x.py` từ thư mục `multiagent/`.
 - **Trạng thái job:** đúng 5 giá trị `queued` / `running` / `done` / `failed` / `superseded`.
+- **Không đặt tên file trong `src/` trùng module chuẩn Python.** Repo chèn `src/` vào `sys.path[0]` nên file trùng tên sẽ che module chuẩn — đã xảy ra thật với `queue.py` (xem hộp cảnh báo ở Task 3), làm sập cả tầng DB vì `psycopg` cần `queue` chuẩn.
 - **Backoff:** 60s → 300s → 900s; `MAX_ATTEMPTS = 3` rồi dead-letter.
 - **Thu hồi job kẹt:** sau 15 phút ở `running`.
 - **Chu kỳ đối soát:** 300 giây.
@@ -30,7 +31,7 @@
 | File | Trách nhiệm |
 |---|---|
 | `multiagent/src/text_utils.py` *(sửa)* | Thêm `content_hash()` — dùng chung graph / reconcile / worker |
-| `multiagent/src/queue.py` *(mới)* | Bảng `review_job`; enqueue / claim / complete / fail / reclaim. Thuần SQL, không biết gì về LLM |
+| `multiagent/src/job_queue.py` *(mới)* | Bảng `review_job`; enqueue / claim / complete / fail / reclaim. Thuần SQL, không biết gì về LLM |
 | `multiagent/src/audit.py` *(mới)* | Bảng `run_log`; ghi bản ghi append-only; tra bản ghi đã có |
 | `multiagent/src/drupal_client.py` *(sửa)* | `write_back()` trả `bool`; thêm `liet_ke_can_cham()`; tách `_fields_tu_resource()` |
 | `multiagent/src/worker.py` *(mới)* | Vòng lặp: claim → chấm → ghi log → đóng job |
@@ -319,28 +320,28 @@ git commit -m "refactor: chuyen content_hash sang text_utils de dung chung 3 noi
 
 ---
 
-### Task 3: `src/queue.py` — hàng đợi trên Postgres
+### Task 3: `src/job_queue.py` — hàng đợi trên Postgres
 
 **Files:**
-- Create: `multiagent/src/queue.py`
-- Test: `multiagent/scripts/test_queue.py`
+- Create: `multiagent/src/job_queue.py`
+- Test: `multiagent/scripts/test_job_queue.py`
 
 **Interfaces:**
 - Consumes: `db.dsn()`, `db.get_conn()` (đã có)
 - Produces:
-  - `queue.dam_bao_bang(conn) -> None`
-  - `queue.enqueue(conn, node_id: str, content_hash: str, source: str, force: bool = False) -> dict` → `{"status": "queued"|"duplicate", "job_id": int}`
-  - `queue.claim(conn, worker_id: str) -> dict | None` → `{"id", "node_id", "content_hash", "attempts"}`
-  - `queue.complete(conn, job_id: int) -> None`
-  - `queue.fail(conn, job_id: int, loi: str, attempts: int) -> str` → trạng thái mới (`"queued"` hoặc `"failed"`)
-  - `queue.reclaim_stuck(conn) -> int` → số job đã thu hồi
-  - `queue.co_job_that_bai(conn, node_id: str, content_hash: str) -> bool`
-  - `queue.job_moi_nhat(conn, node_id: str) -> dict | None`
-  - `queue.thong_ke(conn) -> dict` → `{"queued", "running", "failed"}`
+  - `job_queue.dam_bao_bang(conn) -> None`
+  - `job_queue.enqueue(conn, node_id: str, content_hash: str, source: str, force: bool = False) -> dict` → `{"status": "queued"|"duplicate", "job_id": int}`
+  - `job_queue.claim(conn, worker_id: str) -> dict | None` → `{"id", "node_id", "content_hash", "attempts"}`
+  - `job_queue.complete(conn, job_id: int) -> None`
+  - `job_queue.fail(conn, job_id: int, loi: str, attempts: int) -> str` → trạng thái mới (`"queued"` hoặc `"failed"`)
+  - `job_queue.reclaim_stuck(conn) -> int` → số job đã thu hồi
+  - `job_queue.co_job_that_bai(conn, node_id: str, content_hash: str) -> bool`
+  - `job_queue.job_moi_nhat(conn, node_id: str) -> dict | None`
+  - `job_queue.thong_ke(conn) -> dict` → `{"queued", "running", "failed"}`
 
 - [ ] **Step 1: Viết test — chạy trước khi có code**
 
-Tạo `multiagent/scripts/test_queue.py`:
+Tạo `multiagent/scripts/test_job_queue.py`:
 
 ```python
 """Test hang doi review_job (spec 2026-08-07 muc 5.1, 6.2).
@@ -352,7 +353,7 @@ FakeConn se cho qua ca mot ban cai dat khong he co SKIP LOCKED.
 Khong ket noi duoc -> in [SKIP] va thoat 0, de bo test van "chay duoc o bat cu
 dau". NHUNG [SKIP] KHONG PHAI [PASS] - xem docs/pre-demo-checklist.md muc 5.
 
-Chay: .venv\\Scripts\\python.exe scripts\\test_queue.py
+Chay: .venv\\Scripts\\python.exe scripts\\test_job_queue.py
 """
 import os
 import sys
@@ -360,9 +361,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import db
-import queue as q
+import job_queue as q
 
-SCHEMA = "vf_test_queue"
+SCHEMA = "vf_test_job_queue"
 
 
 def _mo_conn():
@@ -536,12 +537,26 @@ if __name__ == "__main__":
 
 ```bash
 cd multiagent
-.venv/Scripts/python.exe scripts/test_queue.py
+.venv/Scripts/python.exe scripts/test_job_queue.py
 ```
 
-Expected: `ModuleNotFoundError: No module named 'queue'`... **CẢNH BÁO:** `queue` là tên module chuẩn của Python. Vì `sys.path` đã chèn `src/` vào **vị trí 0**, `import queue` sẽ lấy file của mình. Nhưng nếu thấy lỗi lạ liên quan tới `queue.Empty`, đó là dấu hiệu module chuẩn bị che — khi đó đổi tên file thành `job_queue.py` và sửa import tương ứng ở mọi task sau.
+Expected: `ModuleNotFoundError: No module named 'job_queue'`.
 
-- [ ] **Step 3: Viết `src/queue.py`**
+> **VÌ SAO TÊN LÀ `job_queue.py` CHỨ KHÔNG PHẢI `queue.py` — đã trả giá một lần, ghi lại để không ai "sửa cho gọn".**
+>
+> Bản đầu của kế hoạch đặt tên `src/queue.py`. Khi triển khai thật (2026-08-07) nó **làm sập toàn bộ tầng DB của dự án**, không riêng module này:
+>
+> ```
+> File ".venv\Lib\site-packages\psycopg\_acompat.py", line 29
+>     class Queue(queue.Queue[T]):
+> AttributeError: module 'queue' has no attribute 'Queue'
+> ```
+>
+> Nguyên nhân: mọi script trong `scripts/` chèn `src/` vào **`sys.path[0]`**, nên `src/queue.py` che module chuẩn `queue` của Python — mà `psycopg` lại `import queue` để dựng connection pool. Hệ quả: `import db` chết, tức mọi thứ chạm Postgres đều chết.
+>
+> **Bài học rộng hơn tên một file:** quy ước "chèn `src/` vào `sys.path[0]`" của repo này biến **mọi** file trong `src/` trùng tên module chuẩn (`queue`, `types`, `io`, `json`, `logging`...) thành một quả mìn. Đặt tên module mới trong `src/` phải kiểm chéo với thư viện chuẩn trước.
+
+- [ ] **Step 3: Viết `src/job_queue.py`**
 
 ```python
 """Hang doi cham diem, dat tren Postgres dang co.
@@ -743,7 +758,7 @@ def thong_ke(conn) -> dict:
 ```bash
 cd multiagent
 docker compose up -d
-.venv/Scripts/python.exe scripts/test_queue.py
+.venv/Scripts/python.exe scripts/test_job_queue.py
 ```
 
 Expected: 9 dòng `[PASS]` rồi `OK`.
@@ -757,7 +772,7 @@ Expected: `test_skip_locked_hai_worker_khong_giam_chan` **đỏ** với lỗi lo
 - [ ] **Step 6: Commit**
 
 ```bash
-git add multiagent/src/queue.py multiagent/scripts/test_queue.py
+git add multiagent/src/job_queue.py multiagent/scripts/test_job_queue.py
 git commit -m "feat: hang doi review_job tren Postgres voi FOR UPDATE SKIP LOCKED"
 ```
 
@@ -782,7 +797,7 @@ Tạo `multiagent/scripts/test_audit.py`:
 ```python
 """Test nhat ky truy vet run_log (spec 2026-08-07 muc 5.2).
 
-Can Postgres that, cung ly do va cung cach xu ly [SKIP] nhu test_queue.py.
+Can Postgres that, cung ly do va cung cach xu ly [SKIP] nhu test_job_queue.py.
 Chay: .venv\\Scripts\\python.exe scripts\\test_audit.py
 """
 import os
@@ -1376,7 +1391,7 @@ git commit -m "feat: write_back tra bool va them liet_ke_can_cham cho vong doi s
 - Test: `multiagent/scripts/test_worker.py`
 
 **Interfaces:**
-- Consumes: `queue.claim/complete/fail/reclaim_stuck`, `audit.ghi/da_cham`, `drupal_client.write_back`, `graph.build_graph`, `config.load`, `ai_core.USAGE_LOG`, `ai_core.MODEL`
+- Consumes: `job_queue.claim/complete/fail/reclaim_stuck`, `audit.ghi/da_cham`, `drupal_client.write_back`, `graph.build_graph`, `config.load`, `ai_core.USAGE_LOG`, `ai_core.MODEL`
 - Produces: `worker.chay_mot_job(conn, job, *, invoke=None, write_back_fn=None) -> str` (trả `"done"` hoặc `"queued"`/`"failed"`); `worker.vong_lap(...)`
 
 - [ ] **Step 1: Viết test**
@@ -1397,7 +1412,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import audit
 import db
-import queue as q
+import job_queue as q
 import worker
 
 SCHEMA = "vf_test_worker"
@@ -1612,7 +1627,7 @@ import ai_core
 import audit
 import config
 import db
-import queue as q
+import job_queue as q
 import reconcile
 
 NGU_KHI_RONG_GIAY = 2
@@ -1783,7 +1798,7 @@ git commit -m "feat: worker nhan job, goi pipeline, ghi run_log va PATCH ve Drup
 - Test: `multiagent/scripts/test_reconcile.py`
 
 **Interfaces:**
-- Consumes: `drupal_client.liet_ke_can_cham` (Task 5), `queue.enqueue`, `queue.co_job_that_bai` (Task 3)
+- Consumes: `drupal_client.liet_ke_can_cham` (Task 5), `job_queue.enqueue`, `job_queue.co_job_that_bai` (Task 3)
 - Produces: `reconcile.quet(conn, *, liet_ke=None, enqueue_fn=None, co_that_bai=None) -> int`
 
 - [ ] **Step 1: Viết test**
@@ -1916,7 +1931,7 @@ nguyen ly reconciliation loop ma Kubernetes dung.
 Chu ky 5 phut chu khong phai 30 giay: quet thua thi tiet kiem goi API vo ich,
 va do tre xau nhat 5 phut chi xay ra trong tinh huong da hong.
 """
-import queue as q
+import job_queue as q
 
 
 def quet(conn, *, liet_ke=None, enqueue_fn=None, co_that_bai=None) -> int:
@@ -1978,7 +1993,7 @@ git commit -m "feat: vong doi soat bat bai lot, khong hoi sinh job dead-letter"
 - Test: `multiagent/scripts/test_api.py`
 
 **Interfaces:**
-- Consumes: `queue.*` (Task 3)
+- Consumes: `job_queue.*` (Task 3)
 - Produces: `api.app` (FastAPI), `api.kiem_token(authorization: str) -> None`, `api.tao_job(body: JobIn, conn) -> dict`, `api.trang_thai(node_id: str, conn) -> dict`, `api.health(conn) -> dict`
 
 - [ ] **Step 1: Cài phụ thuộc**
@@ -2035,7 +2050,7 @@ os.environ["VF_SERVICE_TOKEN"] = "token-test"
 
 import api
 import db
-import queue as q
+import job_queue as q
 
 SCHEMA = "vf_test_api"
 
@@ -2174,7 +2189,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
 import db
-import queue as q
+import job_queue as q
 
 load_dotenv()
 
@@ -3114,7 +3129,7 @@ Thêm mục mới "Khởi động service và worker trước khi demo" với đ
 
 Trong mục 5, thêm cảnh báo:
 
-> ⚠️ Từ 2026-08-07, bốn bộ test (`test_queue`, `test_audit`, `test_worker`, `test_api`) **cần container Postgres đang chạy**. Không có nó chúng in `[SKIP]` và thoát 0 — **`[SKIP]` không phải `[PASS]`**. Trước khi báo cáo số test xanh, chạy `docker compose ps` xác nhận `vf-agent-db` đang chạy.
+> ⚠️ Từ 2026-08-07, bốn bộ test (`test_job_queue`, `test_audit`, `test_worker`, `test_api`) **cần container Postgres đang chạy**. Không có nó chúng in `[SKIP]` và thoát 0 — **`[SKIP]` không phải `[PASS]`**. Trước khi báo cáo số test xanh, chạy `docker compose ps` xác nhận `vf-agent-db` đang chạy.
 
 - [ ] **Step 8: Sửa `sprint2-report.md` và `editor-ui-design.md`**
 
@@ -3153,7 +3168,7 @@ Mở PR bằng URL (repo này chưa cài `gh`):
 | Chỗ | Sai thế nào | Bắt bằng gì |
 |---|---|---|
 | `node_id` là `nid` thay vì UUID | Job tạo được, `fetch_content` trả 404, job dead-letter sau 3 lần | `test_vf_ai_trigger.php` kiểm định dạng UUID |
-| Thiếu `SKIP LOCKED` | Hai worker chặn nhau, hoặc chấm trùng | `test_queue.py::test_skip_locked_...` (có `lock_timeout` để đỏ thay vì treo) |
+| Thiếu `SKIP LOCKED` | Hai worker chặn nhau, hoặc chấm trùng | `test_job_queue.py::test_skip_locked_...` (có `lock_timeout` để đỏ thay vì treo) |
 | Đối soát hồi sinh job dead-letter | Vòng lặp tiêu tiền API vô hạn | `test_reconcile.py::test_KHONG_hoi_sinh_job_da_dead_letter` |
 | `write_back` vẫn trả `None` | Job báo `done` trong khi Drupal không có kết quả | `test_drupal_client_worker.py` |
 | `USAGE_LOG` không reset | Worker chạy nền phình bộ nhớ, chi phí cộng dồn sai | `test_worker.py::test_usage_log_duoc_reset` |
