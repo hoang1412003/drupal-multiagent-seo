@@ -334,7 +334,7 @@ git commit -m "refactor: chuyen content_hash sang text_utils de dung chung 3 noi
   - `job_queue.claim(conn, worker_id: str) -> dict | None` → `{"id", "node_id", "content_hash", "attempts"}`
   - `job_queue.complete(conn, job_id: int) -> None`
   - `job_queue.fail(conn, job_id: int, loi: str, attempts: int) -> str` → trạng thái mới (`"queued"` hoặc `"failed"`)
-  - `job_queue.reclaim_stuck(conn) -> int` → số job đã thu hồi
+  - `job_queue.reclaim_stuck(conn) -> dict` → `{"queued": n, "failed": m}`. **Đổi từ `int` sau code review**: job mà worker bị giết cứng phải vào `failed` khi vượt `MAX_ATTEMPTS`, nếu không nó được thu hồi về `queued` vô hạn lần — vòng lặp tiêu tiền API. Người vận hành cần phân biệt "thu hồi để chạy lại" với "bỏ cuộc"
   - `job_queue.co_job_that_bai(conn, node_id: str, content_hash: str) -> bool`
   - `job_queue.job_moi_nhat(conn, node_id: str) -> dict | None`
   - `job_queue.thong_ke(conn) -> dict` → `{"queued", "running", "failed"}`
