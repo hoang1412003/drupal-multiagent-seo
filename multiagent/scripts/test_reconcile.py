@@ -81,6 +81,49 @@ def test_tra_ve_so_job_da_xep():
     print("[PASS] tra ve dung so job da xep")
 
 
+def test_mot_node_hong_khong_giet_ca_luot():
+    """Spec muc 9: mot node hong KHONG duoc giet toan bo luot doi soat.
+
+    Neu mot phan tu cua liet_ke() thieu khoa (VD content_hash) -> KeyError.
+    Nhung nhung node con lai PHAI van duoc xu ly - khong duoc bo qua.
+    """
+    da_xep, fn = _gom()
+    reconcile.quet(
+        None,
+        liet_ke=lambda: [
+            {"node_id": "hong", "hash_da_cham": None},  # Thieu content_hash
+            {"node_id": "tot", "content_hash": "moi", "hash_da_cham": "cu"},  # Hop le
+        ],
+        enqueue_fn=fn, co_that_bai=lambda c, n, h: False)
+    # Phan tu "tot" van phai duoc xep, khong bi lung tung vi phan tu truoc no hong
+    assert da_xep == [("tot", "moi", "reconcile")], f"node tot bi lung tung: {da_xep}"
+    print("[PASS] mot node hong khong giet toan bo luot (node tot van duoc xep)")
+
+
+def test_liet_ke_loi_thi_nem_ra_ngoai():
+    """Spec muc 9: neu liet_ke() loi -> de loi vang ra, khong tu nuot.
+
+    liet_ke() hong = nguon du lieu hong (Drupal chet, mang loi). Day la loi
+    nguon - worker.py co try/except bao quanh reconcile.quet() de ghi log
+    dung chung. Neu quet() tu nuot loi thi tao tac them mot tang nuot loi,
+    va khi do khong ai biet doi soat da ngung hoat dong.
+    """
+    da_xep, fn = _gom()
+
+    def liet_ke_loi():
+        raise ValueError("Drupal JSON:API loi")
+
+    try:
+        reconcile.quet(
+            None,
+            liet_ke=liet_ke_loi,
+            enqueue_fn=fn, co_that_bai=lambda c, n, h: False)
+        assert False, "quet() phai de loi vang ra, khong tu nuot"
+    except ValueError as e:
+        assert str(e) == "Drupal JSON:API loi", e
+        print("[PASS] liet_ke() loi thi quet() de loi vang ra (khong nuot)")
+
+
 if __name__ == "__main__":
     failed = False
     for fn_ in (
@@ -89,6 +132,8 @@ if __name__ == "__main__":
         test_chua_cham_bao_gio_thi_xep,
         test_KHONG_hoi_sinh_job_da_dead_letter,
         test_tra_ve_so_job_da_xep,
+        test_mot_node_hong_khong_giet_ca_luot,
+        test_liet_ke_loi_thi_nem_ra_ngoai,
     ):
         try:
             fn_()
