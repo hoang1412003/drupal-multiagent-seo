@@ -14,7 +14,7 @@
 
 - **Ngôn ngữ:** comment và tên hàm nghiệp vụ bằng tiếng Việt **không dấu** trong file `.py` mới (khớp `db.py`, `retrieval.py`); tài liệu `.md` có dấu. Commit message tiếng Việt **không dấu**, **không** có trailer `Co-Authored-By`.
 - **`node_id` LUÔN là UUID của node**, không bao giờ là `nid`. Pipeline gọi `/jsonapi/node/article/{uuid}`.
-- **Không đụng:** `src/graph.py` (trừ đúng một dòng import ở Task 2), 4 agent, `scoring.py`, `retrieval.py`, `config.py`, `state.py`, `embeddings.py`, `db.py`.
+- **Không đụng:** 4 agent, `scoring.py`, `retrieval.py`, `config.py`, `state.py`, `embeddings.py`, `db.py`. `src/graph.py` chỉ đụng ở **Task 2** và chỉ để chuyển `_content_hash` sang `text_utils` — không sửa logic node nào.
 - **Hệ thống không bao giờ tự đổi moderation state của node.** Chỉ ghi 4 field AI.
 - **Test:** script Python thuần trong `multiagent/scripts/`, tên `test_*.py`, in `[PASS]` / `[FAIL]`, kết thúc bằng `sys.exit(1 if failed else 0)`. Không dùng pytest. Chạy bằng `.venv/Scripts/python.exe scripts/test_x.py` từ thư mục `multiagent/`.
 - **Trạng thái job:** đúng 5 giá trị `queued` / `running` / `done` / `failed` / `superseded`.
@@ -46,6 +46,7 @@
 Đây là task **rủi ro cao nhất** nên làm đầu tiên: cả đường đối soát phụ thuộc vào một giả định về môi trường chưa được kiểm. Dự án này đã sai về môi trường nhiều lần vì tin tài liệu thay vì thử trên hệ thống đang chạy.
 
 **Files:**
+- Create: `drupal/scripts/create_workflow.php`
 - Create: `docs/evidence/needs_review_jsonapi_kiem_chung.txt`
 
 **Interfaces:**
@@ -61,22 +62,115 @@ ddev drush pm:list --status=enabled --format=list | grep -E "workflows|content_m
 
 Expected: in ra cả `workflows` và `content_moderation`.
 
-- [ ] **Step 2: Tạo workflow qua giao diện**
+- [ ] **Step 2: Tạo workflow bằng script, KHÔNG bấm qua giao diện**
 
-Mở `http://drupal.ddev.site/admin/config/workflow/workflows`, bấm "Add workflow":
-- Label: `Kiem duyet noi dung`, machine name: `kiem_duyet_noi_dung`, type: `Content moderation`
-- States: giữ `Draft` (draft), `Published` (published); thêm `Needs Review` (machine name **`needs_review`**, Published = không, Default revision = không); thêm `Archived` (archived, Published = không, Default revision = có)
-- Transitions: `Create New Draft` (từ draft/needs_review/published → draft), `Gui duyet` (từ draft → needs_review), `Publish` (từ needs_review/published → published), `Archive` (từ published → archived), `Restore to Draft` (từ archived → draft)
-- This workflow applies to → Content types → tick **Article**
+Theo đúng khuôn mẫu `drupal/scripts/create_ai_fields.php` đã có: chạy được lại nhiều lần, tái lập được trên máy khác, và người chấm đọc file là biết cấu hình gì — bấm tay thì cấu hình chỉ tồn tại trong CSDL của một máy.
+
+Tạo `drupal/scripts/create_workflow.php`:
+
+```php
+<?php
+
+/**
+ * Tạo workflow "Kiểm duyệt nội dung" với state needs_review cho Article.
+ *
+ * State `needs_review` là tín hiệu DUY NHẤT kích hoạt hệ Multi-Agent chấm bài
+ * (spec 2026-08-07 mục 4). Hệ thống AI không nằm trong bất kỳ transition nào:
+ * chấm xong node vẫn ở needs_review, người duyệt tự quyết.
+ *
+ * Chạy lại được nhiều lần (idempotent).
+ *
+ * Chạy: ddev drush php:script scripts/create_workflow.php
+ */
+
+use Drupal\workflows\Entity\Workflow;
+
+$id = 'kiem_duyet_noi_dung';
+
+$workflow = Workflow::load($id);
+if (!$workflow) {
+  $workflow = Workflow::create([
+    'id' => $id,
+    'label' => 'Kiem duyet noi dung',
+    'type' => 'content_moderation',
+  ]);
+  echo "Da tao workflow: $id\n";
+}
+else {
+  echo "Workflow da ton tai, cap nhat lai: $id\n";
+}
+
+$type_plugin = $workflow->getTypePlugin();
+
+// weight: thu tu hien thi trong dropdown, khong phai thu tu chuyen tiep.
+$states = [
+  'draft' => ['label' => 'Draft', 'published' => FALSE, 'default_revision' => FALSE, 'weight' => 0],
+  'needs_review' => ['label' => 'Needs Review', 'published' => FALSE, 'default_revision' => FALSE, 'weight' => 1],
+  'published' => ['label' => 'Published', 'published' => TRUE, 'default_revision' => TRUE, 'weight' => 2],
+  'archived' => ['label' => 'Archived', 'published' => FALSE, 'default_revision' => TRUE, 'weight' => 3],
+];
+foreach ($states as $state_id => $cfg) {
+  if (!$workflow->getTypePlugin()->hasState($state_id)) {
+    $type_plugin->addState($state_id, $cfg['label']);
+  }
+  $type_plugin->setStateTypeConfiguration($state_id, [
+    'published' => $cfg['published'],
+    'default_revision' => $cfg['default_revision'],
+  ]);
+  $workflow->getTypePlugin()->setStateWeight($state_id, $cfg['weight']);
+  echo "  state: $state_id\n";
+}
+
+$transitions = [
+  'create_new_draft' => ['Create New Draft', ['draft', 'needs_review', 'published'], 'draft'],
+  'gui_duyet' => ['Gui duyet', ['draft'], 'needs_review'],
+  'publish' => ['Publish', ['needs_review', 'published'], 'published'],
+  'archive' => ['Archive', ['published'], 'archived'],
+  'khoi_phuc_draft' => ['Khoi phuc ve Draft', ['archived'], 'draft'],
+];
+foreach ($transitions as $tid => [$label, $from, $to]) {
+  if ($type_plugin->hasTransition($tid)) {
+    $type_plugin->setTransitionFromStates($tid, $from);
+  }
+  else {
+    $type_plugin->addTransition($tid, $label, $from, $to);
+  }
+  echo "  transition: $tid\n";
+}
+
+// Ap workflow cho content type Article.
+$type_plugin->addEntityTypeAndBundle('node', 'article');
+
+$workflow->save();
+echo "Da luu workflow. Article gio co state needs_review.\n";
+```
+
+Chạy:
+
+```bash
+cd drupal
+ddev drush php:script scripts/create_workflow.php
+```
+
+Expected: in ra 4 dòng `state:`, 5 dòng `transition:` và dòng cuối `Da luu workflow`.
 
 - [ ] **Step 3: Kiểm workflow đã áp đúng**
 
 ```bash
 cd drupal
 ddev drush config:get workflows.workflow.kiem_duyet_noi_dung type_settings.entity_types
+ddev drush config:get workflows.workflow.kiem_duyet_noi_dung type_settings.states.needs_review
 ```
 
-Expected: có `node: [article]`.
+Expected: lệnh đầu có `node: [article]`; lệnh sau có `published: false` và `default_revision: false`.
+
+Chạy lại script lần thứ hai để xác nhận idempotent:
+
+```bash
+ddev drush php:script scripts/create_workflow.php
+```
+
+Expected: in `Workflow da ton tai, cap nhat lai`, không lỗi.
 
 - [ ] **Step 4: Kiểm chứng JSON:API — ĐÂY LÀ BƯỚC QUYẾT ĐỊNH**
 
@@ -113,8 +207,8 @@ Anh huong: reconcile.py dung filter truc tiep / phai loc phia Python
 - [ ] **Step 6: Commit**
 
 ```bash
-git add docs/evidence/needs_review_jsonapi_kiem_chung.txt
-git commit -m "chore: bat content_moderation, kiem chung JSON:API loc moderation_state"
+git add drupal/scripts/create_workflow.php docs/evidence/needs_review_jsonapi_kiem_chung.txt
+git commit -m "chore: bat content_moderation, tao workflow needs_review bang script"
 ```
 
 ---
