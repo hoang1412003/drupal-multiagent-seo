@@ -26,7 +26,7 @@ if __name__ == "__main__":
             score=50,
             suggestions="test",
         )
-        ok = result is None
+        ok = result is False
     except Exception as e:
         ok = False
         print(f"    loi khong mong doi (le ra khong duoc raise): {e}")

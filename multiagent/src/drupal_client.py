@@ -8,6 +8,8 @@ from typing import Optional
 import requests
 from dotenv import load_dotenv
 
+from text_utils import content_hash
+
 load_dotenv()
 
 BASE_URL = os.environ.get("DRUPAL_BASE_URL", "http://localhost:8080")
@@ -107,25 +109,34 @@ def fetch_content(node_id: str) -> dict:
         requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH, timeout=REQUEST_TIMEOUT_SECONDS
     )
     resource = response.json()["data"]
+    return {"fields": _fields_tu_resource(resource), "raw_content": resource}
+
+
+def _fields_tu_resource(resource: dict) -> dict:
+    """JSON:API resource -> 6 field noi dung. Doc phong thu: field nao chua
+    cau hinh/de trong -> chuoi rong, khong lam sap pipeline.
+
+    Tach rieng vi `liet_ke_can_cham()` cung phai doc y HET cach nay - hai
+    cach doc khac nhau nghia la content_hash hai ben khong khop, va vong doi
+    soat se cham lai vo han moi bai.
+    """
     attributes = resource["attributes"]
     body = attributes.get("body") or {}
     path = attributes.get("path") or {}
-    fields = {
+    return {
         "title": attributes.get("title") or "",
         "body": body.get("value") or "",
         "summary": body.get("summary") or "",
         "url_alias": path.get("alias") or "",
-        # custom field text (xem hướng dẫn setup) - production thật dùng Metatag
         "meta_description": attributes.get("field_meta_description") or "",
         "image_alt": _extract_image_alt(resource, body.get("value") or ""),
     }
-    return {"fields": fields, "raw_content": resource}
 
 
 def write_back(
     node_id: str, status: str, score: Optional[float], suggestions: str,
     report_json: Optional[dict] = None,
-) -> None:
+) -> bool:
     """Ghi ngược kết quả đánh giá AI vào bài viết (PATCH).
 
     `score = None` nghĩa là hệ thống CHƯA chấm được (VD Compliance Agent lỗi
@@ -139,7 +150,8 @@ def write_back(
     Tự retry khi Drupal lỗi mạng/5xx (docs/architecture.md mục 7). Nếu hết
     retry vẫn lỗi, KHÔNG raise - chỉ ghi log cảnh báo, vì ở bước này bài
     viết đã được 4 agent chấm điểm xong (tốn API call thật); để lỗi ghi-ngược
-    làm sập cả script sẽ lãng phí toàn bộ công việc đã làm.
+    làm sập cả script sẽ lãng phí toàn bộ công việc đã làm. Trả `bool` để
+    người gọi biết PATCH có thành công hay không.
     """
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     attributes = {
@@ -167,8 +179,61 @@ def write_back(
             auth=AUTH,
             timeout=REQUEST_TIMEOUT_SECONDS,
         )
+        return True
     except requests.RequestException as e:
-        logging.warning(
-            "Write-back that bai cho node %s: %s",
-            node_id, e,
-        )
+        # VAN khong raise: bai da duoc 4 agent cham xong (ton API call that),
+        # de loi ghi-nguoc lam sap ca script se lang phi toan bo cong da lam.
+        # NHUNG tra ve False, vi im lang o day la bay: worker se bao job
+        # `done` trong khi Drupal khong he co ket qua.
+        logging.warning("Write-back that bai cho node %s: %s", node_id, e)
+        return False
+
+
+# KHONG dung filter[moderation_state]: do la computed field, JSON:API tra
+# HTTP 500 "QueryException: 'moderation_state' not found" (kiem chung
+# 2026-08-07, docs/evidence/needs_review_jsonapi_kiem_chung.txt).
+#
+# Thay bang: loc THO o tang HTTP theo status=0 (chua xuat ban - bao tron
+# draft/needs_review/archived), roi loc TINH phia Python theo attribute
+# `moderation_state` VAN CO trong response.
+_LOC_CAN_CHAM = "filter%5Bstatus%5D=0"
+_STATE_CAN_CHAM = "needs_review"
+
+
+def liet_ke_can_cham(limit: int = 50) -> list:
+    """Cac bai dang o "Needs Review", kem hash hien tai va hash da cham.
+
+    Dung cho vong doi soat (spec muc 6.3). Tra list
+    {node_id, content_hash, hash_da_cham}; `hash_da_cham` = None nghia la
+    chua cham bao gio hoac bao cao doc khong duoc.
+
+    GIOI HAN DA BIET: bai DA XUAT BAN roi tao ban nhap moi dua sang
+    needs_review se khong hien o day, vi JSON:API tra revision MAC DINH (van
+    la ban da xuat ban, do needs_review co default_revision = false). Duong
+    event van bat duoc truong hop do, nen chi mat lop luoi an toan chu khong
+    mat bai. Chi tiet o ke hoach Task 5.
+    """
+    url = (f"{BASE_URL}/jsonapi/node/article?{_LOC_CAN_CHAM}"
+           f"&page%5Blimit%5D={limit}")
+    response = _request_with_retry(
+        requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH,
+        timeout=REQUEST_TIMEOUT_SECONDS,
+    )
+    ra = []
+    for resource in response.json().get("data", []):
+        if resource["attributes"].get("moderation_state") != _STATE_CAN_CHAM:
+            continue      # loc tinh: status=0 con bao ca draft va archived
+        fields = _fields_tu_resource(resource)
+        tho = resource["attributes"].get("field_ai_report_json")
+        try:
+            hash_da_cham = (json.loads(tho) or {}).get("content_hash") if tho else None
+        except (ValueError, AttributeError):
+            # Bao cao hong -> coi nhu chua cham. Khong duoc nem: mot node
+            # hong khong duoc lam chet ca vong doi soat.
+            hash_da_cham = None
+        ra.append({
+            "node_id": resource["id"],
+            "content_hash": content_hash(fields),
+            "hash_da_cham": hash_da_cham,
+        })
+    return ra
