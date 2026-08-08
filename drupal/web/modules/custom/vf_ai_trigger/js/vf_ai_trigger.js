@@ -58,8 +58,21 @@
                 return;
               }
               ve(d.status);
-              if (d.status !== 'none' && d.status !== 'failed' && lan < TOI_DA_LAN) {
+              if (d.status === 'failed') {
+                // Trạng thái cuối, không hỏi tiếp. ve() đã hiện thông báo.
+                return;
+              }
+              // 'none' KHÔNG phải trạng thái cuối — nghĩa là job chưa được
+              // xếp hàng (ví dụ Save vừa chạy, hook chưa kịp gọi service),
+              // vẫn phải hỏi tiếp cho tới khi thấy queued/running/done.
+              if (lan < TOI_DA_LAN) {
                 window.setTimeout(hoi, CHU_KY_MS);
+              }
+              else {
+                // Chạm trần TOI_DA_LAN mà chưa xong: dừng hỏi nhưng phải nói
+                // rõ đã dừng, không được để nguyên chữ "Đang chấm…" mãi mãi
+                // khiến người dùng tưởng hệ thống vẫn đang chạy.
+                el.textContent = '⚠ Đã ngừng theo dõi sau ' + TOI_DA_LAN + ' lần hỏi. Tải lại trang để kiểm tra kết quả mới nhất.';
               }
             })
             .catch(function () {

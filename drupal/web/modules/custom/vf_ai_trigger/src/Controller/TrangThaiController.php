@@ -23,6 +23,18 @@ class TrangThaiController extends ControllerBase {
       // chưa từng được xếp hàng.
       return new JsonResponse(['status' => 'khong_ro'], 200);
     }
+
+    // last_error là message exception thô từ worker Python
+    // (f"{e.__class__.__name__}: {e}" trong worker.py), có thể lộ đường dẫn
+    // nội bộ, URL, chi tiết hạ tầng. Người chỉ có quyền 'xem bao cao ai'
+    // (mặc định là content_editor) chỉ cần biết BÀI CÓ ĐANG ĐƯỢC CHẤM
+    // KHÔNG, không cần và không nên thấy stack trace của hạ tầng. Chỉ ai có
+    // 'dieu khien ai' — cùng ranh giới quyền dự án đã đặt cho thao tác tốn
+    // tiền — mới được xem để chẩn đoán.
+    if (!\Drupal::currentUser()->hasPermission('dieu khien ai')) {
+      unset($kq['last_error']);
+    }
+
     return new JsonResponse($kq, 200);
   }
 
