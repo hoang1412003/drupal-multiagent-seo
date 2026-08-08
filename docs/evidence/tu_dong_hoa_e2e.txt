@@ -99,32 +99,80 @@ KẾT QUẢ 8 TIÊU CHÍ (spec mục 13)
    (status cuối cùng = 'done') - xác nhận toàn bộ đường hồi phục hoạt động,
    không chỉ riêng bước reclaim.
 
-7. Bài luôn thất bại -> dead-letter, đối soát KHÔNG hồi sinh:        ĐẠT
-   Enqueue trực tiếp qua POST /jobs (service HTTP thật, có token thật) với
-   node_id = UUID không tồn tại (00000000-0000-0000-0000-000000000000).
-   Worker claim và gọi fetch_content -> Drupal trả 404 thật
-   ("404 Client Error: Not Found ... /jsonapi/node/article/00000...").
-   Theo dõi thật qua 3 lần thử với backoff (60s rồi 300s, đúng
-   BACKOFF_GIAY=(60,300)):
-     17:12:43 attempts=1 (queued, chờ backoff)
-     17:13:44 attempts=2 (queued, chờ backoff)
-     17:18:49 attempts=3 -> status=failed (dead-letter)
-   Tổng thời gian tới dead-letter: ~6 phút 13 giây (khớp 60s+300s backoff
-   cộng thời gian claim/xử lý).
-   last_error: "HTTPError: 404 Client Error: Not Found for url:
-   http://drupal.ddev.site/jsonapi/node/article/00000000-..."
+7. Bài luôn thất bại -> dead-letter, đối soát KHÔNG hồi sinh:        ĐẠT (chạy lại lần 2, xem ghi chú)
 
-   Xác nhận đối soát KHÔNG hồi sinh: gọi thẳng hàm sản xuất
-   reconcile.quet(conn, liet_ke=<danh_sach_gia_lap_chi_chua_cap_da_dead_letter>)
-   (hàm thật trong src/reconcile.py, không viết lại logic) 3 lần liên tiếp,
-   mỗi lần tiêm một "vòng đối soát thấy bài này vẫn ở needs_review, hash
-   chưa chấm" giả lập cho đúng cặp (node_id, content_hash) đã dead-letter.
-   Kết quả cả 3 lần: "so job them = 0". Đếm review_job cho node UUID giả
-   sau 3 chu kỳ vẫn = 1 (đúng 1 bản ghi dead-letter gốc, không có job mới).
-   Cơ chế chặn: job_queue.co_job_that_bai(conn, node_id, hash) trả về True
-   cho cặp này - xác nhận trực tiếp bằng lệnh gọi hàm, kết quả True.
-   Đây là bằng chứng quan trọng nhất: vòng lặp tiêu tiền API vô hạn đã bị
-   chặn đúng thiết kế.
+   *** LẦN CHẠY ĐẦU (không hợp lệ - GIỮ LẠI để giải thích vì sao đổi cách) ***
+   Lần đầu enqueue job với node_id = UUID không tồn tại
+   (00000000-0000-0000-0000-000000000000). Worker claim, fetch_content ->
+   Drupal trả 404 thật, sau 3 lần thử (backoff 60s/300s) job thành 'failed'
+   lúc 17:18:49. Sau đó gọi reconcile.quet(conn, liet_ke=<danh sách GIẢ LẬP
+   tự viết>) 3 lần, luôn ra "so job them = 0", kết luận ĐẠT.
+   KHÔNG ĐỦ: UUID giả không tồn tại trong Drupal nên
+   drupal_client.liet_ke_can_cham() (hàm thật đối soát dùng để quét) SẼ
+   KHÔNG BAO GIỜ trả về node này - vòng đối soát thật không hề chạm tới nó.
+   Việc "0 job mới" ở lần đầu chỉ chứng minh đối soát không thấy node đó,
+   KHÔNG chứng minh lớp chặn job_queue.co_job_that_bai() thực sự chặn được
+   gì khi đối soát CÓ thấy node. Bản ghi review_job id=39 (UUID giả) vẫn
+   giữ lại trong DB làm dấu vết lịch sử, không xoá.
+
+   *** LẦN CHẠY LẠI (đúng, dùng để kết luận ĐẠT) ***
+   Dùng node THẬT, đang ở needs_review: node 26 "Các loại pin ô tô điện và
+   cách chọn phù hợp" (uuid 3cc05ffa-ac91-4f53-9d80-9b7ac95c88ad).
+
+   Cách đưa job về failed: THỬ cách thật trước - khởi động worker với
+   ANTHROPIC_API_KEY giả (ghi đè biến môi trường tiến trình, .env không đổi)
+   rồi chuyển node 25 sang needs_review. Kết quả: job KHÔNG dead-letter mà
+   vẫn 'done' với điểm suy giảm - vì Brand Voice và Compliance dùng rubric
+   xác định (không gọi LLM, xem docs/... rubric_implementation_state), chỉ
+   content_quality và seo bị thiếu do key sai; missing_agents=2 < 4 nên
+   pipeline coi là "chấm được một phần" theo đúng thiết kế fail-safe
+   (architecture.md mục 6.4), KHÔNG rơi vào failed. run_log xác nhận
+   so_lan_goi (usage) = 0 - không tốn tiền API thật ở bước thử này, nhưng
+   node 25 không dùng được cho phép kiểm dead-letter nữa (job đã 'done').
+   Do đó CHUYỂN SANG CÁCH MÔ PHỎNG (đã ghi rõ theo yêu cầu): trên node 26,
+   để event tạo 1 job 'queued' thật (không có worker nào chạy để nó khỏi bị
+   nhận), rồi UPDATE trực tiếp job đó sang failed/attempts=3 bằng SQL, với
+   last_error nói rõ "[MO PHONG cho tieu chi 7 ...]":
+     UPDATE review_job SET status='failed', attempts=3,
+       last_error='[MO PHONG cho tieu chi 7 - khong that su chay 3 lan
+       that bai qua worker] ...' WHERE id=41;
+
+   Bước bắt buộc - chứng minh đối soát THẬT SỰ NHÌN THẤY node này (phần
+   thiếu ở lần đầu): gọi thẳng drupal_client.liet_ke_can_cham() (không tham
+   số giả lập) và in toàn bộ danh sách. Kết quả thật:
+     So node dang needs_review ma doi soat thay: 6
+     ... (5 node khác) ...
+     node_id=3cc05ffa-ac91-4f53-9d80-9b7ac95c88ad hash_da_cham=None <-- NODE MUC TIEU
+     Node muc tieu 3cc05ffa-ac91-4f53-9d80-9b7ac95c88ad CO trong danh sach doi soat quet: True
+   -> liet_ke_can_cham() CÓ trả về node 26 (hash_da_cham=None đúng vì job
+   dead-letter chưa bao giờ ghi report).
+
+   Bước 1 - chạy reconcile.quet(conn) THẬT (không tiêm gì, dùng
+   co_job_that_bai thật) 3 chu kỳ liên tiếp:
+     chu ky 1: so job them (toan he thong) = 0
+     chu ky 2: so job them (toan he thong) = 0
+     chu ky 3: so job them (toan he thong) = 0
+   review_job cho node 26 sau 3 chu kỳ: vẫn 1 dòng (job 41, failed).
+
+   Bước 2 - VÔ HIỆU HOÁ lớp chặn để chứng minh phép kiểm ở Bước 1 có răng
+   (cùng phương pháp Task 3 Step 5 tạm bỏ SKIP LOCKED): gọi
+   reconcile.quet(conn, co_that_bai=lambda *a: False) đúng 1 chu kỳ. Kết
+   quả thật:
+     so job them (toan he thong) khi lop chan bi vo hieu hoa = 1
+     review_job cho node 26: id=41 (failed) + id=42 MỚI (queued, source=
+     'reconcile') xuất hiện ngay.
+   -> Xác nhận: khi lớp chặn BẬT (Bước 1) -> 0 job mới trong 3 chu kỳ; khi
+   lớp chặn bị TẮT (Bước 2) -> có job mới ngay ở chu kỳ đầu tiên. Đây là
+   bằng chứng lớp chặn job_queue.co_job_that_bai() chính là thứ đang ngăn
+   vòng lặp tiêu tiền API vô hạn, không phải vì đối soát "không nhìn thấy"
+   gì.
+
+   Bước 3 - dọn: xoá job test id=42 vừa tạo ở Bước 2 ngay sau khi xác nhận.
+   review_job cho node 26 sau khi dọn: chỉ còn 1 dòng - (41, 'failed', 3).
+
+   KẾT LUẬN: ĐẠT, dựa trên lần chạy lại - lớp chặn dead-letter đã được
+   chứng minh hoạt động đúng ở mức hệ thống, không phải "xanh vì không
+   kiểm gì".
 
 8. Toàn bộ bộ test xanh:                                            37/37
    Từ multiagent/ (docker compose ps xác nhận vf-agent-db đang chạy khoẻ):
@@ -142,12 +190,17 @@ CHI PHÍ THẬT (cộng từ run_log.usage x đơn giá Claude Haiku 4.5)
 Đơn giá model claude-haiku-4-5-20251001: $1,00 / 1M token vào,
 $5,00 / 1M token ra.
 
-Chi phí lần chạy này (cộng tất cả 5 dòng run_log ở tiêu chí 5, KHÔNG tính
-lần bị giết giữa chừng ở tiêu chí 6 vì lần đó không tới được audit.ghi() nên
-không có bản ghi run_log - đúng thiết kế "chốt chặn tiền", chi phí đó chưa
-ghi được và đã tính bù vào lần chấm lại sau khi worker khởi động lại):
+Chi phí lần chạy này (cộng tất cả dòng run_log, KHÔNG tính lần bị giết giữa
+chừng ở tiêu chí 6 vì lần đó không tới được audit.ghi() nên không có bản
+ghi run_log - đúng thiết kế "chốt chặn tiền", chi phí đó chưa ghi được và
+đã tính bù vào lần chấm lại sau khi worker khởi động lại):
 
-Chi phí lần chạy này (cộng từ run_log.usage): $0,0779
+run_log hiện có 6 dòng: 5 dòng gốc (tiêu chí 1-4) + 1 dòng phát sinh khi
+chạy lại tiêu chí 7 (node 25, worker chạy với ANTHROPIC_API_KEY giả -
+usage=[] nên KHÔNG cộng thêm đồng nào; xác nhận bằng cách cộng lại tổng
+token trước và sau, kết quả không đổi).
+
+Chi phí lần chạy này (cộng từ run_log.usage, cả 6 dòng): $0,0779
 
 (Không in số token thô theo yêu cầu bảo mật của bài; số liệu trên là tổng
 đã quy đổi ra tiền.)
@@ -181,8 +234,13 @@ GHI CHÚ KHÁC
 ------------------------------------------------------------------
 
 - kb_chunk: kiểm lại cuối cùng vẫn đủ 1132 dòng (không đụng tới trong suốt
-  quá trình chạy).
-- Không có tiêu chí nào KHÔNG ĐẠT trong lần chạy này.
-- Toàn bộ 8 tiêu chí dùng đúng 4 node bài mẫu (nid 21, 22, 23, 24 trong 6
-  bài seed) + 1 node UUID giả (tiêu chí 7) - trong phạm vi "2-3 bài" ngân
-  sách cho phép, không có bài nào bị chấm thừa ngoài kế hoạch.
+  quá trình chạy, kể cả lần chạy lại tiêu chí 7).
+- Không có tiêu chí nào KHÔNG ĐẠT trong lần chạy cuối cùng (sau khi sửa
+  tiêu chí 7).
+- Node dùng qua toàn bộ 8 tiêu chí: nid 21, 22, 23, 24 (tiêu chí 1-6) +
+  1 UUID giả (lần chạy đầu tiêu chí 7, không hợp lệ, xem ghi chú) + nid 25
+  (thử cách thật cho tiêu chí 7, không dùng được vì fail-safe không cho
+  dead-letter, usage=[] nên không tốn tiền) + nid 26 (lần chạy lại tiêu chí
+  7, hợp lệ). Tổng cộng thêm 2 node ngoài kế hoạch "2-3 bài" ban đầu vì lần
+  đầu làm tiêu chí 7 phải sửa lại - không có bài nào trong số này tốn tiền
+  API thật ngoài 5 lần chấm đã tính trong tổng $0,0779 ở trên.
