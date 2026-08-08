@@ -1,7 +1,7 @@
 # Thiết kế UI báo cáo trong giao diện soạn bài Drupal
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** **đã triển khai (2026-08-04)** — mức P1, xem `docs/superpowers/specs/2026-08-03-vf-ai-review-module-design.md`. Ba chỗ trong tài liệu này đã được đính chính sau khi chạy thật: mục 2 (field vốn không hiện trên form), mục 4.4 (cơ chế `changed` hỏng), mục 5 (suy giảm mềm không tự động)
+**Trạng thái:** **đã triển khai (2026-08-04)** — mức P1, xem `docs/superpowers/specs/2026-08-03-vf-ai-review-module-design.md`. Bốn chỗ trong tài liệu này đã được đính chính sau khi chạy thật: mục 2 (field vốn không hiện trên form), mục 4.4 (cơ chế `changed` hỏng), mục 5 (suy giảm mềm không tự động), mục 4.3 và mục 9 (2026-08-07: khối "đang chấm" và nút "chấm lại" chuyển từ polling sang event-driven, xem `architecture.md` mục 9)
 **Liên quan:** `docs/architecture.md` mục 2.3 (write-back) và mục 9 (tự động hóa); `docs/roadmap.md` Sprint 2 ("Dựng UI báo cáo cơ bản")
 
 ---
@@ -103,7 +103,7 @@ Không dùng `'#attributes' => ['readonly' => 'readonly']`: đó chỉ là thu�
 
 ### 4.3. Ba trạng thái phải phân biệt
 
-Hệ thống chạy theo polling worker (`architecture.md` mục 9.2), có độ trễ ~30 giây, nên "chưa có kết quả" là trạng thái bình thường chứ không phải lỗi:
+**Cập nhật (2026-08-07):** hệ thống nay chạy event-driven (`architecture.md` mục 9.1), độ trễ thật đo được từ Save tới lúc job bắt đầu chạy là ~2 giây (không còn ~30 giây của polling); vòng đối soát mục 9.2 chỉ còn là lưới an toàn chạy mỗi 300 giây. Dù độ trễ đã ngắn hơn nhiều, "chưa có kết quả" (job đang `queued`/`running`) vẫn là trạng thái bình thường trong vài giây đầu, chứ không phải lỗi:
 
 | Trạng thái | Điều kiện | Hiển thị |
 |---|---|---|
@@ -231,11 +231,12 @@ Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức Aggregator
 
 ## 9. Chưa chốt
 
+**Cập nhật (2026-08-07):** khối trạng thái "⏳ Đang chấm" và nút "Chấm lại" **đã làm**, không còn nằm trong danh sách chưa chốt — xem `architecture.md` mục 9 và spec `superpowers/specs/2026-08-07-needs-review-automation-design.md`. Module `vf_ai_trigger` (route `/vf-ai/status/{node}` cho JS poll, route `/vf-ai/rescore/{node}` cho nút chấm lại, cả hai đòi quyền `xem bao cao ai` / `dieu khien ai`) và `js/vf_ai_trigger.js` (poll mỗi 3 giây, tự nạp lại trang khi thấy `done`, tối đa 40 lần hỏi) đã chạy thật trong lần kiểm E2E (`docs/evidence/tu_dong_hoa_e2e.txt`).
+
 | Hạng mục | Ghi chú |
 |---|---|
-| Vòng phản hồi người duyệt | Khối báo cáo là chỗ tự nhiên để đặt ô *"Không đồng ý với đánh giá này"* + lý do. Đây là hạng mục backlog riêng; ở đây chỉ ghi nhận điểm móc |
-| Hiển thị lịch sử các lần chấm | Hiện chỉ lưu kết quả mới nhất (ghi đè). Gắn với hạng mục audit trail |
-| Nút "chấm lại ngay" | Bỏ qua chờ polling ~30 giây. Nice-to-have, cần thêm route + quyền |
+| Vòng phản hồi người duyệt | Khối báo cáo là chỗ tự nhiên để đặt ô *"Không đồng ý với đánh giá này"* + lý do. Đây là hạng mục backlog riêng, vẫn **chưa triển khai**; không còn bị chặn bởi nhật ký truy vết (`operations.md` mục 4) - ở đây chỉ ghi nhận điểm móc |
+| Hiển thị lịch sử các lần chấm | Hiện chỉ lưu kết quả mới nhất trong 4 field AI (ghi đè). `run_log` (Postgres, đã triển khai) đã giữ lịch sử đầy đủ ở tầng dữ liệu; việc còn lại là hiển thị nó trong editor |
 | Đa ngôn ngữ giao diện | Chuỗi hiển thị hiện hard-code tiếng Việt; Drupal có `t()` sẵn nhưng chưa cần trong phạm vi hiện tại |
 
 ---

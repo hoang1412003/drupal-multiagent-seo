@@ -539,28 +539,51 @@ Trước khi cho hệ thống AI có quyền quyết định publish/từ chối
 
 - Chỉ khi kết quả shadow-test đạt mức đồng thuận đủ tin cậy mới cân nhắc giao quyền quyết định thật cho hệ thống AI - tránh rủi ro để AI tự quyết định publish/từ chối ngay từ đầu khi chưa được kiểm chứng trên dữ liệu thực tế.
 
-## 9. Tự động hóa quy trình (trạng thái hiện tại → mục tiêu sản phẩm cuối kỳ)
+## 9. Tự động hóa quy trình (đã triển khai — event-driven + đối soát an toàn)
 
 Đề tài yêu cầu node ở trạng thái "Needs Review" **tự động** được chấm và trả báo cáo **ngay trong giao diện editor**. Tự động hóa vì vậy là **deliverable bắt buộc của sản phẩm cuối kỳ**, không phải hạng mục tương lai.
 
-### 9.1. Trạng thái hiện tại
+**Trạng thái (cập nhật 2026-08-07): đã triển khai và chạy thật end-to-end.** Thiết kế đầy đủ: `docs/superpowers/specs/2026-08-07-needs-review-automation-design.md`. Bằng chứng chạy thật (8/8 tiêu chí hoàn thành, mục 13 của spec): `docs/evidence/tu_dong_hoa_e2e.txt`.
 
-Pipeline (`build_graph().invoke(node_id)`) đã chạy đúng end-to-end nhưng còn được **kích hoạt thủ công** (chạy script với `node_id`). Chưa có cơ chế tự phát hiện bài mới cần chấm, và trạng thái "Needs Review" chưa được cấu hình (hiện chỉ có Draft/Published).
+### 9.1. Đường chính: event-driven
 
-### 9.2. Mục tiêu cuối kỳ: lớp kích hoạt tự động (polling worker)
+1. **Content Moderation** đã bật trên content type Article, thêm state "Needs Review".
+2. Module Drupal thứ hai `vf_ai_trigger` (tách khỏi `vf_ai_review` vì module kia cam kết chỉ đọc) bắt sự kiện đổi `moderation_state` sang `needs_review`, tự chặn ở tầng so `content_hash` **trước khi** gọi service (Save nhiều lần không sửa gì thì không tốn tiền API, không tạo job thừa), rồi POST job sang service Python.
+3. Service HTTP (`multiagent/src/api.py`, FastAPI, `uvicorn ... --port 8900`) chỉ nhận và trả trạng thái - không chấm, không nạp model - nên trả lời trong vài ms trong lúc Drupal đang chờ editor bấm Save. Job được đẩy vào bảng `review_job` (Postgres), nhận bằng `SELECT ... FOR UPDATE SKIP LOCKED` nên nhiều worker không giẫm chân nhau.
+4. `multiagent/src/worker.py` lấy job, gọi `build_graph().invoke()` (không đổi gì so với pipeline cũ), ghi `run_log` rồi write-back 4 field AI.
+5. JS trong khối báo cáo poll `GET /jobs/by-node/{node_id}` mỗi 3 giây, hiện "⏳ Đang chấm…" rồi tự nạp lại trang khi thấy `done` - không cần F5.
 
-Bổ sung 2 mắt xích để đạt tự động hóa:
+Đo thật trên node `f657ee57` (tiêu chí 1, `docs/evidence/tu_dong_hoa_e2e.txt`): lưu lúc 09:37:18.698 UTC → job chuyển `running` lúc 09:37:20.304 UTC (**1,6 giây**) → hoàn tất `done` lúc 09:37:34.540 UTC (**~15,8 giây** từ Save tới có kết quả).
 
-1. **Bật Content Moderation** trên content type Article, thêm state "Needs Review" (cấu hình Drupal, không cần code).
-2. **Polling worker** - một tiến trình Python chạy nền, định kỳ (ví dụ mỗi 30 giây) truy vấn JSON:API tìm node đang ở "Needs Review" mà chưa có kết quả AI mới, rồi gọi `build_graph().invoke()` chấm và ghi ngược. Tái sử dụng toàn bộ code pipeline hiện có; chỉ thêm vòng lặp "phát hiện việc".
+**Giới hạn đã biết khi lấy nội dung qua JSON:API:** `filter[moderation_state]=...` **không lọc được** - Drupal 10.6 coi `moderation_state` là computed field, Entity Query không dựng được điều kiện SQL cho nó, kết quả thật là **HTTP 500** (`QueryException: 'moderation_state' not found`, xem `docs/evidence/needs_review_jsonapi_kiem_chung.txt`). Cách né: gọi `filter[status]=0` (field thật, không computed) rồi lọc `moderation_state` phía Python trên thuộc tính đã có sẵn trong từng item trả về. Áp dụng cho cả `vf_ai_trigger` và vòng đối soát ở mục 9.2.
 
-Từ góc nhìn người dùng, luồng thành: writer chuyển bài sang "Needs Review" → trong ~30 giây worker tự chấm → báo cáo per-field hiện trong editor. Không ai phải chạy lệnh tay.
+### 9.2. Lưới an toàn: vòng đối soát (polling)
+
+Event một mình chỉ đảm bảo *at-most-once* nếu bên gửi không tự retry - một cú POST thất bại (service tắt, mất mạng) là một bài lọt vĩnh viễn mà không ai biết. Vì vậy vẫn giữ một vòng quét định kỳ, nhưng **vai trò đã đổi: không còn là đường kích hoạt chính, mà là lưới an toàn** chạy song song với event.
+
+`worker.py` cứ mỗi 300 giây gọi `reconcile.quet(conn)`: liệt kê node đang `needs_review` (qua đường JSON:API mô tả ở mục 9.1), so `content_hash` với `run_log`, node nào chưa có kết quả cho đúng nội dung hiện tại thì tạo job mới với `source='reconcile'`. Cùng một khoá idempotency `(node_id, content_hash)` với đường event nên hai đường không chấm trùng.
+
+Đo thật (tiêu chí 2): tắt service lúc 16:42:37, chuyển node `e3af1db4` sang `needs_review` lúc 16:43:29-31 khi service vẫn tắt (log Drupal ghi cảnh báo cURL, **không** làm sập lượt lưu), bật lại service lúc 16:44:55, vòng đối soát tạo `review_job id=34` lúc 09:46:56 UTC (giờ máy ~16:46:56) - tổng **~3 phút 28 giây (207,6 giây)** từ Save tới lúc đối soát bắt được, trong ngưỡng ≤5 phút.
+
+**Giới hạn cố ý của vòng đối soát này**, xem `technical-debt.md` mục 6.
 
 ### 9.3. Quan hệ với kiến trúc production thật
 
-Ở quy mô production, trigger thường là **event-driven**: Drupal phát sự kiện khi đổi trạng thái → đẩy job vào **message queue** (SQS/RabbitMQ/Redis) → worker tiêu thụ. Lý do phải qua queue: chấm bằng LLM mất nhiều giây/bài, không thể gọi đồng bộ và bắt Drupal đứng chờ.
+Nay đường kích hoạt chính **đã là event-driven**, không còn polling. Phần còn thiếu so với production thật chỉ còn hai chỗ, cả hai đều **cố ý chưa làm** (`technical-debt.md` nhóm C, spec mục 11): một message broker riêng (SQS/RabbitMQ/Redis - Postgres + `SKIP LOCKED` đóng đúng vai trò đó ở quy mô vài chục bài/ngày) và container hoá phía Python.
 
-Điểm mấu chốt: **worker xử lý trong production chính là worker polling ở mục 9.2** - phần "bộ não" giống hệt. Khác biệt duy nhất là *cách job đến với worker* (queue đẩy vào so với worker tự đi hỏi). Vì vậy chọn polling cho bản triển khai là **quyết định có cân nhắc** (đủ đạt mục tiêu tự động, thuần Python, ít rủi ro tiến độ), và khi cần nâng lên production chỉ đổi lớp trigger đặt trước worker - không phải viết lại worker.
+Điểm mấu chốt vẫn đúng nguyên như bản thiết kế gốc: **worker xử lý trong production chính là worker này** - phần "bộ não" (gọi `build_graph().invoke()`, ghi `run_log`, write-back) giống hệt bất kể job tới từ event hay từ đối soát. Khác biệt duy nhất là *cách job đến với worker*. Vì vậy khi cần nâng lên production (đổi Postgres queue sang broker riêng, đóng gói container) chỉ đổi lớp trước worker - không phải viết lại worker.
+
+### 9.4. Bảng trạng thái từng mắt xích
+
+| Mắt xích | Trạng thái |
+|---|---|
+| Content Moderation "Needs Review" | Đã bật |
+| Đường event (Drupal → service → hàng đợi) | Đã làm |
+| Hàng đợi bền + retry + dead-letter | Đã làm, Postgres |
+| Vòng đối soát (polling) | Đã làm, vai trò lưới an toàn |
+| Nhật ký truy vết | Đã làm, bảng `run_log` |
+| Message broker riêng | Cố ý chưa làm, lý do ở spec mục 2 Q1 |
+| Container hoá phía Python | Cố ý chưa làm, lý do ở spec mục 11 |
 
 ## 10. Kết luận và bước tiếp theo
 
