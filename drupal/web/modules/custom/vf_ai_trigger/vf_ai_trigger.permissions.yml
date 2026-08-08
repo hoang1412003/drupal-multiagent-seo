@@ -1,0 +1,7 @@
+'xem bao cao ai':
+  title: 'Xem báo cáo đánh giá AI'
+  description: 'Xem kết quả chấm điểm và trạng thái hàng đợi.'
+'dieu khien ai':
+  title: 'Điều khiển hệ thống đánh giá AI'
+  description: 'Bấm chấm lại một bài. Tách riêng khỏi quyền xem vì thao tác này tiêu tiền API thật.'
+  restrict access: true

@@ -1,0 +1,11 @@
+vf_ai_trigger.trang_thai:
+  path: '/vf-ai/status/{node}'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\TrangThaiController::trangThai'
+  requirements:
+    _permission: 'xem bao cao ai'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node

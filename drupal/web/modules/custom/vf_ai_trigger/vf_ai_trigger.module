@@ -9,6 +9,8 @@
  * hook_ENTITY_TYPE_insert/update, không phải một class EventSubscriber.
  */
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\vf_ai_review\AiReportRenderer;
 
@@ -72,4 +74,36 @@ function _vf_ai_trigger_ban_job(NodeInterface $node): void {
 
   // uuid() chứ KHÔNG phải id(): pipeline gọi /jsonapi/node/article/{uuid}.
   \Drupal::service('vf_ai_trigger.client')->guiJob($node->uuid(), $hash);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Chèn ô trạng thái vào chính khối báo cáo của vf_ai_review. Nếu khối đó
+ * không tồn tại (module kia bị tắt) thì không chèn gì — không đổ lỗi, không
+ * làm trắng form soạn bài.
+ */
+function vf_ai_trigger_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'article' || $node->isNew() || !isset($form['vf_ai_review'])) {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('xem bao cao ai')) {
+    return;
+  }
+
+  $url = Url::fromRoute('vf_ai_trigger.trang_thai', ['node' => $node->id()])
+    ->toString();
+
+  $form['vf_ai_review']['vf_ai_trang_thai'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#value' => '',
+    '#attributes' => [
+      'class' => ['vf-ai-trang-thai'],
+      'data-vf-ai-status-url' => $url,
+    ],
+    '#weight' => -100,
+  ];
+  $form['#attached']['library'][] = 'vf_ai_trigger/trang_thai';
 }

@@ -1,0 +1,6 @@
+trang_thai:
+  js:
+    js/vf_ai_trigger.js: {}
+  dependencies:
+    - core/drupal
+    - core/once
