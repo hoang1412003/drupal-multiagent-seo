@@ -2983,16 +2983,23 @@ Trong `vf_ai_trigger_form_node_form_alter()`, ngay sau khối `vf_ai_trang_thai`
 
 ```php
   if (\Drupal::currentUser()->hasPermission('dieu khien ai')) {
+    // KHÔNG tự sinh token. Route đã khai `_csrf_token: 'TRUE'`, và với route
+    // như vậy `Url::fromRoute()->toString()` ĐÃ TỰ NỐI SẴN `?token=...` qua
+    // RouteProcessorCsrf. Tự sinh thêm rồi nối `?token=` lần nữa tạo URL có
+    // HAI `?token=` liên tiếp -> route luôn trả 403 bất kể quyền.
+    //
+    // Kiểm chứng tận dòng code (2026-08-08): `Url::toString()` mặc định
+    // `$collect_bubbleable_metadata = FALSE` -> `UrlGenerator.php:277` truyền
+    // `NULL` xuống -> `RouteProcessorCsrf::processOutbound()` đi nhánh sinh
+    // token THẬT ngay, không phải placeholder lazy-builder. Và nó tính token
+    // theo đúng `ltrim($route->getPath(), '/')` — cùng công thức mà
+    // `CsrfAccessCheck::access()` dùng để xác thực.
+    //
+    // Bản đầu của kế hoạch này tự sinh token kèm `ltrim()`. Chỗ `ltrim()` đó
+    // đúng về ngữ nghĩa nhưng vô nghĩa: cả đoạn tự sinh token lẽ ra không nên
+    // tồn tại. Giữ ghi chú này để không ai "thêm lại cho chắc".
     $url_cham_lai = Url::fromRoute('vf_ai_trigger.cham_lai', ['node' => $node->id()])
       ->toString();
-    // ltrim BẮT BUỘC: CsrfAccessCheck::access() xác thực token theo
-    // `ltrim($route->getPath(), '/')` đã thay tham số, tức "vf-ai/rescore/2"
-    // KHÔNG có gạch chéo đầu. Sinh token từ chuỗi có gạch chéo thì token
-    // không bao giờ khớp và route luôn trả 403 — mà thông báo lỗi chỉ nói
-    // "'csrf_token' URL query argument is invalid", không hề gợi ý nguyên
-    // nhân là một ký tự thừa. Kiểm chứng 2026-08-07 tại
-    // web/core/lib/Drupal/Core/Access/CsrfAccessCheck.php:59.
-    $token = \Drupal::csrfToken()->get(ltrim($url_cham_lai, '/'));
     $form['vf_ai_review']['vf_ai_cham_lai'] = [
       '#type' => 'html_tag',
       '#tag' => 'button',
@@ -3000,7 +3007,8 @@ Trong `vf_ai_trigger_form_node_form_alter()`, ngay sau khối `vf_ai_trang_thai`
       '#attributes' => [
         'type' => 'button',
         'class' => ['button', 'vf-ai-cham-lai'],
-        'data-vf-ai-rescore-url' => $url_cham_lai . '?token=' . $token,
+        // URL đã kèm sẵn token, không nối thêm gì.
+        'data-vf-ai-rescore-url' => $url_cham_lai,
       ],
       '#weight' => 100,
     ];
@@ -3208,4 +3216,5 @@ Mở PR bằng URL (repo này chưa cài `gh`):
 | Token đặt vào config entity | Lộ secret vào git khi export config | Rà `config:export` trước khi commit |
 | JS reload khi thấy `done` mà không nhớ đã thấy `running` | **Mọi bài đã chấm đều tự tải lại vô hạn**, không mở ra sửa được | Mở form một bài đã có báo cáo, trang phải đứng yên |
 | Bỏ `running` khỏi index dedup | write_back PATCH → hook bắn lại → job mới → chấm lại → PATCH… vòng lặp tự chấm vô hạn | Chấm một bài, đếm `review_job` của node đó phải đúng 1 |
-| Token CSRF sinh từ đường dẫn có `/` đầu | Nút "Chấm lại" **luôn** trả 403, thông báo lỗi không gợi ý nguyên nhân | Bấm nút thật, phải ra 202 |
+| Tự sinh token CSRF cho route đã khai `_csrf_token` | URL có **hai** `?token=` → nút "Chấm lại" **luôn** 403, thông báo lỗi không gợi ý nguyên nhân | Bấm nút thật bằng phiên đăng nhập thật, phải ra 202 |
+| Chặn quyền chỉ bằng cách ẩn nút | Người có quyền gọi thẳng URL vẫn tiêu tiền API trên node sai loại | Gọi route với node không phải `article`, phải bị chặn ở server |
