@@ -106,4 +106,32 @@ function vf_ai_trigger_form_node_form_alter(array &$form, FormStateInterface $fo
     '#weight' => -100,
   ];
   $form['#attached']['library'][] = 'vf_ai_trigger/trang_thai';
+
+  if (\Drupal::currentUser()->hasPermission('dieu khien ai')) {
+    // KHÔNG tự sinh token bằng \Drupal::csrfToken()->get(ltrim(...)) rồi nối
+    // '?token=' như bản kế hoạch ban đầu: route đã khai '_csrf_token: TRUE'
+    // nên RouteProcessorCsrf::processOutbound() đã TỰ ĐỘNG nối sẵn '?token=' *
+    // đúng bằng cùng công thức ltrim($route->getPath(), '/') + thay tham số*
+    // ngay trong Url::fromRoute(...)->toString() — xem
+    // web/core/lib/Drupal/Core/Access/RouteProcessorCsrf.php:44. Nối thêm
+    // token thủ công lần nữa tạo ra URL có HAI '?token=' liền nhau
+    // ("...?token=AAA?token=BBB"): trình duyệt chỉ nhận '?' đầu tiên là dấu
+    // phân cách, nên $_GET['token'] nhận nguyên chuỗi rác "AAA?token=BBB",
+    // không khớp cái nào, và route LUÔN trả 403. Lỗi này phát hiện được bằng
+    // cách soi thẳng HTML sinh ra khi kiểm bước 4 của Task 11 — kiểm chứng
+    // 2026-08-08.
+    $url_cham_lai = Url::fromRoute('vf_ai_trigger.cham_lai', ['node' => $node->id()])
+      ->toString();
+    $form['vf_ai_review']['vf_ai_cham_lai'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => 'Chấm lại',
+      '#attributes' => [
+        'type' => 'button',
+        'class' => ['button', 'vf-ai-cham-lai'],
+        'data-vf-ai-rescore-url' => $url_cham_lai,
+      ],
+      '#weight' => 100,
+    ];
+  }
 }

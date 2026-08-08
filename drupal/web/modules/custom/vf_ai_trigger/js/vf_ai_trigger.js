@@ -82,6 +82,29 @@
 
         hoi();
       });
+
+      // Nút "Chấm lại": ép chấm lại thủ công, tốn tiền API thật nên chỉ hiện
+      // với người có quyền 'dieu khien ai' (xem vf_ai_trigger.module).
+      var nut = once('vf-ai-cham-lai', '[data-vf-ai-rescore-url]', context);
+      nut.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          btn.disabled = true;
+          btn.textContent = 'Đang gửi…';
+          fetch(btn.getAttribute('data-vf-ai-rescore-url'), {
+            method: 'POST',
+            credentials: 'same-origin'
+          })
+            .then(function (r) {
+              if (r.status === 202) {
+                window.location.reload();
+              }
+              else {
+                btn.textContent = 'Gửi thất bại';
+              }
+            })
+            .catch(function () { btn.textContent = 'Gửi thất bại'; });
+        });
+      });
     }
   };
 })(Drupal, once);
