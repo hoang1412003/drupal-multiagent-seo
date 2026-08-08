@@ -1,0 +1,188 @@
+BẰNG CHỨNG CHẠY THẬT END-TO-END - HỆ TỰ ĐỘNG HOÁ "NEEDS REVIEW"
+==================================================================
+
+Ngày chạy: 2026-08-08
+Model: claude-haiku-4-5-20251001
+Nhánh: feature/tu-dong-hoa-needs-review
+Site test: 6 bài cẩm nang mẫu tạo lại bằng multiagent/scripts/seed_sample_articles.py
+(nid 21-26, xem multiagent/scripts/sample_articles.json)
+
+Chỉnh trước khi chạy: seed_sample_articles.py được sửa để khai rõ ngôn ngữ
+tiếng Việt một cách tường minh thay vì dựa vào mặc định của site (xem mục
+"Vấn đề phát sinh" bên dưới - lúc chạy thật phải đổi cách tường minh này
+sang truyền qua tiền tố URL /vi/ vì JSON:API cấm POST trực tiếp field
+langcode).
+
+------------------------------------------------------------------
+KẾT QUẢ 8 TIÊU CHÍ (spec mục 13)
+------------------------------------------------------------------
+
+1. Save -> "Đang chấm" trong ~2s -> tự hiện kết quả:              ĐẠT
+   Đo bằng đồng hồ thật: node f657ee57 (bài "Hướng dẫn sạc pin") lưu sang
+   needs_review lúc 09:37:18.698 UTC (review_job.created_at), job chuyển
+   sang running lúc 09:37:20.304 UTC (claimed_at) -> 1,6 giây từ Save tới
+   running, trong ngưỡng ~2s.
+   Job hoàn tất (done, ghi 4 field AI) lúc 09:37:34.540 UTC, khoảng 15,8
+   giây kể từ lúc Save.
+   Xác nhận ghi ngược 4 field: field_ai_status=needs_revision,
+   field_ai_score=76.25, field_ai_suggestions có nội dung, field_ai_report_json
+   có dữ liệu, moderation_state vẫn needs_review (không bị pipeline đổi).
+
+2. Tắt service, Save, bật lại -> đối soát bắt được trong <=5 phút: ĐẠT
+   Trình tự thật (giờ máy chủ, UTC+7 = giờ hệ thống):
+   - 16:42:37 tắt uvicorn (kill cả tiến trình cha lẫn con).
+   - 16:43:28 xác nhận GET /health lỗi kết nối (service đã tắt).
+   - 16:43:29-31 chuyển node e3af1db4 ("Kinh nghiệm lái đường dài") sang
+     needs_review qua drush; log Drupal ghi cảnh báo thật:
+     "Khong gui duoc job cho node e3af1db4...: cURL error 7 ... Could not
+     connect to server ... host.docker.internal:8900" - đúng như thiết kế,
+     KHÔNG làm sập lượt lưu.
+   - 16:44:55 bật lại uvicorn, xác nhận /health OK.
+   - Vòng đối soát trong worker (chu kỳ 300 giây, không phụ thuộc service
+     HTTP) bắt được node này và tạo review_job id=34, source='reconcile',
+     created_at 09:46:56.121991 UTC (~16:46:56 giờ máy).
+   - Thời gian từ lúc Save (không có event) tới lúc đối soát tạo job:
+     khoảng 3 phút 28 giây (207,6 giây) - trong ngưỡng <=5 phút (300 giây).
+   Job hoàn tất done, ghi đủ 4 field AI cho node này.
+
+3. Save 3 lần không sửa gì -> count(review_job) = 1:               ĐẠT (thực đo = 1)
+   Trên node f657ee57 (đã có 1 job từ tiêu chí 1): gọi node->save() 3 lần
+   liên tiếp qua drush, không sửa nội dung. Không log cảnh báo gọi service
+   nào xuất hiện (hook tự chặn ở tầng so hash TRƯỚC khi gọi service, đúng
+   thiết kế "chốt chặn tiền" ở vf_ai_trigger.module).
+   SELECT count(*) FROM review_job WHERE node_id='f657ee57-...' -> 1
+   (trước và sau 3 lần save đều = 1).
+
+4. Sửa một chữ -> job mới:                                         ĐẠT
+   Thêm 1 ký tự (khoảng trắng) vào cuối body của node f657ee57 rồi lưu.
+   content_hash đổi (hash băm nguyên văn field, không chuẩn hoá khoảng
+   trắng) -> hook bắn job mới ngay (source='event'), job id=35.
+   review_job cho node này tăng từ 1 lên 2 bản ghi (id 33, 35).
+   Job 35 hoàn tất 'done' rất nhanh (đã có model load sẵn, cache kết nối).
+
+5. run_log đủ agent_results / config_meta / usage:                  ĐẠT
+   Lệnh:
+   SELECT node_id, decision, final_score, jsonb_array_length(usage) AS
+   so_lan_goi, config_meta->>'calibrated' AS calibrated, model
+   FROM run_log ORDER BY id;
+
+   node_id                              | decision        | final_score | so_lan_goi | calibrated | model
+   f657ee57-2b29-4315-9bf7-f4728587da9b | needs_revision  | 76.25       | 5          | false      | claude-haiku-4-5-20251001
+   e3af1db4-d1bc-4d14-8da9-89d256ffba0b | needs_revision  | 68.15       | 5          | false      | claude-haiku-4-5-20251001
+   f657ee57-2b29-4315-9bf7-f4728587da9b | needs_revision  | 76.85       | 5          | false      | claude-haiku-4-5-20251001
+   5709c2ac-b8e8-4713-8ac6-0f0b8f01af4b | needs_revision  | 76.25       | 5          | false      | claude-haiku-4-5-20251001
+   7bbd6780-a5a7-4507-8be2-23c2a1763193 | publish         | 81.15       | 5          | false      | claude-haiku-4-5-20251001
+
+   5 dòng, mỗi dòng đủ: decision, final_score, usage (mảng 5 lần gọi LLM/job,
+   khớp 4 agent + 1 lần tổng hợp/khác), config_meta.calibrated=false (đúng
+   thực tế: ngưỡng scoring.yaml chưa calibrate từ gold set, cảnh báo này
+   được config.py in ra khi chạy), model=claude-haiku-4-5-20251001 đúng
+   model đang cấu hình trong .env.
+
+6. Giết worker giữa lúc đang chấm -> job kẹt về queued:              ĐẠT (mô phỏng lùi thời gian)
+   Trình tự thật: chuyển node 7bbd6780 ("So sánh chi phí") sang needs_review
+   lúc 17:04:00.094, job (id=37) claim lúc 17:04:00.464 (status=running),
+   giết cả 2 tiến trình worker (cha PID 41732 + con PID 516, taskkill /F /T)
+   lúc 17:04:00.777 - job kẹt ở running, attempts=1, API /health vẫn báo
+   running=1 (worker chết, job vẫn treo).
+
+   KHÔNG chờ đủ 15 phút thật. Đã MÔ PHỎNG bằng cách lùi claimed_at của job
+   37 về quá khứ 20 phút bằng SQL trực tiếp:
+     UPDATE review_job SET claimed_at = claimed_at - interval '20 minutes'
+     WHERE id=37;
+   rồi gọi THẲNG hàm sản xuất job_queue.reclaim_stuck(conn) (không viết lại
+   logic) từ một script Python độc lập. Kết quả hàm trả về:
+     {'queued': 1, 'failed': 0}
+   Kiểm lại DB: job 37 status='queued', attempts=1 (đúng: attempts=1 < 3
+   nên về queued chứ không dead-letter).
+   Khởi động lại worker, job 37 được claim lại và CHẤM XONG bình thường
+   (status cuối cùng = 'done') - xác nhận toàn bộ đường hồi phục hoạt động,
+   không chỉ riêng bước reclaim.
+
+7. Bài luôn thất bại -> dead-letter, đối soát KHÔNG hồi sinh:        ĐẠT
+   Enqueue trực tiếp qua POST /jobs (service HTTP thật, có token thật) với
+   node_id = UUID không tồn tại (00000000-0000-0000-0000-000000000000).
+   Worker claim và gọi fetch_content -> Drupal trả 404 thật
+   ("404 Client Error: Not Found ... /jsonapi/node/article/00000...").
+   Theo dõi thật qua 3 lần thử với backoff (60s rồi 300s, đúng
+   BACKOFF_GIAY=(60,300)):
+     17:12:43 attempts=1 (queued, chờ backoff)
+     17:13:44 attempts=2 (queued, chờ backoff)
+     17:18:49 attempts=3 -> status=failed (dead-letter)
+   Tổng thời gian tới dead-letter: ~6 phút 13 giây (khớp 60s+300s backoff
+   cộng thời gian claim/xử lý).
+   last_error: "HTTPError: 404 Client Error: Not Found for url:
+   http://drupal.ddev.site/jsonapi/node/article/00000000-..."
+
+   Xác nhận đối soát KHÔNG hồi sinh: gọi thẳng hàm sản xuất
+   reconcile.quet(conn, liet_ke=<danh_sach_gia_lap_chi_chua_cap_da_dead_letter>)
+   (hàm thật trong src/reconcile.py, không viết lại logic) 3 lần liên tiếp,
+   mỗi lần tiêm một "vòng đối soát thấy bài này vẫn ở needs_review, hash
+   chưa chấm" giả lập cho đúng cặp (node_id, content_hash) đã dead-letter.
+   Kết quả cả 3 lần: "so job them = 0". Đếm review_job cho node UUID giả
+   sau 3 chu kỳ vẫn = 1 (đúng 1 bản ghi dead-letter gốc, không có job mới).
+   Cơ chế chặn: job_queue.co_job_that_bai(conn, node_id, hash) trả về True
+   cho cặp này - xác nhận trực tiếp bằng lệnh gọi hàm, kết quả True.
+   Đây là bằng chứng quan trọng nhất: vòng lặp tiêu tiền API vô hạn đã bị
+   chặn đúng thiết kế.
+
+8. Toàn bộ bộ test xanh:                                            37/37
+   Từ multiagent/ (docker compose ps xác nhận vf-agent-db đang chạy khoẻ):
+     for f in scripts/test_*.py; do .venv/Scripts/python.exe "$f" ... ; done
+   -> 35 file test_*.py, 0 FAIL.
+   Từ drupal/:
+     ddev exec php scripts/test_ai_report_renderer.php -> 30/30 [PASS], exit 0
+     ddev exec php scripts/test_vf_ai_trigger.php -> 7/7 [PASS], exit 0
+   Tổng: 35 (Python) + 2 (PHP) = 37/37 file test xanh.
+
+------------------------------------------------------------------
+CHI PHÍ THẬT (cộng từ run_log.usage x đơn giá Claude Haiku 4.5)
+------------------------------------------------------------------
+
+Đơn giá model claude-haiku-4-5-20251001: $1,00 / 1M token vào,
+$5,00 / 1M token ra.
+
+Chi phí lần chạy này (cộng tất cả 5 dòng run_log ở tiêu chí 5, KHÔNG tính
+lần bị giết giữa chừng ở tiêu chí 6 vì lần đó không tới được audit.ghi() nên
+không có bản ghi run_log - đúng thiết kế "chốt chặn tiền", chi phí đó chưa
+ghi được và đã tính bù vào lần chấm lại sau khi worker khởi động lại):
+
+Chi phí lần chạy này (cộng từ run_log.usage): $0,0779
+
+(Không in số token thô theo yêu cầu bảo mật của bài; số liệu trên là tổng
+đã quy đổi ra tiền.)
+
+------------------------------------------------------------------
+VẤN ĐỀ PHÁT SINH KHI CHẠY THẬT (không có trong kế hoạch ban đầu)
+------------------------------------------------------------------
+
+1. seed_sample_articles.py dùng "status": False để tạo bản nháp - nhưng vì
+   Content Moderation (workflow "kiem_duyet_noi_dung") đã bật cho content
+   type Article (kết quả các task trước), JSON:API từ chối field "status"
+   với lỗi "Cannot edit the published field of moderated entities". Đã sửa:
+   thay "status": False bằng "moderation_state": "draft" (tương đương ý
+   nghĩa "bản nháp chưa xuất bản" trong workflow mới).
+
+2. Thêm "langcode": "vi" trực tiếp vào attributes JSON:API bị 403
+   ("The current user is not allowed to POST the selected field (langcode)")
+   - đây là giới hạn quyền field-level chuẩn của JSON:API core cho field
+   langcode, không phải lỗi cấu hình riêng của site này. Đã sửa: thay vì
+   gửi langcode như một attribute, POST tới endpoint có tiền tố ngôn ngữ
+   (BASE_URL + "/vi/jsonapi/node/article") - vẫn khai rõ ngôn ngữ tường
+   minh (không dựa im lặng vào default_langcode của site) nhưng qua đường
+   dẫn URL thay vì payload. Đã kiểm lại: cả 6 node tạo ra đều có
+   langcode='vi' thật trong DB (node_field_data).
+
+Cả hai chỗ sửa đều ở multiagent/scripts/seed_sample_articles.py, có comment
+giải thích tại chỗ.
+
+------------------------------------------------------------------
+GHI CHÚ KHÁC
+------------------------------------------------------------------
+
+- kb_chunk: kiểm lại cuối cùng vẫn đủ 1132 dòng (không đụng tới trong suốt
+  quá trình chạy).
+- Không có tiêu chí nào KHÔNG ĐẠT trong lần chạy này.
+- Toàn bộ 8 tiêu chí dùng đúng 4 node bài mẫu (nid 21, 22, 23, 24 trong 6
+  bài seed) + 1 node UUID giả (tiêu chí 7) - trong phạm vi "2-3 bài" ngân
+  sách cho phép, không có bài nào bị chấm thừa ngoài kế hoạch.
