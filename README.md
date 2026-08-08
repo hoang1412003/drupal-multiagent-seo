@@ -24,7 +24,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 
 ## Cấu trúc project
 
-Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc (Drupal CMS ↔ hệ Multi-Agent AI, nối qua JSON:API — xem sơ đồ ở `docs/architecture.md`):
+Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc (Drupal CMS ↔ hệ Multi-Agent AI, nối qua JSON:API **và** qua service HTTP tự động hoá — xem sơ đồ ở `docs/architecture.md` mục 9). Phía Python nay chạy như **ba tiến trình**: service (`api.py`, nhận job), worker (`worker.py`, chấm job) và các script chạy tay (seed dữ liệu, test, dựng KB) — không còn chỉ là script gọi một lần:
 
 ```
 drupal-multiagent-seo/
@@ -32,11 +32,16 @@ drupal-multiagent-seo/
 │   ├── .ddev/                    # cấu hình DDEV (project-type=drupal10, docroot=web)
 │   ├── scripts/                  # tạo field + test lớp render (PHP thuần)
 │   └── web/modules/custom/
-│       └── vf_ai_review/         # module hiển thị báo cáo AI trong giao diện soạn bài
+│       ├── vf_ai_review/         # CHỈ ĐỌC: hiển thị báo cáo AI trong giao diện soạn bài,
+│       │                          # không tính điểm, không gọi API, không sửa dữ liệu node
+│       └── vf_ai_trigger/        # module thứ hai, tách riêng vì nói chuyện với service:
+│                                  # bắt sự kiện Needs Review, gọi service HTTP, route
+│                                  # "chấm lại" - đây là module duy nhất phía Drupal được
+│                                  # phép tạo hiệu ứng phụ (side effect)
 │
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
-│   ├── docker-compose.yml        # Postgres + pgvector (kho vector, tách khỏi Drupal)
+│   ├── docker-compose.yml        # Postgres + pgvector (kho vector + hàng đợi + run_log, tách khỏi Drupal)
 │   ├── .venv/
 │   ├── src/
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
@@ -55,7 +60,12 @@ drupal-multiagent-seo/
 │   │   │   ├── compliance.py       # đã triển khai (LLM + blacklist + RAG fact-check CP3) - Sprint 2
 │   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
 │   │   │   └── brand_voice.py       # đã triển khai (rubric BV1-BV7 + RAG) - Sprint 2
-│   │   └── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
+│   │   ├── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
+│   │   ├── api.py                # service HTTP: chỉ nhận job + trả trạng thái, không chấm gì
+│   │   ├── job_queue.py          # hàng đợi Postgres (SKIP LOCKED, retry, dead-letter)
+│   │   ├── worker.py             # vòng lặp lấy job, gọi graph.py, ghi run_log, write-back
+│   │   ├── reconcile.py          # vòng đối soát định kỳ - lưới an toàn cho đường event
+│   │   └── audit.py              # nhật ký truy vết, ghi bảng run_log (Postgres)
 │   └── scripts/                  # seed dữ liệu mẫu + test thủ công
 │
 ├── docs/                         # tài liệu chung, tham chiếu cả 2 phía
@@ -63,7 +73,7 @@ drupal-multiagent-seo/
 │   ├── architecture.md           # thiết kế hệ thống Multi-Agent
 │   └── roadmap.md                # lộ trình 3 sprint
 │
-└── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY
+└── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
 
 ## Setup
