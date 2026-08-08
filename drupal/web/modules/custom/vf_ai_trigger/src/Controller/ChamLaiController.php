@@ -16,6 +16,20 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 class ChamLaiController extends ControllerBase {
 
   public function chamLai(NodeInterface $node): JsonResponse {
+    // Route nhận bất kỳ node: \d+, không lọc theo bundle ở tầng routing.
+    // Nút chỉ vẽ trên node 'article' (vf_ai_trigger_form_node_form_alter()
+    // chặn từ trước), nhưng ẨN NÚT KHÔNG PHẢI LÀ PHÂN QUYỀN: người có quyền
+    // 'dieu khien ai' vẫn gọi thẳng được URL cho bất kỳ node id nào. Nếu
+    // không chặn ở đây, họ ép chấm được một node không phải article — tiêu
+    // tiền API thật cho một bài mà pipeline không được thiết kế để chấm
+    // (_vf_ai_trigger_ban_job() cũng từ chối âm thầm với lý do tương tự).
+    // Dùng 403 (không phải 404): node THẬT SỰ TỒN TẠI, chỉ là thao tác này
+    // không áp dụng cho bundle của nó — đây là từ chối hành động, không
+    // phải "không tìm thấy tài nguyên".
+    if ($node->bundle() !== 'article') {
+      return new JsonResponse(['ok' => FALSE], 403);
+    }
+
     $hash = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
     $ok = \Drupal::service('vf_ai_trigger.client')
       ->guiJob($node->uuid(), $hash, 'manual', TRUE);

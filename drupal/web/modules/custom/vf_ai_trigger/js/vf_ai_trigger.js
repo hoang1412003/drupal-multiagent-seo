@@ -99,10 +99,17 @@
                 window.location.reload();
               }
               else {
-                btn.textContent = 'Gửi thất bại';
+                // Bật lại nút: lỗi có thể tạm thời (mất mạng, service vừa
+                // khởi động lại) - không bật lại thì người dùng phải tải lại
+                // cả trang mới bấm được lần nữa, mà không biết vì sao.
+                btn.disabled = false;
+                btn.textContent = 'Gửi thất bại, bấm để thử lại';
               }
             })
-            .catch(function () { btn.textContent = 'Gửi thất bại'; });
+            .catch(function () {
+              btn.disabled = false;
+              btn.textContent = 'Gửi thất bại, bấm để thử lại';
+            });
         });
       });
     }
