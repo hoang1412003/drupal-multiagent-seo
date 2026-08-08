@@ -13,7 +13,7 @@ import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
 
 import db
@@ -79,9 +79,17 @@ def health(conn) -> dict:
     return {"ok": True, **q.thong_ke(conn)}
 
 
-@app.post("/jobs", status_code=202, dependencies=[Depends(kiem_token)])
-def post_jobs(body: JobIn):
-    return tao_job(body, _conn())
+@app.post("/jobs", dependencies=[Depends(kiem_token)])
+def post_jobs(body: JobIn, response: Response):
+    """Ma HTTP theo dung ket qua: spec muc 5.4 quy dinh job trung phai la 200,
+    chi job MOI moi la 202. Truoc day status_code=202 khai bao co dinh tren
+    decorator ep moi phan hoi thanh cong thanh 202 - dung, vi ServiceClient
+    ben Drupal khong doc ma HTTP (chi bat Throwable), nhung sai hop dong da
+    ghi trong spec va se bay bat ky client nao sau nay phan biet "job moi"
+    voi "job trung" bang ma HTTP."""
+    kq = tao_job(body, _conn())
+    response.status_code = 200 if kq["status"] == "duplicate" else 202
+    return kq
 
 
 @app.get("/jobs/by-node/{node_id}", dependencies=[Depends(kiem_token)])

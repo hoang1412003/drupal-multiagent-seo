@@ -48,4 +48,31 @@ kiem('node_id la UUID chu khong phai so nguyen',
   (bool) preg_match('/^[0-9a-f-]{36}$/i', $payload['node_id']),
   $payload['node_id']);
 
+// 4. Co goi service hay khong, dua tren so sanh voi content_hash da luu
+//    trong field_ai_report_json cua node. Phai khop y het logic trong
+//    _vf_ai_trigger_ban_job() (vf_ai_trigger.module): chan CHINH write_back()
+//    cua Multi-Agent tu bat lai job khi PATCH 4 field AI ve - PATCH do cung
+//    la mot lan node->save() nen kich hoat lai hook_node_update.
+function se_goi_service(?string $tho_json, string $hash_hien_tai): bool {
+  $report = (new AiReportRenderer())->decode($tho_json);
+  if ($report !== NULL && ($report['content_hash'] ?? NULL) === $hash_hien_tai) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+$bao_cao_trung = json_encode(['content_hash' => $hash]);
+kiem('hash trung voi report da luu (write_back vua PATCH xong) -> KHONG goi service',
+  se_goi_service($bao_cao_trung, $hash) === FALSE);
+
+$bao_cao_lech = json_encode(['content_hash' => 'hash-khac-vi-noi-dung-da-sua']);
+kiem('hash lech voi report da luu (noi dung vua sua) -> CO goi service',
+  se_goi_service($bao_cao_lech, $hash) === TRUE);
+
+kiem('chua cham (field_ai_report_json rong) -> CO goi service',
+  se_goi_service('', $hash) === TRUE);
+
+kiem('JSON hong -> van CO goi service, khong duoc vi loi du lieu ma bo cham bai',
+  se_goi_service('{khong phai json hop le', $hash) === TRUE);
+
 exit($that_bai ? 1 : 0);

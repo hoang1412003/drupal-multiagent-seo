@@ -10,6 +10,7 @@
  */
 
 use Drupal\node\NodeInterface;
+use Drupal\vf_ai_review\AiReportRenderer;
 
 /**
  * State kích hoạt chấm điểm. Trùng machine name của workflow đã tạo.
@@ -40,7 +41,8 @@ function vf_ai_trigger_node_update(NodeInterface $node): void {
  * lại hiện băng "nội dung đã thay đổi". Hệ thống tự mâu thuẫn với chính mình.
  *
  * Lưu mà không sửa gì thì không tốn đồng nào: content_hash không đổi nên
- * index dedup bên service chặn ở tầng INSERT.
+ * index dedup bên service chặn ở tầng INSERT. Nhưng chặn ở tầng INSERT vẫn
+ * tốn một cú gọi mạng — xem so hash bên dưới để chặn sớm hơn, ngay ở Drupal.
  */
 function _vf_ai_trigger_ban_job(NodeInterface $node): void {
   if ($node->bundle() !== 'article') {
@@ -51,9 +53,23 @@ function _vf_ai_trigger_ban_job(NodeInterface $node): void {
     return;
   }
 
-  $hash = \Drupal\vf_ai_review\AiReportRenderer::contentHash(
-    vf_ai_review_hash_fields($node)
-  );
+  $hash = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
+
+  // Bỏ qua nếu nội dung hiện tại đã được chấm đúng hash này rồi. Chặn CHÍNH
+  // write_back() của Multi-Agent tự bắn lại job: PATCH 4 field AI cũng là
+  // một lần node->save(), nên hook này chạy lại ngay bên trong lượt ghi kết
+  // quả. Không chặn thì mỗi lần chấm xong tốn thêm một cú gọi mạng, và vì
+  // hook chạy đồng bộ trong save() nên nó cộng luôn vào thời gian phản hồi
+  // của chính PATCH write_back mà worker đang chờ.
+  //
+  // JSON hỏng (có dữ liệu nhưng decode() trả NULL) thì coi như CHƯA CHẤM và
+  // vẫn gọi service — không được vì một field hỏng mà bỏ chấm bài.
+  $tho = _vf_ai_review_gia_tri($node, 'field_ai_report_json');
+  $report = (new AiReportRenderer())->decode($tho);
+  if ($report !== NULL && ($report['content_hash'] ?? NULL) === $hash) {
+    return;
+  }
+
   // uuid() chứ KHÔNG phải id(): pipeline gọi /jsonapi/node/article/{uuid}.
   \Drupal::service('vf_ai_trigger.client')->guiJob($node->uuid(), $hash);
 }
