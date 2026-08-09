@@ -208,7 +208,7 @@ Theo đúng mẫu `db.dam_bao_bang()` đang dùng cho `kb_chunk`: `queue.dam_bao
 | Endpoint | Vào | Ra |
 |---|---|---|
 | `POST /jobs` | `{node_id, content_hash, source, force?}` | `202 {job_id, status:"queued"}` · `200 {status:"duplicate", job_id}` · `401` · `422` |
-| `GET /jobs/by-node/{node_id}` | — | `200 {status, job_id, scored_at, attempts, last_error}` với `status` ∈ `queued/running/done/failed/none` |
+| `GET /jobs/by-node/{node_id}` | — | `200 {status, job_id, updated_at, attempts, last_error}` với `status` ∈ `queued/running/done/failed/none` |
 | `GET /health` | — | `200 {ok, queued, running, failed}` |
 
 `GET /jobs/by-node` trả về job **mới nhất theo `created_at`** của node đó; không có job nào thì `status: "none"`. Đây là thứ JS trong khối báo cáo poll để biết khi nào nạp lại.
@@ -336,7 +336,7 @@ Phân quyền tách riêng đúng `architecture.md` mục 5.7: **`xem bao cao ai
 | Worker chết giữa job | Job kẹt `running` → thu hồi sau 15 phút | Mục 6.2 |
 | Quá 3 lần thất bại | `status='failed'` + `last_error`, dừng hẳn | Dead-letter. Không thử vô hạn, lỗi vẫn tra được |
 
-Backoff: **1 phút → 5 phút → 15 phút**, rồi dead-letter.
+Backoff: **1 phút → 5 phút**, rồi dead-letter (3 lần thất bại, `job_queue.MAX_ATTEMPTS = 3`, `BACKOFF_GIAY = (60, 300)`).
 
 ### 7.1. `write_back` đang nuốt lỗi — sửa tối thiểu
 
@@ -377,12 +377,12 @@ Giữ phong cách hiện có: script Python thuần, in `[PASS]`, `sys.exit(1)`.
 
 | Test | Kiểm gì |
 |---|---|
-| `test_queue.py` | dedup chặn job trùng; **`SKIP LOCKED` — hai claim đồng thời phải ra hai job khác nhau**; thu hồi job kẹt; backoff tăng đúng; dead-letter sau 3 lần |
-| `test_api.py` | token sai → 401; payload thiếu → 422; enqueue trùng → không sinh job thứ hai; `force:true` → `superseded` + job mới |
-| `test_worker.py` | tiêm graph giả (không gọi LLM): job done ghi `run_log`; `write_back` False → job về `queued`; **đã có `run_log` → không gọi lại graph**; `USAGE_LOG` được reset |
+| `test_job_queue.py` | dedup chặn job trùng; **`SKIP LOCKED` — hai claim đồng thời phải ra hai job khác nhau**; thu hồi job kẹt; backoff tăng đúng; dead-letter sau 3 lần; `enqueue(force=False)` trên cặp đã dead-letter → không tạo job |
+| `test_api.py` | token sai → 401; payload thiếu → 422; enqueue trùng → không sinh job thứ hai; `force:true` → `superseded` + job mới; dead-letter → `dead_letter` (409) |
+| `test_worker.py` | tiêm graph giả (không gọi LLM): job done ghi `run_log`; `write_back` False → job về `queued`; **đã có `run_log` → không gọi lại graph**; `USAGE_LOG` được reset; `run_log.content_hash` ghi theo hash nội dung THẬT đã chấm, không theo hash job |
 | `test_reconcile.py` | hash khớp → không enqueue; hash khác → enqueue; **đã có job `failed` cùng hash → KHÔNG enqueue** (6.3.1); JSON:API lỗi → không làm sập vòng lặp |
 | `test_audit.py` | bản ghi đủ trường; không lọt token/API key |
-| `test_ai_trigger.php` | EventSubscriber dựng đúng payload; `content_hash` khớp `content_hash_fixture.json` |
+| `test_vf_ai_trigger.php` | payload dựng đúng hình dạng và đúng `content_hash`, khớp `content_hash_fixture.json`; điều kiện gọi/không gọi service theo so sánh hash |
 
 ### 9.1. Một tính chất của bộ test bị đổi — phải nói thẳng
 
