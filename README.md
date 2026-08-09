@@ -87,10 +87,23 @@ ddev start
 
 Site chạy tại `http://drupal.ddev.site`. Nếu tạo project từ đầu, xem quy trình đầy đủ ở `docs/architecture.md` mục 2 (research.md có link tham khảo DDEV quickstart chính thức).
 
-Trong Drupal admin, cần bật thêm:
-- `/admin/config/services/jsonapi` — tick "Accept all JSON:API create, read, update, and delete operations"
-- `/admin/modules` — bật module "HTTP Basic Authentication"
-- Tạo field `field_meta_description` trên content type Article (`/admin/structure/types/manage/article/fields`) — kiểu "Text (plain, long)"
+Rồi chạy đủ 4 lệnh sau — **chạy lại được nhiều lần**, không sợ hỏng nếu lỡ chạy hai lần:
+
+```
+cd drupal
+ddev drush en jsonapi basic_auth workflows content_moderation -y   # module core
+ddev drush php:script scripts/create_ai_fields.php                 # 5 field AI trên Article
+ddev drush php:script scripts/create_workflow.php                  # workflow có state needs_review
+ddev drush en vf_ai_review vf_ai_trigger -y                        # 2 module tùy chỉnh
+ddev drush role:perm:add content_editor 'xem bao cao ai'
+ddev drush role:perm:add administrator 'dieu khien ai'
+```
+
+Hai việc còn lại phải làm bằng tay trong giao diện admin:
+- `/admin/config/services/jsonapi` — tick "Accept all JSON:API create, read, update, and delete operations". Không tick thì Multi-Agent đọc được nội dung nhưng **không ghi ngược kết quả về được**.
+- `/admin/config/regional/language` — đảm bảo **tiếng Việt là ngôn ngữ mặc định**. Phạm vi dự án là nội dung tiếng Việt và KB RAG lọc theo `langcode = 'vi'`; site mặc định tiếng Anh sẽ tạo bài sai ngôn ngữ.
+
+Vì sao dùng script thay vì bấm tay: cấu hình bấm tay chỉ tồn tại trong CSDL của một máy, đọc code không biết được gì. Hai script trên là nguồn sự thật cho cấu hình đó — xem `drupal/scripts/`.
 
 **Phía Python:**
 
@@ -98,7 +111,7 @@ Trong Drupal admin, cần bật thêm:
 cd multiagent
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
-cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL
+cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL, VF_SERVICE_TOKEN
 
 docker compose up -d                                # Postgres + pgvector (kho vector + hàng đợi + run_log)
 .venv\Scripts\python.exe src\kb\build_kb.py         # KB fact-check (4 chunk)
@@ -107,6 +120,20 @@ docker compose up -d                                # Postgres + pgvector (kho v
 
 KB là **dữ liệu dẫn xuất** — không nằm trong git, dựng lại từ `specs.json` và
 `docs/brand/corpus/`. Chi tiết: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục 2.
+
+**Chuỗi bí mật phải đặt ở HAI nơi, giống hệt nhau.** Sinh một lần:
+
+```
+.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+rồi dán **cùng giá trị đó** vào:
+1. `.env` — dòng `VF_SERVICE_TOKEN=`
+2. `drupal/web/sites/default/settings.php` — thêm `$settings['vf_ai_service_token'] = '<chuỗi vừa sinh>';`
+
+Đặt ở `settings.php` chứ **không** phải config của Drupal: config export ra file YAML là lộ bí mật vào git. Cả hai file đều đã nằm trong `.gitignore`.
+
+⚠️ **Hai nơi lệch nhau là triệu chứng khó chẩn đoán nhất của hệ thống này:** mọi request từ Drupal sang service trả 401, nhưng Drupal **không hiện lỗi gì cho người soạn bài**, và bài vẫn được chấm — chỉ là chậm vài phút vì phải chờ vòng đối soát thay vì chạy ngay. Nhìn bên ngoài giống "hệ thống chạy đúng, chỉ hơi chậm". Kiểm khi nghi ngờ: `ddev drush watchdog:show` tìm dòng 401 từ `vf_ai_trigger`.
 
 **Chạy tự động hoá "Needs Review"** (service nhận job từ Drupal + worker chấm, cần chạy song song, mỗi lệnh một cửa sổ terminal — chi tiết và lệnh kiểm `/health`: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục "Khởi động service và worker trước khi demo"):
 
