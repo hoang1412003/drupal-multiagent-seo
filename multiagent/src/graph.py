@@ -209,6 +209,7 @@ def _format_issue(issue) -> str:
         return str(issue)
     return "; ".join(f"{k}: {v}" for k, v in issue.items() if k != "field")
 
+
 def _issue_to_json(agent_key: str, issue: dict) -> dict:
     """Một issue/flag của agent -> một mục trong báo cáo JSON.
 
