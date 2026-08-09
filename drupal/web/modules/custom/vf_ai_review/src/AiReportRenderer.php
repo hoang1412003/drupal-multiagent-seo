@@ -24,9 +24,9 @@ class AiReportRenderer {
   /**
    * Field tham gia tính content_hash, ĐÚNG THỨ TỰ NÀY.
    *
-   * Phải khớp _HASH_FIELDS trong multiagent/src/graph.py. Lệch là băng cảnh
-   * báo "nội dung đã thay đổi" hiện sai vĩnh viễn - có test hợp đồng dùng
-   * chung file multiagent/scripts/content_hash_fixture.json để bắt.
+   * Phải khớp _HASH_FIELDS trong multiagent/src/text_utils.py. Lệch là băng
+   * cảnh báo "nội dung đã thay đổi" hiện sai vĩnh viễn - có test hợp đồng
+   * dùng chung file drupal/scripts/content_hash_fixture.json để bắt.
    */
   private const HASH_FIELDS = ['title', 'body', 'summary', 'meta_description'];
 

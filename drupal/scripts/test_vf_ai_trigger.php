@@ -53,6 +53,15 @@ kiem('node_id la UUID chu khong phai so nguyen',
 //    _vf_ai_trigger_ban_job() (vf_ai_trigger.module): chan CHINH write_back()
 //    cua Multi-Agent tu bat lai job khi PATCH 4 field AI ve - PATCH do cung
 //    la mot lan node->save() nen kich hoat lai hook_node_update.
+//
+// GIOI HAN DA BIET: ham se_goi_service() ben duoi CHEP LAI logic cua
+// _vf_ai_trigger_ban_job() thay vi goi thang ham that trong module. Danh
+// doi co ly do - file nay chay bang PHP thuan, KHONG bootstrap Drupal (xem
+// docstring dau file), ma _vf_ai_trigger_ban_job() nhan NodeInterface va
+// goi \Drupal::service(...) nen khong the goi truc tiep o day duoc. Cai gia
+// phai tra: module doi logic dieu kien goi service (vf_ai_trigger.module)
+// ma KHONG sua theo o day thi test nay van xanh trong khi hanh vi that da
+// khac - phai tu doi chieu bang mat hai noi nay moi bien.
 function se_goi_service(?string $tho_json, string $hash_hien_tai): bool {
   $report = (new AiReportRenderer())->decode($tho_json);
   if ($report !== NULL && ($report['content_hash'] ?? NULL) === $hash_hien_tai) {

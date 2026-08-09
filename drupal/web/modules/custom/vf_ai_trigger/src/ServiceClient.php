@@ -6,6 +6,7 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Site\Settings;
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\ClientException;
 
 /**
  * Gọi service Multi-Agent. Là NƠI DUY NHẤT module này chạm mạng.
@@ -49,6 +50,12 @@ class ServiceClient {
 
   /**
    * Xếp một job. TRUE nghĩa là service đã nhận (kể cả khi nó báo trùng).
+   *
+   * 409 (dead_letter) KHÔNG phải lỗi: service đã hiểu đúng request, chỉ là
+   * cặp (node_id, content_hash) này đã bỏ cuộc trước đó (hết MAX_ATTEMPTS) -
+   * chặn có chủ đích, không phải sự cố mạng/server. Bắt riêng bằng
+   * ClientException TRƯỚC catch(\Throwable) chung, ghi mức notice (không
+   * phải warning) và trả FALSE mà không làm Guzzle ném lên trên.
    */
   public function guiJob(string $uuid, string $hash, string $source = 'event', bool $force = FALSE): bool {
     try {
@@ -63,6 +70,19 @@ class ServiceClient {
         ],
       ]);
       return TRUE;
+    }
+    catch (ClientException $e) {
+      if ($e->getResponse()->getStatusCode() === 409) {
+        $this->logger()->notice('Node @uuid dang o trang thai dead-letter (da het luot thu), can bam "Cham lai" neu muon thu lai.', [
+          '@uuid' => $uuid,
+        ]);
+        return FALSE;
+      }
+      $this->logger()->warning('Khong gui duoc job cho node @uuid: @loi', [
+        '@uuid' => $uuid,
+        '@loi' => $e->getMessage(),
+      ]);
+      return FALSE;
     }
     catch (\Throwable $e) {
       $this->logger()->warning('Khong gui duoc job cho node @uuid: @loi', [

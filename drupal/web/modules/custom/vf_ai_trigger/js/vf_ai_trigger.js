@@ -76,7 +76,17 @@
               }
             })
             .catch(function () {
-              el.textContent = '⚠ Không liên lạc được với dịch vụ chấm điểm.';
+              // Một request rớt giữa lúc chấm (mất mạng thoáng qua, service
+              // restart) không được coi là trạng thái cuối — nếu không thì ô
+              // trạng thái đứng yên ở thông báo này mãi mãi dù job chấm xong
+              // ngay sau đó. Hỏi tiếp giống nhánh 'khong_ro' phía trên.
+              ve('khong_ro');
+              if (lan < TOI_DA_LAN) {
+                window.setTimeout(hoi, CHU_KY_MS);
+              }
+              else {
+                el.textContent = '⚠ Đã ngừng theo dõi sau ' + TOI_DA_LAN + ' lần hỏi. Tải lại trang để kiểm tra kết quả mới nhất.';
+              }
             });
         }
 
