@@ -11,10 +11,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import reconcile
 
 
-def _gom():
+def _gom(status="queued"):
+    """`status` mo phong ket qua q.enqueue() thuc: "queued" (job moi tao) la
+    mac dinh vi da phan lon test o day dang kiem "co enqueue hay khong", chu
+    khong kiem gia tri tra ve cua enqueue_fn."""
     da_xep = []
-    return da_xep, lambda conn, node_id, content_hash, source: da_xep.append(
-        (node_id, content_hash, source))
+    return da_xep, lambda conn, node_id, content_hash, source: (
+        da_xep.append((node_id, content_hash, source))
+        or {"status": status, "job_id": 1})
 
 
 def test_hash_khop_thi_khong_xep():
@@ -65,6 +69,22 @@ def test_KHONG_hoi_sinh_job_da_dead_letter():
         enqueue_fn=fn, co_that_bai=lambda c, n, h: True)
     assert da_xep == [], f"da hoi sinh job dead-letter: {da_xep}"
     print("[PASS] job da dead-letter KHONG bi doi soat hoi sinh")
+
+
+def test_enqueue_tra_khac_queued_thi_khong_dem_them():
+    """Sua loi: `enqueue_fn(...)` truoc day bi bo gia tri tra ve, `da_xep += 1`
+    tang VO DIEU KIEN moi lan goi - worker in "doi soat them 1 job" ke ca khi
+    khong co job nao duoc tao that (VD duong event da xep hang cap nay truoc
+    do, enqueue_fn tra 'duplicate', khong INSERT gi ca)."""
+    da_xep, fn = _gom(status="duplicate")
+    n = reconcile.quet(
+        None,
+        liet_ke=lambda: [{"node_id": "u5", "content_hash": "moi",
+                          "hash_da_cham": "cu"}],
+        enqueue_fn=fn, co_that_bai=lambda c, n_, h: False)
+    assert len(da_xep) == 1, "enqueue_fn phai duoc goi"
+    assert n == 0, f"enqueue_fn tra 'duplicate' -> khong duoc dem la da xep them: {n}"
+    print("[PASS] enqueue_fn tra 'duplicate' -> khong dem them job")
 
 
 def test_tra_ve_so_job_da_xep():
@@ -131,6 +151,7 @@ if __name__ == "__main__":
         test_hash_khac_thi_xep,
         test_chua_cham_bao_gio_thi_xep,
         test_KHONG_hoi_sinh_job_da_dead_letter,
+        test_enqueue_tra_khac_queued_thi_khong_dem_them,
         test_tra_ve_so_job_da_xep,
         test_mot_node_hong_khong_giet_ca_luot,
         test_liet_ke_loi_thi_nem_ra_ngoai,

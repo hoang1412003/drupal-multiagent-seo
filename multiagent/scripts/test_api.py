@@ -110,6 +110,29 @@ def test_force_tao_duoc_job_moi(conn):
     print("[PASS] force=True -> tao duoc job moi du da done")
 
 
+def test_tao_job_tren_cap_da_dead_letter_tra_dead_letter(conn):
+    """Sua loi Important (muc 2): dead-letter phai chan CA O DUONG CHINH
+    (api.tao_job -> q.enqueue), khong chi o vong doi soat. api.py doi
+    status='dead_letter' thanh HTTP 409 - test nay chi khoa logic tra ve
+    status dung, phan ma HTTP bu bang buoc curl thu cong (xem docstring
+    dau file).
+
+    Goi q.fail() truc tiep voi `attempts` tu 1..3 thay vi di qua q.claim():
+    claim() la FIFO tren CA BANG (khong loc theo node), ma cac test truoc do
+    (u1, u2, job force cua u3) co y de lai job dang `queued` - claim() se bat
+    nham job cua node khac. fail() chi doc tham so `attempts` truyen vao,
+    khong doc cot attempts that trong DB, nen goi truc tiep van dung ket qua.
+    """
+    kq0 = api.tao_job(api.JobIn(node_id="u5", content_hash="h5"), conn)
+    for lan in (1, 2, 3):
+        q.fail(conn, kq0["job_id"], f"loi {lan}", lan)
+    assert q.job_moi_nhat(conn, "u5")["status"] == "failed"
+
+    kq = api.tao_job(api.JobIn(node_id="u5", content_hash="h5"), conn)
+    assert kq["status"] == "dead_letter", kq
+    print("[PASS] tao_job tren cap da dead-letter -> tra dead_letter (api.py -> HTTP 409)")
+
+
 def test_trang_thai_node_chua_co_job(conn):
     assert api.trang_thai("khong-ton-tai", conn)["status"] == "none"
     print("[PASS] node chua co job -> status 'none'")
@@ -167,6 +190,7 @@ if __name__ == "__main__":
         test_tao_job_moi_tra_queued,
         test_tao_job_trung_tra_duplicate,
         test_force_tao_duoc_job_moi,
+        test_tao_job_tren_cap_da_dead_letter_tra_dead_letter,
         test_trang_thai_node_chua_co_job,
         test_trang_thai_tra_job_moi_nhat,
         test_health_dem_theo_trang_thai,

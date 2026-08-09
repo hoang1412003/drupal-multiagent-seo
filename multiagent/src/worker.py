@@ -25,15 +25,10 @@ import config
 import db
 import job_queue as q
 import reconcile
+import text_utils
 
 NGU_KHI_RONG_GIAY = 2
 CHU_KY_DOI_SOAT_GIAY = 300
-
-# 4/4 agent thieu = hong ha tang, khong phai ket qua danh gia. 1-3 agent thieu
-# thi CHAP NHAN: do dung la tinh huong fail-safe architecture.md muc 6.4 duoc
-# thiet ke de xu ly (chia lai trong so, ghi note "diem chua day du"). Retry
-# luc do la tra tien lan hai cho mot co che dang hoat dong dung.
-_SO_AGENT = 4
 
 
 def _payload_tu_state(state: dict) -> dict:
@@ -106,8 +101,15 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
                           job["attempts"])
         duration_ms = int((time.monotonic() - bat_dau) * 1000)
 
+        # Import o day (khong o dau module) de tranh nap ca chuoi phu thuoc
+        # nang cua graph.py (langgraph, agents, ...) khi worker chi can
+        # invoke() gia trong test. graph.AGENT_LABELS thay cho hang so chep
+        # tay _SO_AGENT = 4 cu: them agent thu 5 se tu dong doi nguong "hong
+        # ha tang", khong con phai sua tay o hai noi.
+        import graph
+
         report = state.get("report") or {}
-        if len(report.get("missing_agents") or []) >= _SO_AGENT:
+        if len(report.get("missing_agents") or []) >= len(graph.AGENT_LABELS):
             return q.fail(conn, job["id"],
                           "ca 4 agent khong tra ket qua - nghi hong ha tang",
                           job["attempts"])
@@ -119,11 +121,28 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         # DEFAULT_CONTENT_TYPE/DEFAULT_LANGCODE cua graph.py hom nay nhung la
         # hai hang so doc lap o hai file, dung loai "mot con so nhieu noi" ma
         # scoring.yaml duoc dung ra de chan (config-spec.md muc 1).
-        import graph
-
         khoa = graph.khoa_cua(state)
+
+        # CRITICAL: ghi run_log theo hash NOI DUNG THAT DA CHAM (state["fields"]),
+        # KHONG theo job["content_hash"] (`chash`). fetch_content() lay revision
+        # MAC DINH cua node, khong co resourceVersion: voi bai DA XUAT BAN roi
+        # dua sang needs_review (default_revision=false), revision mac dinh van
+        # la ban CU da xuat ban - invoke() cham nham noi dung cu trong khi hook
+        # gui hash cua ban nhap moi. Ghi theo `chash` trong truong hop do se
+        # ghi sai chinh nhat ky truy vet, va da_cham() sau nay se tra payload
+        # sai cho hash do vinh vien, khong bao gio goi lai LLM de sua.
+        hash_that = text_utils.content_hash(state.get("fields") or {})
+        if hash_that != chash:
+            logging.warning(
+                "[worker] job %s (node %s): hash job=%s nhung hash noi dung "
+                "THAT DA CHAM=%s - lech nhau. Nguyen nhan co the la "
+                "fetch_content() tra ve revision MAC DINH (ban da xuat ban) "
+                "thay vi ban nhap moi qua JSON:API.",
+                job["id"], node_id, chash, hash_that,
+            )
+
         audit.ghi(
-            conn, job_id=job["id"], node_id=node_id, content_hash=chash,
+            conn, job_id=job["id"], node_id=node_id, content_hash=hash_that,
             duration_ms=duration_ms, report=report,
             config_meta=config.load(**khoa).get("meta") or {},
             usage=list(ai_core.USAGE_LOG), model=ai_core.MODEL, payload=payload,

@@ -92,6 +92,7 @@ def trich_dan_co_that(evidence: str, text_theo_field: dict) -> bool:
         return False
     return all(any(m in t for t in kho) for m in manh)
 
+
 # Các field tham gia content_hash, ĐÚNG thứ tự này. Phía PHP
 # (AiReportRenderer::HASH_FIELDS) phải ghép y hệt, nếu lệch thì bảng cảnh báo
 # "nội dung đã thay đổi" hiện sai vĩnh viễn. Có test hợp đồng dùng chung file

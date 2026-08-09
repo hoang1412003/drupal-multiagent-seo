@@ -70,7 +70,27 @@ def enqueue(conn, node_id: str, content_hash: str, source: str,
     bao trong `conn.transaction()` de neu gian doan giua chung (crash, mat
     ket noi) thi Postgres tu rollback - khong de lai job cu da `superseded`
     ma khong co job thay the (nut "Cham lai" mat job im lang).
+
+    `force=False` va da co job `failed` cung cap (node_id, content_hash) ->
+    KHONG INSERT, tra {"status": "dead_letter", "job_id": <id job failed>}.
+    Truoc day phep kiem nay CHI co o vong doi soat (reconcile.py, spec muc
+    6.3.1), khong o day - nen mot bai da dead-letter, editor mo form bam Save
+    ma khong sua gi cung du de bat lai ca 3 luot thu, du Save khong phai thao
+    tac duoc phep tieu tien (quyen do danh rieng cho nut "Cham lai"). Index
+    dedup van CO Y loai `failed` (INSERT van thanh cong ve mat SQL) - phep
+    kiem o day chan TRUOC ca khi cham toi INSERT, o tang ung dung.
     """
+    if not force:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT id FROM {TEN_BANG} "
+                f"WHERE node_id=%s AND content_hash=%s AND status=%s LIMIT 1",
+                (node_id, content_hash, FAILED),
+            )
+            that_bai = cur.fetchone()
+        if that_bai is not None:
+            return {"status": "dead_letter", "job_id": that_bai[0]}
+
     if force:
         with conn.transaction():
             with conn.cursor() as cur:

@@ -156,12 +156,39 @@ def test_fail_backoff_roi_dead_letter(conn):
     print("[PASS] 3 lan that bai -> dead-letter, giu last_error")
 
 
-def test_job_failed_khong_bi_dedup_chan(conn):
-    """Dedup CO Y loai `failed` - job hong phai xep hang lai duoc."""
-    kq = q.enqueue(conn, "uuid-5", "h5", "manual")
+def test_enqueue_force_false_tren_cap_da_dead_letter_khong_tao_job(conn):
+    """Sua loi Important: TRUOC DAY dedup index CO Y loai `failed` (job hong
+    xep hang lai duoc VE MAT SQL) nhung phep kiem "da dead-letter chua" chi
+    duoc goi o vong doi soat (reconcile.py, spec muc 6.3.1) - khong o duong
+    chinh. Hau qua: mot bai da dead-letter, editor mo form bam Save ma khong
+    sua gi -> hook van gui dung hash cu -> enqueue() (INSERT truc tiep,
+    KHONG qua reconcile) tao job moi -> bat lai ca 3 luot thu, du Save khong
+    phai thao tac duoc phep tieu tien (nut "Cham lai" moi la thao tac do, va
+    content_editor khong co quyen bam no).
+
+    force=False tren cap (node_id, content_hash) da co job `failed` -> KHONG
+    duoc INSERT, tra dead_letter kem dung job_id cua job failed do.
+    """
+    job_cu = q.job_moi_nhat(conn, "uuid-5")
+    assert job_cu["status"] == "failed", job_cu  # da dead-letter tu test truoc
+
+    kq = q.enqueue(conn, "uuid-5", "h5", "event")
+    assert kq == {"status": "dead_letter", "job_id": job_cu["id"]}, kq
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM review_job WHERE node_id='uuid-5' AND content_hash='h5'")
+        assert cur.fetchone()[0] == 1, "khong duoc INSERT job moi cho cap da dead-letter"
+    print("[PASS] force=False tren cap da dead-letter -> khong tao job, tra dead_letter")
+
+
+def test_enqueue_force_true_tren_cap_da_dead_letter_van_tao_job(conn):
+    """force=True (nut "Cham lai" thu cong) van phai vuot qua duoc chan tren -
+    do la luc con nguoi CHU DONG quyet dinh thu lai, dung tinh than tach
+    quyen 'dieu khien ai' khoi 'xem bao cao ai'."""
+    kq = q.enqueue(conn, "uuid-5", "h5", "manual", force=True)
     assert kq["status"] == "queued", kq
-    print("[PASS] job da failed khong chan job moi cung hash")
-    # Don job "queued" vua tao (xem ly do o test_dedup_chan_job_trung).
+    print("[PASS] force=True tren cap da dead-letter -> van tao duoc job moi")
+    # Don job vua tao (xem ly do o test_dedup_chan_job_trung).
     job = q.claim(conn, "w-don")
     q.complete(conn, job["id"])
 
@@ -298,7 +325,8 @@ if __name__ == "__main__":
         test_duplicate_tra_dung_job_id_khi_node_co_nhieu_hash,
         test_skip_locked_hai_worker_khong_giam_chan,
         test_fail_backoff_roi_dead_letter,
-        test_job_failed_khong_bi_dedup_chan,
+        test_enqueue_force_false_tren_cap_da_dead_letter_khong_tao_job,
+        test_enqueue_force_true_tren_cap_da_dead_letter_van_tao_job,
         test_co_job_that_bai,
         test_thu_hoi_job_ket_vuot_max_attempts_thi_dead_letter,
         test_thu_hoi_job_ket,

@@ -55,8 +55,9 @@ def quet(conn, *, liet_ke=None, enqueue_fn=None, co_that_bai=None) -> int:
                 # co nguoi quyet dinh - dung tinh than "bam cham lai la tieu tien
                 # API that".
                 continue
-            enqueue_fn(conn, node_id, chash, "reconcile")
-            da_xep += 1
+            kq = enqueue_fn(conn, node_id, chash, "reconcile")
+            if kq and kq.get("status") == q.QUEUED:
+                da_xep += 1
         except Exception as e:
             # Mot node trong luot quyet khong xep duoc - KHONG duoc giet ca
             # luot. Log, skip node do, roi tiep tuc phia sau.

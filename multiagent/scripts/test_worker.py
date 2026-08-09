@@ -4,6 +4,7 @@ KHONG goi LLM, KHONG can Drupal: tiem `invoke` va `write_back_fn` gia.
 Can Postgres that cho queue/run_log - [SKIP] neu khong co.
 Chay: .venv\\Scripts\\python.exe scripts\\test_worker.py
 """
+import logging
 import os
 import sys
 
@@ -12,6 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 import audit
 import db
 import job_queue as q
+import text_utils
 import worker
 
 SCHEMA = "vf_test_worker"
@@ -74,8 +76,17 @@ def test_write_back_that_bai_thi_job_xep_lai(conn):
 
 
 def test_da_co_run_log_thi_KHONG_goi_lai_pipeline(conn):
-    """Chot chan tien: cham lai mot bai ton $0,057 that."""
-    job1 = _job(conn, "uuid-3", "h3")
+    """Chot chan tien: cham lai mot bai ton $0,057 that.
+
+    Hash cua job PHAI khop hash noi dung THAT cua _STATE_XONG["fields"]: tu
+    khi sua loi CRITICAL (worker ghi run_log theo hash noi dung that, khong
+    theo hash job), do la dung tinh huong BINH THUONG (khong loi revision) -
+    hash job va hash noi dung fetch duoc phai trung nhau. Truong hop chung
+    lech nhau (bug JSON:API tra revision mac dinh) co test rieng:
+    test_ghi_run_log_theo_hash_noi_dung_that_khong_theo_hash_job.
+    """
+    hash_that = text_utils.content_hash(_STATE_XONG["fields"])
+    job1 = _job(conn, "uuid-3", hash_that)
     worker.chay_mot_job(conn, job1, invoke=lambda s: _STATE_XONG,
                         write_back_fn=lambda **kw: False)
     with conn.cursor() as cur:
@@ -221,6 +232,55 @@ def test_config_meta_theo_dung_khoa_cua_state(conn):
     print("[PASS] config_meta ghi dung khoa cua state, khong phai mac dinh cung")
 
 
+def test_ghi_run_log_theo_hash_noi_dung_that_khong_theo_hash_job(conn):
+    """Sua loi CRITICAL: worker truoc day ghi run_log.content_hash = hash CUA
+    JOB (job["content_hash"]), khong phai hash NOI DUNG THAT DA CHAM.
+
+    Loi lo ra khi worker.fetch_content() lay revision MAC DINH cua node
+    (khong resourceVersion=rel:working-copy): voi bai DA XUAT BAN roi dua
+    sang needs_review (default_revision=false), revision mac dinh la BAN CU
+    da xuat ban, trong khi hook gui hash cua BAN NHAP MOI. invoke() vi vay
+    cham nham noi dung cu, nhung run_log lai ghi nhan duoi hash cua ban moi -
+    tra sai payload vinh vien cho ca hai hash tu do ve sau.
+
+    Tai hien: invoke() tra ve state co `fields` KHAC hash voi job["content_hash"]
+    (mo phong dung tinh huong tren). Xac nhan (a) run_log.content_hash la hash
+    cua `fields` chu khong phai cua job; (b) co canh bao duoc ghi neu ca hai
+    gia tri lech nhau.
+    """
+    state_khac = dict(_STATE_XONG, fields={
+        "title": "NOI DUNG THAT KHAC BAN NHAP", "body": "B that",
+        "summary": "S that", "meta_description": "M that",
+    })
+    hash_that = text_utils.content_hash(state_khac["fields"])
+
+    job = _job(conn, "uuid-20", "hash-cua-job-khac-hash-noi-dung-that")
+    assert hash_that != job["content_hash"], "fixture loi: hai hash phai khac nhau"
+
+    ghi_canh_bao = []
+    canh_bao_that = logging.warning
+    logging.warning = lambda *a, **kw: ghi_canh_bao.append(a)
+    try:
+        ket = worker.chay_mot_job(conn, job, invoke=lambda s: state_khac,
+                                  write_back_fn=lambda **kw: True)
+    finally:
+        logging.warning = canh_bao_that
+
+    assert ket == "done", ket
+    with conn.cursor() as cur:
+        cur.execute("SELECT content_hash FROM run_log WHERE node_id='uuid-20'")
+        hash_ghi = cur.fetchone()[0]
+    assert hash_ghi == hash_that, (
+        f"run_log phai ghi theo hash NOI DUNG THAT ({hash_that}), "
+        f"khong phai hash cua job ({job['content_hash']}): got {hash_ghi}")
+
+    assert ghi_canh_bao, "phai co canh bao khi hash that khac hash job"
+    noi_dung_canh_bao = " ".join(str(x) for x in ghi_canh_bao[0])
+    assert job["content_hash"] in noi_dung_canh_bao, ghi_canh_bao[0]
+    assert hash_that in noi_dung_canh_bao, ghi_canh_bao[0]
+    print("[PASS] run_log ghi theo hash noi dung THAT, co canh bao khi lech hash job")
+
+
 def test_usage_log_duoc_reset(conn):
     """USAGE_LOG la list muc module, co y khong tu xoa - worker chay nen
     vo han thi no phinh mai (technical-debt.md nhom C)."""
@@ -253,6 +313,7 @@ if __name__ == "__main__":
         test_usage_log_duoc_don_khi_ca_4_agent_loi,
         test_loi_bat_ngo_khong_lam_chet_vong_lap,
         test_config_meta_theo_dung_khoa_cua_state,
+        test_ghi_run_log_theo_hash_noi_dung_that_khong_theo_hash_job,
         test_usage_log_duoc_reset,
     ):
         try:

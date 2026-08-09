@@ -86,9 +86,19 @@ def post_jobs(body: JobIn, response: Response):
     decorator ep moi phan hoi thanh cong thanh 202 - dung, vi ServiceClient
     ben Drupal khong doc ma HTTP (chi bat Throwable), nhung sai hop dong da
     ghi trong spec va se bay bat ky client nao sau nay phan biet "job moi"
-    voi "job trung" bang ma HTTP."""
+    voi "job trung" bang ma HTTP.
+
+    `dead_letter` -> 409 Conflict: job khong duoc tao vi cap (node_id,
+    content_hash) nay da bo cuoc truoc do (het MAX_ATTEMPTS). Khong phai loi
+    cua request nay - dung 409 chu khong phai 4xx/5xx khac de phan biet voi
+    loi xac thuc (401) hay loi payload (422)."""
     kq = tao_job(body, _conn())
-    response.status_code = 200 if kq["status"] == "duplicate" else 202
+    if kq["status"] == "dead_letter":
+        response.status_code = 409
+    elif kq["status"] == "duplicate":
+        response.status_code = 200
+    else:
+        response.status_code = 202
     return kq
 
 
