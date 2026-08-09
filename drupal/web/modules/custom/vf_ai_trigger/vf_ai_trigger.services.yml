@@ -1,0 +1,4 @@
+services:
+  vf_ai_trigger.client:
+    class: Drupal\vf_ai_trigger\ServiceClient
+    arguments: ['@http_client', '@config.factory', '@logger.factory']

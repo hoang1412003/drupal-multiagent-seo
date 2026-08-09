@@ -1,6 +1,6 @@
 # Việc phải làm trước khi demo / bàn giao
 
-**Cập nhật:** 2026-08-04
+**Cập nhật:** 2026-08-07
 
 Danh sách này **không phải nợ kỹ thuật** — code không thiếu gì. Đây là những
 thứ đúng khi phát triển nhưng **sai khi trình bày**, cộng vài chỗ dễ quên khi
@@ -79,6 +79,31 @@ docker compose ps                                   # container `vf-agent-db` ph
 
 ---
 
+## 2b. Khởi động service và worker trước khi demo
+
+Từ 2026-08-07, chấm điểm không còn chạy tay bằng script — Drupal tự gửi job qua service HTTP, worker tiêu thụ hàng đợi. **Thiếu bước này thì Save một bài sẽ không có gì xảy ra**, kể cả khi KB và Postgres đã dựng đúng ở mục 2.
+
+```bash
+cd multiagent
+docker compose ps                                       # vf-agent-db phải Up
+.venv/Scripts/python.exe -m uvicorn api:app --port 8900 --app-dir src   # cửa sổ 1
+.venv/Scripts/python.exe src/worker.py                                  # cửa sổ 2
+```
+
+**Kiểm:**
+
+```bash
+curl http://127.0.0.1:8900/health
+```
+
+Kỳ vọng `{"ok": true, "queued": ..., "running": ..., "failed": ...}`. Không kết nối được (`curl: (7) Failed to connect`) nghĩa là service chưa chạy — đúng lỗi thật đã gặp khi tắt service giữa chừng lúc kiểm E2E (`docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 2).
+
+⚠️ **`VF_SERVICE_TOKEN` phải khớp giữa hai nơi**: `.env` (phía Python, biến `VF_SERVICE_TOKEN`) và `settings.php` (phía Drupal, khoá `$settings['vf_ai_service_token']`). Hai nơi lệch nhau thì **mọi request POST từ `vf_ai_trigger` sang service đều trả 401**, và Drupal **không hiện lỗi nào cho editor** — bài vẫn được Save bình thường, chỉ là job không được tạo qua đường event. Vì vòng đối soát vẫn chạy song song (`architecture.md` mục 9.2), bài rốt cuộc vẫn được chấm trong vài phút, nên triệu chứng "token lệch" rất dễ bị hiểu nhầm thành "hệ thống chạy đúng, chỉ chậm hơn bình thường". Kiểm khi nghi ngờ: xem log Drupal (`ddev drush watchdog:show`) tìm dòng `401` từ `vf_ai_trigger`, hoặc so trực tiếp giá trị hai bên.
+
+Thiết kế đầy đủ: `docs/superpowers/specs/2026-08-07-needs-review-automation-design.md`.
+
+---
+
 ## 3. Nói đúng về ngưỡng: CHƯA calibrate
 
 `multiagent/config/scoring.yaml` có `meta.calibrated: false`. Hệ thống **tự in
@@ -121,14 +146,22 @@ cd multiagent
 for f in scripts/test_*.py; do .venv/Scripts/python.exe "$f" > /dev/null || echo "FAIL $f"; done
 ```
 
-28/28 bộ tính đến 2026-08-05. Test không cần API key, không cần Drupal, không
-cần KB — chạy được ở bất cứ đâu, mất vài giây.
+37/37 file test tính đến lần chạy thật 2026-08-07/08 (35 file Python +
+`test_ai_report_renderer.php` + `test_vf_ai_trigger.php`, xem
+`docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 8). Phần lớn test không cần API
+key, không cần Drupal, không cần KB — chạy được ở bất cứ đâu, mất vài giây.
+
+⚠️ **Từ 2026-08-07, bốn bộ test (`test_job_queue`, `test_audit`, `test_worker`,
+`test_api`) cần container Postgres đang chạy.** Không có nó chúng in `[SKIP]`
+và thoát 0 — **`[SKIP]` không phải `[PASS]`**. Trước khi báo cáo số test xanh,
+chạy `docker compose ps` xác nhận `vf-agent-db` đang chạy.
 
 Riêng test hợp đồng phía PHP chạy trong container:
 
 ```bash
 cd drupal
 ddev exec php scripts/test_ai_report_renderer.php
+ddev exec php scripts/test_vf_ai_trigger.php
 ```
 
 ---

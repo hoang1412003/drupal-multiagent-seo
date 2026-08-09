@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * @file
+ * Bắn job chấm điểm khi bài được lưu ở trạng thái "Needs Review".
+ *
+ * ĐÍNH CHÍNH THUẬT NGỮ (spec mục 3.2.1): Drupal core phát HOOK cho vòng đời
+ * entity, không phát sự kiện Symfony. Nên cơ chế ở đây là
+ * hook_ENTITY_TYPE_insert/update, không phải một class EventSubscriber.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
+use Drupal\vf_ai_review\AiReportRenderer;
+
+/**
+ * State kích hoạt chấm điểm. Trùng machine name của workflow đã tạo.
+ */
+const VF_AI_TRIGGER_STATE = 'needs_review';
+
+/**
+ * Implements hook_ENTITY_TYPE_insert() for node.
+ */
+function vf_ai_trigger_node_insert(NodeInterface $node): void {
+  _vf_ai_trigger_ban_job($node);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update() for node.
+ */
+function vf_ai_trigger_node_update(NodeInterface $node): void {
+  _vf_ai_trigger_ban_job($node);
+}
+
+/**
+ * Bắn job nếu bài vừa lưu đang ở trạng thái cần duyệt.
+ *
+ * Điều kiện là TRẠNG THÁI SAU KHI LƯU, không phải "vừa có chuyển tiếp"
+ * (spec mục 4.1). Người viết thường đưa bài sang needs_review, đọc báo cáo,
+ * rồi sửa body ngay tại đó và lưu tiếp mà không đổi state — nếu chỉ bắn khi
+ * có chuyển tiếp thì lần sửa đó không bao giờ được chấm lại, trong khi module
+ * lại hiện băng "nội dung đã thay đổi". Hệ thống tự mâu thuẫn với chính mình.
+ *
+ * Lưu mà không sửa gì thì không tốn đồng nào: content_hash không đổi nên
+ * index dedup bên service chặn ở tầng INSERT. Nhưng chặn ở tầng INSERT vẫn
+ * tốn một cú gọi mạng — xem so hash bên dưới để chặn sớm hơn, ngay ở Drupal.
+ */
+function _vf_ai_trigger_ban_job(NodeInterface $node): void {
+  if ($node->bundle() !== 'article') {
+    return;
+  }
+  if (!$node->hasField('moderation_state')
+    || $node->get('moderation_state')->value !== VF_AI_TRIGGER_STATE) {
+    return;
+  }
+
+  $hash = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
+
+  // Bỏ qua nếu nội dung hiện tại đã được chấm đúng hash này rồi. Chặn CHÍNH
+  // write_back() của Multi-Agent tự bắn lại job: PATCH 4 field AI cũng là
+  // một lần node->save(), nên hook này chạy lại ngay bên trong lượt ghi kết
+  // quả. Không chặn thì mỗi lần chấm xong tốn thêm một cú gọi mạng, và vì
+  // hook chạy đồng bộ trong save() nên nó cộng luôn vào thời gian phản hồi
+  // của chính PATCH write_back mà worker đang chờ.
+  //
+  // JSON hỏng (có dữ liệu nhưng decode() trả NULL) thì coi như CHƯA CHẤM và
+  // vẫn gọi service — không được vì một field hỏng mà bỏ chấm bài.
+  $tho = _vf_ai_review_gia_tri($node, 'field_ai_report_json');
+  $report = (new AiReportRenderer())->decode($tho);
+  if ($report !== NULL && ($report['content_hash'] ?? NULL) === $hash) {
+    return;
+  }
+
+  // uuid() chứ KHÔNG phải id(): pipeline gọi /jsonapi/node/article/{uuid}.
+  \Drupal::service('vf_ai_trigger.client')->guiJob($node->uuid(), $hash);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form.
+ *
+ * Chèn ô trạng thái vào chính khối báo cáo của vf_ai_review. Nếu khối đó
+ * không tồn tại (module kia bị tắt) thì không chèn gì — không đổ lỗi, không
+ * làm trắng form soạn bài.
+ */
+function vf_ai_trigger_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node->bundle() !== 'article' || $node->isNew() || !isset($form['vf_ai_review'])) {
+    return;
+  }
+  if (!\Drupal::currentUser()->hasPermission('xem bao cao ai')) {
+    return;
+  }
+
+  $url = Url::fromRoute('vf_ai_trigger.trang_thai', ['node' => $node->id()])
+    ->toString();
+
+  $form['vf_ai_review']['vf_ai_trang_thai'] = [
+    '#type' => 'html_tag',
+    '#tag' => 'div',
+    '#value' => '',
+    '#attributes' => [
+      'class' => ['vf-ai-trang-thai'],
+      'data-vf-ai-status-url' => $url,
+    ],
+    '#weight' => -100,
+  ];
+  $form['#attached']['library'][] = 'vf_ai_trigger/trang_thai';
+
+  if (\Drupal::currentUser()->hasPermission('dieu khien ai')) {
+    // KHÔNG tự sinh token bằng \Drupal::csrfToken()->get(ltrim(...)) rồi nối
+    // '?token=' như bản kế hoạch ban đầu: route đã khai '_csrf_token: TRUE'
+    // nên RouteProcessorCsrf::processOutbound() đã TỰ ĐỘNG nối sẵn '?token=' *
+    // đúng bằng cùng công thức ltrim($route->getPath(), '/') + thay tham số*
+    // ngay trong Url::fromRoute(...)->toString() — xem
+    // web/core/lib/Drupal/Core/Access/RouteProcessorCsrf.php:44. Nối thêm
+    // token thủ công lần nữa tạo ra URL có HAI '?token=' liền nhau
+    // ("...?token=AAA?token=BBB"): trình duyệt chỉ nhận '?' đầu tiên là dấu
+    // phân cách, nên $_GET['token'] nhận nguyên chuỗi rác "AAA?token=BBB",
+    // không khớp cái nào, và route LUÔN trả 403. Lỗi này phát hiện được bằng
+    // cách soi thẳng HTML sinh ra khi kiểm bước 4 của Task 11 — kiểm chứng
+    // 2026-08-08.
+    $url_cham_lai = Url::fromRoute('vf_ai_trigger.cham_lai', ['node' => $node->id()])
+      ->toString();
+    $form['vf_ai_review']['vf_ai_cham_lai'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'button',
+      '#value' => 'Chấm lại',
+      '#attributes' => [
+        'type' => 'button',
+        'class' => ['button', 'vf-ai-cham-lai'],
+        'data-vf-ai-rescore-url' => $url_cham_lai,
+      ],
+      '#weight' => 100,
+    ];
+  }
+}

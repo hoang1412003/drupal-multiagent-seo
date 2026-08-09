@@ -75,12 +75,7 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
   // đó nhảy, nên so nó sẽ luôn báo "đã thay đổi" ngay sau khi chấm.
   $stale = FALSE;
   if ($report !== NULL && !empty($report['content_hash'])) {
-    $hien_tai = AiReportRenderer::contentHash([
-      'title' => (string) $node->label(),
-      'body' => _vf_ai_review_gia_tri($node, 'body'),
-      'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
-      'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
-    ]);
+    $hien_tai = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
     $stale = ($hien_tai !== $report['content_hash']);
   }
 
@@ -126,4 +121,24 @@ function _vf_ai_review_gia_tri($node, string $ten_field, string $thuoc_tinh = 'v
     return '';
   }
   return (string) ($node->get($ten_field)->{$thuoc_tinh} ?? '');
+}
+
+/**
+ * Bốn field tham gia content_hash, lấy ra khỏi node.
+ *
+ * Để một chỗ duy nhất vì từ 2026-08-07 có hai nơi cần: khối báo cáo (băng
+ * "nội dung đã thay đổi") và module vf_ai_trigger (tính hash gửi kèm job).
+ * Hai nơi ghép khác nhau nghĩa là hash lệch, và hệ quả là vòng đối soát
+ * chấm lại vô hạn mọi bài.
+ *
+ * KHÔNG đưa vào AiReportRenderer: class đó cố ý không phụ thuộc Drupal để
+ * test được bằng PHP thuần.
+ */
+function vf_ai_review_hash_fields($node): array {
+  return [
+    'title' => (string) $node->label(),
+    'body' => _vf_ai_review_gia_tri($node, 'body'),
+    'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
+    'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
+  ];
 }

@@ -1,0 +1,76 @@
+Ngay kiem: 2026-08-07
+
+Chuan bi:
+- Bat module: ddev drush en workflows content_moderation -y (ca hai da Enabled,
+  xac nhan bang: ddev drush pm:list --format=json | loc content_moderation/workflows).
+- Tao workflow bang script: ddev drush php:script scripts/create_workflow.php
+  (chay 2 lan, lan 2 in "Workflow da ton tai, cap nhat lai", khong loi -> idempotent).
+- Chuyen node 1 (content type article) sang needs_review bang drush php:eval
+  (khong dung UI vi moi truong khong co trinh duyet trong phien lam viec nay):
+    $node = \Drupal\node\Entity\Node::load(1);
+    $node->set('moderation_state', 'needs_review');
+    $node->setNewRevision(TRUE);
+    $node->save();
+  Ket qua: moderation_state = needs_review, status (published) = 0.
+
+Lenh kiem chung chinh (dung nguyen van tu ke hoach):
+curl -s -u "$DRUPAL_USER:$DRUPAL_PASSWORD" \
+  "http://drupal.ddev.site/jsonapi/node/article?filter%5Bmoderation_state%5D=needs_review&page%5Blimit%5D=5" \
+  | python -m json.tool | head -40
+
+Ket qua (HTTP_STATUS: 500, 20 dong dau cua response):
+{
+    "jsonapi": {
+        "version": "1.0",
+        "meta": {
+            "links": {
+                "self": {
+                    "href": "http://jsonapi.org/format/1.0/"
+                }
+            }
+        }
+    },
+    "errors": [
+        {
+            "title": "Internal Server Error",
+            "status": "500",
+            "detail": "'moderation_state' not found",
+            "links": {
+                "via": {
+                    "href": "http://drupal.ddev.site/jsonapi/node/article?filter%5Bmoderation_state%5D=needs_review&page%5Blimit%5D=5"
+                },
+                "info": {
+                    "href": "https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.5.1"
+                }
+            },
+
+(con lai la stack trace day du cua Drupal\Core\Entity\Query\QueryException:
+ "'moderation_state' not found" trong Tables.php:369 - loi phat sinh vi
+ moderation_state la field TINH TOAN (computed), khong co bang luu trong SQL
+ co san de Entity Query dung filter/dieu kien truc tiep.)
+
+Kiem chung bo sung (de chon huong xu ly cho Task 5):
+1) moderation_state CO xuat hien trong "attributes" cua response khi GET
+   khong loc (vi du GET .../node/article?filter[drupal_internal__nid]=1):
+     "status": false,
+     "moderation_state": "needs_review"
+   => Client doc duoc gia tri moderation_state tren tung ban ghi, chi la
+      KHONG loc duoc no truc tiep bang query string cua JSON:API.
+
+2) filter[status]=0 (published/unpublished, la field that, khong phai
+   computed) hoat dong binh thuong, HTTP 200:
+   curl ... "http://drupal.ddev.site/jsonapi/node/article?filter%5Bstatus%5D=0&page%5Blimit%5D=5"
+   -> tra ve 5 ban ghi status=false, moi ban ghi co san moderation_state
+      (vi du: nid=2..6 co moderation_state=draft).
+
+Ket luan: JSON:API KHONG loc duoc filter[moderation_state]=... truc tiep.
+Ket qua thuc te la HTTP 500 (khac voi hai du doan HTTP 400 hoac "tra ve
+moi bai" trong ke hoach, nhung ket luan van thuoc nhom "khong loc duoc":
+Drupal 10.6 coi moderation_state la computed field, Entity Query/JSON:API
+khong build duoc dieu kien SQL cho no).
+
+Anh huong: reconcile.py (Task 5) KHONG duoc dung
+filter[moderation_state]=needs_review truc tiep (se nhan HTTP 500). Phai
+goi filter[status]=0 (hoac lay toan bo ban ghi can thiet) roi loc
+moderation_state == 'needs_review' phia Python, dua vao attribute
+moderation_state co san trong tung item cua response.

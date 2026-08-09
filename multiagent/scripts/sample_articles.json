@@ -1,31 +1,31 @@
 [
   {
-    "uuid": "d115f055-e97a-4757-af9e-6b4f53e1f408",
+    "uuid": "f657ee57-2b29-4315-9bf7-f4728587da9b",
     "label": "Huong dan sac pin (bai tot)",
     "expected": "publish"
   },
   {
-    "uuid": "5cdf9115-a633-49ee-8938-8e3450d0b140",
+    "uuid": "e3af1db4-d1bc-4d14-8da9-89d256ffba0b",
     "label": "Kinh nghiem lai duong dai (loi chinh ta co y)",
     "expected": "needs_revision"
   },
   {
-    "uuid": "7b5b84b2-1e6a-4c98-aa1f-ab3e21e046f7",
+    "uuid": "5709c2ac-b8e8-4713-8ac6-0f0b8f01af4b",
     "label": "Bao duong xe (thieu SEO co y)",
     "expected": "needs_revision"
   },
   {
-    "uuid": "63f97c51-6f66-4033-b5f3-d6748204db0d",
+    "uuid": "7bbd6780-a5a7-4507-8be2-23c2a1763193",
     "label": "So sanh chi phi (sai thuat ngu brand co y)",
     "expected": "needs_revision"
   },
   {
-    "uuid": "a744f5db-b5e9-4de1-9386-e51689de536f",
+    "uuid": "666beb84-bccf-4e71-af37-a091f31e4307",
     "label": "Tam hoat dong (vi pham compliance co y)",
     "expected": "rejected"
   },
   {
-    "uuid": "ec437da9-b099-4bf0-87a7-3a02ef82559e",
+    "uuid": "3cc05ffa-ac91-4f53-9d80-9b7ac95c88ad",
     "label": "Cac loai pin (bai tot)",
     "expected": "publish"
   }

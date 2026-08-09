@@ -1,0 +1,25 @@
+vf_ai_trigger.trang_thai:
+  path: '/vf-ai/status/{node}'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\TrangThaiController::trangThai'
+  requirements:
+    _permission: 'xem bao cao ai'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node
+
+vf_ai_trigger.cham_lai:
+  path: '/vf-ai/rescore/{node}'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\ChamLaiController::chamLai'
+  methods: [POST]
+  requirements:
+    _permission: 'dieu khien ai'
+    _csrf_token: 'TRUE'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node

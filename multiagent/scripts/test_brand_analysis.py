@@ -96,6 +96,7 @@ def test_binom_nguong_9_tren_10():
 
 if __name__ == "__main__":
     test_strip_html_bo_the_va_thuoc_tinh()
+    test_strip_html_giai_ma_thuc_the()
     test_count_variants_uu_tien_bien_the_dai()
     test_count_variants_khong_phan_biet_hoa_thuong()
     test_count_model_name_phan_biet_cach_viet()

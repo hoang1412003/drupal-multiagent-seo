@@ -1,6 +1,6 @@
 # PHẦN 5: BÁO CÁO SPRINT 2
 
-**Cập nhật:** 2026-08-05
+**Cập nhật:** 2026-08-07
 
 ## 1. Mục tiêu Sprint 2
 
@@ -13,7 +13,7 @@ Theo lộ trình 3 sprint đã được mentor duyệt ([`roadmap.md`](roadmap.m
 5. Tự động hóa: bật Content Moderation "Needs Review" + polling worker.
 6. Dựng UI báo cáo trong giao diện editor.
 
-**Hiện trạng: 4 mục xong, 2 mục chưa.**
+**Hiện trạng: 5 mục xong, 1 mục chưa.**
 
 ---
 
@@ -72,6 +72,23 @@ Module **chỉ đọc**: không tính điểm, không gọi API, không sửa d�
 - Code module: [`drupal/web/modules/custom/vf_ai_review`](../drupal/web/modules/custom/vf_ai_review)
 - Thiết kế giao diện: [`editor-ui-design.md`](editor-ui-design.md)
 
+### 2.5. Tự động hóa — event-driven + hàng đợi bền Postgres
+
+Hiện đã bật thật Content Moderation "Needs Review" trên content type Article, và pipeline không còn kích hoạt thủ công. Hai đường chạy song song:
+
+- **Đường chính, event-driven.** Module Drupal thứ hai `vf_ai_trigger` (tách khỏi `vf_ai_review` vì module kia cam kết chỉ đọc) bắt sự kiện chuyển sang `needs_review`, tự chặn ở tầng so `content_hash` trước khi gọi service để Save lặp lại không tốn tiền, rồi POST job sang service HTTP (`multiagent/src/api.py`). Đo thật: từ Save tới lúc job chuyển `running` mất **1,6 giây**, tới lúc có kết quả đầy đủ mất **~15,8 giây** (`docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 1).
+- **Lưới an toàn, đối soát định kỳ.** Worker quét mỗi 300 giây, bắt các bài lọt đường event (ví dụ service tắt tạm thời). Đo thật: tắt service, Save một bài, bật lại service - đối soát bắt được sau **~3 phút 28 giây**, trong ngưỡng ≤5 phút (tiêu chí 2).
+
+**Vì sao chọn một bảng Postgres làm hàng đợi thay vì dựng Redis/RabbitMQ:** `SELECT ... FOR UPDATE SKIP LOCKED` cho đúng những thứ một message broker cho - nhiều worker không giẫm chân nhau, job không mất khi worker chết, retry có backoff, dead-letter - và đây là mẫu dùng trong sản phẩm thật (pgmq, Oban, River, Solid Queue). Khác biệt so với broker riêng chỉ lộ ra ở quy mô hàng nghìn job/giây; ở đây là vài chục bài/ngày. Thêm một container Redis không giải quyết vấn đề nào ở quy mô này - đúng loại "số ảo" dự án tránh. Postgres cũng đã chạy sẵn cho kho vector từ 2026-08-05, nên chi phí biên gần như bằng không. Chi tiết: spec `2026-08-07-needs-review-automation-design.md` mục 2 quyết định Q1.
+
+**Vì sao vẫn giữ cả hai đường thay vì chỉ dùng event:** event một mình chỉ đảm bảo *at-most-once* nếu bên gửi không tự retry - một cú POST thất bại là một bài lọt vĩnh viễn mà không ai biết, đúng loại bẫy im lặng dự án dành nhiều công để diệt (B2, B6, B9, B11 ở `technical-debt.md`). Vòng đối soát tốn khoảng 40 dòng, dùng lại đúng khoá idempotency `(node_id, content_hash)` đã phải viết cho việc chặn Save lặp lại, và nó bao trọn luôn deliverable "polling worker" ban đầu của roadmap thay vì bỏ cam kết cũ. Chi tiết: spec cùng file, quyết định Q2.
+
+8/8 tiêu chí hoàn thành đã kiểm tra chạy thật (spec mục 13), toàn bộ 37 file test xanh gồm cả bốn bộ cần container Postgres (`test_job_queue`, `test_audit`, `test_worker`, `test_api`).
+
+- Thiết kế đầy đủ (mục 9): [`architecture.md`](architecture.md)
+- Thiết kế chi tiết + 5 quyết định đã chốt: [`superpowers/specs/2026-08-07-needs-review-automation-design.md`](superpowers/specs/2026-08-07-needs-review-automation-design.md)
+- Bằng chứng chạy thật end-to-end: [`evidence/tu_dong_hoa_e2e.txt`](evidence/tu_dong_hoa_e2e.txt)
+
 ---
 
 ## 3. Chưa xong
@@ -93,18 +110,6 @@ Nhiều khả năng nguyên nhân là ngưỡng "câu trên 30 từ" không phù
 - Bảng 33 mẫu (cột nhãn còn trống): [`goldset/labels.csv`](goldset/labels.csv)
 - Quy ước gán nhãn + bảng mã lỗi: [`goldset/annotation-guideline.md`](goldset/annotation-guideline.md)
 - Nguồn dữ liệu + cách chia tập BRAND/GOLD/PERT: [`goldset/sources.md`](goldset/sources.md)
-
-### 3.2. Tự động hóa — thiết kế xong, chưa triển khai
-
-Hiện pipeline chạy đúng end-to-end nhưng còn **kích hoạt thủ công** (chạy lệnh với từng `node_id`), và trạng thái "Needs Review" chưa được cấu hình.
-
-Thiết kế đã chốt gồm hai mắt xích: bật Content Moderation trên content type Article (cấu hình Drupal, không cần code), và một polling worker Python chạy nền định kỳ tìm bài ở "Needs Review" chưa chấm rồi gọi pipeline có sẵn.
-
-**Vì sao chọn polling thay vì message queue:** ở production thật, trigger thường là event-driven qua queue (SQS/RabbitMQ/Redis). Nhưng phần worker xử lý trong hai kiến trúc là **giống hệt nhau** — khác biệt duy nhất là *cách job đến với worker*. Polling đủ đạt mục tiêu tự động của đề bài, thuần Python, không phải dựng thêm hạ tầng; khi cần nâng lên production thì chỉ thay lớp trigger, không phải viết lại worker.
-
-Đây là **deliverable bắt buộc** của sản phẩm cuối kỳ, không phải hạng mục tương lai. Không bị chặn bởi gì cả — là việc tiếp theo sẽ làm.
-
-- Thiết kế đầy đủ (mục 9): [`architecture.md`](architecture.md)
 
 ---
 
@@ -148,10 +153,9 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 | Thứ tự | Việc | Bị chặn bởi |
 |---|---|---|
 | 1 | Chốt hướng gán nhãn gold set | **Chờ mentor** |
-| 2 | Polling worker + Content Moderation | Không bị chặn — làm song song với (1) |
-| 3 | Tiếp tục giảm dao động điểm của Compliance | Không bị chặn, nhưng tốn API và kết quả không chắc |
-| 4 | Đo lại E1 | Nên làm **sau** (3), để đo một lần cho cả hai thay đổi |
-| 5 | Calibration ngưỡng → so sánh baseline → held-out test | Cần nhãn từ (1) |
+| 2 | Tiếp tục giảm dao động điểm của Compliance | Không bị chặn, nhưng tốn API và kết quả không chắc |
+| 3 | Đo lại E1 | Nên làm **sau** (2), để đo một lần cho cả hai thay đổi |
+| 4 | Calibration ngưỡng → so sánh baseline → held-out test | Cần nhãn từ (1) |
 
 ## 7. Ba việc cần mentor quyết
 

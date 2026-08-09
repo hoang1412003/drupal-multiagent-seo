@@ -18,7 +18,7 @@ Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** 
 | **C** | Kế hoạch chưa tới lượt — **không phải nợ** |
 | **D** | Phép đo chưa chạy |
 
-Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng sợ hơn thực tế. Polling worker chưa làm **không phải nợ** — nó là việc đã lên lịch, chưa tới lượt.
+Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng sợ hơn thực tế. Nhóm C là việc đã lên lịch, chưa tới lượt — **không phải nợ** (tự động hoá, từng nằm trong nhóm này, đã xong 2026-08-07, xem mục 4).
 
 ---
 
@@ -333,9 +333,9 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 | Hạng mục | Ghi ở đâu | Ghi chú |
 |---|---|---|
-| Polling worker + Content Moderation "Needs Review" | `architecture.md` mục 9 | Sprint 2 còn lại. Không chặn gì. **Lưu ý khi làm:** `ai_core.USAGE_LOG` là list ở mức module, cố ý không tự xoá (E4 cộng cả list để tính chi phí). Script chạy một lần thì vô hại; worker chạy nền vô hạn thì nó phình mãi — worker phải **tự reset sau mỗi bài**, đừng chặn cứng kích thước list vì làm thế là phá phép đo E4 |
-| Nhật ký truy vết JSONL | `operations.md` mục 2 | Đã **hạ ưu tiên** 2026-08-03 sau khi phát hiện Drupal giữ revision — 3 field AI không mất, chỉ mất bối cảnh chấm |
-| Vòng phản hồi người duyệt | `operations.md` mục 3 | Cần nhật ký truy vết xong trước mới khớp được `(node_id, scored_at)` |
+| ~~Polling worker + Content Moderation "Needs Review"~~ | `architecture.md` mục 9 | ✅ **xong 2026-08-07** — đường chính đã là event-driven, polling giữ lại làm lưới an toàn. Bằng chứng chạy thật: `docs/evidence/tu_dong_hoa_e2e.txt`. Cảnh báo `USAGE_LOG` đã được xử lý đúng như lưu ý cũ: `worker.py` `clear()` list này trong khối `finally` sau **mỗi** job (không chỉ đường thành công), kèm cảnh báo log nếu job hỏng giữa chừng mà đã tiêu token trước khi kịp ghi `run_log` |
+| Nhật ký truy vết JSONL | `operations.md` mục 2 | ✅ **xong 2026-08-07** — đã đổi kết luận sang bảng Postgres `run_log` (không phải JSONL), lý do đổi: `operations.md` mục 2.4 |
+| Vòng phản hồi người duyệt | `operations.md` mục 3 | Chưa triển khai — không còn hạng mục nào chặn |
 | ~~KB fact-check chưa verify số thật~~ | `sources.md` mục 2.1 | ✅ **xong 2026-08-04** — 4/4 entry `verified: true`. Tìm ra 3 chỗ sai, trong đó `sources.md` nói **ngược** sự thật về chuẩn đo. Còn một rủi ro không khử được: VinFast công bố **ba** con số khác nhau cho VF 5 Plus |
 | Bật lại CSS/JS aggregation trong Drupal | `pre-demo-checklist.md` mục 1 | Đang **tắt** từ lúc làm module `vf_ai_review`. Không phải nợ — là cấu hình dev, nhưng để nguyên lúc demo thì trang admin tải chậm thấy rõ |
 | Mở rộng corpus `BRAND` | `sources.md` mục 1.7 | Chỉ làm nếu có quy ước rơi vào vùng chưa đủ căn cứ. Hiện "trạm sạc" ở 9/11 (p = 0,065) — **cố ý không thu thêm** vì đó là *optional stopping* |
@@ -364,6 +364,8 @@ Bảng ngân sách trong mục đó cũng đã đổi từ *ước tính* sang *
 
 **Một phát hiện ngoài dự kiến trong lúc chạy E1:** khi API Anthropic hết hạn mức giữa chừng, **chỉ Brand Voice còn chấm được** (6/7 tiêu chí của nó là regex, không cần LLM); 3 agent kia hỏng hoàn toàn. Đây là kiểm chứng ngoài đời thật cho thiết kế *suy giảm có kiểm soát* ở `architecture.md` mục 6.4 — không phải thí nghiệm có chủ đích, nhưng đáng ghi.
 
+**Phát hiện thứ hai, trùng loại, trong lúc chạy E2E tự động hoá (2026-08-07/08, `docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 7):** khởi động worker với `ANTHROPIC_API_KEY` **sai** (ghi đè biến môi trường tiến trình, `.env` không đổi) rồi chuyển một bài sang Needs Review — job **không** rơi vào dead-letter mà vẫn `done` với điểm suy giảm, vì Compliance và Brand Voice dùng rubric tất định (không gọi LLM cho phần lõi chấm điểm), chỉ Content Quality và SEO thiếu do key sai; `missing_agents = 2 < 4` nên pipeline coi là "chấm được một phần" đúng thiết kế fail-safe, `run_log` xác nhận `usage = []` (không tốn tiền API thật ở lần thử này). Hai lần quan sát độc lập, hai nguyên nhân khác nhau (hết hạn mức và sai key), cùng xác nhận một hành vi thiết kế ở `architecture.md` mục 6.4.
+
 ---
 
 ## 6. Giới hạn cố ý, không phải nợ
@@ -372,12 +374,16 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 
 | Giới hạn | Lý do |
 |---|---|
+| Với bài **đã xuất bản** rồi tạo bản nháp mới đưa sang Needs Review, `worker.py` chấm nhầm nội dung **bản cũ đã xuất bản**, không phải bản nháp mới | Cả đối soát lẫn worker đều đọc nội dung qua JSON:API, mà JSON:API trả về **revision mặc định** của node — với workflow `needs_review` có `default_revision = false`, revision mặc định vẫn là bản đã xuất bản. Đường **event bắn đúng** (hook tính `content_hash` trực tiếp từ revision vừa lưu, không qua JSON:API) — nhưng `worker.py` gọi `fetch_content()` (JSON:API, không `resourceVersion`) để lấy nội dung đưa vào pipeline, nên với bài đã xuất bản nó **chấm sai nội dung** dù hash gửi kèm job là đúng. Đây là giới hạn đã biết, không phải mất bài hoàn toàn (job vẫn chạy, vẫn ghi kết quả) mà là chấm nhầm bản. Cách khắc phục triệt để — đổi `fetch_content()` sang `?resourceVersion=rel:working-copy` — **cố ý chưa làm** trong đợt tự động hoá này, đó là một quyết định thiết kế riêng ngoài phạm vi. Trong lúc chờ, `worker.chay_mot_job()` so `content_hash` của nội dung THẬT đã fetch với `content_hash` của job và ghi `logging.warning` khi hai giá trị lệch nhau — đó là thứ làm giới hạn này **lộ ra** thay vì âm thầm ghi sai `run_log` vĩnh viễn |
 | Shadow-test thật (E6) không làm được | Cần Drupal thật của VinFast, đội content thật, luồng duyệt thật — dự án không được cấp. Thay bằng held-out test (`evaluation-plan.md` mục 4.6) |
 | Gold set do **một người** gán nhãn | Không được cấp nhân sự. Dùng Kappa test-retest làm trần thay cho Kappa người-người, và nêu rõ đó là ước lượng lạc quan |
 | Brand guideline tự trích xuất, không phải tài liệu nội bộ | Dự án không được cấp tài liệu nội bộ VF O2O |
 | Quy ước "trạm sạc / trụ sạc" để `NA` | Thu thêm corpus để đẩy p qua ngưỡng là *optional stopping* — làm mọi p-value mất giá trị |
 | `url_alias` không nằm trong `content_hash` | Bên PHP phải tra bảng `path_alias` riêng; thêm phức tạp để bắt trường hợp hiếm |
 | Chưa hiển thị `criteria` chi tiết của Brand Voice trong UI | Dữ liệu đã có trong pipeline, chờ xem giao diện thật rồi mới quyết |
+| Hoàn tác nội dung → kẹt: một cặp `(node, hash)` đã chấm xong (`done`) không bao giờ được chấm lại bằng đường tự động | Index dedup phủ cả `done`. Editor sửa C1→C2 rồi hoàn tác về C1: hook và đối soát đều gửi job cho hash của C1, nhưng đều bị `duplicate` vì `(node, hash_C1)` đã có job `done` từ trước khi sửa — node giữ nguyên report của C2, băng "nội dung đã thay đổi" **không bao giờ tắt**. Lối thoát duy nhất là nút "Chấm lại" thủ công — mà `content_editor` (chỉ có quyền `xem bao cao ai`) không có quyền bấm. Trớ trêu: `audit.da_cham()` vẫn còn payload đúng của C1 trong `run_log`, ghi lại tốn 0 đồng, nhưng đường tự động không tới được đó |
+| Với bài **đã xuất bản** đang được sửa lại, mỗi lần bấm Save đều tốn tiền API — chốt chặn tiền không cứu được | Hệ quả trực tiếp của việc sửa lỗi ghi `run_log` theo hash nội dung thật (mục 6 dòng trên). Trước khi sửa, `audit.ghi()` ghi theo hash do hook gửi, nên mọi job sau có cùng hash job đều `da_cham()` trúng và không tốn thêm đồng nào — nhưng cái "trúng" đó phục vụ **kết quả của nội dung khác**, sai vĩnh viễn và im lặng. Sau khi sửa, `run_log` mang hash của nội dung thật đã chấm, nên trong đúng ca lệch revision này `da_cham(node, hash_job)` **không bao giờ khớp** → Save lại là chấm lại thật. **Đây là đánh đổi có chủ đích:** thà lộ ra và tốn tiền còn hơn âm thầm trả về điểm của một bài khác. Đo được bằng script tái hiện trên Postgres thật lúc re-review đợt sửa cuối. Khắc phục triệt để cùng chỗ với dòng trên: cho `fetch_content()` đọc `?resourceVersion=rel:working-copy` |
+| `job_queue.enqueue(force=True)` có khe hở nguyên tử hiếm gặp dưới tải đồng thời | Nhánh `force=True` mở `conn.transaction()` tường minh trên connection dùng chung (`db.get_conn()` cache theo DSN), trong khi handler FastAPI chạy đồng bộ trong threadpool. Nếu đúng lúc đó có hai POST đồng thời và một cái là `force=True`, INSERT của luồng kia có thể lọt vào transaction của luồng force và biến mất nếu transaction đó rollback. Xác suất thấp ở quy mô một editor thao tác tuần tự, chưa xử lý vì chưa quan sát được trong thực tế |
 
 ---
 
@@ -412,13 +418,16 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
                                      SINH RA việc mới: E1-Brand phải đo lại
 [x] 11. B6  (graph.py truyền content_type/langcode)  <- xong 2026-08-05, gộp
                                                        về _khoa_cua(), có test
+[x] 16. Tự động hoá Needs Review + nhật ký truy vết  <- xong 2026-08-07, event-
+                                                        driven + đối soát an
+                                                        toàn, xem architecture.md
+                                                        mục 9
 ---- chờ mentor ----
    12. A3  (gán nhãn gold set)
    13. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
    14. Đo lại E1-Brand sau B7  <- tốn API, chưa chạy
    15. A1-content_quality, A1-seo   <- E1 hạ ưu tiên: σ = 0,38 và 0,19
-   16. Polling worker, nhật ký truy vết
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.

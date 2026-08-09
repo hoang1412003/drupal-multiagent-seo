@@ -1,7 +1,7 @@
 # Vận hành: nhật ký truy vết và vòng phản hồi người duyệt
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** thiết kế - chưa triển khai
+**Trạng thái:** mục 2 (nhật ký truy vết) **đã triển khai (2026-08-07)** — xem `architecture.md` mục 9 và `docs/evidence/tu_dong_hoa_e2e.txt`. Mục 3 (vòng phản hồi người duyệt) vẫn là thiết kế, chưa triển khai — không còn bị chặn bởi mục 2, xem mục 4
 
 ---
 
@@ -59,7 +59,7 @@ Một bản ghi cho mỗi lần chấm, **append-only**, không bao giờ sửa 
 
 | Trường | Nội dung | Vì sao cần |
 |---|---|---|
-| `node_id`, `node_changed_at` | Bài nào, ở phiên bản nội dung nào | Phân biệt các lần chấm trên nội dung khác nhau |
+| `node_id`, `content_hash` | Bài nào, ở phiên bản nội dung nào | Phân biệt các lần chấm trên nội dung khác nhau. **Đã đổi từ `node_changed_at` sang `content_hash` lúc triển khai** — `editor-ui-design.md` mục 4.4 phát hiện `changed` của node nhảy ngay sau chính `write_back()` PATCH, nên mốc thời gian không dùng để so sánh nội dung được; hash nội dung thì không |
 | `scored_at` | Thời điểm chấm | |
 | `decision`, `final_score` | Kết quả | |
 | `agent_results` | Điểm + issues/flags đầy đủ của cả 4 agent | Tái dựng được lý do, không chỉ kết luận |
@@ -87,9 +87,11 @@ Chọn **JSONL**: một dòng JSON mỗi lần chấm, ghi bằng `open(..., "a"
 
 **Xoay vòng file:** một file mỗi tháng (`reviews-2026-07.jsonl`) để không phình vô hạn.
 
+> **Đính chính 2026-08-07 — kết luận đã đổi từ JSONL sang bảng Postgres.** Lập luận cũ (*"bất cứ thứ gì nặng hơn đều là over-engineering"*) đúng ở thời điểm viết và **tiền đề của nó đã đổi**: lúc đó phía Multi-Agent chưa có CSDL nào, nên "bảng riêng" nghĩa là dựng thêm hạ tầng. Từ 2026-08-05 Postgres đã chạy sẵn cho kho vector, và bản triển khai tự động hoá dù sao cũng phải tạo bảng cho hàng đợi. Đây là **đổi kết luận, không phải bác bỏ lập luận**. Chi tiết: spec `2026-08-07-needs-review-automation-design.md` mục 2.1. Bảng thật đã chạy: `run_log` (`multiagent/src/audit.py`), bằng chứng chạy thật ở `docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 5.
+
 ### 2.5. Không ghi cái gì
 
-- **Toàn văn bài viết.** Đã có trong Drupal; chép lại làm phình log và nhân bản dữ liệu. Chỉ lưu `node_id` + `node_changed_at`.
+- **Toàn văn bài viết.** Đã có trong Drupal; chép lại làm phình log và nhân bản dữ liệu. Chỉ lưu `node_id` + `content_hash`.
 - **API key, thông tin xác thực.** Hiển nhiên nhưng dễ lọt qua đường log exception.
 - **System prompt đầy đủ.** Chỉ lưu `prompt_version`.
 
@@ -163,10 +165,10 @@ Nếu phần Drupal chưa kịp, có thể thu thủ công trong giai đoạn de
 
 | Hạng mục | Ưu tiên | Vì sao |
 |---|---|---|
-| Nhật ký truy vết | **Trung bình-cao** | Chỉ vài chục dòng code. **`agent_results` / `config_meta` / `usage` không ghi lúc chạy là mất vĩnh viễn** - không ai giữ hộ ba thứ này. Bật sớm thì các lần chạy gold set ở E1/E3/E5 đã có sẵn log để phân tích |
-| Vòng phản hồi | Trung bình | Cần module Drupal (`vf_ai_review`) xong trước. Không có nó vẫn demo được |
+| Nhật ký truy vết | **✅ Đã triển khai (2026-08-07)** | Chỉ vài chục dòng code. **`agent_results` / `config_meta` / `usage` không ghi lúc chạy là mất vĩnh viễn** - không ai giữ hộ ba thứ này. Bảng thật: `run_log` (Postgres, mục 2.4), bằng chứng chạy thật `docs/evidence/tu_dong_hoa_e2e.txt` tiêu chí 5 |
+| Vòng phản hồi | Trung bình | **Nay hết bị chặn**: cần khớp với bản ghi truy vết qua cặp `(node_id, scored_at)` (mục 3.4), và cặp đó **đã có sẵn** trong `run_log` từ 2026-08-07. Vẫn cần module Drupal (`vf_ai_review`) làm ô nhập phản hồi trước khi thu được dữ liệu thật - không có nó vẫn demo được |
 
-**Hạ từ "Cao" xuống "Trung bình-cao" (2026-08-03)** sau khi mục 2.1 được đính chính: 3 field AI đã được Drupal giữ qua revision, nên rủi ro "mất trắng dữ liệu" nhỏ hơn bản v1 mô tả. Phần thật sự mất vĩnh viễn thu hẹp lại còn bối cảnh chấm. Hạng mục gấp hơn ở thời điểm này là **UI báo cáo trong editor** - deliverable bắt buộc của đề bài và chưa có dòng code nào (`docs/editor-ui-design.md` mục 1).
+**Hạ từ "Cao" xuống "Trung bình-cao" (2026-08-03)** sau khi mục 2.1 được đính chính: 3 field AI đã được Drupal giữ qua revision, nên rủi ro "mất trắng dữ liệu" nhỏ hơn bản v1 mô tả. Phần thật sự mất vĩnh viễn thu hẹp lại còn bối cảnh chấm. Hạng mục gấp hơn ở thời điểm đó là **UI báo cáo trong editor** - deliverable bắt buộc của đề bài; mục đó đã xong (`docs/editor-ui-design.md` mục 1), và tới lượt nhật ký truy vết được làm cùng đợt tự động hoá.
 
 **Nhật ký truy vết nên bật trước khi chạy các thí nghiệm**, không phải sau. E1 (chấm 10 bài × 5 lần) sinh ra đúng loại dữ liệu mà log này lưu - có log sẵn thì phân tích phương sai là đọc file, không có thì phải tự chế cách lưu riêng cho thí nghiệm.
 
@@ -174,16 +176,17 @@ Nếu phần Drupal chưa kịp, có thể thu thủ công trong giai đoạn de
 
 ## 5. Ảnh hưởng lên code
 
+**Đã triển khai (2026-08-07), khác thiết kế gốc ở cách lưu — xem mục 2.4:**
+
 | File | Thay đổi |
 |---|---|
-| `src/audit.py` *(mới)* | `append_review_record(...)` ghi một dòng JSONL; xoay file theo tháng |
-| `src/graph.py` | Gọi `audit` trong `write_back_node`, sau khi có `report` |
-| `src/ai_core.py` | Trả thêm `usage` để log chi phí thật (hiện đang bỏ) |
-| `multiagent/logs/` *(mới)* | Thư mục log, **thêm vào `.gitignore`** |
-| `drupal/.../vf_ai_review` | Ô phản hồi trong khối báo cáo |
-| `scripts/` | Test: bản ghi đúng schema, file xoay đúng tháng, không lọt bí mật |
+| `src/audit.py` *(đã có)* | `ghi(...)` INSERT một dòng vào bảng Postgres `run_log` (`CREATE TABLE IF NOT EXISTS`, không xoay file theo tháng — bảng không phình theo cách JSONL phình) |
+| `src/graph.py`, `src/worker.py` | Gọi `audit.ghi()` sau khi có `report`, trước khi write-back |
+| `src/ai_core.py` | Trả thêm `usage`, ghi vào `run_log.usage` |
+| `drupal/.../vf_ai_review` | Ô phản hồi trong khối báo cáo — **chưa làm**, thuộc mục 3 (vòng phản hồi), không thuộc phần nhật ký truy vết |
+| `multiagent/scripts/test_audit.py` | Test: bản ghi đúng schema, `final_score = NULL` giữ nguyên khi Compliance lỗi, không lọt bí mật |
 
-Lưu ý `.gitignore`: log chứa nội dung trích từ bài viết (`excerpt` trong flags) - không đẩy lên repo công khai.
+Không còn thư mục `multiagent/logs/` hay vấn đề `.gitignore` cho file log — dữ liệu nằm trong Postgres cùng container với `kb_chunk`.
 
 ---
 

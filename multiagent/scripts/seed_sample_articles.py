@@ -159,15 +159,23 @@ def create_article(article: dict) -> str:
         "title": article["title"],
         "body": {"value": article["body"], "format": "basic_html"},
         "field_meta_description": article["meta_description"],
-        "status": False,  # bản nháp chưa xuất bản
+        # Content Moderation (workflow "kiem_duyet_noi_dung") nay quan ly
+        # trang thai xuat ban cua Article - field "status" khong con POST
+        # duoc truc tiep ("Cannot edit the published field of moderated
+        # entities"). "draft" tuong duong ban nhap chua xuat ban truoc day.
+        "moderation_state": "draft",
     }
     if article["slug"]:
         attributes["path"] = {"alias": article["slug"]}
 
     payload = {"data": {"type": "node--article", "attributes": attributes}}
+    # Phạm vi dự án là nội dung tiếng Việt, KB RAG lọc theo langcode='vi', nên
+    # node phải khai rõ ngôn ngữ chứ không phụ thuộc mặc định của site. Field
+    # "langcode" không POST được trực tiếp qua JSON:API (bị 403 field access),
+    # nên khai rõ ngôn ngữ bằng tiền tố đường dẫn /vi/ thay vì thuộc tính.
     response = _request_with_retry(
         requests.post,
-        f"{BASE_URL}/jsonapi/node/article",
+        f"{BASE_URL}/vi/jsonapi/node/article",
         headers=POST_HEADERS,
         json=payload,
         auth=AUTH,

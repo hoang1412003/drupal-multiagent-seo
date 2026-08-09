@@ -7,7 +7,6 @@ Cả 4 agent đều chạy thật. Brand Voice chấm theo rubric BV1-BV7 và t�
 tất định (docs/rubrics.md mục 5); 3 agent còn lại vẫn để LLM tự cho điểm.
 Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
 """
-import hashlib
 from datetime import datetime, timezone
 
 from langgraph.graph import END, START, StateGraph
@@ -17,6 +16,7 @@ import config
 from agents import brand_voice, compliance, content_quality, seo
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
+from text_utils import content_hash
 
 DEFAULT_CONTENT_TYPE = "cam_nang"
 DEFAULT_LANGCODE = "vi"
@@ -34,6 +34,15 @@ def _khoa_cua(state: ContentReviewState) -> dict:
         "content_type": state.get("content_type") or DEFAULT_CONTENT_TYPE,
         "langcode": state.get("langcode") or DEFAULT_LANGCODE,
     }
+
+
+# Alias công khai: worker.py cần suy đúng cặp khoá này để tra config_meta ghi
+# vào run_log (audit.ghi), thay vì tự gọi config.load() không tham số - việc
+# đó rơi về mặc định của config.load() chứ không phải khoá state đang dùng,
+# hai hằng số DEFAULT_* nằm ở hai file độc lập nên "tình cờ" trùng hôm nay
+# không đảm bảo mãi trùng. Dùng alias thay vì import thẳng tên có gạch dưới
+# đầu để không phá quy ước "gạch dưới đầu = nội bộ module".
+khoa_cua = _khoa_cua
 
 
 def _config_cua(state: ContentReviewState) -> dict:
@@ -201,25 +210,6 @@ def _format_issue(issue) -> str:
     return "; ".join(f"{k}: {v}" for k, v in issue.items() if k != "field")
 
 
-# Các field tham gia tính content_hash, ĐÚNG THỨ TỰ NÀY. Phía PHP
-# (AiReportRenderer::contentHash) phải ghép y hệt, nếu lệch thì băng cảnh báo
-# "nội dung đã thay đổi" hiện sai vĩnh viễn. Có test hợp đồng dùng chung file
-# scripts/content_hash_fixture.json để bắt sai lệch này.
-_HASH_FIELDS = ("title", "body", "summary", "meta_description")
-
-
-def _content_hash(fields: dict) -> str:
-    """Băm nội dung đã chấm, để sau này biết bài có bị sửa sau khi chấm không.
-
-    Dùng hash chứ KHÔNG dùng mốc thời gian `changed` của node: chính lệnh
-    PATCH của write_back() làm `changed` nhảy, nên so mốc đó sẽ luôn báo
-    "nội dung đã đổi" ngay sau khi chấm (spec mục 4.3, có bằng chứng đo trên
-    DB). Hash chỉ đổi khi nội dung thật sự đổi.
-    """
-    ghep = "\n".join(str(fields.get(k) or "") for k in _HASH_FIELDS)
-    return hashlib.sha256(ghep.encode("utf-8")).hexdigest()
-
-
 def _issue_to_json(agent_key: str, issue: dict) -> dict:
     """Một issue/flag của agent -> một mục trong báo cáo JSON.
 
@@ -276,7 +266,7 @@ def _build_report_json(state: ContentReviewState) -> dict:
     return {
         "version": 1,
         "scored_at": datetime.now(timezone.utc).isoformat(),
-        "content_hash": _content_hash(state.get("fields") or {}),
+        "content_hash": content_hash(state.get("fields") or {}),
         # Lấy decision/final_score từ STATE chứ không từ report, vì đó đúng
         # là nguồn write_back() ghi vào field_ai_status/field_ai_score. Đọc
         # từ report là tạo nguồn thứ hai cho cùng một giá trị - lệch nhau thì

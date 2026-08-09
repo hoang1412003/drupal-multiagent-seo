@@ -24,7 +24,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 
 ## Cấu trúc project
 
-Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc (Drupal CMS ↔ hệ Multi-Agent AI, nối qua JSON:API — xem sơ đồ ở `docs/architecture.md`):
+Hai thư mục cấp cao nhất tương ứng đúng 2 phía trong kiến trúc (Drupal CMS ↔ hệ Multi-Agent AI, nối qua JSON:API **và** qua service HTTP tự động hoá — xem sơ đồ ở `docs/architecture.md` mục 9). Phía Python nay chạy như **ba tiến trình**: service (`api.py`, nhận job), worker (`worker.py`, chấm job) và các script chạy tay (seed dữ liệu, test, dựng KB) — không còn chỉ là script gọi một lần:
 
 ```
 drupal-multiagent-seo/
@@ -32,11 +32,16 @@ drupal-multiagent-seo/
 │   ├── .ddev/                    # cấu hình DDEV (project-type=drupal10, docroot=web)
 │   ├── scripts/                  # tạo field + test lớp render (PHP thuần)
 │   └── web/modules/custom/
-│       └── vf_ai_review/         # module hiển thị báo cáo AI trong giao diện soạn bài
+│       ├── vf_ai_review/         # CHỈ ĐỌC: hiển thị báo cáo AI trong giao diện soạn bài,
+│       │                          # không tính điểm, không gọi API, không sửa dữ liệu node
+│       └── vf_ai_trigger/        # module thứ hai, tách riêng vì nói chuyện với service:
+│                                  # bắt sự kiện Needs Review, gọi service HTTP, route
+│                                  # "chấm lại" - đây là module duy nhất phía Drupal được
+│                                  # phép tạo hiệu ứng phụ (side effect)
 │
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
-│   ├── docker-compose.yml        # Postgres + pgvector (kho vector, tách khỏi Drupal)
+│   ├── docker-compose.yml        # Postgres + pgvector (kho vector + hàng đợi + run_log, tách khỏi Drupal)
 │   ├── .venv/
 │   ├── src/
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
@@ -55,7 +60,12 @@ drupal-multiagent-seo/
 │   │   │   ├── compliance.py       # đã triển khai (LLM + blacklist + RAG fact-check CP3) - Sprint 2
 │   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
 │   │   │   └── brand_voice.py       # đã triển khai (rubric BV1-BV7 + RAG) - Sprint 2
-│   │   └── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
+│   │   ├── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
+│   │   ├── api.py                # service HTTP: chỉ nhận job + trả trạng thái, không chấm gì
+│   │   ├── job_queue.py          # hàng đợi Postgres (SKIP LOCKED, retry, dead-letter)
+│   │   ├── worker.py             # vòng lặp lấy job, gọi graph.py, ghi run_log, write-back
+│   │   ├── reconcile.py          # vòng đối soát định kỳ - lưới an toàn cho đường event
+│   │   └── audit.py              # nhật ký truy vết, ghi bảng run_log (Postgres)
 │   └── scripts/                  # seed dữ liệu mẫu + test thủ công
 │
 ├── docs/                         # tài liệu chung, tham chiếu cả 2 phía
@@ -63,7 +73,7 @@ drupal-multiagent-seo/
 │   ├── architecture.md           # thiết kế hệ thống Multi-Agent
 │   └── roadmap.md                # lộ trình 3 sprint
 │
-└── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY
+└── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
 
 ## Setup
@@ -90,13 +100,20 @@ python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL
 
-docker compose up -d                                # Postgres + pgvector (kho vector)
+docker compose up -d                                # Postgres + pgvector (kho vector + hàng đợi + run_log)
 .venv\Scripts\python.exe src\kb\build_kb.py         # KB fact-check (4 chunk)
 .venv\Scripts\python.exe src\kb\build_brand_kb.py   # KB brand (1128 chunk, vài phút)
 ```
 
 KB là **dữ liệu dẫn xuất** — không nằm trong git, dựng lại từ `specs.json` và
 `docs/brand/corpus/`. Chi tiết: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục 2.
+
+**Chạy tự động hoá "Needs Review"** (service nhận job từ Drupal + worker chấm, cần chạy song song, mỗi lệnh một cửa sổ terminal — chi tiết và lệnh kiểm `/health`: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục "Khởi động service và worker trước khi demo"):
+
+```
+.venv\Scripts\python.exe -m uvicorn api:app --port 8900 --app-dir src
+.venv\Scripts\python.exe src\worker.py
+```
 
 ## Trạng thái Sprint 1
 
@@ -111,12 +128,12 @@ KB là **dữ liệu dẫn xuất** — không nằm trong git, dựng lại t�
 
 ## Trạng thái Sprint 2
 
-- [x] Compliance Agent — chấm theo **rubric CP1–CP8** (`docs/rubrics.md` mục 6): CP1/CP5/CP6 đo bằng máy, CP3 bằng RAG, bốn tiêu chí còn lại gộp vào **một** lần gọi LLM. Điểm do `src/scoring.py` tính **tất định** và `severity` **tra bảng theo mã tiêu chí** — LLM không tự cho điểm, cũng không tự chọn mức nghiêm trọng, vì `critical` là thứ kích hoạt quyền phủ quyết. **RAG fact-check (CP3)**: KB thông số → BGE-M3 self-host → Chroma; lệch số (cùng model) → mức 0 → flag `critical`; **không tra được → mức 1 → flag `low`**, cố ý *không* phải `critical` để không từ chối oan mọi bài nhắc model ngoài KB (E2 recall@3=1.00 trên KB seed). KB đã verify: 4/4 mục `verified: true`, tìm ra 3 chỗ sai khi đối chiếu (`docs/goldset/sources.md` mục 2)
+- [x] Compliance Agent — chấm theo **rubric CP1–CP8** (`docs/rubrics.md` mục 6): CP1/CP5/CP6 đo bằng máy, CP3 bằng RAG, bốn tiêu chí còn lại gộp vào **một** lần gọi LLM. Điểm do `src/scoring.py` tính **tất định** và `severity` **tra bảng theo mã tiêu chí** — LLM không tự cho điểm, cũng không tự chọn mức nghiêm trọng, vì `critical` là thứ kích hoạt quyền phủ quyết. **RAG fact-check (CP3)**: KB thông số → BGE-M3 self-host → Postgres + pgvector; lệch số (cùng model) → mức 0 → flag `critical`; **không tra được → mức 1 → flag `low`**, cố ý *không* phải `critical` để không từ chối oan mọi bài nhắc model ngoài KB (E2 recall@3=1.00 trên KB seed). KB đã verify: 4/4 mục `verified: true`, tìm ra 3 chỗ sai khi đối chiếu (`docs/goldset/sources.md` mục 2)
 - [x] Hoàn thiện Aggregator — veto Compliance, fail-safe khi agent lỗi, chia lại trọng số
 - [x] Retry/backoff khi Drupal lỗi mạng/5xx (`docs/architecture.md` mục 7)
 - [x] Brand Voice Agent dùng RAG — rubric BV1–BV7 (`docs/rubrics.md` mục 5), 6/7 tiêu chí đo bằng regex đối chiếu `brand_rules.json`, BV6 chấm giọng văn bằng LLM + RAG trên KB `kb_brand` (1128 chunk từ 16 bài `BRAND`). Điểm do `src/scoring.py` tính **tất định**, không để LLM tự cho điểm — agent đầu tiên áp dụng rubric v1. Brand guideline **tự trích xuất** từ corpus bằng kiểm định nhị thức (p < 0,05 → ngưỡng ≥9/10 tự rơi ra, không phải số tự đặt). E2 đo được 78,3% so với mốc ngẫu nhiên 21,7%
 - [ ] Thu thập & gán nhãn gold set — 33 mẫu đã thu + bóc tách + chèn perturbation (`docs/goldset/labels.csv`), đang gán nhãn
-- [ ] Tự động hóa — Content Moderation "Needs Review" + polling worker (`docs/architecture.md` mục 9)
+- [x] Tự động hóa — Content Moderation "Needs Review" bật thật, **hai đường song song**: event-driven là đường chính (Drupal → module `vf_ai_trigger` → service HTTP → hàng đợi Postgres, ~2 giây tới lúc job chạy) và vòng đối soát định kỳ 300 giây là lưới an toàn (bắt các job event bị lọt, ví dụ service tắt tạm thời). Chạy thật end-to-end, 8/8 tiêu chí đạt: `docs/architecture.md` mục 9, bằng chứng `docs/evidence/tu_dong_hoa_e2e.txt`
 - [x] UI báo cáo trong editor — module `vf_ai_review`: khối tổng quan ở cột phải + **chú thích lỗi ngay dưới từng field** (phần đáp ứng đúng chữ đề bài). Python ghi thêm `field_ai_report_json` (báo cáo có cấu trúc), module chỉ đọc và render. Escape chống XSS theo `docs/prompt-injection.md` M4. Phát hiện nội dung sửa sau khi chấm bằng **hash nội dung**, không phải mốc `changed`
 
 Báo cáo Sprint 2 đầy đủ (kết quả, phép đo, việc còn vướng): [`docs/sprint2-report.md`](docs/sprint2-report.md).

@@ -1,0 +1,9 @@
+name: 'VF AI Trigger'
+type: module
+description: 'Bắn job chấm điểm sang service Multi-Agent khi bài vào trạng thái Needs Review.'
+core_version_requirement: ^10 || ^11
+package: 'VF O2O'
+dependencies:
+  - drupal:node
+  - drupal:content_moderation
+  - vf_ai_review:vf_ai_review
