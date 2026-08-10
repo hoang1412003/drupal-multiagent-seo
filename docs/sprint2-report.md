@@ -101,11 +101,32 @@ Hiện đã bật thật Content Moderation "Needs Review" trên content type Ar
 
 **Đây là việc đang chặn toàn bộ Sprint 3** — cả ba phép đo còn lại (calibration ngưỡng, so sánh multi-agent với single-agent, test trên tập held-out) đều cần nhãn làm đáp án chuẩn.
 
-**Một vấn đề phát hiện khi rà lại, cần mentor quyết:** quy tắc quy nhãn hiện tại là *có lỗi nhóm A → `rejected`, có lỗi nhóm B → `needs_revision`, không có gì → `publish`*. Nhưng chạy thử script đếm trên 33 mẫu thì **cả 33 bài đều đã dính ít nhất một lỗi nhóm B** — chủ yếu là mã B9 "câu quá dài" (33/33 bài).
+**Một vấn đề phát hiện khi rà lại — ĐÃ XỬ LÝ 2026-08-10, guideline v1.3, chờ mentor xác nhận:** quy tắc quy nhãn hiện tại là *có lỗi nhóm A → `rejected`, có lỗi nhóm B → `needs_revision`, không có gì → `publish`*. Nhưng chạy script đếm trên 33 mẫu thì **cả 33 bài đều dính ít nhất một lỗi nhóm B** — toàn bộ đến từ mã B9 "câu quá dài" (33/33 bài). Nghĩa là gán nhãn xong sẽ **không có bài nào ra nhãn `publish`**, gold set chỉ còn 2 lớp, và ngưỡng publish không có dữ liệu để calibrate.
 
-Nghĩa là gán nhãn xong sẽ **không có bài nào ra nhãn `publish`**, gold set chỉ còn 2 lớp, và ngưỡng publish sẽ không có dữ liệu để calibrate.
+Đo kỹ thêm thì tìm ra hai điều nữa:
 
-Nhiều khả năng nguyên nhân là ngưỡng "câu trên 30 từ" không phù hợp với tiếng Việt, chứ không phải 20 bài của đội content đều viết sai. Nhưng ngưỡng đó dùng để **quy ra nhãn**, tức nó định nghĩa đáp án chuẩn — lấy dữ liệu để chỉnh chính cái ngưỡng sinh ra đáp án thì thành vòng luẩn quẩn. Chỗ này cần người quyết, không suy ra từ dữ liệu được.
+- **B9 gộp 3 tín hiệu nhưng chỉ 1 cái từng kích hoạt.** Câu dài: 33/33. Đoạn dài: 0/33. Thiếu heading: 0/33. Một tiêu chí hoặc luôn đúng hoặc không bao giờ đúng thì phương sai bằng 0, không phân biệt được bài nào với bài nào.
+- **6/13 bài perturbation mất tác dụng ở mức nhãn.** Các bản chèn mã B có nhãn giống hệt bài gốc vì bài gốc đã `needs_revision` sẵn do B9 — công chèn lỗi không tạo thêm tín hiệu nào cho calibration nhãn.
+
+Đã kiểm: các câu dài là **câu thật** (dài nhất 70 tiếng, đúng ngữ pháp), không phải lỗi của bộ tách câu.
+
+**Cách xử lý — tránh vòng luẩn quẩn bằng cách không đụng tới ngưỡng.** Rủi ro ban đầu là: lấy dữ liệu để chỉnh chính cái ngưỡng sinh ra đáp án chuẩn. Nên lời giải đã chọn **không chỉnh ngưỡng nào cả** mà phân loại lại tín hiệu: câu dài → **C4**, đoạn dài → **C5** (nhóm C, ghi vào `notes`, không đổi nhãn); riêng "thiếu heading" giữ ở **B9** vì đó là lỗi cấu trúc thật. Ba căn cứ, không căn cứ nào nhìn phân bố nhãn:
+
+1. `needs_revision` định nghĩa là *"lỗi **phải** sửa"*; câu dài là khuyến nghị văn phong, đúng định nghĩa C1.
+2. Cả 20 bài thật **đã qua kiểm duyệt thật của đội content VinFast và được đăng** với những câu đó.
+3. Guideline v1.1 đã sửa **đúng lỗi cùng loại** cho mã B4 (dùng dải lý tưởng làm ranh giới nhãn → mọi bài dính → phân bố sụp). B9 là mã bị sót trong đợt đó.
+
+Chuyển xuống nhóm C **không mất thông tin nào**: script vẫn đếm và in, người gán vẫn chép vào `notes`, Sprint 3 vẫn đối chiếu được. Thứ duy nhất bị tước là quyền quyết định nhãn.
+
+Phân bố sau khi sửa (chạy lại trên 33 mẫu): **18/33 bài không dính mã đổi nhãn nào**, B9 còn 0/33, C4 33/33. Trần trên của từng lớp — người gán sẽ trừ bớt khi xét tiếp A1–A6, B1, B2, B5, B8, B10:
+
+| Nhãn | Số bài | Từ đâu |
+|---|---|---|
+| `rejected` | 7 | perturbation chèn mã A |
+| `needs_revision` | 13 | 6 perturbation chèn mã B + 7 bài thật dính B3/B4 |
+| `publish` | ≤ 13 | 13 bài thật không dính mã máy nào |
+
+Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và trước khi chạy AI trên gold set. Bảng thay đổi đầy đủ: `goldset/annotation-guideline.md` mục 11 (v1.3).
 
 - Bảng 33 mẫu (cột nhãn còn trống): [`goldset/labels.csv`](goldset/labels.csv)
 - Quy ước gán nhãn + bảng mã lỗi: [`goldset/annotation-guideline.md`](goldset/annotation-guideline.md)
@@ -159,6 +180,6 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 
 ## 7. Ba việc cần mentor quyết
 
-1. **Ngưỡng "câu quá dài"** nên để bao nhiêu từ cho bài tiếng Việt — hoặc mã B9 có nên tính vào việc quy nhãn không? (Xem mục 3.1: hiện nó bắt 33/33 bài và làm sụp phân bố nhãn.)
+1. ~~**Ngưỡng "câu quá dài"** nên để bao nhiêu từ cho bài tiếng Việt — hoặc mã B9 có nên tính vào việc quy nhãn không?~~ → **Đã xử lý 2026-08-10 (guideline v1.3), chỉ cần mentor xác nhận.** Không chỉnh ngưỡng nào (chỉnh sẽ thành vòng luẩn quẩn); thay vào đó chuyển câu dài/đoạn dài xuống nhóm C, giữ "thiếu heading" ở B9. Phân bố nhãn phục hồi về 3 lớp. Chi tiết + 3 căn cứ: mục 3.1.
 2. **Cách gán nhãn 33 bài**: gán tay toàn bộ, giảm cỡ mẫu, hay cho phép AI hỗ trợ ở phần liệt kê mã lỗi?
 3. **Đo lại E1 ngay hay chờ code ổn định?** Đo lại tốn khoảng vài đô; nếu còn sửa tiếp Compliance thì sẽ phải đo thêm lần nữa.

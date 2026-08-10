@@ -95,8 +95,13 @@ Xoá thuộc tính `alt` của một thẻ `<img>` trong body (hoặc đổi th�
 ### B7 - Slug lỗi
 Đổi `url_alias` thành bản **còn dấu tiếng Việt**: `/vn_vi/huong-dan-sac-pin` → `/vn_vi/hướng-dẫn-sạc-pin`
 
-### B9 - Câu và đoạn quá dài
-Gộp 3 câu ngắn liền nhau thành một câu dài bằng "và", "đồng thời", "bên cạnh đó". Cần **ít nhất 3 câu** vượt 30 từ mới đạt ngưỡng - chạy `label_helper.py` để xác nhận trước khi chốt.
+### B9 - KHÔNG dùng nữa (guideline v1.3, 2026-08-10)
+
+Công thức cũ là *"gộp 3 câu ngắn liền nhau thành một câu dài"*. Nay **vô tác dụng**: câu dài đã chuyển xuống mã **C4** (nhóm C), mà mã nhóm C không quy ra nhãn - chèn vào không đổi được ground truth nên không kiểm tra được gì.
+
+May là **chưa bản perturbation nào dùng công thức này** (không sample nào có `B9` trong `injected_codes`), nên không phải làm lại bản nào.
+
+B9 nay chỉ còn nghĩa *"bài >500 từ không có heading H2/H3"*. **Cũng không nên chèn**: xoá hết heading của một bài dài là sửa lớn, phá nguyên tắc "chèn tối thiểu" ở mục 0, và tạo ra một bài không giống bất kỳ bài thật nào.
 
 ### B10 - Số liệu không nguồn
 Chèn một câu có số liệu thống kê không dẫn nguồn:
@@ -116,7 +121,7 @@ Cố ý gài lỗi chính tả tạo ra dữ liệu bẩn khó kiểm soát và 
 3. Chạy label_helper.py trên BÀI GỐC → ghi lại các mã B sẵn có
 4. Áp công thức ở trên cho từng mã trong injected_codes
 5. Chạy lại label_helper.py trên bản đã chèn → xác nhận mã máy đo được
-   đã xuất hiện (với các mã máy đo được: B3, B4, B6, B7, B9)
+   đã xuất hiện (các mã máy đo được và ĐỔI NHÃN: B3, B4, B6, B7, B9)
 6. Ground truth = injected_codes + mã sẵn có ở bước 3, áp quy tắc guideline
    mục 5. Điền vào defect_codes và label
 7. Ghi vào notes: đã đổi gì, số gốc là bao nhiêu (với A3)

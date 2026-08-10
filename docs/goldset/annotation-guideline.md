@@ -1,6 +1,6 @@
 # Hướng dẫn gán nhãn gold set
 
-**Phiên bản:** v1.2 (2026-07-29)
+**Phiên bản:** v1.3 (2026-08-10)
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0 - xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`)
 
 > **Nguồn thi hành các ngưỡng gán nhãn là `multiagent/config/scoring.yaml`** (khối `labelling`) - `label_helper.py` đọc thẳng từ đó. Tài liệu này giữ con số để đọc tại chỗ, nhưng khi lệch nhau thì file config đúng. Lưu ý ngưỡng gán nhãn **cố ý khác** ngưỡng chấm điểm ở `rubrics.md`; lý do ở `docs/config-spec.md` mục 2.
@@ -70,7 +70,7 @@ Nhãn gán cho **một node Drupal** (một bài, ở trạng thái chưa xuất
 | **B6** | Thiếu thuộc tính `alt` (hoặc `alt` rỗng) ở bất kỳ ảnh nào trong `body`, hoặc alt text không mô tả đúng ảnh | |
 | **B7** | `url_alias` còn dấu tiếng Việt, thiếu từ khóa chính, hoặc quá dài | |
 | **B8** | Lỗi chính tả hoặc ngữ pháp (từ 1 lỗi trở lên) | |
-| **B9** | Câu trên 30 từ hoặc đoạn trên 5 câu xuất hiện từ 3 lần trở lên; hoặc bài trên ~500 từ mà không có heading H2/H3 | |
+| **B9** | Bài trên ~500 từ mà không có heading H2/H3 | Lỗi **cấu trúc**, không phải văn phong - xem C4/C5 ở mục 4.3 |
 | **B10** | Số liệu định lượng không nêu nguồn | "90% người dùng hài lòng" không dẫn nguồn |
 
 ### 4.3. Nhóm C - không bắt buộc sửa (vẫn `publish`)
@@ -80,8 +80,20 @@ Nhãn gán cho **một node Drupal** (một bài, ở trạng thái chưa xuất
 | **C1** | Ưu tiên phong cách: có cách diễn đạt hay hơn nhưng cách hiện tại không sai |
 | **C2** | Có thể bổ sung nội dung mở rộng, nhưng bài hiện tại đã đủ dùng |
 | **C3** | Ít internal link nhưng vẫn có |
+| **C4** | Câu trên 30 **tiếng** xuất hiện từ 3 lần trở lên *(máy đếm, xem ghi chú dưới)* |
+| **C5** | Đoạn trên 5 câu xuất hiện từ 3 lần trở lên *(máy đếm)* |
 
 Ghi mã C vào cột `notes` để đối chiếu, **không** dùng để đổi nhãn.
+
+**Ghi chú C4/C5 - vì sao chúng ở nhóm C chứ không phải nhóm B (v1.3).** Ba căn cứ, không căn cứ nào nhìn vào phân bố nhãn thu được:
+
+1. **Định nghĩa.** `needs_revision` ở mục 3 là *"có lỗi **phải** sửa"*. Câu dài là khuyến nghị viết gọn lại, không phải thứ chặn xuất bản - đúng định nghĩa C1.
+2. **Bằng chứng ngoài.** Cả 20 bài thật trong tập `GOLD` đã qua kiểm duyệt thật của đội content VinFast và **đã được đăng** với những câu đó. Nếu câu dài là lỗi phải sửa trước khi đăng thì chúng đã không lên sóng.
+3. **Tiền lệ trong chính tài liệu này.** v1.1 đã sửa đúng lỗi cùng loại cho mã B4: dùng dải *lý tưởng* (dải để **chấm điểm**) làm ranh giới **nhãn** thì gần như mọi bài thật đều dính, phân bố nhãn sụp đổ và Kappa mất ý nghĩa. B9 là mã bị sót trong đợt đó.
+
+**Đơn vị là "tiếng", không phải "từ".** `label_helper.py` đếm bằng `len(s.split())`, mà tiếng Việt viết rời từng âm tiết - nên con số đếm được là **tiếng**, không phải từ ("ô tô điện" = 1 từ ghép, 3 tiếng). Ngưỡng 30 vốn mượn từ quy ước readability tiếng Anh vốn đếm **từ**, nên 30 tiếng (≈20 từ) chưa bao giờ đo đúng thứ nó định đo. Từ v1.3 con số này **không còn quyết định nhãn** nên không cần calibrate; nó chỉ còn là bộ đếm ghi vào `notes`. Giữ nguyên 30 để số liệu C4 so sánh được với các lần chạy trước.
+
+**Mã C vẫn phải ghi đầy đủ.** Chuyển xuống nhóm C **không mất thông tin nào**: `label_helper.py` vẫn đếm và in, người gán vẫn chép vào `notes`, Sprint 3 vẫn đối chiếu được AI có bắt đúng chỗ hay không. Thứ duy nhất bị tước là *quyền quyết định nhãn*.
 
 ---
 
@@ -116,7 +128,7 @@ Ranh giới: **sai số liệu → A; đúng nhưng thiếu điều kiện → B
 |---|---|
 | Không chắc giữa 2 nhãn liền kề | Chọn nhãn **nghiêm hơn**, và ghi vào `notes` là ca khó. Ca khó là dữ liệu quý - chính chỗ đó AI cũng sẽ sai |
 | Nghi ngờ A3 nhưng chưa đối chiếu được thông số công bố | **Không đoán.** Dừng, tra `sources.md` mục 2, tra được rồi mới gán. Nếu VinFast không công bố số đó thì không phải A3; xét B10 (số liệu không nguồn) |
-| Bài quá ngắn (dưới ~300 từ) | Không phải lỗi riêng. Xét bình thường theo bảng mã; ngắn thường kéo theo B9/A5 |
+| Bài quá ngắn (dưới ~300 từ) | Không phải lỗi riêng. Xét bình thường theo bảng mã; ngắn thường kéo theo A5 (không trả lời được câu hỏi ở tiêu đề). **Không** kéo theo B9 - B9 chỉ áp dụng cho bài trên ~500 từ |
 | Bài có lỗi lặp cùng một loại nhiều lần | Ghi mã lỗi **một lần**, ghi số lần vào `notes` |
 | Bài thuộc mục "Công ty"/thông cáo báo chí | Loại khỏi gold set (spec mục 6.2), không gán nhãn |
 
@@ -222,3 +234,28 @@ Tại thời điểm sửa **chưa có nhãn nào được gán theo v1**, nên 
 | B6 | Thiếu `image_alt`, hoặc alt text không mô tả đúng ảnh | Thiếu thuộc tính `alt` (hoặc `alt` rỗng) ở bất kỳ ảnh nào trong `body`, hoặc alt text không mô tả đúng ảnh | Trang nguồn thật (vinfastauto.com) không có field ảnh đại diện riêng - mọi ảnh nằm trong `body` (xem `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 3.3). Trường `image_alt` không tồn tại nên định nghĩa cũ không đo được gì; B6 chuyển sang xét mọi thẻ `<img>` trong `body` |
 
 Tại thời điểm sửa **chưa có nhãn nào được gán** (cột `label` trong `labels.csv` còn trống toàn bộ), nên không phải gán lại gì.
+
+**v1.3 (2026-08-10)** - tách mã B9 làm ba, chuyển hai tín hiệu văn phong xuống nhóm C:
+
+| Tín hiệu | v1.2 | v1.3 | Lý do |
+|---|---|---|---|
+| Câu trên 30 tiếng (≥3 lần) | B9 (nhóm B) | **C4** (nhóm C) | Khuyến nghị văn phong, không phải lỗi phải sửa - ba căn cứ ở mục 4.3 |
+| Đoạn trên 5 câu (≥3 lần) | B9 (nhóm B) | **C5** (nhóm C) | Cùng họ readability với C4 |
+| Bài >500 từ không có H2/H3 | B9 (nhóm B) | **B9** (giữ nguyên nhóm B) | Lỗi **cấu trúc** thật, không phải văn phong |
+
+**Vấn đề mà v1.3 sửa, đo được trên chính 33 mẫu** (`scripts/label_helper.py` chạy trên `docs/goldset/raw/*.txt`):
+
+- B9 kích hoạt ở **33/33 bài**, nên áp quy tắc mục 5 thì **không bài nào ra nhãn `publish`** - gold set còn 2 lớp và ngưỡng publish không có dữ liệu để calibrate (E5 ở `docs/evaluation-plan.md`).
+- Toàn bộ 33 lượt kích hoạt đến từ **một** tín hiệu duy nhất là câu dài; hai tín hiệu còn lại của B9 kích hoạt **0/33**. Một tiêu chí hoặc luôn đúng hoặc không bao giờ đúng thì phương sai bằng 0, không phân biệt được bài nào với bài nào.
+- Hệ quả ít thấy hơn nhưng nặng ngang: **6/13 bài perturbation mất hết tác dụng ở mức nhãn.** Các bản chèn mã B (P-001b, P-003a, P-004a, P-006a, P-007b, P-009a) có nhãn giống hệt bài gốc vì bài gốc đã `needs_revision` sẵn do B9 - công chèn lỗi không tạo thêm tín hiệu nào cho calibration nhãn. *(Chúng vẫn giữ giá trị đo Recall theo từng mã lỗi.)*
+- Đã kiểm: các câu dài là **câu thật**, không phải lỗi của bộ tách câu - câu dài nhất trong corpus là 70 tiếng, đọc được, đúng ngữ pháp. Nên đây không phải bug để sửa ở `split_sentences()`.
+
+Phân bố nhãn dự kiến sau v1.3 (trần trên - người gán sẽ trừ bớt khi xét tiếp A1-A6, B1, B2, B5, B8, B10):
+
+| Nhãn | Số bài | Từ đâu |
+|---|---|---|
+| `rejected` | 7 | perturbation chèn mã A |
+| `needs_revision` | 13 | 6 perturbation chèn mã B + 7 bài thật dính B3/B4 |
+| `publish` | ≤ 13 | 13 bài thật không dính mã máy nào |
+
+Tại thời điểm sửa **chưa có nhãn nào được gán**, nên không phải gán lại gì. Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và trước khi chạy hệ thống AI trên gold set.

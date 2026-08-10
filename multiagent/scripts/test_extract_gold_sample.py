@@ -311,7 +311,7 @@ def test_render_roundtrip() -> None:
 
 def _b6_codes(body: str) -> list:
     """Chạy analyze() trên body cho trước, trả về các mã B6 tìm được."""
-    _, codes = analyze({"body": body})
+    _, codes, _ = analyze({"body": body})
     return [c for c in codes if c.startswith("B6")]
 
 

@@ -1,9 +1,15 @@
 """Trợ giúp gán nhãn gold set: tính sẵn các mã lỗi ĐO ĐƯỢC BẰNG MÁY.
 
 Mục đích: cắt bớt thời gian gán nhãn thủ công (docs/goldset/annotation-guideline.md).
-Script chỉ tính các mã lỗi đếm được một cách khách quan - B3, B4, B6, B7, B9.
-Mọi mã còn lại (toàn bộ nhóm A, B1, B2, B5, B8, B10) CẦN NGƯỜI ĐỌC và script
-cố ý KHÔNG đoán hộ.
+Script chỉ tính các mã lỗi đếm được một cách khách quan - B3, B4, B6, B7, B9
+(đổi nhãn) và C4, C5 (KHÔNG đổi nhãn). Mọi mã còn lại (toàn bộ nhóm A, B1, B2,
+B5, B8, B10) CẦN NGƯỜI ĐỌC và script cố ý KHÔNG đoán hộ.
+
+HAI NHÓM MÃ TRẢ VỀ RIÊNG, KHÔNG GỘP MỘT LIST (guideline v1.3):
+mã B quyết định nhãn, mã C thì không - `analyze()` trả chúng ở hai vị trí khác
+nhau để việc đó là ràng buộc cấu trúc chứ không phải quy ước đặt tên mà người
+gọi phải nhớ. Trước v1.3 câu dài/đoạn dài nằm trong B9 và kích hoạt 33/33 bài,
+làm mọi bài thành `needs_revision` và xoá sạch lớp `publish` khỏi gold set.
 
 Script KHÔNG gọi LLM và KHÔNG đọc kết quả AI - gán nhãn phải mù với kết quả AI
 (annotation-guideline mục 2).
@@ -55,9 +61,12 @@ _LB = config.load()["labelling"]
 TITLE_MIN, TITLE_MAX = _LB["title_ok"]          # B4
 META_MIN, META_MAX = _LB["meta_ok"]             # B3
 URL_MAX = _LB["url_max_chars"]                  # B7
-LONG_SENTENCE_WORDS = _LB["long_sentence_words"]        # B9
-LONG_PARAGRAPH_SENTENCES = _LB["long_paragraph_sentences"]  # B9
-REPEAT_THRESHOLD = _LB["repeat_threshold"]      # B9: "từ 3 lần trở lên"
+# C4/C5 KHÔNG đổi nhãn, nên hai ngưỡng dưới không cần calibrate - chúng chỉ
+# là bộ đếm ghi vào `notes`. Đơn vị là TIẾNG (len(s.split()) trên tiếng Việt
+# viết rời từng âm tiết), không phải TỪ - guideline v1.3 mục 4.3.
+LONG_SENTENCE_WORDS = _LB["long_sentence_words"]        # C4
+LONG_PARAGRAPH_SENTENCES = _LB["long_paragraph_sentences"]  # C5
+REPEAT_THRESHOLD = _LB["repeat_threshold"]      # C4/C5: "từ 3 lần trở lên"
 HEADING_REQUIRED_WORDS = _LB["heading_required_words"]  # B9
 
 # Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
@@ -155,9 +164,13 @@ def split_paragraphs(html: str) -> list[str]:
     return [p.strip() for p in re.split(r"\n\s*\n", plain) if p.strip()]
 
 
-def analyze(fields: dict) -> tuple[list[str], list[str]]:
-    """Trả về (dòng số đo, mã lỗi máy kết luận được)."""
-    measures, codes = [], []
+def analyze(fields: dict) -> tuple[list[str], list[str], list[str]]:
+    """Trả về (dòng số đo, mã nhóm A/B, mã nhóm C).
+
+    Hai list mã tách riêng vì chúng có ngữ nghĩa khác nhau: nhóm B quy ra nhãn
+    (annotation-guideline mục 5), nhóm C chỉ ghi vào `notes`.
+    """
+    measures, codes, c_codes = [], [], []
 
     def check(name: str, value):
         """None = chưa thu; chuỗi rỗng = đã kiểm tra và không có."""
@@ -209,7 +222,7 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             codes.append(f"B7 ({'; '.join(flags)})")
         measures.append("  → B7 phần 'thiếu từ khóa chính' CẦN NGƯỜI xét")
 
-    # --- B6 + B9: đọc từ body -----------------------------------------------
+    # --- B6, B9 + C4/C5: đọc từ body ---------------------------------------
     body = fields.get("body", "")
     if body.strip():
         # --- B6: alt text của MỌI ảnh trong body ------------------------
@@ -261,28 +274,33 @@ def analyze(fields: dict) -> tuple[list[str], list[str]]:
             f"  body               {words} từ (đếm theo tiếng, chưa tách từ)",
             f"  số đoạn            {len(paragraphs)}",
             f"  số câu             {len(all_sentences)}",
-            f"  câu > {LONG_SENTENCE_WORDS} từ         {len(long_sentences)}",
+            f"  câu > {LONG_SENTENCE_WORDS} tiếng      {len(long_sentences)}",
             f"  đoạn > {LONG_PARAGRAPH_SENTENCES} câu        {len(long_paragraphs)}",
             f"  heading            h2={h2} h3={h3}",
             f"  internal link      {links}",
         ]
 
-        b9 = []
-        if len(long_sentences) >= REPEAT_THRESHOLD:
-            b9.append(f"{len(long_sentences)} câu > {LONG_SENTENCE_WORDS} từ")
-        if len(long_paragraphs) >= REPEAT_THRESHOLD:
-            b9.append(f"{len(long_paragraphs)} đoạn > {LONG_PARAGRAPH_SENTENCES} câu")
+        # B9 nay CHỈ còn tín hiệu cấu trúc (guideline v1.3). Hai tín hiệu văn
+        # phong tách sang C4/C5 và KHÔNG đổi nhãn - lý do đầy đủ ở
+        # annotation-guideline.md mục 4.3 và bảng đổi ở mục 11.
         if words > HEADING_REQUIRED_WORDS and h2 == 0:
-            b9.append(f"bài {words} từ nhưng không có h2")
-        if b9:
-            codes.append(f"B9 ({'; '.join(b9)})")
+            codes.append(f"B9 (bài {words} từ nhưng không có h2)")
+
+        if len(long_sentences) >= REPEAT_THRESHOLD:
+            c_codes.append(
+                f"C4 ({len(long_sentences)} câu > {LONG_SENTENCE_WORDS} tiếng)"
+            )
+        if len(long_paragraphs) >= REPEAT_THRESHOLD:
+            c_codes.append(
+                f"C5 ({len(long_paragraphs)} đoạn > {LONG_PARAGRAPH_SENTENCES} câu)"
+            )
 
         if long_sentences:
             measures.append("  Câu dài nhất:")
             longest = max(long_sentences, key=lambda s: len(s.split()))
-            measures.append(f'    ({len(longest.split())} từ) "{longest[:110]}..."')
+            measures.append(f'    ({len(longest.split())} tiếng) "{longest[:110]}..."')
 
-    return measures, codes
+    return measures, codes, c_codes
 
 
 HUMAN_ONLY = (
@@ -295,7 +313,7 @@ HUMAN_ONLY = (
 
 def report(path: str) -> None:
     fields = parse_sample(path)
-    measures, codes = analyze(fields)
+    measures, codes, c_codes = analyze(fields)
 
     print("=" * 72)
     print(os.path.basename(path))
@@ -303,8 +321,14 @@ def report(path: str) -> None:
     print("\n[SỐ ĐO]")
     print("\n".join(measures))
 
-    print("\n[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]")
+    print("\n[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC - ĐỔI NHÃN]")
     print("\n".join(f"  {c}" for c in codes) if codes else "  (không có)")
+
+    # In khối RIÊNG chứ không gộp vào khối trên: gộp lại thì mã C nằm cạnh mã B
+    # trong cùng một danh sách và người gán rất dễ áp nhầm quy tắc mục 5 lên
+    # chúng - đúng cái lỗi mà guideline v1.3 vừa sửa.
+    print("\n[MÃ NHÓM C - GHI VÀO `notes`, KHÔNG ĐỔI NHÃN]")
+    print("\n".join(f"  {c}" for c in c_codes) if c_codes else "  (không có)")
 
     print("\n[CẦN NGƯỜI ĐỌC - script không đoán hộ]")
     print("  " + HUMAN_ONLY)
