@@ -60,7 +60,7 @@ Không A, không B → publish
 | `defect_codes` | Mã **nhóm A/B** tìm thấy, cách nhau bằng `;`. VD: `B3;B8`. **Không** ghi mã C vào đây |
 | `label` | `publish` / `needs_revision` / `rejected` |
 | `annotator` | Ký hiệu của bạn, VD `A1` |
-| `date` | Ngày gán, VD `2026-08-11` |
+| `date` | Ngày gán, VD `2026-08-10` |
 | `notes` | Ca khó + **mã nhóm C** (C4/C5 chép từ report) + **số lỗi chính tả** nếu có B8 |
 
 Sửa trực tiếp trong CSV (Excel/Notepad đều được, giữ đúng số cột phân tách bằng dấu phẩy).

@@ -149,6 +149,24 @@ CP3 gắn cờ `critical` với nội dung *"sai lệch so với thông số cô
 
 Đây cũng là lý do thiết kế CP3 chọn "không tra được → mức 1, không phải mức 0" (`rubrics.md` mục 6.2): nguồn sự thật của bài toán này vốn không sạch.
 
+#### ⚠️ Trường hợp thứ hai, phát hiện khi gán nhãn (2026-08-10): VF e34
+
+Không phải cá biệt của VF 5 Plus. **VF e34 cũng có hai con số công bố mâu thuẫn, và cả hai đều ghi cùng một chuẩn đo:**
+
+| Con số | Nơi công bố | Chuẩn đo ghi kèm |
+|---|---|---|
+| **318,6km** | `summary` của bài G-002 | "theo chuẩn **NEDC**" |
+| **285km** | body của G-015 | "theo tiêu chuẩn **NEDC**" |
+| 285km | G-001, G-005 | (không nêu chuẩn) |
+
+Lệch **33,6km** giữa hai bài của cùng VinFast, cùng model, cùng chuẩn đo. Khác trường hợp VF 5 Plus ở chỗ đó: VF 5 Plus lệch nhau một phần vì các trang ghi chuẩn khác nhau hoặc không ghi, còn ở đây **cả hai cùng khẳng định NEDC**, nên không có cách nào hoà giải.
+
+**Hệ quả cho việc gán nhãn — đã chốt thành quy tắc, xem `annotation-guideline.md` mục 6:** bài trích một con số mà VinFast **có** công bố ở đâu đó thì **không phải A3**. Không thể quy người viết là sai khi họ trích đúng số của chính hãng; lỗi nằm ở nguồn, không nằm ở bài.
+
+**Hệ quả cho CP3:** đây là lần thứ hai xác nhận "thông số công bố chính thức" không phải một giá trị duy nhất, tức mức 1 ("không kiểm chứng được") không phải một trường hợp hiếm mà là **trạng thái thường gặp** của bài toán này. Cần nêu khi báo cáo độ chính xác của CP3.
+
+**Việc chưa làm:** VF e34 **không có trong `specs.json`** (KB chỉ phủ VF 9, VF 8, VF 5 Plus, chu kỳ bảo dưỡng), trong khi corpus nhắc VF e34 ở ít nhất 6 bài. Cố ý chưa thêm — giữ khoảng lệch giữa tài liệu này (ground truth của người gán) và KB của AI để **đo được độ phủ KB ảnh hưởng CP3 bao nhiêu**. Mở rộng cả hai cùng lúc sẽ xoá mất phép đo đó.
+
 #### Ví dụ demo thay thế cho Compliance
 
 Ví dụ cũ hỏng, dùng ví dụ này thay:

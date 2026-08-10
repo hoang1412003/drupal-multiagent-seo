@@ -80,13 +80,23 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 Đã ghi ở `docs/evaluation-plan.md` mục 4.5 điều kiện 4, kèm bằng chứng đo trên `node/7` (2026-07-30) và bài `G-001`.
 
-### A3. Gold set chưa gán nhãn
+### A3. Gold set chưa gán nhãn — ✅ ĐÃ XONG (2026-08-10), 33/33
 
-**Trạng thái:** 33 mẫu đã thu, bóc tách, chèn perturbation. Cột `label` trong `docs/goldset/labels.csv` còn trống toàn bộ.
+**Cách làm cuối cùng:** gán tay toàn bộ, **giữ nguyên 33 mẫu**, **không** dùng AI gán nháp. Khối lượng nhỏ hơn dự kiến nhiều vì quy tắc quy nhãn (guideline mục 5) vốn **dừng sớm** — chỉ 20/33 bài phải đọc, 13 bài còn lại suy nhãn từ `injected_codes`. Công cụ hỗ trợ: `scripts/quet_ung_vien.py` (đánh dấu chỗ cần xem, không kết luận) + `label_helper.py` (mã máy đo được).
 
-**Chặn bởi:** đang chờ mentor quyết quy trình. Người thực hiện thấy đọc + gán tay 33 bài quá tốn thời gian và đang hỏi mentor: giảm cỡ mẫu, cho phép AI gán nháp, hay giữ nguyên thủ công.
+**Phân bố cuối:**
 
-**Lưu ý bắt buộc:** không được dùng AI gán nháp nếu mentor chưa duyệt. `annotation-guideline.md` mục 2 yêu cầu **gán mù**; nhãn do AI nháp sẽ neo người gán và thổi phồng Cohen's Kappa mà cả Sprint 3 dựa vào.
+| | `rejected` | `needs_revision` | `publish` |
+|---|---|---|---|
+| 20 bài thật | 3 | 15 | **2** |
+| 13 perturbation | 7 | 6 | 0 |
+| **Tổng 33** | **10** | **21** | **2** |
+
+Đã rà nhất quán toàn bộ: `rejected` ⟺ có mã A, `needs_revision` ⟺ chỉ mã B, `publish` ⟺ không mã nào; `defect_codes` của bài perturbation đã gộp `injected_codes` (cần cho phép đo Recall/F1 theo mã).
+
+**Cổng còn lại trước khi tin bất kỳ con số Sprint 3 nào:** test-retest (guideline mục 8.1) — đợi ≥3 ngày, gán lại 3-4 bài mù với nhãn cũ, yêu cầu Kappa ≥ 0,80. Sớm nhất **2026-08-13**. Chưa chạy.
+
+**Giữ nguyên nguyên tắc đã cam kết:** không dùng AI gán nháp. Ba lần trong lúc gán có cân nhắc sửa nội dung bài cho ra `publish` — **không làm**, lý do ở mục 6 (dòng "Gold set lệch lớp").
 
 ---
 
@@ -356,6 +366,32 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 **Bài học, cùng họ với B8:** cả hai lần đều là *lớp phòng vệ tất định bị sai bởi chính giả định của nó*. B8 giả định "mọi cụm cấm bắt đầu và kết thúc bằng chữ"; B12 giả định "khớp chuỗi là đủ để kết luận vi phạm". Và cả hai lần bộ test đều xanh suốt, vì test kiểm *cơ chế khớp* chứ không kiểm *kết luận rút ra từ nó*.
 
+#### B12b. Mặt còn lại: CP1 bỏ sót claim không có trong blacklist — ⚠️ CHƯA SỬA, CỐ Ý
+
+B12 đo **precision**. Mặt **recall** có một ca đã bắt được bằng tay khi gán nhãn gold set (2026-08-10), ghi lại vì nó là bằng chứng thật chứ không phải suy luận.
+
+**Bài G-011** chứa câu:
+
+> *"Chính sách bảo dưỡng xe máy điện tại VinFast hiện đang là ưu đãi **có một không hai** dành riêng cho khách hàng, **không có ở bất kì loại xe điện hãng khác trên thị trường**."*
+
+Người gán nhãn xếp đây là **A1** (khẳng định độc nhất, có nêu phạm vi "trên thị trường") → nhãn `rejected`. Nhưng cụm *"có một không hai"* **không có trong `compliance_rules.json`**, nên CP1 sẽ báo sạch → AI đề xuất `needs_revision`. Đây là **false negative trên đúng đường veto**.
+
+Ca này cũng cho thấy giới hạn của cả `scripts/quet_ung_vien.py`: danh sách mẫu độc lập của nó cũng không có cụm đó.
+
+**Ca thứ hai, tìm được cùng đợt — G-020:**
+
+> *"…cơ hội sở hữu mẫu xe được **săn đón nhất thị trường** xe xanh…"*
+
+Cũng thoả cả hai điều kiện A1 (nêu phạm vi + nói về sản phẩm VinFast), cũng **không có trong blacklist**, cũng dẫn tới `rejected` theo nhãn người nhưng CP1 sẽ báo sạch.
+
+**Hai ca độc lập trong 20 bài thật (10%) cho thấy đây không phải cá biệt.** Blacklist 19 cụm phủ được các cách nói phổ biến ("tốt nhất", "số 1", "duy nhất") nhưng tiếng Việt có vô số biến thể diễn đạt cùng ý — *"có một không hai"*, *"săn đón nhất"*, và chắc chắn còn nữa. Đây là **giới hạn bản chất của cách đo bằng danh sách cụm cố định**, không phải một lỗi vá được bằng cách thêm vài dòng.
+
+Hướng xử lý sau Sprint 3, ghi lại để không quên: cách duy nhất phủ hết là chuyển CP1 sang **nhận diện ngữ nghĩa** (LLM xác nhận "câu này có phải claim so sánh nhất không") thay vì so khớp chuỗi. Nhưng nó đánh đổi đúng thứ B12 vừa bảo vệ — tính tất định và khả năng miễn nhiễm prompt injection của CP1 (`prompt-injection.md` mục 4c). Không làm trong phạm vi hiện tại.
+
+**⚠️ CỐ Ý KHÔNG SỬA — thêm cụm này vào blacklist bây giờ là rò rỉ dữ liệu.** Gold set tồn tại để **đo** AI. Bổ sung luật dựa trên nội dung đọc được từ chính gold set thì lúc đo, AI bắt được — nhưng chỉ vì đã được mách đáp án, và recall thu được không nói lên gì về nội dung chưa thấy. Muốn mở rộng blacklist thì lấy mẫu từ **nguồn độc lập** (văn bản Luật Quảng cáo, corpus ngoài 33 mẫu), không lấy từ đây.
+
+**Giá trị của việc ghi lại:** khi chạy AI trên gold set ở Sprint 3, G-011 chắc chắn lệch. Có ghi chép này thì kết luận rút ra được ngay — *"lệch vì blacklist thiếu cụm, không phải vì cơ chế hỏng"* — thay vì phải điều tra lại từ đầu. Đây là chẩn đoán, không chỉ là một con số xấu.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -379,7 +415,7 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — cần gold set (E1 đã đạt, không còn chặn) |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — gold set **đã có nhãn** (A3 xong 2026-08-10). Còn chặn bởi: test-retest (≥2026-08-13) và đo lại E1 sau khi khoá code. ⚠️ Chỉ calibrate được **ngưỡng 50**; ngưỡng `publish` = 80 không đủ mẫu, xem mục 6 |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
 **E4 làm lộ hai sai số trong tài liệu — ✅ đã sửa cả hai (2026-08-04), `evaluation-plan.md` mục 4.4:**
@@ -406,6 +442,8 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 | Với bài **đã xuất bản** rồi tạo bản nháp mới đưa sang Needs Review, `worker.py` chấm nhầm nội dung **bản cũ đã xuất bản**, không phải bản nháp mới | Cả đối soát lẫn worker đều đọc nội dung qua JSON:API, mà JSON:API trả về **revision mặc định** của node — với workflow `needs_review` có `default_revision = false`, revision mặc định vẫn là bản đã xuất bản. Đường **event bắn đúng** (hook tính `content_hash` trực tiếp từ revision vừa lưu, không qua JSON:API) — nhưng `worker.py` gọi `fetch_content()` (JSON:API, không `resourceVersion`) để lấy nội dung đưa vào pipeline, nên với bài đã xuất bản nó **chấm sai nội dung** dù hash gửi kèm job là đúng. Đây là giới hạn đã biết, không phải mất bài hoàn toàn (job vẫn chạy, vẫn ghi kết quả) mà là chấm nhầm bản. Cách khắc phục triệt để — đổi `fetch_content()` sang `?resourceVersion=rel:working-copy` — **cố ý chưa làm** trong đợt tự động hoá này, đó là một quyết định thiết kế riêng ngoài phạm vi. Trong lúc chờ, `worker.chay_mot_job()` so `content_hash` của nội dung THẬT đã fetch với `content_hash` của job và ghi `logging.warning` khi hai giá trị lệch nhau — đó là thứ làm giới hạn này **lộ ra** thay vì âm thầm ghi sai `run_log` vĩnh viễn |
 | Shadow-test thật (E6) không làm được | Cần Drupal thật của VinFast, đội content thật, luồng duyệt thật — dự án không được cấp. Thay bằng held-out test (`evaluation-plan.md` mục 4.6) |
 | Gold set do **một người** gán nhãn | Không được cấp nhân sự. Dùng Kappa test-retest làm trần thay cho Kappa người-người, và nêu rõ đó là ước lượng lạc quan |
+| **Gold set lệch lớp: `publish` chỉ 2/33 → ngưỡng `publish` KHÔNG calibrate được** | Đo được, không phải ước lượng: **2/20 bài thật đạt `publish`, tỉ lệ cơ sở 10%**. Đây là **tính chất của nội dung**, không phải sai số lấy mẫu — thu thêm bài cùng nguồn thì tỉ lệ vẫn 10%, nên muốn có ~10 mẫu `publish` phải thu thêm **~80 bài**. Thu 30 bài (≈7 giờ gán nhãn, chưa kể thu thủ công vì WAF chặn bot) chỉ lên được 5 mẫu — vẫn không đủ. Bỏ 7 giờ để đi từ "không calibrate được" sang "vẫn không calibrate được" là trao đổi lỗ, nên **cố ý không thu thêm**.<br><br>**Điều làm giới hạn này chấp nhận được:** quy tắc quyết định có hai ngưỡng, và cái calibrate được lại là cái quan trọng hơn. Ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố **10/21** — đủ để quét, và nó chính là ngưỡng gắn với **quyền phủ quyết**, tức phần rủi ro pháp lý. Ngưỡng **80** (`publish` ↔ `needs_revision`) chỉ phân biệt "đề xuất đăng luôn" với "đề xuất xem lại", mà hệ thống **không bao giờ tự xuất bản** (`architecture.md` mục 2.3) nên hậu quả sai thấp hơn hẳn.<br><br>**Phải nêu trong báo cáo Sprint 3:** *"ngưỡng `publish` = 80 giữ nguyên giá trị minh hoạ, chưa calibrate, do lớp `publish` chỉ có 2 mẫu"*. Đổi cỡ gold set là quyết định của mentor, không tự làm.<br><br>**Không được sửa nội dung bài để tạo ra `publish`** — đã cân nhắc và bác bỏ. Gold set là thước đo; sửa bài cho tới khi ra nhãn mong muốn là mài lại thước. Khác perturbation ở chỗ: chèn lỗi thì biết chính xác đã thêm gì (`injected_codes`), còn dọn sạch thì không bao giờ chắc đã hết, và nhãn `publish` khi ấy đúng **do mình tạo ra** chứ không do quan sát. |
+| Con số `publish` thấp phản ánh chất lượng nguồn, không phải lỗi rubric | Kiểm bằng chính định nghĩa: các mã đẩy bài xuống `needs_revision` đều là **lỗi phải sửa thật** — B3 (meta sai độ dài, 30% bài thật), B8 (lỗi chính tả: `"hành trinh"`, `"viêc"`, `"thông suất"`, `"khuyến cáokhách"` — đều đã đối chiếu `raw_html` xác nhận có trong nguồn gốc), B2 (thời gian sạc thiếu loại trụ). Khác hẳn B9 trước đây — B9 sai vì "câu dài" là **văn phong**, không phải lỗi. Đã cân nhắc nới B8 xuống và **bác bỏ**: một lỗi chính tả đúng là thứ phải sửa trước khi đăng, nới nó là lặp lại bẫy chỉnh ngưỡng cho phân bố đẹp |
 | Brand guideline tự trích xuất, không phải tài liệu nội bộ | Dự án không được cấp tài liệu nội bộ VF O2O |
 | Quy ước "trạm sạc / trụ sạc" để `NA` | Thu thêm corpus để đẩy p qua ngưỡng là *optional stopping* — làm mọi p-value mất giá trị |
 | `url_alias` không nằm trong `content_hash` | Bên PHP phải tra bảng `path_alias` riêng; thêm phức tạp để bắt trường hợp hiếm |
