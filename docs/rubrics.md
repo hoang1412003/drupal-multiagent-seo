@@ -159,7 +159,7 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 
 | Mã | Tiêu chí | Đo | `0` | `1` | `2` | Severity khi `0` | Mã lỗi |
 |---|---|---|---|---|---|---|---|
-| **CP1** | Không có claim tuyệt đối/so sánh nhất ("số 1", "tốt nhất", "duy nhất") | máy | Có | - | Không | **critical** | A1 |
+| **CP1** | Không có claim tuyệt đối/so sánh nhất ("số 1", "tốt nhất", "duy nhất") | máy | Có, **nêu rõ phạm vi so sánh** ("tốt nhất thị trường") | Có cụm so sánh nhất nhưng **không nêu phạm vi** ("cách tốt nhất để…") | Không có cụm nào | **critical** | A1 |
 | **CP2** | Không so sánh trực tiếp hơn hẳn đối thủ cụ thể | LLM | Có | - | Không | **critical** | A2 |
 | **CP3** | Số liệu khớp thông số VinFast công bố | LLM + RAG | Có sai lệch | Không kiểm chứng được (không có trong KB) | Khớp | **critical** | A3 |
 | **CP4** | Khuyến mại nêu đủ thời hạn & điều kiện | LLM | Thiếu | - | Đủ | **critical** | A4 |
@@ -184,6 +184,18 @@ Rule-based blacklist hiện có (`compliance_rules.json`) trở thành **cách �
 Bất kỳ tiêu chí `critical` nào ở mức `0` → sinh flag `severity: critical` → Aggregator veto → `rejected`, độc lập với điểm tổng (`architecture.md` mục 6.2). Không đổi gì ở tầng Aggregator.
 
 **CP3 mức `1` ("không kiểm chứng được") cố ý KHÔNG phải critical.** Knowledge base fact-check chỉ có thông số của một số model; một claim không tra được trong KB không có nghĩa là sai. Coi nó là critical sẽ khiến mọi bài nhắc tới model ngoài KB đều bị từ chối - lỗi hệ thống, không phải lỗi nội dung.
+
+**CP1 mức `1` ("không nêu phạm vi so sánh") cũng cố ý KHÔNG phải critical (thêm 2026-08-10).** Cùng một hình dạng lập luận với CP3, áp cho tiêu chí thứ hai:
+
+Một cụm so sánh nhất chỉ trở thành **claim quảng cáo kiểm chứng được** khi nó khẳng định trong một phạm vi xác định - đó chính là thứ Luật Quảng cáo 2012 đòi tài liệu chứng minh. *"Cách **tốt nhất** để khắc phục sự cố"* hay *"giữ pin ở **trạng thái tốt nhất**"* là cách nói thông thường, không khẳng định gì về thị trường. Blacklist so khớp chuỗi không phân biệt được hai thứ đó.
+
+**Đo trên 33 mẫu gold set (2026-08-10):** cách cũ - mọi lần khớp đều là mức 0 - cho ra **13 bài bị veto trong khi chỉ 3 bài vi phạm thật** (precision **0,21**). 10 bài bị từ chối oan gồm *"cách tốt nhất để khắc phục sự cố"*, *"áp dụng **duy nhất** 01 Gói cố định"* (lượng từ, không phải so sánh), và một **tiêu đề cột bảng thông số** *"Thời gian sạc nhanh nhất"*. Sau khi tách mức: precision **1,00**, recall giữ nguyên **1,00**.
+
+Vì sao đây là lỗi phải sửa ở code chứ không để calibration lo: flag `critical` cho ra `rejected` **bất kể điểm tổng**, tức veto đi vòng qua ngưỡng. Ngưỡng nào ở E5 cũng không chạm tới được 10 bài đó.
+
+**Đánh đổi đã biết, ghi rõ chứ không giấu:** claim thật mà không nêu phạm vi (*"VinFast là thương hiệu xe điện tốt nhất."*) rơi xuống mức 1. Nó **không biến mất** - vẫn sinh flag `low` hiện trong báo cáo cho người duyệt, chỉ thôi tự động từ chối bài. Trong một hệ thống không bao giờ tự xuất bản (`architecture.md` mục 2.3), đổi 10 lần chặn oan chắc chắn lấy vài lần hạ mức là đánh đổi có lợi. Có test khoá cả hai chiều, gồm đúng ca đánh đổi này (`scripts/test_compliance_rules.py`).
+
+Danh sách cụm chỉ phạm vi và cờ `can_pham_vi` của từng cụm nằm trong `compliance_rules.json` - **không** đưa vào `scoring.yaml` vì đó không phải ngưỡng calibrate được, mà là dữ liệu của CP1.
 
 ---
 
