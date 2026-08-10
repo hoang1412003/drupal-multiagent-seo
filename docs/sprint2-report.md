@@ -115,6 +115,12 @@ Vì sao B8 lọt nhiều: nó là mã **duy nhất không có công cụ nào** 
 
 **⚠️ Giới hạn phải nêu khi báo cáo Sprint 3:** gold set **không có mẫu `publish` nào**, nên **ngưỡng `publish` = 80 không calibrate được** và giữ nguyên giá trị minh hoạ. Nguyên nhân đo được: **B8 có ở 10/20 bài thật (50%)** — lỗi chính tả và lặp từ phổ biến tới mức không bài nào qua nổi cửa đó. Vì vậy thu thêm bài từ cùng nguồn gần như chắc chắn không cứu được, và **cố ý không thu thêm**. Bù lại, ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố 10/23, calibrate được — và đó chính là ngưỡng gắn với quyền phủ quyết, phần rủi ro cao nhất. Chi tiết: `technical-debt.md` mục 6.
 
+**Nếu bị hỏi "sao gold set không có bài `publish`":** lớp `publish` **vẫn nằm trong hệ nhãn** và vẫn là một trong ba giá trị hợp lệ — nó rỗng vì **đo được là không có**, không phải vì bị loại ra. Rà 33 bài × 16 mã lỗi thì B8 (lỗi chính tả/ngữ pháp) xuất hiện ở 10/20 bài thật, không bài nào qua nổi cửa đó.
+
+Đã cân nhắc và **bác bỏ** hai cách tạo ra lớp `publish`, ghi lại vì cả hai đều hấp dẫn: *sửa nội dung bài cho sạch* và *nhờ AI duyệt web sàng tìm bài sạch*. Cả hai đều biến gold set từ **thước đo** thành thứ do chính mình tạo ra — sửa bài tới khi ra nhãn mong muốn là mài lại thước, còn sàng lọc theo chất lượng thì mẫu mất tính đại diện và tệ hơn là tương quan với chính rubric đang được đo.
+
+**Phản biện mạnh nhất còn lại** — *"vậy làm sao biết AI không báo lỗi giả trên bài sạch?"* — không thuộc phạm vi gold set mà thuộc **bộ mẫu kiểm thử chức năng** (`architecture.md` mục 8.1), nơi dòng đầu tiên của bảng đã là *"Bài sạch → không báo lỗi giả"* và cho phép **tự dựng mẫu**. Hai bộ có mục đích khác nhau: gold set đo *mức đồng thuận với người*, bộ chức năng kiểm *cơ chế*. Việc dựng 1 bài sạch cho bộ chức năng **chưa làm**, xếp sau E1.
+
 **Cổng còn lại:** test-retest (`annotation-guideline.md` mục 8.1) — đợi ≥3 ngày, gán lại 3-4 bài mù với nhãn cũ, yêu cầu Kappa ≥ 0,80. Sớm nhất **2026-08-13**.
 
 **Một vấn đề phát hiện khi rà lại — ĐÃ XỬ LÝ 2026-08-10, guideline v1.3, chờ mentor xác nhận:** quy tắc quy nhãn hiện tại là *có lỗi nhóm A → `rejected`, có lỗi nhóm B → `needs_revision`, không có gì → `publish`*. Nhưng chạy script đếm trên 33 mẫu thì **cả 33 bài đều dính ít nhất một lỗi nhóm B** — toàn bộ đến từ mã B9 "câu quá dài" (33/33 bài). Nghĩa là gán nhãn xong sẽ **không có bài nào ra nhãn `publish`**, gold set chỉ còn 2 lớp, và ngưỡng publish không có dữ liệu để calibrate.
