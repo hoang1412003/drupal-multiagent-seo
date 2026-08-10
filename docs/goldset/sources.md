@@ -119,6 +119,7 @@ Nguồn đối chiếu claim định lượng (tầm hoạt động, thời gian
 | VF 9 | 438km (Eco) / 423km (Plus) | **WLTP (dự kiến)** | bảng thông số trong bài G-009 |
 | VF 8 | 420km (Eco) / 400km (Plus) | **WLTP (dự kiến)** | bảng thông số trong bài G-009 |
 | VF 5 Plus | 326,4km — **nhưng xem cảnh báo dưới** | NEDC | trang tổng quan VF 5 Plus |
+| **VF e34** | **318,6km** — nhưng xem cảnh báo dưới | NEDC | trang tổng quan chính thức, bản HTML lưu ở `raw_html/spec_vf_e34.html` (2026-08-10) |
 | Bảo dưỡng định kỳ | mỗi 12.000km **hoặc 12 tháng, tùy điều kiện nào đến trước** | | trang `lich-bao-duong-xe-vinfast` |
 
 Bảng thông số nằm sẵn trong corpus (`docs/goldset/raw/G-009.txt`), tải từ vinfastauto.com. Nguyên văn:
@@ -149,29 +150,26 @@ CP3 gắn cờ `critical` với nội dung *"sai lệch so với thông số cô
 
 Đây cũng là lý do thiết kế CP3 chọn "không tra được → mức 1, không phải mức 0" (`rubrics.md` mục 6.2): nguồn sự thật của bài toán này vốn không sạch.
 
-#### ⚠️ Trường hợp thứ hai, phát hiện khi gán nhãn (2026-08-10): VF e34
+#### ⚠️ Trường hợp thứ hai (2026-08-10): VF e34 — ĐÃ VERIFY TỪ TRANG CHÍNH THỨC
 
-Không phải cá biệt của VF 5 Plus. **VF e34 cũng có hai con số công bố mâu thuẫn, và cả hai đều ghi cùng một chuẩn đo:**
+Không phải cá biệt của VF 5 Plus. **VF e34 cũng có hai con số công bố mâu thuẫn, cả hai đều ghi cùng một chuẩn đo:**
 
 | Con số | Nơi công bố | Chuẩn đo ghi kèm |
 |---|---|---|
-| **318,6km** | `summary` của bài G-002 | "theo chuẩn **NEDC**" |
+| **318,6km** | **trang tổng quan chính thức** (nguồn của KB) | "theo chuẩn **NEDC**", ghi **hai lần**, nhất quán |
+| 318,6km | `summary` của bài G-002 | "theo chuẩn NEDC" |
 | **285km** | body của G-015 | "theo tiêu chuẩn **NEDC**" |
 | 285km | G-001, G-005 | (không nêu chuẩn) |
 
-Lệch **33,6km** giữa hai bài của cùng VinFast, cùng model, cùng chuẩn đo. Khác trường hợp VF 5 Plus ở chỗ đó: VF 5 Plus lệch nhau một phần vì các trang ghi chuẩn khác nhau hoặc không ghi, còn ở đây **cả hai cùng khẳng định NEDC**, nên không có cách nào hoà giải.
+Lệch **33,6km** giữa các trang của cùng VinFast, cùng model, **cùng khẳng định NEDC** — nên không hoà giải được, khác VF 5 Plus (ở đó các trang ghi chuẩn khác nhau hoặc không ghi).
 
-**Hệ quả cho việc gán nhãn — đã chốt thành quy tắc, xem `annotation-guideline.md` mục 6:** bài trích một con số mà VinFast **có** công bố ở đâu đó thì **không phải A3**. Không thể quy người viết là sai khi họ trích đúng số của chính hãng; lỗi nằm ở nguồn, không nằm ở bài.
+**Đã ghi cả hai con số vào `specs.json`**, đúng cách đã làm với VF 5 Plus, để CP3 không gắn cờ oan bài trích con số còn lại.
 
-**Hệ quả cho CP3:** đây là lần thứ hai xác nhận "thông số công bố chính thức" không phải một giá trị duy nhất, tức mức 1 ("không kiểm chứng được") không phải một trường hợp hiếm mà là **trạng thái thường gặp** của bài toán này. Cần nêu khi báo cáo độ chính xác của CP3.
+**Điểm quan trọng về nguồn: mục VF e34 lấy từ TRANG THÔNG SỐ, không lấy từ bài trong corpus.** Khác VF 8 và VF 9 — hai mục đó dựng từ bảng thông số nằm trong bài **G-009, một bài THUỘC gold set**, nên G-009 về nguyên tắc không bao giờ có thể mắc A3 và mọi bài trùng số với nó tự động "đúng". Đó là một vòng tròn nhỏ đã ghi nhận; VF e34 không mắc phải vì nguồn độc lập. Nếu có thời gian nên verify lại VF 8/VF 9 từ trang thông số riêng để gỡ nốt.
 
-**Việc chưa làm:** VF e34 **không có trong `specs.json`** (KB chỉ phủ VF 9, VF 8, VF 5 Plus, chu kỳ bảo dưỡng), trong khi corpus nhắc VF e34 ở ít nhất 6 bài. Cố ý chưa thêm — giữ khoảng lệch giữa tài liệu này (ground truth của người gán) và KB của AI để **đo được độ phủ KB ảnh hưởng CP3 bao nhiêu**. Mở rộng cả hai cùng lúc sẽ xoá mất phép đo đó.
+**Vì sao chỉ thêm VF e34 mà không thêm các model khác.** Đo trên 33 mẫu: VF e34 được nhắc ở **21/33 bài** và có claim km ở **8 bài** — nhiều nhất corpus, mà lại chưa có trong KB. Các model xe máy điện (Klara 11 bài, Vento 10, Theon 10, Feliz 9) tuy xuất hiện nhiều nhưng **gần như không bài nào có claim km**, nên thêm chúng vào KB không cho CP3 thêm gì để đối chiếu. VF 3/6/7 và MPV thì corpus gần như không nhắc.
 
-#### Ví dụ demo thay thế cho Compliance
-
-Ví dụ cũ hỏng, dùng ví dụ này thay:
-
-> Bảng thông số ghi rõ **"(Dự kiến theo chuẩn WLTP)"** cạnh con số 420km. Một bài marketing trích lại **"VF 8 đi được 420km một lần sạc"** mà bỏ mất vế chuẩn đo → đúng là mã lỗi **B1**, và CP5 bắt được bằng máy (`compliance_analysis.py`). Ví dụ này verify được, và mạnh hơn ví dụ cũ vì nó cho thấy **thông tin bị lược mất trong quá trình viết lại**, chứ không phải hãng không công bố.
+**Hệ quả cho CP3:** đây là lần thứ hai xác nhận "thông số công bố chính thức" không phải một giá trị duy nhất, tức mức 1 ("không kiểm chứng được") không phải ca hiếm mà là **trạng thái thường gặp** của bài toán này. Cần nêu khi báo cáo độ chính xác của CP3.
 
 ---
 

@@ -160,13 +160,20 @@ Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và 
 
 | Mã | Đo gì | Kết quả |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | Đạt ngưỡng — ⚠️ xem cảnh báo dưới |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | **Đạt** — σ `final_score` = **1,79** < 2 (đo lại 2026-08-11, cả 4 agent dùng rubric) |
 | **E2** | Retrieval lấy đúng đoạn | Fact-check **1.00**; brand **78,3%** so với mốc ngẫu nhiên **21,7%** |
 | **E4** | Chi phí mỗi bài | TB **$0,057**/bài; cả chương trình đến giờ **$8,33** |
 
 **E2 — con số 78,3% là chặn dưới, không phải tỉ lệ thật.** Ground truth chỉ gán một nhóm chủ đề mỗi bài, trong khi nhiều bài thuộc hai nhóm nên bị tính trượt oan. **Không** sửa nhãn để chữa các ca này — sửa sau khi đã nhìn kết quả là tự tạo thiên vị. Báo cáo con số bị đánh giá thấp, lệch về hướng an toàn.
 
-**⚠️ E1 — số hiện có thuộc về code cũ.** Đợt sửa lỗi cuối Sprint 2 (mục 5 dưới đây) làm thay đổi cách chấm điểm Brand Voice, mà Brand chiếm trọng số 0,25 trong điểm tổng. Nên **σ hiện có không còn áp dụng cho code đang chạy**, kể cả σ điểm tổng. Chưa đo lại, và chưa trích vào báo cáo nào.
+**E1 — đã đo lại 2026-08-11 trên code hiện tại**, sau khi cả 4 agent chuyển sang rubric và KB thêm VF e34. Kết quả: σ `final_score` = **1,79** (ngưỡng < 2, đạt), chi phí $3,06.
+
+⚠️ **Hai giới hạn phải nêu kèm, không được trích mỗi con số 1,79:**
+
+- **Tỉ lệ ra cùng quyết định tụt từ 100% xuống 88%** — khoảng 1 trong 8 lượt chấm cho đề xuất khác.
+- **σ riêng của `content_quality` (4,38) và `compliance` (4,68) chưa đạt.** Ngưỡng < 2 áp cho `final_score` vì đó là đại lượng E5 quét, nhưng vẫn phải nói rõ hai agent này dao động lớn.
+
+**Chẩn đoán 88% — không phải lỗi rubric:** 8/10 bài có điểm Compliance nằm trong dải 44–58, tức sát ngưỡng `compliance_veto_below = 50`. Hai bài có điểm đúng bằng 50 ở cả 5 lượt. Chỉ cần một tiêu chí nhích một bậc là lật giữa `rejected` và `needs_revision`. Mà **50 là số minh hoạ chưa calibrate** — nên nhiều khả năng đây là *ngưỡng đặt đúng giữa vùng điểm dày nhất*, không phải agent hỏng. Vì vậy thứ tự là **calibrate trước (E5), sửa agent sau nếu còn cần**.
 
 - Kế hoạch 6 phép đo, thứ tự phụ thuộc, tiêu chí đạt: [`evaluation-plan.md`](evaluation-plan.md)
 - Số liệu thô E1/E4: [`evidence/e1_e4_report.txt`](evidence/e1_e4_report.txt), [`evidence/e1_rubric_v2_report.txt`](evidence/e1_rubric_v2_report.txt)

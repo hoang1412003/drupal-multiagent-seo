@@ -45,9 +45,17 @@ def test_chunk_has_model_context():
 
 
 def test_dem_dung_so_chunk():
-    rows = build_kb.chuan_bi_rows(_entries(), FakeEmbedder())
-    assert len(rows) == 4, f"phai co 4 chunk (seed), thuc te {len(rows)}"
-    print("[PASS] chuan_bi_rows ra dung so chunk")
+    """Mot muc trong specs.json -> dung MOT chunk (cat theo don vi "mot model
+    xe", rag-design.md muc 4.3).
+
+    So sanh voi len(_entries()) chu KHONG hard-code con so: hard-code thi moi
+    lan them mot model vao KB lai phai sua test, va con so trong test thanh
+    ban chep thu hai cua thong tin da co trong specs.json."""
+    entries = _entries()
+    rows = build_kb.chuan_bi_rows(entries, FakeEmbedder())
+    assert len(rows) == len(entries), (
+        f"phai co {len(entries)} chunk (mot muc mot chunk), thuc te {len(rows)}")
+    print(f"[PASS] chuan_bi_rows ra dung {len(rows)} chunk")
 
 
 def test_chunk_id_duy_nhat_va_co_khoa_phan_vung():
@@ -73,7 +81,7 @@ def test_cot_phan_vung_va_meta():
 
 
 def test_moi_muc_kb_da_verified():
-    """4/4 muc phai `verified: true` (docs/goldset/sources.md muc 2).
+    """MOI muc phai `verified: true` (docs/goldset/sources.md muc 2).
 
     Kiem o day vi day la noi du lieu di vao he thong: mot muc chua verify lot
     vao KB la CP3 doi chieu bang so chua ai kiem, ma CP3 di thang toi co
@@ -81,7 +89,7 @@ def test_moi_muc_kb_da_verified():
     """
     chua = [e["model"] for e in _entries() if not e.get("verified")]
     assert not chua, f"con muc chua verify: {chua}"
-    print("[PASS] 4/4 muc KB da verified")
+    print(f"[PASS] {len(_entries())}/{len(_entries())} muc KB da verified")
 
 
 if __name__ == "__main__":

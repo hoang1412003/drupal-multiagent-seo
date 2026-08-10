@@ -24,6 +24,20 @@
     "nguon_kiem": "Kiem 2026-08-04. Bang thong so trong bai G-009 (docs/goldset/raw/G-009.txt), tai tu vinfastauto.com. Nguyen van: '420km (Eco) / 400km (Plus) (Du kien theo chuan WLTP)'. Truoc do KB ghi tieu_chuan_do = 'can xac nhan' - SAI, trang co neu chuan."
   },
   {
+    "model": "VF e34",
+    "content_type": "cam_nang",
+    "langcode": "vi",
+    "specs": {
+      "tam_hoat_dong": "318,6km theo trang tổng quan chính thức; VinFast còn công bố '285km' ở nhiều bài cẩm nang khác, cũng ghi chuẩn NEDC",
+      "tieu_chuan_do": "NEDC",
+      "dung_luong_pin": "42kW theo nguyên văn trang (đơn vị trang ghi là kW, không phải kWh)",
+      "sac_nhanh": "đi thêm khoảng 180km sau khoảng 18 phút sạc siêu nhanh"
+    },
+    "source_url": "/vn_vi/tong-quan-o-to-dien-vinfast-vf-e34",
+    "verified": true,
+    "nguon_kiem": "Kiem 2026-08-10 tu trang tong quan chinh thuc, luu ban HTML o docs/goldset/raw_html/spec_vf_e34.html. Trang ghi '318,6km sau 1 lan sac theo chuan NEDC' HAI LAN, nhat quan. CANH BAO: ba bai trong gold set (G-001, G-005, G-015) ghi 285km, rieng G-015 ghi ro 'theo tieu chuan NEDC' - tuc VinFast cong bo HAI con so khac nhau cho cung model, cung chuan do. Ghi ca hai vao specs de CP3 khong gan co oan bai trich con so con lai. Cung ho van de voi VF 5 Plus. NGUON DOC LAP voi gold set: lay tu trang thong so, KHONG lay tu bai trong corpus - khac voi VF 8/VF 9 (dung bang thong so trong bai G-009, tuc mot bai NAM TRONG gold set)."
+  },
+  {
     "model": "VF 5 Plus",
     "content_type": "cam_nang",
     "langcode": "vi",

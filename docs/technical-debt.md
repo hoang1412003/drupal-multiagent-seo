@@ -471,11 +471,11 @@ Giống hệt hình dạng của B12: **một bộ so khớp từ vựng gộp h
 
 | Mã | Đo gì | Trạng thái |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt** (2026-08-04) — điểm tổng σ = 0,28; 100% giữ nguyên quyết định. ⚠️ **Cần chạy lại phần Brand** sau B7 (2026-08-05): số σ Brand hiện có đo trên code cũ |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt, đo lại 2026-08-11** sau khi cả 4 agent dùng rubric + thêm VF e34 vào KB: σ `final_score` = **1,79** < 2. ⚠️ Nhưng tỉ lệ giữ nguyên quyết định tụt **100% → 88%**, và σ riêng của `content_quality` (4,38) với `compliance` (4,68) chưa đạt. Chẩn đoán: 8/10 bài có điểm Compliance nằm sát ngưỡng veto 50 — **ngưỡng đặt sai chỗ, không phải agent hỏng**. Calibrate trước, sửa agent sau. Chi tiết: `evaluation-plan.md` mục 4.1 |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — gold set **đã có nhãn** (A3 xong 2026-08-10). Còn chặn bởi: test-retest (≥2026-08-13) và đo lại E1 sau khi khoá code. ⚠️ Chỉ calibrate được **ngưỡng 50**; ngưỡng `publish` = 80 không đủ mẫu, xem mục 6 |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — **hết chặn: gold set có nhãn, E1 đã đạt.** Còn test-retest nhãn (≥2026-08-13) nên chạy song song được. ⚠️ Chỉ calibrate được **ngưỡng 50** và `compliance_veto_below`; ngưỡng `publish` = 80 không có mẫu, xem mục 6. Chi phí: chấm gold set 33 bài ~$2, sau đó quét bao nhiêu ngưỡng cũng $0 |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
 **E4 làm lộ hai sai số trong tài liệu — ✅ đã sửa cả hai (2026-08-04), `evaluation-plan.md` mục 4.4:**

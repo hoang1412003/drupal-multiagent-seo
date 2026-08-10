@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** E2, E4 đã chạy. **E1 phải chạy lại** (code chấm điểm đổi ở B7, B12 và đợt chuyển rubric 2026-08-10). Gold set **đã gán nhãn xong** 33/33; E3/E5/E6 còn chờ E1 và test-retest.
+**Trạng thái:** E1, E2, E4 đã chạy — **E1 đo lại 2026-08-11 sau khi cả 4 agent dùng rubric, σ `final_score` = 1,79 < 2, ĐẠT**. Gold set đã gán nhãn 33/33. E5 sẵn sàng chạy; E3/E6 sau đó. Test-retest nhãn còn chờ (sớm nhất 13/08).
 
 ---
 
@@ -68,12 +68,14 @@ Năm điểm chặn quan trọng:
 
 | Thành phần | Giá trị |
 |---|---|
-| Commit | ghi lại khi commit đợt chuyển rubric. **Bản 1 (`56e1d6d`) đã hết hiệu lực** — khoá đó mở lại ngay trong ngày để chuyển nốt SEO và Content Quality sang rubric |
+| Commit | `3255517` (chuyển rubric) + KB thêm VF e34. **Bản 1 (`56e1d6d`) đã hết hiệu lực** — khoá đó mở lại ngay trong ngày để chuyển nốt SEO và Content Quality sang rubric |
 | Model | `claude-haiku-4-5-20251001` |
 | Rubric version | v1 (`rubrics.md`) — **áp dụng cho cả 4 agent** |
 | Prompt version | `51c0cba6c91e1435` *(bản 1 là `019c2d5e231aad48`, đổi vì SEO và CQ có prompt mới)* |
 | Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
+| KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
+| E1 | **đã chạy 2026-08-11** trên đúng bộ này: σ `final_score` = **1,79** < 2 ✅ |
 
 `prompt_version` là SHA-256 của 4 system prompt nối theo thứ tự tên. Băm lại bất cứ lúc nào để kiểm prompt có bị đổi không:
 
@@ -130,6 +132,55 @@ Kết quả **âm**: rubric KHÔNG ổn định hơn thang 0-100 (σ `final_scor
 So sánh lại được nhờ `scripts/so_sanh_phuong_sai.py`, chạy trên **cùng bộ mẫu** - so trên tập khác nhau thì chênh lệch đến từ đổi mẫu chứ không phải đổi cách chấm.
 
 **Quy mô:** 10 bài × 5 lần × 4 agent = 200 lần gọi LLM.
+
+#### Kết quả E1 sau khi cả 4 agent dùng rubric (2026-08-11)
+
+Số liệu thô: `docs/evidence/e1_sau_rubric_4_agent.json`. Chi phí thật **$3,06**, 50 lượt chấm, 39,5 giây/lượt (4 agent chạy tuần tự trong script; pipeline thật chạy song song nên nhanh hơn).
+
+| Agent | σ trung bình | σ lớn nhất | Đạt < 2? | So với lần đo trước |
+|---|---|---|---|---|
+| **seo** | **0,27** | 2,74 | ✅ | 0,19 → 0,27 (gần như không đổi, nhưng điểm nay **có định nghĩa**) |
+| brand | 1,44 | 5,48 | ✅ | — |
+| content_quality | 4,38 | 14,40 | ❌ | **0,38 → 4,38** |
+| compliance | 4,68 | 11,57 | ❌ | 4,18 → 4,68 |
+| **`final_score`** | **1,79** | 4,04 | **✅ ĐẠT** | 1,33 → 1,79 |
+
+**Cổng E5 mở.** Tiêu chí σ < 2 áp cho `final_score` — đó là đại lượng E5 quét ngưỡng lên — và nó đạt. σ từng agent chỉ quan trọng qua đường đóng góp vào điểm tổng.
+
+**Dự đoán về SEO đúng hoàn toàn:** 7/10 tiêu chí đo bằng máy → σ = 0,27, gần như tất định. Đây là nước đi lãi rõ: giữ nguyên độ ổn định mà đổi được một con số LLM tự đặt lấy một con số giải thích được.
+
+**Content Quality tăng từ 0,38 lên 4,38 — đúng như đã lường trước**, và đúng cơ chế mục 4.1 mô tả: rubric **không tạo ra** dao động mà **làm nó hiện ra**. Thang 0-100 tự do nuốt chỗ LLM lưỡng lự; rubric lượng tử hoá 0/1/2 rồi chia mẫu số nên phơi ra.
+
+**Đóng góp vào phương sai điểm tổng** (trọng số² × σ²) — cho thấy Compliance mới là nguồn chính, không phải CQ vừa đổi:
+
+```
+compliance    0,30² × 4,68²  =  1,97   60%
+content_qual  0,25² × 4,38²  =  1,20   36%
+brand         0,25² × 1,44²  =  0,13
+seo           0,20² × 0,27²  =  0,003
+```
+
+Tính thử: hoàn nguyên CQ về thang tự do cho σ `final_score` ≈ 1,45 thay vì 1,79 — **cả hai đều qua cổng**, nên hoàn nguyên chỉ đổi điểm-có-định-nghĩa lấy một con số đẹp hơn chút. Không làm.
+
+#### ⚠️ Tỉ lệ ra cùng quyết định tụt từ 100% xuống **88%** — và nguyên nhân KHÔNG phải rubric
+
+Đây là con số đáng lo hơn σ: khoảng 1 trong 8 lượt chấm cho ra đề xuất khác. Nhưng chẩn đoán từ dữ liệu thô chỉ đúng một chỗ:
+
+```
+G-001   compliance [50,0  50,0  50,0  50,0  50,0]   nằm ĐÚNG trên ngưỡng veto
+G-010   compliance [50,0  50,0  50,0  50,0  50,0]   nằm ĐÚNG trên ngưỡng veto
+G-003   compliance [66,7  37,5  62,5  50,0  50,0]   nhảy qua nhảy lại
+G-005   compliance [58,3  58,3  58,3  58,3  50,0]
+G-004   compliance [66,7  66,7  66,7  50,0  66,7]
+```
+
+**8/10 bài có điểm Compliance nằm trong dải 44–58**, tức sát ngưỡng `compliance_veto_below = 50`. Cả 4 bài đổi quyết định đều thuộc nhóm đó — chỉ cần một tiêu chí nhích một bậc là lật giữa `rejected` và `needs_revision`.
+
+**Mà 50 là số minh hoạ chưa calibrate** (`scoring.yaml` ghi `meta.calibrated: false`; nguồn: `architecture.md` mục 6.2). Nói cách khác, 88% có thể là **ngưỡng đặt sai chỗ — đúng giữa vùng điểm dày nhất — chứ không phải agent hỏng.**
+
+**Vì vậy thứ tự đúng là calibrate TRƯỚC, sửa agent SAU** (nếu còn cần). E5 sẽ dời ngưỡng ra khỏi cụm điểm; nếu số lần lật giảm thì không phải đụng dòng code nào. Nếu vẫn lật nhiều thì lúc đó **biết chắc** là lỗi agent chứ không phải lỗi ngưỡng, và sửa có mục tiêu.
+
+Thêm một căn cứ cho việc không vội sửa Compliance: nợ B5 đã thử một bản sửa rất hợp lý và σ chỉ đi từ **7,70 xuống 7,29**. Bốn tiêu chí còn dao động (CP2/CP4/CP7/CP8) đều cần đọc hiểu, không chuyển sang đo bằng máy được như CP5/CP6 đã làm.
 
 ### 4.2. E2 - recall@k của retrieval
 

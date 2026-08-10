@@ -46,6 +46,7 @@ import ai_core
 from agents import brand_voice, compliance, content_quality, seo
 from graph import aggregator_node
 
+from drupal_client import _extract_image_alt
 from label_helper import parse_sample
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -75,9 +76,14 @@ def doc_bai(sample_id: str) -> dict:
         "summary": fields.get("summary", ""),
         "meta_description": fields.get("meta_description", ""),
         "url_alias": fields.get("url_alias", ""),
-        # Cac bai gold set khong co field anh dai dien rieng - moi anh nam
-        # trong body (spec 2026-07-29 muc 3.3).
-        "image_alt": "",
+        # Boc alt cua MOI anh trong body, DUNG ham ma production dung
+        # (drupal_client._extract_image_alt). Truoc 2026-08-10 cho o day la
+        # chuoi rong, nen SEO9 luon thanh NA va E1 do mot pipeline KHAC
+        # production. Cac bai gold set khong co field anh dai dien rieng -
+        # moi anh nam trong body (spec 2026-07-29 muc 3.3) - nen truyen
+        # resource rong va de ham tu boc tu body.
+        "image_alt": _extract_image_alt({"relationships": {}},
+                                        fields.get("body", "")),
     }
 
 
