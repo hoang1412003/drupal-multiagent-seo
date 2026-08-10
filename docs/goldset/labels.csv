@@ -1,34 +1,34 @@
 sample_id,source_url,split,variant,injected_codes,defect_codes,label,annotator,date,guideline_version,notes
-G-001,/vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai,gold-real,original,,,,,,v1.2,
-G-002,/vn_vi/cach-cham-soc-xe-dien-vf-e34,gold-real,original,,,,,,v1.2,
-G-003,/vn_vi/cach-khoi-dong-xe-may-dien-vinfast,gold-real,original,,,,,,v1.2,
-G-004,/vn_vi/dinh-nghia-den-projector-la-gi,gold-real,original,,,,,,v1.2,
-G-005,/vn_vi/nhung-kien-thuc-co-ban-ve-sac-xe-o-to-dien-can-biet,gold-real,original,,,,,,v1.2,
-G-006,/vn_vi/thoi-gian-sac-day-xe-may-dien-vinfast-bao-lau,gold-real,original,,,,,,v1.2,
-G-007,/vn_vi/cac-loai-pin-xe-may-dien-vinfast-dac-diem-gia-cach-su-dung,gold-real,original,,,,,,v1.2,
-G-008,/vn_vi/khi-nao-nen-sac-pin-xe-dien,gold-real,original,,,,,,v1.2,
-G-009,/vn_vi/tim-hieu-cac-loai-pin-o-to-dien,gold-real,original,,,,,,v1.2,
-G-010,/vn_vi/cach-sac-pin-xe-may-dien-vinfast,gold-real,original,,,,,,v1.2,
-G-011,/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast,gold-real,original,,,,,,v1.2,
-G-012,/vn_vi/chi-phi-su-dung-xe-dien,gold-real,original,,,,,,v1.2,
-G-013,/vn_vi/nuoi-o-to-dien-vinfast-vf-e34-co-re-hon-xe-xang,gold-real,original,,,,,,v1.2,
-G-014,/vn_vi/chi-phi-nuoi-xe-vf-e34-hang-thang-tiet-kiem-bao-nhieu,gold-real,original,,,,,,v1.2,
-G-015,/vn_vi/co-nen-mua-o-to-thoi-diem-nay,gold-real,original,,,,,,v1.2,
-G-016,/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang,gold-real,original,,,,,,v1.2,
-G-017,/vn_vi/tong-quan-tram-sac-vinfast,gold-real,original,,,,,,v1.2,
-G-018,/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter,gold-real,original,,,,,,v1.2,
-G-019,/vn_vi/ung-dung-vinfast-cho-o-to-dien,gold-real,original,,,,,,v1.2,
-G-020,/vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast,gold-real,original,,,,,,v1.2,
-P-001a,/vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho,gold-pert,perturbed,A1,,,,,v1.2,"Chèn câu claim tuyệt đối cuối đoạn mở đầu: 'VinFast là thương hiệu xe điện số 1 Việt Nam với công nghệ pin tốt nhất thị trường hiện nay.'"
-P-001b,/vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho,gold-pert,perturbed,B3,,,,,v1.2,"Xóa meta_description (để trống)."
-P-002a,/vn_vi/huong-dan-sac-pin-o-to-dien-vinfast,gold-pert,perturbed,A3,,,,,v1.2,"Chèn câu claim tầm hoạt động VF 8 sai (500km); số công bố thật 420km Eco / 400km Plus theo sources.md mục 2.1. Bài gốc không có claim số liệu định lượng sẵn có nên chèn câu mới thay vì sửa số có sẵn - lệch nhẹ so với công thức chuẩn 'tìm số thật rồi đổi'."
-P-003a,/vn_vi/cach-de-xe-dien-lau-het-pin-moi-nhat,gold-pert,perturbed,B1,,,,,v1.2,"Chèn câu claim tầm hoạt động VF 8 420km (đúng số công bố) nhưng KHÔNG nêu điều kiện đo NEDC/WLTP. Bài gốc không có claim quãng đường sẵn có nên chèn câu mới thay vì xóa điều kiện có sẵn."
-P-004a,/vn_vi/xe-dien-sac-bao-lau-thi-day,gold-pert,perturbed,B2,,,,,v1.2,"Chèn câu claim thời gian sạc '30 phút' không nêu loại trụ sạc/dải %. Bài gốc không có claim tương tự sẵn có nên chèn câu mới. Lưu ý: title gốc đã sẵn có '2024' (label_helper báo B4 tự nhiên, KHÔNG phải do chèn)."
-P-004b,/vn_vi/xe-dien-sac-bao-lau-thi-day,gold-pert,perturbed,A4,,,,,v1.2,"Chèn khối khuyến mại 'giảm ngay 3 triệu đồng cho khách đặt cọc sớm' không nêu thời hạn/điều kiện. Lưu ý: title gốc đã sẵn có '2024' (label_helper báo B4 tự nhiên, KHÔNG phải do chèn)."
-P-005a,/vn_vi/sac-pin-luu-dong-24-7,gold-pert,perturbed,A2,,,,,v1.2,"Chèn câu so sánh trực tiếp hơn hẳn Tesla và BYD (dịch vụ sạc lưu động)."
-P-006a,/vn_vi/so-sanh-chi-phi-van-hanh-xe-dien-va-xe-xang,gold-pert,perturbed,B10,,,,,v1.2,"Chèn câu số liệu '90% người dùng hài lòng' không dẫn nguồn."
-P-007a,/vn_vi/o-to-dien-va-o-to-xang-co-gi-khac-nhau,gold-pert,perturbed,A1;B5,,,,,v1.2,"A1: chèn câu 'VinFast là thương hiệu ô tô điện hàng đầu Việt Nam với công nghệ pin tốt nhất thị trường hiện nay.' B5: đổi 3 chỗ 'ô tô điện'->'xe hơi điện' (2 heading mục 1 và 1.7 + câu đầu mục 1.7)."
-P-007b,/vn_vi/o-to-dien-va-o-to-xang-co-gi-khac-nhau,gold-pert,perturbed,B4,,,,,v1.2,"Gắn năm cũ vào title: '...có gì khác nhau?' -> '...có gì khác nhau 2019?'."
-P-008a,/vn_vi/so-sanh-xe-may-dien-va-xe-may-xang,gold-pert,perturbed,A2;B10,,,,,v1.2,"A2: chèn câu so sánh trực tiếp hơn hẳn Yadea và Pega. B10: chèn câu '90% người dùng xe máy điện hài lòng' không dẫn nguồn."
-P-009a,/vn_vi/huong-dan-tim-tram-sac-va-showroom-vinfast-tren-website,gold-pert,perturbed,B6;B7,,,,,v1.2,"B6: xóa alt của ảnh đầu bài (alt rỗng). B7: đổi url_alias thành bản còn dấu tiếng Việt."
-P-010a,/vn_vi/huong-dan-su-dung-ung-dung-vinfast,gold-pert,perturbed,A4,,,,,v1.2,"Chèn câu khuyến mại 'tặng gói bảo dưỡng miễn phí trị giá 2 triệu đồng' không nêu thời hạn/điều kiện."
+G-001,/vn_vi/kinh-nghiem-chay-o-to-dien-vinfast-duong-dai,gold-real,original,,B3,needs_revision,A1,2026-08-10,v1.3,C4 (29 câu > 30 tiếng)
+G-002,/vn_vi/cach-cham-soc-xe-dien-vf-e34,gold-real,original,,B8,needs_revision,A1,2026-08-10,v1.3,"C4 (20 câu > 30 tiếng); B8: ""khuyến cáokhách"", ""hư hỏnghệ thống"" - dính chữ, đã kiểm có trong raw_html gốc"
+G-003,/vn_vi/cach-khoi-dong-xe-may-dien-vinfast,gold-real,original,,B8,needs_revision,A1,2026-08-10,v1.3,"C4 (23 câu > 30 tiếng); B8: ""hết hành trinh"" - thiếu dấu huyền, đúng là ""hành trình"" (Bước 2 phần khởi động)"
+G-004,/vn_vi/dinh-nghia-den-projector-la-gi,gold-real,original,,B3,needs_revision,A1,2026-08-10,v1.3,C4 (8 câu > 30 tiếng)
+G-005,/vn_vi/nhung-kien-thuc-co-ban-ve-sac-xe-o-to-dien-can-biet,gold-real,original,,B1;B2,needs_revision,A1,2026-08-10,v1.3,"C4 (6 câu > 30 tiếng); B1: ""VF e34 ... 285km"" không nêu chuẩn đo. B2: ""cổng sạc nhanh ... 18 phút"" không nêu dải %"
+G-006,/vn_vi/thoi-gian-sac-day-xe-may-dien-vinfast-bao-lau,gold-real,original,,B2,needs_revision,A1,2026-08-10,v1.3,"C4 (10 câu > 30 tiếng); B2: ""thời gian sạc đầy trung bình khoảng 10 tiếng"" - không nêu loại sạc lẫn dải %"
+G-007,/vn_vi/cac-loai-pin-xe-may-dien-vinfast-dac-diem-gia-cach-su-dung,gold-real,original,,B2,needs_revision,A1,2026-08-10,v1.3,"C4 (13 câu > 30 tiếng); B2: ""sạc đầy ... 3 giờ để đạt 90% dung lượng"" - không nêu loại sạc. KHÔNG tính A1 cho ""tập đoàn pin hàng đầu thế giới - LG Chem"": nói về bên thứ ba, không phải sản phẩm VinFast (nguyên tắc A1 (a)+(b), guideline mục 6)"
+G-008,/vn_vi/khi-nao-nen-sac-pin-xe-dien,gold-real,original,,B8,needs_revision,A1,2026-08-10,v1.3,"C4 (28 câu > 30 tiếng); B8: ""đảm bảo viêc di chuyển được thông suất"" - 2 lỗi: viêc->việc, thông suất->thông suốt. C1: ""1.Khi"", ""2.Trường"" thiếu dấu cách sau số thứ tự (trình bày, KHÔNG tính B8)"
+G-009,/vn_vi/tim-hieu-cac-loai-pin-o-to-dien,gold-real,original,,B4,needs_revision,A1,2026-08-10,v1.3,C4 (17 câu > 30 tiếng)
+G-010,/vn_vi/cach-sac-pin-xe-may-dien-vinfast,gold-real,original,,A1,rejected,A1,2026-08-10,v1.3,"C4 (19 câu > 30 tiếng); CA KHÓ - A1: ""hệ thống trạm sạc hiện đại nhất Việt Nam"", có phạm vi so sánh + nói về hạ tầng VinFast. Nằm trong link "">>> Tìm hiểu thêm"" chứ không phải câu văn tác giả tự viết, nhưng vẫn quan sát được trên bài đã đăng và nằm trong body"
+G-011,/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast,gold-real,original,,A1;B3,rejected,A1,2026-08-10,v1.3,C4 (18 câu > 30 tiếng)
+G-012,/vn_vi/chi-phi-su-dung-xe-dien,gold-real,original,,B10,needs_revision,A1,2026-08-10,v1.3,"C4 (35 câu > 30 tiếng); B10: ""chi phí bảo dưỡng xe điện chỉ khoảng 25-30% so với xe động cơ đốt trong"" - không dẫn nguồn"
+G-013,/vn_vi/nuoi-o-to-dien-vinfast-vf-e34-co-re-hon-xe-xang,gold-real,original,,B8,needs_revision,A1,2026-08-10,v1.3,"C4 (23 câu > 30 tiếng); B8: ""Để có thêm thông hoặc cần hỗ trợ"" - thiếu chữ ""tin"""
+G-014,/vn_vi/chi-phi-nuoi-xe-vf-e34-hang-thang-tiet-kiem-bao-nhieu,gold-real,original,,B3,needs_revision,A1,2026-08-10,v1.3,C4 (22 câu > 30 tiếng)
+G-015,/vn_vi/co-nen-mua-o-to-thoi-diem-nay,gold-real,original,,B8,needs_revision,A1,2026-08-10,v1.3,"C4 (14 câu > 30 tiếng); B8: ""cáchliên hệ"" - dính chữ, đã kiểm có trong raw_html gốc"
+G-016,/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang,gold-real,original,,,publish,A1,2026-08-10,v1.3,C4 (8 câu > 30 tiếng); Đọc kỹ không tìm thấy lỗi chính tả/ngữ pháp. Sạch cả 3 lớp quét máy
+G-017,/vn_vi/tong-quan-tram-sac-vinfast,gold-real,original,,B4;B3,needs_revision,A1,2026-08-10,v1.3,C4 (20 câu > 30 tiếng)
+G-018,/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter,gold-real,original,,B3,needs_revision,A1,2026-08-10,v1.3,C4 (3 câu > 30 tiếng)
+G-019,/vn_vi/ung-dung-vinfast-cho-o-to-dien,gold-real,original,,,publish,A1,2026-08-10,v1.3,"C4 (22 câu > 30 tiếng); Đọc kỹ không tìm thấy lỗi chính tả/ngữ pháp. Sạch cả 3 lớp quét máy. ""chia sẻ"" đúng chính tả (bộ quét báo động giả)"
+G-020,/vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast,gold-real,original,,A1,rejected,A1,2026-08-10,v1.3,C4 (20 câu > 30 tiếng)
+P-001a,/vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho,gold-pert,perturbed,A1,A1,rejected,A1,2026-08-10,v1.3,Chèn câu claim tuyệt đối cuối đoạn mở đầu: 'VinFast là thương hiệu xe điện số 1 Việt Nam với công nghệ pin tốt nhất thị trường hiện nay.'
+P-001b,/vn_vi/cham-soc-xe-dien-vao-thoi-tiet-hanh-kho,gold-pert,perturbed,B3,B3,needs_revision,A1,2026-08-10,v1.3,Xóa meta_description (để trống).
+P-002a,/vn_vi/huong-dan-sac-pin-o-to-dien-vinfast,gold-pert,perturbed,A3,B3;A3,rejected,A1,2026-08-10,v1.3,Chèn câu claim tầm hoạt động VF 8 sai (500km); số công bố thật 420km Eco / 400km Plus theo sources.md mục 2.1. Bài gốc không có claim số liệu định lượng sẵn có nên chèn câu mới thay vì sửa số có sẵn - lệch nhẹ so với công thức chuẩn 'tìm số thật rồi đổi'.
+P-003a,/vn_vi/cach-de-xe-dien-lau-het-pin-moi-nhat,gold-pert,perturbed,B1,B1,needs_revision,A1,2026-08-10,v1.3,Chèn câu claim tầm hoạt động VF 8 420km (đúng số công bố) nhưng KHÔNG nêu điều kiện đo NEDC/WLTP. Bài gốc không có claim quãng đường sẵn có nên chèn câu mới thay vì xóa điều kiện có sẵn.
+P-004a,/vn_vi/xe-dien-sac-bao-lau-thi-day,gold-pert,perturbed,B2,B4;B2,needs_revision,A1,2026-08-10,v1.3,"Chèn câu claim thời gian sạc '30 phút' không nêu loại trụ sạc/dải %. Bài gốc không có claim tương tự sẵn có nên chèn câu mới. Lưu ý: title gốc đã sẵn có '2024' (label_helper báo B4 tự nhiên, KHÔNG phải do chèn)."
+P-004b,/vn_vi/xe-dien-sac-bao-lau-thi-day,gold-pert,perturbed,A4,B4;A4,rejected,A1,2026-08-10,v1.3,"Chèn khối khuyến mại 'giảm ngay 3 triệu đồng cho khách đặt cọc sớm' không nêu thời hạn/điều kiện. Lưu ý: title gốc đã sẵn có '2024' (label_helper báo B4 tự nhiên, KHÔNG phải do chèn)."
+P-005a,/vn_vi/sac-pin-luu-dong-24-7,gold-pert,perturbed,A2,B3;A2,rejected,A1,2026-08-10,v1.3,Chèn câu so sánh trực tiếp hơn hẳn Tesla và BYD (dịch vụ sạc lưu động).
+P-006a,/vn_vi/so-sanh-chi-phi-van-hanh-xe-dien-va-xe-xang,gold-pert,perturbed,B10,B10,needs_revision,A1,2026-08-10,v1.3,Chèn câu số liệu '90% người dùng hài lòng' không dẫn nguồn.
+P-007a,/vn_vi/o-to-dien-va-o-to-xang-co-gi-khac-nhau,gold-pert,perturbed,A1;B5,B4;A1;B5,rejected,A1,2026-08-10,v1.3,A1: chèn câu 'VinFast là thương hiệu ô tô điện hàng đầu Việt Nam với công nghệ pin tốt nhất thị trường hiện nay.' B5: đổi 3 chỗ 'ô tô điện'->'xe hơi điện' (2 heading mục 1 và 1.7 + câu đầu mục 1.7).
+P-007b,/vn_vi/o-to-dien-va-o-to-xang-co-gi-khac-nhau,gold-pert,perturbed,B4,B4,needs_revision,A1,2026-08-10,v1.3,Gắn năm cũ vào title: '...có gì khác nhau?' -> '...có gì khác nhau 2019?'.
+P-008a,/vn_vi/so-sanh-xe-may-dien-va-xe-may-xang,gold-pert,perturbed,A2;B10,A2;B10,rejected,A1,2026-08-10,v1.3,A2: chèn câu so sánh trực tiếp hơn hẳn Yadea và Pega. B10: chèn câu '90% người dùng xe máy điện hài lòng' không dẫn nguồn.
+P-009a,/vn_vi/huong-dan-tim-tram-sac-va-showroom-vinfast-tren-website,gold-pert,perturbed,B6;B7,B7;B6,needs_revision,A1,2026-08-10,v1.3,B6: xóa alt của ảnh đầu bài (alt rỗng). B7: đổi url_alias thành bản còn dấu tiếng Việt.
+P-010a,/vn_vi/huong-dan-su-dung-ung-dung-vinfast,gold-pert,perturbed,A4,A4,rejected,A1,2026-08-10,v1.3,Chèn câu khuyến mại 'tặng gói bảo dưỡng miễn phí trị giá 2 triệu đồng' không nêu thời hạn/điều kiện.

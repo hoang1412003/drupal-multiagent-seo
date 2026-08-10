@@ -128,9 +128,38 @@ Ranh giới: **sai số liệu → A; đúng nhưng thiếu điều kiện → B
 |---|---|
 | Không chắc giữa 2 nhãn liền kề | Chọn nhãn **nghiêm hơn**, và ghi vào `notes` là ca khó. Ca khó là dữ liệu quý - chính chỗ đó AI cũng sẽ sai |
 | Nghi ngờ A3 nhưng chưa đối chiếu được thông số công bố | **Không đoán.** Dừng, tra `sources.md` mục 2, tra được rồi mới gán. Nếu VinFast không công bố số đó thì không phải A3; xét B10 (số liệu không nguồn) |
+| **VinFast công bố NHIỀU con số khác nhau cho cùng một thông số** | Bài trích **bất kỳ** con số nào hãng có công bố → **không phải A3**. Xem ghi chú dưới bảng |
+| Đối chiếu A3 thì lấy nguồn ở đâu | `sources.md` mục 2.1 (thông số VinFast công bố), **KHÔNG** phải `multiagent/src/kb/specs.json` (KB của AI). Hai cái cố ý lệch nhau — xem ghi chú dưới bảng |
 | Bài quá ngắn (dưới ~300 từ) | Không phải lỗi riêng. Xét bình thường theo bảng mã; ngắn thường kéo theo A5 (không trả lời được câu hỏi ở tiêu đề). **Không** kéo theo B9 - B9 chỉ áp dụng cho bài trên ~500 từ |
 | Bài có lỗi lặp cùng một loại nhiều lần | Ghi mã lỗi **một lần**, ghi số lần vào `notes` |
 | Bài thuộc mục "Công ty"/thông cáo báo chí | Loại khỏi gold set (spec mục 6.2), không gán nhãn |
+
+**Ghi chú A1 (thêm 2026-08-10).** Cụm so sánh nhất chỉ tính là A1 khi thoả **cả hai**:
+
+- **(a) Nêu phạm vi so sánh** — "thị trường", "Việt Nam", "thế giới", "phân khúc". Thiếu phạm vi thì thường là trạng ngữ, không phải claim: *"cách **tốt nhất** để khắc phục sự cố"*, *"giữ pin ở **trạng thái tốt nhất**"*, *"áp dụng **duy nhất** 01 Gói"* đều **không** phải A1.
+- **(b) Nói về sản phẩm / dịch vụ / hạ tầng của chính VinFast.** Luật Quảng cáo và Luật Cạnh tranh điều chỉnh claim về **hàng hoá được quảng cáo**; khen một nhà cung cấp không phải là khẳng định sản phẩm mình hơn đối thủ.
+
+Ba ca thật đã áp dụng:
+
+| Bài | Cụm | (a) | (b) | Kết luận |
+|---|---|---|---|---|
+| G-020 | "mẫu xe được **săn đón nhất thị trường** xe xanh" | ✓ | ✓ xe VinFast | **A1** |
+| G-010 | "hệ thống trạm sạc **hiện đại nhất Việt Nam**" | ✓ | ✓ trạm sạc VinFast | **A1** *(ca khó: nằm trong link "Tìm hiểu thêm")* |
+| G-007 | "tập đoàn pin **hàng đầu thế giới** – LG Chem" | ✓ | ✗ bên thứ ba | **không A1** |
+
+Vế (a) trùng đúng cách CP1 phân biệt mức 0 với mức 1 sau đợt sửa nợ B12 (`rubrics.md` mục 6.2) — **trùng là có chủ đích**, cùng một lập luận pháp lý, không phải chép từ code sang.
+
+⚠️ **Hai cụm A1 tìm được bằng tay mà blacklist của AI KHÔNG có:** *"có một không hai"* (G-011) và *"săn đón nhất"* (G-020). Đây là false negative đã biết của CP1, ghi ở `technical-debt.md` B12b. **Không** bổ sung chúng vào `compliance_rules.json` — làm vậy là dạy AI bằng đáp án lấy từ chính gold set.
+
+**Ghi chú A3 (thêm 2026-08-10, làm rõ chứ không đổi luật — xem cuối mục này).**
+
+*Vì sao "trích số nào hãng có công bố cũng được".* A3 định nghĩa là *"số liệu **sai lệch** so với thông số VinFast công bố"*. Khi chính hãng công bố hai con số mâu thuẫn thì không thể quy người viết là sai vì trích một trong hai — lỗi nằm ở **nguồn**, không nằm ở bài. Đây không phải tình huống giả định: `sources.md` mục 2.1 ghi **hai** ca đã gặp — VF 5 Plus (`>300km` / `>320km` / `326,4km`) và VF e34 (`285km` / `318,6km`, **cả hai cùng ghi chuẩn NEDC**).
+
+Quy tắc này **không làm mất khả năng bắt lỗi**: bản perturbation P-002a chèn *"VF 8 500km"*, mà 500km không xuất hiện ở bất kỳ công bố nào (thật là 420/400km), nên vẫn là A3 bình thường.
+
+*Vì sao đối chiếu với `sources.md` chứ không với `specs.json`.* `specs.json` là thứ **AI** tra được; `sources.md` là thứ **VinFast công bố**. Nếu người gán nhãn cũng chỉ đối chiếu với KB của AI thì người sẽ không bao giờ tìm ra A3 mà AI bỏ sót, và recall của CP3 đẹp lên do vòng tròn chứ không do đúng. Khoảng lệch giữa hai file **chính là độ phủ KB**, và đó là một trong những thứ Sprint 3 phải đo.
+
+**Không tăng version, và không nhãn nào đã gán bị đổi.** Bảng mã lỗi (mục 4) và quy tắc quy nhãn (mục 5) không đổi một chữ; đây là làm rõ một dòng vốn đã có trong chính bảng này (*"Nếu VinFast không công bố số đó thì không phải A3"*) cho tình huống nó chưa lường tới. Đã rà lại 20 nhãn gán trước ngày này: **không nhãn nào thay đổi** dưới quy tắc này. Tăng version lúc đang gán dở sẽ tách gold set làm hai nhóm không trộn chung được khi tính Kappa (mục 11) — cái giá đó không có lý do để trả.
 
 ---
 

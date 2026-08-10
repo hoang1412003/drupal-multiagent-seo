@@ -1,6 +1,6 @@
 # PHẦN 5: BÁO CÁO SPRINT 2
 
-**Cập nhật:** 2026-08-07
+**Cập nhật:** 2026-08-10
 
 ## 1. Mục tiêu Sprint 2
 
@@ -13,7 +13,7 @@ Theo lộ trình 3 sprint đã được mentor duyệt ([`roadmap.md`](roadmap.m
 5. Tự động hóa: bật Content Moderation "Needs Review" + polling worker.
 6. Dựng UI báo cáo trong giao diện editor.
 
-**Hiện trạng: 5 mục xong, 1 mục chưa.**
+**Hiện trạng: 6/6 mục xong** (mục 4 — gold set — hoàn tất 2026-08-10).
 
 ---
 
@@ -91,15 +91,27 @@ Hiện đã bật thật Content Moderation "Needs Review" trên content type Ar
 
 ---
 
-## 3. Chưa xong
+## 3. Mục cuối cùng — hoàn tất muộn
 
-### 3.1. Gold set — đã thu xong, chưa gán nhãn
+### 3.1. Gold set — ✅ ĐÃ GÁN NHÃN XONG 33/33 (2026-08-10)
 
-**Đã làm:** thu và xử lý 33 mẫu (20 bài thật + 13 bài chèn lỗi có chủ đích), bóc tách sạch phần template dùng chung (header, footer, khối CTA), ghi lại chính xác lỗi nào được chèn vào bài nào.
+**Đã làm:** thu và xử lý 33 mẫu (20 bài thật + 13 bài chèn lỗi có chủ đích), bóc tách sạch phần template dùng chung, ghi lại chính xác lỗi nào được chèn vào bài nào, và **gán nhãn toàn bộ**.
 
-**Chưa làm:** gán nhãn `publish` / `needs_revision` / `rejected` cho từng mẫu.
+**Cách làm:** gán tay hoàn toàn, giữ nguyên 33 mẫu, **không** dùng AI gán nháp. Khối lượng nhỏ hơn dự kiến vì quy tắc quy nhãn vốn **dừng sớm** — chỉ 20/33 bài phải đọc, 13 bài suy nhãn từ `injected_codes`. Hai công cụ hỗ trợ, đều tất định và độc lập với hệ AI đang bị đo: `label_helper.py` (mã đếm được) và `scripts/quet_ung_vien.py` (đánh dấu chỗ cần xem, **không** kết luận mã lỗi).
 
-**Đây là việc đang chặn toàn bộ Sprint 3** — cả ba phép đo còn lại (calibration ngưỡng, so sánh multi-agent với single-agent, test trên tập held-out) đều cần nhãn làm đáp án chuẩn.
+**Phân bố:**
+
+| | `rejected` | `needs_revision` | `publish` |
+|---|---|---|---|
+| 20 bài thật | 3 | 15 | **2** |
+| 13 perturbation | 7 | 6 | 0 |
+| **Tổng** | **10** | **21** | **2** |
+
+**Kết quả nghiệp vụ đáng nêu:** chỉ **2/20 bài cẩm nang đã xuất bản của VinFast** đạt chuẩn đăng ngay theo rubric. 18 bài còn lại cần ít nhất một chỉnh sửa — chủ yếu meta description sai độ dài (30% bài thật) và lỗi chính tả. Toàn bộ lỗi chính tả tìm được đều đã **đối chiếu `raw_html` gốc** để xác nhận là lỗi của nguồn, không phải do script bóc tách sai: `"khuyến cáokhách"`, `"hư hỏnghệ thống"` (G-002), `"cáchliên hệ"` (G-015), `"hành trinh"` (G-003), `"viêc di chuyển được thông suất"` (G-008), thiếu chữ `"tin"` (G-013).
+
+**⚠️ Giới hạn phải nêu khi báo cáo Sprint 3:** lớp `publish` chỉ có 2 mẫu, nên **ngưỡng `publish` = 80 không calibrate được** và giữ nguyên giá trị minh hoạ. Tỉ lệ cơ sở 10% là tính chất của nội dung chứ không phải sai số lấy mẫu — muốn đủ mẫu phải thu thêm ~80 bài, nên **cố ý không thu thêm**. Bù lại, ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố 10/21, calibrate được — và đó chính là ngưỡng gắn với quyền phủ quyết, phần rủi ro cao nhất. Chi tiết: `technical-debt.md` mục 6.
+
+**Cổng còn lại:** test-retest (`annotation-guideline.md` mục 8.1) — đợi ≥3 ngày, gán lại 3-4 bài mù với nhãn cũ, yêu cầu Kappa ≥ 0,80. Sớm nhất **2026-08-13**.
 
 **Một vấn đề phát hiện khi rà lại — ĐÃ XỬ LÝ 2026-08-10, guideline v1.3, chờ mentor xác nhận:** quy tắc quy nhãn hiện tại là *có lỗi nhóm A → `rejected`, có lỗi nhóm B → `needs_revision`, không có gì → `publish`*. Nhưng chạy script đếm trên 33 mẫu thì **cả 33 bài đều dính ít nhất một lỗi nhóm B** — toàn bộ đến từ mã B9 "câu quá dài" (33/33 bài). Nghĩa là gán nhãn xong sẽ **không có bài nào ra nhãn `publish`**, gold set chỉ còn 2 lớp, và ngưỡng publish không có dữ liệu để calibrate.
 
@@ -173,13 +185,20 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 
 | Thứ tự | Việc | Bị chặn bởi |
 |---|---|---|
-| 1 | Chốt hướng gán nhãn gold set | **Chờ mentor** |
-| 2 | Tiếp tục giảm dao động điểm của Compliance | Không bị chặn, nhưng tốn API và kết quả không chắc |
-| 3 | Đo lại E1 | Nên làm **sau** (2), để đo một lần cho cả hai thay đổi |
-| 4 | Calibration ngưỡng → so sánh baseline → held-out test | Cần nhãn từ (1) |
+| 1 | ~~Gán nhãn gold set~~ | ✅ xong 2026-08-10, 33/33 |
+| 2 | **Test-retest** — gán lại 3-4 bài mù, yêu cầu Kappa ≥ 0,80 | Phải đợi ≥3 ngày kể từ khi gán xong → sớm nhất **2026-08-13** |
+| 3 | Tuyên bố **khoá code** chấm điểm (feature freeze) | Không bị chặn. Phải làm trước (4) |
+| 4 | Đo lại E1 (~$3) | Sau (3). Số E1 hiện có thuộc code cũ — Brand đổi ở B7, Compliance đổi ở B12 |
+| 5 | Calibration ngưỡng → so sánh baseline → held-out test | Cần (2) và (4) |
+
+**Cố ý KHÔNG làm:** giảm dao động điểm Compliance (σ = 4,18). σ `final_score` = 1,33 đã đạt ngưỡng < 2 nên E5 không bị chặn; tiền lệ B5 cho thấy loại sửa này khó đoán kết quả (7,70 → 7,29), và mỗi lần sửa lại phải đo lại E1.
 
 ## 7. Ba việc cần mentor quyết
 
 1. ~~**Ngưỡng "câu quá dài"** nên để bao nhiêu từ cho bài tiếng Việt — hoặc mã B9 có nên tính vào việc quy nhãn không?~~ → **Đã xử lý 2026-08-10 (guideline v1.3), chỉ cần mentor xác nhận.** Không chỉnh ngưỡng nào (chỉnh sẽ thành vòng luẩn quẩn); thay vào đó chuyển câu dài/đoạn dài xuống nhóm C, giữ "thiếu heading" ở B9. Phân bố nhãn phục hồi về 3 lớp. Chi tiết + 3 căn cứ: mục 3.1.
-2. **Cách gán nhãn 33 bài**: gán tay toàn bộ, giảm cỡ mẫu, hay cho phép AI hỗ trợ ở phần liệt kê mã lỗi?
-3. **Đo lại E1 ngay hay chờ code ổn định?** Đo lại tốn khoảng vài đô; nếu còn sửa tiếp Compliance thì sẽ phải đo thêm lần nữa.
+2. ~~**Cách gán nhãn 33 bài**: gán tay toàn bộ, giảm cỡ mẫu, hay cho phép AI hỗ trợ?~~ → **Đã xong 2026-08-10.** Gán tay toàn bộ, giữ đủ 33 mẫu, không dùng AI gán nháp. Chỉ 20/33 bài phải đọc vì quy tắc quy nhãn vốn dừng sớm. Kết quả ở mục 3.1.
+3. ~~**Đo lại E1 ngay hay chờ?**~~ → **Đã quyết: chờ.** Thứ tự là khoá code → đo E1 một lần → calibrate. Ngưỡng calibrate chỉ có hiệu lực với đúng bộ (rubric, prompt, model) đã dùng khi đo (`rubrics.md` mục 10), nên đo trước khi khoá là chắc chắn phải đo lại.
+
+**Việc mới cần mentor quyết (thay cho ba việc trên):**
+
+4. **Có thu thêm bài để cứu lớp `publish` không?** Số liệu: `publish` = 2/33, tỉ lệ cơ sở 10% trên bài thật, cần thu thêm **~80 bài** mới đủ mẫu calibrate. **Đề xuất: không thu** — ngưỡng quan trọng hơn (50, gắn với quyền phủ quyết) đã calibrate được với phân bố 10/21. Đây là quyết định về cỡ gold set nên thuộc thẩm quyền mentor.
