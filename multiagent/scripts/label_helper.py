@@ -41,11 +41,25 @@ import glob
 import os
 import re
 import sys
-import unicodedata
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 import config
+# Bóc HTML và tách câu dùng CHUNG với agent (text_utils). Trước 2026-08-10
+# file này có bản `strip_html` riêng, lệch với bản của agent ở hai chỗ: bản
+# kia giải mã thực thể HTML, bản này gộp dấu chấm nhân đôi. Đo được trên 8 bài
+# gold set: số câu lệch tới 62 câu ở G-007 (266 so với 328). Vì rubric CQ3/CQ4
+# đếm đúng thứ mã C4/C5 ở đây đếm, hai bên phải đo bằng một hàm.
+from text_utils import (  # noqa: E402
+    co_dau_tieng_viet,
+    split_paragraphs,
+    split_sentences,
+    strip_html,
+)
+
+# Giữ tên cũ để không phải sửa mọi chỗ gọi trong file này và trong
+# scripts/quet_ung_vien.py (nó import `strip_html`, `split_sentences` từ đây).
+has_vietnamese_diacritics = co_dau_tieng_viet
 
 NOT_COLLECTED = "?"
 
@@ -69,12 +83,6 @@ LONG_PARAGRAPH_SENTENCES = _LB["long_paragraph_sentences"]  # C5
 REPEAT_THRESHOLD = _LB["repeat_threshold"]      # C4/C5: "từ 3 lần trở lên"
 HEADING_REQUIRED_WORDS = _LB["heading_required_words"]  # B9
 
-# Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
-# Không có "st." (Street/Saint, viết tắt tiếng Anh): văn bản cẩm nang tiếng
-# Việt không dùng, và khi so khớp theo hậu tố chuỗi nó khớp nhầm cả "VinFast."
-_ABBREVIATIONS = ("tp.", "tt.", "vd.", "vs.", "tr.", "q.", "p.")
-
-
 def parse_sample(path: str) -> dict:
     """Đọc file mẫu -> dict các field. Thiếu '---' -> coi toàn bộ là body."""
     with open(path, encoding="utf-8") as f:
@@ -91,77 +99,6 @@ def parse_sample(path: str) -> dict:
         key, _, value = line.partition(":")
         fields[key.strip().lower()] = value.strip()
     return fields
-
-
-# Thẻ khối: kết thúc thẻ = kết thúc câu. Không xử lý riêng thì tiêu đề <h2>
-# (vốn không có dấu chấm) dính vào câu đầu của đoạn ngay sau, làm số câu dài
-# bị thổi lên.
-_BLOCK_END = re.compile(
-    r"</(?:h[1-6]|p|li|div|blockquote|td|th)\s*>|<br\s*/?>", re.IGNORECASE
-)
-
-
-def strip_html(html: str) -> str:
-    text = _BLOCK_END.sub(".\n", html)
-    text = re.sub(r"<[^>]+>", " ", text)
-    text = re.sub(r"\.\s*\.", ".", text)      # gộp dấu chấm bị nhân đôi
-    return re.sub(r"[ \t]+", " ", text)
-
-
-def has_vietnamese_diacritics(text: str) -> bool:
-    """True nếu có ký tự tiếng Việt có dấu (kể cả đ/Đ)."""
-    if "đ" in text.lower():
-        return True
-    # Ký tự có dấu tách được thành chữ cái gốc + dấu tổ hợp
-    return any(
-        unicodedata.combining(c) for c in unicodedata.normalize("NFD", text)
-    )
-
-
-def split_sentences(text: str) -> list[str]:
-    """Tách câu tiếng Việt (bản v0 - sẽ thay bằng LanguageAnalyzer).
-
-    Không cắt ở: số thập phân ("3.5 giây"), viết tắt ("TP.HCM"), dấu chấm
-    theo sau bởi chữ thường (thường là viết tắt bị lọt).
-    """
-    sentences = []
-    current = ""
-    for i, ch in enumerate(text):
-        current += ch
-        if ch not in ".!?":
-            continue
-        after = text[i + 1:i + 2]
-        if ch == "." and text[i - 1:i].isdigit() and after.isdigit():
-            continue                                  # 3.5
-        # So khớp theo TỪ cuối cùng (ranh giới từ = khoảng trắng), không phải
-        # hậu tố chuỗi cố định - tránh khớp nhầm "st." vào cuối "VinFast."
-        # Bỏ ký tự không phải chữ/số ở ĐẦU từ (dấu ngoặc/nháy mở kiểu
-        # "(tp." hay "“tp.") trước khi so khớp, nhưng giữ dấu chấm ở CUỐI vì
-        # _ABBREVIATIONS gồm cả dấu chấm.
-        last_word = re.search(r"(\S+)$", text[:i + 1])
-        if last_word:
-            candidate = re.sub(r"^\W+", "", last_word.group(1)).lower()
-            if candidate in _ABBREVIATIONS:
-                continue                              # TP.HCM, (tp. Thủ Đức)
-        if after and after not in " \n":
-            continue                                  # dính liền, chưa hết câu
-        if after == " " and text[i + 2:i + 3].islower():
-            continue                                  # viết tắt lọt lưới
-        if current.strip():
-            sentences.append(current.strip())
-        current = ""
-    if current.strip():
-        sentences.append(current.strip())
-    return sentences
-
-
-def split_paragraphs(html: str) -> list[str]:
-    """Ưu tiên thẻ <p>; không có thì tách theo dòng trống."""
-    paragraphs = re.findall(r"<p[^>]*>(.*?)</p>", html, re.DOTALL | re.IGNORECASE)
-    if paragraphs:
-        return [strip_html(p).strip() for p in paragraphs if strip_html(p).strip()]
-    plain = strip_html(html)
-    return [p.strip() for p in re.split(r"\n\s*\n", plain) if p.strip()]
 
 
 def analyze(fields: dict) -> tuple[list[str], list[str], list[str]]:

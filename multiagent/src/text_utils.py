@@ -1,12 +1,26 @@
-"""Tiện ích xử lý văn bản dùng chung cho phần brand.
+"""Tiện ích xử lý văn bản dùng chung cho MỌI phía đo cùng một bài.
 
-Tách riêng vì cả script offline (sinh brand guideline) lẫn agent runtime
-(chấm bài) đều phải bóc HTML theo ĐÚNG một cách - nếu hai bên bóc khác nhau
-thì tần suất thống kê được sẽ không khớp với tần suất đếm lúc chấm.
+Tách riêng vì script offline (sinh brand guideline), agent runtime (chấm bài)
+và script gán nhãn (`scripts/label_helper.py`) đều phải bóc HTML và tách câu
+theo ĐÚNG một cách - nếu hai bên đo khác nhau thì con số hai bên nói về cùng
+một bài lại không so được với nhau.
+
+**Đó không phải rủi ro lý thuyết - nó đã xảy ra.** Trước 2026-08-10 tồn tại
+HAI bản `strip_html`: bản ở đây và một bản riêng trong `label_helper.py`. Mỗi
+bản đúng một nửa:
+
+    text_utils    giải mã thực thể HTML (&gt; &nbsp;)   thiếu: gộp ". ."
+    label_helper  gộp dấu chấm nhân đôi ". " -> "."     thiếu: giải mã entity
+
+Hệ quả đo được trên 8 bài gold set: số câu lệch nhau tới **62 câu trên
+G-007** (266 so với 328, tức 23%). Vì rubric CQ3/CQ4 đếm câu dài và đoạn dài,
+còn mã C4/C5 lúc gán nhãn cũng đếm đúng thứ đó, hai bên sẽ nói hai con số
+khác nhau về cùng một bài. Nay hợp nhất: bản dưới đây làm CẢ HAI việc.
 """
 import hashlib
 import html
 import re
+import unicodedata
 
 # Thẻ khối: kết thúc thẻ = kết thúc câu, nếu không tiêu đề <h2> (không có dấu
 # chấm) sẽ dính vào câu đầu của đoạn ngay sau.
@@ -28,7 +42,79 @@ def strip_html(raw: str) -> str:
     # trước sẽ biến "&lt;p&gt;" thành thẻ thật rồi bị xoá nhầm. Không giải mã
     # thì đoạn trích làm bằng chứng hiện ra dạng "&gt;&gt;&gt; Tìm hiểu thêm".
     text = html.unescape(text)
+    # Gộp dấu chấm bị nhân đôi. Câu vốn đã kết thúc bằng "." nằm trong <p> thì
+    # sau khi thay </p> thành ".\n" sẽ thành "..", và split_sentences đếm đó
+    # thành một câu rỗng thừa. Bước này trước ở label_helper, nay dùng chung.
+    text = re.sub(r"\.\s*\.", ".", text)
     return re.sub(r"[ \t]+", " ", text)
+
+
+# --------------------------------------------------- tách câu / tách đoạn
+#
+# Chuyển từ `scripts/label_helper.py` vào đây 2026-08-10 để rubric CQ3/CQ4 của
+# agent và mã C4/C5 của người gán nhãn dùng CHUNG một phép đếm. Ngưỡng thì vẫn
+# tách bạch (họ `scoring` và họ `labelling` trong scoring.yaml, cố ý khác nhau
+# - `config-spec.md` mục 2); chỉ **cách đo** là dùng chung.
+
+# Viết tắt tiếng Việt hay gặp - không được cắt câu sau dấu chấm của chúng.
+# Không có "st." (Street/Saint): văn bản cẩm nang tiếng Việt không dùng, và khi
+# so khớp theo hậu tố chuỗi nó khớp nhầm cả "VinFast.".
+_VIET_TAT = ("tp.", "tt.", "vd.", "vs.", "tr.", "q.", "p.")
+
+
+def split_sentences(text: str) -> list:
+    """Tách câu tiếng Việt.
+
+    Không cắt ở: số thập phân ("3.5 giây"), viết tắt ("TP.HCM"), dấu chấm theo
+    sau bởi chữ thường (thường là viết tắt bị lọt).
+    """
+    sentences = []
+    current = ""
+    for i, ch in enumerate(text):
+        current += ch
+        if ch not in ".!?":
+            continue
+        after = text[i + 1:i + 2]
+        if ch == "." and text[i - 1:i].isdigit() and after.isdigit():
+            continue                                  # 3.5
+        # So khớp theo TỪ cuối cùng (ranh giới từ = khoảng trắng), không phải
+        # hậu tố chuỗi cố định - tránh khớp nhầm "st." vào cuối "VinFast.".
+        # Bỏ ký tự không phải chữ/số ở ĐẦU từ (dấu ngoặc/nháy mở kiểu "(tp."
+        # hay "“tp.") trước khi so khớp, nhưng giữ dấu chấm ở CUỐI vì
+        # _VIET_TAT gồm cả dấu chấm.
+        last_word = re.search(r"(\S+)$", text[:i + 1])
+        if last_word:
+            candidate = re.sub(r"^\W+", "", last_word.group(1)).lower()
+            if candidate in _VIET_TAT:
+                continue                              # TP.HCM, (tp. Thủ Đức)
+        if after and after not in " \n":
+            continue                                  # dính liền, chưa hết câu
+        if after == " " and text[i + 2:i + 3].islower():
+            continue                                  # viết tắt lọt lưới
+        if current.strip():
+            sentences.append(current.strip())
+        current = ""
+    if current.strip():
+        sentences.append(current.strip())
+    return sentences
+
+
+def split_paragraphs(raw_html: str) -> list:
+    """Ưu tiên thẻ <p>; không có thì tách theo dòng trống."""
+    paragraphs = re.findall(r"<p[^>]*>(.*?)</p>", raw_html, re.DOTALL | re.IGNORECASE)
+    if paragraphs:
+        return [strip_html(p).strip() for p in paragraphs if strip_html(p).strip()]
+    plain = strip_html(raw_html)
+    return [p.strip() for p in re.split(r"\n\s*\n", plain) if p.strip()]
+
+
+def co_dau_tieng_viet(text: str) -> bool:
+    """True nếu có ký tự tiếng Việt có dấu (kể cả đ/Đ). Dùng cho SEO5 và B7."""
+    if "đ" in text.lower():
+        return True
+    return any(
+        unicodedata.combining(c) for c in unicodedata.normalize("NFD", text)
+    )
 
 
 def _chuan_hoa(s: str) -> str:
