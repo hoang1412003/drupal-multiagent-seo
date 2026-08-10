@@ -12,11 +12,15 @@ File làm việc cá nhân — không phải tài liệu chính thức của d�
 
 **Bước 2 — Đọc phần máy đã tính sẵn trong report (khỏi phải đo tay):**
 ```
-[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC]
+[MÃ LỖI MÁY KẾT LUẬN ĐƯỢC - ĐỔI NHÃN]
   B3 (220 ký tự, ngoài 140-170)   ← meta_description quá dài
-  B9 (29 câu > 30 từ)             ← quá nhiều câu dài
+
+[MÃ NHÓM C - GHI VÀO `notes`, KHÔNG ĐỔI NHÃN]
+  C4 (29 câu > 30 tiếng)          ← nhiều câu dài
 ```
-→ Biết ngay bài này **ít nhất** dính B3, B9 (trừ khi có mã A thì nhãn đổi thành `rejected`).
+→ Biết ngay bài này **ít nhất** dính B3 (trừ khi có mã A thì nhãn đổi thành `rejected`).
+
+⚠️ **Hai khối này KHÔNG được trộn lẫn.** Chỉ khối đầu quy ra nhãn theo quy tắc ở Bước 4. Khối C4/C5 chép nguyên vào cột `notes` và **dừng ở đó** — nếu để nó đổi nhãn thì mọi bài đều thành `needs_revision` và gold set mất sạch lớp `publish` (đó chính là lỗi guideline v1.3 vừa sửa).
 
 **Bước 3 — Đọc toàn văn `raw/G-001.txt`, tự tìm nốt phần máy không đoán được**, theo đúng thứ tự bảng mã ở `annotation-guideline.md` mục 4:
 - **Nhóm A trước** (A1-A6): claim "số 1/tốt nhất/duy nhất"? So sánh Tesla/BYD...? Số liệu sai so với `sources.md` mục 2? Khuyến mại thiếu thời hạn? Lạc đề >50%? Hướng dẫn kỹ thuật gây mất an toàn?
@@ -35,11 +39,11 @@ Không A, không B → publish
 
 | Cột | Ghi gì |
 |---|---|
-| `defect_codes` | Mọi mã tìm thấy, cách nhau bằng `;`. VD: `B3;B9` |
+| `defect_codes` | Mọi mã **nhóm A/B** tìm thấy, cách nhau bằng `;`. VD: `B3;B8`. **Không** ghi mã C vào đây |
 | `label` | `publish` / `needs_revision` / `rejected` |
 | `annotator` | Ký hiệu của bạn, VD `A1` |
 | `date` | Ngày gán, VD `2026-07-31` |
-| `notes` | Ca khó / mã nhóm C nếu có, để trống nếu không |
+| `notes` | Ca khó + **mã nhóm C** (C4/C5 lấy từ report, kèm số đếm). VD: `C4 (29 câu > 30 tiếng)` |
 
 Sửa trực tiếp trong CSV (Excel/Notepad đều được, giữ đúng số cột phân tách bằng dấu phẩy).
 

@@ -115,10 +115,10 @@ default:
     title_ok: [40, 70]           # ngoài dải -> B4
     meta_ok: [140, 170]          # ngoài dải -> B3
     url_max_chars: 75            # -> B7
-    long_sentence_words: 30      # -> B9
-    long_paragraph_sentences: 5  # -> B9
+    long_sentence_words: 30      # -> C4, KHÔNG đổi nhãn (guideline v1.3)
+    long_paragraph_sentences: 5  # -> C5, KHÔNG đổi nhãn
     repeat_threshold: 3          # số lần lặp mới tính là lỗi
-    heading_required_words: 500
+    heading_required_words: 500  # -> B9
 
   # --- Retrieval (rag-design.md) ------------------------------------------
   retrieval:

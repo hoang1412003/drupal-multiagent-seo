@@ -84,14 +84,19 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 |---|---|---|---|---|---|---|
 | **CQ1** | Chính tả | LLM | ≥3 lỗi | 1-2 lỗi | Không lỗi | B8 |
 | **CQ2** | Ngữ pháp, câu tối nghĩa | LLM | ≥3 câu | 1-2 câu | Không | B8 |
-| **CQ3** | Câu quá dài (>30 từ) | máy | ≥3 câu | 1-2 câu | Không | B9 |
-| **CQ4** | Đoạn quá dài (>5 câu) | máy | ≥3 đoạn | 1-2 đoạn | Không | B9 |
+| **CQ3** | Câu quá dài (>30 tiếng) | máy | ≥3 câu | 1-2 câu | Không | C4 |
+| **CQ4** | Đoạn quá dài (>5 câu) | máy | ≥3 đoạn | 1-2 đoạn | Không | C5 |
 | **CQ5** | Cấu trúc heading | máy | Bài >500 từ, không có `<h2>` | Có `<h2>` nhưng phân cấp lộn xộn (h3 trước h2) | Có và đúng phân cấp | B9 |
 | **CQ6** | Mạch lạc, không trùng lặp | LLM | Có đoạn lặp ý rõ rệt hoặc lạc đề | Lặp nhẹ | Không | - |
 | **CQ7** | Số liệu định lượng có nguồn | LLM | Có số liệu không nguồn | Một phần có nguồn | Mọi số liệu có nguồn | B10 |
 | **CQ8** | `summary` (teaser) | máy + LLM | Trống *(máy)* | Có nhưng không tóm đúng nội dung *(LLM)* | Có và tóm đúng | - |
 
-**Ghi chú CQ3/CQ4:** ngưỡng 30 từ / 5 câu lấy từ `architecture.md` mục 5.5, hiện là **giá trị tạm** chờ calibrate từ gold set. Tách câu tiếng Việt không cắt thô theo dấu chấm (số thập phân "3.5 giây", viết tắt "TP.HCM") - quy tắc tách nằm ở `LanguageAnalyzer`.
+**Ghi chú CQ3/CQ4:** ngưỡng 30 tiếng / 5 câu lấy từ `architecture.md` mục 5.5, hiện là **giá trị tạm**. Tách câu tiếng Việt không cắt thô theo dấu chấm (số thập phân "3.5 giây", viết tắt "TP.HCM") - quy tắc tách nằm ở `LanguageAnalyzer`.
+
+**Hai đính chính về CQ3/CQ4 (2026-08-10, guideline v1.3):**
+
+1. **Đơn vị là TIẾNG, không phải TỪ.** Phép đếm là `len(s.split())`, mà tiếng Việt viết rời từng âm tiết ("ô tô điện" = 1 từ ghép, 3 tiếng). Con số 30 mượn từ quy ước readability tiếng Anh vốn đếm **từ**, nên 30 tiếng (≈20 từ) là câu bình thường chứ không dài. Khi triển khai A1-content_quality thì đây là chỗ phải quyết lại - hoặc đổi sang đếm từ thật bằng `underthesea` (`architecture.md` mục 5.5), hoặc quy đổi ngưỡng sang đơn vị tiếng. **Chưa sửa ở đây** vì khối `scoring` hiện chưa có ai đọc, và đổi ngưỡng chấm điểm là quyết định thuộc A1 chứ không thuộc đợt này.
+2. **Cột "Mã lỗi" đổi B9 → C4/C5.** Không phải đổi tiêu chí chấm điểm - CQ3/CQ4 vẫn chấm y như cũ, Content Quality Agent vẫn trừ điểm câu dài. Đổi là ở phía **gán nhãn**: hai tín hiệu này chuyển xuống nhóm C nên không còn quy ra `needs_revision`. Đây đúng là loại **chênh lệch có chủ đích giữa thang chấm điểm và thang gán nhãn** mà mục 7 mô tả, và là thứ calibration E5 sinh ra để đo.
 
 **Cố ý không có tiêu chí "readability".** Flesch-Kincaid đếm âm tiết theo quy tắc tiếng Anh, không áp dụng được cho tiếng Việt (`architecture.md` mục 5.5). CQ3/CQ4 là phần *đo được* của khái niệm đó; phần còn lại bỏ, không thay bằng cảm nhận của LLM.
 

@@ -491,7 +491,7 @@ Mục đích: kiểm tra tính đúng đắn về mặt chức năng (agent có 
 | Thiếu điều kiện đo / loại trụ sạc | B1, B2 | Compliance CP5, CP6 |
 | Thiếu meta description, slug lỗi, thiếu alt | B3, B6, B7 | SEO |
 | Sai thuật ngữ, tên model | B5 | Brand Voice (regex) |
-| Lỗi chính tả, câu quá dài | B8, B9 | Content Quality |
+| Lỗi chính tả, câu quá dài | B8, C4 | Content Quality |
 
 **Đây - không phải gold set - mới là nơi phủ mã lỗi.** Gold set 33 mẫu quá nhỏ để cho ra tỉ lệ theo từng mã (1 hay 3 mẫu A3 đều không phân biệt được "chạy đúng" với "may mắn"), và nhiệm vụ của nó là calibrate ngưỡng nên cần mẫu **gần ranh giới quyết định**, trong khi mẫu chèn lỗi luôn rơi dứt khoát về một phía. Ở bộ chức năng thì thêm mẫu rẻ: không cần gán nhãn mù, không cần test-retest, không đếm vào 33.
 
