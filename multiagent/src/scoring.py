@@ -4,8 +4,12 @@ severity cho Compliance (mục 6).
 Hàm thuần: không gọi mạng, không gọi LLM. Đây là điều kiện để calibrate
 ngưỡng từ gold set ở Sprint 3 - chấm lại cùng bộ mức luôn ra cùng điểm.
 
-Brand Voice và Compliance dùng. Content Quality và SEO chưa (docs/rubrics.md
-mục 8.1).
+Cả 4 agent đều dùng (từ 2026-08-10, khi SEO và Content Quality chuyển nốt
+sang rubric - nợ A1 đóng).
+
+`kiem_diem_llm()` và hằng DIEM_MIN/DIEM_MAX đã XOÁ cùng ngày: chúng tồn tại để
+chặn điểm LLM tự đặt ra ngoài thang 0-100 (nợ B10), mà nay không agent nào để
+LLM tự cho `score` nữa nên không còn đường nào cho một con số như vậy lọt vào.
 """
 
 
@@ -23,37 +27,6 @@ def score_from_criteria(criteria: list[dict]) -> float | None:
     if not ap_dung:
         return None
     return round(100 * sum(c["level"] for c in ap_dung) / (2 * len(ap_dung)), 1)
-
-
-# Thang điểm của hệ thống. score_from_criteria() luôn quy các mức về dải này.
-# KHÔNG đưa vào scoring.yaml: đây là định nghĩa thang đo, không phải ngưỡng
-# calibrate được - calibration đổi ngưỡng quyết định, không đổi thang.
-DIEM_MIN, DIEM_MAX = 0, 100
-
-
-def kiem_diem_llm(score, ten_agent: str):
-    """Kiểm điểm do LLM tự đặt, trước khi nó vào công thức của Aggregator.
-
-    Content Quality và SEO chưa chuyển sang rubric nên vẫn để LLM tự cho
-    `score` (nợ A1). Hai điều kiện cộng lại làm chỗ này hở:
-
-    1. KHÔNG chỗ nào nói cho LLM biết thang điểm là gì - cả hai system prompt
-       đều không nhắc "0-100", LLM chỉ suy ra từ tên trường `score`.
-    2. Structured outputs không chặn hộ: `minimum`/`maximum` nằm trong nhóm
-       ràng buộc JSON Schema mà Anthropic **không hỗ trợ**, nên đặt vào schema
-       là để cho có. Kiểu `integer` thì có hiệu lực, nên chỉ cần kiểm dải.
-
-    Ném ValueError chứ KHÔNG kẹp về biên: graph.py bắt exception rồi đánh dấu
-    agent lỗi, Aggregator chia lại trọng số và ghi `note`, nên người duyệt
-    thấy "điểm chưa đầy đủ". Kẹp biên sẽ sửa lặng lẽ một con số bất thường -
-    đúng kiểu im lặng mà cả dự án tránh.
-    """
-    if not DIEM_MIN <= score <= DIEM_MAX:
-        raise ValueError(
-            f"Agent {ten_agent} trả score = {score}, ngoài thang "
-            f"{DIEM_MIN}-{DIEM_MAX}. Không dùng được cho điểm tổng."
-        )
-    return score
 
 
 # Severity của flag Compliance, tra theo MÃ tiêu chí (docs/rubrics.md mục 6).

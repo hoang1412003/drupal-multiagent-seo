@@ -24,7 +24,7 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 ## 2. Nhóm A — Chặn Sprint 3
 
-### A1. Ba agent còn để LLM tự cho `score`
+### A1. Ba agent còn để LLM tự cho `score` — ✅ ĐÃ ĐÓNG (2026-08-10), cả 4 agent dùng rubric
 
 **Bằng chứng:** `src/agents/content_quality.py:16`, `seo.py:24`, `compliance.py:77` đều còn `"score": {"type": "integer"}` trong output schema — LLM tự phát minh thang điểm mỗi lần gọi.
 
@@ -66,7 +66,13 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **σ = 4,18 đã loại trừ được một nghi phạm (2026-08-04):** B5 không phải nguyên nhân — sửa xong σ trên 4 bài xấu nhất chỉ đi từ 7,70 xuống 7,29 (mục B5, có số đo trước/sau). Nguồn dao động còn lại nằm ở CP2/CP4/CP7/CP8, bốn tiêu chí LLM chấm, đúng như hướng đã ghi ở trên.
 
-`content_quality` và `seo`: **vẫn để LLM tự cho điểm** — có chủ ý, xem lại số σ ở bảng trên. *(Từ 2026-08-05 điểm hai agent này bị chặn trong dải 0-100 khi nhận — mục B10. Đó là kiểm giá trị vô lý, **không** phải rubric: nó không làm điểm tái lập được, nên không thay thế được gì của A1.)*
+**`content_quality` và `seo`: ĐÃ CHUYỂN sang rubric (2026-08-10).** Trước đó quyết định giữ thang tự do, lập luận dựa trên σ = 0,38 và 0,19 ở bảng trên. Lập luận ấy **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai nói được 78 khác 74 ở chỗ nào — mà calibrate ngưỡng trên một đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được. Đó chính là luận điểm gốc ở `rubrics.md` mục 1, và nó không bị σ bác bỏ.
+
+Cài đặt: `src/seo_analysis.py` + `src/content_analysis.py` (phần đo bằng máy, tách theo đúng khuôn `compliance_analysis.py`), agent chỉ còn ghép mức. Ngưỡng đọc từ khối `scoring` của `scoring.yaml` — **lần đầu khối đó được dùng**, đóng nốt bước 5 của `config-spec.md` mục 7.
+
+Tỉ lệ đo bằng máy: **SEO 7/10** tiêu chí, **CQ 3/8** (+CQ1/CQ2 do LLM liệt kê lỗi nhưng MÁY đếm và quy mức). Vì thế SEO nhiều khả năng làm σ **giảm**, CQ thì có thể **tăng** — chưa biết, phải đo lại E1.
+
+Dọn theo: `scoring.kiem_diem_llm()`, hằng `DIEM_MIN/DIEM_MAX` và `scripts/test_diem_llm.py` **đã xoá** — chúng chặn điểm LLM tự đặt ra ngoài thang (nợ B10), mà nay không agent nào để LLM cho điểm nên không còn đường nào cho con số đó lọt vào. `scripts/test_seo_prompt.py` cũng xoá: nó khoá bản chép ngưỡng trong prompt (nợ B4), mà bản chép đó biến mất. *(Từ 2026-08-05 điểm hai agent này bị chặn trong dải 0-100 khi nhận — mục B10. Đó là kiểm giá trị vô lý, **không** phải rubric: nó không làm điểm tái lập được, nên không thay thế được gì của A1.)*
 
 ### A2. SEO Agent không đọc `alt` của ảnh nằm trong `body` — ✅ ĐÃ SỬA (2026-08-04)
 
@@ -88,11 +94,23 @@ Kèm theo đã sửa một lỗi regex ở **cả** `drupal_client.py` và `labe
 
 | | `rejected` | `needs_revision` | `publish` |
 |---|---|---|---|
-| 20 bài thật | 3 | 15 | **2** |
+| 20 bài thật | 3 | 17 | **0** |
 | 13 perturbation | 7 | 6 | 0 |
-| **Tổng 33** | **10** | **21** | **2** |
+| **Tổng 33** | **10** | **23** | **0** |
+
+**Con số này là KẾT QUẢ CỦA MỘT ĐỢT RÀ LẠI, không phải lần gán đầu.** Lần gán đầu cho 2 bài `publish` (G-016, G-019). Rà lại có hệ thống 33 bài × 16 mã lỗi (2026-08-10) tìm ra **6 lỗi B8 bị bỏ sót**, trong đó **cả hai bài `publish` đều dính**:
+
+| Bài | Lỗi tìm thêm | Hệ quả |
+|---|---|---|
+| G-016 | `"thấp hơn **ít nhất ít hơn** 40%"` | `publish` → `needs_revision` |
+| G-019 | `"đều **được được** trang bị"` | `publish` → `needs_revision` |
+| G-009, G-010, G-014, P-007a, P-009a | lặp từ (`"nên nên"`, `"thêm thêm"`, `"cần cần"`, `"hơn hơn"`, `"sản sản"`) | chỉ thêm mã, nhãn không đổi |
+
+Toàn bộ đã đối chiếu `raw_html` gốc xác nhận là lỗi của nguồn. **B8 là mã duy nhất không có công cụ nào lúc gán lần đầu** — cả 6 lỗi đều lọt qua mắt người đọc lướt, và cả 6 đều là **lặp từ**, loại lỗi mà mọi từ đều đúng chính tả nên đọc rất dễ trượt.
 
 Đã rà nhất quán toàn bộ: `rejected` ⟺ có mã A, `needs_revision` ⟺ chỉ mã B, `publish` ⟺ không mã nào; `defect_codes` của bài perturbation đã gộp `injected_codes` (cần cho phép đo Recall/F1 theo mã).
+
+**Đợt rà lại đó cũng đóng nốt hai mã chưa ai kiểm có hệ thống:** A5 (lạc đề >50%) và A6 (mất an toàn) — quét ứng viên trên cả 33 bài, **không bài nào dính**. Trước đó chúng là 0/33 vì *chưa ai rà*, khác hẳn 0/33 vì *đã rà và không có*.
 
 **Cổng còn lại trước khi tin bất kỳ con số Sprint 3 nào:** test-retest (guideline mục 8.1) — đợi ≥3 ngày, gán lại 3-4 bài mù với nhãn cũ, yêu cầu Kappa ≥ 0,80. Sớm nhất **2026-08-13**. Chưa chạy.
 
@@ -392,7 +410,7 @@ Hướng xử lý sau Sprint 3, ghi lại để không quên: cách duy nhất p
 
 **Giá trị của việc ghi lại:** khi chạy AI trên gold set ở Sprint 3, G-011 chắc chắn lệch. Có ghi chép này thì kết luận rút ra được ngay — *"lệch vì blacklist thiếu cụm, không phải vì cơ chế hỏng"* — thay vì phải điều tra lại từ đầu. Đây là chẩn đoán, không chỉ là một con số xấu.
 
-### B13. Bốn trong bảy tiêu chí Brand Voice gần như không mang thông tin — ⚠️ CHƯA SỬA, CỐ Ý
+### B13. Năm tiêu chí gần như không mang thông tin trên corpus hiện tại — ⚠️ CHƯA SỬA, CỐ Ý
 
 **Bằng chứng:** chạy khô phần tất định của Brand Voice trên 33 mẫu gold set (stub BV6 để không gọi LLM, $0):
 
@@ -406,6 +424,19 @@ Hướng xử lý sau Sprint 3, ghi lại để không quên: cách duy nhất p
 | BV7 từ bị loại | 0 | 0 | 33 | 0 | **chưa bao giờ phát hiện gì** |
 
 Điểm Brand vì thế nén trong dải hẹp **70–90**, dù trọng số của nó là 0,25.
+
+**Sau khi chuyển SEO/CQ sang rubric (2026-08-10), thêm hai tiêu chí cùng loại:**
+
+| Mã | mức 0 | mức 1 | mức 2 | Nhận xét |
+|---|---|---|---|---|
+| **SEO10** internal link | 0 | 0 | **33** | mọi bài đều có ≥3 link; ít nhất là 3, nhiều nhất 81 |
+| **CQ5** cấu trúc heading | 0 | 0 | **33** | mọi bài đều có `<h2>` đúng phân cấp |
+
+Tổng cộng **5 tiêu chí** không phân biệt được bài nào với bài nào: BV1, BV5, BV7, SEO10, CQ5 (luôn mức 2) và BV3 (không bao giờ đạt mức 2).
+
+**Một ca CÙNG HÌNH DẠNG nhưng đã sửa, để đối chiếu:** CQ3 (câu quá dài) ban đầu cũng cho **33/33 mức 0**. Khác biệt là ở đó **tìm được lập luận không nhắc tới phân bố**: ngưỡng 30 là quy ước readability tiếng Anh vốn đếm **từ**, còn phép đếm ở đây là `len(s.split())` trên tiếng Việt viết rời từng âm tiết, tức đếm **tiếng**. Đổi sang 45 tiếng (≈30 từ, đúng chuẩn gốc) cho phân bố **13/14/6**.
+
+Đó cũng là phép thử để phân biệt "sửa cho đúng" với "chỉnh cho phân bố đẹp": **lý do phải phát biểu được mà không cần nhắc tới phân bố thu được.** Với 5 tiêu chí ở trên thì không phát biểu được — chúng luôn mức 2 vì nội dung của VinFast thật sự đạt ở những điểm đó — nên **không đụng tới**.
 
 **Chẩn đoán BV3 — cùng họ lỗi với B12.** `_UNG_VIEN_XUNG_HO = ["bạn", "quý khách", "khách hàng", "người dùng"]`, và mức = 2 nếu bài chỉ dùng 1 kiểu, 1 nếu 2 kiểu, 0 nếu ≥3. Nhưng **"khách hàng" và "người dùng" là danh từ ngôi thứ ba, không phải cách xưng hô ngôi thứ hai**. Bài cẩm nang nào cũng viết *"người dùng nên sạc pin…"* và *"khách hàng có thể đặt cọc…"* — hai cụm chỉ hai đối tượng khác nhau, không phải xưng hô lẫn lộn. Nên gần như mọi bài có ≥2 "kiểu" và **0/33 đạt mức 2**.
 
@@ -471,7 +502,7 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 | Với bài **đã xuất bản** rồi tạo bản nháp mới đưa sang Needs Review, `worker.py` chấm nhầm nội dung **bản cũ đã xuất bản**, không phải bản nháp mới | Cả đối soát lẫn worker đều đọc nội dung qua JSON:API, mà JSON:API trả về **revision mặc định** của node — với workflow `needs_review` có `default_revision = false`, revision mặc định vẫn là bản đã xuất bản. Đường **event bắn đúng** (hook tính `content_hash` trực tiếp từ revision vừa lưu, không qua JSON:API) — nhưng `worker.py` gọi `fetch_content()` (JSON:API, không `resourceVersion`) để lấy nội dung đưa vào pipeline, nên với bài đã xuất bản nó **chấm sai nội dung** dù hash gửi kèm job là đúng. Đây là giới hạn đã biết, không phải mất bài hoàn toàn (job vẫn chạy, vẫn ghi kết quả) mà là chấm nhầm bản. Cách khắc phục triệt để — đổi `fetch_content()` sang `?resourceVersion=rel:working-copy` — **cố ý chưa làm** trong đợt tự động hoá này, đó là một quyết định thiết kế riêng ngoài phạm vi. Trong lúc chờ, `worker.chay_mot_job()` so `content_hash` của nội dung THẬT đã fetch với `content_hash` của job và ghi `logging.warning` khi hai giá trị lệch nhau — đó là thứ làm giới hạn này **lộ ra** thay vì âm thầm ghi sai `run_log` vĩnh viễn |
 | Shadow-test thật (E6) không làm được | Cần Drupal thật của VinFast, đội content thật, luồng duyệt thật — dự án không được cấp. Thay bằng held-out test (`evaluation-plan.md` mục 4.6) |
 | Gold set do **một người** gán nhãn | Không được cấp nhân sự. Dùng Kappa test-retest làm trần thay cho Kappa người-người, và nêu rõ đó là ước lượng lạc quan |
-| **Gold set lệch lớp: `publish` chỉ 2/33 → ngưỡng `publish` KHÔNG calibrate được** | Đo được, không phải ước lượng: **2/20 bài thật đạt `publish`, tỉ lệ cơ sở 10%**. Đây là **tính chất của nội dung**, không phải sai số lấy mẫu — thu thêm bài cùng nguồn thì tỉ lệ vẫn 10%, nên muốn có ~10 mẫu `publish` phải thu thêm **~80 bài**. Thu 30 bài (≈7 giờ gán nhãn, chưa kể thu thủ công vì WAF chặn bot) chỉ lên được 5 mẫu — vẫn không đủ. Bỏ 7 giờ để đi từ "không calibrate được" sang "vẫn không calibrate được" là trao đổi lỗ, nên **cố ý không thu thêm**.<br><br>**Điều làm giới hạn này chấp nhận được:** quy tắc quyết định có hai ngưỡng, và cái calibrate được lại là cái quan trọng hơn. Ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố **10/21** — đủ để quét, và nó chính là ngưỡng gắn với **quyền phủ quyết**, tức phần rủi ro pháp lý. Ngưỡng **80** (`publish` ↔ `needs_revision`) chỉ phân biệt "đề xuất đăng luôn" với "đề xuất xem lại", mà hệ thống **không bao giờ tự xuất bản** (`architecture.md` mục 2.3) nên hậu quả sai thấp hơn hẳn.<br><br>**Phải nêu trong báo cáo Sprint 3:** *"ngưỡng `publish` = 80 giữ nguyên giá trị minh hoạ, chưa calibrate, do lớp `publish` chỉ có 2 mẫu"*. Đổi cỡ gold set là quyết định của mentor, không tự làm.<br><br>**Không được sửa nội dung bài để tạo ra `publish`** — đã cân nhắc và bác bỏ. Gold set là thước đo; sửa bài cho tới khi ra nhãn mong muốn là mài lại thước. Khác perturbation ở chỗ: chèn lỗi thì biết chính xác đã thêm gì (`injected_codes`), còn dọn sạch thì không bao giờ chắc đã hết, và nhãn `publish` khi ấy đúng **do mình tạo ra** chứ không do quan sát. |
+| **Gold set KHÔNG CÓ lớp `publish`: 0/33 → ngưỡng `publish` KHÔNG calibrate được** | Đo được, không phải ước lượng: **0/20 bài thật đạt `publish`**. Lần gán đầu ra 2 bài, nhưng đợt rà lại có hệ thống (33 bài × 16 mã, 2026-08-10) tìm ra lỗi B8 ở **cả hai** — xem A3.<br><br>**Nguyên nhân đo được, không phải phỏng đoán: B8 có ở 10/20 bài thật (50%).** Lỗi chính tả và lặp từ phổ biến tới mức không bài nào qua nổi cửa đó. Vì vậy **thu thêm bài từ cùng nguồn gần như chắc chắn không cứu được lớp `publish`** — nó không phải vấn đề cỡ mẫu mà là **tính chất của nội dung**. Đã cân nhắc thu thêm ~30 bài (≈7 giờ gán nhãn, thu thủ công vì WAF chặn bot) và **bác bỏ**: kỳ vọng thu về 0-1 mẫu `publish`.<br><br>**Điều làm giới hạn này chấp nhận được:** quy tắc quyết định có hai ngưỡng, và cái calibrate được lại là cái quan trọng hơn. Ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố **10/23** — đủ để quét, và nó chính là ngưỡng gắn với **quyền phủ quyết**, tức phần rủi ro pháp lý. Ngưỡng **80** chỉ phân biệt "đề xuất đăng luôn" với "đề xuất xem lại", mà hệ thống **không bao giờ tự xuất bản** (`architecture.md` mục 2.3) nên hậu quả sai thấp hơn hẳn.<br><br>**Phải nêu trong báo cáo Sprint 3:** *"ngưỡng `publish` = 80 giữ nguyên giá trị minh hoạ, chưa calibrate, do gold set không có mẫu `publish` nào"*. Và nêu kèm phát hiện nghiệp vụ đi cùng: **20/20 bài cẩm nang đã xuất bản của VinFast đều cần ít nhất một chỉnh sửa** — đó chính là lý do công cụ này đáng tồn tại.<br><br>**Hai cách làm đã cân nhắc và BÁC BỎ**, ghi lại vì cả hai đều hấp dẫn: (1) *sửa nội dung bài cho sạch rồi gán `publish`* — gold set là thước đo, sửa bài tới khi ra nhãn mong muốn là mài lại thước; khác perturbation ở chỗ chèn lỗi thì biết chính xác đã thêm gì (`injected_codes`), còn dọn sạch thì không bao giờ chắc đã hết. (2) *nhờ AI duyệt web tìm bài sạch* — sàng lọc theo chất lượng làm mẫu mất tính đại diện, và tệ hơn là sàng theo tiêu chí giống rubric nên gold set thành tương quan với chính hệ thống đang bị đo. |
 | Con số `publish` thấp phản ánh chất lượng nguồn, không phải lỗi rubric | Kiểm bằng chính định nghĩa: các mã đẩy bài xuống `needs_revision` đều là **lỗi phải sửa thật** — B3 (meta sai độ dài, 30% bài thật), B8 (lỗi chính tả: `"hành trinh"`, `"viêc"`, `"thông suất"`, `"khuyến cáokhách"` — đều đã đối chiếu `raw_html` xác nhận có trong nguồn gốc), B2 (thời gian sạc thiếu loại trụ). Khác hẳn B9 trước đây — B9 sai vì "câu dài" là **văn phong**, không phải lỗi. Đã cân nhắc nới B8 xuống và **bác bỏ**: một lỗi chính tả đúng là thứ phải sửa trước khi đăng, nới nó là lặp lại bẫy chỉnh ngưỡng cho phân bố đẹp |
 | Brand guideline tự trích xuất, không phải tài liệu nội bộ | Dự án không được cấp tài liệu nội bộ VF O2O |
 | Quy ước "trạm sạc / trụ sạc" để `NA` | Thu thêm corpus để đẩy p qua ngưỡng là *optional stopping* — làm mọi p-value mất giá trị |

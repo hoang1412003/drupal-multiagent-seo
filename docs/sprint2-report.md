@@ -103,13 +103,17 @@ Hiện đã bật thật Content Moderation "Needs Review" trên content type Ar
 
 | | `rejected` | `needs_revision` | `publish` |
 |---|---|---|---|
-| 20 bài thật | 3 | 15 | **2** |
+| 20 bài thật | 3 | 17 | **0** |
 | 13 perturbation | 7 | 6 | 0 |
-| **Tổng** | **10** | **21** | **2** |
+| **Tổng** | **10** | **23** | **0** |
 
-**Kết quả nghiệp vụ đáng nêu:** chỉ **2/20 bài cẩm nang đã xuất bản của VinFast** đạt chuẩn đăng ngay theo rubric. 18 bài còn lại cần ít nhất một chỉnh sửa — chủ yếu meta description sai độ dài (30% bài thật) và lỗi chính tả. Toàn bộ lỗi chính tả tìm được đều đã **đối chiếu `raw_html` gốc** để xác nhận là lỗi của nguồn, không phải do script bóc tách sai: `"khuyến cáokhách"`, `"hư hỏnghệ thống"` (G-002), `"cáchliên hệ"` (G-015), `"hành trinh"` (G-003), `"viêc di chuyển được thông suất"` (G-008), thiếu chữ `"tin"` (G-013).
+**Con số này qua HAI vòng.** Lần gán đầu cho 2 bài `publish`. Sau đó rà lại có hệ thống toàn bộ **33 bài × 16 mã lỗi** và tìm ra **6 lỗi B8 bị bỏ sót** — trong đó cả hai bài `publish` đều dính (`"thấp hơn ít nhất ít hơn 40%"` ở G-016, `"đều được được trang bị"` ở G-019). Vòng rà đó cũng đóng nốt A5/A6, hai mã trước đó chưa ai kiểm có hệ thống: không bài nào dính.
 
-**⚠️ Giới hạn phải nêu khi báo cáo Sprint 3:** lớp `publish` chỉ có 2 mẫu, nên **ngưỡng `publish` = 80 không calibrate được** và giữ nguyên giá trị minh hoạ. Tỉ lệ cơ sở 10% là tính chất của nội dung chứ không phải sai số lấy mẫu — muốn đủ mẫu phải thu thêm ~80 bài, nên **cố ý không thu thêm**. Bù lại, ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố 10/21, calibrate được — và đó chính là ngưỡng gắn với quyền phủ quyết, phần rủi ro cao nhất. Chi tiết: `technical-debt.md` mục 6.
+Vì sao B8 lọt nhiều: nó là mã **duy nhất không có công cụ nào** lúc gán lần đầu, và cả 6 lỗi đều là **lặp từ** — loại lỗi mà mọi từ đều đúng chính tả nên đọc lướt rất dễ trượt.
+
+**Kết quả nghiệp vụ đáng nêu:** **không bài nào trong 20 bài cẩm nang đã xuất bản của VinFast** đạt chuẩn đăng ngay theo rubric. Cả 20 bài đều cần ít nhất một chỉnh sửa — chủ yếu meta description sai độ dài (30% bài thật) và lỗi chính tả. Toàn bộ lỗi chính tả tìm được đều đã **đối chiếu `raw_html` gốc** để xác nhận là lỗi của nguồn, không phải do script bóc tách sai: `"khuyến cáokhách"`, `"hư hỏnghệ thống"` (G-002), `"cáchliên hệ"` (G-015), `"hành trinh"` (G-003), `"viêc di chuyển được thông suất"` (G-008), thiếu chữ `"tin"` (G-013).
+
+**⚠️ Giới hạn phải nêu khi báo cáo Sprint 3:** gold set **không có mẫu `publish` nào**, nên **ngưỡng `publish` = 80 không calibrate được** và giữ nguyên giá trị minh hoạ. Nguyên nhân đo được: **B8 có ở 10/20 bài thật (50%)** — lỗi chính tả và lặp từ phổ biến tới mức không bài nào qua nổi cửa đó. Vì vậy thu thêm bài từ cùng nguồn gần như chắc chắn không cứu được, và **cố ý không thu thêm**. Bù lại, ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố 10/23, calibrate được — và đó chính là ngưỡng gắn với quyền phủ quyết, phần rủi ro cao nhất. Chi tiết: `technical-debt.md` mục 6.
 
 **Cổng còn lại:** test-retest (`annotation-guideline.md` mục 8.1) — đợi ≥3 ngày, gán lại 3-4 bài mù với nhãn cũ, yêu cầu Kappa ≥ 0,80. Sớm nhất **2026-08-13**.
 
@@ -201,4 +205,4 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 
 **Việc mới cần mentor quyết (thay cho ba việc trên):**
 
-4. **Có thu thêm bài để cứu lớp `publish` không?** Số liệu: `publish` = 2/33, tỉ lệ cơ sở 10% trên bài thật, cần thu thêm **~80 bài** mới đủ mẫu calibrate. **Đề xuất: không thu** — ngưỡng quan trọng hơn (50, gắn với quyền phủ quyết) đã calibrate được với phân bố 10/21. Đây là quyết định về cỡ gold set nên thuộc thẩm quyền mentor.
+4. **Có thu thêm bài để cứu lớp `publish` không?** Số liệu: `publish` = **0/33**, và nguyên nhân là **B8 có ở 50% bài thật** — tức không phải vấn đề cỡ mẫu mà là tính chất nội dung, nên thu thêm gần như chắc chắn vẫn ra 0. **Đề xuất: không thu** — ngưỡng quan trọng hơn (50, gắn với quyền phủ quyết) đã calibrate được với phân bố 10/23. Đây là quyết định về cỡ gold set nên thuộc thẩm quyền mentor.

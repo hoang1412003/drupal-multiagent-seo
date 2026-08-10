@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** **E1, E2, E4 đã chạy** (2026-08-04). E3, E5, E6 chờ gold set gán nhãn.
+**Trạng thái:** E2, E4 đã chạy. **E1 phải chạy lại** (code chấm điểm đổi ở B7, B12 và đợt chuyển rubric 2026-08-10). Gold set **đã gán nhãn xong** 33/33; E3/E5/E6 còn chờ E1 và test-retest.
 
 ---
 
@@ -60,7 +60,7 @@ Năm điểm chặn quan trọng:
 
 ---
 
-## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-10
+## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-10 (bản 2)
 
 `rubrics.md` mục 10 quy định: ngưỡng calibrate được **chỉ có hiệu lực với đúng bộ (rubric version, prompt version, model)** đã dùng lúc đo. Nên trước khi chạy E1 và E5 phải chốt bộ đó lại, và ghi ra để về sau kiểm chứng được.
 
@@ -68,36 +68,41 @@ Năm điểm chặn quan trọng:
 
 | Thành phần | Giá trị |
 |---|---|
-| Commit | `56e1d6d` — trạng thái **code**. Chính commit thêm mục này nằm sau đó nhưng chỉ sửa tài liệu, không đụng đường chấm điểm |
+| Commit | ghi lại khi commit đợt chuyển rubric. **Bản 1 (`56e1d6d`) đã hết hiệu lực** — khoá đó mở lại ngay trong ngày để chuyển nốt SEO và Content Quality sang rubric |
 | Model | `claude-haiku-4-5-20251001` |
-| Rubric version | v1 (`rubrics.md`) |
-| Prompt version | `019c2d5e231aad48` |
+| Rubric version | v1 (`rubrics.md`) — **áp dụng cho cả 4 agent** |
+| Prompt version | `51c0cba6c91e1435` *(bản 1 là `019c2d5e231aad48`, đổi vì SEO và CQ có prompt mới)* |
 | Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
-| Gold set | `labels.csv` 33/33, phân bố 10 `rejected` / 21 `needs_revision` / 2 `publish` |
+| Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 
-`prompt_version` là SHA-256 của 4 system prompt nối theo thứ tự tên: `brand_voice._BV6_PROMPT`, `compliance._LLM_PROMPT`, `content_quality.SYSTEM_PROMPT`, `seo.SYSTEM_PROMPT`. Băm lại bất cứ lúc nào để kiểm prompt có bị đổi không:
+`prompt_version` là SHA-256 của 4 system prompt nối theo thứ tự tên. Băm lại bất cứ lúc nào để kiểm prompt có bị đổi không:
 
 ```python
 import hashlib, sys; sys.path.insert(0, "src")
 from agents import content_quality, seo, compliance, brand_voice
 ps = {"brand_voice_bv6": brand_voice._BV6_PROMPT,
       "compliance": compliance._LLM_PROMPT,
-      "content_quality": content_quality.SYSTEM_PROMPT,
-      "seo": seo.SYSTEM_PROMPT}
+      "content_quality": content_quality._LLM_PROMPT,
+      "seo": seo._LLM_PROMPT}
 h = hashlib.sha256()
 for k in sorted(ps): h.update(ps[k].encode())
-print(h.hexdigest()[:16])      # phải ra 019c2d5e231aad48
+print(h.hexdigest()[:16])      # phải ra 51c0cba6c91e1435
 ```
+
+*(Bản 1 dùng `content_quality.SYSTEM_PROMPT` và `seo.SYSTEM_PROMPT` — hai tên đó **không còn tồn tại** sau khi chuyển rubric.)*
 
 **Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng.
 
-**Ba thứ cố ý KHÔNG sửa trước khi khoá**, ghi rõ để không ai tưởng là bỏ sót:
+**Vì sao có bản 2:** bản 1 khoá lúc mới 2/4 agent dùng rubric, kèm lập luận rằng σ của `content_quality` (0,38) và `seo` (0,19) đủ nhỏ nên không cần chuyển. Lập luận đó **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai biết 78 khác 74 ở chỗ nào, mà calibrate một ngưỡng trên đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được — đó chính là luận điểm gốc của `rubrics.md` mục 1. Nên đã chuyển nốt: **4/4 agent dùng rubric, nợ A1 đóng.**
 
-- **`content_quality` và `seo` vẫn để LLM tự cho `score`, không dùng rubric** (2/4 agent dùng rubric, không phải 4/4). Đây là quyết định **dựa trên số đo, không phải làm không kịp**, và chính E1 là thứ quyết định nó: σ đo được là **0,38** và **0,19**, nhỏ hơn nhiều bước nhảy 2 điểm của E5 nên không chặn calibration (`technical-debt.md` A1). Thêm nữa, mục 4.1 dưới đây có bằng chứng chuyển sang rubric **làm σ tăng** chứ không giảm (0,28 → 1,43 khi chuyển Compliance) — rubric không tạo ra dao động mà làm nó hiện ra. Hai agent *đã* dùng rubric đúng là hai agent cần nhất: Compliance (có quyền phủ quyết) và Brand Voice (từng bất ổn nhất).
-  **Hệ quả của việc khoá:** nếu sau này làm nốt rubric cho hai agent này thì E1 **và** E5 phải chạy lại từ đầu.
+Rủi ro đã lường trước và đo được: rubric làm dao động **hiện ra** (mục 4.1: chuyển Compliance đẩy σ từ 0,28 lên 1,43). Với SEO thì ngược lại — 7/10 tiêu chí đo bằng máy nên σ nhiều khả năng giảm; với Content Quality thì 4/8 do LLM chấm nên có thể tăng. Đó là lý do E1 phải chạy lại, và là chỗ có thể phải hoàn nguyên riêng Content Quality nếu σ vượt 2.
+
+**Hai thứ cố ý KHÔNG sửa trước khi khoá**, ghi rõ để không ai tưởng là bỏ sót:
 
 - **σ Compliance = 4,18** (chưa đạt ngưỡng < 2). Không chặn E5 vì thứ E5 quét là `final_score`, mà σ `final_score` = 1,33 đã đạt. Tiền lệ B5 cho thấy loại sửa này khó đoán kết quả (7,70 → 7,29), và mỗi lần sửa lại phải đo lại E1.
-- **BV3 không bài nào đạt mức 2** (0/33) và BV1/BV5/BV7 luôn ở mức 2 — bốn tiêu chí Brand gần như không mang thông tin. Chẩn đoán ở `technical-debt.md`; không sửa vì nó không gây quyết định sai (Brand không có quyền phủ quyết) và sửa cần một quyết định thiết kế riêng.
+- **Năm tiêu chí gần như không mang thông tin trên corpus này:** BV3 (0/33 đạt mức 2), BV1/BV5/BV7 và **SEO10** (33/33 luôn mức 2 — mọi bài đều có ≥3 internal link). Chẩn đoán ở `technical-debt.md` B13; không sửa vì chúng không gây quyết định sai, và với chúng **không tìm được lập luận nào không nhắc tới phân bố** — chỉnh ngưỡng lúc đó sẽ là đúng bẫy B9.
+
+  *(Ngoại lệ đã sửa: CQ3 ban đầu cũng 33/33 mức 0, nhưng ở đó có lập luận độc lập — ngưỡng 30 là quy ước readability tiếng Anh đếm **từ**, áp nhầm lên số **tiếng**. Đổi sang 45 tiếng ≈ 30 từ, phát biểu được mà không cần nhắc tới phân bố. Sau khi sửa: 13/14/6.)*
 
 ---
 

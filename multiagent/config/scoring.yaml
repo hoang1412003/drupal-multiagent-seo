@@ -56,12 +56,32 @@ default:
   # --- Ngưỡng CHẤM ĐIỂM (docs/rubrics.md) --------------------------------
   # Dải "lý tưởng", dùng để cho điểm từng phần.
   scoring:
-    title_ideal: [50, 60]        # ký tự
-    title_acceptable: [40, 70]
-    meta_ideal: [140, 170]
-    body_min_words: 600
-    long_sentence_words: 30
-    long_paragraph_sentences: 5
+    title_ideal: [50, 60]        # ký tự -> SEO1 mức 2
+    title_acceptable: [40, 70]   # -> SEO1 mức 1; ngoài dải này là mức 0
+    meta_ideal: [140, 170]       # -> SEO3 mức 2
+    url_max_chars: 75            # -> SEO5 mức 1 khi vượt
+    body_min_words: 600          # -> SEO7 mức 2; dưới 300 là mức 0
+    body_thin_words: 300         # -> SEO7 ranh giới mức 0/1
+    internal_link_min: 3         # -> SEO10 mức 2; 1-2 link là mức 1
+    # 45 chu khong phai 30. So 30 la quy uoc readability TIENG ANH, von dem
+    # TU; con phep dem o day la len(s.split()) tren tieng Viet viet roi tung
+    # am tiet, tuc dem TIENG ("o to dien" = 1 tu ghep, 3 tieng). 45 tieng ~ 30
+    # tu, dung chuan goc ma so 30 muon ve.
+    #
+    # Ly do doi phat bieu duoc MA KHONG NHAC toi phan bo thu duoc - do la phep
+    # thu de phan biet "sua cho dung" voi "chinh cho phan bo dep" (bay B9).
+    # (De tham chieu: o nguong 30, CQ3 cho 33/33 bai muc 0, tuc khong phan
+    # biet duoc bai nao voi bai nao.)
+    #
+    # CO Y KHAC labelling.long_sentence_words = 30. Ben do chi la BO DEM ghi
+    # vao cot notes, khong quyet dinh nhan gi, va giu 30 de so lieu C4 da ghi
+    # trong labels.csv con so sanh duoc. Ben nay QUYET DINH MUC nen chuan dung
+    # dan cao hon. Hai ho nguong co y tach bach - config-spec.md muc 2.
+    long_sentence_words: 45      # -> CQ3
+    long_paragraph_sentences: 5  # -> CQ4
+    heading_required_words: 500  # -> CQ5 (bài dài mà không có h2)
+    loi_it: 1                    # -> CQ1/CQ2: 1-2 lỗi = mức 1
+    loi_nhieu: 3                 # -> CQ1/CQ2: >=3 lỗi = mức 0
 
   # --- Ngưỡng GÁN NHÃN (docs/goldset/annotation-guideline.md) ------------
   # CỐ Ý khác họ scoring - đọc docs/config-spec.md mục 2 TRƯỚC KHI SỬA.
@@ -121,9 +141,15 @@ default:
     title_ideal: [50, 60]
     title_acceptable: [40, 70]
     meta_ideal: [140, 170]
+    url_max_chars: 75
     body_min_words: 600
-    long_sentence_words: 30
+    body_thin_words: 300
+    internal_link_min: 3
+    long_sentence_words: 45      # KHAC labelling (30) - xem khoi default
     long_paragraph_sentences: 5
+    heading_required_words: 500
+    loi_it: 1
+    loi_nhieu: 3
 
   labelling:
     title_ok: [40, 70]
