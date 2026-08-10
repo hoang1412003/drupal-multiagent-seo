@@ -392,6 +392,35 @@ Hướng xử lý sau Sprint 3, ghi lại để không quên: cách duy nhất p
 
 **Giá trị của việc ghi lại:** khi chạy AI trên gold set ở Sprint 3, G-011 chắc chắn lệch. Có ghi chép này thì kết luận rút ra được ngay — *"lệch vì blacklist thiếu cụm, không phải vì cơ chế hỏng"* — thay vì phải điều tra lại từ đầu. Đây là chẩn đoán, không chỉ là một con số xấu.
 
+### B13. Bốn trong bảy tiêu chí Brand Voice gần như không mang thông tin — ⚠️ CHƯA SỬA, CỐ Ý
+
+**Bằng chứng:** chạy khô phần tất định của Brand Voice trên 33 mẫu gold set (stub BV6 để không gọi LLM, $0):
+
+| Mã | mức 0 | mức 1 | mức 2 | NA | Nhận xét |
+|---|---|---|---|---|---|
+| BV1 tên model | 0 | 0 | 21 | 12 | **chưa bao giờ phát hiện gì** |
+| BV2 thuật ngữ | 1 | 0 | 32 | 0 | bắt đúng P-007a (bài chèn B5) ✅ |
+| **BV3 nhất quán xưng hô** | **14** | **19** | **0** | 0 | **không bài nào đạt** |
+| BV4 khớp corpus | 0 | 0 | 0 | 33 | NA vĩnh viễn, đã có tài liệu |
+| BV5 viết hoa title | 0 | 0 | 33 | 0 | **chưa bao giờ phát hiện gì** |
+| BV7 từ bị loại | 0 | 0 | 33 | 0 | **chưa bao giờ phát hiện gì** |
+
+Điểm Brand vì thế nén trong dải hẹp **70–90**, dù trọng số của nó là 0,25.
+
+**Chẩn đoán BV3 — cùng họ lỗi với B12.** `_UNG_VIEN_XUNG_HO = ["bạn", "quý khách", "khách hàng", "người dùng"]`, và mức = 2 nếu bài chỉ dùng 1 kiểu, 1 nếu 2 kiểu, 0 nếu ≥3. Nhưng **"khách hàng" và "người dùng" là danh từ ngôi thứ ba, không phải cách xưng hô ngôi thứ hai**. Bài cẩm nang nào cũng viết *"người dùng nên sạc pin…"* và *"khách hàng có thể đặt cọc…"* — hai cụm chỉ hai đối tượng khác nhau, không phải xưng hô lẫn lộn. Nên gần như mọi bài có ≥2 "kiểu" và **0/33 đạt mức 2**.
+
+Giống hệt hình dạng của B12: **một bộ so khớp từ vựng gộp hai cách dùng ngôn ngữ khác nhau.** B12 gộp so-sánh-nhất-làm-claim với so-sánh-nhất-làm-trạng-ngữ; BV3 gộp xưng-hô với danh-từ-chỉ-người.
+
+**Vì sao CỐ Ý chưa sửa, khác với B12:**
+
+1. **Không gây quyết định sai.** Brand không có quyền phủ quyết; BV3 chỉ dịch điểm xuống đều cho mọi bài, mà calibration hấp thụ được bằng cách hạ ngưỡng. B12 thì tạo ra 10 lần **từ chối oan** mà không ngưỡng nào chạm tới.
+2. **Sửa cần một quyết định thiết kế thật, có bẫy vòng luẩn quẩn.** "Xưng hô" nghĩa là gì trong văn marketing tiếng Việt — *"Khách hàng có thể đặt cọc"* là xưng hô với người đọc hay mô tả khách hàng nói chung? Thu hẹp danh sách cho tới khi phân bố đẹp chính là lỗi B9 lặp lại.
+3. **Đang khoá code.** Mỗi lần sửa Brand là một lần phải đo lại E1 (`evaluation-plan.md` mục 3a).
+
+**Hệ quả phải nêu khi báo cáo:** Brand Voice đóng góp rất ít khả năng phân biệt vào điểm tổng ở phạm vi hiện tại — 0,25 trọng số của nó gần như là một hằng số cộng thêm. Điều này cần nói khi diễn giải kết quả E5, vì nó ảnh hưởng cách đọc trọng số đã calibrate.
+
+*(BV1/BV5/BV7 luôn ở mức 2 thì khác BV3: chúng là tiêu chí "không được có X" trên nội dung do đội content chuyên nghiệp viết, nên không tìm thấy vi phạm là kết quả hợp lý — chỉ là chúng không giúp phân biệt bài nào với bài nào.)*
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)

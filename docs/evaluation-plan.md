@@ -60,6 +60,47 @@ Năm điểm chặn quan trọng:
 
 ---
 
+## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-10
+
+`rubrics.md` mục 10 quy định: ngưỡng calibrate được **chỉ có hiệu lực với đúng bộ (rubric version, prompt version, model)** đã dùng lúc đo. Nên trước khi chạy E1 và E5 phải chốt bộ đó lại, và ghi ra để về sau kiểm chứng được.
+
+**Bộ đã khoá:**
+
+| Thành phần | Giá trị |
+|---|---|
+| Commit | `56e1d6d` — trạng thái **code**. Chính commit thêm mục này nằm sau đó nhưng chỉ sửa tài liệu, không đụng đường chấm điểm |
+| Model | `claude-haiku-4-5-20251001` |
+| Rubric version | v1 (`rubrics.md`) |
+| Prompt version | `019c2d5e231aad48` |
+| Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
+| Gold set | `labels.csv` 33/33, phân bố 10 `rejected` / 21 `needs_revision` / 2 `publish` |
+
+`prompt_version` là SHA-256 của 4 system prompt nối theo thứ tự tên: `brand_voice._BV6_PROMPT`, `compliance._LLM_PROMPT`, `content_quality.SYSTEM_PROMPT`, `seo.SYSTEM_PROMPT`. Băm lại bất cứ lúc nào để kiểm prompt có bị đổi không:
+
+```python
+import hashlib, sys; sys.path.insert(0, "src")
+from agents import content_quality, seo, compliance, brand_voice
+ps = {"brand_voice_bv6": brand_voice._BV6_PROMPT,
+      "compliance": compliance._LLM_PROMPT,
+      "content_quality": content_quality.SYSTEM_PROMPT,
+      "seo": seo.SYSTEM_PROMPT}
+h = hashlib.sha256()
+for k in sorted(ps): h.update(ps[k].encode())
+print(h.hexdigest()[:16])      # phải ra 019c2d5e231aad48
+```
+
+**Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng.
+
+**Ba thứ cố ý KHÔNG sửa trước khi khoá**, ghi rõ để không ai tưởng là bỏ sót:
+
+- **`content_quality` và `seo` vẫn để LLM tự cho `score`, không dùng rubric** (2/4 agent dùng rubric, không phải 4/4). Đây là quyết định **dựa trên số đo, không phải làm không kịp**, và chính E1 là thứ quyết định nó: σ đo được là **0,38** và **0,19**, nhỏ hơn nhiều bước nhảy 2 điểm của E5 nên không chặn calibration (`technical-debt.md` A1). Thêm nữa, mục 4.1 dưới đây có bằng chứng chuyển sang rubric **làm σ tăng** chứ không giảm (0,28 → 1,43 khi chuyển Compliance) — rubric không tạo ra dao động mà làm nó hiện ra. Hai agent *đã* dùng rubric đúng là hai agent cần nhất: Compliance (có quyền phủ quyết) và Brand Voice (từng bất ổn nhất).
+  **Hệ quả của việc khoá:** nếu sau này làm nốt rubric cho hai agent này thì E1 **và** E5 phải chạy lại từ đầu.
+
+- **σ Compliance = 4,18** (chưa đạt ngưỡng < 2). Không chặn E5 vì thứ E5 quét là `final_score`, mà σ `final_score` = 1,33 đã đạt. Tiền lệ B5 cho thấy loại sửa này khó đoán kết quả (7,70 → 7,29), và mỗi lần sửa lại phải đo lại E1.
+- **BV3 không bài nào đạt mức 2** (0/33) và BV1/BV5/BV7 luôn ở mức 2 — bốn tiêu chí Brand gần như không mang thông tin. Chẩn đoán ở `technical-debt.md`; không sửa vì nó không gây quyết định sai (Brand không có quyền phủ quyết) và sửa cần một quyết định thiết kế riêng.
+
+---
+
 ## 4. Chi tiết từng phép đo
 
 ### 4.1. E1 - Độ ổn định điểm của agent
