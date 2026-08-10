@@ -1,0 +1,812 @@
+==========================================================================
+G-001   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (220 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (29 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1.00 km, 15 phút, 220km, 285km, 60km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...ể tiên phong mở kỷ nguyên di chuyển xanh và nhận những ưu đãi hấp dẫn từ VinFast. Để có thêm thông tin hoặc cần hỗ...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-002   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (20 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 318,6km
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-003   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (23 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...c phục sớm. Đối với Klara S (2022) và Feliz S , cách tốt nhất để khắc phục sự cố này là dùng khóa điều khiển RF tạm...
+     - "tốt nhất" -> ...Tuy nhiên đây chỉ là cách khắc phục tạm thời, cách tốt nhất là chủ xe nên để các chuyên gia kỹ thuật kiểm tra và s...
+     - "dẫn đầu" -> ...ệ mới ngay hôm nay để có cơ hội sở hữu mẫu phương tiện dẫn đầu xu hướng và nhận loạt ưu đãi hấp dẫn từ VinFast. Quý...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 2 phút, 30 phút
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...i sở hữu mẫu phương tiện dẫn đầu xu hướng và nhận loạt ưu đãi hấp dẫn từ VinFast. Quý khách hàng có nhu cầu tìm hi...
+     - "ưu đãi" -> ...tính chất tham khảo . &gt;&gt;&gt; Hè rộn ràng, ngàn ưu đãi cùng VinFast . Từ 25/06 – 31/08/2024 Chương trình tr...
+     - "ưu đãi" -> ...ãi suất 0% khi mua xe máy điện VinFast . Chương trình ưu đãi mùa hè hấp dẫn cho xe máy điện VinFast tới hết 31/08/2...
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Từ 25/06 – 31/08/2024 Chương trình trả góp lãi suất 0% khi mua xe máy điện VinFast .
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-004   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (186 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (8 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...èn Bi/đèn thấu kính là loại đèn nơi tập trung ánh sáng tốt nhất của xe, cho khả năng chiếu sáng mạnh mẽ nhờ cấu tạo ba...
+     - "tốt nhất" -> ...ói sáng cho người đối diện. Hỗ trợ tập trung ánh sáng tốt nhất cho xe, nhờ đó các tài xế lái xe có thể dễ dàng hơn tr...
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...h thức để tham khảo giá cũng như tìm hiểu chương trình ưu đãi mà hãng dành cho khách hàng....
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-005   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (6 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...xe đúng cách, từ đó giúp xe vận hành trong trạng thái tốt nhất và kéo dài tuổi thọ của pin. 1.1. Sạc xe ô tô điện l...
+     - "tốt nhất" -> ...ăng của xe điện có thể được hoạt động trong trạng thái tốt nhất. . Bộ sạc chậm được đánh giá là thân thiện và an toà...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 150km, 18 phút, 180km, 23 phút, 285km, 3,3kW, 350kW, 42kW, 50kW
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Với chế độ sạc thường, VF e34 có thể di chuyển với quãng đường khoảng 285km sau 1 lần sạc.
+     - Tuy nhiên, quãng đường mà xe có thể di chuyển được sẽ ngắn hơn so với sạc thường, khoảng 180km sau 1 lần sạc.
+     - Sở hữu nguồn điện áp cao, xe điện có thể vận hành 80 - 150km/h với tốc độ sạc từ 0 - 80% chỉ trong vòng 23 phút.
+     - Cổng sạc Chademo: sử dụng điện áp 600V - 800V từ nguồn điện một chiều (DC) với tốc độ sạc rất nhanh, cung cấp năng lượng để xe đi được quãng đường lên đến 150km sau một giờ sạc.
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Nếu chọn cổng sạc nhanh, thì xe ô tô điện VinFast VF e34 sẽ chỉ mất khoảng 18 phút để hoàn tất quá trình sạc.
+     - Sở hữu nguồn điện áp cao, xe điện có thể vận hành 80 - 150km/h với tốc độ sạc từ 0 - 80% chỉ trong vòng 23 phút.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Việc sạc đầy ô tô điện 100% hoặc để pin cạn kiệt năng lượng trong thời gian dài có thể khiến chất lượng và tuổi thọ pin giảm mạnh.
+     - Vì thế, một trong những lưu ý quan trọng về cách sạc ô tô điện đó là chỉ nên sạc pin đạt mức 80%.
+     - Tuy nhiên, khi chuẩn bị một chuyến đi dài, người sử dụng có thể sạc đầy 100% để các tính năng của xe điện có thể được hoạt động trong trạng thái tốt nhất.
+     - Mỗi năm, pin sẽ giảm khoảng 2,3% dung lượng so với mức bình thường.
+     - Như vậy sau thời gian bảo hành quy định (8 - 10 năm), pin vẫn có khả năng lưu trữ 80% dung lượng ban đầu.
+     - Loại pin sử dụng, pin thể rắn có thể sạc xả cả 5000 lần (10 năm) vẫn giữ 90% dung lượng;.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-006   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (10 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...i tuổi thọ pin. Để đảm bảo pin luôn trong trạng thái tốt nhất, kéo dài tuổi thọ và nâng cao hiệu suất hoạt động, ngư...
+     - "tuyệt đối" -> ...nhiệt độ pin trở về mức bình thường rồi mới sử dụng. Tuyệt đối không sạc pin ở những nơi dễ gây cháy nổ hoặc những mô...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1 phút, 101km, 110km, 120km, 150km, 160km, 194km, 198km, 200km, 203km, 205km, 3,5 KWh, 3,5kWh, 30km, 70km, 75km, 80km, 90km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...thế hệ mới ngay hôm nay để nhận được những chính sách ưu đãi, hậu mãi hấp dẫn từ VinFast. Cần hỗ trợ thêm thông t...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Quãng đường đi được trong một lần sạc đầy (duy trì tốc độ 30km/h) .
+     - 80km .
+     - 70km .
+     - 75km .
+     - 90km .
+     - 198km .
+     - 90km .
+     - 120km .
+     (+12 chỗ nữa)
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Với công nghệ mới, thời gian sạc đầy xe máy điện VinFast trung bình khoảng 10 tiếng.
+     - Như vậy, nếu so sánh về thời gian sạc thì pin Lithium có ưu thế hơn khi có thời gian sạc ngắn dưới 6 tiếng.
+     - Nên sạc khoảng 10 tiếng trong 3 lần sạc đầu tiên sau khi mua xe để làm già pin/ắc quy.
+     - Sau khi rút sạc ra khỏi xe, nếu muốn cắm lại sạc thì nên đợi thêm khoảng 1 phút.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - 8h: 80% dung lượng pin .
+     - 10h: 100% dung lượng pin .
+     - 3h: 90% SOC .
+     - 4,8h: 100% SOC .
+     - 3h: 90% SOC .
+     - 4,8h: 100% SOC .
+     - 8h: 80% dung lượng pin .
+     - 9h: 95% dung lượng pin .
+     (+9 chỗ nữa)
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-007   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (13 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "hàng đầu" -> ...ất dưới sự hợp tác của hãng với tập đoàn công nghệ pin hàng đầu thế giới - LG Chem, sở hữu các ưu điểm nổi bật về tuổi...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 08 giờ, 09 giờ, 10 giờ, 101 km, 11 giờ, 12 giờ, 120 km, 2 phút, 3 giờ, 30 phút, 300km, 30km, 70 km, 70km, 75 km, 90km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "miễn phí" -> ...đã cắm sạc. Bước 5: Chọn hình thức sạc Trải nghiệm (miễn phí) hoặc Sạc tính phí tùy theo chương trình của hãng. B...
+     - "miễn phí" -> ...Người dùng có thể sạc pin tại trạm sạc của VinFast miễn phí hoặc trả phí với chi phí hợp lý, rõ ràng, minh bạch....
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Xe máy điện tiên tiến của VinFast được trang bị pin Lithium một lần sạc đầy có thể đi được quãng đường tối thiểu 70km (nếu duy trì tốc độ 30km/h).
+     - Quãng đường đi được sau 1 lần sạc đầy (duy trì tốc độ 30km/h).
+     - 101 km .
+     - 120 km .
+     - 75 km .
+     - 70 km.
+     - Quãng đường đi được sau 1 lần sạc đầy (tốc độ 30km/h).
+     - 90km .
+     (+2 chỗ nữa)
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Pin có thời gian sạc đầy nhanh chóng, chỉ mất khoảng 3 giờ để đạt đến 90% dung lượng.
+     - Sau mỗi lần bật khóa xe, màn hình sáng sau 45 giây, bạn nên lấy pin ra rồi cắm sạc vào pin 2 phút, sau đó ngắt sạc rồi lắp lại vào xe.
+     - Khi mới vận hành xe về, đừng vội sạc, hãy để xe khoảng 30 phút cho ắc quy nguội hẳn.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Pin có thời gian sạc đầy nhanh chóng, chỉ mất khoảng 3 giờ để đạt đến 90% dung lượng.
+     - 3h (90% SOC); 4,8h (100% SOC)/pin.
+     - 3h (90% SOC); 4,8h (100% SOC)/pin.
+     - 3h (90% SOC); 4,8h (100% SOC)/pin.
+     - 20%-100% dung lượng: 08 giờ.
+     - 5%-100% dung lượng: 10 giờ.
+     - 0%-100% dung lượng: 12 giờ.
+     - 20%-100% dung lượng: 08 giờ.
+     (+7 chỗ nữa)
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-008   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (28 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...động và nâng cao tuổi thọ cho pin. Để pin đạt hiệu quả tốt nhất và kéo dài tuổi thọ, người dùng nên tuân thủ quy định...
+     - "tốt nhất" -> ...sản xuất để bảo đảm hiệu suất hoạt động của pin ở mức tốt nhất (Nguồn: Sưu tầm). &gt;&gt; Tìm hiểu thêm:. Những k...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1 giờ, 1,9 kW, 1,9kW, 10 giờ, 11kW, 120 phút, 150kW, 250kW, 3,5 kW, 3,5kW, 30 phút, 30kW, 4 giờ, 43kW, 500 km, 500km, 60kW, 90 phút
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "khuyến mại" -> ...VinFast Evo200 Lite từ ngày 01/07 - 20/09/2023:. - Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 t...
+     - "khuyến mại" -> ...tháng kể từ thời điểm kích hoạt HĐTP. - Sau 3 tháng khuyến mại thì HĐTP tự động chuyển sang gói 350.000 đồng/tháng ch...
+     - "ưu đãi" -> ...khảo thông tin và đặt cọc xe sớm để không bỏ lỡ những ưu đãi hấp dẫn từ VinFast. Ngoài ra, khách hàng có thể cập nh...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - - Sau 3 tháng khuyến mại thì HĐTP tự động chuyển sang gói 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng.
+     - Nếu khách hàng di chuyển quá 500km/tháng thì phải trả thêm phụ phí là: 429 đồng/km.
+     - - Khách hàng sẽ phải trả phí thuê bao pin hàng tháng là 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng.
+     - - Nếu khách hàng di chuyển quá 500km/tháng thì người thuê sẽ phải trả thêm phụ phí tính là: 429 đồng/km.
+     - - Chính sách cho thuê pin LFP 3,5 kW: Khách hàng sẽ phải trả phí thuê bao pin hàng tháng là 350.000 đồng/tháng cho quãng đường tối đa: 500km/tháng.
+     - Nếu khách hàng di chuyển quá 500km/tháng thì người thuê sẽ phải trả thêm phụ phí tính là: 429 đồng/km.
+     - Quãng đường tối đa: 500km/tháng - Phí phụ trội: 429 đồng/km.
+     - Quãng đường tối đa: 500km/tháng - Phí phụ trội: 429 đồng/km.
+     (+1 chỗ nữa)
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Đối với những chiếc xe điện mới, người dùng nên sạc pin trong khoảng 10 giờ sử dụng đối với 3 lần sạc pin đầu tiên nhằm làm già ắc quy.
+     - Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%.
+     - Đây là bộ sạc cho phép người dùng nạp đầy pin từ 0 lên 100% trong khoảng 1 giờ.
+     - Ngoài ra, sau khi sử dụng xe, chủ phương tiện nên để pin nghỉ trong khoảng 30 phút đến 1 giờ để giảm về nhiệt độ môi trường rồi mới tiến hành sạc.
+     - Trụ sạc ô tô - sạc nhanh DC 60kW: Sạc gồm 2 cổng sạc với công suất 60kW/cổng, có thể sạc được 80% pin trong khoảng 30 - 90 phút (tuỳ dòng xe).
+     - Trụ sạc có thể nạp được 80% pin trong thời gian ngắn từ 40 - 120 phút (tuỳ dòng xe).
+     - Trụ sạc ô tô - sạc nhanh DC 11kW: Thiết kế nhỏ gọn và cho phép nạp tới 80% dung lượng pin chỉ sau 40 - 120 phút (tuỳ dòng xe).
+     - Trụ sạc xe máy: Được đặt tại những bãi đỗ xe công cộng có thể dừng xe trong thời gian dài, thời gian sạc đầy theo tiêu chuẩn là 4 giờ.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Trong khoảng 1 giờ, bộ sạc này thường sạc được mức năng lượng từ 0 lên tới 10%.
+     - Đây là bộ sạc cho phép người dùng nạp đầy pin từ 0 lên 100% trong khoảng 1 giờ.
+     - Duy trì dung lượng pin trên 20% khi sử dụng .
+     - Chủ xe không nên để pin hoạt động dưới mức 20% vì việc này sẽ làm tăng nguy cơ hao mòn pin và tốn nhiều thời gian sạc đầy.
+     - Sạc ở mức tối đa 80% để tăng tuổi thọ pin .
+     - Khi nạp năng lượng cho pin, người dùng không nên sạc đầy tới 100% mà chỉ nên dừng ở mức tối đa 80% để tăng tuổi thọ cho bộ phận này.
+     - Trong trường hợp cần di chuyển quãng đường xa, người dùng có thể sạc pin đầy ở mức 100% để tận dụng tối đa công năng.
+     - Trụ sạc ô tô - sạc nhanh DC 60kW: Sạc gồm 2 cổng sạc với công suất 60kW/cổng, có thể sạc được 80% pin trong khoảng 30 - 90 phút (tuỳ dòng xe).
+     (+2 chỗ nữa)
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-009   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (ngoài 40-70)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (17 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "nhanh nhất" -> ...ại xe . Loại pin . Công suất tối đa . Thời gian sạc nhanh nhất . Quãng đường di chuyển sau 1 lần sạc đầy . VF e34 ....
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 100kW, 110 kW, 18 phút, 180km, 24 phút, 26 phút, 260kW, 285km, 30 phút, 300kW, 300km, 400km, 420km, 423km, 438km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...VF 8 , VF 9 và VF e34 ngay hôm nay để tận hưởng những ưu đãi hấp dẫn và trải nghiệm những mẫu xe điện thông minh, h...
+     - "miễn phí" -> ...lượng cao, nhờ chính sách thay thế/sửa chữa/bảo dưỡng miễn phí trong trường hợp pin hỏng/lỗi do Nhà sản xuất, hoặc kh...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-010   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (19 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "nhất việt nam" -> ...Cấu tạo trạm sạc xe điện và hệ thống trạm sạc hiện đại nhất Việt Nam . Danh sách trạm sạc VinFast Hà Nội cập nhật mới nhất...
+     - "hiện đại nhất" -> ...thêm:. Cấu tạo trạm sạc xe điện và hệ thống trạm sạc hiện đại nhất Việt Nam . Danh sách trạm sạc VinFast Hà Nội cập nhật...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1 phút
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "miễn phí" -> ...mạnh mẽ. Khách hàng quan tâm có thể đăng ký lái thử miễn phí và đặt mua ngay xe máy điện VinFast qua website hoặc n...
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Trong trường hợp rút sạc đột ngột, người dùng cần đợi ít nhất 10 giây nếu sạc trên xe và 1 phút nếu sạc trực tiếp, sau đó mới cắm sạc trở lại.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-011   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (187 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (18 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tuyệt đối" -> ...có hãy đem đến nhà phân phối VinFast để được sửa chữa. Tuyệt đối không tự ý thay thế cho chi tiết này. Đặc biệt lưu ý c...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 000km, 1.000km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...nh sách bảo dưỡng xe máy điện tại VinFast hiện đang là ưu đãi có một không hai dành riêng cho khách hàng , không có...
+     - "ưu đãi" -> ...máy điện VinFast từ 25/06 – 31/08/2024. Chương trình ưu đãi mùa hè hấp dẫn cho xe máy điện VinFast tới hết 31/08/2...
+     - "miễn phí" -> ...a A2 (phiên bản 5 cells Ắc quy) được bảo dưỡng định kỳ miễn phí 7 lần đầu tiên trong khung thời gian bảo dưỡng. Nếu qu...
+     - "miễn phí" -> ...hỏng nặng hoặc không nằm trong danh sách được bảo hành miễn phí, bạn sẽ chịu các chi phí bảo dưỡng xe VinFast bình thư...
+     - "miễn phí" -> ...cho khách hàng, vậy nên đừng bỏ lỡ bảo dưỡng bảo hành miễn phí định kỳ theo như chính sách nhà Vin để tiết kiệm và an...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-012   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (35 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "số 1" -> ...bảo hiểm… giống như xe xăng. Tuy nhiên, theo Nghị định số 10/2022/NĐ-CP được Chính phủ ban hành ngày 15/1/2022, ô...
+     - "duy nhất" -> ...e34 và lựa chọn hình thức thuê pin sẽ chỉ được áp dụng duy nhất 01 Gói cố định (sử dụng không giới hạn số km/tháng) vớ...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1,6km, 100km, 13,4kW, 1500km, 2,9 triệu, 20 triệu, 30 triệu, 40.000km, 5 triệu, 500km, 690 triệu
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...cũng đang được hưởng nhiều lợi ích từ những chính sách ưu đãi về thuế, phí khi mua và sử dụng ô tô điện. Ưu đãi ch...
+     - "ưu đãi" -> ...ch ưu đãi về thuế, phí khi mua và sử dụng ô tô điện. Ưu đãi chính sách thuế của nhà nước . Mới đây Quốc hội thô...
+     - "ưu đãi" -> ...giá tối ưu, chi phí bảo dưỡng tiết kiệm và hưởng nhiều ưu đãi hấp dẫn. Liên hệ với chúng tôi nếu cần cung cấp thêm...
+     - "miễn phí" -> ...hủ ban hành ngày 15/1/2022, ô tô điện chạy pin sẽ được miễn phí lệ phí trước bạ đăng ký lần đầu trong vòng 3 năm, áp d...
+     - "miễn phí" -> ...ng dưới mức 70% người dùng sẽ được VinFast đổi pin mới miễn phí. Chi phí di chuyển của xe điện VinFast VF e34 chỉ...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Điển hình, hiện giá gói thuê bao pin linh hoạt đối với xe điện VinFast VF e34 là 657.500 đồng/tháng với quãng đường di chuyển 500km/tháng, mỗi km sau đó người dùng sẽ trả thêm 1.315 đồng/km.
+     - Theo một số nghiên cứu trên thế giới, ước tính chi phí bảo dưỡng xe ô tô điện cho mỗi 40.000km di chuyển chỉ tốn khoảng 4 - 5 triệu đồng.
+     - 500km/tháng .
+     - 1500km/tháng .
+     - Tính trung bình mỗi xe ô tô xăng sẽ tốn khoảng 7,8L/100km di chuyển và theo mức giá xăng hiện tại tương đương 1.170.000 đồng/500km và mỗi km là khoảng 2.340 đồng/km.
+     - Theo báo cáo thực hiện bởi Văn phòng Hiệu suất năng lượng và Năng lượng tái tạo Hoa Kỳ (EERE), xe ô tô sử dụng động cơ đốt phải chi trả trung bình 0,1 USD cho phí bảo dưỡng trên mỗi 1,6km (1 dặm).
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Trong 2 năm tiếp theo, mức thu phí này chỉ bằng 50% mức thu đối với các loại xe xăng, dầu thiết kế cùng số chỗ ngồi.
+     - 1,5 - 2% giá trị ô tô .
+     - Pin cho thuê được hỗ trợ đổi chỉ còn khả năng tiếp nhận sạc dưới mức 70%.
+     - Tổng hợp chi phí bảo dưỡng xe điện chỉ khoảng 25-30% so với xe sử dụng động cơ đốt trong.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-013   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (23 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "số 1" -> ...bảo hiểm… giống như xe xăng. Tuy nhiên, theo Nghị định số 10/2022/NĐ-CP được Chính phủ ban hành ngày 15/1/2022, từ...
+     - "duy nhất" -> ...xe và lựa chọn hình thức thuê pin sẽ chỉ được áp dụng duy nhất 01 Gói cố định (không giới hạn số km/tháng) với mức gi...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 0,134 kWh, 100km, 13,4kWh, 18 triệu, 318,6km, 40.000km, 5 triệu, 500km, 6 giờ
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...ho chủ xe. &gt;&gt;&gt;Tìm hiểu thêm: Các chính sách ưu đãi thuế cho ô tô điện mới nhất . Khách hàng sở hữu ô...
+     - "ưu đãi" -> ...công nghệ hiện đại được trang bị trên xe và nhận những ưu đãi hấp dẫn từ VinFast. Để có thêm thông hoặc cần hỗ trợ...
+     - "tặng" -> ...hà với mạng lưới điện sinh hoạt và bộ sạc di động được tặng kèm. Sạc pin tại hệ thống trạm sạc VinFast . Chi p...
+     - "miễn phí" -> ...gửi xe tại TTTM Vincom, cụ thể:. Đối với khách: Được miễn phí tối đa 6 giờ/ lần. Đối với chủ căn hộ Vinhomes: Được...
+     - "miễn phí" -> ...tối đa 6 giờ/ lần. Đối với chủ căn hộ Vinhomes: Được miễn phí gửi xe hàng tháng. &gt;&gt;&gt; Tìm hiểu thêm: 7 đặ...
+     - "miễn phí" -> ...ừ ngày 1/3/2022 - 1/3/2025, ô tô điện chạy pin sẽ được miễn phí lệ phí trước bạ đăng ký lần đầu trong vòng 3 năm. Tron...
+     - "miễn phí" -> ...hất . Khách hàng sở hữu ô tô điện chạy pin sẽ được miễn phí lệ phí trước bạ đăng ký lần đầu trong vòng 3 năm . C...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Gói thuê pin linh hoạt: 657.000 VNĐ/ tháng/500km, trả phí phụ trội 1.315 VNĐ/km tiếp theo.
+     - Cụ thể, theo tính toán của nhà sản xuất, mức tiêu thụ năng lượng VinFast VF e34 là khoảng 13,4kWh/100km, tương đương 0,134 kWh/km.
+     - Nếu tính theo giá sạc tại trạm VinFast hiện nay là 3.117,4 VNĐ/kWh thì chi phí sạc xe điện VinFast VF e34 cho quãng đường 500km là: .
+     - Vì vậy, tổng chi phí vận hành của ô tô điện VinFast VF e34 khi di chuyển khoảng 500km là: 657.500 + 208.866 = 866.366 (VNĐ) .
+     - Xe VF e34 được trang bị pin có độ bền cao và sạc được nhiều lần nên xe có thể đạt được quãng đường di chuyển tới 318,6km chỉ sau 1 lần nạp đầy pin tiêu chuẩn.
+     - Nếu tính chi phí VinFast VF e34 di chuyển quãng đường 500km theo giá sạc tại trạm là 3.117,4 VNĐ/kWh, mức tiêu thụ năng lượng là 0,134 kWh/km thì chi phí vận hành là 208.866 (VNĐ).
+     - Còn đối với xe xăng, trung bình 1 chiếc xe hạng C tiêu hao khoảng 7,8 lít/100km, tính theo giá bán xăng RON 95-V hiện nay (tháng 8/2022) là 25.840VNĐ/lít thì chi phí người dùng phải bỏ ra là: 7,8 x 5 
+     - VinFast VF e34 có chi phí để di chuyển quãng đường 500km cực kỳ tiết kiệm (Nguồn: Sưu tầm).
+     (+1 chỗ nữa)
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Một quyền lợi khác của khách hàng sở hữu xe ô tô điện VF e34 là được thay pin mới nếu bị lỗi do nhà sản xuất hoặc dung lượng pin tối đa còn dưới 70%.
+     - Trong 2 năm tiếp theo, mức phí mà chủ xe phải nộp chỉ bằng 50% mức thu đối với các loại xe xăng, dầu thiết kế cùng số chỗ ngồi.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-014   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (172 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (22 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 0,134 kWh, 1,6km, 100km, 13,4kWh, 2 triệu, 500km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...thể tiết kiệm một phần chi phí nếu tận dụng chính sách ưu đãi của VinFast như:. Miễn phí gửi xe tại TTTM Vincom, t...
+     - "ưu đãi" -> ...có nhu cầu đi lại trong đô thị và tận dụng chính sách ưu đãi dành cho chủ xe VinFast, khách hàng có thể tối ưu chi...
+     - "ưu đãi" -> ...góp phần bảo vệ môi trường sống. VinFast hiện có nhiều ưu đãi hấp dẫn khi khách hàng đặt mua VF e34 và đặt cọc VF 8...
+     - "tặng" -> ...hà với mạng lưới điện sinh hoạt và bộ sạc di động được tặng kèm. Ngoài ra, người dùng có thể sạc pin tại hệ thống...
+     - "miễn phí" -> ...F e34 sẽ được hỗ trợ bảo dưỡng, sửa chữa, thay thế pin miễn phí trong trường hợp lỗi do nhà sản xuất hoặc khi dung lượ...
+     - "miễn phí" -> ...phí nếu tận dụng chính sách ưu đãi của VinFast như:. Miễn phí gửi xe tại TTTM Vincom, tối đa 6h/lần đối với khách....
+     - "miễn phí" -> ...gửi xe tại TTTM Vincom, tối đa 6h/lần đối với khách. Miễn phí gửi xe hàng tháng cho chủ căn hộ Vinhomes. Như vậy,...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-015   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (14 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "dẫn đầu" -> ...e34 , VF 8 , VF 9 . Để có thể sở hữu những mẫu xe đang dẫn đầu xu hướng mới về nhiên liệu sạch và thân thiện với môi...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1,2 triệu, 1,6 km, 1.400km, 285km, 42kWh, 500 km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "giảm giá" -> ...à dầu mazut có giá khoảng 16.548 đồng/kg. Đây là lần giảm giá xăng dầu liên tiếp thứ 4 và là lần giảm giá thứ 7 kể t...
+     - "giảm giá" -> ...Đây là lần giảm giá xăng dầu liên tiếp thứ 4 và là lần giảm giá thứ 7 kể từ đầu năm cho đến thời điểm ngày 8/8. Theo d...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Theo báo cáo của Văn phòng Hiệu suất Năng lượng và Năng lượng Tái tạo Hoa Kỳ (EERE), xe có động cơ đốt trong phải trả trung bình 0,1 USD cho mỗi 1,6 km (1 dặm) để bảo dưỡng.
+     - Trung bình 1 tháng khách hàng cần sạc khoảng 5 lần cho quãng đường di chuyển khoảng 1.400km.
+     - Ngoài ra, khách hàng sử dụng VF e34 được áp dụng chính sách thuê pin với gói 657.500 đồng cho hành trình 500 km giữ nguyên giá thuê pin suốt vòng đời sản phẩm.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Đổi pin mới khi khả năng sạc/xả xuống dưới 70%.
+     - Nhìn chung, chi phí bảo dưỡng đối với xe điện thấp hơn xe động cơ đốt trong khoảng 25-30%.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-016   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (8 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...h, bảo dưỡng, tạo điều kiện cho khách hàng chăm sóc xe tốt nhất. Chi phí bảo dưỡng ô tô điện và ô tô xăng có sự ch...
+     - "tốt nhất" -> ...là pin và động cơ. Chúng sẽ đảm bảo hiệu quả vận hành tốt nhất cho một chiếc ô tô điện chất lượng. Hiện nay, pin ô...
+     - "tốt nhất" -> ...ợng. Hiện nay, pin ô tô điện sẽ có khả năng vận hành tốt nhất khi chất làm mát luôn giữ vững ở mức ổn định. Các nhà...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1,6km, 18 triệu, 40.000km, 5 triệu, 500.000km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...n xuất ô tô điện vẫn luôn chú trọng đến các chính sách ưu đãi cho việc bảo hành, bảo dưỡng, tạo điều kiện cho khách...
+     - "ưu đãi" -> ...giá tối ưu, chi phí bảo dưỡng tiết kiệm và hưởng nhiều ưu đãi hấp dẫn. Liên hệ với chúng tôi nếu cần cung cấp thêm...
+     - "miễn phí" -> ...quý khách hàng cũng sẽ được hỗ trợ dịch vụ cứu hộ 24/7 miễn phí. Bảo dưỡng ô tô điện VinFast với chi phí tiết kiệm...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Theo nghiên cứu, chi phí cho việc bảo dưỡng ô tô điện ít hơn 40% trên mỗi 1,6km so với ô tô xăng.
+     - Những chiếc xe ô tô điện thuần túy sẽ có mức chi phí bảo dưỡng thấp hơn ít nhất ít hơn 40% trên mỗi 1,6km so với các dòng ô tô chạy bằng xăng.
+     - Cụ thể, chi phí bảo dưỡng ô tô điện và ô tô xăng sẽ có sự chênh lệch 40% trên mỗi 1,6km.
+     - Nếu những chiếc ô tô điện được bảo dưỡng đúng cách, vòng đời của chúng có thể đạt gần 500.000km.
+     - Sử dụng ô tô điện tiết kiệm chi phí hơn 40% mỗi 1,6km so với ô tô xăng.
+     - Dựa theo một số nghiên cứu trên thế giới, ước tính chi phí bảo dưỡng ô tô điện trong quãng đường di chuyển 40.000km sẽ rơi vào khoảng 4 - 5 triệu đồng.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Những chiếc xe ô tô điện thuần túy sẽ có mức chi phí bảo dưỡng thấp hơn ít nhất ít hơn 40% trên mỗi 1,6km so với các dòng ô tô chạy bằng xăng.
+     - Cụ thể, chi phí bảo dưỡng ô tô điện và ô tô xăng sẽ có sự chênh lệch 40% trên mỗi 1,6km.
+     - Sử dụng ô tô điện tiết kiệm chi phí hơn 40% mỗi 1,6km so với ô tô xăng.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-017   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (ngoài 40-70)
+  B3 (186 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (20 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 11kW, 150kW, 18 phút, 180 km, 2,2kW, 220 phút, 23,4 phút, 285 km, 3,5kW, 30 phút, 300 kW, 30kW, 420 phút, 60 phút, 60kW, 660 phút, 7,4kW
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...húc”, sử dụng hệ thống trạm sạc hiện đại và nhận những ưu đãi hấp dẫn từ VinFast. Tổng đài tư vấn: 1900 23 23 89 ....
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-018   [CHỈ QUÉT A]
+==========================================================================
+  đã chắc >= needs_revision. Chỉ cần biết có mã A hay không.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (118 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (3 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "miễn phí" -> ...ớc 5: Bạn có thể chọn hình thức sạc. Chọn trải nghiệm (miễn phí). Bước 6: Bắt đầu sạc: Ổ cắm được cấp điện, đèn LED t...
+     - "miễn phí" -> ...cooter rất đơn giản, chi phí sạc pin xe cũng hoàn toàn miễn phí. Hiện nay hệ sinh thái trạm sạc VinFast được trải dài...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-019   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (22 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "miễn phí" -> ...st. Tính năng cập nhật phần mềm từ xa qua phần mềm miễn phí FOTA và thu phí SOTA. &gt;&gt;&gt; Tìm hiểu thêm: Xe...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-020   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (20 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...ện, nhanh chóng, hiệu quả và có được những trải nghiệm tốt nhất, chủ phương tiện nên đọc kỹ các hướng dẫn và các thao...
+     - "nhanh nhất" -> ...g cho hành khách trên xe bằng cách tìm kiếm sự giúp đỡ nhanh nhất có thể. Hiện nay, tất cả các mẫu ô tô điện VinFast đ...
+     - "nhanh nhất" -> ...y lốp xe. Cuộc gọi khẩn cấp hỗ trợ tìm kiếm cứu hộ nhanh nhất khi xe không may gặp tai nạn hoặc có vấn đề về pin, độ...
+     - "hoàn hảo" -> ...ùng sự thuận tiện trong việc quản lý xe và trải nghiệm hoàn hảo khi sử dụng phương tiện xanh Để quản lý xe ô tô điện q...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 10 phút
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...xe được săn đón nhất thị trường xe xanh và nhận những ưu đãi hấp dẫn từ VinFast!. Nếu có nhu cầu tìm hiểu hoặc sở...
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Hệ thống sẽ gửi thông báo cho chủ xe 10 phút trước khi xe đạt đến mức sạc giới hạn.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - Để giới hạn mức sạc, người dùng bấm chọn “Mức sạc”, mức mặc định của VinFast là 100%.
+     - Người dùng cần lưu ý mức sạc tối thiểu là 20% và không được đặt thấp hơn mức pin hiện tại.
+     - Trạng thái khi xe được sạc: Có biểu tượng pin với màu xanh ký hiệu tia sét, đồng thời thông báo khoảng thời gian còn lại để xe có thể đạt 100% năng lượng.
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+P-001a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (8 câu > 30 tiếng)
+
+==========================================================================
+P-001b   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (trống)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (8 câu > 30 tiếng)
+
+==========================================================================
+P-002a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (131 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (20 câu > 30 tiếng)
+
+==========================================================================
+P-003a   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (13 câu > 30 tiếng)
+
+==========================================================================
+P-004a   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (gắn năm 2024 - kiểm tra còn hợp lệ không)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (5 câu > 30 tiếng)
+
+==========================================================================
+P-004b   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (gắn năm 2024 - kiểm tra còn hợp lệ không)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (5 câu > 30 tiếng)
+
+==========================================================================
+P-005a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B3 (137 ký tự, ngoài 140-170)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (11 câu > 30 tiếng)
+
+==========================================================================
+P-006a   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (15 câu > 30 tiếng)
+
+==========================================================================
+P-007a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (ngoài 40-70)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (18 câu > 30 tiếng)
+
+==========================================================================
+P-007b   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (gắn năm 2019 - kiểm tra còn hợp lệ không)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (18 câu > 30 tiếng)
+
+==========================================================================
+P-008a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (21 câu > 30 tiếng)
+
+==========================================================================
+P-009a   [XONG]
+==========================================================================
+  nhãn = needs_revision (chèn mã B). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B7 (còn dấu tiếng Việt)
+  B6 (1/9 ảnh thiếu alt text)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (18 câu > 30 tiếng)
+
+==========================================================================
+P-010a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (19 câu > 30 tiếng)
+

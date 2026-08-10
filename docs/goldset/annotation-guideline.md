@@ -27,7 +27,7 @@ Nguyên tắc chung: **nhãn phải suy ra được từ các dấu hiệu quan 
 | **Gán nhãn mù với kết quả AI.** Gán trước khi chạy hệ thống, hoặc nếu đã chạy thì tuyệt đối không mở `field_ai_status` / `field_ai_score` trước khi chốt nhãn | Xem điểm AI trước sẽ bị neo (anchoring) → Kappa bị thổi phồng, không còn giá trị chứng minh |
 | **Chỉ đánh giá phần nội dung hệ thống thật sự đọc:** `title`, `body`, `summary`, `meta_description`, `url_alias` | Khối CTA/header/footer là template dùng chung, không thuộc quyền kiểm soát người viết (spec mục 7.1); ảnh (`alt`) nằm trong `body` nên không liệt riêng |
 | **Gán theo bảng mã lỗi ở mục 4, không gán theo cảm nhận** | Bắt buộc để tái lập được; cũng là nguồn dữ liệu để đối chiếu AI bắt đúng loại lỗi hay không |
-| **Ghi lại mã lỗi, không chỉ ghi nhãn cuối** | Nhãn cuối chỉ có 3 giá trị nên rất dễ trùng nhau ngẫu nhiên; mã lỗi mới cho biết AI và người có đồng ý về *lý do* hay không |
+| **Ghi lại mã lỗi, không chỉ ghi nhãn cuối** | Nhãn cuối chỉ có 3 giá trị nên rất dễ trùng nhau ngẫu nhiên; mã lỗi mới cho biết AI và người có đồng ý về *lý do* hay không. *(Ghi mã tìm thấy — **không** bắt buộc liệt kê đầy đủ trên bài thật, xem mục 7)* |
 | **Tối đa 15 bài/phiên** | Chống mệt → trôi tiêu chuẩn |
 | **Xáo trộn thứ tự, không gán liên tiếp toàn bộ bài perturbation** | Gán liên tiếp các bài đã biết trước là có lỗi sẽ tạo kỳ vọng "bài nào cũng lỗi" |
 
@@ -137,10 +137,22 @@ Ranh giới: **sai số liệu → A; đúng nhưng thiếu điều kiện → B
 ## 7. Quy trình một phiên gán nhãn
 
 1. Mở `labels.csv`, lấy các dòng chưa có nhãn, xáo trộn thứ tự.
-2. Với từng bài: đọc hết → duyệt bảng mã lỗi mục 4 theo thứ tự A → B → ghi **mọi** mã lỗi tìm thấy.
+2. Với từng bài: duyệt bảng mã lỗi mục 4 theo thứ tự **A trước, B sau**, ghi các mã tìm thấy.
 3. Áp quy tắc mục 5 để ra nhãn. **Không** gán nhãn trước rồi tìm lỗi để biện minh.
 4. Ghi `annotator`, `date`, `guideline_version`.
 5. Tối đa 15 bài rồi nghỉ.
+
+**Quy tắc mục 5 dừng sớm (short-circuit) — không phải liệt kê đủ mới gán được nhãn.** Tìm thấy một mã A là chốt `rejected`, không cần duyệt tiếp; đã có một mã B là chắc chắn ít nhất `needs_revision`, chỉ còn phải kiểm có mã A nào không. Với bài mà `label_helper.py` đã tìm ra mã B, phần việc còn lại chỉ là *"có mã A không?"*.
+
+**`defect_codes` KHÔNG bắt buộc đầy đủ trên bài thật.** Ghi những mã thực sự tìm thấy, không cố liệt kê cho đủ. Ba lý do, và không lý do nào là để làm ít đi:
+
+- Trong 4 phép đo của Sprint 3, chỉ **Recall/F1 theo từng mã** cần `defect_codes`; E5 (calibration), E3 (baseline) và E6 (held-out) đều chỉ cần `label`.
+- Recall/F1 theo mã báo cáo **trên tập perturbation**, nơi ground truth chính xác tuyệt đối vì lỗi do chính người gán chèn vào — mục 10.6 đã yêu cầu tách riêng hai tập.
+- Liệt kê sót một mã trên bài thật sẽ khiến AI bắt đúng mã đó bị tính thành **báo động giả**. Danh sách thiếu sót không trung lập: nó làm AI trông tệ hơn thực tế.
+
+Ghi giới hạn này vào báo cáo Sprint 3: *"`defect_codes` trên bài thật không liệt kê đầy đủ; chỉ số theo từng mã báo cáo trên tập perturbation."*
+
+**Công cụ hỗ trợ:** `scripts/quet_ung_vien.py` đánh dấu sẵn các đoạn cần xem cho A1, A2, A3, A4, B1, B2, B5, B10 và tự xếp mỗi bài vào nhóm *đã xong / chỉ quét A / quét đầy đủ*. Nó **chỉ đánh dấu chỗ cần xem, không kết luận mã lỗi** — và cố ý quét rộng, nên phần lớn đoạn nó đánh dấu sẽ bị bác bỏ. Mẫu của nó viết độc lập, không lấy từ `compliance_rules.json`/`brand_rules.json`: dùng chính danh sách của AI để đi tìm nhãn thì chỗ nào danh sách đó thiếu, ground truth cũng thiếu y hệt.
 
 ---
 
@@ -259,3 +271,5 @@ Phân bố nhãn dự kiến sau v1.3 (trần trên - người gán sẽ trừ b
 | `publish` | ≤ 13 | 13 bài thật không dính mã máy nào |
 
 Tại thời điểm sửa **chưa có nhãn nào được gán**, nên không phải gán lại gì. Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và trước khi chạy hệ thống AI trên gold set.
+
+**Cùng ngày, làm rõ thêm mục 7 (không phải đổi luật, nên không tăng version):** quy tắc mục 5 vốn đã dừng sớm, và `defect_codes` không bắt buộc đầy đủ trên bài thật. Bảng mã lỗi (mục 4) và quy tắc quy nhãn (mục 5) **không đổi một chữ** — chỉ ghi rõ cách vận dụng, kèm công cụ `scripts/quet_ung_vien.py`.
