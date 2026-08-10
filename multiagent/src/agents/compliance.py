@@ -60,12 +60,31 @@ _NHAN = {
 }
 
 
-def _load_rules() -> list[dict]:
+def _nap_file_rules() -> dict:
     global _rules_cache
     if _rules_cache is None:
         with open(_RULES_PATH, encoding="utf-8") as f:
-            _rules_cache = json.load(f)["phrases"]
+            _rules_cache = json.load(f)
     return _rules_cache
+
+
+def _load_rules() -> list[dict]:
+    return _nap_file_rules()["phrases"]
+
+
+def _pham_vi() -> list[str]:
+    """Các cụm chỉ phạm vi so sánh ("thị trường", "Việt Nam"...)."""
+    return _nap_file_rules()["pham_vi"]
+
+
+# Cửa sổ tìm cụm chỉ phạm vi quanh chỗ khớp. Rộng về SAU nhiều hơn vì tiếng
+# Việt đặt phạm vi sau tính từ ("tốt nhất thị trường", "số 1 Việt Nam").
+_TRUOC_PHAM_VI, _SAU_PHAM_VI = 30, 45
+
+
+def _co_pham_vi(text: str, start: int, end: int) -> bool:
+    cua_so = text[max(0, start - _TRUOC_PHAM_VI):end + _SAU_PHAM_VI].lower()
+    return any(p in cua_so for p in _pham_vi())
 
 
 _KY_TU_TU = re.compile(r"\w", re.UNICODE)
@@ -103,6 +122,11 @@ def match_blacklist(text: str) -> list[dict]:
     Dùng \\b (word boundary) thay vì so khớp chuỗi con thô, để tránh khớp
     nhầm vào số dài hơn (VD cụm "số 1" khớp nhầm vào "số 10", "số 100") -
     nhưng chỉ ở đầu/cuối là chữ/số, xem `_mau_khop`.
+
+    Khoá `la_claim` cho biết lần khớp này có phải claim quảng cáo thật không:
+    với cụm `can_pham_vi`, chỉ tính là claim khi quanh đó có cụm chỉ phạm vi
+    so sánh. `_cp1_claim_tuyet_doi` dùng nó để chọn mức 0 hay mức 1 - xem lý
+    do ở đó.
     """
     flags = []
     for rule in _load_rules():
@@ -117,6 +141,10 @@ def match_blacklist(text: str) -> list[dict]:
                 "severity": rule["severity"],
                 "rule": rule["rule"],
                 "excerpt": text[start:end].strip(),
+                "la_claim": (
+                    not rule.get("can_pham_vi", False)
+                    or _co_pham_vi(text, match.start(), match.end())
+                ),
             }
         )
     return flags
@@ -136,18 +164,49 @@ def _tieu_chi(ma: str, level, occurrences=None, reason="") -> dict:
 
 
 def _cp1_claim_tuyet_doi(text_theo_field: dict) -> dict:
+    """Mức 0 khi có claim so sánh nhất NÊU RÕ PHẠM VI; mức 1 khi chỉ có cụm
+    so sánh nhất dùng không kèm phạm vi.
+
+    Vì sao tách hai mức (2026-08-10): mức 0 sinh flag `critical` -> Aggregator
+    veto -> `rejected`, tức chặn xuất bản. Cách cũ coi MỌI lần khớp là mức 0,
+    đo trên 33 mẫu gold set cho ra **14 bài bị veto trong khi chỉ 3 bài vi
+    phạm thật** - "tốt nhất" trong "cách tốt nhất để khắc phục sự cố", "duy
+    nhất" trong "áp dụng duy nhất 01 Gói" đều bị chặn oan. Precision 0,21.
+
+    Lập luận giống hệt CP3 mức 1 (docs/rubrics.md mục 6.2): claim so sánh nhất
+    chỉ trở thành khẳng định kiểm chứng được khi nó xác định phạm vi so sánh,
+    nên thiếu phạm vi thì "chưa đủ căn cứ để chặn", không phải "chắc chắn vi
+    phạm". Sau khi sửa: precision 1,00 trên cùng bộ mẫu, recall giữ nguyên.
+
+    ĐÁNH ĐỔI ĐÃ BIẾT: claim thật mà không nêu phạm vi ("VinFast là thương hiệu
+    xe điện tốt nhất.") rơi xuống mức 1. Nó KHÔNG biến mất - vẫn sinh flag
+    `low` hiện trong báo cáo cho người duyệt, chỉ thôi tự động từ chối bài.
+    Đổi 11 lần chặn oan chắc chắn lấy vài lần hạ mức là đánh đổi có lợi trong
+    một hệ thống luôn có người bấm nút cuối (architecture.md mục 2.3).
+    """
     if not any(t.strip() for t in text_theo_field.values()):
         return _tieu_chi("CP1", None)
-    cho_sai = []
+
+    cho_sai, co_claim = [], False
     for field, text in text_theo_field.items():
         for m in match_blacklist(text):
             cho_sai.append({"field": field, "text": m["excerpt"], "rule": m["rule"]})
+            co_claim = co_claim or m["la_claim"]
+
     if not cho_sai:
         return _tieu_chi("CP1", 2)
+    if co_claim:
+        return _tieu_chi(
+            "CP1", 0, cho_sai,
+            "Bỏ cụm so sánh tuyệt đối hoặc thay bằng phát biểu có căn cứ kiểm "
+            "chứng được (kèm nguồn, phạm vi so sánh, thời điểm).",
+        )
     return _tieu_chi(
-        "CP1", 0, cho_sai,
-        "Bỏ cụm so sánh tuyệt đối hoặc thay bằng phát biểu có căn cứ kiểm "
-        "chứng được (kèm nguồn, phạm vi so sánh, thời điểm).",
+        "CP1", 1, cho_sai,
+        "Bài dùng cụm so sánh nhất nhưng không nêu phạm vi so sánh. Nhiều khả "
+        "năng là cách nói thông thường (VD 'cách tốt nhất để...'), không phải "
+        "claim quảng cáo - rà lại để chắc chắn, và cân nhắc diễn đạt khác nếu "
+        "câu có thể bị hiểu là khẳng định hơn hẳn đối thủ.",
     )
 
 

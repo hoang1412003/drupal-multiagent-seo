@@ -312,9 +312,34 @@ def test_tu_cam_giau_trong_binh_luan_html_van_bi_bat():
 
 
 def test_tu_cam_giau_trong_the_display_none_van_bi_bat():
-    result = _chay('<p>Sạch</p><div style="display:none">sản phẩm số 1</div>')
-    assert _muc(result, "CP1") == 0, "tu cam trong the an phai bi bat"
-    print("[PASS] tu cam giau trong the display:none van bi CP1 bat")
+    """Kiem CA HAI chieu cua duong quet phan an, sau khi CP1 tach muc 0/1
+    (2026-08-10).
+
+    Bai cu chi kiem mot payload 'san pham so 1' va doi muc 0. Cum do khong neu
+    pham vi so sanh nen nay ra muc 1 - nhung dieu test NAY phai khoa lai la
+    'duong quet phan an CO cham toi CP1', khong phai 'cum nay critical'. Nen
+    kiem ca hai payload thay vi noi long mot phep khang dinh:
+
+      - giau claim CO pham vi   -> muc 0 + flag critical  (tinh chat an ninh)
+      - giau cum KHONG pham vi  -> muc 1, VAN sinh flag   (khong bi nuot im lang)
+
+    Chat hon ban cu: ban cu khong he kiem truong hop thu hai.
+    """
+    co_pham_vi = _chay(
+        '<p>Sạch</p><div style="display:none">sản phẩm số 1 Việt Nam</div>'
+    )
+    assert _muc(co_pham_vi, "CP1") == 0, "claim an co pham vi phai la muc 0"
+    assert any(f["severity"] == "critical" for f in co_pham_vi["flags"]), \
+        co_pham_vi["flags"]
+
+    khong_pham_vi = _chay(
+        '<p>Sạch</p><div style="display:none">sản phẩm số 1</div>'
+    )
+    assert _muc(khong_pham_vi, "CP1") == 1, "cum an khong pham vi -> muc 1"
+    assert any(f["rule"].startswith("So sánh tuyệt đối")
+               for f in khong_pham_vi["flags"]), \
+        "van phai sinh flag de nguoi duyet thay, du khong veto"
+    print("[PASS] tu cam giau trong the display:none van bi CP1 bat (ca 2 chieu)")
 
 
 def test_bai_sach_khong_bi_bat_nham():

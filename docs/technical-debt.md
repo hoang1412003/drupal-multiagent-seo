@@ -327,6 +327,35 @@ Comment nói "trích được **nguyên văn**", code chỉ kiểm chuỗi **kh�
 
 > **Ghi chú 2026-08-05:** `retrieval._get_collection()` nói ở trên **không còn tồn tại** — kho vector đã chuyển sang Postgres + pgvector (`rag-design.md` mục 4.2a). Phép kiểm không bị mất theo: nó chuyển sang `db.get_conn()` (cache khoá theo **DSN** thay vì theo đường dẫn thư mục), và test khoá lại nằm ở `scripts/test_retrieval.py::test_ket_noi_cache_theo_dsn`. Giữ nguyên đoạn trên làm bản ghi của lỗi gốc.
 
+### B12. Blacklist CP1 veto oan 10/13 bài — ✅ ĐÃ SỬA (2026-08-10)
+
+**Bằng chứng (đo được, không phải suy luận):** chạy `match_blacklist()` trên 33 mẫu gold set — **13 bài sinh flag `critical`, chỉ 3 bài vi phạm thật**. Precision **0,21**.
+
+10 bài bị chặn oan, tất cả đều là cách dùng hợp lệ:
+
+| Bài | Đoạn khớp | Thực chất |
+|---|---|---|
+| G-003 | "cách **tốt nhất** để khắc phục sự cố" | trạng ngữ |
+| G-005, G-006, G-008 | "giữ pin ở **trạng thái tốt nhất**" | lời khuyên bảo dưỡng |
+| G-009 | "Thời gian **sạc nhanh nhất**" | **tiêu đề cột bảng thông số** |
+| G-012, G-013 | "áp dụng **duy nhất** 01 Gói cố định" | lượng từ trong điều khoản |
+| G-004, G-016, P-003a | "ánh sáng **tốt nhất**", "chăm sóc xe **tốt nhất**" | trạng ngữ |
+
+**Vì sao là nợ nặng chứ không phải sai số chấp nhận được:**
+
+- Flag `critical` → Aggregator veto → `rejected` **bất kể điểm tổng**. Đây là đường rủi ro cao nhất của hệ thống, và nó đang sai 10/13 lần.
+- **Calibration KHÔNG sửa được.** E5 quét ngưỡng trên `final_score`, nhưng veto đi vòng qua ngưỡng — 10 bài đó không ngưỡng nào chạm tới. Chạy E5 trước khi sửa thì mọi ngưỡng đều trông tệ vì lý do không liên quan tới ngưỡng.
+- 9 trong 13 bài ứng viên `publish` (sau khi v1.3 khôi phục lớp này) nằm đúng trong nhóm bị veto oan — tức lớp `publish` vừa cứu được ở guideline v1.3 sẽ bị CP1 xoá lần nữa.
+- **Test cũ không phủ.** 13 ca trong `test_compliance_rules.py` chỉ kiểm *số lượng* flag `match_blacklist()` trả về, không kiểm mức CP1 suy ra từ đó.
+
+**Đã sửa:** tách CP1 thành mức 0 (có nêu phạm vi so sánh → `critical`, vẫn veto) và mức 1 (không nêu phạm vi → `low`, không veto). Cùng hình dạng lập luận với CP3 mức 1 đã có sẵn trong rubric. Cờ `can_pham_vi` cho từng cụm trong `compliance_rules.json` phân biệt cụm so sánh nhất với cam kết tuyệt đối ("cam kết 100%", "an toàn tuyệt đối" — vi phạm không cần phạm vi). Sau khi sửa: precision **1,00**, recall giữ **1,00**.
+
+**Đánh đổi đã biết:** claim thật không nêu phạm vi rơi xuống mức 1 — vẫn sinh flag `low` cho người duyệt thấy, chỉ thôi tự động từ chối. Có test khoá đúng ca đó.
+
+**Cảnh báo về con số 1,00:** quy tắc được thiết kế bằng cách nhìn chính 33 mẫu này, nên precision/recall tuyệt đối trên chúng **là fit vào tập test, không phải bằng chứng tổng quát hoá**. Đã kiểm thêm 13 ca tự soạn ngoài corpus: 11/13 đúng, 2 ca trượt đều là đánh đổi đã biết ở trên. Con số đáng tin sẽ đến từ E6 (held-out).
+
+**Bài học, cùng họ với B8:** cả hai lần đều là *lớp phòng vệ tất định bị sai bởi chính giả định của nó*. B8 giả định "mọi cụm cấm bắt đầu và kết thúc bằng chữ"; B12 giả định "khớp chuỗi là đủ để kết luận vi phạm". Và cả hai lần bộ test đều xanh suốt, vì test kiểm *cơ chế khớp* chứ không kiểm *kết luận rút ra từ nó*.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -422,8 +451,14 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
                                                         driven + đối soát an
                                                         toàn, xem architecture.md
                                                         mục 9
+[x] 17. B12 (CP1 veto oan 10/13 bai)  <- xong 2026-08-10, khong ton API:
+                                        precision 0,21 -> 1,00. PHAI xong
+                                        truoc E1 (doi diem Compliance) va
+                                        truoc E5 (veto di vong qua nguong)
 ---- chờ mentor ----
-   12. A3  (gán nhãn gold set)
+   12. A3  (gán nhãn gold set)  <- KHONG con bi chan: guideline v1.3 +
+                                   scripts/quet_ung_vien.py, chi 20/33 bai
+                                   phai doc
    13. E3, E5, E6
 ---- không chặn gì, làm lúc nào cũng được ----
    14. Đo lại E1-Brand sau B7  <- tốn API, chưa chạy
