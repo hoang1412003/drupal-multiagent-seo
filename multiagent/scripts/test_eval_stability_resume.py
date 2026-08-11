@@ -63,6 +63,15 @@ def test_ghi_ket_qua_luu_prompt_version() -> None:
     check("metadata prompt version", payload["_meta"], {"prompt_version": prompt_version()})
 
 
+def test_ghi_ket_qua_khong_cho_meta_cu_ghi_de() -> None:
+    path = path_chua_ton_tai()
+    ghi_ket_qua({"_meta": {"prompt_version": "cu"}, "G-001": []}, path)
+    with open(path, encoding="utf-8") as f:
+        payload = json.load(f)
+    check("metadata hien tai ghi de metadata cu", payload["_meta"],
+          {"prompt_version": prompt_version()})
+
+
 if __name__ == "__main__":
     for test in (
         test_file_moi_tra_dict_rong,
@@ -70,6 +79,7 @@ if __name__ == "__main__":
         test_file_sai_prompt_bi_tu_choi,
         test_file_dung_prompt_duoc_resume,
         test_ghi_ket_qua_luu_prompt_version,
+        test_ghi_ket_qua_khong_cho_meta_cu_ghi_de,
     ):
         test()
     print("PASS: E1 resume prompt-version guard")

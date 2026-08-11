@@ -152,7 +152,7 @@ def nap_ket_qua(path: str | None = None) -> dict:
 def ghi_ket_qua(data: dict, path: str | None = None) -> None:
     path = path or KET_QUA
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    payload = {"_meta": {"prompt_version": prompt_version()}, **data}
+    payload = {**data, "_meta": {"prompt_version": prompt_version()}}
     with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
 
