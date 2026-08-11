@@ -159,9 +159,15 @@ rồi dán **cùng giá trị đó** vào:
 - [x] Hoàn thiện Aggregator — veto Compliance, fail-safe khi agent lỗi, chia lại trọng số
 - [x] Retry/backoff khi Drupal lỗi mạng/5xx (`docs/architecture.md` mục 7)
 - [x] Brand Voice Agent dùng RAG — rubric BV1–BV7 (`docs/rubrics.md` mục 5), 6/7 tiêu chí đo bằng regex đối chiếu `brand_rules.json`, BV6 chấm giọng văn bằng LLM + RAG trên KB `kb_brand` (1128 chunk từ 16 bài `BRAND`). Điểm do `src/scoring.py` tính **tất định**, không để LLM tự cho điểm — agent đầu tiên áp dụng rubric v1. Brand guideline **tự trích xuất** từ corpus bằng kiểm định nhị thức (p < 0,05 → ngưỡng ≥9/10 tự rơi ra, không phải số tự đặt). E2 đo được 78,3% so với mốc ngẫu nhiên 21,7%
-- [ ] Thu thập & gán nhãn gold set — 33 mẫu đã thu + bóc tách + chèn perturbation (`docs/goldset/labels.csv`), đang gán nhãn
+- [x] Thu thập & gán nhãn gold set — hoàn tất **33/33** mẫu calibration (`docs/goldset/labels.csv`)
 - [x] Tự động hóa — Content Moderation "Needs Review" bật thật, **hai đường song song**: event-driven là đường chính (Drupal → module `vf_ai_trigger` → service HTTP → hàng đợi Postgres, ~2 giây tới lúc job chạy) và vòng đối soát định kỳ 300 giây là lưới an toàn (bắt các job event bị lọt, ví dụ service tắt tạm thời). Chạy thật end-to-end, 8/8 tiêu chí đạt: `docs/architecture.md` mục 9, bằng chứng `docs/evidence/tu_dong_hoa_e2e.txt`
 - [x] UI báo cáo trong editor — module `vf_ai_review`: khối tổng quan ở cột phải + **chú thích lỗi ngay dưới từng field** (phần đáp ứng đúng chữ đề bài). Python ghi thêm `field_ai_report_json` (báo cáo có cấu trúc), module chỉ đọc và render. Escape chống XSS theo `docs/prompt-injection.md` M4. Phát hiện nội dung sửa sau khi chấm bằng **hash nội dung**, không phải mốc `changed`
+
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
 
 Báo cáo Sprint 2 đầy đủ (kết quả, phép đo, việc còn vướng): [`docs/sprint2-report.md`](docs/sprint2-report.md).
 

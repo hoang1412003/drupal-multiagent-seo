@@ -1,4 +1,4 @@
-# Nhật ký hiệu đính tập `gold-corrected`
+# Nhật ký hiệu đính tập `functional-clean`
 
 Ngày hiệu đính: 2026-08-11  
 Người gán: `A1`  
@@ -6,10 +6,13 @@ Guideline: `v1.3`
 
 ## Nguyên tắc truy vết
 
-- `raw_html/C-xxx.html` là bằng chứng nguồn tải từ vinfastauto.com và không được sửa.
-- `raw/C-xxx.txt` là bản corrected dùng để đánh giá lớp `publish`.
+- Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+- Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+- Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+- `docs/functional-tests/raw_html/C-xxx.html` là bằng chứng nguồn tải từ vinfastauto.com và không được sửa.
+- `docs/functional-tests/clean/C-xxx.txt` là bản corrected dùng để đánh giá lớp `publish`.
 - Các bài được viết lại ở mức cần thiết để loại thông tin cũ, sai, thiếu điều kiện hoặc hướng dẫn có thể gây mất an toàn. Vì vậy tập này là dữ liệu augmented/corrected, không phải natural-only.
-- Không chạy lại `extract_gold_sample.py` với `C-*.html` sau khi hiệu đính, trừ khi chủ động muốn tạo lại bản thô và chấp nhận mất bản corrected hiện tại.
+- Extractor từ chối ghi đè tệp đã có; chỉ dùng `--force` khi chủ động muốn tạo lại bản thô và chấp nhận mất bản corrected hiện tại.
 
 ## Phạm vi sửa theo bài
 
@@ -29,3 +32,5 @@ Guideline: `v1.3`
 ## Điều kiện chốt nhãn
 
 Mười bản cuối được chốt `publish` vì không còn mã A/B theo guideline v1.3. `label_helper.py` không phát hiện B3/B4/B6/B7/B9; `quet_ung_vien.py` không tìm thấy ứng viên A1/A2/A3/A4/B1/B2/B5/B10; người gán đã đọc kiểm A5, A6 và B8. Không bài nào đạt ngưỡng lặp để ghi C4/C5.
+
+Khi chạy pipeline, báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues`; không đưa 10 mẫu này vào E5 hoặc Kappa.

@@ -6,7 +6,13 @@ Danh sách URL thật thu thập từ nguồn công khai, dùng để (1) xây g
 
 **Không copy text thuần.** Copy nội dung bằng chuột từ trình duyệt sẽ mất hết thẻ HTML (`<h2>`, `<img alt>`, `<a href>`), khiến `scripts/label_helper.py` đếm heading = 0 và kết luận sai mã lỗi B9 ("không có h2") cho hầu hết bài dài - hỏng ground truth ngay từ khâu thu thập. Chi tiết xem `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 1.1.
 
-Danh sách này là **ứng viên**, chưa phải gold set cuối. Mục tiêu chốt 30-50 mẫu: ~60% giữ nguyên (nhãn theo chất lượng thật) + ~40% chèn lỗi có chủ đích (perturbation, ground truth biết trước).
+Danh sách nguồn ban đầu dưới đây đã được chốt thành gold calibration 33 mẫu: ~60% giữ nguyên (nhãn theo chất lượng thật) + ~40% chèn lỗi có chủ đích (perturbation, ground truth biết trước).
+
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
 
 Mỗi URL được gán sẵn vào 1 trong 3 tập rời nhau (`BRAND` / `GOLD` / `PERT`) - xem mục 1.6 giải thích vì sao bắt buộc phải tách và cách gán.
 
@@ -80,7 +86,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 | `GOLD` | 20 | Gold set, giữ nguyên, gán nhãn theo chất lượng thật | Trích xuất brand guideline |
 | `PERT` | 10 | Bài nguồn để tạo bản chèn lỗi (mỗi bài 1-2 biến thể → ~13 mẫu) | Trích xuất brand guideline |
 
-**Gold set cuối = 20 (`GOLD`) + ~13 (từ `PERT`) ≈ 33 mẫu**, tỉ lệ ~61% bài thật / ~39% perturbation - nằm đúng trong khoảng 30-50 mẫu và đúng tỉ lệ 60/40 đã chốt.
+**Gold set calibration = 20 (`GOLD`, split `gold-real`) + 13 bản từ `PERT` (split `gold-pert`) = 33 mẫu**, tỉ lệ ~61% bài thật / ~39% perturbation. Gold không có lớp `publish`; 10 bản sạch ở mục 1.8 thuộc bộ kiểm thử chức năng riêng, không mở rộng gold.
 
 Tách thêm `PERT` khỏi `GOLD` (thay vì chèn lỗi vào chính 20 bài `GOLD`) để tránh cùng một nội dung xuất hiện hai lần trong gold set - các mẫu như vậy không độc lập với nhau, làm khoảng tin cậy của Kappa hẹp một cách giả tạo.
 
@@ -97,6 +103,23 @@ Mở rộng từ 10 lên 16 bài **có căn cứ định lượng, không phải
 **Không thu thêm nữa** dù nhóm "trạm sạc" đang ở 9/11 (p = 0,065), chỉ thiếu chút là đạt. Lý do: lần mở rộng vừa rồi chính đáng vì lý do là *thiếu phủ sóng*, biết trước khi nhìn kết quả; còn thu thêm bây giờ thì lý do là *"p đang gần 0,05"* — tức thu đến khi nào có ý nghĩa thì dừng, đúng lỗi thống kê **optional stopping**, làm mọi con số p mất giá trị.
 
 Hai URL phải đổi trong quá trình thu, đã ghi chú ngay tại dòng tương ứng ở mục 1.1 và 1.5.
+
+### 1.8. Tập `functional-clean` kiểm thử lớp `publish` (2026-08-11)
+
+Mười bài dưới đây được tải thủ công từ mục Tin tức của VinFast. HTML nguồn được giữ nguyên tại `docs/functional-tests/raw_html/C-xxx.html`; bản đã bóc tách và hiệu đính nằm tại `docs/functional-tests/clean/C-xxx.txt`. Đây là dữ liệu **corrected/augmented**, expected `publish`, không phải bài tự nhiên nguyên trạng và không được dùng để trích xuất brand guideline, E5 hoặc Kappa.
+
+- `C-001` /vn_vi/he-thong-phanh-tren-xe-o-to-dien
+- `C-002` /vn_vi/5-kinh-nghiem-di-xe-may-dien-duong-dai-an-toan
+- `C-003` /vn_vi/huong-dan-su-dung-che-do-sport-tren-xe-may-dien-vinfast
+- `C-004` /vn_vi/che-do-eco-tren-xe-may-dien-vinfast-gia-toc-muot-ma-tiet-kiem-dien
+- `C-005` /vn_vi/su-dung-tinh-nang-lien-quan-den-pin-tren-ung-dung-vinfast
+- `C-006` /vn_vi/cau-hoi-thuong-gap-khi-tim-hieu-pin-xe-may-dien-vinfast
+- `C-007` /vn_vi/thong-so-cac-loai-tru-sac-o-to-va-xe-may-dien-vinfast
+- `C-008` /vn_vi/nhung-hang-muc-can-quan-tam-khi-bao-duong-o-to-dien
+- `C-009` /vn_vi/luu-y-giup-lop-xe-dien-luon-ben
+- `C-010` /vn_vi/y-nghia-cac-loai-den-canh-bao-tren-o-to-dien
+
+Manifest riêng nằm tại `docs/functional-tests/clean_labels.csv`; quy tắc truy vết và phạm vi chỉnh sửa được ghi tại `docs/functional-tests/corrections.md`. Báo cáo functional-clean bằng `publish_rate`, `false_positive_articles` và `false_positive_issues`, không gộp các chỉ số này với E5/Kappa của `gold-real` và `gold-pert`.
 
 ---
 

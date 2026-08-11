@@ -154,6 +154,18 @@ Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và 
 - Quy ước gán nhãn + bảng mã lỗi: [`goldset/annotation-guideline.md`](goldset/annotation-guideline.md)
 - Nguồn dữ liệu + cách chia tập BRAND/GOLD/PERT: [`goldset/sources.md`](goldset/sources.md)
 
+#### Hậu kiểm tách evaluation suite (2026-08-11)
+
+Phần trên là hồ sơ lịch sử của gold set và các số đo E5 đã chạy; không sửa lại số liệu lịch sử 0,713 sau khi bổ sung bộ kiểm thử chức năng.
+
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+
+Mười mẫu functional-clean đã được dựng nhưng chưa chạy pipeline. Khi chạy, báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues`; không gộp chúng vào Kappa/accuracy lịch sử của E5.
+
 ---
 
 ## 4. Phép đo đã chạy
