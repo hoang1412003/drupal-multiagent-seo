@@ -640,7 +640,7 @@ Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự
 
 ```bash
 cd multiagent
-HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py    # đọc 8.0 TRƯỚC
+HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json    # đọc 8.0 TRƯỚC
 ```
 
 **Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên bản khoá 2. B14 sau đó sửa CP3/CP4 — tức đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
