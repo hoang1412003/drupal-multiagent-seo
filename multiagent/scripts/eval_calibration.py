@@ -38,6 +38,7 @@ LABELS = os.path.join(REPO, "docs", "goldset", "labels.csv")
 KET_QUA = os.path.join(REPO, "docs", "evidence", "e5_sau_sua_cp3_cp4.json")
 
 NHAN = ("rejected", "needs_revision", "publish")
+GOLD_SPLITS = frozenset({"gold-real", "gold-pert"})
 
 
 def prompt_version() -> str:
@@ -126,7 +127,7 @@ def cham_gold_set(ket_qua_path: str) -> dict:
                 f"  - --ket-qua <ten file moi>\n")
         da_co = cu
 
-    ids = sorted(x[:-4] for x in os.listdir(GOLD_DIR) if x.endswith(".txt"))
+    ids = gold_ids()
     for i, sid in enumerate(ids, 1):
         if sid in da_co:
             continue
@@ -182,11 +183,24 @@ def f1_theo_lop(that: list, du_doan: list, lop: str) -> float:
     return 2 * p * r / (p + r)
 
 
-def doc_nhan() -> dict:
+def _gold_rows(labels_path: str = LABELS) -> list[dict]:
     import csv
-    with open(LABELS, encoding="utf-8") as f:
-        return {r["sample_id"]: r["label"].strip()
-                for r in csv.DictReader(f) if r["label"].strip()}
+    with open(labels_path, encoding="utf-8") as f:
+        return [r for r in csv.DictReader(f)
+                if r.get("split") in GOLD_SPLITS and r.get("label", "").strip()]
+
+
+def doc_nhan(labels_path: str = LABELS) -> dict[str, str]:
+    return {r["sample_id"]: r["label"].strip() for r in _gold_rows(labels_path)}
+
+
+def gold_ids(labels_path: str = LABELS, gold_dir: str = GOLD_DIR) -> list[str]:
+    ids = sorted(r["sample_id"] for r in _gold_rows(labels_path))
+    missing = [sid for sid in ids
+               if not os.path.isfile(os.path.join(gold_dir, f"{sid}.txt"))]
+    if missing:
+        raise FileNotFoundError("Thieu file gold: " + ", ".join(missing))
+    return ids
 
 
 def quet(ket_qua: dict, nhan_that: dict, w: dict) -> list:
