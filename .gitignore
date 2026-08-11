@@ -9,6 +9,9 @@ img-for-ai-see/
 venv/
 ~$*.docx
 
+# Worktree cô lập cho các kế hoạch triển khai bằng superpowers.
+.worktrees/
+
 # KB nam trong Postgres tu 2026-08-05, khong con la thu muc tren dia. Giu lai
 # dong nay cho ai da tung chay ban Chroma: thu muc cu con nam tren may ho.
 # Xoa tay duoc, KB dung lai bang docker compose up + src/kb/build_*.py.
