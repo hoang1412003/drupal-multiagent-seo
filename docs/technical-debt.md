@@ -454,6 +454,47 @@ Giống hệt hình dạng của B12: **một bộ so khớp từ vựng gộp h
 
 ---
 
+### B14. CP3 so mọi con số có "km" với tầm hoạt động — ✅ ĐÃ SỬA (2026-08-11)
+
+**Phát hiện bởi E5, không phải bởi test.** Lần chạy E5 đầu cho Kappa **0,264** ở bộ ngưỡng tốt nhất, và bộ tốt nhất bị đẩy về **đáy dải quét**. Đó là dấu hiệu bài toán không nằm ở ngưỡng — không ngưỡng nào cứu được thì lỗi ở tầng dưới.
+
+Truy ngược: **16/33 bài mang cờ `critical` trong khi chỉ 7 bài đáng có** → precision đường veto **0,44**. Chạy riêng Compliance trên 12 bài lệch nhãn ($0,93) cho thấy **8/9 báo động giả đến từ CP3**.
+
+Nguyên nhân gốc — **không phải "LLM bất định"**: CP3 kiểm "cùng model" nhưng **quên kiểm "cùng chỉ số"**.
+
+| Câu bị gắn cờ sai | Con số thực chất là gì |
+|---|---|
+| *"VF e34 đã vượt qua cung đường 220km"* | quãng đường **một chuyến đi** |
+| *"657.500 đồng/tháng với quãng đường 500km/tháng"* | **hạn mức gói thuê pin** |
+| *"VF e34 có công suất pin là 42kWh"* | **dung lượng pin** |
+| *"Trụ sạc nhanh DC 30kW — khoảng 60 phút"* | **thông số trụ sạc** |
+
+Mọi con số đi kèm `km` đều bị đem so với `tam_hoat_dong` = 285km trong KB, rồi kết luận "mâu thuẫn".
+
+CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn"* cho câu **có** thời hạn ngay trong trích dẫn (*"từ 25/06 – 31/08/2024"*, *"Trước 6/4/2022"*), và cho cả chính sách nhà nước lẫn lời mời chung chung vốn không phải khuyến mại.
+
+**Sửa ba lớp, cố ý không chỉ sửa prompt:**
+
+1. **Prompt trích claim** — `tam_hoat_dong` nay ghi rõ *"SAU MỘT LẦN SẠC ĐẦY"*, kèm bốn loại số hay bị nhầm liệt kê thẳng vào nhóm `khac`.
+2. **Chốt chặn tất định trong code** — claim `metric="khac"` **không bao giờ** đi vào bước so sánh LLM:
+   ```python
+   if claim.get("metric") == "khac":
+       khong_tra_duoc.append(claim)
+       continue
+   ```
+   Lớp này **bắt buộc**, không phải phòng xa: `retriever` **không có ngưỡng similarity**, nên nó *luôn* trả về chunk gần nhất dù câu hỏi chẳng liên quan gì. Chỉ sửa prompt thì mọi lần LLM phân loại trượt lại thành một lần veto oan.
+3. **Prompt đối chiếu** — `mismatch` đòi đủ **ba** điều: đúng model, **đúng chỉ số**, số mâu thuẫn.
+
+**Kết quả đo lại trên 12 bài chẩn đoán:** báo động giả **9 → 1**. Đồng thời bắt được **P-010a** (bài chèn lỗi A4 mà CP4 từng bỏ sót) — sửa đúng hướng thì recall tăng chứ không đánh đổi.
+
+**Kết quả trên toàn bộ E5:** Kappa **0,264 → 0,713**, accuracy **0,636 → 0,879**. Chi tiết: `evaluation-plan.md` mục 4.5.
+
+**Bài học lặp lại lần thứ ba trong dự án này** (sau B12 và BV3 ở B13): *một bộ so khớp gộp hai thứ khác nhau làm một.* B12 gộp so-sánh-nhất-làm-claim với làm-trạng-ngữ; BV3 gộp xưng-hô với danh-từ-chỉ-người; B14 gộp mọi con số có đơn vị `km` thành tầm hoạt động. Cả ba đều **không lộ ra trong unit test** vì test dùng ví dụ do chính người viết code nghĩ ra — chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+
+**Còn sót, đã biết:** **P-006a** vẫn là báo động giả của CP4 dù câu đó đã được nêu **làm ví dụ ngay trong prompt**. Đây là **giới hạn của sửa-bằng-prompt**; cách chặn đúng là một chốt tất định — regex mốc thời gian trong trích dẫn, giống lớp 2 ở trên. Chưa làm vì đang khoá code chờ đo lại E1.
+
+---
+
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
 
 | Hạng mục | Ghi ở đâu | Ghi chú |
@@ -471,11 +512,11 @@ Giống hệt hình dạng của B12: **một bộ so khớp từ vựng gộp h
 
 | Mã | Đo gì | Trạng thái |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt, đo lại 2026-08-11** sau khi cả 4 agent dùng rubric + thêm VF e34 vào KB: σ `final_score` = **1,79** < 2. ⚠️ Nhưng tỉ lệ giữ nguyên quyết định tụt **100% → 88%**, và σ riêng của `content_quality` (4,38) với `compliance` (4,68) chưa đạt. Chẩn đoán: 8/10 bài có điểm Compliance nằm sát ngưỡng veto 50 — **ngưỡng đặt sai chỗ, không phải agent hỏng**. Calibrate trước, sửa agent sau. Chi tiết: `evaluation-plan.md` mục 4.1 |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt, đo lại 2026-08-11** sau khi cả 4 agent dùng rubric + thêm VF e34 vào KB: σ `final_score` = **1,79** < 2. ⚠️ Nhưng tỉ lệ giữ nguyên quyết định tụt **100% → 88%**, và σ riêng của `content_quality` (4,38) với `compliance` (4,68) chưa đạt. Chẩn đoán ban đầu — *"8/10 bài có điểm Compliance sát ngưỡng veto 50, ngưỡng đặt sai chỗ chứ agent không hỏng"* — **E5 chứng minh là SAI một nửa**: ngưỡng đúng là đặt sai chỗ, nhưng agent **cũng** hỏng thật (B14, CP3 báo động giả 8/9). ⚠️ **Số 1,79 nay đã hết hiệu lực** — code chấm điểm đổi sau khi sửa B14, phải đo lại. Chi tiết: `evaluation-plan.md` mục 4.1 |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | ❌ chưa — **hết chặn: gold set có nhãn, E1 đã đạt.** Còn test-retest nhãn (≥2026-08-13) nên chạy song song được. ⚠️ Chỉ calibrate được **ngưỡng 50** và `compliance_veto_below`; ngưỡng `publish` = 80 không có mẫu, xem mục 6. Chi phí: chấm gold set 33 bài ~$2, sau đó quét bao nhiêu ngưỡng cũng $0 |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | ⚠️ **đã chạy 2 lần (2026-08-11), kết quả CHƯA chốt vào config.** Lần 1 Kappa 0,264 → phát hiện B14; sau khi sửa, Kappa **0,713** (*substantial*), accuracy 0,879, sai 4/33. **Ba cảnh báo phải nêu kèm:** (a) ngưỡng tối ưu đẩy veto xuống dưới mọi điểm → veto-theo-điểm bị vô hiệu, quyết định do **cờ `critical`** một mình; (b) ngưỡng `publish` không calibrate được (mục 6); (c) **chưa có trần Kappa** để diễn giải 0,713 — chờ test-retest ≥2026-08-13. `meta.calibrated` vẫn `false` cho tới khi đo lại E1. Chi tiết: `evaluation-plan.md` mục 4.5 |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
 **E4 làm lộ hai sai số trong tài liệu — ✅ đã sửa cả hai (2026-08-04), `evaluation-plan.md` mục 4.4:**

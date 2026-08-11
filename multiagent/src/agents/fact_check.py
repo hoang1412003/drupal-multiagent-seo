@@ -28,8 +28,19 @@ _RULE_KHONG_TRA = "Số liệu chưa kiểm chứng được bằng thông số 
 _EXTRACT_PROMPT = (
     "Bạn trích các CLAIM ĐỊNH LƯỢNG có thể kiểm chứng bằng thông số kỹ thuật "
     "xe điện VinFast từ nội dung. Chỉ trích claim gắn với một model cụ thể và "
-    "một con số kiểm chứng được: tầm hoạt động/quãng đường (km), thời gian sạc, "
-    "dung lượng pin, giá, chu kỳ bảo dưỡng. KHÔNG trích câu chung chung không "
+    "một con số kiểm chứng được, thuộc ĐÚNG MỘT trong các chỉ số sau:\n"
+    "- tam_hoat_dong: quãng đường xe đi được SAU MỘT LẦN SẠC ĐẦY\n"
+    "- thoi_gian_sac: thời gian sạc pin CỦA XE\n"
+    "- pin: dung lượng pin (kWh)\n"
+    "- gia: giá xe\n"
+    "- bao_duong: chu kỳ bảo dưỡng định kỳ\n"
+    "- khac: MỌI con số khác. Không chắc thì chọn 'khac'.\n\n"
+    "CẨN TRỌNG - bốn loại số DỄ BỊ NHẦM thành tam_hoat_dong, phải ghi 'khac':\n"
+    "1. Quãng đường một CHUYẾN ĐI cụ thể ('đã vượt 220km', 'hành trình 1.000km')\n"
+    "2. Hạn mức quãng đường của GÓI THUÊ PIN ('500km/tháng')\n"
+    "3. Quãng đường đi thêm sau SẠC NHANH/sạc một phần ('180km sau 18 phút')\n"
+    "4. Thông số TRỤ SẠC, không phải của xe ('trụ 30kW - 60 phút')\n\n"
+    "KHÔNG trích câu chung chung không "
     "có số. Với mỗi claim, ghi: model (ví dụ 'VF 8'), metric, value (nguyên "
     "văn con số), field chứa nó (title/body/meta_description), và excerpt "
     "(trích nguyên văn cụm chứa claim). Nếu không có claim định lượng nào, "
@@ -65,12 +76,20 @@ _EXTRACT_SCHEMA = {
 _COMPARE_PROMPT = (
     "Bạn đối chiếu từng claim với đoạn thông số công bố tra được. Với mỗi mục "
     "đánh số, trả verdict:\n"
-    "- 'mismatch' CHỈ KHI đoạn thông số rõ ràng là của ĐÚNG model trong claim "
-    "VÀ con số trong claim MÂU THUẪN với con số công bố.\n"
-    "- 'match' khi cùng model và con số khớp.\n"
-    "- 'unverifiable' khi đoạn thông số thuộc MODEL KHÁC, không đủ dữ kiện, "
-    "hoặc không chắc. Khi nghi ngờ luôn chọn 'unverifiable', TUYỆT ĐỐI không "
-    "chọn 'mismatch'.\n"
+    "- 'mismatch' CHỈ KHI thoả ĐỦ BA điều: (a) đoạn thông số là của ĐÚNG model "
+    "trong claim, (b) đoạn thông số có ĐÚNG CHỈ SỐ mà claim nói tới, (c) con "
+    "số mâu thuẫn.\n"
+    "- 'match' khi đủ (a) và (b), và con số khớp.\n"
+    "- 'unverifiable' khi thiếu (a) HOẶC thiếu (b), không đủ dữ kiện, hoặc "
+    "không chắc. Khi nghi ngờ luôn chọn 'unverifiable', TUYỆT ĐỐI không chọn "
+    "'mismatch'.\n\n"
+    "ĐIỀU KIỆN (b) LÀ CHỖ HAY SAI NHẤT. Mỗi mục ghi rõ `metric` của claim, và "
+    "đoạn thông số cũng ghi rõ tên chỉ số nó chứa - hai bên phải là CÙNG MỘT "
+    "chỉ số. Bốn ca dưới đây đều PHẢI là 'unverifiable', không được 'mismatch':\n"
+    "- claim nói quãng đường MỘT CHUYẾN ĐI, thông số nói tầm hoạt động/lần sạc\n"
+    "- claim nói hạn mức GÓI THUÊ PIN (km/tháng), thông số nói tầm hoạt động\n"
+    "- claim nói DUNG LƯỢNG PIN (kWh), thông số nói tầm hoạt động (km)\n"
+    "- claim nói thông số TRỤ SẠC, thông số nói thông số của xe\n"
     "Trả lời bằng tiếng Việt trong trường reason."
 )
 
@@ -147,6 +166,20 @@ def danh_gia(fields: dict, *, content_type: str = "cam_nang", langcode: str = "v
     pairs = []            # (claim, hit) - chỉ giữ claim tra được thông số
     khong_tra_duoc = []   # claim không có đoạn thông số nào để đối chiếu
     for claim in claims:
+        # CHỐT CHẶN TẤT ĐỊNH: `khac` nghĩa là claim không thuộc chỉ số nào KB
+        # có, nên KHÔNG đối chiếu được - đưa thẳng sang "chưa kết luận", không
+        # gọi LLM so sánh.
+        #
+        # Vì sao chặn ở code chứ không chỉ dặn trong prompt: `retriever` không
+        # có ngưỡng similarity (rag-design.md mục 4.4, `min_similarity: null`),
+        # nên truy vấn "VF e34 khac" VẪN trả về chunk gần nhất. Cặp đó đi vào
+        # LLM và LLM có thể kết luận `mismatch` giữa hai chỉ số khác nhau -
+        # đúng lỗi đo được ngày 2026-08-11: CP3 gây 8/9 báo động giả trên
+        # đường veto, do so quãng đường một chuyến đi / hạn mức thuê bao /
+        # dung lượng pin với `tam_hoat_dong`.
+        if claim.get("metric") == "khac":
+            khong_tra_duoc.append(claim)
+            continue
         query = f"{claim['model']} {claim['metric']}"
         hits = retriever(query, content_type, langcode, embedder=embedder)
         if hits:

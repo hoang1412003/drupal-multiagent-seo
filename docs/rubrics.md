@@ -163,7 +163,7 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 |---|---|---|---|---|---|---|---|
 | **CP1** | Không có claim tuyệt đối/so sánh nhất ("số 1", "tốt nhất", "duy nhất") | máy | Có, **nêu rõ phạm vi so sánh** ("tốt nhất thị trường") | Có cụm so sánh nhất nhưng **không nêu phạm vi** ("cách tốt nhất để…") | Không có cụm nào | **critical** | A1 |
 | **CP2** | Không so sánh trực tiếp hơn hẳn đối thủ cụ thể | LLM | Có | - | Không | **critical** | A2 |
-| **CP3** | Số liệu khớp thông số VinFast công bố | LLM + RAG | Có sai lệch | Không kiểm chứng được (không có trong KB) | Khớp | **critical** | A3 |
+| **CP3** | Số liệu khớp thông số VinFast công bố | LLM + RAG | Sai lệch **cùng model + cùng chỉ số** | Không kiểm chứng được (ngoài KB, **hoặc khác chỉ số**) | Khớp | **critical** | A3 |
 | **CP4** | Khuyến mại nêu đủ thời hạn & điều kiện | LLM | Thiếu | - | Đủ | **critical** | A4 |
 | **CP5** | Claim tầm hoạt động có điều kiện đo (NEDC/WLTP) | LLM | Thiếu hoàn toàn | Có lưu ý chung nhưng không nêu chuẩn đo | Nêu rõ chuẩn đo | medium | B1 |
 | **CP6** | Claim thời gian sạc nêu loại trụ & dải % | LLM | Thiếu cả hai | Nêu một trong hai | Nêu đủ | medium | B2 |
@@ -194,6 +194,20 @@ Một cụm so sánh nhất chỉ trở thành **claim quảng cáo kiểm chứ
 **Đo trên 33 mẫu gold set (2026-08-10):** cách cũ - mọi lần khớp đều là mức 0 - cho ra **13 bài bị veto trong khi chỉ 3 bài vi phạm thật** (precision **0,21**). 10 bài bị từ chối oan gồm *"cách tốt nhất để khắc phục sự cố"*, *"áp dụng **duy nhất** 01 Gói cố định"* (lượng từ, không phải so sánh), và một **tiêu đề cột bảng thông số** *"Thời gian sạc nhanh nhất"*. Sau khi tách mức: precision **1,00**, recall giữ nguyên **1,00**.
 
 Vì sao đây là lỗi phải sửa ở code chứ không để calibration lo: flag `critical` cho ra `rejected` **bất kể điểm tổng**, tức veto đi vòng qua ngưỡng. Ngưỡng nào ở E5 cũng không chạm tới được 10 bài đó.
+
+**CP3 mức `0` đòi thêm điều kiện "CÙNG CHỈ SỐ" (sửa 2026-08-11, nợ B14).** Định nghĩa cũ — *"có sai lệch so với thông số VinFast công bố"* — thiếu mất vế quan trọng nhất: sai lệch **của cùng một đại lượng**. Nay `mismatch` đòi đủ **ba** điều:
+
+1. cùng model,
+2. **cùng chỉ số**,
+3. con số mâu thuẫn.
+
+Thiếu bất kỳ điều nào → mức `1` (không kiểm chứng được), không phải mức 0. Trước khi sửa, mọi con số đi kèm `km` đều bị đem so với tầm hoạt động: *"cung đường 220km"* (một chuyến đi), *"500km/tháng"* (hạn mức gói thuê pin), *"42kWh"* (dung lượng pin) — 8/9 báo động giả trong E5 đến từ đây.
+
+**Vế "cùng chỉ số" được chặn bằng CODE, không chỉ bằng prompt:** claim phân loại `metric = "khac"` không bao giờ đi vào bước so sánh LLM. Lý do bắt buộc phải có lớp này: `retriever` **không có ngưỡng similarity** nên luôn trả về chunk gần nhất dù câu hỏi chẳng liên quan — chỉ dựa vào prompt thì mỗi lần LLM phân loại trượt lại thành một lần veto oan.
+
+**CP4 cũng viết lại prompt cùng đợt:** loại trừ chính sách nhà nước và lời mời chung chung (không phải khuyến mại), và buộc đọc lại trích dẫn tìm thời hạn đã có sẵn. Trước đó nó gắn cờ *"thiếu thời hạn"* cho câu ghi rõ *"từ 25/06 – 31/08/2024"*.
+
+Kết quả chung của cả hai: báo động giả trên bộ chẩn đoán **9 → 1**, Kappa E5 **0,264 → 0,713**. Chi tiết: `technical-debt.md` B14.
 
 **Đánh đổi đã biết, ghi rõ chứ không giấu:** claim thật mà không nêu phạm vi (*"VinFast là thương hiệu xe điện tốt nhất."*) rơi xuống mức 1. Nó **không biến mất** - vẫn sinh flag `low` hiện trong báo cáo cho người duyệt, chỉ thôi tự động từ chối bài. Trong một hệ thống không bao giờ tự xuất bản (`architecture.md` mục 2.3), đổi 10 lần chặn oan chắc chắn lấy vài lần hạ mức là đánh đổi có lợi. Có test khoá cả hai chiều, gồm đúng ca đánh đổi này (`scripts/test_compliance_rules.py`).
 

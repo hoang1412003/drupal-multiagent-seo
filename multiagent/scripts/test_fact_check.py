@@ -151,6 +151,59 @@ def test_verdict_trung_index_giu_lan_dau():
     print("[PASS] verdict trung index -> giu lan dau")
 
 
+def test_claim_khac_khong_bao_gio_di_vao_so_sanh():
+    """metric='khac' -> chua ket luan, KHONG goi LLM so sanh.
+
+    Chot chan TAT DINH, khong chi dan trong prompt. Ly do: retriever khong co
+    nguong similarity nen truy van "VF e34 khac" VAN tra ve chunk gan nhat, va
+    cap do di vao LLM roi co the ra 'mismatch' giua hai chi so khac nhau.
+
+    Do duoc 2026-08-11: CP3 gay 8/9 bao dong gia tren duong veto vi so quang
+    duong MOT CHUYEN DI ('da vuot 220km'), han muc GOI THUE PIN ('500km/thang')
+    va DUNG LUONG PIN ('42kWh') voi `tam_hoat_dong`.
+    """
+    da_goi = []
+
+    def compare_gia(pairs):
+        da_goi.append(pairs)
+        return [{"index": i, "verdict": "mismatch", "reason": "x"}
+                for i in range(len(pairs))]
+
+    claims = [{"model": "VF e34", "metric": "khac", "value": "220km",
+               "field": "body", "excerpt": "đã vượt qua cung đường 220km"}]
+    kq = fact_check.danh_gia(
+        {"title": "", "body": "x", "meta_description": ""},
+        extract_fn=lambda f: claims,
+        compare_fn=compare_gia,
+        retriever=lambda *a, **k: [{"model": "VF e34", "text": "tam_hoat_dong: 318,6km"}],
+    )
+    assert da_goi == [], "claim 'khac' KHONG duoc di vao compare_fn"
+    assert kq["level"] == 1, f"phai la muc 1 (chua ket luan), thuc te {kq['level']}"
+    print("[PASS] claim metric='khac' -> muc 1, khong goi LLM so sanh")
+
+
+def test_claim_co_metric_that_van_duoc_so_sanh():
+    """Chieu nguoc lai: khong duoc chan nham claim hop le."""
+    da_goi = []
+
+    def compare_gia(pairs):
+        da_goi.append(pairs)
+        return [{"index": 0, "verdict": "mismatch", "reason": "lech so"}]
+
+    claims = [{"model": "VF 8", "metric": "tam_hoat_dong", "value": "500km",
+               "field": "body", "excerpt": "VF 8 đi được 500km"}]
+    kq = fact_check.danh_gia(
+        {"title": "", "body": "x", "meta_description": ""},
+        extract_fn=lambda f: claims,
+        compare_fn=compare_gia,
+        retriever=lambda *a, **k: [{"model": "VF 8", "text": "tam_hoat_dong: 420km"}],
+    )
+    assert len(da_goi) == 1, "claim co metric that PHAI di vao compare_fn"
+    assert kq["level"] == 0, f"lech so cung model cung chi so -> muc 0, thuc te {kq['level']}"
+    print("[PASS] claim metric that van duoc so sanh -> muc 0 khi lech")
+
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -162,6 +215,8 @@ if __name__ == "__main__":
         test_mot_claim_khop_mot_claim_khong_tra_duoc_ra_muc_1,
         test_index_ngoai_bien_khong_lam_sap,
         test_thieu_verdict_khong_duoc_len_muc_2,
+        test_claim_khac_khong_bao_gio_di_vao_so_sanh,
+        test_claim_co_metric_that_van_duoc_so_sanh,
         test_verdict_trung_index_giu_lan_dau,
     ):
         try:

@@ -162,7 +162,7 @@ Cảnh báo thứ hai quan trọng khi báo cáo: không để lỡ trình bày 
 
 | Không vào | Vì sao |
 |---|---|
-| **System prompt của 4 agent** | Là code, không phải tham số. Sửa prompt là thay đổi hành vi cần review qua git, không phải chỉnh cấu hình. Chỉ *phiên bản* prompt vào `meta.prompt_version` |
+| **System prompt của 4 agent** | Là code, không phải tham số. Sửa prompt là thay đổi hành vi cần review qua git, không phải chỉnh cấu hình. Chỉ *phiên bản* prompt vào `meta.prompt_version`.<br><br>⚠️ **Không phải mọi prompt đều nằm trong 4 agent.** CP3 gọi hai prompt riêng trong `fact_check.py`; đến 2026-08-11 chúng vẫn ngoài phép băm, nên `prompt_version` từng có thể **không đổi trong khi hành vi chấm điểm đã đổi** (`evaluation-plan.md` mục 3a). Đã tách thành hash thứ hai. Thêm prompt ở module mới thì phải cập nhật công thức băm — đây đúng loại lỗi "một con số ở nhiều nơi" mà mục 1 nói tới, chỉ khác là ở đây thiếu chỗ chứ không phải thừa chỗ |
 | **Danh sách blacklist** (`compliance_rules.json`) | Là dữ liệu tra cứu, không phải tham số điều chỉnh; không do calibration sinh ra |
 | **API key, URL Drupal** | Đã ở `.env`, không được trộn bí mật vào file cấu hình theo dõi bởi git |
 | **Bảng mã lỗi A/B/C** | Là định nghĩa ngữ nghĩa, đổi là phải gán lại nhãn - thuộc về guideline có version, không phải config |

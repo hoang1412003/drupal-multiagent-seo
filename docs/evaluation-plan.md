@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** E1, E2, E4 đã chạy — **E1 đo lại 2026-08-11 sau khi cả 4 agent dùng rubric, σ `final_score` = 1,79 < 2, ĐẠT**. Gold set đã gán nhãn 33/33. E5 sẵn sàng chạy; E3/E6 sau đó. Test-retest nhãn còn chờ (sớm nhất 13/08).
+**Trạng thái:** E1, E2, E4, **E5** đã chạy. **E5 (2026-08-11): Kappa 0,713 — *substantial agreement*, accuracy 0,879, sai 4/33** — nhưng chạy hai lần mới ra, lần 1 (Kappa 0,264) là thứ tìm ra lỗi B14. ⚠️ **E1 phải đo lại**: σ = 1,79 đo trên code trước khi sửa B14, nay hết hiệu lực. Gold set 33/33. Còn E3/E6 và test-retest nhãn (sớm nhất 13/08 — **chưa có trần Kappa thì chưa diễn giải được 0,713**).
 
 ---
 
@@ -60,7 +60,7 @@ Năm điểm chặn quan trọng:
 
 ---
 
-## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-10 (bản 2)
+## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-11 (bản 3)
 
 `rubrics.md` mục 10 quy định: ngưỡng calibrate được **chỉ có hiệu lực với đúng bộ (rubric version, prompt version, model)** đã dùng lúc đo. Nên trước khi chạy E1 và E5 phải chốt bộ đó lại, và ghi ra để về sau kiểm chứng được.
 
@@ -68,30 +68,38 @@ Năm điểm chặn quan trọng:
 
 | Thành phần | Giá trị |
 |---|---|
-| Commit | `3255517` (chuyển rubric) + KB thêm VF e34. **Bản 1 (`56e1d6d`) đã hết hiệu lực** — khoá đó mở lại ngay trong ngày để chuyển nốt SEO và Content Quality sang rubric |
+| Commit | bản sửa **B14** (CP3 cùng-chỉ-số + CP4). **Bản 2 (`3255517`) hết hiệu lực** — E5 lần 1 chạy trên bản đó và chính nó tìm ra B14 |
 | Model | `claude-haiku-4-5-20251001` |
 | Rubric version | v1 (`rubrics.md`) — **áp dụng cho cả 4 agent** |
-| Prompt version | `51c0cba6c91e1435` *(bản 1 là `019c2d5e231aad48`, đổi vì SEO và CQ có prompt mới)* |
+| Prompt version | **`0bdc5ab12ec65f89`** — công thức MỚI, phủ **6** prompt (4 agent + 2 của `fact_check`). *Bản 2 là `51c0cba6c91e1435` theo công thức cũ chỉ phủ 4; hai số không so sánh trực tiếp được.* Xem cảnh báo bên dưới |
 | Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 | KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
-| E1 | **đã chạy 2026-08-11** trên đúng bộ này: σ `final_score` = **1,79** < 2 ✅ |
+| E1 | ⚠️ **CHƯA đo trên bản này.** Số 1,79 thuộc bản 2, không được trích dẫn cho bản 3 |
+| E5 | ✅ chạy trên đúng bản này: Kappa **0,713**, accuracy 0,879 (mục 4.5) |
 
-`prompt_version` là SHA-256 của 4 system prompt nối theo thứ tự tên. Băm lại bất cứ lúc nào để kiểm prompt có bị đổi không:
+> ### ⚠️ Bản khoá cũ có lỗ hổng — phát hiện khi sửa B14
+>
+> Công thức `prompt_version` của bản 1 và bản 2 chỉ băm **4 system prompt của 4 agent**. Nhưng CP3 gọi hai prompt riêng nằm trong `fact_check.py` (`_EXTRACT_PROMPT`, `_COMPARE_PROMPT`) — **không nằm trong phép băm**.
+>
+> Nghĩa là: **phần lớn bản sửa B14 nằm ở chỗ mà `prompt_version` không nhìn thấy.** Sửa xong hai prompt đó thì hash 4-agent vẫn có thể không đổi, và bản khoá sẽ khẳng định "cùng một bộ" trong khi hành vi chấm điểm đã khác hẳn — đúng thứ mà bản khoá sinh ra để chặn.
+>
+> Lần này hash 4-agent *có* đổi (do CP4 nằm trong `compliance._LLM_PROMPT`), nên lỗ hổng không gây hậu quả. Đó là **may, không phải thiết kế**.
+>
+> **Đã xử lý — công thức nay nằm trong CODE, không phải trong tài liệu:** hàm `eval_calibration.prompt_version()` là nguồn duy nhất. Chép công thức vào đây rồi cũng trôi lệch, đúng như `config-spec.md` mục 1 mô tả.
+>
+> **Và nó đã được dùng làm chốt chặn thật:** `eval_calibration.py` ghi `prompt_version` vào file kết quả, rồi **từ chối resume** nếu hash lệch. Chốt này sinh ra từ một cái bẫy có thật — script resume để khỏi trả lại $1,9, nhưng sau khi sửa B14 thì file cũ mang điểm của bản code khác; chạy tiếp sẽ **trộn điểm hai bản mà không ai nhìn ra**. File cũ nay đổi tên thành `e5_truoc_sua_cp3_cp4.json` và đánh dấu hết hiệu lực.
 
-```python
-import hashlib, sys; sys.path.insert(0, "src")
-from agents import content_quality, seo, compliance, brand_voice
-ps = {"brand_voice_bv6": brand_voice._BV6_PROMPT,
-      "compliance": compliance._LLM_PROMPT,
-      "content_quality": content_quality._LLM_PROMPT,
-      "seo": seo._LLM_PROMPT}
-h = hashlib.sha256()
-for k in sorted(ps): h.update(ps[k].encode())
-print(h.hexdigest()[:16])      # phải ra 51c0cba6c91e1435
+`prompt_version` là SHA-256 của **6** system prompt nối theo thứ tự tên. Kiểm bất cứ lúc nào:
+
+```bash
+.venv/Scripts/python.exe -c "import sys; sys.path[:0]=['scripts','src']; \
+import eval_calibration as e; print(e.prompt_version())"      # phải ra 0bdc5ab12ec65f89
 ```
 
-*(Bản 1 dùng `content_quality.SYSTEM_PROMPT` và `seo.SYSTEM_PROMPT` — hai tên đó **không còn tồn tại** sau khi chuyển rubric.)*
+**Thêm prompt ở module mới thì phải sửa `prompt_version()`** — nếu không, bản khoá sẽ khẳng định "cùng một bộ" trong khi hành vi đã đổi, đúng lỗi vừa mắc ở bản 1-2.
+
+*(Công thức của bản 1 tham chiếu `content_quality.SYSTEM_PROMPT` và `seo.SYSTEM_PROMPT` — hai tên đó **không còn tồn tại** sau khi chuyển rubric. Đó là lần đầu công thức chép-tay này hỏng; lỗ hổng `fact_check` là lần thứ hai. Nên nay nó nằm trong code.)*
 
 **Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng.
 
@@ -133,7 +141,9 @@ So sánh lại được nhờ `scripts/so_sanh_phuong_sai.py`, chạy trên **c�
 
 **Quy mô:** 10 bài × 5 lần × 4 agent = 200 lần gọi LLM.
 
-#### Kết quả E1 sau khi cả 4 agent dùng rubric (2026-08-11)
+#### Kết quả E1 sau khi cả 4 agent dùng rubric (2026-08-11) — ⚠️ ĐÃ HẾT HIỆU LỰC
+
+> **Không trích các con số dưới đây cho code hiện tại.** Chúng đo trên bản khoá **bản 2**; sau đó B14 sửa CP3/CP4, tức đổi đúng agent có σ cao nhất bảng. Giữ lại vì phần chẩn đoán bên dưới vẫn còn giá trị, và vì bảng này là **đầu vào của việc tìm ra B14**.
 
 Số liệu thô: `docs/evidence/e1_sau_rubric_4_agent.json`. Chi phí thật **$3,06**, 50 lượt chấm, 39,5 giây/lượt (4 agent chạy tuần tự trong script; pipeline thật chạy song song nên nhanh hơn).
 
@@ -179,6 +189,12 @@ G-004   compliance [66,7  66,7  66,7  50,0  66,7]
 **Mà 50 là số minh hoạ chưa calibrate** (`scoring.yaml` ghi `meta.calibrated: false`; nguồn: `architecture.md` mục 6.2). Nói cách khác, 88% có thể là **ngưỡng đặt sai chỗ — đúng giữa vùng điểm dày nhất — chứ không phải agent hỏng.**
 
 **Vì vậy thứ tự đúng là calibrate TRƯỚC, sửa agent SAU** (nếu còn cần). E5 sẽ dời ngưỡng ra khỏi cụm điểm; nếu số lần lật giảm thì không phải đụng dòng code nào. Nếu vẫn lật nhiều thì lúc đó **biết chắc** là lỗi agent chứ không phải lỗi ngưỡng, và sửa có mục tiêu.
+
+> **Hậu kiểm (2026-08-11): suy đoán trên SAI một nửa, và cách bố trí thí nghiệm đã cứu được.**
+>
+> E5 cho thấy **cả hai** đều đúng: ngưỡng *có* đặt sai chỗ, nhưng agent **cũng hỏng thật** — CP3 gắn cờ `critical` sai 8/9 lần (B14). Mệnh đề *"chứ không phải agent hỏng"* là suy luận **hoặc-này-hoặc-kia** trên một tình huống có hai nguyên nhân cùng lúc.
+>
+> Điều đáng giữ lại: **thứ tự "calibrate trước" vẫn đúng, dù lý do đưa ra thì sai.** Đúng không phải vì ngưỡng là thủ phạm, mà vì E5 là *phép chẩn đoán rẻ nhất* — nó phơi ra lỗi agent (qua việc ngưỡng tối ưu bị dồn về đáy dải quét) mà không cần đoán trước lỗi nằm ở đâu. Nếu làm ngược lại — sửa Compliance trước rồi mới đo — thì sẽ sửa mò, và σ 4,68 không chỉ được vào CP3.
 
 Thêm một căn cứ cho việc không vội sửa Compliance: nợ B5 đã thử một bản sửa rất hợp lý và σ chỉ đi từ **7,70 xuống 7,29**. Bốn tiêu chí còn dao động (CP2/CP4/CP7/CP8) đều cần đọc hiểu, không chuyển sang đo bằng máy được như CP5/CP6 đã làm.
 
@@ -319,6 +335,67 @@ Hai điều kiện cuối phát hiện ngày 2026-07-30 khi chạy pipeline th�
 Nguyên nhân ở `drupal_client.py`: `image_alt` chỉ lấy từ `relationships.field_image.data.meta.alt`, còn ảnh trong body nằm lẫn trong chuỗi HTML của `attributes.body.value` và không được bóc ra. System prompt của `seo.py` cũng chỉ dặn LLM chấm field `[image_alt]`.
 
 Hệ quả cho calibration: Recall/F1 của tiêu chí SEO9 sẽ lệch có hệ thống, vì ground truth (mã lỗi B6 trong `annotation-guideline.md` v1.2) xét **mọi ảnh trong body** còn hệ thống chỉ xét **một ảnh đại diện**. Hai bên đo hai tập ảnh khác nhau. Chi tiết và bằng chứng thứ hai (bài G-001 của gold set): `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 6.
+
+#### Kết quả E5 lần đầu (2026-08-11)
+
+Số liệu thô: `docs/evidence/e5_sau_sua_cp3_cp4.json` (điểm 4 agent trên 33 bài) và `e5_quet_nguong.json` (50 bộ ngưỡng tốt nhất). Script: `scripts/eval_calibration.py`, hai pha — chấm 33 bài **một lần** (~$1,9), rồi quét **7056 tổ hợp ngưỡng** với chi phí **$0**. Quét miễn phí được là nhờ Aggregator là hàm thuần không gọi LLM (`architecture.md` mục 6); đây là lợi ích cụ thể của quyết định thiết kế đó, đáng nêu khi bảo vệ.
+
+**E5 phải chạy HAI lần, và lần đầu là thứ tìm ra lỗi.**
+
+| | Kappa (ngưỡng 50/50/80) | Kappa (tốt nhất) | Accuracy |
+|---|---|---|---|
+| Lần 1 — trước khi sửa CP3/CP4 | 0,090 | 0,264 | 0,636 |
+| **Lần 2 — sau khi sửa** | **0,427** | **0,713** | **0,879** |
+
+Kappa **0,713** nằm trong vùng *substantial agreement* (Landis–Koch 0,61–0,80). Sai **4/33 bài**.
+
+**Lần 1 không phải thất bại — nó là phép chẩn đoán.** Kappa 0,264 với ngưỡng tối ưu bị đẩy về đáy dải quét là dấu hiệu *bài toán không nằm ở ngưỡng*. Truy ngược ra: **16/33 bài có cờ `critical` trong khi chỉ 7 bài đáng có** — precision đường veto 44%. Và 8/9 báo động giả đến từ **CP3**.
+
+Nguyên nhân gốc, không phải "LLM bất định": **CP3 kiểm "cùng model" nhưng quên kiểm "cùng chỉ số".** Nó so mọi con số có `km` với `tam_hoat_dong`:
+
+| Câu bị gắn cờ sai | Thực chất |
+|---|---|
+| *"VF e34 đã vượt qua cung đường 220km"* | quãng đường một chuyến đi |
+| *"657.500 đồng/tháng với quãng đường 500km/tháng"* | hạn mức gói thuê pin |
+| *"VF e34 có công suất pin là 42kWh"* | dung lượng pin |
+| *"Trụ sạc nhanh DC 30kW - Khoảng 60 phút"* | thông số trụ sạc |
+
+CP4 mắc lỗi cùng họ: gắn cờ *"khuyến mại thiếu thời hạn"* cho câu **có** thời hạn (*"từ 25/06 – 31/08/2024"*, *"Trước 6/4/2022"*).
+
+**Đã sửa ba lớp** (chi tiết ở `technical-debt.md` B14):
+1. Prompt trích claim tách bạch `tam_hoat_dong` khỏi bốn loại số hay bị nhầm
+2. **Chốt chặn tất định**: claim `metric="khac"` không bao giờ vào so sánh LLM — phải chặn ở code vì `retriever` không có ngưỡng similarity nên luôn trả về chunk gần nhất
+3. Prompt đối chiếu đòi đủ **ba** điều: đúng model, **đúng chỉ số**, số mâu thuẫn
+
+Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và bắt được thêm P-010a (bài chèn A4 mà CP4 từng bỏ sót).
+
+**Bốn bài còn sai, ba trong đó đã có tài liệu từ trước:**
+
+| Bài | Người | Máy | Nguyên nhân |
+|---|---|---|---|
+| G-011 | rejected | needs_revision | `"có một không hai"` ngoài blacklist — B12b, **cố ý không vá** |
+| G-020 | rejected | needs_revision | `"săn đón nhất"` ngoài blacklist — B12b, **cố ý không vá** |
+| P-006a | needs_revision | rejected | CP4 vẫn báo oan câu có thời hạn — giới hạn của sửa-bằng-prompt |
+| G-008 | needs_revision | rejected | **chưa chẩn đoán** |
+
+#### ⚠️ Ba điều phải nêu khi trích con số 0,713
+
+**1. Ngưỡng tối ưu vô hiệu hoá veto-theo-điểm.** `veto = 30` và `nr = 30` nằm ở đáy dải quét, mà điểm Compliance thấp nhất trong cả bộ là **33,3** — tức ngưỡng nằm dưới mọi điểm. Ở cấu hình tối ưu, `rejected` do **duy nhất cờ `critical`** sinh ra.
+
+Đây không phải lỗi mà là kết luận: sau khi CP3/CP4 hết báo oan, **cờ `critical` một mình đã đủ khớp phán đoán của người**. Ngưỡng điểm không thêm được gì. Và đây là **plateau, không phải cực trị bị cắt cụt** — mọi giá trị ≤ 33 cho kết quả y hệt, nên không cần mở rộng dải quét.
+
+**2. Ngưỡng `publish` không calibrate được.** Bộ tối ưu đẩy nó lên ≥92 chỉ vì gold set **không có mẫu `publish` nào** nên mọi dự đoán `publish` đều sai. Đó là hệ quả của lớp rỗng, không phải calibration thật (`technical-debt.md` mục 6).
+
+**3. CHƯA CÓ TRẦN để diễn giải 0,713.** `annotation-guideline.md` mục 8.2 bắt buộc báo cáo Kappa kèm **trần trên** — Kappa test-retest của chính người gán, chạy sớm nhất **13/08**. Không có trần thì 0,713 không nói được là tốt hay kém: nếu trần là 0,75 thì đây là kết quả rất tốt; nếu trần là 0,95 thì còn khoảng cách lớn.
+
+#### Chưa chốt ngưỡng vào `scoring.yaml`
+
+`meta.calibrated` vẫn để `false`. Hai việc phải xong trước khi đổi:
+
+- **Đo lại E1** — CP3/CP4 vừa đổi nên σ đo ngày 2026-08-11 đã hết hiệu lực. Ghi `calibrated: true` mà không biết điểm có ổn định không là đúng thứ khối `meta` được dựng ra để chặn.
+- **Test-retest nhãn** (≥13/08) — để có trần Kappa.
+
+---
 
 ### 4.6. E6 - Shadow-test: phải viết lại cho khả thi
 

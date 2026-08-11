@@ -160,9 +160,10 @@ Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và 
 
 | Mã | Đo gì | Kết quả |
 |---|---|---|
-| **E1** | Độ ổn định điểm qua nhiều lần chấm | **Đạt** — σ `final_score` = **1,79** < 2 (đo lại 2026-08-11, cả 4 agent dùng rubric) |
+| **E1** | Độ ổn định điểm qua nhiều lần chấm | Đạt σ `final_score` = **1,79** < 2 — nhưng ⚠️ **số này đã hết hiệu lực**, code chấm điểm đổi sau khi sửa B14. Phải đo lại |
 | **E2** | Retrieval lấy đúng đoạn | Fact-check **1.00**; brand **78,3%** so với mốc ngẫu nhiên **21,7%** |
 | **E4** | Chi phí mỗi bài | TB **$0,057**/bài; cả chương trình đến giờ **$8,33** |
+| **E5** | Ngưỡng quyết định (calibration) | Kappa **0,713** (*substantial*), accuracy **0,879**, sai 4/33 — sau khi sửa B14. Xem mục 5a |
 
 **E2 — con số 78,3% là chặn dưới, không phải tỉ lệ thật.** Ground truth chỉ gán một nhóm chủ đề mỗi bài, trong khi nhiều bài thuộc hai nhóm nên bị tính trượt oan. **Không** sửa nhãn để chữa các ca này — sửa sau khi đã nhìn kết quả là tự tạo thiên vị. Báo cáo con số bị đánh giá thấp, lệch về hướng an toàn.
 
@@ -174,6 +175,8 @@ Quyết định được chốt **trước** khi gán bất kỳ nhãn nào và 
 - **σ riêng của `content_quality` (4,38) và `compliance` (4,68) chưa đạt.** Ngưỡng < 2 áp cho `final_score` vì đó là đại lượng E5 quét, nhưng vẫn phải nói rõ hai agent này dao động lớn.
 
 **Chẩn đoán 88% — không phải lỗi rubric:** 8/10 bài có điểm Compliance nằm trong dải 44–58, tức sát ngưỡng `compliance_veto_below = 50`. Hai bài có điểm đúng bằng 50 ở cả 5 lượt. Chỉ cần một tiêu chí nhích một bậc là lật giữa `rejected` và `needs_revision`. Mà **50 là số minh hoạ chưa calibrate** — nên nhiều khả năng đây là *ngưỡng đặt đúng giữa vùng điểm dày nhất*, không phải agent hỏng. Vì vậy thứ tự là **calibrate trước (E5), sửa agent sau nếu còn cần**.
+
+> **Hậu kiểm 2026-08-11 — chẩn đoán trên sai một nửa.** E5 cho thấy ngưỡng *có* đặt sai chỗ **và** agent cũng hỏng thật: CP3 gắn cờ `critical` sai 8/9 lần (`technical-debt.md` B14). Thứ tự "calibrate trước" vẫn đúng, nhưng vì lý do khác với lý do nêu ở đây — E5 là phép chẩn đoán rẻ nhất, chứ không phải vì ngưỡng là thủ phạm duy nhất. Sau khi sửa: Kappa 0,264 → **0,713**.
 
 - Kế hoạch 6 phép đo, thứ tự phụ thuộc, tiêu chí đạt: [`evaluation-plan.md`](evaluation-plan.md)
 - Số liệu thô E1/E4: [`evidence/e1_e4_report.txt`](evidence/e1_e4_report.txt), [`evidence/e1_rubric_v2_report.txt`](evidence/e1_rubric_v2_report.txt)
@@ -198,17 +201,43 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 
 ---
 
+## 5a. E5 — Calibration ngưỡng (2026-08-11)
+
+**Kết quả chính: Kappa 0,713** — *substantial agreement* theo thang Landis–Koch, accuracy **0,879**, sai **4/33 bài**.
+
+Nhưng con số đó chỉ có được sau **hai lần chạy**, và lần đầu mới là phần đáng kể nhất:
+
+| | Kappa (ngưỡng 50/50/80) | Kappa (tốt nhất) | Accuracy |
+|---|---|---|---|
+| Lần 1 | 0,090 | 0,264 | 0,636 |
+| **Lần 2 — sau khi sửa B14** | **0,427** | **0,713** | **0,879** |
+
+**E5 lần 1 không phải thất bại — nó là phép chẩn đoán.** Kappa 0,264 kèm dấu hiệu *ngưỡng tối ưu bị dồn về đáy dải quét* nói rằng vấn đề không nằm ở ngưỡng. Truy ngược ra **16/33 bài mang cờ `critical` trong khi chỉ 7 bài đáng có**, và **8/9 báo động giả đến từ CP3**: nó kiểm "cùng model" nhưng quên kiểm "cùng chỉ số", nên đem mọi con số có `km` so với tầm hoạt động — kể cả quãng đường một chuyến đi, hạn mức gói thuê pin, dung lượng pin. Chi tiết + bản sửa 3 lớp: `technical-debt.md` **B14**.
+
+**Ba điều phải nêu kèm khi trích 0,713:**
+
+1. **Ngưỡng tối ưu vô hiệu hoá veto-theo-điểm.** Điểm Compliance thấp nhất là 33,3, mà ngưỡng tối ưu là 30 → nằm dưới mọi điểm. Kết luận thật: sau khi CP3 hết báo oan, **cờ `critical` một mình đã đủ khớp phán đoán của người**. Đây là *plateau*, không phải cực trị bị cắt cụt.
+2. **Ngưỡng `publish` vẫn không calibrate được** — lớp `publish` rỗng (mục 3.1).
+3. **Chưa có trần Kappa.** Không có Kappa test-retest thì 0,713 không nói được là tốt hay kém.
+
+**Chi phí:** chấm 33 bài ~$1,9/lần; quét **7056 tổ hợp ngưỡng** tốn **$0** vì Aggregator là hàm thuần không gọi LLM — lợi ích cụ thể của một quyết định thiết kế, đáng nêu khi bảo vệ. Bản sao logic aggregator dùng cho việc quét được khoá bằng `test_e5_khop_aggregator.py` (2662 tổ hợp điểm + 4 nhánh agent lỗi).
+
+---
+
 ## 6. Việc tiếp theo
 
 | Thứ tự | Việc | Bị chặn bởi |
 |---|---|---|
 | 1 | ~~Gán nhãn gold set~~ | ✅ xong 2026-08-10, 33/33 |
-| 2 | **Test-retest** — gán lại 3-4 bài mù, yêu cầu Kappa ≥ 0,80 | Phải đợi ≥3 ngày kể từ khi gán xong → sớm nhất **2026-08-13** |
-| 3 | Tuyên bố **khoá code** chấm điểm (feature freeze) | Không bị chặn. Phải làm trước (4) |
-| 4 | Đo lại E1 (~$3) | Sau (3). Số E1 hiện có thuộc code cũ — Brand đổi ở B7, Compliance đổi ở B12 |
-| 5 | Calibration ngưỡng → so sánh baseline → held-out test | Cần (2) và (4) |
+| 2 | **Test-retest** — gán lại 3-4 bài mù, yêu cầu Kappa ≥ 0,80 | Phải đợi ≥3 ngày → sớm nhất **2026-08-13**. **Chặn việc diễn giải Kappa 0,713** |
+| 3 | ~~Khoá code chấm điểm~~ | ✅ bản 3 ghi 2026-08-11 (`evaluation-plan.md` mục 3a) |
+| 4 | ~~E5 calibration~~ | ✅ xong — Kappa 0,713, mục 5a |
+| 5 | **Đo lại E1** (~$3) trên bản khoá 3 | Không bị chặn. **Phải xong trước khi ghi ngưỡng vào `scoring.yaml`** |
+| 6 | Chốt ngưỡng đã calibrate vào `scoring.yaml`, đặt `meta.calibrated: true` | Cần (5) |
+| 7 | Chốt chặn tất định cho CP4 (regex mốc thời gian) — chữa P-006a | Sau (5), vì sửa code lại phải đo lại |
+| 8 | E3 so baseline → E6 held-out | Cần (2) và (5) |
 
-**Cố ý KHÔNG làm:** giảm dao động điểm Compliance (σ = 4,18). σ `final_score` = 1,33 đã đạt ngưỡng < 2 nên E5 không bị chặn; tiền lệ B5 cho thấy loại sửa này khó đoán kết quả (7,70 → 7,29), và mỗi lần sửa lại phải đo lại E1.
+**Cố ý KHÔNG làm:** giảm dao động điểm Compliance bằng cách chỉnh chung chung. B14 cho thấy cách đúng là **tìm lỗi cụ thể rồi sửa có mục tiêu** — σ cao là *triệu chứng*, không phải thứ để nhắm vào. Tiền lệ B5 (7,70 → 7,29) là ví dụ của việc sửa mò.
 
 ## 7. Ba việc cần mentor quyết
 

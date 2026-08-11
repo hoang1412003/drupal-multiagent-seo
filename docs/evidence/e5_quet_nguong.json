@@ -1,0 +1,902 @@
+[
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 30,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 30,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 30,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 30,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 32,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 32,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 32,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 32,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 34,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 34,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 34,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 34,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 36,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 36,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 36,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 36,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 38,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 38,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 38,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 38,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 40,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 40,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 40,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 40,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 42,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 42,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 42,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 42,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 44,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 44,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 44,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 44,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 46,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 46,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 46,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 46,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 48,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 48,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 48,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 48,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 50,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 50,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 50,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 50,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 52,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 52,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 52,
+   "publish": 98
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 52,
+   "publish": 100
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 54,
+   "publish": 94
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ },
+ {
+  "nguong": {
+   "veto": 30,
+   "nr": 54,
+   "publish": 96
+  },
+  "kappa": 0.26394052044609667,
+  "accuracy": 0.6363636363636364,
+  "f1": {
+   "rejected": 0.5384615384615384,
+   "needs_revision": 0.7,
+   "publish": 0.0
+  },
+  "phan_bo": {
+   "rejected": 16,
+   "needs_revision": 17
+  }
+ }
+]
