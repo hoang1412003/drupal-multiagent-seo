@@ -1,7 +1,9 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04, cập nhật 2026-08-05: thêm B8–B11; đóng B6, B7)
+**Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; **2026-08-11 thêm B14 và mục 8 — BÀN GIAO**)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
+
+> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-2026-08-11) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
 
@@ -556,7 +558,7 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 
 ---
 
-## 7. Thứ tự đề xuất
+## 7. Thứ tự đề xuất (lịch sử — việc đang mở nằm ở **mục 8**)
 
 ```
 [x] 1. E1 + E4  (độ ổn định, chi phí)   <- xong 2026-08-04
@@ -606,3 +608,130 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 ```
 
 Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không phụ thuộc gì**, và là thí nghiệm quyết định số phận của `rubrics.md`. Nếu điểm đã ổn định bất ngờ thì luận điểm chính của rubric yếu đi và nên biết **trước** khi bỏ công viết lại 3 prompt (`evaluation-plan.md` mục 3 điểm 2). **Đó đúng là chuyện đã xảy ra:** E1 cho thấy hai trong ba agent ổn định hơn dự kiến, nên công viết lại rubric giờ dồn vào **một** agent (Compliance) thay vì ba. Chạy E1 trước đã tiết kiệm khoảng hai phần ba khối lượng của A1.
+
+---
+
+## 8. BÀN GIAO — việc còn lại (2026-08-11)
+
+Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
+
+**Trạng thái gốc:** commit `b6dfa9a` trên `main`. 36/36 test script xanh. E5 xong (Kappa 0,713), E1 **hết hiệu lực**.
+
+### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
+
+**Cả hai script đo đều RESUME từ file kết quả cũ.** Đó là tính năng tiết kiệm tiền (đứt giữa chừng thì chạy tiếp), nhưng nếu code chấm điểm đã đổi thì nó **trộn điểm của hai bản code khác nhau và không báo gì**.
+
+| Script | File mặc định | Tình trạng file đó |
+|---|---|---|
+| `eval_calibration.py` (E5) | `e5_sau_sua_cp3_cp4.json` | ✅ hợp lệ — **đã có chốt chặn**, lệch `prompt_version` là dừng |
+| `eval_stability.py` (E1) | `e1_stability_raw.json` | 🔴 **ngày 2026-08-04, TRƯỚC CẢ RUBRIC** — và **CHƯA có chốt chặn** |
+
+**Nghĩa là:** gõ `python scripts/eval_stability.py` không tham số sẽ nối tiếp vào dữ liệu chết từ một bản code khác hẳn, tiêu ~$3, và in ra một con số σ **vô nghĩa mà trông hoàn toàn bình thường**.
+
+**Hai cách xử lý, chọn một:**
+
+- **Nên làm:** bê chốt chặn từ `eval_calibration.cham_gold_set()` sang `eval_stability.chay_do()` — ghi `_meta.prompt_version` vào file, từ chối resume khi lệch. Khoảng 15 dòng, không tốn API. Cùng một lỗi đã cắn một lần rồi.
+- **Tạm thời:** luôn truyền file mới — `eval_stability.py` **có** cờ `--ket-qua` (đã kiểm chạy thật), nhận tên file tương đối trong `docs/evidence/`:
+
+  ```bash
+  HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json
+  ```
+
+  Nhưng đây chỉ là **kỷ luật của người gõ lệnh**, không phải chốt chặn — quên một lần là mất $3 và ra số sai. Vì vậy vẫn nên làm cách trên.
+
+### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
+
+```bash
+cd multiagent
+HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py    # đọc 8.0 TRƯỚC
+```
+
+**Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên bản khoá 2. B14 sau đó sửa CP3/CP4 — tức đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
+
+**Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent — vì `final_score` mới là đại lượng E5 quét ngưỡng lên.
+
+**Nếu σ ≥ 2:** dừng, **đừng chốt ngưỡng**. Bước nhảy quét của E5 là 2 điểm; σ lớn hơn bước nhảy thì ngưỡng chọn ra chỉ là nhiễu. Chẩn đoán theo mẫu B14: tìm **lỗi cụ thể**, đừng nhắm vào σ. σ cao là *triệu chứng*, không phải thứ để sửa trực tiếp — tiền lệ B5 sửa mò cho kết quả 7,70 → 7,29.
+
+**Kỳ vọng:** σ compliance nên **giảm** so với 4,68 — CP3 bớt báo động giả thì bớt lật mức giữa các lượt. Giảm là bằng chứng thêm cho B14; không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra.
+
+### 8.2. Chốt ngưỡng vào `scoring.yaml` — sau 8.1, $0
+
+Sửa `multiagent/config/scoring.yaml`. ⚠️ **File có HAI khối `meta` và HAI khối `decision`** (dòng ~30/51 và ~119/135) cho hai profile. Xác định profile nào đang dùng trước khi sửa, hoặc sửa cả hai cho nhất quán.
+
+```yaml
+meta:
+  calibrated: true
+  calibrated_at: "2026-08-11"
+  gold_set: "labels.csv @ <sha commit>"
+  guideline_version: "v1.3"
+  rubric_version: "v1"
+  prompt_version: "0bdc5ab12ec65f89"
+  model: "claude-haiku-4-5-20251001"
+  kappa: 0.713
+```
+
+**Về giá trị `decision` — đọc kỹ trước khi đổi.** Bộ tối ưu là `veto=30, nr=30, publish≥92`, nhưng:
+
+- `veto = 30` nằm **dưới điểm Compliance thấp nhất (33,3)** → veto-theo-điểm bị **vô hiệu hoàn toàn**, quyết định do cờ `critical` một mình. Đây là *plateau*: mọi giá trị ≤ 33 cho kết quả y hệt.
+- `publish ≥ 92` **không phải calibration thật** — nó chỉ phản ánh lớp `publish` rỗng (mục 6). Ghi 92 vào config là mã hoá một hiện vật của gold set thành tham số hệ thống.
+
+**Khuyến nghị:** chốt ngưỡng `nr`, giữ `publish = 80` kèm ghi chú "chưa calibrate", và ghi rõ trong `meta` rằng veto-theo-điểm hiện không có tác dụng. Nhưng đây là **quyết định nên hỏi mentor**, không tự quyết — nó đổi hành vi hệ thống dựa trên một gold set thiếu một lớp.
+
+### 8.3. Test-retest nhãn — từ **2026-08-13**, $0
+
+Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**.
+
+**Vì sao chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Trần 0,75 thì 0,713 là rất tốt; trần 0,95 thì còn khoảng cách lớn. **Chưa có trần thì 0,713 không nói lên điều gì** — đừng đưa vào báo cáo mentor.
+
+Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ.
+
+### 8.4. Chốt chặn tất định cho CP4 — sau 8.1
+
+**Triệu chứng:** P-006a vẫn bị gắn cờ "khuyến mại thiếu thời hạn" dù đoạn trích **có** thời hạn, và dù câu đó đã được nêu **làm ví dụ ngay trong prompt** (`src/agents/compliance.py:302`).
+
+**Kết luận:** đây là **giới hạn của sửa-bằng-prompt**, không phải prompt viết chưa đủ rõ. Đừng viết lại prompt lần nữa.
+
+**Cách đúng — cùng khuôn với lớp 2 của B14:** chặn bằng code. Sau khi LLM trả CP4 mức 0, chạy regex tìm mốc thời gian trong `evidence`; tìm thấy thì **kéo lên mức 1**. Cần bắt các dạng `dd/mm/yyyy`, `dd/mm – dd/mm/yyyy`, `Trước d/m/yyyy`, `đến hết ...`, `trong tháng ...`.
+
+**Nhớ:** đây là sửa code chấm điểm → **phải đo lại E1 và E5 sau đó**, và ghi bản khoá số 4. Vì vậy xếp **sau** 8.1, và nên gộp chung với các sửa code khác thành một đợt để chỉ đo lại một lần.
+
+### 8.5. Chẩn đoán G-008 — $0 đến ~$0,1
+
+Bài duy nhất trong 4 bài sai mà **chưa biết nguyên nhân** (người: `needs_revision`, máy: `rejected`). Ba bài kia đã có tài liệu: G-011/G-020 là B12b cố ý, P-006a là 8.4.
+
+Cách làm: mở `docs/evidence/e5_sau_sua_cp3_cp4.json`, tìm `G-008`, xem `co_critical` và điểm 4 agent. Nếu `co_critical: true` thì chạy riêng `compliance.run` trên bài đó để xem tiêu chí nào gắn cờ — rẻ hơn nhiều so với chạy cả 4 agent.
+
+### 8.6. Bài sạch cho bộ kiểm thử chức năng — $0, không đụng gold set
+
+`architecture.md` mục 8.1 yêu cầu một bài *"Bài sạch | (không) | Không báo lỗi giả"*, và bộ này **tách biệt với gold set**.
+
+**Đây là phản biện mạnh nhất với việc lớp `publish` rỗng** — hiện chưa có gì chứng minh hệ thống **có đường ra `publish`**. Cách làm: lấy một bài thật, sửa hết lỗi, xác nhận ra `publish`.
+
+⚠️ **Đúng thao tác "sửa bài cho sạch" mà mục 6 đã BÁC BỎ với gold set.** Hợp lệ ở đây **chỉ vì** bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*, không tham gia calibration, không tính Kappa. **Tuyệt đối không** thêm bài này vào `labels.csv`.
+
+### 8.7. E3 và E6 — sau 8.1 và 8.3
+
+`evaluation-plan.md` mục 4.3 và 4.6. E3 so multi-agent với single-agent; E6 held-out test. Cả hai cần ngưỡng đã chốt và trần Kappa.
+
+---
+
+### Ba cái bẫy đã cắn dự án này, đừng lặp lại
+
+**1. Chỉnh ngưỡng cho phân bố đẹp.** Phép thử: *lý do phải phát biểu được mà **không** nhắc tới phân bố thu được.* CQ3 qua được phép thử này (số 30 là quy ước readability tiếng Anh vốn đếm **từ**, còn code đếm **tiếng** tiếng Việt); B9 thì không, và nó từng làm sập cả 3 lớp nhãn. Xem B13.
+
+**2. Một bộ so khớp gộp hai thứ khác nhau.** Đã xảy ra **ba lần**: B12 (so-sánh-nhất làm claim vs làm trạng ngữ), BV3 (xưng hô vs danh từ chỉ người), B14 (mọi số có `km` vs tầm hoạt động). **Không lần nào lộ ra trong unit test** — vì test dùng ví dụ do chính người viết code nghĩ ra. Chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+
+**3. Con số chép tay trong tài liệu trôi lệch khỏi code.** Công thức `prompt_version` hỏng **hai lần**: bản 1 tham chiếu biến không còn tồn tại; bản 1-2 bỏ sót hai prompt của `fact_check` — đúng chỗ B14 được sửa. Nay nằm trong `eval_calibration.prompt_version()`. Quy tắc: **mọi con số trong tài liệu phải tính lại được từ một file trong `docs/evidence/`.**
+
+### Chi phí API đã tiêu
+
+| Hạng mục | |
+|---|---|
+| Trước phiên 2026-08-11 | $8,33 |
+| E1 (bản khoá 2) | $3,06 |
+| E5 lần 1 | $1,86 |
+| Chẩn đoán 12 bài | $0,93 |
+| E5 lần 2 | $1,85 |
+| **Cộng dồn** | **~$16** |
+
+Còn lại dự kiến: E1 ~$3, E3 ~$2, E6 ~$2.
