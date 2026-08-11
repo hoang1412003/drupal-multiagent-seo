@@ -101,6 +101,23 @@ def cham_mot_bai(fields: dict) -> dict:
             "usage": list(ai_core.USAGE_LOG)}
 
 
+def nap_ket_qua(path: str) -> dict:
+    """Đọc E5 result và từ chối dữ liệu thiếu/khác prompt version."""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    meta = data.pop("_meta", {})
+    prompt_cu = meta.get("prompt_version")
+    prompt_hien_tai = prompt_version()
+    if prompt_cu != prompt_hien_tai:
+        raise SystemExit(
+            f"\nDUNG LAI: {os.path.basename(path)} thieu hoac khong dung "
+            f"prompt version hien tai.\n"
+            f"Tron hai ban se cho ket qua vo nghia. Chon mot:\n"
+            f"  - doi ten file cu roi chay lai tu dau (~$1,9), hoac\n"
+            f"  - --ket-qua <ten file moi>\n")
+    return data
+
+
 def cham_gold_set(ket_qua_path: str) -> dict:
     """Cham cac bai chua co trong file ket qua, luu sau moi bai (resumable).
 
@@ -112,20 +129,9 @@ def cham_gold_set(ket_qua_path: str) -> dict:
     Nen ghi `prompt_version` vao file va TU CHOI resume khi no lech.
     """
     pv = prompt_version()
-    da_co, meta = {}, {}
+    da_co = {}
     if os.path.isfile(ket_qua_path):
-        with open(ket_qua_path, encoding="utf-8") as f:
-            cu = json.load(f)
-        meta = cu.pop("_meta", {})
-        pv_cu = meta.get("prompt_version")
-        if pv_cu and pv_cu != pv:
-            raise SystemExit(
-                f"\nDUNG LAI: {os.path.basename(ket_qua_path)} cham bang prompt "
-                f"{pv_cu}, code hien tai la {pv}.\n"
-                f"Tron hai ban se cho ket qua vo nghia. Chon mot:\n"
-                f"  - doi ten file cu roi chay lai tu dau (~$1,9), hoac\n"
-                f"  - --ket-qua <ten file moi>\n")
-        da_co = cu
+        da_co = nap_ket_qua(ket_qua_path)
 
     ids = gold_ids()
     for i, sid in enumerate(ids, 1):
@@ -272,14 +278,7 @@ if __name__ == "__main__":
             else os.path.join(REPO, "docs", "evidence", a.ket_qua))
 
     if a.bao_cao:
-        with open(path, encoding="utf-8") as f:
-            kq = json.load(f)
-        meta = kq.pop("_meta", {})       # khong phai mot bai, dung de lan vao
-        pv = prompt_version()
-        if meta.get("prompt_version") not in (None, pv):
-            print(f"!! CANH BAO: ket qua cham bang prompt "
-                  f"{meta['prompt_version']}, code hien tai {pv}. "
-                  f"Nguong quet ra chi ap dung cho ban CU.\n")
+        kq = nap_ket_qua(path)
     else:
         t0 = time.monotonic()
         print("PHA 1 - cham gold set (ton tien API, resumable)\n")

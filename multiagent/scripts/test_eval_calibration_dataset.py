@@ -8,6 +8,7 @@ import os
 import shutil
 import tempfile
 
+import eval_calibration
 from eval_calibration import doc_nhan, gold_ids
 
 _THU_MUC_TAM = []
@@ -41,6 +42,29 @@ def fixture_dataset(bo_file=None):
     return labels, raw
 
 
+def write_json(data: dict) -> str:
+    fd, path = tempfile.mkstemp(suffix=".json")
+    _THU_MUC_TAM.append(path)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        import json
+        json.dump(data, f)
+    return path
+
+
+def test_e5_file_legacy_thieu_meta_bi_tu_choi_truoc_paid_path():
+    path = write_json({"G-001": {"diem": {}}})
+    try:
+        eval_calibration.nap_ket_qua(path)
+    except SystemExit as error:
+        check("huong dan dung file ket qua moi", "--ket-qua" in str(error), True)
+    except Exception as error:
+        raise AssertionError(
+            f"legacy E5 phải SystemExit trước paid path, nhận {type(error).__name__}"
+        ) from error
+    else:
+        raise AssertionError("legacy E5 thiếu _meta phải bị từ chối")
+
+
 def test_chi_lay_hai_split_gold():
     labels, raw = fixture_dataset()
     check("ID calibration", gold_ids(labels, raw), ["G-001", "P-001a"])
@@ -61,9 +85,13 @@ def test_gold_id_thieu_file_phai_dung():
 @atexit.register
 def _don_dep():
     for thu_muc in _THU_MUC_TAM:
-        shutil.rmtree(thu_muc)
+        if os.path.isdir(thu_muc):
+            shutil.rmtree(thu_muc)
+        elif os.path.exists(thu_muc):
+            os.unlink(thu_muc)
 
 
 if __name__ == "__main__":
+    test_e5_file_legacy_thieu_meta_bi_tu_choi_truoc_paid_path()
     test_chi_lay_hai_split_gold()
     test_gold_id_thieu_file_phai_dung()
