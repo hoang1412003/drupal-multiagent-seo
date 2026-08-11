@@ -1,0 +1,27 @@
+title: Lưu ý giúp lốp ô tô điện bền và vận hành an toàn
+url_alias: /vn_vi/luu-y-giup-lop-xe-dien-luon-ben
+meta_description: Hướng dẫn kiểm tra áp suất, độ mòn và tình trạng lốp ô tô điện, đồng thời duy trì thói quen lái phù hợp để hỗ trợ vận hành an toàn trong quá trình sử dụng xe.
+summary: Lốp là bộ phận tiếp xúc trực tiếp với mặt đường và chịu ảnh hưởng từ tải trọng, lực kéo cùng thói quen lái. Người dùng cần kiểm tra lốp thường xuyên và tuân theo thông số dành cho xe.
+---
+<p>Lốp ảnh hưởng trực tiếp đến khả năng bám đường, phanh và độ ổn định của ô tô điện. Mô-men xoắn của động cơ, khối lượng xe, tải chở và điều kiện đường đều có thể tác động đến quá trình mòn lốp.</p>
+<p>Người dùng cần lựa chọn lốp đúng kích thước, chỉ số tải và chỉ số tốc độ được nhà sản xuất chấp thuận. Không nên chọn lốp chỉ dựa trên hình thức hoặc giá bán.</p>
+<img alt="Lốp được lắp đúng thông số trên ô tô điện VinFast"/>
+<h2>1. Duy trì áp suất lốp phù hợp</h2>
+<p>Áp suất quá thấp hoặc quá cao đều có thể làm thay đổi diện tích tiếp xúc với mặt đường và khiến lốp mòn không đều. Người dùng nên kiểm tra khi lốp nguội và đối chiếu với nhãn thông tin trên xe hoặc tài liệu hướng dẫn.</p>
+<p>Khi hệ thống giám sát áp suất lốp phát cảnh báo, hãy dừng ở nơi an toàn để quan sát các bánh xe. Nếu lốp bị thủng, biến dạng hoặc mất áp suất nhanh, người dùng cần liên hệ hỗ trợ thay vì tiếp tục hành trình.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/tai-lieu-tham-khao">Tài liệu hướng dẫn sử dụng ô tô</a></p>
+<img alt="Thiết bị đo áp suất lốp ô tô điện"/>
+<h2>2. Quan sát độ mòn và hư hỏng</h2>
+<p>Cần kiểm tra bề mặt lốp để phát hiện vết cắt, nứt, phồng, vật lạ và dấu hiệu mòn bất thường. Gai lốp ở các vị trí khác nhau nên được quan sát thay vì chỉ nhìn mép ngoài.</p>
+<p>Lốp phải được thay khi đạt giới hạn mòn, hư hỏng hoặc không còn đáp ứng yêu cầu kỹ thuật. Giới hạn cụ thể cần được đối chiếu với quy định hiện hành và hướng dẫn của nhà sản xuất lốp.</p>
+<h2>3. Đảo lốp và kiểm tra góc đặt bánh xe</h2>
+<p>Lịch đảo lốp phụ thuộc vào cấu hình dẫn động, loại lốp và khuyến nghị dành cho từng mẫu xe. Một số loại lốp có chiều quay hoặc vị trí lắp riêng nên không thể áp dụng cùng một sơ đồ đảo.</p>
+<p>Nếu lốp mòn lệch, vô-lăng rung hoặc xe có xu hướng lệch hướng, người dùng nên yêu cầu cơ sở dịch vụ kiểm tra cân bằng bánh xe và góc đặt bánh. Không nên chỉ thay một lốp mà bỏ qua nguyên nhân gây mòn.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/bao-duong-o-to-dien">Thông tin bảo dưỡng ô tô điện</a></p>
+<img alt="Kỹ thuật viên kiểm tra góc đặt bánh xe ô tô điện"/>
+<h2>4. Duy trì thói quen lái phù hợp</h2>
+<p>Tăng tốc hoặc phanh gấp thường xuyên có thể làm lốp chịu lực lớn và mòn nhanh hơn. Người lái nên điều khiển ga, phanh và vô-lăng một cách ổn định theo điều kiện giao thông.</p>
+<p>Không chở quá tải và cần giảm tốc độ khi đi qua ổ gà, gờ cao hoặc bề mặt đường xấu. Sau va chạm mạnh với mép đường, chủ xe nên kiểm tra lốp và vành để phát hiện hư hỏng.</p>
+<p>&gt;&gt;&gt; Tham khảo: <a href="https://vinfastauto.com/vn_vi/dich-vu-bao-duong">Thông tin bảo dưỡng định kỳ</a></p>
+<img alt="Ô tô điện VinFast vận hành trên đường đô thị"/>
+<p>Kiểm tra lốp thường xuyên và xử lý bất thường đúng lúc giúp duy trì khả năng vận hành của xe. Khi cần thay lốp, người dùng nên sử dụng sản phẩm đáp ứng đầy đủ thông số kỹ thuật.</p>

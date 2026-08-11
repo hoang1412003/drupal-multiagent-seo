@@ -1,0 +1,11 @@
+sample_id,source_url,variant,expected_label,annotator,date,guideline_version,notes
+C-001,/vn_vi/he-thong-phanh-tren-xe-o-to-dien,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-001
+C-002,/vn_vi/5-kinh-nghiem-di-xe-may-dien-duong-dai-an-toan,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-002
+C-003,/vn_vi/huong-dan-su-dung-che-do-sport-tren-xe-may-dien-vinfast,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-003
+C-004,/vn_vi/che-do-eco-tren-xe-may-dien-vinfast-gia-toc-muot-ma-tiet-kiem-dien,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-004
+C-005,/vn_vi/su-dung-tinh-nang-lien-quan-den-pin-tren-ung-dung-vinfast,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-005
+C-006,/vn_vi/cau-hoi-thuong-gap-khi-tim-hieu-pin-xe-may-dien-vinfast,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-006
+C-007,/vn_vi/thong-so-cac-loai-tru-sac-o-to-va-xe-may-dien-vinfast,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-007
+C-008,/vn_vi/nhung-hang-muc-can-quan-tam-khi-bao-duong-o-to-dien,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-008
+C-009,/vn_vi/luu-y-giup-lop-xe-dien-luon-ben,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-009
+C-010,/vn_vi/y-nghia-cac-loai-den-canh-bao-tren-o-to-dien,corrected,publish,A1,2026-08-11,v1.3,Bản functional-clean từ HTML nguồn C-010

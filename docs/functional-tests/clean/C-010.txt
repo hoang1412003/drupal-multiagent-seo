@@ -1,0 +1,27 @@
+title: Ý nghĩa các loại đèn cảnh báo trên ô tô điện
+url_alias: /vn_vi/y-nghia-cac-loai-den-canh-bao-tren-o-to-dien
+meta_description: Tìm hiểu ý nghĩa màu sắc và một số đèn cảnh báo thường gặp trên ô tô điện, cùng cách xử lý phù hợp khi biểu tượng xuất hiện trên bảng đồng hồ.
+summary: Đèn cảnh báo giúp người lái nhận biết trạng thái hoặc bất thường của phương tiện. Ý nghĩa và cách xử lý có thể khác nhau giữa các mẫu xe, vì vậy cần đối chiếu tài liệu hướng dẫn.
+---
+<p>Bảng đồng hồ trên ô tô điện hiển thị nhiều biểu tượng liên quan đến pin, phanh, lốp và hệ thống điện. Một biểu tượng có thể sáng khi xe tự kiểm tra lúc khởi động, nhưng cũng có thể báo hiệu tình trạng cần được xử lý.</p>
+<p>Người lái không nên chỉ dựa vào hình dạng hoặc màu sắc để kết luận nguyên nhân. Hãy đọc thông báo đi kèm và tra đúng mục trong tài liệu hướng dẫn của mẫu xe.</p>
+<img alt="Các biểu tượng cảnh báo trên bảng đồng hồ ô tô điện"/>
+<h2>1. Nhận biết cảnh báo theo màu sắc</h2>
+<p>Màu đỏ thường được dùng cho tình trạng cần người lái chú ý ngay và có thể yêu cầu dừng xe an toàn. Màu vàng hoặc màu cam thường báo trạng thái cần kiểm tra sớm, trong khi màu xanh thường thể hiện một chức năng đang hoạt động.</p>
+<p>Quy ước cụ thể phụ thuộc vào thiết kế của từng xe. Khi đèn đỏ tiếp tục sáng hoặc xe có biểu hiện bất thường, người lái nên giảm tốc, tìm vị trí dừng phù hợp và làm theo hướng dẫn hiển thị.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/tai-lieu-tham-khao">Tài liệu hướng dẫn sử dụng ô tô</a></p>
+<h2>2. Đèn cảnh báo pin và hệ thống điện</h2>
+<p>Biểu tượng pin có thể liên quan đến mức năng lượng, khả năng sạc hoặc trạng thái của hệ thống điện áp cao. Biểu tượng ắc quy phụ trợ có thể phản ánh bất thường ở nguồn điện phụ hoặc hệ thống nạp tương ứng.</p>
+<p>Nếu xe hạn chế công suất, không thể chuyển sang trạng thái sẵn sàng hoặc đồng thời hiển thị nhiều cảnh báo, người lái không nên tự tháo các bộ phận điện. Hãy dừng xe theo hướng dẫn và liên hệ hỗ trợ kỹ thuật.</p>
+<img alt="Đèn cảnh báo pin trên màn hình ô tô điện"/>
+<h2>3. Đèn cảnh báo phanh, lốp và cân bằng điện tử</h2>
+<p>Đèn phanh có thể xuất hiện khi phanh đỗ đang kích hoạt hoặc khi hệ thống phát hiện bất thường. Nếu đèn không tắt sau khi nhả phanh đỗ, người lái cần xem thông báo và xử lý theo tài liệu hướng dẫn.</p>
+<p>Đèn áp suất lốp báo rằng hệ thống ghi nhận áp suất không phù hợp hoặc có vấn đề với việc giám sát. Đèn cân bằng điện tử có thể nhấp nháy khi hệ thống can thiệp; nếu sáng liên tục, xe có thể cần được kiểm tra.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/dich-vu-bao-duong">Thông tin bảo dưỡng định kỳ</a></p>
+<img alt="Đèn cảnh báo áp suất lốp trên bảng đồng hồ"/>
+<h2>4. Đèn cảnh báo nhiệt độ và hệ thống làm mát</h2>
+<p>Cảnh báo nhiệt độ có thể xuất hiện khi hệ thống phát hiện điều kiện vận hành không phù hợp. Người lái nên giảm tốc và dừng xe ở nơi an toàn nếu có yêu cầu trên màn hình hoặc nếu xe giảm công suất bất thường.</p>
+<p>Không tự mở hệ thống làm mát hay chạm vào bộ phận điện áp cao. Sau khi dừng xe, hãy làm theo tài liệu hướng dẫn và liên hệ cơ sở dịch vụ nếu cảnh báo không biến mất.</p>
+<p>&gt;&gt;&gt; Tham khảo: <a href="https://vinfastauto.com/vn_vi/bao-duong-o-to-dien">Thông tin bảo dưỡng ô tô điện</a></p>
+<img alt="Thông báo nhiệt độ trên màn hình ô tô điện"/>
+<p>Khi chưa xác định được ý nghĩa của biểu tượng, người lái nên ưu tiên chỉ dẫn trên xe và trong tài liệu chính thức. Việc tiếp tục vận hành dù có cảnh báo nghiêm trọng có thể làm tăng rủi ro.</p>
