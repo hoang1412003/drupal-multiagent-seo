@@ -15,6 +15,7 @@ Cách chạy:
     .venv\\Scripts\\python.exe scripts\\extract_gold_sample.py ..\\docs\\goldset\\raw_html\\*.html
 """
 import csv
+import argparse
 import glob
 import os
 import re
@@ -252,7 +253,15 @@ def expected_url_for(sample_id: str, table: dict[str, str]) -> str | None:
     return None
 
 
-def process(path: str, table: dict) -> bool:
+def write_output(path: str, content: str, force: bool = False) -> None:
+    if os.path.exists(path) and not force:
+        raise FileExistsError(
+            f"Tu choi ghi de {path}; dung --force neu chu dong tao lai")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+def process(path: str, table: dict, force: bool = False) -> bool:
     """Bóc tách 1 file HTML và ghi file .txt. Trả về True nếu ghi thành công.
 
     Bắt cả ExtractError lẫn Exception bất kỳ: một file lệch encoding hay lỗi
@@ -282,8 +291,15 @@ def process(path: str, table: dict) -> bool:
             )
 
         os.makedirs(RAW_DIR, exist_ok=True)
-        with open(os.path.join(RAW_DIR, f"{sample_id}.txt"), "w", encoding="utf-8") as f:
-            f.write(render_txt(fields, body_html))
+        write_output(
+            os.path.join(RAW_DIR, f"{sample_id}.txt"),
+            render_txt(fields, body_html),
+            force=force,
+        )
+    except FileExistsError as error:
+        print(f"{sample_id}.html")
+        print(f"  [TU CHOI GHI DE] {error}")
+        return False
     except ExtractError as error:
         print(f"{sample_id}.html")
         print(f"  [LOI] {error} - KHONG ghi file")
@@ -311,12 +327,13 @@ def process(path: str, table: dict) -> bool:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--force", action="store_true")
+    parser.add_argument("paths", nargs="+")
+    args = parser.parse_args()
 
     paths = []
-    for arg in sys.argv[1:]:
+    for arg in args.paths:
         paths.extend(sorted(glob.glob(arg)) or [arg])
 
     missing = [p for p in paths if not os.path.isfile(p)]
@@ -325,6 +342,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     table = load_expected_urls()
-    written = sum(process(path, table) for path in paths)
+    written = sum(process(path, table, force=args.force) for path in paths)
     print(f"\nDa ghi {written}/{len(paths)} file vao {RAW_DIR}")
     sys.exit(0 if written == len(paths) else 1)

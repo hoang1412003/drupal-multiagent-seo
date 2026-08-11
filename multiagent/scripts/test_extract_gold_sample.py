@@ -20,6 +20,7 @@ from extract_gold_sample import (
     expected_url_for,
     extract_fields,
     render_txt,
+    write_output,
     _clean_text,
 )
 from label_helper import analyze, parse_sample, split_sentences
@@ -30,6 +31,39 @@ FIXTURE = os.path.join(
 )
 
 _results = []
+
+
+def temp_file(content: str) -> str:
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(content)
+    return path
+
+
+def read(path: str) -> str:
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def test_write_output_tu_choi_ghi_de() -> None:
+    path = temp_file("ban da hieu dinh")
+    try:
+        write_output(path, "noi dung boc lai")
+    except FileExistsError:
+        pass
+    else:
+        raise AssertionError("phải từ chối ghi đè mặc định")
+    check("nội dung cũ còn nguyên", read(path), "ban da hieu dinh")
+    os.remove(path)
+
+
+def test_write_output_force_ghi_de() -> None:
+    path = temp_file("cu")
+    try:
+        write_output(path, "moi", force=True)
+        check("force thay nội dung", read(path), "moi")
+    finally:
+        os.remove(path)
 
 
 def check(name: str, actual, expected) -> None:
@@ -455,6 +489,8 @@ def test_embedded_reported() -> None:
 
 
 if __name__ == "__main__":
+    test_write_output_tu_choi_ghi_de()
+    test_write_output_force_ghi_de()
     test_fields()
     test_missing_node_detail()
     test_clean_body_errors()
