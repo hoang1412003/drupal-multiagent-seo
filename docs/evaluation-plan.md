@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test-retest nhãn (sớm nhất 13/08 — chưa có trần Kappa thì chưa diễn giải được 0,713).
+**Trạng thái:** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. Preflight E1 bản 4 đã đạt trên snapshot `04f10e1`/prompt `020738e209017213`, nhưng **không gọi API, không tạo output và không phải kết quả E1**; lượt trả phí được hoãn sang 2026-08-13. Cùng ngày phải làm test–retest mù **trước khi xem/chạy output E1**. E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test-retest nhãn.
 
 Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
 
@@ -74,14 +74,14 @@ Năm điểm chặn quan trọng:
 
 | Thành phần | Giá trị |
 |---|---|
-| Commit | bản sửa **chốt CP4 tất định** (LLM chấm điều kiện + code kiểm thời hạn). Bản 3 sau B14 hết hiệu lực đối với phép đo hiện hành |
+| Score-path snapshot | `04f10e1`: bản sửa **chốt CP4 tất định** (LLM chấm điều kiện + code kiểm thời hạn) và fix N1 double write-back. Có thể chạy từ descendant chỉ thêm tài liệu nếu xác minh diff đường chấm so với snapshot này rỗng; evidence vẫn phải ghi HEAD thực tế |
 | Model | `claude-haiku-4-5-20251001` |
 | Rubric version | v1 (`rubrics.md`) — **áp dụng cho cả 4 agent** |
 | Prompt version | **`020738e209017213`** — tính từ code, phủ **6** prompt (4 agent + 2 của `fact_check`). Bản 3 là `0bdc5ab12ec65f89`; mọi file kết quả mang hash đó nay là dữ liệu lịch sử |
 | Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 | KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
-| E1 | ⚠️ **CHƯA đo trên bản này.** Số 1,79 thuộc code trước B14/CP4 hiện hành |
+| E1 | ⚠️ **CHƯA đo trên bản này.** Preflight ngày 2026-08-12 đạt nhưng không gọi API/không tạo output; số 1,79 thuộc code trước B14/CP4 hiện hành |
 | E5 | ⚠️ **CHƯA đo trên bản này.** Kappa **0,713**, accuracy 0,879 thuộc bản 3 trước chốt CP4 (mục 4.5) |
 
 > ### ⚠️ Bản khoá cũ có lỗ hổng — phát hiện khi sửa B14
@@ -108,6 +108,10 @@ import eval_calibration as e; print(e.prompt_version())"      # phải ra 020738
 *(Công thức của bản 1 tham chiếu `content_quality.SYSTEM_PROMPT` và `seo.SYSTEM_PROMPT` — hai tên đó **không còn tồn tại** sau khi chuyển rubric. Đó là lần đầu công thức chép-tay này hỏng; lỗ hổng `fact_check` là lần thứ hai. Nên nay nó nằm trong code.)*
 
 **Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng. Chốt CP4 vừa đổi đúng đường này, nên bản 4 chưa có E1/E5 hợp lệ.
+
+`04f10e1` là **snapshot của đường chấm**, không phải yêu cầu HEAD phải đứng mãi ở đúng commit đó. Commit chỉ sửa tài liệu được phép là descendant nếu trước lượt đo đã chứng minh không có diff ở agent/fact-check/graph/scoring/config/rule/retrieval/KB so với snapshot; evidence phải ghi cả HEAD thực tế và score-path snapshot. Cách phân biệt này tránh việc một commit tài liệu làm mất hiệu lực phép đo, nhưng không cho phép núp thay đổi hành vi trong commit mang nhãn `docs`.
+
+**Hàng rào cho luồng productization song song:** thiết kế service độc lập/admin ngày 2026-08-12 chỉ được thay lớp API, auth, migration, site/profile, connector, admin UI và observability. Nếu việc triển khai làm đổi prompt, input chuẩn hóa của agent, retrieval, scoring, rule, Aggregator hoặc output report với cùng input thì đó **không còn là refactor lớp bao quanh**: phải dừng, ghi nhận thay đổi score-path và đo lại E1/E5. `site_id`, `profile_id` và `policy_version` chỉ là metadata cho tới khi profile mới được calibrate; chúng không được phép âm thầm chọn bộ ngưỡng/prompt khác cho profile `cam-nang-vn` hiện hành.
 
 **Vì sao có bản 2:** bản 1 khoá lúc mới 2/4 agent dùng rubric, kèm lập luận rằng σ của `content_quality` (0,38) và `seo` (0,19) đủ nhỏ nên không cần chuyển. Lập luận đó **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai biết 78 khác 74 ở chỗ nào, mà calibrate một ngưỡng trên đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được — đó chính là luận điểm gốc của `rubrics.md` mục 1. Nên đã chuyển nốt: **4/4 agent dùng rubric, nợ A1 đóng.**
 
@@ -139,6 +143,12 @@ Rủi ro đã lường trước và đo được: rubric làm dao động **hi�
 
 **Tiêu chí:** σ < 2 điểm. Ngưỡng này không tùy tiện - `architecture.md` mục 8.2 dự kiến quét ngưỡng theo bước nhảy 2 điểm, nên dao động phải nhỏ hơn bước nhảy thì việc quét mới có nghĩa.
 
+#### Trạng thái bản 4 tại bàn giao 2026-08-12
+
+Preflight đã xác nhận legacy guard chặn file cũ trước đường trả phí, prompt version `020738e209017213`, model `claude-haiku-4-5-20251001`, 10 mẫu `G-001..G-010`, 50 lượt dự kiến và file đích mới `e1_sau_cp4_deadline_guard.json`. Tại thời điểm kiểm, file đích **chưa tồn tại** và không có API trả phí nào được gọi. Vì vậy trạng thái vẫn là **E1 bản 4 chưa chạy**.
+
+Lượt chạy được xếp vào ngày 2026-08-13, sau khi hoàn tất và khóa nhãn test–retest mù. Trước khi chạy vẫn phải có xác nhận riêng cho chi phí khoảng 3 USD. Lệnh và checklist vận hành là `technical-debt.md` mục 8.0–8.3; không sao chép file kết quả cũ sang tên mới và không xem output E1 trước khi người gán chốt nhãn lượt hai.
+
 **Biến thể quan trọng - so rubric với cách hiện tại:** ✅ **đã chạy 2026-08-04**, kết quả đầy đủ ở `docs/rubrics.md` mục 9.1 và `docs/evidence/e1_rubric_v2_report.txt`.
 
 Kết quả **âm**: rubric KHÔNG ổn định hơn thang 0-100 (σ `final_score` 0,28 → 1,43 trên 7 bài chung). Ghi lại nguyên văn đúng như đã cam kết. Chẩn đoán: rubric không tạo ra dao động mà làm dao động hiện ra - thang 0-100 tự do nuốt chỗ LLM lưỡng lự, còn rubric lượng tử hoá 0/1/2 rồi chia mẫu số nên khuếch đại lên. Điều kiện E5 vẫn đạt vì σ `final_score` = 1,33 < 2.
@@ -161,7 +171,7 @@ Số liệu thô: `docs/evidence/e1_sau_rubric_4_agent.json`. Chi phí thật **
 | compliance | 4,68 | 11,57 | ❌ | 4,18 → 4,68 |
 | **`final_score`** | **1,79** | 4,04 | **✅ ĐẠT** | 1,33 → 1,79 |
 
-**Cổng E5 mở.** Tiêu chí σ < 2 áp cho `final_score` — đó là đại lượng E5 quét ngưỡng lên — và nó đạt. σ từng agent chỉ quan trọng qua đường đóng góp vào điểm tổng.
+**Ở bản 2, cổng E5 đã mở. Trạng thái đó không được kế thừa sang bản 4.** Tiêu chí σ < 2 áp cho `final_score` — đó là đại lượng E5 quét ngưỡng lên — và khi ấy nó đạt. σ từng agent chỉ quan trọng qua đường đóng góp vào điểm tổng.
 
 **Dự đoán về SEO đúng hoàn toàn:** 7/10 tiêu chí đo bằng máy → σ = 0,27, gần như tất định. Đây là nước đi lãi rõ: giữ nguyên độ ổn định mà đổi được một con số LLM tự đặt lấy một con số giải thích được.
 
@@ -311,7 +321,7 @@ Lưu ý khi đọc bảng: hai dòng chẩn đoán B5 rẻ hơn hẳn ($0,023/l�
 
 Functional-clean là phép kiểm cơ chế riêng: chạy 10 mẫu corrected có expected `publish`, rồi báo cáo `publish_rate`, `false_positive_articles` (số bài bị báo oan) và `false_positive_issues` (tổng số issue báo oan). Không gộp ba chỉ số này với Kappa/accuracy của gold calibration; nếu nêu tổng 43 thì phải gọi rõ là evaluation suite.
 
-1. ~~**E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.~~ ✅ **đạt (2026-08-04)** — điểm tổng σ = 1,33 sau khi Compliance chuyển sang rubric (σ = 0,28 với cách chấm cũ). **Nhưng có một lưu ý phải mang theo:** riêng Compliance đạt σ = 5,48 trên bài G-002. Điểm tổng ổn định vì trọng số làm loãng dao động đó, không phải vì nó không tồn tại — nên ngưỡng calibrate ra sẽ kém ổn định hơn với các bài mà Compliance dao động mạnh. Làm rubric Compliance trước sẽ cho ngưỡng đáng tin hơn.
+1. ⚠️ **E1 bản 4 phải đạt trước và hiện chưa chạy.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ `final_score` < 2. Kết quả ngày 2026-08-04 và bản 2 là lịch sử; chốt CP4 đã đổi đúng đường Compliance nên không mở cổng E5 hiện hành. Preflight 2026-08-12 chỉ xác nhận an toàn vận hành, không thay thế phép đo.
 2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý. ✅ **đã có cảnh báo tự động (2026-08-04)**: `src/config.py` so `meta.model` trong `scoring.yaml` với model đang chạy và log cảnh báo khi lệch.
 3. ~~**Brand Voice Agent phải là agent thật, không còn stub.**~~ ✅ **đạt (2026-08-03)**
 4. ~~**SEO Agent phải đọc được `alt` của ảnh nằm trong `body`.**~~ ✅ **đạt (2026-08-04)** — `_extract_image_alt()` bóc mọi thẻ `<img>` trong body; test `scripts/test_image_alt.py`.
@@ -442,9 +452,10 @@ Nêu rõ những thứ không đo cũng quan trọng như nêu những thứ đo
 
 ## 6. Thứ tự khuyến nghị
 
-1. **E4 chi phí + E1 độ ổn định** - chạy được ngay hôm nay, rẻ, và E1 quyết định có nên viết lại 4 prompt theo rubric hay không
-2. Implement rubric (nếu E1 cho thấy cần) → chạy lại E1 để so phương sai
-3. **E2 recall@k** khi dựng KB xong, trước khi nối RAG vào agent
-4. Thu và gán nhãn gold set — đã xong 33/33
-5. **E3 baseline** + **E5 calibration** khi có gold set
-6. **E6 held-out test** sau cùng
+Trạng thái lịch sử của các bước đã hoàn thành nằm ở mục 4. Thứ tự **hiện hành từ bàn giao 2026-08-12** là:
+
+1. **Ngày 2026-08-13: test–retest nhãn trước** — 4 bài ngẫu nhiên, gán mù, lưu riêng và khóa nhãn lượt hai; chỉ sau đó mới mở nhãn lượt một để tính Kappa. Giao thức đầy đủ: `annotation-guideline.md` mục 8.1; checklist chống lộ nhãn: `technical-debt.md` mục 8.3.
+2. **E1 bản 4 sau test–retest** — xin xác nhận riêng chi phí khoảng 3 USD, chạy vào file mới. Nếu σ `final_score` ≥ 2 thì dừng và chẩn đoán; không chạy E5.
+3. **E5 bản 4 khi E1 đạt** — xin xác nhận chi phí riêng, dùng đúng bộ commit/prompt/model đã khóa; chưa chốt ngưỡng `publish` nếu chưa có quyết định mentor về lớp publish rỗng.
+4. **Functional-clean** — chạy và báo cáo riêng `publish_rate`/false positive, tuyệt đối không gộp với Kappa/accuracy calibration.
+5. **E3 baseline**, rồi **E6 held-out** sau khi có ngưỡng hợp lệ và đã có trần Kappa test–retest.

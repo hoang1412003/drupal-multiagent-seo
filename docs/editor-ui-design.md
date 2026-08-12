@@ -236,8 +236,10 @@ Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức Aggregator
 | Hạng mục | Ghi chú |
 |---|---|
 | Vòng phản hồi người duyệt | Khối báo cáo là chỗ tự nhiên để đặt ô *"Không đồng ý với đánh giá này"* + lý do. Đây là hạng mục backlog riêng, vẫn **chưa triển khai**; không còn bị chặn bởi nhật ký truy vết (`operations.md` mục 4) - ở đây chỉ ghi nhận điểm móc |
-| Hiển thị lịch sử các lần chấm | Hiện chỉ lưu kết quả mới nhất trong 4 field AI (ghi đè). `run_log` (Postgres, đã triển khai) đã giữ lịch sử đầy đủ ở tầng dữ liệu; việc còn lại là hiển thị nó trong editor |
+| Hiển thị lịch sử các lần chấm | Hiện chỉ lưu kết quả mới nhất trong 4 field AI (ghi đè). `run_log` (Postgres, đã triển khai) giữ lịch sử đầy đủ. Thiết kế productization ngày 2026-08-12 sẽ hiển thị lịch sử chi tiết ở admin Multi-Agent; đưa lịch sử rút gọn vào editor vẫn là hạng mục tùy chọn riêng |
 | Đa ngôn ngữ giao diện | Chuỗi hiển thị hiện hard-code tiếng Việt; Drupal có `t()` sẵn nhưng chưa cần trong phạm vi hiện tại |
+
+**Ranh giới UI đã chốt ngày 2026-08-12:** người viết/người duyệt vẫn chỉ dùng màn soạn bài Drupal này; họ không cần tài khoản Multi-Agent. Trang quản trị độc lập phục vụ viewer/operator/admin để theo dõi nhiều job, chi phí và lỗi vận hành, không thay thế báo cáo theo field trong editor. Xem [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
 ---
 

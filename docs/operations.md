@@ -190,7 +190,25 @@ Không còn thư mục `multiagent/logs/` hay vấn đề `.gitignore` cho file 
 
 ---
 
-## 6. Chưa chốt
+## 6. Vận hành qua trang quản trị độc lập — thiết kế đã duyệt, chưa triển khai
+
+Thiết kế productization ngày 2026-08-12 đưa dữ liệu vận hành hiện có lên trang `/admin` của service, thay vì dựng trang quản trị trong Drupal. Nguồn sự thật chi tiết: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
+
+Ba role vận hành:
+
+- `viewer`: xem dashboard, jobs, history, config/KB/evaluation chỉ đọc;
+- `operator`: thêm test connection, retry/rescore có cảnh báo chi phí, pause/resume intake và xử lý dead-letter;
+- `admin`: thêm quản lý tài khoản/role và xem audit.
+
+Người viết bài không dùng trang này; họ tiếp tục làm việc trong Drupal. Các action có hiệu ứng phụ phải được kiểm quyền ở server, dùng CSRF, có xác nhận khi có thể tốn LLM và ghi audit. Config/rubric/prompt/KB đã calibrate không có nút sửa trên web.
+
+Dashboard tối thiểu đọc dữ liệu thật để hiển thị health, queue depth, decision, latency, token/cost. Review detail hiển thị agent result/evidence/veto/profile/policy/model/prompt và link về Drupal. Service chỉ lưu external ID/revision/hash/kết quả/metadata; **không lưu toàn văn bài nháp** và không hiển thị secret trong UI/log/audit.
+
+Pause chặn enqueue mới và chặn worker claim job `queued`, nhưng để job đang chạy hoàn tất và giữ nguyên queue cho tới lúc resume. Retry write-back phải dùng lại kết quả đã lưu, không gọi LLM lần hai. Mọi job/run mới phải có correlation ID cùng site/profile/policy để điều tra xuyên Drupal → API → worker → write-back.
+
+---
+
+## 7. Chưa chốt
 
 | Hạng mục | Ghi chú |
 |---|---|

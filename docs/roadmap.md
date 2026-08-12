@@ -44,6 +44,23 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 - Demo bàn giao sản phẩm.
 
-## 3. Ghi chú quan trọng từ mentor
+## 3. Luồng song song: productization nền tảng Multi-Agent
+
+**Đã duyệt thiết kế ngày 2026-08-12, chưa triển khai code.** Luồng này không thay thế và không tự mở rộng tiêu chí hoàn thành Sprint 3 do mentor giao. Mục tiêu là tách Multi-Agent thành service độc lập có API, connector Drupal, site/profile, trang quản trị và phân quyền để có thể tái sử dụng sau này. Phạm vi MVP vẫn chỉ là Việt Nam, tiếng Việt, bài `cam_nang` và một Drupal site.
+
+Thiết kế chuẩn: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
+
+| Pha | Kết quả |
+|---|---|
+| P1 — Nền dữ liệu | Migration có version; site/profile mặc định; nâng schema cũ không mất dữ liệu |
+| P2 — Auth + admin shell | Local account, session, CSRF, RBAC, bootstrap admin, audit nền |
+| P3 — Vận hành | Dashboard, jobs, history, retry/dead-letter có cảnh báo chi phí |
+| P4 — API/connector | `/api/v1`, credential theo site, Drupal connector, dedup và pause/resume |
+| P5 — Hoàn thiện MVP | Connection, users, config/KB/evaluation chỉ đọc, metrics/correlation |
+| P6 — Hardening | Security/integration test, staging, migration/rollback rehearsal, tài liệu/demo |
+
+**Hàng rào với Sprint 3:** productization chỉ thay lớp bao quanh. Không sửa 4 agent, prompt, `fact_check.py`, `scoring.py`, Aggregator, rule, KB hoặc `scoring.yaml` trong lúc E1/E5 đang khóa. Nếu `prompt_version` khác `020738e209017213`, dừng luồng productization và đánh giá lại phép đo trước khi tiếp tục.
+
+## 4. Ghi chú quan trọng từ mentor
 
 "Mặc dù dùng AI, nhưng các phần lõi em cũng cần research sâu hơn để hiểu thật sự" - mentor nhấn mạnh việc dùng công cụ AI hỗ trợ không thay thế việc tự nghiên cứu và hiểu sâu các khái niệm kỹ thuật cốt lõi (kiến trúc multi-agent, RAG, phương pháp luận calibration thống kê, shadow-testing) trước khi triển khai. Tài liệu ở research.md và architecture.md là nền tảng nghiên cứu; các khái niệm mới (RAG, Cohen's Kappa, shadow-test) cần được hiểu rõ bản chất, không chỉ áp dụng theo hướng dẫn.

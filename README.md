@@ -21,6 +21,19 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 - [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
 - [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) — việc phải làm trước khi demo/bàn giao: cấu hình dev quên tắt, KB phải dựng lại trên máy mới, và cách nói đúng về ngưỡng chưa calibrate
+- [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **chưa triển khai code**
+
+### Dành cho AI/model tiếp nhận dự án
+
+Không suy trạng thái hiện hành từ ngày sửa file hoặc từ các báo cáo lịch sử. Trước khi đề xuất việc tiếp theo, model phải đọc theo thứ tự:
+
+1. [`docs/technical-debt.md` mục 8 — BÀN GIAO](docs/technical-debt.md#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-12) — **nguồn sự thật cho trạng thái đang làm**, việc kế tiếp, lệnh chạy, cổng chi phí và các việc tuyệt đối chưa được suy đoán là đã xong.
+2. [`docs/evaluation-plan.md` mục 3a và 4](docs/evaluation-plan.md#3a-khoá-code-chấm-điểm--2026-08-12-bản-4) — hợp đồng đo lường, bộ code/prompt/model đã khoá và cách phân biệt kết quả hiện hành với số lịch sử.
+3. Tài liệu chuyên biệt theo việc đang làm; riêng gán nhãn/test–retest phải đọc [`docs/goldset/annotation-guideline.md` mục 8](docs/goldset/annotation-guideline.md#8-đo-độ-tin-cậy-của-chính-nhãn).
+
+Nếu các tài liệu mâu thuẫn, dừng và đối chiếu bằng commit, `prompt_version` do code tính và file evidence; không tự chọn con số thuận lợi hơn. Những mục có nhãn **hết hiệu lực/lịch sử** chỉ dùng để giải thích quá trình, không được báo cáo như kết quả của code hiện hành.
+
+Với công việc liên quan service độc lập, admin, auth, site/connector hoặc profile thị trường, phải đọc thêm [thiết kế productization đã duyệt](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Không suy cấu trúc “planned” trong tài liệu đó là code đã tồn tại.
 
 ## Cấu trúc project
 
@@ -75,6 +88,12 @@ drupal-multiagent-seo/
 │
 └── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
+
+### Hướng productization đã duyệt — chưa triển khai
+
+Song song với Sprint 3, phần Python sẽ được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith: `/api/v1` cho Drupal, `/admin` cho người vận hành, worker riêng và PostgreSQL chung. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema sẽ có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
+
+Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); cây thư mục/module trong spec là kiến trúc mục tiêu, **không phải trạng thái code hiện tại**.
 
 ## Setup
 

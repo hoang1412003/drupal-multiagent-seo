@@ -278,37 +278,25 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 **Trạng thái (cập nhật 2026-08-04): đã triển khai.** `multiagent/config/scoring.yaml` giữ trọng số và ngưỡng, tra theo khoá `(content_type, langcode)`; `src/config.py` nạp và phát cảnh báo lúc chạy; `graph.py` đọc từ config thay vì hằng số `WEIGHTS`; `state.py` đã có `content_type`/`langcode`. Bằng chứng đây là refactor thuần: `label_helper.py` chạy lại trên 33 mẫu gold set cho ra file giống hệt từng byte với báo cáo đã commit. Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
 
-### 5.7. Trang quản lý agent + tách service — ghi nhận, CHƯA làm
+### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — thiết kế đã duyệt, chưa triển khai
 
-Cùng loại với hai hướng mở rộng ở mục 4.2 (GEO Optimizer Agent, Visual Consistency Agent) và hai trục ở mục 5.6: **có thiết kế, cố ý chưa làm trong phạm vi dự án hiện tại.** Lý do hoãn giống hệt: roadmap Sprint 3 mentor giao là calibration → shadow-test/held-out → hoàn thiện UI → demo, và việc đang chặn Sprint 3 là **gán nhãn gold set**. Thêm một trang quản lý lúc này là mở rộng phạm vi, không phải hoàn thành phạm vi.
+**Quyết định mới ngày 2026-08-12 thay thế đề xuất cũ đặt trang quản trị trong Drupal.** Multi-Agent sẽ là một service độc lập; Drupal là connector/client đầu tiên. Trang quản trị nằm tại `/admin` của service và dùng tài khoản local riêng trong MVP. Thiết kế đầy đủ, bao gồm schema, API, role, bảo mật, migration, test và rollout: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
-**Ai dùng.** Không phải biên tập viên — họ đã có báo cáo theo từng field ngay trong màn soạn bài (module `vf_ai_review`, mục 2.3). Trang này phục vụ **trưởng nhóm content** (nhiều bài: tuần này bao nhiêu bài bị chặn, lỗi nào hay gặp) và **người vận hành** (service sống không, chi phí bao nhiêu, KB có gì).
+MVP vẫn chỉ phục vụ **một công ty, một Drupal site, thị trường Việt Nam, tiếng Việt và bài `cam_nang`**. Khả năng mở rộng nằm ở ranh giới connector, `site_id` và `review_profile`; không được mô tả thành “đã hỗ trợ đa website/đa thị trường”. Mỗi thị trường mới vẫn phải có policy, KB, gold set và calibration riêng.
 
-**Màn hình dự kiến**, mỗi màn đều đã có dữ liệu thật đứng sau:
+Kiến trúc chọn **modular monolith**, không phải microservice phân mảnh: một FastAPI app phục vụ `/api/v1` cho Drupal và UI server-rendered `/admin`; worker là tiến trình riêng; PostgreSQL giữ queue, run history, KB, site/profile và auth. Engine LangGraph/4 agent/Aggregator hiện tại được cô lập thành module và phải giữ nguyên hành vi.
 
-| Màn | Nguồn dữ liệu |
-|---|---|
-| Tổng quan: số bài, phân bố quyết định, chi phí/token, độ trễ | `run_log` |
-| Lịch sử chấm + chi tiết một lần chấm (mức từng tiêu chí CP1–CP9 / BV1–BV7, trích dẫn, đoạn KB, `veto_reason`) | `run_log` — đây chính là **nhật ký truy vết** ở `operations.md` mục 2 |
-| Soi KB: duyệt chunk, lọc metadata, ô thử truy vấn chạy đúng `retrieve()` | bảng `kb_chunk` |
-| Cấu hình — **chỉ đọc** | `config/scoring.yaml` |
-| Chấm lại thủ công một node | gọi `build_graph().invoke()` |
+**Danh tính và role tách theo ranh giới hệ thống:**
 
-**Cấu hình để CHỈ ĐỌC là ràng buộc thiết kế, không phải thiếu tính năng.** `scoring.yaml` ghi rõ *"KHÔNG SỬA TAY khối đã calibrate"*; một nút Lưu trên web sẽ cắt đứt mối liên hệ giữa con số và bằng chứng calibration sinh ra nó. Trang chỉ hiển thị `meta.calibrated / gold_set / kappa / model` để người xem biết ngưỡng đang dùng từ đâu ra.
+- Drupal có `content_editor` (người viết cũng là người duyệt), `site_admin` và machine role `ai_service`.
+- Admin Multi-Agent có `viewer`, `operator`, `admin`; không tự ánh xạ với role Drupal.
+- Người viết không cần tài khoản Multi-Agent. Drupal gọi service server-to-server bằng Bearer credential riêng theo site; service suy `site_id` từ credential, không tin ID gửi trong body.
 
-**Đăng nhập: Drupal là nhà cung cấp danh tính duy nhất.** Tuyệt đối không dựng kho tài khoản thứ hai — hai kho nghĩa là một người hai mật khẩu, và khi ai đó nghỉ việc phải nhớ khoá ở hai chỗ. Cần phân biệt:
+**Trang quản trị MVP:** đăng nhập; dashboard health/queue/decision/token/cost/latency; jobs và retry có cảnh báo chi phí; review history; kết nối Drupal + pause/resume intake; config/KB/evaluation chỉ đọc; quản lý user; audit. Không có prompt editor và không chạy E1–E6 từ UI.
 
-- **Danh tính máy** (service ↔ service): service account / API key. Đã có sẵn `DRUPAL_USER`/`DRUPAL_PASSWORD`.
-- **Danh tính người**: tài khoản Drupal. Đề xuất 2 role (`ai_service` cho máy, `ai_admin` cho người) và 3 permission — `xem bao cao ai` (cho `content_editor`), `xem quan tri ai`, `dieu khien ai`. Tách `xem` khỏi `dieu khien` vì bấm "chấm lại" là **tiêu tiền API thật**.
+Productization được làm **song song với Sprint 3**, nhưng chỉ ở lớp bao quanh. Mọi thay đổi vào agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml` làm mất hiệu lực bản đo hiện hành và phải dừng theo `evaluation-plan.md` mục 3a. Trong giai đoạn này `prompt_version` phải giữ `020738e209017213`.
 
-Hai cách đặt trang, và chúng khác nhau hẳn về khối lượng việc:
-
-1. **Trang nằm trong Drupal**, gọi API của service → **0 việc về auth**. Đây là cách nên làm cho v1.
-2. **UI riêng của service** → phải cho service tin token Drupal qua `simple_oauth` (Drupal làm OAuth2 provider). Là một hạng mục riêng, không làm kèm.
-
-Điều kiện để không phải viết lại khi đổi ý: **service expose API sạch ngay từ đầu, Drupal chỉ là một client của API đó.** Khi ấy chọn (1) không khoá đường sang (2).
-
-**Một tiền đề đã sẵn sàng:** việc chuyển kho vector sang Postgres (2026-08-05, `rag-design.md` mục 4.2a) chính là bước hạ tầng của hướng này — `run_log` và `review_state` nằm cùng một DB với `kb_chunk`, nên trang quản lý không cần thêm kho dữ liệu nào nữa.
+PostgreSQL hiện có là tiền đề tốt, nhưng schema hiện hành chưa tenant-aware và chưa có migration version. Việc triển khai phải nâng dữ liệu cũ về một default site/profile, không mất queue/run/KB; Drupal tiếp tục là nguồn sự thật của nội dung và service **không lưu toàn văn bài nháp**.
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 

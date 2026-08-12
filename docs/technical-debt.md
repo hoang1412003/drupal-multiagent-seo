@@ -1,9 +1,9 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; **2026-08-11 thêm B14 và mục 8 — BÀN GIAO**)
+**Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; 2026-08-11 thêm B14 và mục 8; **2026-08-12 đóng CP4/N1 và cập nhật bàn giao đo lường**)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
-> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-2026-08-11) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
+> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-12) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
 
@@ -615,7 +615,16 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Snapshot hiện tại:** nhánh triển khai bản 4 có chốt CP4 tất định tại production commit `c6b1660`, prompt version `020738e209017213`; full suite offline **40/40 test script xanh**, riêng Compliance rubric có 42 ca. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
+**Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`; full suite offline **41/41 test script xanh**. HEAD có thể là descendant chỉ thêm tài liệu, nhưng trước lượt đo phải xác minh diff agent/fact-check/graph/scoring/config/rule/retrieval/KB so với `04f10e1` rỗng và ghi HEAD thực tế vào evidence. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
+
+**Trạng thái ngắn cho AI/model tiếp nhận:**
+
+- ✅ **Code cần cho lượt đo đã xong:** CP4 và N1 đã merge; không còn việc sửa code nào phải chen vào trước E1.
+- ✅ **Preflight E1 bản 4 đã đạt ngày 2026-08-12:** legacy guard từ chối file cũ trước đường trả phí; model/prompt/sample/output target đúng; API key chỉ được xác nhận là có cấu hình, không ghi giá trị secret.
+- ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
+- ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
+- ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
+- 📝 **Productization/admin đã duyệt thiết kế, chưa triển khai:** làm song song nhưng không đổi score-path; đọc mục 8.9 và design spec trước khi viết code. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -630,8 +639,9 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 
 **Cách chạy lần đo mới:** giữ file lịch sử nguyên trạng và truyền tên file mới qua cờ `--ket-qua`:
 
-  ```bash
-  HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json
+  ```powershell
+  $env:HF_HUB_OFFLINE = '1'
+  .\.venv\Scripts\python.exe scripts\eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json
   ```
 
 Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự kiến khoảng **3 USD**. File mới sẽ được ghi `_meta.prompt_version`; các lần resume sau đó cũng bị từ chối nếu hash prompt đổi.
@@ -640,10 +650,26 @@ Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự
 
 ### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
 
-```bash
+```powershell
 cd multiagent
-HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json    # đọc 8.0 TRƯỚC
+$env:HF_HUB_OFFLINE = '1'
+.\.venv\Scripts\python.exe scripts\eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json  # đọc 8.0 TRƯỚC
 ```
+
+**Preflight đã chạy ngày 2026-08-12, không gọi API và không tạo output:**
+
+| Kiểm tra | Kết quả |
+|---|---|
+| Legacy guard | `REJECTED_BEFORE_PAID_PATH` |
+| Commit được kiểm | `04f10e1` |
+| Prompt version | `020738e209017213` |
+| Model | `claude-haiku-4-5-20251001` |
+| Cấu hình calibration | `calibrated: false` |
+| Mẫu / số lượt dự kiến | `G-001..G-010` / `10 × 5 = 50` |
+| File đích | `e1_sau_cp4_deadline_guard.json` — **chưa tồn tại** |
+| Chi phí phát sinh trong preflight | **0 USD** |
+
+Kết luận preflight chỉ chứng minh lệnh **sẵn sàng chạy an toàn**; nó không phải kết quả E1 và không mở cổng E5. Trước lượt chạy ngày 2026-08-13 vẫn phải xác nhận riêng chi phí dự kiến khoảng 3 USD.
 
 **Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên code cũ. B14 rồi chốt CP4 đã đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
 
@@ -679,6 +705,13 @@ Sau E5 bản 4, chỉ chốt ngưỡng mới nếu điều kiện đo đạt; `p
 ### 8.3. Test-retest nhãn — từ **2026-08-13**, $0
 
 Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**.
+
+**Thứ tự bắt buộc trong phiên 2026-08-13 (để AI/model không vô tình làm hỏng phép đo):**
+
+1. Chọn ngẫu nhiên 4 `sample_id`, chỉ đưa bài gốc và guideline cho người gán; không hiển thị `label`, `defect_codes`, `notes` cũ, báo cáo AI hoặc output E1.
+2. Lưu nhãn lượt hai vào **file evidence mới**, không ghi đè `docs/goldset/labels.csv`. Tệp đề xuất: `docs/evidence/test_retest_2026-08-13.csv`, tối thiểu có `sample_id,retest_label,annotator,date,notes` và ghi cách chọn mẫu/seed để tái lập.
+3. Chỉ sau khi file lượt hai đã khóa mới mở nhãn lượt một để tính Cohen's Kappa và ghi kết quả/evidence.
+4. Sau test–retest mới chuyển sang E1; xin người dùng xác nhận riêng chi phí trước khi gọi API. Hai phép đo độc lập: một phép bị chặn không được làm mất bằng chứng của phép còn lại.
 
 **Vì sao chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Trần 0,75 thì 0,713 là rất tốt; trần 0,95 thì còn khoảng cách lớn. **Chưa có trần thì 0,713 không nói lên điều gì** — đừng đưa vào báo cáo mentor.
 
@@ -728,6 +761,20 @@ Test tích hợp offline mới `scripts/test_worker_graph_integration.py` đã g
 
 Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **không làm mất hiệu lực quan hệ đo lường 8.1 → 8.2**. Trước production pilot vẫn phải đếm revision/request trên Drupal thật; test offline đóng lỗi ownership trong code nhưng không thay thế smoke test CMS.
 
+### 8.9. Productization service độc lập + trang quản trị — 📝 THIẾT KẾ ĐÃ DUYỆT, CHƯA TRIỂN KHAI
+
+Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
+
+**Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
+
+**Role:** Drupal có `content_editor` (người viết cũng duyệt), `site_admin`, machine role `ai_service`; admin Multi-Agent có `viewer`, `operator`, `admin`. Hai hệ thống không tự ánh xạ tài khoản. Người viết không cần đăng nhập Multi-Agent.
+
+**Bảo vệ phép đo:** không sửa agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml`. `prompt_version` phải giữ `020738e209017213`; nếu đổi thì dừng productization và xử lý theo `evaluation-plan.md` mục 3a. Không chen hạng mục này vào trước test–retest/E1 và không tự chạy phép đo trả phí.
+
+**Thứ tự triển khai sau khi có implementation plan được duyệt:** (P1) migration version + default site/profile; (P2) local auth/admin shell; (P3) dashboard/jobs/history; (P4) connector Drupal + `/api/v1`; (P5) users/config/KB/evaluation read-only; (P6) security/integration/docs/demo. Migration phải nâng schema hiện hành không mất queue/run/KB. Service không lưu toàn văn bài nháp và không lưu secret plaintext.
+
+**Điều kiện bắt đầu code:** design spec được người dùng review; sau đó viết implementation plan theo task nhỏ, có TDD và checkpoint. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy module/bảng trong spec đã tồn tại.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
@@ -747,6 +794,7 @@ Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **kh�
 | E5 lần 1 | $1,86 |
 | Chẩn đoán 12 bài | $0,93 |
 | E5 lần 2 | $1,85 |
+| Preflight E1 bản 4 (không gọi API) | $0 |
 | **Cộng dồn** | **~$16** |
 
 Còn lại dự kiến: E1 ~$3, E3 ~$2, E6 ~$2.
@@ -829,6 +877,7 @@ Các việc dưới đây là hardening dài hạn. Không chen chúng vào gi�
 - Thay việc chỉ dựa vào `CREATE TABLE IF NOT EXISTS` bằng migration có version cho queue, audit và vector schema.
 - Kiểm thử nâng cấp từ schema đang tồn tại, không chỉ tạo database mới.
 - Xử lý khe hở `force=True` trên connection cache dùng chung đã ghi ở mục 6 trước khi có nhiều request đồng thời; ưu tiên transaction/connection riêng theo request hoặc pool có ranh giới rõ.
+- Phần migration site/profile/admin đã được đưa vào design productization mục 8.9; khi triển khai phải giải quyết cùng nợ này, không dựng cơ chế migration thứ hai.
 
 ### H4. Khoá phiên bản dependency Python
 
@@ -874,6 +923,7 @@ State/config có hai chiều này nhưng luồng runtime hiện tối ưu cho `c
 - Giới hạn service trong private network/loopback hoặc bổ sung rate limit phù hợp nếu mở ra ngoài; đặt giới hạn kích thước request và nội dung bài.
 - Giữ quyền manual rescore tách khỏi quyền chỉ xem báo cáo; test CSRF, bundle guard và việc `last_error` kỹ thuật không lộ cho editor thường.
 - Duy trì regression test escape mọi dữ liệu report do LLM sinh trước khi render trong Drupal.
+- Thiết kế local admin auth, role `viewer/operator/admin`, per-site token hash, CSRF/session/audit và last-admin guard đã chốt ở mục 8.9; đây vẫn là nợ cho tới khi code/test tồn tại.
 
 ### H11. Vòng phản hồi của biên tập viên
 

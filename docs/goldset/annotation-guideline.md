@@ -196,6 +196,8 @@ Hai phép đo này chạy **trước** khi báo cáo bất kỳ chỉ số AI n�
 - Tính Cohen's Kappa giữa 2 lượt của cùng một người.
 - **Tiêu chí:** Kappa ≥ 0.80. Dưới mức đó nghĩa là tài liệu hướng dẫn này chưa đủ rõ → sửa guideline, tăng version, gán lại toàn bộ.
 
+**Khi AI/model hỗ trợ phiên test–retest:** model có thể chọn `sample_id` và chuẩn bị bài, nhưng không được hiển thị/nhắc lại `label`, `defect_codes`, `notes` cũ hoặc kết quả AI cho người gán. Nhãn lượt hai phải lưu vào file evidence riêng và khóa trước khi model mở nhãn lượt một để tính Kappa; tuyệt đối không ghi đè `labels.csv`. Ghi cả cách chọn mẫu/seed để chứng minh 10% mẫu được chọn độc lập. Nếu cùng phiên còn chạy phép đo AI, phải hoàn tất test–retest trước khi xem output phép đo đó để tránh neo nhận thức.
+
 ### 8.2. Trần trên của Kappa
 
 Kappa AI-người không diễn giải được nếu đứng một mình: 0.60 là tốt hay kém phụ thuộc vào mức đồng thuận **tối đa hợp lý** trên chính bộ mẫu này. Cần một con số làm trần.

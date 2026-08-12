@@ -4,6 +4,18 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
+## 0. Project Handoff (Required)
+
+Before proposing or changing anything in this repository:
+
+0. Communicate with the project owner in Vietnamese unless the user requests another language.
+1. Read `README.md`, especially **"Dành cho AI/model tiếp nhận dự án"**, for the project map.
+2. Read `docs/technical-debt.md` **section 8 — BÀN GIAO** for the current state, next action, cost gates, and commands. This is the source of truth for work in progress.
+3. Read the relevant measurement contract in `docs/evaluation-plan.md`; for labeling work, also read `docs/goldset/annotation-guideline.md`.
+4. For standalone service, admin, authentication, connector/site, or market-profile work, read `docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`. It is approved design, not implemented state.
+
+Do not treat measurements in historical reports or superseded subsections as valid for the current code. A valid E1/E5 result must be traceable to the locked score-path snapshot (a later documentation-only descendant is allowed only when the score-path diff is empty), match the locked `(prompt_version, model)`, and have its own evidence file.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
