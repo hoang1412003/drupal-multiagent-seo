@@ -29,15 +29,17 @@ BODY_KHONG_SO = "Hướng dẫn sạc pin an toàn cho xe điện đúng cách."
 def _llm(muc_theo_ma: dict, evidence: str = BODY):
     """Gia lap LLM: tra mot muc co san cho moi ma."""
     def fn(fields, text_theo_field):
-        return {
-            ma: compliance._tieu_chi(
+        result = {}
+        for ma, muc in muc_theo_ma.items():
+            muc_sau = compliance._hop_thuc_hoa(ma, muc, evidence, text_theo_field)
+            can_evidence = muc_sau in (0, 1) or (ma == "CP4" and muc_sau == 2)
+            result[ma] = compliance._tieu_chi(
                 ma,
-                compliance._hop_thuc_hoa(ma, muc, evidence, text_theo_field),
-                ([{"field": "body", "text": evidence}] if muc in (0, 1) else []),
+                muc_sau,
+                ([{"field": "body", "text": evidence}] if can_evidence else []),
                 "ly do",
             )
-            for ma, muc in muc_theo_ma.items()
-        }
+        return result
     return fn
 
 
@@ -127,12 +129,11 @@ def test_cp2_khong_trich_dan_duoc_thi_ve_muc_2():
 def test_trich_dan_co_that_thi_giu_nguyen_muc():
     result = compliance.run(
         {"title": "", "body": BODY, "meta_description": ""},
-        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": 1},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": None, "CP7": 1},
                           evidence="chạy được 420 km"),        # co that trong bai
         danh_gia_cp3=_cp3_na,
     )
     assert _muc(result, "CP7") == 1, "trich dan co that thi giu nguyen muc"
-    assert _muc(result, "CP4") == 2
     print("[PASS] trich dan nguyen van co that -> giu nguyen muc LLM cham")
 
 
@@ -485,6 +486,144 @@ def test_cp4_khong_muon_ngay_tu_field_khac():
     print("[PASS] CP4 khong muon ngay tu field khac")
 
 
+def test_cp4_du_dieu_kien_va_thoi_han_thi_muc_2():
+    body = "Từ ngày 01/07 - 20/09/2023. Khuyến mại 199.000 đồng/tháng cho khách kích hoạt HĐTP."
+    result = compliance.run(
+        {"title": "", "body": body, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": None, "CP8": None},
+                          evidence="Khuyến mại 199.000 đồng/tháng cho khách kích hoạt HĐTP."),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 2
+    cp4_criterion = next(c for c in result["criteria"] if c["id"] == "CP4")
+    assert cp4_criterion["occurrences"] == [], "evidence muc 2 chi duoc giu noi bo"
+    assert not any(f["rule"].endswith("(CP4)") for f in result["flags"])
+    print("[PASS] CP4 du dieu kien + thoi han -> muc 2")
+
+
+def test_cp4_du_dieu_kien_nhung_thieu_thoi_han_thi_critical():
+    evidence = "Khách hàng đặt cọc mua VF 8 được giảm ngay 3 triệu đồng."
+    result = compliance.run(
+        {"title": "", "body": evidence, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": None, "CP8": None},
+                          evidence=evidence),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 0
+    cp4 = [f for f in result["flags"] if f["rule"].endswith("(CP4)")]
+    assert cp4 and cp4[0]["severity"] == "critical", result["flags"]
+    assert "thời hạn" in cp4[0]["suggestion"].lower()
+    print("[PASS] CP4 thieu thoi han -> muc 0 critical")
+
+
+def test_cp4_co_thoi_han_nhung_thieu_dieu_kien_van_critical():
+    evidence = "Giảm 3 triệu đồng đến 31/08/2024."
+    result = compliance.run(
+        {"title": "", "body": evidence, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 0, "CP7": None, "CP8": None},
+                          evidence=evidence),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 0
+    assert any(f["severity"] == "critical" and f["rule"].endswith("(CP4)")
+               for f in result["flags"])
+    print("[PASS] CP4 co thoi han nhung thieu dieu kien van critical")
+
+
+def test_cp4_na_khong_bi_regex_tu_kich_hoat():
+    body = "Bài viết ngày 01/07/2023 không có khuyến mại."
+    result = compliance.run(
+        {"title": "", "body": body, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": None, "CP7": None, "CP8": None}),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") is None
+    print("[PASS] CP4 NA khong bi regex ngay thang tu kich hoat")
+
+
+def test_cp4_evidence_bia_khong_duoc_dung_de_veto():
+    result = compliance.run(
+        {"title": "", "body": BODY_KHONG_SO, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": None, "CP8": None},
+                          evidence="Khuyến mại 3 triệu đồng đến 31/08/2024."),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") is None
+    assert not any(f["rule"].endswith("(CP4)") for f in result["flags"])
+    print("[PASS] CP4 evidence bia -> NA, khong veto")
+
+
+def test_cp4_muc_1_ngoai_rubric_duoc_chuan_hoa_ve_0():
+    evidence = "Giảm 3 triệu đồng đến 31/08/2024."
+    result = compliance.run(
+        {"title": "", "body": evidence, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 1, "CP7": None, "CP8": None},
+                          evidence=evidence),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 0
+    print("[PASS] CP4 khong cho muc 1 lam mat veto A4")
+
+
+def test_cp4_g008_co_thoi_han_khong_bi_veto_oan():
+    evidence = (
+        "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng "
+        "kể từ thời điểm kích hoạt HĐTP."
+    )
+    body = "Chính sách từ ngày 01/07 - 20/09/2023. " + evidence
+    result = compliance.run(
+        {"title": "", "body": body, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": 2, "CP8": None}, evidence),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 2
+    print("[PASS] G-008 co thoi han -> CP4 khong veto oan")
+
+
+def test_cp4_p006a_co_thoi_han_khong_bi_veto_oan():
+    evidence = (
+        "Trước 6/4/2022, khách hàng đặt cọc 2 mẫu xe VinFast VF 8 và VinFast "
+        "VF 9 sẽ được nhận ưu đãi lên đến 250 triệu đồng."
+    )
+    result = compliance.run(
+        {"title": "", "body": evidence, "meta_description": ""},
+        danh_gia_llm=_llm({"CP2": 2, "CP4": 2, "CP7": None, "CP8": None}, evidence),
+        danh_gia_cp3=_cp3_na,
+    )
+    assert _muc(result, "CP4") == 2
+    print("[PASS] P-006a co thoi han -> CP4 khong veto oan")
+
+
+def test_cp4_duong_llm_that_giu_evidence_de_chot_thoi_han():
+    evidence = (
+        "Khuyến mại 199.000 đồng/tháng không giới hạn số km trong vòng 3 tháng "
+        "kể từ thời điểm kích hoạt HĐTP."
+    )
+
+    def fake_call_agent(*args, **kwargs):
+        return {
+            "criteria": [
+                {"id": "CP2", "muc": "2", "field": "body", "evidence": "", "reason": ""},
+                {"id": "CP4", "muc": "2", "field": "body", "evidence": evidence, "reason": ""},
+                {"id": "CP7", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+                {"id": "CP8", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+            ]
+        }
+
+    call_agent_cu = compliance.call_agent
+    compliance.call_agent = fake_call_agent
+    try:
+        result = compliance.run(
+            {"title": "", "body": evidence, "meta_description": ""},
+            danh_gia_cp3=_cp3_na,
+        )
+    finally:
+        compliance.call_agent = call_agent_cu
+
+    assert _muc(result, "CP4") == 2
+    print("[PASS] duong LLM that giu evidence CP4 muc 2 de chot thoi han")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -521,6 +660,15 @@ if __name__ == "__main__":
         test_cp4_nhan_thoi_han_o_block_lien_ke_evidence,
         test_cp4_khong_muon_ngay_o_xa_evidence,
         test_cp4_khong_muon_ngay_tu_field_khac,
+        test_cp4_du_dieu_kien_va_thoi_han_thi_muc_2,
+        test_cp4_du_dieu_kien_nhung_thieu_thoi_han_thi_critical,
+        test_cp4_co_thoi_han_nhung_thieu_dieu_kien_van_critical,
+        test_cp4_na_khong_bi_regex_tu_kich_hoat,
+        test_cp4_evidence_bia_khong_duoc_dung_de_veto,
+        test_cp4_muc_1_ngoai_rubric_duoc_chuan_hoa_ve_0,
+        test_cp4_g008_co_thoi_han_khong_bi_veto_oan,
+        test_cp4_p006a_co_thoi_han_khong_bi_veto_oan,
+        test_cp4_duong_llm_that_giu_evidence_de_chot_thoi_han,
     ):
         try:
             fn()
