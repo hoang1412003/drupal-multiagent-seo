@@ -722,11 +722,11 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 
 `evaluation-plan.md` mục 4.3 và 4.6. E3 so multi-agent với single-agent; E6 held-out test. Cả hai cần ngưỡng đã chốt và trần Kappa.
 
-### 8.8. Chốt kiểm tra miễn phí trước lượt chạy production tiếp theo — phát hiện mới 2026-08-12
+### 8.8. Chốt kiểm tra miễn phí trước lượt chạy production tiếp theo — ✅ ĐÃ XONG (2026-08-12)
 
-Đợt rà soát tĩnh độc lập ngày 2026-08-12 phát hiện một đường điều khiển **có khả năng ghi kết quả về Drupal hai lần cho cùng một job**; chi tiết và mức độ chắc chắn nằm ở mục 9.1. Trước lượt chạy end-to-end hoặc production tiếp theo, hãy viết test tương tác thật giữa `worker.chay_mot_job()` và graph mặc định để đếm số lần PATCH, rồi mới quyết định có sửa hay không.
+Test tích hợp offline mới `scripts/test_worker_graph_integration.py` đã giữ worker + topology LangGraph thật, chỉ thay biên Drupal/agent/audit/queue bằng fake/spy. Chu kỳ RED xác nhận một job gọi transport PATCH **2 lần**; sau sửa test GREEN với đúng **1 lần**. Chi tiết nguyên nhân và fix ở mục N1.
 
-Đây là phép kiểm **$0**, nên có thể làm trước E1 để tránh quên, nhưng **không thay đổi quan hệ phụ thuộc đo lường 8.1 → 8.2**: E1/E5 chấm dữ liệu cục bộ và vấn đề write-back chưa được chứng minh là làm đổi điểm. Không hoãn E1 chỉ vì chưa sửa một lỗi mới còn ở trạng thái cần tái hiện; ngược lại, không chạy production end-to-end khi chưa biết một job PATCH một hay hai lần.
+Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **không làm mất hiệu lực quan hệ đo lường 8.1 → 8.2**. Trước production pilot vẫn phải đếm revision/request trên Drupal thật; test offline đóng lỗi ownership trong code nhưng không thay thế smoke test CMS.
 
 ---
 
@@ -757,22 +757,22 @@ Còn lại dự kiến: E1 ~$3, E3 ~$2, E6 ~$2.
 
 Mục này bổ sung sau snapshot bàn giao ở mục 8. Nó **không viết lại lịch sử**, không tự mở lại B14, và không đổi B12b/B13 từ “cố ý chưa sửa” thành việc phải làm ngay. Mỗi phát hiện được gắn trạng thái để tránh biến suy luận tĩnh thành kết luận production.
 
-### N1. Graph và worker có khả năng write-back hai lần — ⚠️ CẦN TEST TÁI HIỆN, ưu tiên cao nếu xác nhận
+### N1. Graph và worker write-back hai lần — ✅ ĐÃ XÁC NHẬN VÀ SỬA (2026-08-12)
 
-**Bằng chứng từ luồng điều khiển:**
+**Bằng chứng từ luồng điều khiển trước sửa:**
 
-1. `worker.chay_mot_job()` dùng `build_graph().invoke` làm `invoke` mặc định (`multiagent/src/worker.py`).
-2. `build_graph()` đã đăng ký node `write_back`, nối `aggregator → write_back → END` (`multiagent/src/graph.py`). Lượt `invoke()` vì vậy đã có thể PATCH Drupal lần thứ nhất.
+1. `worker.chay_mot_job()` từng dùng `build_graph().invoke` làm `invoke` mặc định (`multiagent/src/worker.py`).
+2. `build_graph()` mặc định đăng ký node `write_back`, nối `aggregator → write_back → END` (`multiagent/src/graph.py`). Lượt `invoke()` vì vậy PATCH Drupal lần thứ nhất.
 3. Sau khi `invoke()` trả về, worker gọi `_payload_tu_state(state)` rồi gọi `write_back_fn(node_id=..., **payload)`; với dependency mặc định đây là PATCH lần thứ hai.
-4. `scripts/test_worker.py` luôn tiêm `invoke` và `write_back_fn` giả, nên test hiện tại không đi xuyên qua graph đã compile và không đếm được tương tác này.
+4. Trước N4, `scripts/test_worker.py` luôn tiêm `invoke` và `write_back_fn` giả, nên không đi xuyên qua graph đã compile và không đếm được tương tác này.
 
-**Ảnh hưởng nếu tái hiện:** tạo revision/save thừa trong Drupal, kích hoạt hook hai lần, tăng request nội bộ, và có thể sinh hai `scored_at` khác nhau. Lần PATCH nằm trong graph cũng không được worker quản lý cùng ranh giới audit/retry với lần PATCH sau.
+**RED đã tái hiện:** `scripts/test_worker_graph_integration.py` chạy worker và graph thật, dùng chung một PATCH spy ở hai biên. Assertion `calls == 1` thất bại với diagnostic nguyên văn `thực tế 2`. Vì test không gọi Drupal/LLM/PostgreSQL nên kết quả này xác nhận đường gọi trong code, không phụ thuộc mạng hay dữ liệu.
 
-**Cách xác minh trước khi sửa:** dựng test không gọi LLM và không cần Drupal thật: dùng graph tối giản hoặc monkeypatch bốn agent/fetch node nhưng giữ nguyên topology của `build_graph()`, thay transport PATCH bằng spy, chạy `worker.chay_mot_job()` với dependency mặc định ở ranh giới graph–worker, rồi assert `calls == 1`. Trước khi sửa, test phải đỏ và diagnostic phải xác nhận giá trị thực tế là `2`; nếu không tái hiện thì hạ/đóng N1 thay vì sửa theo suy luận.
+**Nguyên nhân gốc:** node `write_back` có từ pipeline thủ công tháng 7. Worker queue thêm ngày 2026-08-07 cần tự ghi `run_log`, quản lý retry và PATCH sau audit, nhưng spec lúc đó yêu cầu không sửa `graph.py`; side effect cũ vì vậy còn nguyên trong `build_graph().invoke()` và worker thêm side effect thứ hai.
 
-**Hướng sửa đề xuất nếu xác nhận:** chỉ một tầng được sở hữu side effect. Ưu tiên để graph thuần phân tích và trả state/report; worker sở hữu audit, retry và write-back. Không giữ hai đường PATCH rồi dùng dedup để che triệu chứng.
+**Fix:** `build_graph(*, include_write_back=True)` giữ mặc định cũ cho `run_all_samples.py`/`smoke_test_graph.py`. Worker production gọi `build_graph(include_write_back=False)`, nhận state phân tích, ghi audit rồi là tầng duy nhất PATCH/retry. Không dùng dedup để che PATCH thừa.
 
-**Xong khi:** test tương tác chứng minh mỗi job thành công PATCH đúng một lần; các ca cache-hit, PATCH thất bại, retry và worker chết giữa audit/write-back vẫn xanh; Drupal không sinh revision thừa.
+**GREEN đã xác minh:** cùng regression test quan sát đúng 1 PATCH. Các test `test_worker.py`, `test_report_json.py`, `test_per_field_report.py`, `test_missing_agent_report.py` và meta-test đều xanh. Việc đếm revision Drupal thật còn nằm trong production-pilot checklist, không được suy ra từ test offline.
 
 ### N2. `content_hash` chưa bao phủ mọi đầu vào mà SEO chấm — ⚠️ GIỚI HẠN ĐÃ BIẾT + PHẦN BỔ SUNG
 
@@ -796,11 +796,11 @@ Bốn wrapper `content_quality_node`, `seo_node`, `brand_voice_node`, `complianc
 
 **Xong khi:** một test ép từng agent ném lỗi và xác nhận job vẫn suy giảm đúng, đồng thời audit/log chỉ ra đúng agent + loại lỗi mà không lộ secret.
 
-### N4. Test worker chưa khoá ranh giới graph–worker — ⚠️ TEST GAP
+### N4. Test worker chưa khoá ranh giới graph–worker — ✅ ĐÃ ĐÓNG CÙNG N1 (2026-08-12)
 
-`scripts/test_worker.py` kiểm tốt queue/audit/retry bằng dependency giả, còn test graph kiểm aggregation/write-back theo từng phần. Chưa có test nối hai thành phần bằng dependency mặc định; N1 lọt qua chính khe này. Đây không phủ định giá trị snapshot “40/40”, mà chỉ nói 40 test script chưa bao phủ một interaction quan trọng.
+`scripts/test_worker.py` vẫn kiểm queue/audit/retry bằng dependency giả. Test mới `scripts/test_worker_graph_integration.py` bổ sung đúng lớp còn thiếu: worker dùng đường graph mặc định của production, topology LangGraph thật, fetch/agent/PATCH/audit/queue được thay ở ranh giới ngoài để chạy offline và đếm side effect.
 
-**Xong khi:** có ít nhất một test offline chạy topology thật với fetch/LLM/PATCH được thay bằng fake ở ranh giới mạng, và khoá thứ tự `fetch → agents → aggregate → audit → một write-back → done`.
+Test này sẽ đỏ nếu worker bỏ `include_write_back=False`, nếu graph bỏ qua cờ và nối lại node write-back, hoặc nếu worker tạo thêm một PATCH sau đường hiện hành.
 
 ### N5. Mức độ xác minh của đợt rà soát này
 
@@ -851,7 +851,7 @@ Các việc dưới đây là hardening dài hạn. Không chen chúng vào gi�
 - README phải thống nhất số entry/chunk fact KB với dữ liệu hiện hành.
 - Mô tả cả bốn agent đều dùng rubric tất định để tính điểm; LLM chỉ cung cấp phần đánh giá/trích xuất được code kiểm soát.
 - Comment/script phải thống nhất số field AI thực tế được tạo.
-- Sau khi N1 được xác minh, cập nhật sơ đồ quyền sở hữu write-back đúng với code.
+- Sơ đồ quyền sở hữu write-back đã cập nhật sau khi đóng N1; giữ đồng bộ nếu topology đổi lần nữa.
 - Mọi số đo E1/E5 phải đi kèm commit, prompt version và evidence file; không chép số lịch sử thành trạng thái hiện hành.
 
 ### H8. Làm rõ phạm vi `content_type` và `langcode`
