@@ -34,13 +34,14 @@ Agent chấm theo 7 tiêu chí BV1–BV7; 6/7 đo bằng regex, chỉ BV6 (mức
 
 ### 2.2. Compliance Agent + Fact-check
 
-Chấm theo 8 tiêu chí CP1–CP8, bằng **ba cách đo khác nhau**:
+Chấm theo 8 tiêu chí CP1–CP8; bảng dưới tách rõ vai trò của từng cách đo và bước ghép:
 
 | Cách đo | Tiêu chí |
 |---|---|
 | Máy (blacklist + regex) | CP1, CP5, CP6 |
 | RAG, đối chiếu thông số VinFast công bố | CP3 |
-| LLM (một lần gọi chung) | CP2, CP4, CP7, CP8 |
+| LLM (một lần gọi chung) | CP2, điều kiện của CP4, CP7, nguồn của CP8 |
+| Ghép tất định LLM + regex | CP4: LLM chấm điều kiện, code chốt thời hạn quanh evidence thật |
 
 **Điểm và mức nghiêm trọng đều do code tính, không để LLM tự cho.** Lý do: `critical` là thứ kích hoạt quyền phủ quyết, tức nó chính là quyết định *chặn hay không chặn xuất bản*. Để LLM tự chọn thì đúng chỗ quan trọng nhất lại là chỗ bất định nhất — đo được σ = 5,48 trên một bài ở cách chấm cũ.
 
@@ -175,7 +176,7 @@ Mười mẫu functional-clean đã được dựng nhưng chưa chạy pipeline
 | **E1** | Độ ổn định điểm qua nhiều lần chấm | Đạt σ `final_score` = **1,79** < 2 — nhưng ⚠️ **số này đã hết hiệu lực**, code chấm điểm đổi sau khi sửa B14. Phải đo lại |
 | **E2** | Retrieval lấy đúng đoạn | Fact-check **1.00**; brand **78,3%** so với mốc ngẫu nhiên **21,7%** |
 | **E4** | Chi phí mỗi bài | TB **$0,057**/bài; cả chương trình đến giờ **$8,33** |
-| **E5** | Ngưỡng quyết định (calibration) | Kappa **0,713** (*substantial*), accuracy **0,879**, sai 4/33 — sau khi sửa B14. Xem mục 5a |
+| **E5** | Ngưỡng quyết định (calibration) | Kappa **0,713**, accuracy **0,879**, sai 4/33 trên bản 3 sau B14; ⚠️ **đã hết hiệu lực** sau chốt CP4 bản 4. Xem mục 5a |
 
 **E2 — con số 78,3% là chặn dưới, không phải tỉ lệ thật.** Ground truth chỉ gán một nhóm chủ đề mỗi bài, trong khi nhiều bài thuộc hai nhóm nên bị tính trượt oan. **Không** sửa nhãn để chữa các ca này — sửa sau khi đã nhìn kết quả là tự tạo thiên vị. Báo cáo con số bị đánh giá thấp, lệch về hướng an toàn.
 
@@ -207,7 +208,7 @@ Hai lỗi đáng kể nhất:
 
 Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache toàn cục bỏ qua tham số đường dẫn; BV6 không thực sự kiểm trích dẫn nguyên văn; và `graph.py` không truyền khoá `(content_type, langcode)` xuống agent.
 
-**Hiện 28/28 bộ test xanh**, không cần API key, không cần Drupal, không cần KB.
+**Snapshot lịch sử tại thời điểm viết mục này: 28/28 bộ test xanh.** Số test hiện hành được báo ở verification của bản 4; test offline không cần API key, Drupal hay KB.
 
 - Danh sách đầy đủ kèm bằng chứng đo được: [`technical-debt.md`](technical-debt.md)
 
@@ -215,7 +216,7 @@ Bốn lỗi còn lại: `score` của hai agent không có chặn biên; cache t
 
 ## 5a. E5 — Calibration ngưỡng (2026-08-11)
 
-**Kết quả chính: Kappa 0,713** — *substantial agreement* theo thang Landis–Koch, accuracy **0,879**, sai **4/33 bài**.
+**Kết quả lịch sử của bản 3: Kappa 0,713** — *substantial agreement* theo thang Landis–Koch, accuracy **0,879**, sai **4/33 bài**. Chốt CP4 bản 4 đã đổi prompt và đường veto, nên con số này không còn là kết quả của code hiện hành.
 
 Nhưng con số đó chỉ có được sau **hai lần chạy**, và lần đầu mới là phần đáng kể nhất:
 
@@ -243,11 +244,11 @@ Nhưng con số đó chỉ có được sau **hai lần chạy**, và lần đ�
 | 1 | ~~Gán nhãn gold set~~ | ✅ xong 2026-08-10, 33/33 |
 | 2 | **Test-retest** — gán lại 3-4 bài mù, yêu cầu Kappa ≥ 0,80 | Phải đợi ≥3 ngày → sớm nhất **2026-08-13**. **Chặn việc diễn giải Kappa 0,713** |
 | 3 | ~~Khoá code chấm điểm~~ | ✅ bản 3 ghi 2026-08-11 (`evaluation-plan.md` mục 3a) |
-| 4 | ~~E5 calibration~~ | ✅ xong — Kappa 0,713, mục 5a |
-| 5 | **Đo lại E1** (~$3) trên bản khoá 3 | Không bị chặn. **Phải xong trước khi ghi ngưỡng vào `scoring.yaml`** |
-| 6 | Chốt ngưỡng đã calibrate vào `scoring.yaml`, đặt `meta.calibrated: true` | Cần (5) |
-| 7 | Chốt chặn tất định cho CP4 (regex mốc thời gian) — chữa P-006a | Sau (5), vì sửa code lại phải đo lại |
-| 8 | E3 so baseline → E6 held-out | Cần (2) và (5) |
+| 4 | E5 calibration bản 3 | ⚠️ số lịch sử 0,713; hết hiệu lực sau CP4 bản 4 |
+| 5 | ~~Chốt chặn tất định cho CP4~~ | ✅ bản 4: chữa P-006a/G-008 bằng regex thời hạn quanh evidence thật |
+| 6 | **Đo lại E1** (~$3) trên bản khoá 4 | Không bị chặn. **Phải xong trước E5 mới** |
+| 7 | **Đo lại E5 vào file mới**, rồi chốt ngưỡng nếu đạt | Cần (6); không resume file bản 3 |
+| 8 | E3 so baseline → E6 held-out | Cần (2) và (7) |
 
 **Cố ý KHÔNG làm:** giảm dao động điểm Compliance bằng cách chỉnh chung chung. B14 cho thấy cách đúng là **tìm lỗi cụ thể rồi sửa có mục tiêu** — σ cao là *triệu chứng*, không phải thứ để nhắm vào. Tiền lệ B5 (7,70 → 7,29) là ví dụ của việc sửa mò.
 

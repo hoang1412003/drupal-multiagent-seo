@@ -58,7 +58,7 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 - Bài nào Compliance dao động mạnh thì ngưỡng E5 calibrate ra kém tin cậy hơn ở vùng đó.
 - Nguyên nhân đã chẩn đoán bằng số, không phải đoán: mẫu số trung bình 4.6/8 nên một tiêu chí nhích một bậc là ±16.7 điểm (`rubrics.md` mục 9.1).
-- Hướng giảm tiếp đã kiểm chứng được: chuyển thêm tiêu chí sang đo bằng máy. CP2/CP4/CP7 hiện vẫn do LLM chấm và đều cần đọc hiểu, nên không rẻ như CP5/CP6.
+- Hướng giảm tiếp đã kiểm chứng được: chuyển thêm tiêu chí sang đo bằng máy. CP4 nay đã tách: LLM chấm điều kiện, code chốt thời hạn; CP2/CP7 vẫn cần LLM đọc hiểu.
 
 ⚠️ **Hai ô σ brand ở trên đã HẾT HIỆU LỰC từ 2026-08-05** — code Brand Voice đã đổi ở B7 (BV6 siết kiểm trích dẫn). Giữ lại làm bản ghi của lần đo đó, **không** trích như số của hệ thống đang chạy. Xem mục B7.
 
@@ -66,7 +66,7 @@ Phân biệt A/B với C là quan trọng: gộp chung làm bức tranh đáng s
 
 **Cảnh báo thứ hai, thêm 2026-08-04 sau khi sửa B5:** σ thấp cũng có thể là **triệu chứng của lỗi**, không phải bằng chứng của chất lượng. Bài G-008 có σ = 0,00 và điểm cố định 66,7 qua 5/5 lượt — trông ổn định nhất bộ — nhưng đó là vì một phép kiểm hỏng đang kẹp cứng các tiêu chí về cùng giá trị ở mọi lượt; sửa xong điểm rải 42,9–57,1. Trước khi khoe một σ thấp, phải trả lời được nó đến từ đo chính xác hay từ vứt bỏ thông tin.
 
-**σ = 4,18 đã loại trừ được một nghi phạm (2026-08-04):** B5 không phải nguyên nhân — sửa xong σ trên 4 bài xấu nhất chỉ đi từ 7,70 xuống 7,29 (mục B5, có số đo trước/sau). Nguồn dao động còn lại nằm ở CP2/CP4/CP7/CP8, bốn tiêu chí LLM chấm, đúng như hướng đã ghi ở trên.
+**σ = 4,18 đã loại trừ được một nghi phạm (2026-08-04):** B5 không phải nguyên nhân — sửa xong σ trên 4 bài xấu nhất chỉ đi từ 7,70 xuống 7,29 (mục B5, có số đo trước/sau). Ở thời điểm đo, nguồn dao động còn lại nằm ở CP2/CP4/CP7/CP8. CP4 đã đổi kiến trúc ngày 2026-08-12 nên con số này chỉ còn là bằng chứng lịch sử.
 
 **`content_quality` và `seo`: ĐÃ CHUYỂN sang rubric (2026-08-10).** Trước đó quyết định giữ thang tự do, lập luận dựa trên σ = 0,38 và 0,19 ở bảng trên. Lập luận ấy **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai nói được 78 khác 74 ở chỗ nào — mà calibrate ngưỡng trên một đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được. Đó chính là luận điểm gốc ở `rubrics.md` mục 1, và nó không bị σ bác bỏ.
 
@@ -247,7 +247,7 @@ Số lần ghi đè oan giảm 80% và mẫu số lớn lên, **nhưng σ gần 
 
 **Bài học cho cách đọc mọi σ trong dự án này:** σ thấp chỉ đáng mừng khi biết chắc nó không đến từ việc vứt bỏ thông tin. Ghi thêm vào cảnh báo σ đã có ở mục A1.
 
-**Hệ quả cho A1/E5:** B5 **không phải** nguyên nhân của σ Compliance = 4,18, và giờ đã loại trừ được bằng số. Nguồn dao động còn lại là CP2/CP4/CP7/CP8 — bốn tiêu chí LLM chấm. Hướng duy nhất còn lại vẫn là hướng A1 đã ghi: chuyển thêm tiêu chí sang đo bằng máy.
+**Hệ quả cho A1/E5 tại thời điểm đo:** B5 **không phải** nguyên nhân của σ Compliance = 4,18. Kết quả này dẫn tới hướng chuyển thêm tiêu chí sang máy; CP4 đã thực hiện một phần hướng đó ngày 2026-08-12 bằng chốt thời hạn tất định.
 
 *(Ghi nhận về phương pháp: mô phỏng offline trên dữ liệu đã đo dự đoán σ = 7,35, đo thật ra 7,29. Mô phỏng lại Aggregator/rubric trên kết quả đã lưu là cách rẻ và đủ chính xác để thử một thay đổi trước khi trả tiền chạy lại — cùng lợi ích mà `architecture.md` mục 8.2 nêu cho việc quét ngưỡng.)*
 
@@ -493,7 +493,7 @@ CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn
 
 **Bài học lặp lại lần thứ ba trong dự án này** (sau B12 và BV3 ở B13): *một bộ so khớp gộp hai thứ khác nhau làm một.* B12 gộp so-sánh-nhất-làm-claim với làm-trạng-ngữ; BV3 gộp xưng-hô với danh-từ-chỉ-người; B14 gộp mọi con số có đơn vị `km` thành tầm hoạt động. Cả ba đều **không lộ ra trong unit test** vì test dùng ví dụ do chính người viết code nghĩ ra — chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
 
-**Còn sót, đã biết:** **P-006a** vẫn là báo động giả của CP4 dù câu đó đã được nêu **làm ví dụ ngay trong prompt**. Đây là **giới hạn của sửa-bằng-prompt**; cách chặn đúng là một chốt tất định — regex mốc thời gian trong trích dẫn, giống lớp 2 ở trên. Chưa làm vì đang khoá code chờ đo lại E1.
+**Còn sót ở bản 3, đã xử lý trong bản 4 (2026-08-12):** **P-006a** vẫn là báo động giả của CP4 dù câu đó đã được nêu **làm ví dụ ngay trong prompt**. Đây là **giới hạn của sửa-bằng-prompt**. Bản 4 dùng regex chốt thời hạn trong evidence hoặc vùng lân cận có giới hạn; xem mục 8.4.
 
 ---
 
@@ -518,7 +518,7 @@ CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
 | **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | ⚠️ **đã chạy 2 lần (2026-08-11), kết quả CHƯA chốt vào config.** Lần 1 Kappa 0,264 → phát hiện B14; sau khi sửa, Kappa **0,713** (*substantial*), accuracy 0,879, sai 4/33. **Ba cảnh báo phải nêu kèm:** (a) ngưỡng tối ưu đẩy veto xuống dưới mọi điểm → veto-theo-điểm bị vô hiệu, quyết định do **cờ `critical`** một mình; (b) ngưỡng `publish` không calibrate được (mục 6); (c) **chưa có trần Kappa** để diễn giải 0,713 — chờ test-retest ≥2026-08-13. `meta.calibrated` vẫn `false` cho tới khi đo lại E1. Chi tiết: `evaluation-plan.md` mục 4.5 |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | ⚠️ **đã chạy 2 lần trên bản 3 (2026-08-11), nay hết hiệu lực với bản 4.** Lần 1 Kappa 0,264 → phát hiện B14; lần 2 Kappa **0,713**, accuracy 0,879, sai 4/33 → để lại P-006a/G-008 và dẫn tới chốt CP4. Bản 4 chưa chạy E5; `meta.calibrated` vẫn `false`. Chi tiết: `evaluation-plan.md` mục 4.5 và mục 8.4 dưới đây |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
 
 **E4 làm lộ hai sai số trong tài liệu — ✅ đã sửa cả hai (2026-08-04), `evaluation-plan.md` mục 4.4:**
@@ -615,7 +615,7 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Snapshot hiện tại:** `main` tại merge commit `ccac806` (PR #38), sạch và đồng bộ `origin/main`; **40/40** test script xanh. E5 đã chạy (Kappa 0,713); E1 cũ **hết hiệu lực** và chưa đo lại sau B14. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
+**Snapshot hiện tại:** nhánh triển khai bản 4 có chốt CP4 tất định, prompt version `020738e209017213`. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng. Số test/commit cuối được ghi sau verification của nhánh.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -623,7 +623,7 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 
 | Script | File mặc định | Tình trạng file đó |
 |---|---|---|
-| `eval_calibration.py` (E5) | `e5_sau_sua_cp3_cp4.json` | ✅ hợp lệ — **đã có chốt chặn**, lệch `prompt_version` là dừng |
+| `eval_calibration.py` (E5) | `e5_sau_sua_cp3_cp4.json` | 🔴 dữ liệu bản 3 (`0bdc5ab12ec65f89`), guard bản 4 (`020738e209017213`) **đã xác nhận từ chối resume** |
 | `eval_stability.py` (E1) | `e1_stability_raw.json` | 🔴 dữ liệu **ngày 2026-08-04, TRƯỚC CẢ RUBRIC** — file legacy thiếu metadata nên chốt chặn hiện tại sẽ từ chối resume |
 
 **Nghĩa là:** gõ `python scripts/eval_stability.py` không tham số với file legacy hiện tại sẽ dừng trước khi gọi API; không còn âm thầm trộn dữ liệu hoặc tiêu tiền. Không xóa/ghi đè file cũ vì đó là bằng chứng lịch sử.
@@ -631,7 +631,7 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 **Cách chạy lần đo mới:** giữ file lịch sử nguyên trạng và truyền tên file mới qua cờ `--ket-qua`:
 
   ```bash
-  HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json
+  HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json
   ```
 
 Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự kiến khoảng **3 USD**. File mới sẽ được ghi `_meta.prompt_version`; các lần resume sau đó cũng bị từ chối nếu hash prompt đổi.
@@ -642,10 +642,10 @@ Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự
 
 ```bash
 cd multiagent
-HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json    # đọc 8.0 TRƯỚC
+HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json    # đọc 8.0 TRƯỚC
 ```
 
-**Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên bản khoá 2. B14 sau đó sửa CP3/CP4 — tức đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
+**Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên code cũ. B14 rồi chốt CP4 đã đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
 
 **Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent — vì `final_score` mới là đại lượng E5 quét ngưỡng lên.
 
@@ -653,28 +653,28 @@ HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1
 
 **Kỳ vọng:** σ compliance nên **giảm** so với 4,68 — CP3 bớt báo động giả thì bớt lật mức giữa các lượt. Giảm là bằng chứng thêm cho B14; không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra.
 
-### 8.2. Chốt ngưỡng vào `scoring.yaml` — sau 8.1, $0
+### 8.2. Đo lại E5 rồi mới chốt ngưỡng — sau 8.1
 
-Sửa `multiagent/config/scoring.yaml`. ⚠️ **File có HAI khối `meta` và HAI khối `decision`** (dòng ~30/51 và ~119/135) cho hai profile. Xác định profile nào đang dùng trước khi sửa, hoặc sửa cả hai cho nhất quán.
+Không được chốt kết quả E5 bản 3 vào `multiagent/config/scoring.yaml`: CP4 đã đổi cả prompt lẫn đường sinh cờ `critical`, đúng đại lượng quyết định nhãn. Chạy E5 vào **file mới** sau khi E1 đạt và có xác nhận riêng cho chi phí; guard phải từ chối file cũ trước API.
 
 ```yaml
 meta:
-  calibrated: true
-  calibrated_at: "2026-08-11"
+  calibrated: false              # giữ false cho tới khi E5 bản 4 hoàn tất
+  calibrated_at: null
   gold_set: "labels.csv @ <sha commit>"
   guideline_version: "v1.3"
   rubric_version: "v1"
-  prompt_version: "0bdc5ab12ec65f89"
+  prompt_version: null
   model: "claude-haiku-4-5-20251001"
-  kappa: 0.713
+  kappa: null
 ```
 
-**Về giá trị `decision` — đọc kỹ trước khi đổi.** Bộ tối ưu là `veto=30, nr=30, publish≥92`, nhưng:
+**Bộ ngưỡng lịch sử `veto=30, nr=30, publish≥92` không được tái sử dụng như kết quả hiện hành**, vì:
 
 - `veto = 30` nằm **dưới điểm Compliance thấp nhất (33,3)** → veto-theo-điểm bị **vô hiệu hoàn toàn**, quyết định do cờ `critical` một mình. Đây là *plateau*: mọi giá trị ≤ 33 cho kết quả y hệt.
 - `publish ≥ 92` **không phải calibration thật** — nó chỉ phản ánh lớp `publish` rỗng (mục 6). Ghi 92 vào config là mã hoá một hiện vật của gold set thành tham số hệ thống.
 
-**Khuyến nghị:** chốt ngưỡng `nr`, giữ `publish = 80` kèm ghi chú "chưa calibrate", và ghi rõ trong `meta` rằng veto-theo-điểm hiện không có tác dụng. Nhưng đây là **quyết định nên hỏi mentor**, không tự quyết — nó đổi hành vi hệ thống dựa trên một gold set thiếu một lớp.
+Sau E5 bản 4, chỉ chốt ngưỡng mới nếu điều kiện đo đạt; `prompt_version` phải là hash do code tính tại lần đo. Việc xử lý ngưỡng `publish` vẫn cần mentor quyết vì calibration gold set không có lớp publish.
 
 ### 8.3. Test-retest nhãn — từ **2026-08-13**, $0
 
@@ -684,21 +684,23 @@ Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong 
 
 Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ.
 
-### 8.4. Chốt chặn tất định cho CP4 — sau 8.1
+### 8.4. Chốt chặn tất định cho CP4 — ✅ ĐÃ SỬA (2026-08-12)
 
-**Triệu chứng:** P-006a vẫn bị gắn cờ "khuyến mại thiếu thời hạn" dù đoạn trích **có** thời hạn, và dù câu đó đã được nêu **làm ví dụ ngay trong prompt** (`src/agents/compliance.py:302`).
+**Triệu chứng:** P-006a và G-008 bị gắn cờ `critical` "khuyến mại thiếu thời hạn" dù evidence **có** thời hạn; nhắc lại ví dụ ngay trong prompt vẫn không ngăn được veto oan.
 
 **Kết luận:** đây là **giới hạn của sửa-bằng-prompt**, không phải prompt viết chưa đủ rõ. Đừng viết lại prompt lần nữa.
 
-**Cách đúng — cùng khuôn với lớp 2 của B14:** chặn bằng code. Sau khi LLM trả CP4 mức 0, chạy regex tìm mốc thời gian trong `evidence`; tìm thấy thì **kéo lên mức 1**. Cần bắt các dạng `dd/mm/yyyy`, `dd/mm – dd/mm/yyyy`, `Trước d/m/yyyy`, `đến hết ...`, `trong tháng ...`.
+**Đã sửa theo thiết kế tách hai vế:** LLM chỉ chấm khuyến mại cụ thể có đủ **điều kiện áp dụng**; code kiểm **thời hạn** trong evidence đã qua chống bịa hoặc cửa sổ 240 ký tự quanh evidence thật trong cùng field. Bảng ghép chỉ có `{NA, 0, 2}`; thiếu một trong hai vế là mức `0`/`critical`, tuyệt đối không kéo lên mức `1`.
 
-**Nhớ:** đây là sửa code chấm điểm → **phải đo lại E1 và E5 sau đó**, và ghi bản khoá số 4. Vì vậy xếp **sau** 8.1, và nên gộp chung với các sửa code khác thành một đợt để chỉ đo lại một lần.
+Regex nhận ngày cụ thể, khoảng ngày, tháng kết thúc, thời lượng và “đến khi hết hàng”; không nhận giá/tháng, km/tháng hay phút sạc. Nó không quét toàn bài và không mượn ngày từ field khác. Test khóa P-006a, G-008, thiếu điều kiện, thiếu thời hạn, NA và evidence bịa. Thiết kế: `superpowers/specs/2026-08-12-cp4-deterministic-deadline-guard-design.md`.
 
-### 8.5. Chẩn đoán G-008 — $0 đến ~$0,1
+**Hệ quả đo lường:** prompt version hiện hành là `020738e209017213`; E1 và E5 bản 3 đều hết hiệu lực, phải đo lại vào file mới.
 
-Bài duy nhất trong 4 bài sai mà **chưa biết nguyên nhân** (người: `needs_revision`, máy: `rejected`). Ba bài kia đã có tài liệu: G-011/G-020 là B12b cố ý, P-006a là 8.4.
+### 8.5. Chẩn đoán G-008 — ✅ ĐÃ XONG, $0
 
-Cách làm: mở `docs/evidence/e5_sau_sua_cp3_cp4.json`, tìm `G-008`, xem `co_critical` và điểm 4 agent. Nếu `co_critical: true` thì chạy riêng `compliance.run` trên bài đó để xem tiêu chí nào gắn cờ — rẻ hơn nhiều so với chạy cả 4 agent.
+File E5 cũ chứng minh G-008 có `co_critical: true`; bước chẩn đoán focused được ghi trong spec CP4 xác định cờ đó đến từ CP4 báo thiếu thời hạn. Nội dung thật có cả khoảng ngày lân cận và thời lượng “trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP”, nên đây cùng nguyên nhân với P-006a, không phải một lỗi độc lập.
+
+Đã khóa bằng test literal G-008 trong `scripts/test_compliance_rubric.py`; chốt 8.4 nhận thời hạn và không còn veto oan trong phép kiểm offline. Kết quả pipeline/E5 mới chưa được suy đoán từ unit test và vẫn phải đo lại.
 
 ### 8.6. Bài sạch cho bộ kiểm thử chức năng — $0, không đụng gold set
 

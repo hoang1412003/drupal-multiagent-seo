@@ -164,11 +164,11 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 | **CP1** | Không có claim tuyệt đối/so sánh nhất ("số 1", "tốt nhất", "duy nhất") | máy | Có, **nêu rõ phạm vi so sánh** ("tốt nhất thị trường") | Có cụm so sánh nhất nhưng **không nêu phạm vi** ("cách tốt nhất để…") | Không có cụm nào | **critical** | A1 |
 | **CP2** | Không so sánh trực tiếp hơn hẳn đối thủ cụ thể | LLM | Có | - | Không | **critical** | A2 |
 | **CP3** | Số liệu khớp thông số VinFast công bố | LLM + RAG | Sai lệch **cùng model + cùng chỉ số** | Không kiểm chứng được (ngoài KB, **hoặc khác chỉ số**) | Khớp | **critical** | A3 |
-| **CP4** | Khuyến mại nêu đủ thời hạn & điều kiện | LLM | Thiếu | - | Đủ | **critical** | A4 |
-| **CP5** | Claim tầm hoạt động có điều kiện đo (NEDC/WLTP) | LLM | Thiếu hoàn toàn | Có lưu ý chung nhưng không nêu chuẩn đo | Nêu rõ chuẩn đo | medium | B1 |
-| **CP6** | Claim thời gian sạc nêu loại trụ & dải % | LLM | Thiếu cả hai | Nêu một trong hai | Nêu đủ | medium | B2 |
+| **CP4** | Khuyến mại nêu đủ thời hạn & điều kiện | LLM điều kiện + regex thời hạn | Thiếu **một trong hai** vế | - | Đủ cả hai | **critical** | A4 |
+| **CP5** | Claim tầm hoạt động có điều kiện đo (NEDC/WLTP) | máy | Thiếu hoàn toàn | Có lưu ý chung nhưng không nêu chuẩn đo | Nêu rõ chuẩn đo | medium | B1 |
+| **CP6** | Claim thời gian sạc nêu loại trụ & dải % | máy | Thiếu cả hai | Nêu một trong hai | Nêu đủ | medium | B2 |
 | **CP7** | Chính sách pin/thuê pin nêu đủ điều kiện, phí, thời hạn | LLM | Thiếu ≥2 yếu tố | Thiếu 1 yếu tố | Đủ | medium | - |
-| **CP8** | Số liệu định lượng có nguồn | LLM | Có số liệu không nguồn | Một phần | Đủ nguồn | low | B10 |
+| **CP8** | Số liệu định lượng có nguồn | máy chốt áp dụng + LLM chấm nguồn | Có số liệu không nguồn | Một phần | Đủ nguồn | low | B10 |
 
 ### 6.1. Vì sao bỏ việc LLM tự cho điểm và tự chọn severity
 
@@ -205,9 +205,11 @@ Thiếu bất kỳ điều nào → mức `1` (không kiểm chứng được), 
 
 **Vế "cùng chỉ số" được chặn bằng CODE, không chỉ bằng prompt:** claim phân loại `metric = "khac"` không bao giờ đi vào bước so sánh LLM. Lý do bắt buộc phải có lớp này: `retriever` **không có ngưỡng similarity** nên luôn trả về chunk gần nhất dù câu hỏi chẳng liên quan — chỉ dựa vào prompt thì mỗi lần LLM phân loại trượt lại thành một lần veto oan.
 
-**CP4 cũng viết lại prompt cùng đợt:** loại trừ chính sách nhà nước và lời mời chung chung (không phải khuyến mại), và buộc đọc lại trích dẫn tìm thời hạn đã có sẵn. Trước đó nó gắn cờ *"thiếu thời hạn"* cho câu ghi rõ *"từ 25/06 – 31/08/2024"*.
+**CP4 nay tách hai trách nhiệm (2026-08-12):** LLM chỉ nhận diện khuyến mại cụ thể và chấm **điều kiện áp dụng**; code tìm **thời hạn** trong evidence thật hoặc cửa sổ 240 ký tự chuẩn hoá quanh evidence trong cùng field. Bảng ghép chỉ cho `{NA, 0, 2}`: không có khuyến mại cụ thể → `NA`; thiếu điều kiện **hoặc** thiếu thời hạn → `0`/`critical`; đủ cả hai → `2`. CP4 không dùng mức `1`.
 
-Kết quả chung của cả hai: báo động giả trên bộ chẩn đoán **9 → 1**, Kappa E5 **0,264 → 0,713**. Chi tiết: `technical-debt.md` B14.
+Chốt này thay cho cách cũ chỉ nhắc LLM “đọc lại thời hạn”, vì cách đó vẫn veto oan P-006a và G-008 dù evidence đã có mốc thời gian. Regex không quét toàn bài, không mượn ngày ở field khác và không coi giá/tháng, km/tháng hay phút sạc là thời hạn. Thiết kế và biên an toàn: `superpowers/specs/2026-08-12-cp4-deterministic-deadline-guard-design.md`.
+
+Kappa E5 **0,713** là kết quả lịch sử sau B14 nhưng **trước** chốt CP4 này; không đại diện cho code hiện hành và phải đo lại. Chi tiết: `technical-debt.md` B14 và mục 8.4.
 
 **Đánh đổi đã biết, ghi rõ chứ không giấu:** claim thật mà không nêu phạm vi (*"VinFast là thương hiệu xe điện tốt nhất."*) rơi xuống mức 1. Nó **không biến mất** - vẫn sinh flag `low` hiện trong báo cáo cho người duyệt, chỉ thôi tự động từ chối bài. Trong một hệ thống không bao giờ tự xuất bản (`architecture.md` mục 2.3), đổi 10 lần chặn oan chắc chắn lấy vài lần hạ mức là đánh đổi có lợi. Có test khoá cả hai chiều, gồm đúng ca đánh đổi này (`scripts/test_compliance_rules.py`).
 
@@ -255,7 +257,7 @@ Rubric đã vào code cho **Brand Voice** (2026-08-03) và **Compliance** (2026-
 |---|---|
 | `src/scoring.py` | ✅ `score_from_criteria()` theo công thức mục 2.2 **và** `severity_for()` tra bảng cho Compliance |
 | `src/agents/brand_voice.py` | ✅ BV1–BV7, output `criteria: [{id, level, occurrences, suggestion, reference}]` |
-| `src/agents/compliance.py` | ✅ CP1–CP8. CP1/CP5/CP6 đo bằng máy, CP3 bằng RAG, bốn tiêu chí còn lại gộp vào **một** lần gọi LLM |
+| `src/agents/compliance.py` | ✅ CP1–CP8. CP1/CP5/CP6 đo bằng máy, CP3 bằng RAG; CP4 ghép LLM-điều-kiện với regex-thời-hạn; CP2/CP4/CP7/CP8 vẫn gộp trong **một** lần gọi LLM |
 | `src/compliance_analysis.py` | ✅ phần "đo bằng máy" của CP5, CP6 và cổng áp dụng của CP8 |
 | `src/agents/fact_check.py` | ✅ `danh_gia()` trả mức 0/1/2/NA cho CP3 thay vì trả list flag |
 | `src/brand_analysis.py`, `src/text_utils.py` | ✅ phần "đo bằng máy" của BV1–BV5, BV7 (thay cho `src/analyzers/` dự kiến) |
@@ -270,7 +272,7 @@ Rubric đã vào code cho **Brand Voice** (2026-08-03) và **Compliance** (2026-
    | | Không trích được thì | Vì sao |
    |---|---|---|
    | CP2 | → mức `2` | mức 2 của CP2 đúng nghĩa "không tìm thấy vi phạm", không có gì để trích |
-   | CP4–CP7 | → `NA` | **LLM** là bên duy nhất nói bài có bàn tới chủ đề; nó không chứng minh được thì không có căn cứ nào để nói bài làm đúng chủ đề đó |
+   | CP4, CP7 | → `NA` | **LLM** là bên duy nhất nói bài có bàn tới chủ đề; nó không chứng minh được thì không có căn cứ nào để nói bài làm đúng chủ đề đó. Riêng CP4 mức 2 giữ evidence nội bộ để code chốt thời hạn rồi mới bỏ khỏi output đạt |
    | CP8 | → mức `0` | **MÁY** đã chốt bài có số liệu định lượng, độc lập với LLM. Vậy "có số liệu mà không chỉ ra được nguồn nào" chính là định nghĩa mức 0 |
 
    `NA` và mức `0` đều **tuyệt đối không được là mức 2**. Chọn nhầm hướng ở đây chính là lỗi "điểm miễn phí" số 1 dưới đây — và CP8 đã từng nhầm đúng kiểu đó: trước 2026-08-04 nó trả mức 2, tức cộng điểm tối đa cho tiêu chí vừa bị nghi vi phạm (`technical-debt.md` B5, đo được 10/20 lượt dính).
