@@ -299,14 +299,17 @@ def _cp4_chuan_hoa(text: str) -> str:
 
 def _cp4_co_thoi_han(evidence: str, text_theo_field: dict) -> bool:
     """Có dấu hiệu thời hạn trong evidence hoặc sát evidence thật hay không."""
-    if _CP4_MOC_THOI_HAN.search(_cp4_chuan_hoa(evidence)):
-        return True
-
     manh = [
         _cp4_chuan_hoa(m).strip(" \"'“”…-")
         for m in _CP4_TACH_EVIDENCE.split(evidence or "")
     ]
-    anchors = sorted((m for m in manh if m), key=len, reverse=True)
+    manh = [m for m in manh if m]
+    # Evidence nhiều mảnh có thể được xác thực ở các field khác nhau. Khi đó
+    # không được lấy một mảnh chỉ chứa ngày ở title để hợp thức hoá khuyến mại
+    # nằm trong body. Ưu tiên mảnh không có mốc thời hạn làm anchor khuyến mại;
+    # chỉ khi evidence toàn mốc thời gian mới dùng chính các mảnh đó.
+    khong_moc = [m for m in manh if not _CP4_MOC_THOI_HAN.search(m)]
+    anchors = sorted(khong_moc or manh, key=len, reverse=True)
     if not anchors:
         return False
 
