@@ -276,6 +276,57 @@ def _cp3_so_lieu(fields: dict, content_type: str, langcode: str, danh_gia_cp3) -
 
 # ------------------------------------------------- CP2, CP4-CP8: một lần LLM
 
+_CP4_CUA_SO = 240
+_CP4_MOC_THOI_HAN = re.compile(
+    r"(?:"
+    r"\b\d{1,2}[/-]\d{1,2}\s*[-–—]\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|"
+    r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|"
+    r"\b(?:từ(?: ngày)?|kể từ(?: ngày)?|trước|đến|tới(?: hết)?)\s+"
+    r"\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|"
+    r"\b(?:đến|tới)\s+hết\s+tháng\s+\d{1,2}(?:/\d{4})?\b|"
+    r"\btrong(?: vòng)?\s+\d+\s+(?:ngày|tháng|năm)(?:\s+đầu)?\b|"
+    r"\b\d+\s+(?:ngày|tháng|năm)\s+kể từ\b|"
+    r"\báp dụng\s+đến khi\s+hết hàng\b"
+    r")",
+    re.IGNORECASE,
+)
+_CP4_TACH_EVIDENCE = re.compile(r"\s+và\s+|[;\n]|(?<=[.%])\s+")
+
+
+def _cp4_chuan_hoa(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip().lower()
+
+
+def _cp4_co_thoi_han(evidence: str, text_theo_field: dict) -> bool:
+    """Có dấu hiệu thời hạn trong evidence hoặc sát evidence thật hay không."""
+    if _CP4_MOC_THOI_HAN.search(_cp4_chuan_hoa(evidence)):
+        return True
+
+    manh = [
+        _cp4_chuan_hoa(m).strip(" \"'“”…-")
+        for m in _CP4_TACH_EVIDENCE.split(evidence or "")
+    ]
+    anchors = sorted((m for m in manh if m), key=len, reverse=True)
+    if not anchors:
+        return False
+
+    for text in text_theo_field.values():
+        kho = _cp4_chuan_hoa(text)
+        for anchor in anchors:
+            start = 0
+            while True:
+                vi_tri = kho.find(anchor, start)
+                if vi_tri < 0:
+                    break
+                cua_so = kho[
+                    max(0, vi_tri - _CP4_CUA_SO):
+                    min(len(kho), vi_tri + len(anchor) + _CP4_CUA_SO)
+                ]
+                if _CP4_MOC_THOI_HAN.search(cua_so):
+                    return True
+                start = vi_tri + 1
+    return False
+
 _LLM_PROMPT = (
     "Bạn là chuyên gia kiểm duyệt tuân thủ pháp lý cho nội dung marketing xe "
     "điện (ô tô điện, xe máy điện) tại Việt Nam.\n\n"

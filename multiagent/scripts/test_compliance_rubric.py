@@ -431,6 +431,60 @@ def test_cp3_loi_kb_thanh_na_khong_phai_0():
     print("[PASS] KB loi -> CP3 NA, khong phai muc 0")
 
 
+def test_cp4_nhan_cac_dinh_dang_thoi_han_da_chot():
+    cases = (
+        "Áp dụng ngày 01/07/2023.",
+        "Áp dụng từ 01/07 - 20/09/2023.",
+        "Trước 6/4/2022, khách đặt cọc được ưu đãi.",
+        "Chương trình kéo dài tới hết tháng 9.",
+        "Khuyến mại trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP.",
+        "Ưu đãi trong 3 tháng đầu.",
+        "Áp dụng đến khi hết hàng.",
+    )
+    for evidence in cases:
+        texts = {"title": "", "body": evidence, "meta_description": ""}
+        assert compliance._cp4_co_thoi_han(evidence, texts), evidence
+    print("[PASS] CP4 nhan du cac dang thoi han da chot")
+
+
+def test_cp4_khong_nhan_so_lieu_khong_phai_thoi_han():
+    for evidence in (
+        "Gói thuê pin 350.000 đồng/tháng.",
+        "Sạc trong 30 phút bằng trụ DC.",
+        "Quãng đường tối đa 500 km/tháng.",
+    ):
+        texts = {"title": "", "body": evidence, "meta_description": ""}
+        assert not compliance._cp4_co_thoi_han(evidence, texts), evidence
+    print("[PASS] CP4 khong nham gia, quang duong, phut sac la thoi han")
+
+
+def test_cp4_nhan_thoi_han_o_block_lien_ke_evidence():
+    evidence = "Khuyến mại 199.000 đồng/tháng cho khách kích hoạt HĐTP."
+    body = "Từ ngày 01/07 - 20/09/2023. " + evidence
+    texts = {"title": "", "body": body, "meta_description": ""}
+    assert compliance._cp4_co_thoi_han(evidence, texts)
+    print("[PASS] CP4 nhan thoi han o block lien ke")
+
+
+def test_cp4_khong_muon_ngay_o_xa_evidence():
+    evidence = "Khuyến mại 199.000 đồng cho khách đặt cọc."
+    body = "Bài cập nhật ngày 01/07/2023. " + ("x" * 300) + " " + evidence
+    texts = {"title": "", "body": body, "meta_description": ""}
+    assert not compliance._cp4_co_thoi_han(evidence, texts)
+    print("[PASS] CP4 khong quet ngay o xa evidence")
+
+
+def test_cp4_khong_muon_ngay_tu_field_khac():
+    evidence = "Khuyến mại 199.000 đồng cho khách đặt cọc."
+    texts = {
+        "title": "Bài cập nhật ngày 01/07/2023",
+        "body": evidence,
+        "meta_description": "",
+    }
+    assert not compliance._cp4_co_thoi_han(evidence, texts)
+    print("[PASS] CP4 khong muon ngay tu field khac")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -462,6 +516,11 @@ if __name__ == "__main__":
         test_llm_loi_nhung_co_vi_pham_cung_thi_van_tra_ket_qua,
         test_khong_tieu_chi_nao_ap_dung_thi_tra_none,
         test_cp3_loi_kb_thanh_na_khong_phai_0,
+        test_cp4_nhan_cac_dinh_dang_thoi_han_da_chot,
+        test_cp4_khong_nhan_so_lieu_khong_phai_thoi_han,
+        test_cp4_nhan_thoi_han_o_block_lien_ke_evidence,
+        test_cp4_khong_muon_ngay_o_xa_evidence,
+        test_cp4_khong_muon_ngay_tu_field_khac,
     ):
         try:
             fn()
