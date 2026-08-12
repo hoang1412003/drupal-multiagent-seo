@@ -611,11 +611,11 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 ---
 
-## 8. BÀN GIAO — việc còn lại (2026-08-11)
+## 8. BÀN GIAO — việc còn lại (cập nhật 2026-08-12)
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Trạng thái gốc:** commit `b6dfa9a` trên `main`. 36/36 test script xanh. E5 xong (Kappa 0,713), E1 **hết hiệu lực**.
+**Snapshot hiện tại:** `main` tại merge commit `ccac806` (PR #38), sạch và đồng bộ `origin/main`; **40/40** test script xanh. E5 đã chạy (Kappa 0,713); E1 cũ **hết hiệu lực** và chưa đo lại sau B14. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -635,6 +635,8 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   ```
 
 Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự kiến khoảng **3 USD**. File mới sẽ được ghi `_meta.prompt_version`; các lần resume sau đó cũng bị từ chối nếu hash prompt đổi.
+
+**Nợ Minor không chặn CLI:** helper `ghi_ket_qua(data, path)` hiện gọi `os.makedirs(os.path.dirname(path))`; nếu code khác import trực tiếp helper rồi truyền đúng một filename tương đối như `"e1.json"`, `dirname` rỗng và lệnh tạo thư mục sẽ lỗi. CLI không dính vì luôn chuẩn hoá `--ket-qua` thành đường dẫn tuyệt đối. Khi sửa, chỉ gọi `os.makedirs()` nếu `dirname` khác rỗng và thêm test cho bare filename.
 
 ### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
 
@@ -710,7 +712,7 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 
 **Trạng thái: đã dựng 10 mẫu, chưa chạy pipeline.** Manifest nằm tại `docs/functional-tests/clean_labels.csv`; cần chạy pipeline rồi báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues` để chứng minh hệ thống có đường ra `publish` mà không làm sai phép calibration.
 
-**Chốt chặn đã có test:** extractor từ chối ghi đè bản corrected trừ khi truyền `--force`; E5 chỉ nhận hai split allowlist `gold-real` và `gold-pert`, nên functional-clean không thể lọt vào phép tính do chỉ dựa vào vị trí tệp.
+**Chốt chặn đã có test:** extractor từ chối ghi đè bản corrected trừ khi truyền `--force` và route HTML functional về đúng thư mục functional-clean; E5 lấy đầu vào từ manifest `docs/goldset/labels.csv`, chỉ nhận allowlist split `gold-real` và `gold-pert`, nên functional-clean không thể lọt vào phép tính dù có tệp lạ ở gần dữ liệu gold.
 
 ⚠️ **Đúng thao tác "sửa bài cho sạch" mà mục 6 đã BÁC BỎ với gold set.** Hợp lệ ở đây **chỉ vì** bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*, không tham gia calibration, không tính Kappa. **Tuyệt đối không** thêm bài này vào `labels.csv`.
 

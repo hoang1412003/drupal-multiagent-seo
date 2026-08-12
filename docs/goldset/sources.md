@@ -18,9 +18,11 @@ Mỗi URL được gán sẵn vào 1 trong 3 tập rời nhau (`BRAND` / `GOLD` 
 
 ---
 
-## 1. Bài cẩm nang - ứng viên gold set
+## 1. Bài cẩm nang — danh sách phân tập ban đầu (bản ghi lịch sử)
 
 Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = gold set, giữ nguyên · **`PERT`** = bài nguồn để tạo bản chèn lỗi
+
+> **Cách đọc checklist:** các ô `[ ]` bên dưới được giữ nguyên như dấu vết của danh sách thu thập ban đầu, **không có nghĩa là còn chờ tải hoặc gán nhãn**. Trạng thái chính thức hiện nằm trong các manifest: `docs/brand/corpus_index.csv`, `docs/goldset/labels.csv` và `docs/functional-tests/clean_labels.csv`. Gold calibration đã hoàn tất 33/33; functional-clean đã dựng đủ 10/10 nhưng chưa chạy pipeline.
 
 ### 1.1. Lái xe / sử dụng / an toàn
 - [ ] `BRAND` /vn_vi/cach-lai-xe-o-to-dien
@@ -72,7 +74,7 @@ Ký hiệu: **`BRAND`** = corpus trích xuất brand guideline · **`GOLD`** = g
 - [ ] `GOLD` /vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast
 - [ ] `PERT` /vn_vi/huong-dan-su-dung-ung-dung-vinfast
 
-**Tổng: 40 ứng viên** = 10 `BRAND` + 20 `GOLD` + 10 `PERT`. Mở rộng thêm bằng Google `site:vinfastauto.com/vn_vi` + từ khóa "cách/kinh nghiệm/hướng dẫn/lưu ý/so sánh".
+**Tổng danh sách ban đầu: 40 bài** = 10 `BRAND` + 20 `GOLD` + 10 `PERT`. Dòng hướng dẫn mở rộng bằng Google `site:vinfastauto.com/vn_vi` + từ khóa "cách/kinh nghiệm/hướng dẫn/lưu ý/so sánh" là quy trình lịch sử; trạng thái cuối phải đọc từ manifest, không suy ra từ các checkbox trên.
 
 ### 1.6. Vì sao phải tách 3 tập rời nhau
 
