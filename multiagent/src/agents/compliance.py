@@ -276,6 +276,60 @@ def _cp3_so_lieu(fields: dict, content_type: str, langcode: str, danh_gia_cp3) -
 
 # ------------------------------------------------- CP2, CP4-CP8: một lần LLM
 
+_CP4_CUA_SO = 240
+_CP4_MOC_THOI_HAN = re.compile(
+    r"(?:"
+    r"\b\d{1,2}[/-]\d{1,2}\s*[-–—]\s*\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|"
+    r"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|"
+    r"\b(?:từ(?: ngày)?|kể từ(?: ngày)?|trước|đến|tới(?: hết)?)\s+"
+    r"\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\b|"
+    r"\b(?:đến|tới)\s+hết\s+tháng\s+\d{1,2}(?:/\d{4})?\b|"
+    r"\btrong(?: vòng)?\s+\d+\s+(?:ngày|tháng|năm)(?:\s+đầu)?\b|"
+    r"\b\d+\s+(?:ngày|tháng|năm)\s+kể từ\b|"
+    r"\báp dụng\s+đến khi\s+hết hàng\b"
+    r")",
+    re.IGNORECASE,
+)
+_CP4_TACH_EVIDENCE = re.compile(r"\s+và\s+|[;\n]|(?<=[.%])\s+")
+
+
+def _cp4_chuan_hoa(text: str) -> str:
+    return re.sub(r"\s+", " ", text or "").strip().lower()
+
+
+def _cp4_co_thoi_han(evidence: str, text_theo_field: dict) -> bool:
+    """Có dấu hiệu thời hạn trong evidence hoặc sát evidence thật hay không."""
+    manh = [
+        _cp4_chuan_hoa(m).strip(" \"'“”…-")
+        for m in _CP4_TACH_EVIDENCE.split(evidence or "")
+    ]
+    manh = [m for m in manh if m]
+    # Evidence nhiều mảnh có thể được xác thực ở các field khác nhau. Khi đó
+    # không được lấy một mảnh chỉ chứa ngày ở title để hợp thức hoá khuyến mại
+    # nằm trong body. Ưu tiên mảnh không có mốc thời hạn làm anchor khuyến mại;
+    # chỉ khi evidence toàn mốc thời gian mới dùng chính các mảnh đó.
+    khong_moc = [m for m in manh if not _CP4_MOC_THOI_HAN.search(m)]
+    anchors = sorted(khong_moc or manh, key=len, reverse=True)
+    if not anchors:
+        return False
+
+    for text in text_theo_field.values():
+        kho = _cp4_chuan_hoa(text)
+        for anchor in anchors:
+            start = 0
+            while True:
+                vi_tri = kho.find(anchor, start)
+                if vi_tri < 0:
+                    break
+                cua_so = kho[
+                    max(0, vi_tri - _CP4_CUA_SO):
+                    min(len(kho), vi_tri + len(anchor) + _CP4_CUA_SO)
+                ]
+                if _CP4_MOC_THOI_HAN.search(cua_so):
+                    return True
+                start = vi_tri + 1
+    return False
+
 _LLM_PROMPT = (
     "Bạn là chuyên gia kiểm duyệt tuân thủ pháp lý cho nội dung marketing xe "
     "điện (ô tô điện, xe máy điện) tại Việt Nam.\n\n"
@@ -288,26 +342,19 @@ _LLM_PROMPT = (
     "  0 = có so sánh như vậy\n"
     "  2 = không có\n"
     "  (CP2 KHÔNG được chấm NA)\n\n"
-    "CP4 - Thông tin khuyến mại nêu đủ THỜI HẠN và ĐIỀU KIỆN áp dụng.\n"
+    "CP4 - Khuyến mại nêu giá trị cụ thể có đủ ĐIỀU KIỆN áp dụng hay không.\n"
+    "  Hệ thống sẽ tự kiểm THỜI HẠN bằng code; bạn không kết luận thiếu/đủ "
+    "thời hạn.\n"
     "  Chỉ xét khuyến mại NÊU GIÁ TRỊ CỤ THỂ (số tiền, phần trăm, quà tặng "
     "định lượng). Câu chào mời chung chung không có giá trị nào - 'nhận nhiều "
     "ưu đãi hấp dẫn', 'liên hệ để biết ưu đãi' - KHÔNG phải khuyến mại theo "
     "nghĩa này, chấm NA.\n"
     "  Chính sách của NHÀ NƯỚC (miễn lệ phí trước bạ, ưu đãi thuế) KHÔNG phải "
     "khuyến mại của doanh nghiệp, cũng chấm NA.\n"
-    "  0 = có khuyến mại nêu giá trị cụ thể NHƯNG thiếu thời hạn hoặc thiếu "
-    "điều kiện\n"
-    "  2 = có khuyến mại nêu giá trị cụ thể VÀ nêu đủ cả hai\n"
-    "  NA = bài không có khuyến mại nào nêu giá trị cụ thể\n\n"
-    "  ⚠ TRƯỚC KHI chấm CP4 mức 0, ĐỌC LẠI đoạn bạn định trích: nếu trong đó "
-    "đã có MỐC THỜI GIAN thì thời hạn KHÔNG thiếu, không được lấy lý do đó. "
-    "Mốc thời gian gồm mọi dạng: 'từ 25/06 – 31/08/2024', 'trước 6/4/2022', "
-    "'đến hết tháng 9', 'trong 3 tháng đầu', 'áp dụng đến khi hết hàng'. Hai "
-    "câu dưới đây ĐỀU CÓ thời hạn, chấm mức 0 cho chúng là SAI:\n"
-    "    'Chương trình trả góp lãi suất 0% từ 25/06 – 31/08/2024'\n"
-    "    'Trước 6/4/2022, khách đặt cọc VF 8 và VF 9 được ưu đãi 250 triệu'\n"
-    "  Ngược lại, câu có giá trị mà KHÔNG có mốc nào thì đúng là mức 0, ví dụ "
-    "'tặng gói bảo dưỡng miễn phí trị giá 2 triệu đồng' đứng một mình.\n\n"
+    "  0 = có khuyến mại nêu giá trị cụ thể nhưng thiếu điều kiện áp dụng\n"
+    "  2 = có khuyến mại nêu giá trị cụ thể và nêu đủ điều kiện áp dụng\n"
+    "  NA = bài không có khuyến mại nào nêu giá trị cụ thể\n"
+    "  Không dùng mức 1 cho CP4.\n\n"
     "CP7 - Chính sách pin / thuê pin nêu đủ ĐIỀU KIỆN, PHÍ và THỜI HẠN.\n"
     "  0 = thiếu từ 2 yếu tố trở lên\n"
     "  1 = thiếu 1 yếu tố\n"
@@ -422,8 +469,9 @@ def _danh_gia_llm(fields: dict, text_theo_field: dict) -> dict:
             continue      # mã lạ hoặc chấm trùng -> giữ lần đầu
         muc = None if c["muc"] == "NA" else int(c["muc"])
         muc = _hop_thuc_hoa(ma, muc, c["evidence"], text_theo_field)
+        can_evidence = muc in (0, 1) or (ma == "CP4" and muc == 2)
         occ = ([{"field": c["field"], "text": c["evidence"]}]
-               if muc in (0, 1) else [])
+               if can_evidence else [])
         theo_ma[ma] = _tieu_chi(ma, muc, occ, c["reason"] if muc in (0, 1) else "")
     return theo_ma
 
@@ -468,6 +516,30 @@ def _chot_cp8(tu_llm: dict, text_theo_field: dict, llm_hong: bool) -> dict:
             "(thông cáo VinFast, trang thông số chính thức) ngay cạnh số liệu.",
         )
     return tu_llm
+
+
+def _chot_cp4(tu_llm: dict, text_theo_field: dict) -> dict:
+    """Ghép điều kiện do LLM đọc với thời hạn do code nhận diện."""
+    muc = tu_llm["level"]
+    if muc is None:
+        return tu_llm
+    if muc in (0, 1):
+        # CP4 không có mức một phần: thiếu điều kiện là lỗi A4 mức 0.
+        return _tieu_chi("CP4", 0, tu_llm["occurrences"], tu_llm["reason"])
+    if muc != 2 or not tu_llm["occurrences"]:
+        return _tieu_chi("CP4", None)
+
+    evidence = tu_llm["occurrences"][0].get("text", "")
+    if _cp4_co_thoi_han(evidence, text_theo_field):
+        # Evidence mức 2 chỉ dùng nội bộ để chốt thời hạn; output đạt giữ
+        # hình dạng cũ với occurrences rỗng.
+        return _tieu_chi("CP4", 2)
+    return _tieu_chi(
+        "CP4", 0, tu_llm["occurrences"],
+        "Khuyến mại đã nêu điều kiện áp dụng nhưng chưa thấy thời hạn trong "
+        "đoạn khuyến mại hoặc nội dung liền kề. Bổ sung ngày bắt đầu/kết thúc "
+        "hoặc thời lượng áp dụng ngay cạnh ưu đãi.",
+    )
 
 
 # ------------------------------------------------------------------- ghép
@@ -571,7 +643,7 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         _cp1_claim_tuyet_doi(text_theo_field),
         llm["CP2"],
         _cp3_so_lieu(fields, content_type, langcode, danh_gia_cp3),
-        llm["CP4"],
+        _chot_cp4(llm["CP4"], text_theo_field),
         _cp5_tam_hoat_dong(text_theo_field),
         _cp6_thoi_gian_sac(text_theo_field),
         llm["CP7"],

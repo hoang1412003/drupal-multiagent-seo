@@ -1,7 +1,7 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** E1, E2, E4, **E5** đã chạy. **E5 (2026-08-11): Kappa 0,713 — *substantial agreement*, accuracy 0,879, sai 4/33** — nhưng chạy hai lần mới ra, lần 1 (Kappa 0,264) là thứ tìm ra lỗi B14. ⚠️ **E1 phải đo lại**: σ = 1,79 đo trên code trước khi sửa B14, nay hết hiệu lực. Gold set 33/33. Còn E3/E6 và test-retest nhãn (sớm nhất 13/08 — **chưa có trần Kappa thì chưa diễn giải được 0,713**).
+**Trạng thái:** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test-retest nhãn (sớm nhất 13/08 — chưa có trần Kappa thì chưa diễn giải được 0,713).
 
 Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
 
@@ -66,7 +66,7 @@ Năm điểm chặn quan trọng:
 
 ---
 
-## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-11 (bản 3)
+## 3a. KHOÁ CODE CHẤM ĐIỂM — 2026-08-12 (bản 4)
 
 `rubrics.md` mục 10 quy định: ngưỡng calibrate được **chỉ có hiệu lực với đúng bộ (rubric version, prompt version, model)** đã dùng lúc đo. Nên trước khi chạy E1 và E5 phải chốt bộ đó lại, và ghi ra để về sau kiểm chứng được.
 
@@ -74,15 +74,15 @@ Năm điểm chặn quan trọng:
 
 | Thành phần | Giá trị |
 |---|---|
-| Commit | bản sửa **B14** (CP3 cùng-chỉ-số + CP4). **Bản 2 (`3255517`) hết hiệu lực** — E5 lần 1 chạy trên bản đó và chính nó tìm ra B14 |
+| Commit | bản sửa **chốt CP4 tất định** (LLM chấm điều kiện + code kiểm thời hạn). Bản 3 sau B14 hết hiệu lực đối với phép đo hiện hành |
 | Model | `claude-haiku-4-5-20251001` |
 | Rubric version | v1 (`rubrics.md`) — **áp dụng cho cả 4 agent** |
-| Prompt version | **`0bdc5ab12ec65f89`** — công thức MỚI, phủ **6** prompt (4 agent + 2 của `fact_check`). *Bản 2 là `51c0cba6c91e1435` theo công thức cũ chỉ phủ 4; hai số không so sánh trực tiếp được.* Xem cảnh báo bên dưới |
+| Prompt version | **`020738e209017213`** — tính từ code, phủ **6** prompt (4 agent + 2 của `fact_check`). Bản 3 là `0bdc5ab12ec65f89`; mọi file kết quả mang hash đó nay là dữ liệu lịch sử |
 | Guideline gán nhãn | v1.3 (`annotation-guideline.md`) |
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 | KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
-| E1 | ⚠️ **CHƯA đo trên bản này.** Số 1,79 thuộc bản 2, không được trích dẫn cho bản 3 |
-| E5 | ✅ chạy trên đúng bản này: Kappa **0,713**, accuracy 0,879 (mục 4.5) |
+| E1 | ⚠️ **CHƯA đo trên bản này.** Số 1,79 thuộc code trước B14/CP4 hiện hành |
+| E5 | ⚠️ **CHƯA đo trên bản này.** Kappa **0,713**, accuracy 0,879 thuộc bản 3 trước chốt CP4 (mục 4.5) |
 
 > ### ⚠️ Bản khoá cũ có lỗ hổng — phát hiện khi sửa B14
 >
@@ -100,14 +100,14 @@ Năm điểm chặn quan trọng:
 
 ```bash
 .venv/Scripts/python.exe -c "import sys; sys.path[:0]=['scripts','src']; \
-import eval_calibration as e; print(e.prompt_version())"      # phải ra 0bdc5ab12ec65f89
+import eval_calibration as e; print(e.prompt_version())"      # phải ra 020738e209017213
 ```
 
 **Thêm prompt ở module mới thì phải sửa `prompt_version()`** — nếu không, bản khoá sẽ khẳng định "cùng một bộ" trong khi hành vi đã đổi, đúng lỗi vừa mắc ở bản 1-2.
 
 *(Công thức của bản 1 tham chiếu `content_quality.SYSTEM_PROMPT` và `seo.SYSTEM_PROMPT` — hai tên đó **không còn tồn tại** sau khi chuyển rubric. Đó là lần đầu công thức chép-tay này hỏng; lỗ hổng `fact_check` là lần thứ hai. Nên nay nó nằm trong code.)*
 
-**Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng.
+**Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng. Chốt CP4 vừa đổi đúng đường này, nên bản 4 chưa có E1/E5 hợp lệ.
 
 **Vì sao có bản 2:** bản 1 khoá lúc mới 2/4 agent dùng rubric, kèm lập luận rằng σ của `content_quality` (0,38) và `seo` (0,19) đủ nhỏ nên không cần chuyển. Lập luận đó **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai biết 78 khác 74 ở chỗ nào, mà calibrate một ngưỡng trên đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được — đó chính là luận điểm gốc của `rubrics.md` mục 1. Nên đã chuyển nốt: **4/4 agent dùng rubric, nợ A1 đóng.**
 
@@ -346,7 +346,7 @@ Nguyên nhân ở `drupal_client.py`: `image_alt` chỉ lấy từ `relationship
 
 Hệ quả cho calibration: Recall/F1 của tiêu chí SEO9 sẽ lệch có hệ thống, vì ground truth (mã lỗi B6 trong `annotation-guideline.md` v1.2) xét **mọi ảnh trong body** còn hệ thống chỉ xét **một ảnh đại diện**. Hai bên đo hai tập ảnh khác nhau. Chi tiết và bằng chứng thứ hai (bài G-001 của gold set): `docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md` mục 6.
 
-#### Kết quả E5 lần đầu (2026-08-11)
+#### Kết quả E5 lịch sử trên bản 3 (2026-08-11; hết hiệu lực với code hiện hành)
 
 Số liệu thô: `docs/evidence/e5_sau_sua_cp3_cp4.json` (điểm 4 agent trên 33 bài) và `e5_quet_nguong.json` (50 bộ ngưỡng tốt nhất). Script: `scripts/eval_calibration.py`, hai pha — chấm 33 bài **một lần** (~$1,9), rồi quét **7056 tổ hợp ngưỡng** với chi phí **$0**. Quét miễn phí được là nhờ Aggregator là hàm thuần không gọi LLM (`architecture.md` mục 6); đây là lợi ích cụ thể của quyết định thiết kế đó, đáng nêu khi bảo vệ.
 
@@ -357,7 +357,7 @@ Số liệu thô: `docs/evidence/e5_sau_sua_cp3_cp4.json` (điểm 4 agent trên
 | Lần 1 — trước khi sửa CP3/CP4 | 0,090 | 0,264 | 0,636 |
 | **Lần 2 — sau khi sửa** | **0,427** | **0,713** | **0,879** |
 
-Kappa **0,713** nằm trong vùng *substantial agreement* (Landis–Koch 0,61–0,80). Sai **4/33 bài**.
+Kappa **0,713** nằm trong vùng *substantial agreement* (Landis–Koch 0,61–0,80). Sai **4/33 bài**. Đây là bằng chứng lịch sử đã dẫn tới chẩn đoán CP4; sau chốt CP4 ngày 2026-08-12, không được trình bày con số này như kết quả của code hiện hành.
 
 **Lần 1 không phải thất bại — nó là phép chẩn đoán.** Kappa 0,264 với ngưỡng tối ưu bị đẩy về đáy dải quét là dấu hiệu *bài toán không nằm ở ngưỡng*. Truy ngược ra: **16/33 bài có cờ `critical` trong khi chỉ 7 bài đáng có** — precision đường veto 44%. Và 8/9 báo động giả đến từ **CP3**.
 
@@ -385,8 +385,8 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 |---|---|---|---|
 | G-011 | rejected | needs_revision | `"có một không hai"` ngoài blacklist — B12b, **cố ý không vá** |
 | G-020 | rejected | needs_revision | `"săn đón nhất"` ngoài blacklist — B12b, **cố ý không vá** |
-| P-006a | needs_revision | rejected | CP4 vẫn báo oan câu có thời hạn — giới hạn của sửa-bằng-prompt |
-| G-008 | needs_revision | rejected | **chưa chẩn đoán** |
+| P-006a | needs_revision | rejected | CP4 báo oan câu có thời hạn — đã có test hồi quy và chốt tất định ở bản 4 |
+| G-008 | needs_revision | rejected | CP4 tạo cờ `critical` oan dù có thời hạn — đã có test hồi quy và chốt tất định ở bản 4 |
 
 #### ⚠️ Ba điều phải nêu khi trích con số 0,713
 
@@ -402,7 +402,7 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 
 `meta.calibrated` vẫn để `false`. Hai việc phải xong trước khi đổi:
 
-- **Đo lại E1** — CP3/CP4 vừa đổi nên σ đo ngày 2026-08-11 đã hết hiệu lực. Ghi `calibrated: true` mà không biết điểm có ổn định không là đúng thứ khối `meta` được dựng ra để chặn.
+- **Đo lại E1 và E5** — CP4 vừa đổi nên cả độ ổn định lẫn calibration ngày 2026-08-11 đã hết hiệu lực. Ghi `calibrated: true` hoặc chép ngưỡng cũ vào config lúc này là sai phiên bản.
 - **Test-retest nhãn** (≥13/08) — để có trần Kappa.
 
 ---
