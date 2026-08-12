@@ -547,7 +547,7 @@ Những thứ dưới đây là **quyết định có cân nhắc**, ghi ở đ�
 | Gold set do **một người** gán nhãn | Không được cấp nhân sự. Dùng Kappa test-retest làm trần thay cho Kappa người-người, và nêu rõ đó là ước lượng lạc quan |
 | **Gold set KHÔNG CÓ lớp `publish`: 0/33 → ngưỡng `publish` KHÔNG calibrate được** | Đo được, không phải ước lượng: **0/20 bài thật đạt `publish`**. Lần gán đầu ra 2 bài, nhưng đợt rà lại có hệ thống (33 bài × 16 mã, 2026-08-10) tìm ra lỗi B8 ở **cả hai** — xem A3.<br><br>**Nguyên nhân đo được, không phải phỏng đoán: B8 có ở 10/20 bài thật (50%).** Lỗi chính tả và lặp từ phổ biến tới mức không bài nào qua nổi cửa đó. Vì vậy **thu thêm bài từ cùng nguồn gần như chắc chắn không cứu được lớp `publish`** — nó không phải vấn đề cỡ mẫu mà là **tính chất của nội dung**. Đã cân nhắc thu thêm ~30 bài (≈7 giờ gán nhãn, thu thủ công vì WAF chặn bot) và **bác bỏ**: kỳ vọng thu về 0-1 mẫu `publish`.<br><br>**Điều làm giới hạn này chấp nhận được:** quy tắc quyết định có hai ngưỡng, và cái calibrate được lại là cái quan trọng hơn. Ngưỡng **50** (`rejected` ↔ `needs_revision`) có phân bố **10/23** — đủ để quét, và nó chính là ngưỡng gắn với **quyền phủ quyết**, tức phần rủi ro pháp lý. Ngưỡng **80** chỉ phân biệt "đề xuất đăng luôn" với "đề xuất xem lại", mà hệ thống **không bao giờ tự xuất bản** (`architecture.md` mục 2.3) nên hậu quả sai thấp hơn hẳn.<br><br>**Phải nêu trong báo cáo Sprint 3:** *"ngưỡng `publish` = 80 giữ nguyên giá trị minh hoạ, chưa calibrate, do gold set không có mẫu `publish` nào"*. Và nêu kèm phát hiện nghiệp vụ đi cùng: **20/20 bài cẩm nang đã xuất bản của VinFast đều cần ít nhất một chỉnh sửa** — đó chính là lý do công cụ này đáng tồn tại.<br><br>**Hai cách làm đã cân nhắc và BÁC BỎ**, ghi lại vì cả hai đều hấp dẫn: (1) *sửa nội dung bài cho sạch rồi gán `publish`* — gold set là thước đo, sửa bài tới khi ra nhãn mong muốn là mài lại thước; khác perturbation ở chỗ chèn lỗi thì biết chính xác đã thêm gì (`injected_codes`), còn dọn sạch thì không bao giờ chắc đã hết. (2) *nhờ AI duyệt web tìm bài sạch* — sàng lọc theo chất lượng làm mẫu mất tính đại diện, và tệ hơn là sàng theo tiêu chí giống rubric nên gold set thành tương quan với chính hệ thống đang bị đo. |
 | Con số `publish` thấp phản ánh chất lượng nguồn, không phải lỗi rubric | Kiểm bằng chính định nghĩa: các mã đẩy bài xuống `needs_revision` đều là **lỗi phải sửa thật** — B3 (meta sai độ dài, 30% bài thật), B8 (lỗi chính tả: `"hành trinh"`, `"viêc"`, `"thông suất"`, `"khuyến cáokhách"` — đều đã đối chiếu `raw_html` xác nhận có trong nguồn gốc), B2 (thời gian sạc thiếu loại trụ). Khác hẳn B9 trước đây — B9 sai vì "câu dài" là **văn phong**, không phải lỗi. Đã cân nhắc nới B8 xuống và **bác bỏ**: một lỗi chính tả đúng là thứ phải sửa trước khi đăng, nới nó là lặp lại bẫy chỉnh ngưỡng cho phân bố đẹp |
-| **Không kiểm được "AI có báo lỗi giả trên bài sạch không"** — vì gold set không có bài sạch nào | Đây là **phản biện mạnh nhất** với việc lớp `publish` rỗng, và gold set không trả lời được. Nhưng `architecture.md` mục 8.1 đã thiết kế sẵn chỗ khác cho nó: **bộ mẫu kiểm thử chức năng**, dòng đầu tiên của bảng là *"Bài sạch \| (không) \| Không báo lỗi giả"*. Mục đó ghi rõ bộ này **tách biệt với gold set** và cho phép tạo mẫu nhân tạo — *"thêm mẫu rẻ: không cần gán nhãn mù, không cần test-retest, không đếm vào 33"*.<br><br>**Phân vai phải giữ rõ, vì lẫn hai thứ này là gốc của mọi tranh cãi ở trên:**<br>• **Gold set** trả lời *"AI có khớp nhãn người không?"* → mẫu BẮT BUỘC là bài thật, không sửa, không sàng lọc.<br>• **Bộ kiểm thử chức năng** trả lời *"AI có bắt đúng / không bắt oan loại lỗi này không?"* → được phép TỰ DỰNG mẫu, vì nó không tham gia calibration và không tính Kappa.<br><br>**Việc cần làm (chưa làm):** dựng 1 bài sạch cho bộ chức năng — lấy một bài thật rồi sửa hết lỗi — và xác nhận hệ thống trả `publish`. Nó chứng minh **hệ thống CÓ đường ra `publish`**, chỉ là nội dung thật của VinFast không đi qua đó. Đây đúng là thao tác "sửa bài cho sạch" mà mục trên đã BÁC BỎ với gold set — hợp lệ ở đây chính vì bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*. |
+| **Gold set không kiểm được "AI có báo lỗi giả trên bài sạch không"** — vì gold calibration không có bài sạch nào | Đây là **phản biện mạnh nhất** với việc lớp `publish` rỗng, và gold set không trả lời được. Nhưng `architecture.md` mục 8.1 đã thiết kế sẵn chỗ khác cho nó: **bộ mẫu kiểm thử chức năng**, dòng đầu tiên của bảng là *"Bài sạch \| (không) \| Không báo lỗi giả"*. Mục đó ghi rõ bộ này **tách biệt với gold set** và cho phép tạo mẫu nhân tạo — *"thêm mẫu rẻ: không cần gán nhãn mù, không cần test-retest, không đếm vào 33"*.<br><br>**Phân vai phải giữ rõ, vì lẫn hai thứ này là gốc của mọi tranh cãi ở trên:**<br>• **Gold set** trả lời *"AI có khớp nhãn người không?"* → mẫu BẮT BUỘC là bài thật, không sửa, không sàng lọc.<br>• **Bộ kiểm thử chức năng** trả lời *"AI có bắt đúng / không bắt oan loại lỗi này không?"* → được phép TỰ DỰNG mẫu, vì nó không tham gia calibration và không tính Kappa.<br><br>**Hậu kiểm 2026-08-11:** đã dựng 10 mẫu functional-clean corrected, expected `publish`, nhưng chưa chạy pipeline. Khi chạy phải báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues`; không đưa các mẫu này vào E5/Kappa. Đây đúng là thao tác "sửa bài cho sạch" mà mục trên đã BÁC BỎ với gold set — hợp lệ ở đây chính vì bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*. |
 | Brand guideline tự trích xuất, không phải tài liệu nội bộ | Dự án không được cấp tài liệu nội bộ VF O2O |
 | Quy ước "trạm sạc / trụ sạc" để `NA` | Thu thêm corpus để đẩy p qua ngưỡng là *optional stopping* — làm mọi p-value mất giá trị |
 | `url_alias` không nằm trong `content_hash` | Bên PHP phải tra bảng `path_alias` riêng; thêm phức tạp để bắt trường hợp hiếm |
@@ -619,31 +619,28 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
-**Cả hai script đo đều RESUME từ file kết quả cũ.** Đó là tính năng tiết kiệm tiền (đứt giữa chừng thì chạy tiếp), nhưng nếu code chấm điểm đã đổi thì nó **trộn điểm của hai bản code khác nhau và không báo gì**.
+**Cả hai script đo đều RESUME từ file kết quả cũ.** Đó là tính năng tiết kiệm tiền (đứt giữa chừng thì chạy tiếp), nhưng nếu code chấm điểm đã đổi thì có nguy cơ trộn điểm của hai bản code. Cả E1 và E5 nay đều có chốt `prompt_version` để từ chối resume khi metadata thiếu hoặc lệch.
 
 | Script | File mặc định | Tình trạng file đó |
 |---|---|---|
 | `eval_calibration.py` (E5) | `e5_sau_sua_cp3_cp4.json` | ✅ hợp lệ — **đã có chốt chặn**, lệch `prompt_version` là dừng |
-| `eval_stability.py` (E1) | `e1_stability_raw.json` | 🔴 **ngày 2026-08-04, TRƯỚC CẢ RUBRIC** — và **CHƯA có chốt chặn** |
+| `eval_stability.py` (E1) | `e1_stability_raw.json` | 🔴 dữ liệu **ngày 2026-08-04, TRƯỚC CẢ RUBRIC** — file legacy thiếu metadata nên chốt chặn hiện tại sẽ từ chối resume |
 
-**Nghĩa là:** gõ `python scripts/eval_stability.py` không tham số sẽ nối tiếp vào dữ liệu chết từ một bản code khác hẳn, tiêu ~$3, và in ra một con số σ **vô nghĩa mà trông hoàn toàn bình thường**.
+**Nghĩa là:** gõ `python scripts/eval_stability.py` không tham số với file legacy hiện tại sẽ dừng trước khi gọi API; không còn âm thầm trộn dữ liệu hoặc tiêu tiền. Không xóa/ghi đè file cũ vì đó là bằng chứng lịch sử.
 
-**Hai cách xử lý, chọn một:**
-
-- **Nên làm:** bê chốt chặn từ `eval_calibration.cham_gold_set()` sang `eval_stability.chay_do()` — ghi `_meta.prompt_version` vào file, từ chối resume khi lệch. Khoảng 15 dòng, không tốn API. Cùng một lỗi đã cắn một lần rồi.
-- **Tạm thời:** luôn truyền file mới — `eval_stability.py` **có** cờ `--ket-qua` (đã kiểm chạy thật), nhận tên file tương đối trong `docs/evidence/`:
+**Cách chạy lần đo mới:** giữ file lịch sử nguyên trạng và truyền tên file mới qua cờ `--ket-qua`:
 
   ```bash
   HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json
   ```
 
-  Nhưng đây chỉ là **kỷ luật của người gõ lệnh**, không phải chốt chặn — quên một lần là mất $3 và ra số sai. Vì vậy vẫn nên làm cách trên.
+Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự kiến khoảng **3 USD**. File mới sẽ được ghi `_meta.prompt_version`; các lần resume sau đó cũng bị từ chối nếu hash prompt đổi.
 
 ### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
 
 ```bash
 cd multiagent
-HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py    # đọc 8.0 TRƯỚC
+HF_HUB_OFFLINE=1 .venv/Scripts/python.exe scripts/eval_stability.py --ket-qua e1_sau_b14.json    # đọc 8.0 TRƯỚC
 ```
 
 **Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên bản khoá 2. B14 sau đó sửa CP3/CP4 — tức đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
@@ -705,7 +702,15 @@ Cách làm: mở `docs/evidence/e5_sau_sua_cp3_cp4.json`, tìm `G-008`, xem `co_
 
 `architecture.md` mục 8.1 yêu cầu một bài *"Bài sạch | (không) | Không báo lỗi giả"*, và bộ này **tách biệt với gold set**.
 
-**Đây là phản biện mạnh nhất với việc lớp `publish` rỗng** — hiện chưa có gì chứng minh hệ thống **có đường ra `publish`**. Cách làm: lấy một bài thật, sửa hết lỗi, xác nhận ra `publish`.
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+
+**Trạng thái: đã dựng 10 mẫu, chưa chạy pipeline.** Manifest nằm tại `docs/functional-tests/clean_labels.csv`; cần chạy pipeline rồi báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues` để chứng minh hệ thống có đường ra `publish` mà không làm sai phép calibration.
+
+**Chốt chặn đã có test:** extractor từ chối ghi đè bản corrected trừ khi truyền `--force`; E5 chỉ nhận hai split allowlist `gold-real` và `gold-pert`, nên functional-clean không thể lọt vào phép tính do chỉ dựa vào vị trí tệp.
 
 ⚠️ **Đúng thao tác "sửa bài cho sạch" mà mục 6 đã BÁC BỎ với gold set.** Hợp lệ ở đây **chỉ vì** bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*, không tham gia calibration, không tính Kappa. **Tuyệt đối không** thêm bài này vào `labels.csv`.
 

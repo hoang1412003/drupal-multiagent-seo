@@ -6,6 +6,7 @@ Cách chạy:
     .venv\\Scripts\\python.exe scripts\\test_extract_gold_sample.py
 """
 import os
+import shutil
 import sys
 import tempfile
 
@@ -13,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from bs4 import BeautifulSoup, NavigableString
 
+import extract_gold_sample as extractor
 from extract_gold_sample import (
     KEEP_TAGS,
     ExtractError,
@@ -20,6 +22,7 @@ from extract_gold_sample import (
     expected_url_for,
     extract_fields,
     render_txt,
+    write_output,
     _clean_text,
 )
 from label_helper import analyze, parse_sample, split_sentences
@@ -30,6 +33,75 @@ FIXTURE = os.path.join(
 )
 
 _results = []
+
+
+def temp_file(content: str) -> str:
+    fd, path = tempfile.mkstemp(suffix=".txt")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(content)
+    return path
+
+
+def read(path: str) -> str:
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def test_write_output_tu_choi_ghi_de() -> None:
+    path = temp_file("ban da hieu dinh")
+    try:
+        write_output(path, "noi dung boc lai")
+    except FileExistsError:
+        pass
+    else:
+        raise AssertionError("phải từ chối ghi đè mặc định")
+    check("nội dung cũ còn nguyên", read(path), "ban da hieu dinh")
+    os.remove(path)
+
+
+def test_write_output_force_ghi_de() -> None:
+    path = temp_file("cu")
+    try:
+        write_output(path, "moi", force=True)
+        check("force thay nội dung", read(path), "moi")
+    finally:
+        os.remove(path)
+
+
+def test_process_functional_ghi_clean_va_tu_choi_ghi_de() -> None:
+    """Functional HTML phải đi vào functional clean, không quay lại gold."""
+    thu_muc = tempfile.mkdtemp(prefix="extract-functional-")
+    raw_html = os.path.join(thu_muc, "docs", "functional-tests", "raw_html")
+    clean = os.path.join(thu_muc, "docs", "functional-tests", "clean")
+    gold = os.path.join(thu_muc, "fake-gold")
+    os.makedirs(raw_html)
+    html_path = os.path.join(raw_html, "C-001.html")
+    shutil.copyfile(FIXTURE, html_path)
+
+    old_functional_html = extractor.FUNCTIONAL_HTML_DIR
+    old_functional_clean = extractor.FUNCTIONAL_CLEAN_DIR
+    old_gold = extractor.RAW_DIR
+    extractor.FUNCTIONAL_HTML_DIR = raw_html
+    extractor.FUNCTIONAL_CLEAN_DIR = clean
+    extractor.RAW_DIR = gold
+    clean_path = os.path.join(clean, "C-001.txt")
+    gold_path = os.path.join(gold, "C-001.txt")
+    try:
+        check("functional process ghi thành công", extractor.process(html_path, {}), True)
+        check("functional output nằm trong clean", os.path.isfile(clean_path), True)
+        check("functional process không tạo gold C", os.path.exists(gold_path), False)
+
+        with open(clean_path, "w", encoding="utf-8") as f:
+            f.write("ban da hieu dinh")
+        check("functional process từ chối ghi đè",
+              extractor.process(html_path, {}), False)
+        check("functional clean cũ còn nguyên", read(clean_path),
+              "ban da hieu dinh")
+    finally:
+        extractor.FUNCTIONAL_HTML_DIR = old_functional_html
+        extractor.FUNCTIONAL_CLEAN_DIR = old_functional_clean
+        extractor.RAW_DIR = old_gold
+        shutil.rmtree(thu_muc)
 
 
 def check(name: str, actual, expected) -> None:
@@ -455,6 +527,9 @@ def test_embedded_reported() -> None:
 
 
 if __name__ == "__main__":
+    test_write_output_tu_choi_ghi_de()
+    test_write_output_force_ghi_de()
+    test_process_functional_ghi_clean_va_tu_choi_ghi_de()
     test_fields()
     test_missing_node_detail()
     test_clean_body_errors()

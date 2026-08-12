@@ -47,6 +47,7 @@ from agents import brand_voice, compliance, content_quality, seo
 from graph import aggregator_node
 
 from drupal_client import _extract_image_alt
+from eval_calibration import prompt_version
 from label_helper import parse_sample
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -131,17 +132,29 @@ def cham_mot_luot(fields: dict) -> dict:
     }
 
 
-def nap_ket_qua() -> dict:
-    if os.path.isfile(KET_QUA):
-        with open(KET_QUA, encoding="utf-8") as f:
-            return json.load(f)
+def nap_ket_qua(path: str | None = None) -> dict:
+    path = path or KET_QUA
+    if os.path.isfile(path):
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        meta = data.pop("_meta", {})
+        prompt_cu = meta.get("prompt_version")
+        if prompt_cu != prompt_version():
+            raise SystemExit(
+                f"\nDUNG LAI: {os.path.basename(path)} khong dung prompt version "
+                f"hien tai.\nTron hai ban se cho ket qua vo nghia. Chon mot:\n"
+                f"  - doi ten file cu roi chay lai tu dau, hoac\n"
+                f"  - --ket-qua <ten file moi>\n")
+        return data
     return {}
 
 
-def ghi_ket_qua(data: dict) -> None:
-    os.makedirs(os.path.dirname(KET_QUA), exist_ok=True)
-    with open(KET_QUA, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+def ghi_ket_qua(data: dict, path: str | None = None) -> None:
+    path = path or KET_QUA
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    payload = {**data, "_meta": {"prompt_version": prompt_version()}}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
 def chay_do() -> dict:

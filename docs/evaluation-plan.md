@@ -3,6 +3,12 @@
 **Phiên bản:** v1 (2026-07-27)
 **Trạng thái:** E1, E2, E4, **E5** đã chạy. **E5 (2026-08-11): Kappa 0,713 — *substantial agreement*, accuracy 0,879, sai 4/33** — nhưng chạy hai lần mới ra, lần 1 (Kappa 0,264) là thứ tìm ra lỗi B14. ⚠️ **E1 phải đo lại**: σ = 1,79 đo trên code trước khi sửa B14, nay hết hiệu lực. Gold set 33/33. Còn E3/E6 và test-retest nhãn (sớm nhất 13/08 — **chưa có trần Kappa thì chưa diễn giải được 0,713**).
 
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+
 ---
 
 ## 1. Vì sao gom vào một tài liệu
@@ -301,6 +307,10 @@ Lưu ý khi đọc bảng: hai dòng chẩn đoán B5 rẻ hơn hẳn ($0,023/l�
 
 Đã đặc tả đầy đủ ở `architecture.md` mục 8.2 (Recall/F1, Cohen's Kappa, quét ngưỡng theo Youden's Index). Bốn điều kiện tiên quyết cần nhấn lại ở đây:
 
+**Biên dữ liệu bắt buộc:** E5 đọc manifest `docs/goldset/labels.csv` và chỉ nhận hai split allowlist `gold-real`, `gold-pert`. Mọi split khác bị loại; 10 mẫu functional-clean có manifest riêng và không tham gia chấm E5 hoặc tính Kappa.
+
+Functional-clean là phép kiểm cơ chế riêng: chạy 10 mẫu corrected có expected `publish`, rồi báo cáo `publish_rate`, `false_positive_articles` (số bài bị báo oan) và `false_positive_issues` (tổng số issue báo oan). Không gộp ba chỉ số này với Kappa/accuracy của gold calibration; nếu nêu tổng 43 thì phải gọi rõ là evaluation suite.
+
 1. ~~**E1 phải đạt trước.** Bước nhảy 2 điểm chỉ có nghĩa nếu σ < 2.~~ ✅ **đạt (2026-08-04)** — điểm tổng σ = 1,33 sau khi Compliance chuyển sang rubric (σ = 0,28 với cách chấm cũ). **Nhưng có một lưu ý phải mang theo:** riêng Compliance đạt σ = 5,48 trên bài G-002. Điểm tổng ổn định vì trọng số làm loãng dao động đó, không phải vì nó không tồn tại — nên ngưỡng calibrate ra sẽ kém ổn định hơn với các bài mà Compliance dao động mạnh. Làm rubric Compliance trước sẽ cho ngưỡng đáng tin hơn.
 2. **Ngưỡng chốt được chỉ có hiệu lực với đúng bộ `(rubric version, prompt version, model)`** đã dùng khi calibrate. Đổi model là phải calibrate lại - mà `ANTHROPIC_MODEL` đang đọc từ biến môi trường nên có thể đổi mà không ai để ý. ✅ **đã có cảnh báo tự động (2026-08-04)**: `src/config.py` so `meta.model` trong `scoring.yaml` với model đang chạy và log cảnh báo khi lệch.
 3. ~~**Brand Voice Agent phải là agent thật, không còn stub.**~~ ✅ **đạt (2026-08-03)**
@@ -435,6 +445,6 @@ Nêu rõ những thứ không đo cũng quan trọng như nêu những thứ đo
 1. **E4 chi phí + E1 độ ổn định** - chạy được ngay hôm nay, rẻ, và E1 quyết định có nên viết lại 4 prompt theo rubric hay không
 2. Implement rubric (nếu E1 cho thấy cần) → chạy lại E1 để so phương sai
 3. **E2 recall@k** khi dựng KB xong, trước khi nối RAG vào agent
-4. Thu gold set (đang chạy song song, không phụ thuộc gì ở trên)
+4. Thu và gán nhãn gold set — đã xong 33/33
 5. **E3 baseline** + **E5 calibration** khi có gold set
 6. **E6 held-out test** sau cùng

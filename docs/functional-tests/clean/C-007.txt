@@ -1,0 +1,26 @@
+title: Tìm hiểu các loại trụ sạc ô tô điện VinFast
+url_alias: /vn_vi/thong-so-cac-loai-tru-sac-o-to-va-xe-may-dien-vinfast
+meta_description: Tìm hiểu sự khác nhau giữa trụ sạc AC và DC, cách chọn đầu nối phù hợp, lưu ý an toàn và cách xử lý tình huống thực tế khi sạc ô tô điện VinFast.
+summary: Hệ thống sạc ô tô điện gồm nhiều loại trụ với công suất và cách sử dụng khác nhau. Người dùng cần chọn trụ tương thích với xe, làm theo hướng dẫn trên trụ và theo dõi cảnh báo trong suốt quá trình sạc.
+---
+<p>Trụ sạc cung cấp điện năng cho pin của ô tô điện thông qua đầu nối và giao thức tương thích. Tùy thiết kế, trụ có thể cấp dòng điện xoay chiều hoặc dòng điện một chiều với tốc độ sạc khác nhau.</p>
+<p>Người dùng nên kiểm tra cổng sạc, khả năng tiếp nhận điện và hướng dẫn của mẫu xe trước khi bắt đầu. Công suất thực tế còn phụ thuộc vào trụ, trạng thái pin, nhiệt độ và hệ thống quản lý pin trên xe.</p>
+<img alt="Ô tô điện VinFast đỗ đúng vị trí tại trạm sạc"/>
+<h2>1. Trụ sạc AC và DC khác nhau như thế nào?</h2>
+<p>Với trụ AC, bộ chuyển đổi trên xe tiếp nhận dòng điện xoay chiều và chuyển thành dòng điện phù hợp để nạp pin. Hình thức này thường được dùng khi xe có thời gian đỗ lâu.</p>
+<p>Trụ DC đưa dòng điện một chiều đến hệ thống pin thông qua cơ chế kiểm soát của xe và trụ. Hình thức này có thể rút ngắn thời gian chờ, nhưng tốc độ không cố định trong toàn bộ phiên sạc.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/pin-va-tram-sac">Thông tin pin và trạm sạc ô tô điện</a></p>
+<img alt="Đầu nối của trụ sạc ô tô điện VinFast"/>
+<h2>2. Cách chọn trụ sạc phù hợp</h2>
+<p>Trước hết, người dùng cần xác nhận trụ hỗ trợ đúng loại đầu nối của xe. Tiếp theo, hãy đối chiếu thông tin hiển thị trên trụ với tài liệu hướng dẫn và nhu cầu của hành trình.</p>
+<p>Không nên cố cắm đầu nối không tương thích hoặc sử dụng bộ chuyển đổi ngoài danh mục được nhà sản xuất chấp thuận. Nếu đầu nối, dây dẫn hoặc cổng sạc có dấu hiệu hư hỏng, người dùng không nên bắt đầu phiên sạc.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/tim-kiem-showroom-tram-sac">Tìm kiếm trạm sạc VinFast</a></p>
+<h2>3. Các bước sạc ô tô điện tại trạm</h2>
+<ol> <li>Đỗ xe đúng vị trí, về số đỗ và thực hiện các bước an toàn theo hướng dẫn của xe.</li> <li>Kiểm tra đầu nối, dây sạc và khu vực quanh cổng sạc trước khi thao tác.</li> <li>Kết nối đầu sạc đúng chiều rồi khởi tạo phiên sạc theo chỉ dẫn trên trụ hoặc ứng dụng.</li> <li>Xác nhận trạng thái sạc trên trụ và trên xe trước khi rời vị trí.</li> <li>Kết thúc phiên sạc theo đúng trình tự, cất đầu nối vào vị trí quy định rồi mới di chuyển xe.</li> </ol>
+<img alt="Người dùng kết nối đầu sạc với ô tô điện VinFast"/>
+<h2>4. Lưu ý an toàn trong quá trình sạc</h2>
+<p>Không chạm vào phần tiếp điện, không kéo căng dây và không tự tháo thiết bị của trụ. Trẻ em cần được giám sát khi ở gần khu vực sạc.</p>
+<p>Nếu trụ hoặc xe phát cảnh báo, có mùi khét, tiếng động bất thường hay dấu hiệu quá nhiệt, người dùng cần dừng phiên sạc theo hướng dẫn. Sau đó, hãy giữ khoảng cách an toàn và liên hệ đơn vị vận hành trạm hoặc cơ sở dịch vụ.</p>
+<p>&gt;&gt;&gt; Tham khảo: <a href="https://vinfastauto.com/vn_vi/tai-lieu-tham-khao">Tài liệu hướng dẫn sử dụng ô tô</a></p>
+<img alt="Màn hình trụ sạc hiển thị trạng thái phiên sạc"/>
+<p>Việc làm theo hướng dẫn của đúng mẫu xe và đúng loại trụ giúp quá trình sạc diễn ra thuận tiện, đồng thời hạn chế thao tác sai.</p>

@@ -228,6 +228,12 @@ Diễn giải: nếu trần là 0.65 thì AI đạt 0.60 là **rất tốt**, kh
 
 File: `docs/goldset/labels.csv`
 
+Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
+
+Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
+
+Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+
 | Cột | Nội dung |
 |---|---|
 | `sample_id` | `G-001` (bài thật) hoặc `P-001a` (bản perturbation, hậu tố a/b nếu 1 bài gốc sinh nhiều biến thể) |
@@ -252,6 +258,15 @@ File: `docs/goldset/labels.csv`
 4. Ground truth suy ra từ `injected_codes` **cộng với** các lỗi sẵn có của bài gốc, áp quy tắc mục 5. Không gán lại bằng cảm tính.
 5. Phân bố lỗi chèn phải phủ đủ các nhóm, ưu tiên loại **hiếm gặp tự nhiên** trong bài đã publish: A1, A2, A3, A4, B3.
 6. Khi báo cáo kết quả Sprint 3, **tách riêng chỉ số trên bài thật và trên bài perturbation**. Gộp chung sẽ thổi phồng kết quả, vì lỗi chèn do chính tác giả tạo ra và tác giả cũng là người viết rule Compliance - agent bắt được lỗi mình tự chèn không chứng minh được năng lực tổng quát hoá.
+
+### 10.1. Quy tắc tạo bản functional-clean corrected
+
+1. Giữ nguyên HTML tải từ website tại `docs/functional-tests/raw_html/C-xxx.html`; không chỉnh sửa bằng chứng nguồn.
+2. Bóc tách một lần sang `docs/functional-tests/clean/C-xxx.txt`, sau đó sửa bản TXT để loại các mã A/B. Extractor có write guard: muốn ghi đè tệp đã có phải truyền rõ `--force`.
+3. Dùng manifest riêng `docs/functional-tests/clean_labels.csv`: `variant=corrected`, `expected_label=publish`; không có `injected_codes` hoặc `defect_codes` vì đây không phải manifest gold.
+4. Không nhập C vào `docs/goldset/labels.csv`, không dùng để xây brand guideline, không đưa vào E5 hoặc tính Kappa.
+5. Mọi thay đổi nội dung đáng kể phải ghi vào `docs/functional-tests/corrections.md`. Bản cuối vẫn phải chạy `label_helper.py`, `quet_ung_vien.py` và được người gán đọc kiểm A5/A6/B8.
+6. Khi báo cáo, functional-clean dùng riêng `publish_rate`, `false_positive_articles` và `false_positive_issues`; không tạo chỉ số gộp với gold calibration.
 
 ---
 

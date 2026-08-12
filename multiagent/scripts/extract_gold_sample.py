@@ -1,10 +1,12 @@
-"""Bóc tách bài viết đã lưu từ vinfastauto.com thành file raw cho gold set.
+"""Bóc tách bài viết đã lưu từ vinfastauto.com thành file text sạch.
 
 Thiết kế: docs/superpowers/specs/2026-07-29-goldset-html-extraction-design.md
 
 Đầu vào : docs/goldset/raw_html/<sample_id>.html
+          hoặc docs/functional-tests/raw_html/<sample_id>.html
           (lưu bằng Ctrl+S trên trình duyệt -> "Webpage, HTML Only")
 Đầu ra  : docs/goldset/raw/<sample_id>.txt
+          hoặc docs/functional-tests/clean/<sample_id>.txt
           (đúng format scripts/label_helper.py đọc được)
 
 Vì sao phải lưu bằng trình duyệt: vinfastauto.com chặn truy cập tự động
@@ -15,6 +17,7 @@ Cách chạy:
     .venv\\Scripts\\python.exe scripts\\extract_gold_sample.py ..\\docs\\goldset\\raw_html\\*.html
 """
 import csv
+import argparse
 import glob
 import os
 import re
@@ -28,6 +31,10 @@ from bs4 import BeautifulSoup, Comment, NavigableString
 _HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.normpath(os.path.join(_HERE, "..", ".."))
 RAW_DIR = os.path.join(REPO_ROOT, "docs", "goldset", "raw")
+FUNCTIONAL_HTML_DIR = os.path.join(
+    REPO_ROOT, "docs", "functional-tests", "raw_html")
+FUNCTIONAL_CLEAN_DIR = os.path.join(
+    REPO_ROOT, "docs", "functional-tests", "clean")
 LABELS_CSV = os.path.join(REPO_ROOT, "docs", "goldset", "labels.csv")
 
 # Thẻ giữ lại trong body: đều mang ý nghĩa cấu trúc/nội dung mà label_helper.py
@@ -252,7 +259,23 @@ def expected_url_for(sample_id: str, table: dict[str, str]) -> str | None:
     return None
 
 
-def process(path: str, table: dict) -> bool:
+def write_output(path: str, content: str, force: bool = False) -> None:
+    if os.path.exists(path) and not force:
+        raise FileExistsError(
+            f"Tu choi ghi de {path}; dung --force neu chu dong tao lai")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+def output_dir_for(path: str) -> str:
+    """Route functional HTML sang clean; các input khác giữ hành vi gold."""
+    parent = os.path.realpath(os.path.dirname(os.path.abspath(path)))
+    if parent == os.path.realpath(FUNCTIONAL_HTML_DIR):
+        return FUNCTIONAL_CLEAN_DIR
+    return RAW_DIR
+
+
+def process(path: str, table: dict, force: bool = False) -> bool:
     """Bóc tách 1 file HTML và ghi file .txt. Trả về True nếu ghi thành công.
 
     Bắt cả ExtractError lẫn Exception bất kỳ: một file lệch encoding hay lỗi
@@ -281,9 +304,17 @@ def process(path: str, table: dict) -> bool:
                 f"canonical khac labels.csv: {fields['url_alias']} != {expected}"
             )
 
-        os.makedirs(RAW_DIR, exist_ok=True)
-        with open(os.path.join(RAW_DIR, f"{sample_id}.txt"), "w", encoding="utf-8") as f:
-            f.write(render_txt(fields, body_html))
+        output_dir = output_dir_for(path)
+        os.makedirs(output_dir, exist_ok=True)
+        write_output(
+            os.path.join(output_dir, f"{sample_id}.txt"),
+            render_txt(fields, body_html),
+            force=force,
+        )
+    except FileExistsError as error:
+        print(f"{sample_id}.html")
+        print(f"  [TU CHOI GHI DE] {error}")
+        return False
     except ExtractError as error:
         print(f"{sample_id}.html")
         print(f"  [LOI] {error} - KHONG ghi file")
@@ -311,12 +342,13 @@ def process(path: str, table: dict) -> bool:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(__doc__)
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--force", action="store_true")
+    parser.add_argument("paths", nargs="+")
+    args = parser.parse_args()
 
     paths = []
-    for arg in sys.argv[1:]:
+    for arg in args.paths:
         paths.extend(sorted(glob.glob(arg)) or [arg])
 
     missing = [p for p in paths if not os.path.isfile(p)]
@@ -325,6 +357,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
     table = load_expected_urls()
-    written = sum(process(path, table) for path in paths)
-    print(f"\nDa ghi {written}/{len(paths)} file vao {RAW_DIR}")
+    written = sum(process(path, table, force=args.force) for path in paths)
+    print(f"\nDa ghi {written}/{len(paths)} file")
     sys.exit(0 if written == len(paths) else 1)

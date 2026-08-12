@@ -1,0 +1,32 @@
+title: Sử dụng tính năng pin trên Ứng dụng VinFast
+url_alias: /vn_vi/su-dung-tinh-nang-lien-quan-den-pin-tren-ung-dung-vinfast
+meta_description: Hướng dẫn kiểm tra dung lượng pin, trạng thái sạc, lịch sử phiên sạc và tìm trạm sạc từ xa bằng Ứng dụng VinFast dành cho người dùng ô tô điện.
+summary: Ứng dụng VinFast hỗ trợ người dùng theo dõi dung lượng pin, trạng thái sạc và thông tin trạm sạc. Tên mục và cách hiển thị có thể thay đổi theo phiên bản ứng dụng hoặc mẫu xe.
+---
+<p>Trước mỗi hành trình, người dùng nên kiểm tra dung lượng pin và lên kế hoạch nạp năng lượng phù hợp. Ứng dụng VinFast cung cấp các thông tin hỗ trợ quản lý xe từ xa, nhưng dữ liệu trên ứng dụng không thay thế cảnh báo trực tiếp trên phương tiện.</p>
+<img alt="Giao diện quản lý pin trên Ứng dụng VinFast"/>
+<p>Người dùng cần cập nhật ứng dụng và tham khảo tài liệu hướng dẫn của mẫu xe đang sử dụng.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cach-tim-tram-sac-vinfast">Cách tìm trạm sạc VinFast</a></p>
+<h2>1. Kiểm tra dung lượng pin</h2>
+<p>Sau khi đăng nhập và liên kết đúng phương tiện, người dùng mở khu vực quản lý pin và sạc trên giao diện chính. Màn hình sẽ hiển thị dung lượng pin cùng các thông tin liên quan mà xe hỗ trợ.</p>
+<p>Nếu dữ liệu chưa cập nhật, hãy kiểm tra kết nối mạng và trạng thái liên kết với xe. Khi ứng dụng và bảng đồng hồ trên xe hiển thị khác nhau, người dùng nên ưu tiên cảnh báo trực tiếp trên xe và liên hệ hỗ trợ nếu sai lệch kéo dài.</p>
+<img alt="Ứng dụng VinFast hiển thị dung lượng pin của ô tô điện"/>
+<p>Thông tin dung lượng giúp người dùng chủ động lựa chọn thời điểm sạc.</p>
+<h2>2. Theo dõi trạng thái sạc</h2>
+<p>Sau khi kết nối xe với thiết bị sạc đúng hướng dẫn, người dùng có thể mở mục quản lý pin để theo dõi phiên sạc. Ứng dụng có thể hiển thị trạng thái đang sạc, hoàn tất hoặc gặp lỗi tùy theo phương tiện và phiên bản phần mềm.</p>
+<p>Nếu xuất hiện cảnh báo lỗi, không tự ý tháo lắp thiết bị điện. Hãy thực hiện hướng dẫn hiển thị trên xe, trụ sạc hoặc ứng dụng. Khi có mùi khét, khói, nhiệt bất thường hay cáp hư hỏng, cần dừng thao tác và liên hệ đơn vị hỗ trợ.</p>
+<img alt="Ứng dụng VinFast hiển thị trạng thái phiên sạc"/>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/huong-dan-sac-pin-o-to-dien-vinfast">Hướng dẫn sạc pin ô tô điện VinFast</a></p>
+<h2>3. Tra cứu lịch sử sạc</h2>
+<p>Trong khu vực lịch sử, người dùng có thể chọn một phiên sạc để xem những thông tin đang được hệ thống lưu trữ. Dữ liệu có thể gồm thời gian, địa điểm và chi phí phát sinh, tùy chính sách dịch vụ tại thời điểm sử dụng.</p>
+<p>Người dùng nên kiểm tra thông tin phiên sạc trước khi thanh toán. Nếu phát hiện dữ liệu bất thường, hãy lưu lại mã phiên và liên hệ kênh chăm sóc khách hàng để được đối chiếu.</p>
+<img alt="Danh sách lịch sử sạc trên Ứng dụng VinFast"/>
+<h2>4. Thiết lập giới hạn sạc</h2>
+<p>Với mẫu xe có hỗ trợ, người dùng có thể điều chỉnh giới hạn sạc trong ứng dụng. Mức phù hợp phụ thuộc vào mẫu xe, nhu cầu di chuyển và khuyến cáo trong tài liệu hướng dẫn.</p>
+<p>Không áp dụng một mức cài đặt cố định cho mọi mẫu xe. Sau khi thay đổi, người dùng cần kiểm tra lại thông tin đã lưu và theo dõi trạng thái sạc trên xe.</p>
+<img alt="Màn hình thiết lập giới hạn sạc trên Ứng dụng VinFast"/>
+<h2>5. Tìm trạm sạc</h2>
+<p>Người dùng có thể tìm trạm sạc từ khu vực bản đồ hoặc mục quản lý pin và sạc. Hãy chọn địa điểm phù hợp, kiểm tra trạng thái khả dụng và sử dụng chức năng chỉ đường nếu cần.</p>
+<p>Thông tin vị trí hoặc số cổng khả dụng có thể thay đổi theo thời gian. Người dùng nên kiểm tra lại trước khi đến và tuân thủ hướng dẫn tại trạm.</p>
+<img alt="Bản đồ tìm trạm sạc trên Ứng dụng VinFast"/>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/pin-va-tram-sac">Thông tin pin và trạm sạc ô tô điện</a></p>
