@@ -722,6 +722,12 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 
 `evaluation-plan.md` mục 4.3 và 4.6. E3 so multi-agent với single-agent; E6 held-out test. Cả hai cần ngưỡng đã chốt và trần Kappa.
 
+### 8.8. Chốt kiểm tra miễn phí trước lượt chạy production tiếp theo — phát hiện mới 2026-08-12
+
+Đợt rà soát tĩnh độc lập ngày 2026-08-12 phát hiện một đường điều khiển **có khả năng ghi kết quả về Drupal hai lần cho cùng một job**; chi tiết và mức độ chắc chắn nằm ở mục 9.1. Trước lượt chạy end-to-end hoặc production tiếp theo, hãy viết test tương tác thật giữa `worker.chay_mot_job()` và graph mặc định để đếm số lần PATCH, rồi mới quyết định có sửa hay không.
+
+Đây là phép kiểm **$0**, nên có thể làm trước E1 để tránh quên, nhưng **không thay đổi quan hệ phụ thuộc đo lường 8.1 → 8.2**: E1/E5 chấm dữ liệu cục bộ và vấn đề write-back chưa được chứng minh là làm đổi điểm. Không hoãn E1 chỉ vì chưa sửa một lỗi mới còn ở trạng thái cần tái hiện; ngược lại, không chạy production end-to-end khi chưa biết một job PATCH một hay hai lần.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
@@ -744,3 +750,131 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 | **Cộng dồn** | **~$16** |
 
 Còn lại dự kiến: E1 ~$3, E3 ~$2, E6 ~$2.
+
+---
+
+## 9. Phát hiện bổ sung từ đợt rà soát độc lập 2026-08-12
+
+Mục này bổ sung sau snapshot bàn giao ở mục 8. Nó **không viết lại lịch sử**, không tự mở lại B14, và không đổi B12b/B13 từ “cố ý chưa sửa” thành việc phải làm ngay. Mỗi phát hiện được gắn trạng thái để tránh biến suy luận tĩnh thành kết luận production.
+
+### N1. Graph và worker có khả năng write-back hai lần — ⚠️ CẦN TEST TÁI HIỆN, ưu tiên cao nếu xác nhận
+
+**Bằng chứng từ luồng điều khiển:**
+
+1. `worker.chay_mot_job()` dùng `build_graph().invoke` làm `invoke` mặc định (`multiagent/src/worker.py`).
+2. `build_graph()` đã đăng ký node `write_back`, nối `aggregator → write_back → END` (`multiagent/src/graph.py`). Lượt `invoke()` vì vậy đã có thể PATCH Drupal lần thứ nhất.
+3. Sau khi `invoke()` trả về, worker gọi `_payload_tu_state(state)` rồi gọi `write_back_fn(node_id=..., **payload)`; với dependency mặc định đây là PATCH lần thứ hai.
+4. `scripts/test_worker.py` luôn tiêm `invoke` và `write_back_fn` giả, nên test hiện tại không đi xuyên qua graph đã compile và không đếm được tương tác này.
+
+**Ảnh hưởng nếu tái hiện:** tạo revision/save thừa trong Drupal, kích hoạt hook hai lần, tăng request nội bộ, và có thể sinh hai `scored_at` khác nhau. Lần PATCH nằm trong graph cũng không được worker quản lý cùng ranh giới audit/retry với lần PATCH sau.
+
+**Cách xác minh trước khi sửa:** dựng test không gọi LLM và không cần Drupal thật: dùng graph tối giản hoặc monkeypatch bốn agent/fetch node nhưng giữ nguyên topology của `build_graph()`, thay transport PATCH bằng spy, chạy `worker.chay_mot_job()` với dependency mặc định ở ranh giới graph–worker, rồi assert `calls == 1`. Trước khi sửa, test phải đỏ và diagnostic phải xác nhận giá trị thực tế là `2`; nếu không tái hiện thì hạ/đóng N1 thay vì sửa theo suy luận.
+
+**Hướng sửa đề xuất nếu xác nhận:** chỉ một tầng được sở hữu side effect. Ưu tiên để graph thuần phân tích và trả state/report; worker sở hữu audit, retry và write-back. Không giữ hai đường PATCH rồi dùng dedup để che triệu chứng.
+
+**Xong khi:** test tương tác chứng minh mỗi job thành công PATCH đúng một lần; các ca cache-hit, PATCH thất bại, retry và worker chết giữa audit/write-back vẫn xanh; Drupal không sinh revision thừa.
+
+### N2. `content_hash` chưa bao phủ mọi đầu vào mà SEO chấm — ⚠️ GIỚI HẠN ĐÃ BIẾT + PHẦN BỔ SUNG
+
+Python và PHP hiện thống nhất hash bốn field theo thứ tự `title`, `body`, `summary`, `meta_description`. Trong khi đó SEO còn đọc `url_alias` và `image_alt`/alt của ảnh đại diện.
+
+- `url_alias` đã được chấp nhận là giới hạn cố ý ở mục 6 vì PHP phải tra `path_alias` riêng.
+- **Phần bổ sung của đợt rà soát:** alt của ảnh đại diện cũng không nằm trong hash. Nếu editor chỉ đổi alt này, kết quả SEO cũ có thể không bị đánh dấu stale và cặp `(node, hash)` có thể bị dedup, dù đầu vào thực tế của SEO đã đổi.
+- Alt của ảnh nằm trực tiếp trong `body` khác trường hợp trên: nó làm chuỗi body đổi nên hash đã đổi theo.
+
+**Không sửa bằng cách chỉ thêm field ở một phía.** Nếu đưa đầu vào mới vào hash, phải cập nhật đồng thời `multiagent/src/text_utils.py`, phần PHP tính hash, fixture chia sẻ `drupal/scripts/content_hash_fixture.json`, hook trigger, stale banner và test round-trip hai ngôn ngữ.
+
+**Xong khi:** thay từng đầu vào được chấm (`title`, `body`, `summary`, `meta_description`, và các field được quyết định bổ sung) làm hash đổi ở cả Python lẫn PHP; thay riêng field đầu ra AI không làm hash đổi. Quyết định giữ loại trừ `url_alias` hoặc featured image alt phải được ghi rõ là đánh đổi có chủ đích.
+
+### N3. Graph làm mất nguyên nhân lỗi của từng agent — ⚠️ NỢ QUAN SÁT, chưa chặn calibration
+
+Bốn wrapper `content_quality_node`, `seo_node`, `brand_voice_node`, `compliance_node` trong `multiagent/src/graph.py` bắt `Exception` rộng và chỉ trả kết quả agent là `None`. Aggregator xử lý suy giảm có kiểm soát đúng về mặt quyết định, nhưng audit/report không giữ được nguyên nhân gốc: timeout LLM, parse schema, retrieval/database hay lỗi lập trình đều có cùng hình dạng “agent thiếu”.
+
+**Ảnh hưởng:** khó chẩn đoán production, khó phân loại lỗi có nên retry, và số đo “missing agent” không nói được thành phần nào hỏng vì nguyên nhân gì.
+
+**Hướng xử lý:** log có cấu trúc gồm `job_id`/correlation ID, tên agent, giai đoạn và loại exception; làm sạch message trước khi lưu, tuyệt đối không ghi token/authorization header. Phân biệt lỗi tạm thời (timeout, 429, 5xx), lỗi dữ liệu/schema và lỗi lập trình. Báo cáo cho editor vẫn dùng thông điệp an toàn, chi tiết kỹ thuật chỉ nằm trong log/audit có quyền phù hợp.
+
+**Xong khi:** một test ép từng agent ném lỗi và xác nhận job vẫn suy giảm đúng, đồng thời audit/log chỉ ra đúng agent + loại lỗi mà không lộ secret.
+
+### N4. Test worker chưa khoá ranh giới graph–worker — ⚠️ TEST GAP
+
+`scripts/test_worker.py` kiểm tốt queue/audit/retry bằng dependency giả, còn test graph kiểm aggregation/write-back theo từng phần. Chưa có test nối hai thành phần bằng dependency mặc định; N1 lọt qua chính khe này. Đây không phủ định giá trị snapshot “40/40”, mà chỉ nói 40 test script chưa bao phủ một interaction quan trọng.
+
+**Xong khi:** có ít nhất một test offline chạy topology thật với fetch/LLM/PATCH được thay bằng fake ở ranh giới mạng, và khoá thứ tự `fetch → agents → aggregate → audit → một write-back → done`.
+
+### N5. Mức độ xác minh của đợt rà soát này
+
+Đợt rà soát độc lập không gọi API trả phí, không khởi động Drupal/PostgreSQL thật. 13/15 nhóm test offline được chạy tới cuối và xanh; hai nhóm dừng vì sandbox Windows từ chối tạo thư mục tạm, không có assertion nghiệp vụ thất bại trước điểm dừng. Meta-test báo cả 40 file test đều có test function được gọi. Các số này là **mức xác minh của môi trường rà soát**, không thay thế snapshot 40/40 ở commit bàn giao và không được diễn giải thành “2 test fail”.
+
+## 10. Backlog củng cố sau Sprint 3 — không chặn E1/E5 trừ khi ghi khác
+
+Các việc dưới đây là hardening dài hạn. Không chen chúng vào giữa E1 → E5 chỉ để làm hệ thống “đẹp hơn”; chỉ nâng ưu tiên khi có sự cố thực tế, yêu cầu production hoặc mentor đổi phạm vi.
+
+### H1. Một test runner và CI thống nhất
+
+- Có một lệnh chạy toàn bộ test offline, báo pass/fail/skip nhất quán trên Windows.
+- Tách marker/nhóm: unit, PostgreSQL integration, Drupal integration, LLM/evaluation trả phí.
+- CI mặc định chỉ chạy nhóm không cần secret và không tốn API; test trả phí phải có phê duyệt rõ.
+- Hai test của đợt rà soát N5 dừng ở thao tác tạo thư mục tạm: trước tiên tái hiện ngoài sandbox để phân biệt giới hạn môi trường với lỗi project. Chỉ sửa helper/path nếu chứng minh code chọn nơi ghi không phù hợp; nếu là giới hạn sandbox thì cấu hình `TEMP`/workspace hoặc đánh dấu skip có lý do. Nợ bare filename của `ghi_ket_qua()` đã ghi ở mục 8.0, không tạo ticket trùng.
+
+### H2. Timeout, retry và ngân sách cho LLM
+
+- Đặt connection/read timeout rõ ràng.
+- Chỉ retry timeout, 429 và 5xx với backoff có giới hạn; không retry vô hạn lỗi schema/lập trình.
+- Ghi số lần thử, token và chi phí theo job/agent.
+- Có trần ngân sách hoặc số lần gọi để một job lỗi không tiêu tiền không kiểm soát.
+
+### H3. Migration và an toàn kết nối PostgreSQL
+
+- Thay việc chỉ dựa vào `CREATE TABLE IF NOT EXISTS` bằng migration có version cho queue, audit và vector schema.
+- Kiểm thử nâng cấp từ schema đang tồn tại, không chỉ tạo database mới.
+- Xử lý khe hở `force=True` trên connection cache dùng chung đã ghi ở mục 6 trước khi có nhiều request đồng thời; ưu tiên transaction/connection riêng theo request hoặc pool có ranh giới rõ.
+
+### H4. Khoá phiên bản dependency Python
+
+`multiagent/requirements.txt` chủ yếu dùng lower bound `>=`, nên hai lần dựng môi trường có thể lấy dependency khác nhau. Giữ file khai báo dependency trực tiếp nhưng bổ sung lockfile/constraints được sinh có kiểm soát; CI phải dựng từ bản khoá và có quy trình cập nhật định kỳ. Không sửa đồng loạt phiên bản trước khi baseline test xanh.
+
+### H5. Observability xuyên suốt
+
+- Dùng correlation ID xuyên `Drupal hook → API job → worker → agent → audit → PATCH`.
+- Theo dõi queue depth, queue/job latency, thời gian từng agent, retry/dead-letter, PATCH failure, missing-agent rate, token/chi phí và phân bố decision.
+- Không đưa `last_error` kỹ thuật hoặc dữ liệu nhạy cảm cho role editor thường.
+
+### H6. Phiên bản hoá knowledge base và ngưỡng retrieval
+
+- Lưu vào audit: hash/version của `specs.json`, brand corpus, generated rules, embedding model và ngày build collection.
+- Đo phân bố similarity trên retrieval test set rồi mới quyết định `min_similarity`; hiện để `null` nghĩa là luôn có “chunk gần nhất” dù bằng chứng có thể yếu.
+- Khi không có chunk đủ liên quan, ưu tiên trả “không đủ bằng chứng” thay vì ép so sánh với tài liệu yếu.
+
+### H7. Đồng bộ tài liệu với code
+
+- README phải thống nhất số entry/chunk fact KB với dữ liệu hiện hành.
+- Mô tả cả bốn agent đều dùng rubric tất định để tính điểm; LLM chỉ cung cấp phần đánh giá/trích xuất được code kiểm soát.
+- Comment/script phải thống nhất số field AI thực tế được tạo.
+- Sau khi N1 được xác minh, cập nhật sơ đồ quyền sở hữu write-back đúng với code.
+- Mọi số đo E1/E5 phải đi kèm commit, prompt version và evidence file; không chép số lịch sử thành trạng thái hiện hành.
+
+### H8. Làm rõ phạm vi `content_type` và `langcode`
+
+State/config có hai chiều này nhưng luồng runtime hiện tối ưu cho `cam_nang/vi` và có đường dùng mặc định. Nếu phạm vi sản phẩm chỉ là tiếng Việt + cẩm nang, ghi rõ để tránh tuyên bố mở rộng quá mức. Nếu mở rộng thật, Drupal/job/worker phải truyền bundle + language tường minh, KB/rule/test phải tách theo từng tổ hợp; không coi việc thêm một block YAML là đủ.
+
+### H9. Checklist trước production pilot
+
+1. N1 đã được tái hiện và đóng hoặc có bằng chứng không xảy ra.
+2. Working revision ở mục 6 đã được xử lý hoặc pilot không cho bài published tạo working copy đi qua AI.
+3. Content hash có quyết định rõ cho mọi input được chấm.
+4. Unit/integration suite xanh trên commit triển khai.
+5. E1/E5 hiện hành có prompt version đúng; `meta.calibrated` chỉ bật khi đủ điều kiện.
+6. Functional-clean được báo cáo riêng, không lọt vào gold calibration.
+7. Token, retry, dead-letter, quyền rescore và quy trình rollback đã được kiểm tra trên staging.
+
+### H10. Bảo mật và phân quyền vận hành
+
+- Có quy trình tạo, lưu và rotate shared token Drupal–Python; secret không nằm trong Git, log hoặc report.
+- Giới hạn service trong private network/loopback hoặc bổ sung rate limit phù hợp nếu mở ra ngoài; đặt giới hạn kích thước request và nội dung bài.
+- Giữ quyền manual rescore tách khỏi quyền chỉ xem báo cáo; test CSRF, bundle guard và việc `last_error` kỹ thuật không lộ cho editor thường.
+- Duy trì regression test escape mọi dữ liệu report do LLM sinh trước khi render trong Drupal.
+
+### H11. Vòng phản hồi của biên tập viên
+
+Hiện hệ thống ghi kết quả AI nhưng chưa có dữ liệu có cấu trúc về việc editor đồng ý, bác bỏ hay sửa theo từng gợi ý. Nếu làm feedback loop, phải xác định trước mục đích và quyền riêng tư: lưu reason code tối thiểu, liên kết đúng report/revision/prompt version, không tự đưa feedback chưa duyệt vào gold set hoặc KB. Báo cáo aggregate dùng để tìm criterion có false positive/negative; thay đổi rule vẫn phải qua test và evaluation độc lập.
