@@ -624,7 +624,7 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
 - ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
 - ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
-- 📝 **Productization/admin đã duyệt thiết kế, chưa triển khai:** làm song song nhưng không đổi score-path; đọc mục 8.9 và design spec trước khi viết code. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên.
+- 📝 **Productization/admin đã có design + implementation plan, chưa triển khai code:** làm song song nhưng không đổi score-path; đọc mục 8.9, design spec và plan tổng trước khi viết code. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -765,15 +765,17 @@ Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **kh�
 
 Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
+Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Plan có TDD, migration 0001–0004, checkpoint score freeze, cutover/rollback và ma trận 11 tiêu chí; **chưa task code nào được thực thi**.
+
 **Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
 
 **Role:** Drupal có `content_editor` (người viết cũng duyệt), `site_admin`, machine role `ai_service`; admin Multi-Agent có `viewer`, `operator`, `admin`. Hai hệ thống không tự ánh xạ tài khoản. Người viết không cần đăng nhập Multi-Agent.
 
 **Bảo vệ phép đo:** không sửa agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml`. `prompt_version` phải giữ `020738e209017213`; nếu đổi thì dừng productization và xử lý theo `evaluation-plan.md` mục 3a. Không chen hạng mục này vào trước test–retest/E1 và không tự chạy phép đo trả phí.
 
-**Thứ tự triển khai sau khi có implementation plan được duyệt:** (P1) migration version + default site/profile; (P2) local auth/admin shell; (P3) dashboard/jobs/history; (P4) connector Drupal + `/api/v1`; (P5) users/config/KB/evaluation read-only; (P6) security/integration/docs/demo. Migration phải nâng schema hiện hành không mất queue/run/KB. Service không lưu toàn văn bài nháp và không lưu secret plaintext.
+**Thứ tự triển khai được đặc tả trong plan, chưa thực thi:** (1) foundation migration/site/profile; (2) local auth/admin shell; (3) dashboard/jobs/history/users/config/KB/evaluation; (4) connector Drupal + `/api/v1`; (5) observability/security/integration/rollout. Migration phải nâng schema hiện hành không mất queue/run/KB. Service không lưu toàn văn bài nháp và không lưu secret plaintext.
 
-**Điều kiện bắt đầu code:** design spec được người dùng review; sau đó viết implementation plan theo task nhỏ, có TDD và checkpoint. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy module/bảng trong spec đã tồn tại.
+**Việc tiếp theo của luồng productization:** người dùng review/chọn cách thực thi plan; sau đó bắt đầu Foundation Task 1. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy module/bảng trong spec/plan đã tồn tại.
 
 ---
 

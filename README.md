@@ -22,6 +22,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
 - [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) — việc phải làm trước khi demo/bàn giao: cấu hình dev quên tắt, KB phải dựng lại trên máy mới, và cách nói đúng về ngưỡng chưa calibrate
 - [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **chưa triển khai code**
+- [`docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md) — implementation plan tổng và 5 plan con; **mới là kế hoạch, chưa phải module đang tồn tại**
 
 ### Dành cho AI/model tiếp nhận dự án
 
@@ -33,7 +34,7 @@ Không suy trạng thái hiện hành từ ngày sửa file hoặc từ các bá
 
 Nếu các tài liệu mâu thuẫn, dừng và đối chiếu bằng commit, `prompt_version` do code tính và file evidence; không tự chọn con số thuận lợi hơn. Những mục có nhãn **hết hiệu lực/lịch sử** chỉ dùng để giải thích quá trình, không được báo cáo như kết quả của code hiện hành.
 
-Với công việc liên quan service độc lập, admin, auth, site/connector hoặc profile thị trường, phải đọc thêm [thiết kế productization đã duyệt](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Không suy cấu trúc “planned” trong tài liệu đó là code đã tồn tại.
+Với công việc liên quan service độc lập, admin, auth, site/connector hoặc profile thị trường, phải đọc [thiết kế productization đã duyệt](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) rồi [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Không suy cấu trúc “planned” là code đã tồn tại; chỉ task có commit/evidence mới được đánh dấu triển khai.
 
 ## Cấu trúc project
 
@@ -93,7 +94,7 @@ drupal-multiagent-seo/
 
 Song song với Sprint 3, phần Python sẽ được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith: `/api/v1` cho Drupal, `/admin` cho người vận hành, worker riêng và PostgreSQL chung. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema sẽ có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
 
-Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); cây thư mục/module trong spec là kiến trúc mục tiêu, **không phải trạng thái code hiện tại**.
+Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); thứ tự TDD/checkpoint nằm trong [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Cây thư mục/module trong hai tài liệu là kiến trúc mục tiêu, **không phải trạng thái code hiện tại**.
 
 ## Setup
 

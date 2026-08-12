@@ -48,7 +48,7 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 **Đã duyệt thiết kế ngày 2026-08-12, chưa triển khai code.** Luồng này không thay thế và không tự mở rộng tiêu chí hoàn thành Sprint 3 do mentor giao. Mục tiêu là tách Multi-Agent thành service độc lập có API, connector Drupal, site/profile, trang quản trị và phân quyền để có thể tái sử dụng sau này. Phạm vi MVP vẫn chỉ là Việt Nam, tiếng Việt, bài `cam_nang` và một Drupal site.
 
-Thiết kế chuẩn: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
+Thiết kế chuẩn: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Kế hoạch triển khai tổng và 5 plan con: [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Có plan không có nghĩa code đã được triển khai.
 
 | Pha | Kết quả |
 |---|---|

@@ -4,6 +4,7 @@
 **Trạng thái:** Đã được chủ dự án duyệt; **chưa triển khai code**
 **Phạm vi MVP:** một công ty, thị trường Việt Nam, tiếng Việt, loại nội dung `cam_nang`, một website Drupal
 **Quan hệ với roadmap:** thực hiện song song với Sprint 3 nhưng không được làm thay đổi đường chấm điểm đang khóa
+**Bổ sung kỹ thuật sau implementation review:** reconciliation dùng Drupal pending metadata feed vì JSON:API không hỗ trợ collection revision; không thay đổi phạm vi MVP
 
 ---
 
@@ -227,7 +228,7 @@ Không lưu title/summary/body/SEO text toàn phần trong queue, run log hoặc
 
 API máy–máy đặt dưới `/api/v1`. Contract khởi đầu:
 
-- `POST /api/v1/jobs`: nhận `external_content_id`, `external_revision_id` nếu có, `content_hash` và cờ `force` khi route Drupal đã xác thực quyền rescore.
+- `POST /api/v1/jobs`: nhận `external_content_id`, `external_revision_id` nếu có, `content_type`, `langcode`, `content_hash`, `source` và cờ `force` khi route Drupal đã xác thực quyền rescore. MVP dùng `content_type=cam_nang`, `langcode=vi`; hai giá trị vẫn phải gửi tường minh để profile selection không rơi về mặc định im lặng.
 - `GET /api/v1/jobs/{job_id}`: trạng thái một job thuộc đúng site của credential.
 - `GET /api/v1/jobs/by-content/{external_content_id}`: trạng thái mới nhất thuộc đúng site.
 - `/health`: chỉ trả tình trạng sống tối thiểu, không lộ database URL, secret hoặc stack trace.
@@ -261,6 +262,10 @@ Cùng bài, cùng nội dung và cùng policy chỉ có một job hiệu lực. 
 ### 7.4. Connector interface
 
 Connector Drupal chuyển payload JSON:API thành input chuẩn gồm sáu trường nội dung hiện tại cùng `content_type`, `langcode`, external ID/revision và link nguồn. Worker chỉ gọi interface connector, không đọc trực tiếp biến môi trường Drupal toàn cục.
+
+Khi job có `external_revision_id`, connector đọc đúng revision bằng `?resourceVersion=id:{revision_id}`. Không được fetch revision mặc định rồi ghi audit dưới hash của bản nháp. Cơ chế resource version này là contract chính thức của JSON:API cho node/media revisions: <https://www.drupal.org/docs/core-modules-and-themes/core-modules/jsonapi-module/revisions>.
+
+JSON:API không cung cấp collection các revision/working copy để reconciliation quét hàng loạt. Vì vậy module Drupal cung cấp read-only feed `GET /vf-ai/integration/v1/pending`, chỉ cho machine permission riêng. Feed dùng entity query `latestRevision()` để liệt kê revision mới nhất đang `needs_review`, trả UUID, revision ID, content type, langcode, fingerprint v2 và link nguồn; **không trả title/body/summary**. Connector lấy danh sách metadata từ feed rồi fetch từng revision cụ thể qua JSON:API. `rel:working-copy` chỉ là fallback cho một external ID legacy không có revision ID, không phải collection discovery. Drupal Entity API định nghĩa `latestRevision()` là default revision hoặc pending revision mới hơn: <https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21Query%21QueryInterface.php/function/QueryInterface%3A%3AlatestRevision/10>.
 
 Write-back chỉ ghi bốn field kết quả AI hiện hành, không chuyển moderation state và không publish. MVP có thể tiếp tục dùng JSON:API với machine account quyền tối thiểu; giới hạn đã biết là Drupal core khó khóa quyền sửa theo field. Dedicated callback endpoint chỉ nhận đúng AI fields là hardening sau MVP, không được trình bày như đã có.
 
@@ -325,12 +330,13 @@ UI dùng template server-rendered với Jinja2, HTMX cho tương tác nhỏ và 
 5. **Drupal connection:** hiển thị đúng site MVP, trạng thái/last success; test connection; pause/resume intake. Không có UI thêm nhiều site ở MVP.
 6. **Config & KB:** chỉ đọc metadata scoring, rules, profile, KB version/chunk metadata; không có nút Save và không hiển thị secret.
 7. **Users:** admin tạo tài khoản, gán role, khóa/mở khóa, reset mật khẩu tạm; mỗi user tự đổi mật khẩu.
-8. **Evaluation:** chỉ đọc trạng thái/evidence E1–E6 và cảnh báo kết quả lịch sử/hết hiệu lực; không chạy phép đo trả phí từ UI. Nguồn là `docs/evidence/evaluation-manifest.json` được version-control, mỗi entry có `experiment`, `status`, `score_path_snapshot`, `prompt_version`, `model`, `run_at`, `evidence_path`; loader chỉ nhận đường dẫn dưới `docs/evidence/`, không quét/mở file tùy ý từ request web.
+8. **Evaluation:** chỉ đọc trạng thái/evidence E1–E6 và cảnh báo kết quả lịch sử/hết hiệu lực; không chạy phép đo trả phí từ UI. Nguồn là `docs/evidence/evaluation-manifest.json` được version-control, mỗi entry có `experiment`, `status`, `score_path_snapshot`, `prompt_version`, `model`, `run_at`, `evidence_path`, `metadata_complete`; provenance không tồn tại trong evidence cũ phải để `null` và cảnh báo, không suy diễn. Loader chỉ nhận đường dẫn dưới `docs/evidence/`, không quét/mở file tùy ý từ request web.
 9. **Audit:** admin xem thao tác đăng nhập, user/role, pause/resume, test connection, retry/rescore và rotate credential theo metadata đã lọc.
 
 ### 9.2. Nguyên tắc hiển thị
 
 - Dashboard phải đọc dữ liệu thật, không mock metric.
+- Staging smoke dùng fake engine phải lưu cờ `is_fixture`; dashboard/cost/decision mặc định loại fixture, review detail hiển thị cảnh báo rõ và không được trình bày fixture score như kết quả AI.
 - Viewer không thấy nút thao tác gây hiệu ứng phụ.
 - Mọi action operator/admin dùng POST + CSRF và xác nhận khi có chi phí/rủi ro.
 - Lỗi kỹ thuật và `last_error` nhạy cảm được làm sạch trước khi hiển thị.

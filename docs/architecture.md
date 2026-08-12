@@ -280,7 +280,7 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 ### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — thiết kế đã duyệt, chưa triển khai
 
-**Quyết định mới ngày 2026-08-12 thay thế đề xuất cũ đặt trang quản trị trong Drupal.** Multi-Agent sẽ là một service độc lập; Drupal là connector/client đầu tiên. Trang quản trị nằm tại `/admin` của service và dùng tài khoản local riêng trong MVP. Thiết kế đầy đủ, bao gồm schema, API, role, bảo mật, migration, test và rollout: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
+**Quyết định mới ngày 2026-08-12 thay thế đề xuất cũ đặt trang quản trị trong Drupal.** Multi-Agent sẽ là một service độc lập; Drupal là connector/client đầu tiên. Trang quản trị nằm tại `/admin` của service và dùng tài khoản local riêng trong MVP. Thiết kế đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Thứ tự migration/auth/admin/connector/hardening và checkpoint TDD: [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Các module trong hai tài liệu vẫn là planned state cho tới commit triển khai tương ứng.
 
 MVP vẫn chỉ phục vụ **một công ty, một Drupal site, thị trường Việt Nam, tiếng Việt và bài `cam_nang`**. Khả năng mở rộng nằm ở ranh giới connector, `site_id` và `review_profile`; không được mô tả thành “đã hỗ trợ đa website/đa thị trường”. Mỗi thị trường mới vẫn phải có policy, KB, gold set và calibration riêng.
 
