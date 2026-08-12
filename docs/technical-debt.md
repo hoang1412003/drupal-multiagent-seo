@@ -615,7 +615,7 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Snapshot hiện tại:** nhánh triển khai bản 4 có chốt CP4 tất định, prompt version `020738e209017213`. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng. Số test/commit cuối được ghi sau verification của nhánh.
+**Snapshot hiện tại:** nhánh triển khai bản 4 có chốt CP4 tất định tại production commit `c6b1660`, prompt version `020738e209017213`; full suite offline **40/40 test script xanh**, riêng Compliance rubric có 42 ca. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
