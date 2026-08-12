@@ -85,7 +85,10 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
     if invoke is None:
         from graph import build_graph
 
-        invoke = build_graph().invoke
+        # Worker phai ghi audit TRUOC khi PATCH va tu quan ly retry neu PATCH
+        # that bai. Graph co write-back rieng se PATCH som mot lan ngoai ranh
+        # gioi nay, roi worker PATCH lan hai sau audit.
+        invoke = build_graph(include_write_back=False).invoke
 
     ai_core.USAGE_LOG.clear()
     da_ghi_usage = False

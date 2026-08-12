@@ -40,9 +40,9 @@ ContentReviewState = {
 }
 ```
 
-### 2.2. Đồ thị xử lý (8 node)
+### 2.2. Đồ thị xử lý (7 node phân tích + write-back tuỳ caller)
 
-Toàn bộ hệ thống gồm 8 bước xử lý (node) nối tiếp nhau:
+Phần phân tích gồm 7 node; bước ghi ngược được bật/tắt tuỳ đường gọi:
 
 ```
 Node 1: Fetch Node                    (lấy nội dung từ Drupal qua JSON:API)
@@ -52,14 +52,15 @@ Node 4: SEO Agent                ├─ chạy song song, độc lập với nha
 Node 5: Brand Voice Agent        │
 Node 6: Compliance Agent        ─┘
 Node 7: Aggregator                    (tổng hợp 4 kết quả, tính điểm, ra quyết định)
-Node 8: Write-back Node               (ghi kết quả ngược vào Drupal qua PATCH)
+         ├─ script thủ công: Node 8 Write-back (mặc định của build_graph())
+         └─ worker production: END; worker audit rồi tự PATCH đúng một lần
 ```
 
 LangGraph tự động quản lý việc chạy song song 4 node agent và chờ đủ cả 4 kết quả trước khi chuyển sang Aggregator (cơ chế fan-out/fan-in có sẵn), không cần tự viết code đồng bộ thủ công.
 
-### 2.3. Ghi kết quả ngược về Drupal (Write-back Node)
+### 2.3. Ghi kết quả ngược về Drupal (giai đoạn Write-back)
 
-Node cuối cùng trong đồ thị (Node 8) có nhiệm vụ lấy quyết định và báo cáo do Aggregator tạo ra, ghi ngược vào đúng bài viết gốc trong Drupal - để đội content mở lại bài viết là thấy ngay kết quả đánh giá, không cần dùng công cụ nào khác.
+Giai đoạn cuối lấy quyết định và báo cáo do Aggregator tạo ra, ghi ngược vào đúng bài viết gốc trong Drupal - để đội content mở lại bài viết là thấy ngay kết quả đánh giá, không cần dùng công cụ nào khác. Các script thủ công dùng `build_graph()` mặc định nên vẫn có Node 8. Worker production gọi `build_graph(include_write_back=False)`, ghi `run_log` trước rồi tự PATCH; ranh giới này giúp worker quản lý retry và bảo đảm một job không PATCH hai lần.
 
 **Hệ thống không tự động xuất bản.** Write-back Node chỉ ghi *đề xuất* (field_ai_status, field_ai_score, field_ai_suggestions) vào bài viết, **không** tự chuyển moderation state của node sang Published. Quyết định publish cuối cùng luôn do người duyệt bấm sau khi đọc đề xuất - đúng tinh thần đề tài là "hỗ trợ quy trình kiểm duyệt", không thay thế người duyệt. Vì vậy giá trị `decision = "publish"` ở các mục dưới được hiểu là "đề xuất publish", không phải hành động publish tự động.
 
@@ -550,7 +551,7 @@ Trước khi cho hệ thống AI có quyền quyết định publish/từ chối
 1. **Content Moderation** đã bật trên content type Article, thêm state "Needs Review".
 2. Module Drupal thứ hai `vf_ai_trigger` (tách khỏi `vf_ai_review` vì module kia cam kết chỉ đọc) bắt sự kiện đổi `moderation_state` sang `needs_review`, tự chặn ở tầng so `content_hash` **trước khi** gọi service (Save nhiều lần không sửa gì thì không tốn tiền API, không tạo job thừa), rồi POST job sang service Python.
 3. Service HTTP (`multiagent/src/api.py`, FastAPI, `uvicorn ... --port 8900`) chỉ nhận và trả trạng thái - không chấm, không nạp model - nên trả lời trong vài ms trong lúc Drupal đang chờ editor bấm Save. Job được đẩy vào bảng `review_job` (Postgres), nhận bằng `SELECT ... FOR UPDATE SKIP LOCKED` nên nhiều worker không giẫm chân nhau.
-4. `multiagent/src/worker.py` lấy job, gọi `build_graph().invoke()` (không đổi gì so với pipeline cũ), ghi `run_log` rồi write-back 4 field AI.
+4. `multiagent/src/worker.py` lấy job, gọi `build_graph(include_write_back=False).invoke()`, ghi `run_log`, rồi chính worker write-back 4 field AI đúng một lần. Graph production không PATCH sớm ngoài ranh giới audit/retry; `build_graph()` mặc định chỉ còn được giữ có write-back cho các script chạy thủ công.
 5. JS trong khối báo cáo poll `GET /jobs/by-node/{node_id}` mỗi 3 giây, hiện "⏳ Đang chấm…" rồi tự nạp lại trang khi thấy `done` - không cần F5.
 
 Đo thật trên node `f657ee57` (tiêu chí 1, `docs/evidence/tu_dong_hoa_e2e.txt`): lưu lúc 09:37:18.698 UTC → job chuyển `running` lúc 09:37:20.304 UTC (**1,6 giây**) → hoàn tất `done` lúc 09:37:34.540 UTC (**~15,8 giây** từ Save tới có kết quả).
@@ -571,7 +572,7 @@ Event một mình chỉ đảm bảo *at-most-once* nếu bên gửi không tự
 
 Nay đường kích hoạt chính **đã là event-driven**, không còn polling. Phần còn thiếu so với production thật chỉ còn hai chỗ, cả hai đều **cố ý chưa làm** (`technical-debt.md` nhóm C, spec mục 11): một message broker riêng (SQS/RabbitMQ/Redis - Postgres + `SKIP LOCKED` đóng đúng vai trò đó ở quy mô vài chục bài/ngày) và container hoá phía Python.
 
-Điểm mấu chốt vẫn đúng nguyên như bản thiết kế gốc: **worker xử lý trong production chính là worker này** - phần "bộ não" (gọi `build_graph().invoke()`, ghi `run_log`, write-back) giống hệt bất kể job tới từ event hay từ đối soát. Khác biệt duy nhất là *cách job đến với worker*. Vì vậy khi cần nâng lên production (đổi Postgres queue sang broker riêng, đóng gói container) chỉ đổi lớp trước worker - không phải viết lại worker.
+Điểm mấu chốt vẫn đúng nguyên như bản thiết kế gốc: **worker xử lý trong production chính là worker này** - phần "bộ não" (gọi graph phân tích không side effect, ghi `run_log`, write-back đúng một lần) giống hệt bất kể job tới từ event hay từ đối soát. Khác biệt duy nhất là *cách job đến với worker*. Vì vậy khi cần nâng lên production (đổi Postgres queue sang broker riêng, đóng gói container) chỉ đổi lớp trước worker - không phải viết lại worker.
 
 ### 9.4. Bảng trạng thái từng mắt xích
 

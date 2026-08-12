@@ -1,11 +1,12 @@
 """Khung LangGraph cho pipeline Multi-Agent kiểm duyệt nội dung.
 
-Khớp thiết kế 8 node trong docs/architecture.md:
-Fetch -> Orchestrator/Dispatch -> 4 agent (song song) -> Aggregator -> Write-back
+Pipeline phân tích gồm Fetch -> Orchestrator/Dispatch -> 4 agent (song song)
+-> Aggregator. ``build_graph()`` mặc định nối thêm Write-back để giữ hành vi
+của các script chạy thủ công; worker production tắt node đó vì worker phải ghi
+audit trước rồi mới tự PATCH trong ranh giới retry của nó.
 
-Cả 4 agent đều chạy thật. Brand Voice chấm theo rubric BV1-BV7 và tính điểm
-tất định (docs/rubrics.md mục 5); 3 agent còn lại vẫn để LLM tự cho điểm.
-Báo cáo trả về gom theo từng field (docs/architecture.md mục 3).
+Cả 4 agent đều chạy thật và dùng rubric để tính điểm tất định. Báo cáo trả về
+gom theo từng field (docs/architecture.md mục 3).
 """
 from datetime import datetime, timezone
 
@@ -325,7 +326,7 @@ def write_back_node(state: ContentReviewState) -> dict:
     return {}
 
 
-def build_graph():
+def build_graph(*, include_write_back: bool = True):
     graph = StateGraph(ContentReviewState)
 
     graph.add_node("fetch", fetch_node)
@@ -335,7 +336,6 @@ def build_graph():
     graph.add_node("brand", brand_node)
     graph.add_node("compliance", compliance_node)
     graph.add_node("aggregator", aggregator_node)
-    graph.add_node("write_back", write_back_node)
 
     graph.add_edge(START, "fetch")
     graph.add_edge("fetch", "orchestrator")
@@ -344,7 +344,11 @@ def build_graph():
         graph.add_edge("orchestrator", agent)
         graph.add_edge(agent, "aggregator")
 
-    graph.add_edge("aggregator", "write_back")
-    graph.add_edge("write_back", END)
+    if include_write_back:
+        graph.add_node("write_back", write_back_node)
+        graph.add_edge("aggregator", "write_back")
+        graph.add_edge("write_back", END)
+    else:
+        graph.add_edge("aggregator", END)
 
     return graph.compile()
