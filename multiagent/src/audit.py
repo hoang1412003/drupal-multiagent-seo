@@ -8,6 +8,9 @@ Tra loi duoc cau "bai nay bi chan hoi thang truoc, vi sao" - Drupal giu duoc
 DIEM BAO NHIEU qua revision, nhung khong giu BOI CANH sinh ra no.
 """
 import json
+from uuid import UUID, uuid4
+
+from review_platform import sites
 
 TEN_BANG = "run_log"
 
@@ -54,19 +57,51 @@ def ghi(conn, *, job_id, node_id: str, content_hash: str, duration_ms: int,
     """
     with conn.cursor() as cur:
         cur.execute(
+            "SELECT site_id, profile_id, policy_version, external_content_id, "
+            "external_revision_id, content_type, langcode, correlation_id "
+            "FROM review_job WHERE id=%s",
+            (job_id,),
+        )
+        job_scope = cur.fetchone()
+    if job_scope is None:
+        # Compatibility cho caller/test legacy khong co review_job tuong ung.
+        context = sites.select_review_context(
+            conn,
+            UUID("00000000-0000-4000-8000-000000000001"),
+            "cam_nang",
+            "vi",
+        )
+        job_scope = (
+            context.site.id,
+            context.profile.id,
+            context.profile.policy_version,
+            node_id,
+            None,
+            context.profile.content_type,
+            context.profile.language_code,
+            uuid4(),
+        )
+
+    with conn.cursor() as cur:
+        cur.execute(
             f"INSERT INTO {TEN_BANG} "
             "(job_id, node_id, content_hash, duration_ms, decision, final_score,"
             " missing_agents, veto_reason, note, agent_results, config_meta,"
-            " usage, model, payload) "
+            " usage, model, payload, public_id, site_id, profile_id, policy_version,"
+            " external_content_id, external_revision_id, content_type, langcode,"
+            " correlation_id, writeback_status) "
             "VALUES (%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s::jsonb,%s::jsonb,"
-            "        %s::jsonb,%s,%s::jsonb) RETURNING id",
+            "        %s::jsonb,%s,%s::jsonb,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+            "RETURNING id",
             (
                 job_id, node_id, content_hash, duration_ms,
                 report.get("decision"), report.get("final_score"),
                 _js(report.get("missing_agents") or []),
                 report.get("veto_reason"), report.get("note"),
                 _js(report.get("details") or {}),
-                _js(config_meta), _js(usage), model, _js(payload),
+                _js(config_meta), _js(usage), model, _js(payload), uuid4(),
+                *job_scope,
+                "pending",
             ),
         )
         return cur.fetchone()[0]

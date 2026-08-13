@@ -6,6 +6,7 @@ Chay: .venv\\Scripts\\python.exe scripts\\test_worker.py
 """
 import logging
 import os
+from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -15,8 +16,10 @@ import db
 import job_queue as q
 import text_utils
 import worker
+from review_platform import migrations
 
 SCHEMA = "vf_test_worker"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 _STATE_XONG = {
     "node_id": "uuid-1",
@@ -35,7 +38,8 @@ def _dung_schema_sach():
     with conn.cursor() as cur:
         cur.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
         cur.execute(f"CREATE SCHEMA {SCHEMA}")
-        cur.execute(f"SET search_path TO {SCHEMA}")
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    migrations.apply_pending(conn, MIGRATIONS_DIR)
     q.dam_bao_bang(conn)
     audit.dam_bao_bang(conn)
     return conn

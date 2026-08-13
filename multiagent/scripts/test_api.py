@@ -11,6 +11,7 @@ Can Postgres that cho phan hang doi - [SKIP] neu khong co.
 Chay: .venv\\Scripts\\python.exe scripts\\test_api.py
 """
 import os
+from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -20,8 +21,10 @@ os.environ["VF_SERVICE_TOKEN"] = "token-test"
 import api
 import db
 import job_queue as q
+from review_platform import migrations
 
 SCHEMA = "vf_test_api"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 
 class _FakeCursorDDL:
@@ -56,8 +59,8 @@ def _dung_schema_sach():
     with conn.cursor() as cur:
         cur.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
         cur.execute(f"CREATE SCHEMA {SCHEMA}")
-        cur.execute(f"SET search_path TO {SCHEMA}")
-    q.dam_bao_bang(conn)
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    migrations.apply_pending(conn, MIGRATIONS_DIR)
     return conn
 
 
@@ -125,6 +128,11 @@ def test_tao_job_tren_cap_da_dead_letter_tra_dead_letter(conn):
     """
     kq0 = api.tao_job(api.JobIn(node_id="u5", content_hash="h5"), conn)
     for lan in (1, 2, 3):
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE review_job SET attempts=%s, status='running' WHERE id=%s",
+                (lan, kq0["job_id"]),
+            )
         q.fail(conn, kq0["job_id"], f"loi {lan}", lan)
     assert q.job_moi_nhat(conn, "u5")["status"] == "failed"
 

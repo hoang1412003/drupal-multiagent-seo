@@ -10,21 +10,27 @@ dau". NHUNG [SKIP] KHONG PHAI [PASS] - xem docs/pre-demo-checklist.md muc 5.
 Chay: .venv\\Scripts\\python.exe scripts\\test_job_queue.py
 """
 import os
+from pathlib import Path
 import sys
+from uuid import UUID
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import db
 import job_queue as q
+from review_platform import migrations, sites
 
 SCHEMA = "vf_test_job_queue"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
+DEFAULT_SITE_ID = UUID("00000000-0000-4000-8000-000000000001")
+DEFAULT_PROFILE_ID = UUID("00000000-0000-4000-8000-000000000002")
 
 
 def _mo_conn():
     """Mot ket noi RIENG (khong dung db.get_conn cache) tro vao schema tam."""
     conn = db.psycopg.connect(db.dsn(), autocommit=True)
     with conn.cursor() as cur:
-        cur.execute(f"SET search_path TO {SCHEMA}")
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
     return conn
 
 
@@ -41,9 +47,41 @@ def _dung_schema_sach(conn):
     with conn.cursor() as cur:
         cur.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
         cur.execute(f"CREATE SCHEMA {SCHEMA}")
-        cur.execute(f"SET search_path TO {SCHEMA}")
-    q.dam_bao_bang(conn)
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    migrations.apply_pending(conn, MIGRATIONS_DIR)
     return conn
+
+
+def _default_context(conn):
+    return sites.select_review_context(conn, DEFAULT_SITE_ID, "cam_nang", "vi")
+
+
+def _second_site_context(conn):
+    site_id = UUID("00000000-0000-4000-8000-000000000010")
+    profile_id = UUID("00000000-0000-4000-8000-000000000011")
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO site "
+            "(id, slug, name, connector_type, base_url, secret_ref) "
+            "VALUES (%s, 'drupal-vn-secondary', 'Drupal secondary', 'drupal', "
+            "'http://secondary.ddev.site', 'DRUPAL_SECONDARY') "
+            "ON CONFLICT DO NOTHING",
+            (site_id,),
+        )
+        cur.execute(
+            "INSERT INTO review_profile "
+            "(id, code, market_code, language_code, content_type, status, "
+            "policy_version, policy_snapshot) "
+            "VALUES (%s, 'cam-nang-vn-secondary', 'VN', 'vi', 'cam_nang', "
+            "'active', 'cam-nang-vn-v1', '{}'::jsonb) ON CONFLICT DO NOTHING",
+            (profile_id,),
+        )
+        cur.execute(
+            "INSERT INTO site_profile_assignment (site_id, profile_id) VALUES (%s, %s) "
+            "ON CONFLICT DO NOTHING",
+            (site_id, profile_id),
+        )
+    return sites.select_review_context(conn, site_id, "cam_nang", "vi")
 
 
 def test_enqueue_va_claim(conn):
@@ -308,6 +346,204 @@ def test_force_nguyen_tu_loi_giua_chung_khong_mat_job(conn):
     print("[PASS] force nguyen tu: loi giua UPDATE va INSERT duoc rollback, khong mat job")
 
 
+def test_scoped_cung_external_hash_khac_site_khong_dedup(conn):
+    primary = _default_context(conn)
+    secondary = _second_site_context(conn)
+    first = q.enqueue_scoped(conn, primary, "same-external", "same-hash", "event")
+    second = q.enqueue_scoped(conn, secondary, "same-external", "same-hash", "event")
+    assert first["status"] == q.QUEUED and second["status"] == q.QUEUED, (first, second)
+    assert first["job_id"] != second["job_id"], (first, second)
+    for _ in range(2):
+        job = q.claim(conn, "w-don-scoped")
+        q.complete(conn, job["id"])
+    print("[PASS] cung external/hash o hai site tao hai job rieng")
+
+
+def test_scoped_cung_site_hash_policy_tra_duplicate(conn):
+    context = _default_context(conn)
+    first = q.enqueue_scoped(conn, context, "scoped-duplicate", "hash-scoped", "event")
+    second = q.enqueue_scoped(conn, context, "scoped-duplicate", "hash-scoped", "reconcile")
+    assert second == {"status": q.DUPLICATE, "job_id": first["job_id"]}, second
+    job = q.claim(conn, "w-don-scoped")
+    q.complete(conn, job["id"])
+    print("[PASS] scoped dedup dung site/external/hash/policy")
+
+
+def test_scoped_force_lien_ket_supersedes_job_id(conn):
+    context = _default_context(conn)
+    first = q.enqueue_scoped(conn, context, "force-link", "hash-force-link", "event")
+    job = q.claim(conn, "w-force-link")
+    assert job["id"] == first["job_id"], job
+    q.complete(conn, job["id"])
+
+    replacement = q.enqueue_scoped(
+        conn,
+        context,
+        "force-link",
+        "hash-force-link",
+        "manual",
+        force=True,
+    )
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT status FROM review_job WHERE id=%s",
+            (first["job_id"],),
+        )
+        old_status = cur.fetchone()[0]
+        cur.execute(
+            "SELECT supersedes_job_id FROM review_job WHERE id=%s",
+            (replacement["job_id"],),
+        )
+        linked_id = cur.fetchone()[0]
+    assert old_status == q.SUPERSEDED, old_status
+    assert linked_id == first["job_id"], linked_id
+    q.complete(conn, q.claim(conn, "w-don-scoped")["id"])
+    print("[PASS] force scoped supersede va link job cu nguyen tu")
+
+
+def test_pause_giu_queued_claim_bo_qua_va_resume_claim_lai(conn):
+    context = _default_context(conn)
+    with conn.cursor() as cur:
+        cur.execute("UPDATE site SET intake_paused=true WHERE id=%s", (context.site.id,))
+    queued = q.enqueue_scoped(conn, context, "paused-job", "paused-hash", "event")
+    assert q.claim(conn, "w-paused") is None
+    with conn.cursor() as cur:
+        cur.execute("SELECT status FROM review_job WHERE id=%s", (queued["job_id"],))
+        assert cur.fetchone()[0] == q.QUEUED
+        cur.execute("UPDATE site SET intake_paused=false WHERE id=%s", (context.site.id,))
+    resumed = q.claim(conn, "w-resumed")
+    assert resumed["id"] == queued["job_id"], resumed
+    assert resumed["site_id"] == context.site.id, resumed
+    assert resumed["profile_id"] == context.profile.id, resumed
+    assert resumed["node_id"] == resumed["external_content_id"] == "paused-job", resumed
+    q.complete(conn, resumed["id"])
+    print("[PASS] pause giu queued, resume claim lai cung job va du metadata")
+
+
+def test_transient_retry_co_jitter_retry_after_va_toi_da_ba_claim(conn):
+    context = _default_context(conn)
+    queued = q.enqueue_scoped(conn, context, "retry-jitter", "retry-hash", "event")
+    first = q.claim(conn, "w-retry")
+    assert first["id"] == queued["job_id"] and first["attempts"] == 1, first
+    assert q.fail(conn, first["id"], "loi 1", rng=lambda: 0.5) == q.QUEUED
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT extract(epoch FROM (run_after-now())) FROM review_job WHERE id=%s",
+            (first["id"],),
+        )
+        delay = float(cur.fetchone()[0])
+        assert 61 <= delay <= 63.5, delay
+        cur.execute("UPDATE review_job SET run_after=now() WHERE id=%s", (first["id"],))
+
+    second = q.claim(conn, "w-retry")
+    assert second["attempts"] == 2, second
+    assert q.fail(
+        conn,
+        second["id"],
+        "loi 2",
+        retry_after_seconds=700,
+        rng=lambda: 0.5,
+    ) == q.QUEUED
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT extract(epoch FROM (run_after-now())) FROM review_job WHERE id=%s",
+            (second["id"],),
+        )
+        delay = float(cur.fetchone()[0])
+        assert 598 <= delay <= 600.5, delay
+        cur.execute("UPDATE review_job SET run_after=now() WHERE id=%s", (second["id"],))
+
+    third = q.claim(conn, "w-retry")
+    assert third["attempts"] == 3, third
+    assert q.fail(conn, third["id"], "loi 3", rng=lambda: 0.5) == q.FAILED
+    assert q.claim(conn, "w-retry") is None
+    print("[PASS] retry jitter/Retry-After va toi da ba claim")
+
+
+def test_supersedes_explicit_chi_nhan_failed_cung_scope(conn):
+    primary = _default_context(conn)
+    target = q.enqueue_scoped(conn, primary, "admin-retry", "admin-hash", "event")
+    claimed = q.claim(conn, "w-admin-retry")
+    with conn.cursor() as cur:
+        cur.execute("UPDATE review_job SET attempts=3 WHERE id=%s", (claimed["id"],))
+    assert q.fail(conn, claimed["id"], "terminal") == q.FAILED
+
+    retry = q.enqueue_scoped(
+        conn,
+        primary,
+        "admin-retry",
+        "admin-hash",
+        "admin_retry",
+        force=True,
+        supersedes_job_id=target["job_id"],
+    )
+    with conn.cursor() as cur:
+        cur.execute("SELECT status FROM review_job WHERE id=%s", (target["job_id"],))
+        assert cur.fetchone()[0] == q.FAILED
+        cur.execute(
+            "SELECT supersedes_job_id FROM review_job WHERE id=%s",
+            (retry["job_id"],),
+        )
+        assert cur.fetchone()[0] == target["job_id"]
+
+    secondary = _second_site_context(conn)
+    before = q.job_moi_nhat(conn, "admin-retry")["id"]
+    try:
+        q.enqueue_scoped(
+            conn,
+            secondary,
+            "admin-retry",
+            "admin-hash",
+            "admin_retry",
+            force=True,
+            supersedes_job_id=target["job_id"],
+        )
+    except ValueError as exc:
+        assert "khong cung scope" in str(exc), exc
+    else:
+        raise AssertionError("target khac site phai bi tu choi")
+    assert q.job_moi_nhat(conn, "admin-retry")["id"] == before
+    q.complete(conn, q.claim(conn, "w-don-scoped")["id"])
+    print("[PASS] supersedes explicit chi link failed cung scope, khong sua failed")
+
+
+def test_scoped_chan_input_rong_truoc_khi_insert(conn):
+    context = _default_context(conn)
+    for field, values in (
+        ("external_content_id", ("", "hash", "event")),
+        ("content_hash", ("node", " ", "event")),
+        ("source", ("node", "hash", None)),
+    ):
+        try:
+            q.enqueue_scoped(conn, context, *values)
+        except ValueError as exc:
+            assert field in str(exc), exc
+        else:
+            raise AssertionError(f"{field} rong phai bi tu choi")
+    try:
+        q.enqueue_scoped(
+            conn,
+            context,
+            "node",
+            "hash",
+            "event",
+            supersedes_job_id=999,
+        )
+    except ValueError as exc:
+        assert "force=True" in str(exc), exc
+    else:
+        raise AssertionError("supersedes_job_id khong force phai bi tu choi")
+    print("[PASS] scoped enqueue chan external/hash/source rong")
+
+
+def test_dam_bao_bang_khong_tai_tao_index_dedup_legacy(conn):
+    q.dam_bao_bang(conn)
+    with conn.cursor() as cur:
+        cur.execute("SELECT to_regclass('review_job_dedup')")
+        assert cur.fetchone()[0] is None
+    print("[PASS] compatibility guard khong tai tao index dedup legacy")
+
+
 if __name__ == "__main__":
     try:
         conn = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -332,6 +568,14 @@ if __name__ == "__main__":
         test_thu_hoi_job_ket,
         test_force_dat_superseded_va_tao_job_moi,
         test_force_nguyen_tu_loi_giua_chung_khong_mat_job,
+        test_scoped_cung_external_hash_khac_site_khong_dedup,
+        test_scoped_cung_site_hash_policy_tra_duplicate,
+        test_scoped_force_lien_ket_supersedes_job_id,
+        test_pause_giu_queued_claim_bo_qua_va_resume_claim_lai,
+        test_transient_retry_co_jitter_retry_after_va_toi_da_ba_claim,
+        test_supersedes_explicit_chi_nhan_failed_cung_scope,
+        test_scoped_chan_input_rong_truoc_khi_insert,
+        test_dam_bao_bang_khong_tai_tao_index_dedup_legacy,
     ):
         try:
             fn(conn)

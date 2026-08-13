@@ -4,14 +4,17 @@ Can Postgres that, cung ly do va cung cach xu ly [SKIP] nhu test_job_queue.py.
 Chay: .venv\\Scripts\\python.exe scripts\\test_audit.py
 """
 import os
+from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import audit
 import db
+from review_platform import migrations
 
 SCHEMA = "vf_test_audit"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 _REPORT = {
     "node_id": "uuid-1",
@@ -41,7 +44,8 @@ def _dung_schema_sach(conn):
     with conn.cursor() as cur:
         cur.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
         cur.execute(f"CREATE SCHEMA {SCHEMA}")
-        cur.execute(f"SET search_path TO {SCHEMA}")
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    migrations.apply_pending(conn, MIGRATIONS_DIR)
     audit.dam_bao_bang(conn)
     return conn
 
