@@ -437,6 +437,12 @@ Toàn bộ offline suite hiện tại phải xanh. Với cùng input và fake ag
 
 ## 13. Thứ tự triển khai
 
+Chương trình productization dùng **5 plan kỹ thuật** theo plan tổng tại
+`docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md`. Phạm vi
+P3 được gom thành một lát admin vận hành hoàn chỉnh để mọi màn hình dùng chung
+read model, RBAC, CSRF, pagination, sanitization và checkpoint UI trước khi
+chuyển sang ranh giới API/connector.
+
 ### P1 — Nền dữ liệu
 
 - Migration runner có version.
@@ -448,28 +454,31 @@ Toàn bộ offline suite hiện tại phải xanh. Với cùng input và fake ag
 - Local user, session, CSRF, RBAC, bootstrap CLI.
 - Layout/login/logout và audit nền.
 
-### P3 — Quan sát vận hành
+### P3 — Admin Operations
 
-- Dashboard, jobs, review history/detail.
-- Retry/dead-letter có confirmation và cost audit.
+- Dashboard, jobs, review history/detail và retry/dead-letter có xác nhận chi
+  phí + audit.
+- Quản lý user theo last-admin invariant.
+- Config/KB/evaluation chỉ đọc và audit log chỉ dành cho admin.
 
-### P4 — Ranh giới connector và API v1
+### P4 — API v1 và connector Drupal
 
-- Extract connector interface/Drupal adapter nhưng giữ hành vi cũ.
-- Per-site credential, profile selection, dedup và pause/resume.
-- Chuyển module Drupal sang contract `/api/v1` sau regression.
+- Extract connector interface/Drupal adapter nhưng giữ hành vi cũ; thêm
+  per-site credential, profile selection, dedup và pause/resume.
+- Chuyển module Drupal sang contract `/api/v1` và callback CAS/idempotent sau
+  regression; giữ hash v1 trong cửa sổ rollback.
 
-### P5 — Quản trị hoàn chỉnh MVP
+### P5 — Hardening và rollout
 
-- Connection screen, users, config/KB/evaluation read-only.
-- Token/cost/latency/correlation metadata đầy đủ.
+- Worker heartbeat, durable usage event, token/cost/latency/correlation metadata
+  đầy đủ và connection health/capability thật.
+- Security/integration test, staging smoke test, migration/rollback rehearsal,
+  secret rotation và tài liệu bàn giao/demo flow.
 
-### P6 — Hardening và bàn giao
-
-- Security/integration test, staging smoke test, migration rehearsal và rollback rehearsal.
-- Đồng bộ tài liệu vận hành, quyền Drupal, secret rotation và demo flow.
-
-Thứ tự kỹ thuật ưu tiên là: migration/auth/admin đọc dữ liệu hiện hành → thêm site/profile metadata → tách connector nhưng giữ behavior → regression → mới cut API/worker sang contract mới. Không “big-bang rewrite”.
+Thứ tự kỹ thuật hiện hành là: foundation site/profile → auth/admin shell → admin
+operations đọc dữ liệu hiện hành → tách connector nhưng giữ behavior →
+regression → mới cut API/worker sang contract mới → hardening/rollout. Không
+“big-bang rewrite”.
 
 ---
 
