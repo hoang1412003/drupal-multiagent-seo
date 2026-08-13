@@ -125,12 +125,18 @@ def get_user(conn, user_id: UUID) -> AdminUser:
     return _from_row(row)
 
 
-def find_by_username(conn, username: str) -> AdminUser | None:
+def find_by_username(
+    conn,
+    username: str,
+    *,
+    for_update: bool = False,
+) -> AdminUser | None:
     normalized = normalize_username(username)
+    lock_clause = " FOR UPDATE" if for_update else ""
     with conn.cursor() as cur:
         cur.execute(
             f"SELECT {_USER_COLUMNS} FROM admin_user "
-            "WHERE username_normalized=%s",
+            f"WHERE username_normalized=%s{lock_clause}",
             (normalized,),
         )
         row = cur.fetchone()

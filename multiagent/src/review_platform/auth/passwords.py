@@ -1,6 +1,6 @@
 """Password policy va Argon2id hashing cho tai khoan Platform Admin."""
 from argon2 import PasswordHasher, Type
-from argon2.exceptions import InvalidHashError, VerifyMismatchError
+from argon2.exceptions import InvalidHashError, VerificationError
 
 
 MIN_PASSWORD_LENGTH = 12
@@ -43,7 +43,7 @@ def verify_password(hash_value: str, password: str) -> bool:
     """Khong de caller phan biet mismatch va hash bi hong/sai dinh dang."""
     try:
         return HASHER.verify(hash_value, password)
-    except (VerifyMismatchError, InvalidHashError, TypeError):
+    except (VerificationError, InvalidHashError, TypeError):
         return False
 
 

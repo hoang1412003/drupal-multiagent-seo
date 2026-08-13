@@ -5,6 +5,7 @@ Chay: .venv\\Scripts\\python.exe scripts\\test_admin_users.py
 import os
 from pathlib import Path
 import sys
+import threading
 from contextlib import contextmanager
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -61,6 +62,7 @@ def test_argon2id_dung_tham_so_va_password_policy(conn):
     assert passwords.verify_password(value, plain)
     assert not passwords.verify_password(value, "sai-hoan-toan")
     assert not passwords.verify_password("khong-phai-argon2", plain)
+    assert not passwords.verify_password("$argon2id$", plain)
     assert not passwords.needs_rehash(value)
 
     spaced = "  Mat-khau-co-khoang-trang  "
@@ -117,6 +119,62 @@ def test_last_active_admin_guard_khi_ha_role_va_khoa(conn):
     with expect(users.LastActiveAdminError, "admin active cuối"):
         users.set_active(conn, second.id, False)
     print("[PASS] khong the ha role/lock admin active cuoi cung")
+
+
+def test_last_active_admin_guard_khi_hai_request_dong_thoi(conn):
+    _reset_schema(conn)
+    first = users.create_user(
+        conn,
+        username="concurrent-admin-one",
+        password="Mat-khau-concurrent-one",
+        role=Role.ADMIN,
+    )
+    second = users.create_user(
+        conn,
+        username="concurrent-admin-two",
+        password="Mat-khau-concurrent-two",
+        role=Role.ADMIN,
+    )
+    worker_connections = [
+        db.psycopg.connect(db.dsn(), autocommit=True),
+        db.psycopg.connect(db.dsn(), autocommit=True),
+    ]
+    for worker_conn in worker_connections:
+        with worker_conn.cursor() as cur:
+            cur.execute(f"SET search_path TO {SCHEMA}, public")
+
+    barrier = threading.Barrier(2)
+    results = []
+
+    def demote(worker_conn, user_id):
+        try:
+            barrier.wait(5)
+            users.set_role(worker_conn, user_id, Role.OPERATOR)
+            results.append("demoted")
+        except users.LastActiveAdminError:
+            results.append("denied")
+        except Exception as exc:
+            results.append(exc)
+
+    threads = [
+        threading.Thread(target=demote, args=(worker_connections[0], first.id)),
+        threading.Thread(target=demote, args=(worker_connections[1], second.id)),
+    ]
+    try:
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join(10)
+    finally:
+        for worker_conn in worker_connections:
+            worker_conn.close()
+
+    assert all(not thread.is_alive() for thread in threads)
+    assert sorted(results) == ["demoted", "denied"], results
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_user WHERE active AND role='admin'")
+        assert cur.fetchone()[0] == 1
+    print("[PASS] hai request dong thoi van giu lai mot active admin")
 
 
 def test_reset_va_change_password_revoke_session(conn):
@@ -184,6 +242,7 @@ if __name__ == "__main__":
             test_argon2id_dung_tham_so_va_password_policy,
             test_username_nfkc_casefold_strip_va_khong_trung,
             test_last_active_admin_guard_khi_ha_role_va_khoa,
+            test_last_active_admin_guard_khi_hai_request_dong_thoi,
             test_reset_va_change_password_revoke_session,
         ):
             try:

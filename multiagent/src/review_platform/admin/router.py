@@ -97,9 +97,9 @@ def login_page(
 @router.post("/login", response_class=HTMLResponse)
 def login(
     request: Request,
-    username: str = Form(...),
-    password: str = Form(...),
-    csrf_token: str = Form(...),
+    username: str = Form(default=""),
+    password: str = Form(default=""),
+    csrf_token: str = Form(default=""),
     conn=Depends(dependencies.get_db),
     config=Depends(dependencies.get_auth_config),
 ):
@@ -130,54 +130,64 @@ def login(
             "Tạm thời chưa thể đăng nhập. Vui lòng thử lại sau.",
         )
 
-    try:
-        candidate = users.find_by_username(conn, username)
-    except ValueError:
-        candidate = None
-    candidate_hash = candidate.password_hash if candidate else _DUMMY_PASSWORD_HASH
-    credential_ok = passwords.verify_password(candidate_hash, password)
-    active_ok = candidate is not None and candidate.active
-    if not credential_ok or not active_ok:
-        failed = limiter.record_failure(username, ip_address)
-        reason = "inactive" if credential_ok and candidate is not None else "invalid_credentials"
-        audit_log.write_event(
-            conn,
-            action=audit_log.AuditAction.LOGIN_FAILED,
-            actor_user_id=None,
-            actor_username="anonymous",
-            target_type="admin_user",
-            target_id=str(candidate.id) if candidate else None,
-            outcome="denied",
-            metadata={"subject_hash": failed.subject_hash, "reason": reason},
+    with conn.transaction():
+        try:
+            candidate = users.find_by_username(conn, username, for_update=True)
+        except ValueError:
+            candidate = None
+        candidate_hash = candidate.password_hash if candidate else _DUMMY_PASSWORD_HASH
+        credential_ok = (
+            len(password) <= passwords.MAX_PASSWORD_LENGTH
+            and passwords.verify_password(candidate_hash, password)
         )
-        if failed.blocked:
+        active_ok = candidate is not None and candidate.active
+        if not credential_ok or not active_ok:
+            failed = limiter.record_failure(username, ip_address)
+            reason = (
+                "inactive"
+                if credential_ok and candidate is not None
+                else "invalid_credentials"
+            )
+            audit_log.write_event(
+                conn,
+                action=audit_log.AuditAction.LOGIN_FAILED,
+                actor_user_id=None,
+                actor_username="anonymous",
+                target_type="admin_user",
+                target_id=str(candidate.id) if candidate else None,
+                outcome="denied",
+                metadata={"subject_hash": failed.subject_hash, "reason": reason},
+            )
+            if failed.blocked:
+                return _login_error(
+                    request,
+                    429,
+                    "Tạm thời chưa thể đăng nhập. Vui lòng thử lại sau.",
+                )
             return _login_error(
                 request,
-                429,
-                "Tạm thời chưa thể đăng nhập. Vui lòng thử lại sau.",
+                401,
+                "Thông tin đăng nhập không hợp lệ. Vui lòng thử lại.",
             )
-        return _login_error(
-            request,
-            401,
-            "Thông tin đăng nhập không hợp lệ. Vui lòng thử lại.",
-        )
 
-    limiter.record_success(username, ip_address)
-    issued = sessions.issue(conn, candidate.id)
-    users.mark_login_success(conn, candidate.id)
-    audit_log.write_event(
-        conn,
-        action=audit_log.AuditAction.LOGIN_SUCCESS,
-        actor_user_id=candidate.id,
-        actor_username=candidate.username,
-        target_type="admin_user",
-        target_id=str(candidate.id),
-        outcome="success",
-        metadata={"subject_hash": decision.subject_hash},
-    )
-    destination = (
-        "/admin/change-password" if candidate.must_change_password else "/admin"
-    )
+        limiter.record_success(username, ip_address)
+        issued = sessions.issue(conn, candidate.id)
+        users.mark_login_success(conn, candidate.id)
+        audit_log.write_event(
+            conn,
+            action=audit_log.AuditAction.LOGIN_SUCCESS,
+            actor_user_id=candidate.id,
+            actor_username=candidate.username,
+            target_type="admin_user",
+            target_id=str(candidate.id),
+            outcome="success",
+            metadata={"subject_hash": decision.subject_hash},
+        )
+        destination = (
+            "/admin/change-password"
+            if candidate.must_change_password
+            else "/admin"
+        )
     response = RedirectResponse(destination, status_code=303)
     response.set_cookie(
         SESSION_COOKIE,
@@ -213,17 +223,18 @@ def logout(
     conn=Depends(dependencies.get_db),
 ):
     raw_token = request.cookies.get(SESSION_COOKIE, "")
-    sessions.revoke(conn, raw_token, "logout")
-    audit_log.write_event(
-        conn,
-        action=audit_log.AuditAction.LOGOUT,
-        actor_user_id=resolved.user.id,
-        actor_username=resolved.user.username,
-        target_type="admin_session",
-        target_id=str(resolved.session_id),
-        outcome="success",
-        metadata={"session_id": str(resolved.session_id)},
-    )
+    with conn.transaction():
+        sessions.revoke(conn, raw_token, "logout")
+        audit_log.write_event(
+            conn,
+            action=audit_log.AuditAction.LOGOUT,
+            actor_user_id=resolved.user.id,
+            actor_username=resolved.user.username,
+            target_type="admin_session",
+            target_id=str(resolved.session_id),
+            outcome="success",
+            metadata={"session_id": str(resolved.session_id)},
+        )
     response = RedirectResponse("/admin/login", status_code=303)
     response.delete_cookie(SESSION_COOKIE, path="/admin")
     return response
@@ -258,14 +269,25 @@ def change_password(
     config=Depends(dependencies.get_auth_config),
 ):
     try:
-        if new_password != confirm_password:
-            raise passwords.PasswordPolicyError("password confirmation mismatch")
-        users.change_password(
-            conn,
-            resolved.user.id,
-            current_password,
-            new_password,
-        )
+        with conn.transaction():
+            if new_password != confirm_password:
+                raise passwords.PasswordPolicyError("password confirmation mismatch")
+            users.change_password(
+                conn,
+                resolved.user.id,
+                current_password,
+                new_password,
+            )
+            audit_log.write_event(
+                conn,
+                action=audit_log.AuditAction.PASSWORD_CHANGED,
+                actor_user_id=resolved.user.id,
+                actor_username=resolved.user.username,
+                target_type="admin_user",
+                target_id=str(resolved.user.id),
+                outcome="success",
+                metadata={},
+            )
     except (passwords.PasswordPolicyError, users.InvalidCurrentPasswordError):
         return _template(
             request,
@@ -276,16 +298,6 @@ def change_password(
             error="Không thể đổi mật khẩu. Vui lòng kiểm tra thông tin và thử lại.",
         )
 
-    audit_log.write_event(
-        conn,
-        action=audit_log.AuditAction.PASSWORD_CHANGED,
-        actor_user_id=resolved.user.id,
-        actor_username=resolved.user.username,
-        target_type="admin_user",
-        target_id=str(resolved.user.id),
-        outcome="success",
-        metadata={},
-    )
     response = RedirectResponse("/admin/login", status_code=303)
     response.delete_cookie(SESSION_COOKIE, path="/admin")
     response.set_cookie(

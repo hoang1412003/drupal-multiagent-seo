@@ -69,6 +69,28 @@ def test_discover_checksum_khong_phu_thuoc_lf_hay_crlf():
     print("[PASS] checksum migration khong doi khi Git checkout LF/CRLF")
 
 
+def test_status_chap_nhan_checksum_crlf_lich_su_nhung_van_chan_sua_sql():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        migration = root / "0001_first.sql"
+        lf_content = b"SELECT 1;\nSELECT 2;\n"
+        crlf_content = lf_content.replace(b"\n", b"\r\n")
+        migration.write_bytes(lf_content)
+        conn = FakeConnection()
+        conn.history[1] = (
+            "first",
+            hashlib.sha256(crlf_content).hexdigest(),
+        )
+
+        current = migrations.status(conn, root)
+        assert current.applied == (1,) and current.pending == (), current
+
+        migration.write_bytes(b"SELECT 1;\nSELECT 3;\n")
+        with expect(migrations.MigrationError, "checksum khong khop version 0001"):
+            migrations.status(conn, root)
+    print("[PASS] checksum CRLF lich su tuong thich nhung semantic edit van bi chan")
+
+
 def test_discover_chan_version_trung():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -356,7 +378,7 @@ def test_migration_0001_nang_legacy_bao_toan_du_lieu(conn):
     _reset_schema(conn, schema)
     try:
         _create_legacy_schema(conn)
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3]
 
         assert _scalar(conn, "SELECT count(*) FROM review_job") == 1
         assert _scalar(conn, "SELECT count(*) FROM run_log") == 1
@@ -390,7 +412,7 @@ def test_migration_0001_tao_fresh_schema_va_seed(conn):
     schema = "vf_test_migration_fresh"
     _reset_schema(conn, schema)
     try:
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3]
         assert _scalar(conn, "SELECT count(*) FROM site") == 1
         assert _scalar(conn, "SELECT count(*) FROM review_profile") == 1
         assert _scalar(conn, "SELECT count(*) FROM site_profile_assignment") == 1
@@ -502,8 +524,8 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
             assert migrations.apply_pending(conn, first_only) == [1]
 
         before = migrations.status(conn, MIGRATIONS_DIR)
-        assert before.applied == (1,) and before.pending == (2,), before
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2]
+        assert before.applied == (1,) and before.pending == (2, 3), before
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2, 3]
 
         expected_tables = {
             "admin_user",
@@ -523,8 +545,16 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
                 "AND indexname='admin_session_active_token_idx'"
             )
             index_definition = cur.fetchone()[0].lower()
+            cur.execute(
+                "SELECT indexdef FROM pg_indexes "
+                "WHERE schemaname=current_schema() "
+                "AND indexname='admin_session_user_idx'"
+            )
+            user_index_row = cur.fetchone()
         assert "token_hash" in index_definition
         assert "where (revoked_at is null)" in index_definition
+        assert user_index_row is not None
+        assert "(user_id)" in user_index_row[0].lower()
 
         with expect(db.psycopg.errors.CheckViolation, "admin_user_role_check"):
             with conn.cursor() as cur:
@@ -552,7 +582,7 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
                 )
     finally:
         _drop_schema(conn, schema)
-    print("[PASS] migration 0002 tao schema va rang buoc admin auth")
+    print("[PASS] migration 0002/0003 tao schema, rang buoc va index admin auth")
 
 
 if __name__ == "__main__":
@@ -569,6 +599,7 @@ if __name__ == "__main__":
     for fn in (
         test_discover_sap_xep_va_checksum_canonical,
         test_discover_checksum_khong_phu_thuoc_lf_hay_crlf,
+        test_status_chap_nhan_checksum_crlf_lich_su_nhung_van_chan_sua_sql,
         test_discover_chan_version_trung,
         test_discover_chan_ten_file_sql_sai_quy_uoc,
         test_discover_chan_khoang_trong_version,

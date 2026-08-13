@@ -7,6 +7,7 @@ import hashlib
 import os
 from pathlib import Path
 import sys
+import threading
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -44,7 +45,7 @@ def _reset_schema(conn):
     migrations.apply_pending(conn, MIGRATIONS_DIR)
 
 
-def _make_client(conn, *, cookie_secure=False):
+def _make_client(conn, *, cookie_secure=False, raise_server_exceptions=True):
     app = FastAPI()
     app.state.auth_config = dependencies.AuthConfig(
         csrf_key=CSRF_KEY,
@@ -72,6 +73,7 @@ def _make_client(conn, *, cookie_secure=False):
     return TestClient(
         app,
         follow_redirects=False,
+        raise_server_exceptions=raise_server_exceptions,
         client=("198.51.100.20", 50000),
     )
 
@@ -166,6 +168,75 @@ def test_redirect_login_csrf_truoc_credential_va_wrong_password(conn):
             "198.51.100.20",
         )
     print("[PASS] redirect, login CSRF truoc credential va bo qua X-Forwarded-For")
+
+
+def test_login_csrf_chay_truoc_form_validation(conn):
+    _reset_schema(conn)
+    users.create_user(
+        conn,
+        "csrf-order",
+        "Mat-khau-csrf-order",
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+
+    missing_csrf = client.post(
+        "/admin/login",
+        data={
+            "username": "csrf-order",
+            "password": "Mat-khau-csrf-order",
+        },
+    )
+    invalid_csrf_missing_credentials = client.post(
+        "/admin/login",
+        data={"csrf_token": "sai"},
+    )
+    assert missing_csrf.status_code == 403, missing_csrf.text
+    assert invalid_csrf_missing_credentials.status_code == 403, (
+        invalid_csrf_missing_credentials.text
+    )
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_login_throttle")
+        assert cur.fetchone()[0] == 0
+    print("[PASS] login CSRF tra 403 truoc moi form/credential validation")
+
+
+def test_login_tu_choi_password_qua_dai_truoc_argon2(conn):
+    _reset_schema(conn)
+    users.create_user(
+        conn,
+        "oversized-password",
+        "Mat-khau-hop-le-2026",
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    csrf_token = _login_csrf(client)
+    original_verify = router.passwords.verify_password
+
+    def must_not_verify(_hash_value, _password):
+        raise AssertionError("password qua dai khong duoc dua vao Argon2")
+
+    router.passwords.verify_password = must_not_verify
+    try:
+        response = client.post(
+            "/admin/login",
+            data={
+                "username": "oversized-password",
+                "password": "x" * 129,
+                "csrf_token": csrf_token,
+            },
+        )
+    finally:
+        router.passwords.verify_password = original_verify
+
+    assert response.status_code == 401, response.text
+    assert "Thông tin đăng nhập không hợp lệ" in response.text
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_login_throttle")
+        assert cur.fetchone()[0] == 1
+    print("[PASS] login password >128 bi generic reject truoc Argon2")
 
 
 def test_login_ok_cookie_flags_home_va_static(conn):
@@ -307,6 +378,264 @@ def test_change_password_generic_error_revoke_va_bat_login_lai(conn):
     print("[PASS] change password dung generic error, revoke va bat login lai")
 
 
+def test_login_lock_chan_reset_password_lot_qua_revoke_all(conn):
+    _reset_schema(conn)
+    old_password = "Mat-khau-race-old-2026"
+    user = users.create_user(
+        conn,
+        "race.user",
+        old_password,
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    csrf_token = _login_csrf(client)
+    other_conn = db.psycopg.connect(db.dsn(), autocommit=True)
+    with other_conn.cursor() as cur:
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+
+    verified = threading.Event()
+    release_login = threading.Event()
+    reset_started = threading.Event()
+    reset_done = threading.Event()
+    login_result = {}
+    reset_result = {}
+    original_verify = router.passwords.verify_password
+
+    def blocking_verify(hash_value, password):
+        result = original_verify(hash_value, password)
+        if password == old_password and result:
+            verified.set()
+            if not release_login.wait(5):
+                raise AssertionError("test timeout khi cho login tiep tuc")
+        return result
+
+    def run_login():
+        try:
+            login_result["response"] = client.post(
+                "/admin/login",
+                data={
+                    "username": user.username,
+                    "password": old_password,
+                    "csrf_token": csrf_token,
+                },
+            )
+        except Exception as exc:
+            login_result["error"] = exc
+
+    def run_reset():
+        reset_started.set()
+        try:
+            users.reset_password(
+                other_conn,
+                user.id,
+                "Mat-khau-race-new-2026",
+            )
+        except Exception as exc:
+            reset_result["error"] = exc
+        finally:
+            reset_done.set()
+
+    router.passwords.verify_password = blocking_verify
+    login_thread = threading.Thread(target=run_login)
+    reset_thread = threading.Thread(target=run_reset)
+    reset_was_blocked = False
+    try:
+        login_thread.start()
+        assert verified.wait(5), "login khong den diem verify"
+        reset_thread.start()
+        assert reset_started.wait(2)
+        reset_was_blocked = not reset_done.wait(0.25)
+    finally:
+        release_login.set()
+        login_thread.join(5)
+        if reset_thread.ident is not None:
+            reset_thread.join(5)
+        router.passwords.verify_password = original_verify
+        other_conn.close()
+
+    assert not login_thread.is_alive() and not reset_thread.is_alive()
+    assert "error" not in login_result, login_result
+    assert "error" not in reset_result, reset_result
+    assert reset_was_blocked, "reset-password khong cho row lock cua login"
+    assert login_result["response"].status_code == 303
+    raw_token = client.cookies.get(router.SESSION_COOKIE)
+    assert sessions.resolve(conn, raw_token) is None
+    print("[PASS] row lock serialize login voi reset va session moi bi revoke")
+
+
+def test_login_lock_chan_change_password_lot_qua_revoke_all(conn):
+    _reset_schema(conn)
+    old_password = "Mat-khau-race-change-old"
+    user = users.create_user(
+        conn,
+        "race.change.user",
+        old_password,
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    csrf_token = _login_csrf(client)
+    other_conn = db.psycopg.connect(db.dsn(), autocommit=True)
+    with other_conn.cursor() as cur:
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+
+    verified = threading.Event()
+    release_login = threading.Event()
+    change_started = threading.Event()
+    change_done = threading.Event()
+    login_result = {}
+    change_result = {}
+    original_verify = router.passwords.verify_password
+
+    def blocking_verify(hash_value, password):
+        result = original_verify(hash_value, password)
+        if (
+            threading.current_thread() is not change_thread
+            and password == old_password
+            and result
+        ):
+            verified.set()
+            if not release_login.wait(5):
+                raise AssertionError("test timeout khi cho login tiep tuc")
+        return result
+
+    def run_login():
+        try:
+            login_result["response"] = client.post(
+                "/admin/login",
+                data={
+                    "username": user.username,
+                    "password": old_password,
+                    "csrf_token": csrf_token,
+                },
+            )
+        except Exception as exc:
+            login_result["error"] = exc
+
+    def run_change():
+        change_started.set()
+        try:
+            users.change_password(
+                other_conn,
+                user.id,
+                old_password,
+                "Mat-khau-race-change-new",
+            )
+        except Exception as exc:
+            change_result["error"] = exc
+        finally:
+            change_done.set()
+
+    login_thread = threading.Thread(target=run_login)
+    change_thread = threading.Thread(target=run_change)
+    router.passwords.verify_password = blocking_verify
+    change_was_blocked = False
+    try:
+        login_thread.start()
+        assert verified.wait(5), "login khong den diem verify"
+        change_thread.start()
+        assert change_started.wait(2)
+        change_was_blocked = not change_done.wait(0.25)
+    finally:
+        release_login.set()
+        login_thread.join(5)
+        if change_thread.ident is not None:
+            change_thread.join(5)
+        router.passwords.verify_password = original_verify
+        other_conn.close()
+
+    assert not login_thread.is_alive() and not change_thread.is_alive()
+    assert "error" not in login_result, login_result
+    assert "error" not in change_result, change_result
+    assert change_was_blocked, "change-password khong cho row lock cua login"
+    assert login_result["response"].status_code == 303
+    raw_token = client.cookies.get(router.SESSION_COOKIE)
+    assert sessions.resolve(conn, raw_token) is None
+    print("[PASS] row lock serialize login voi change-password va revoke session moi")
+
+
+def test_auth_state_change_va_audit_cung_transaction(conn):
+    _reset_schema(conn)
+    old_password = "Mat-khau-atomic-old-2026"
+    new_password = "Mat-khau-atomic-new-2026"
+    user = users.create_user(
+        conn,
+        "atomic.user",
+        old_password,
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn, raise_server_exceptions=False)
+    original_write_event = router.audit_log.write_event
+
+    def reject_action(rejected_action):
+        def fake_write_event(event_conn, *, action, **kwargs):
+            if action is rejected_action:
+                raise RuntimeError(f"audit unavailable: {action.value}")
+            return original_write_event(event_conn, action=action, **kwargs)
+
+        return fake_write_event
+
+    token = _login_csrf(client)
+    router.audit_log.write_event = reject_action(
+        router.audit_log.AuditAction.LOGIN_SUCCESS
+    )
+    try:
+        failed_login = client.post(
+            "/admin/login",
+            data={
+                "username": user.username,
+                "password": old_password,
+                "csrf_token": token,
+            },
+        )
+    finally:
+        router.audit_log.write_event = original_write_event
+    assert failed_login.status_code == 500
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_session WHERE user_id=%s", (user.id,))
+        assert cur.fetchone()[0] == 0
+        cur.execute("SELECT last_login_at FROM admin_user WHERE id=%s", (user.id,))
+        assert cur.fetchone()[0] is None
+
+    assert _login(client, user.username, old_password).status_code == 303
+    raw_token = client.cookies.get(router.SESSION_COOKIE)
+    csrf_token = _session_csrf(conn, client)
+
+    router.audit_log.write_event = reject_action(router.audit_log.AuditAction.LOGOUT)
+    try:
+        failed_logout = client.post(
+            "/admin/logout",
+            data={"csrf_token": csrf_token},
+        )
+    finally:
+        router.audit_log.write_event = original_write_event
+    assert failed_logout.status_code == 500
+    assert sessions.resolve(conn, raw_token) is not None
+
+    router.audit_log.write_event = reject_action(
+        router.audit_log.AuditAction.PASSWORD_CHANGED
+    )
+    try:
+        failed_change = client.post(
+            "/admin/change-password",
+            data={
+                "current_password": old_password,
+                "new_password": new_password,
+                "confirm_password": new_password,
+                "csrf_token": csrf_token,
+            },
+        )
+    finally:
+        router.audit_log.write_event = original_write_event
+    assert failed_change.status_code == 500
+    assert users.authenticate_candidate(conn, user.username, old_password)
+    assert users.authenticate_candidate(conn, user.username, new_password) is None
+    assert sessions.resolve(conn, raw_token) is not None
+    print("[PASS] login/logout/change-password rollback neu audit that bai")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -322,10 +651,15 @@ if __name__ == "__main__":
         for fn in (
             test_auth_config_fail_fast_key_thieu_ngan_trung_va_bool_sai,
             test_redirect_login_csrf_truoc_credential_va_wrong_password,
+            test_login_csrf_chay_truoc_form_validation,
+            test_login_tu_choi_password_qua_dai_truoc_argon2,
             test_login_ok_cookie_flags_home_va_static,
             test_inactive_throttle_va_must_change_redirect,
             test_logout_csrf_revoke_va_viewer_bi_operator_gate,
             test_change_password_generic_error_revoke_va_bat_login_lai,
+            test_login_lock_chan_reset_password_lot_qua_revoke_all,
+            test_login_lock_chan_change_password_lot_qua_revoke_all,
+            test_auth_state_change_va_audit_cung_transaction,
         ):
             try:
                 fn(connection)

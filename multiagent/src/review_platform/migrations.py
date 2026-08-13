@@ -14,6 +14,7 @@ class Migration:
     name: str
     path: Path
     checksum: str
+    compatible_checksums: frozenset[str]
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,16 @@ def _canonical_checksum(content: bytes) -> str:
     return hashlib.sha256(canonical).hexdigest()
 
 
+def _compatible_checksums(content: bytes) -> frozenset[str]:
+    """Chap nhan checksum raw LF/CRLF cua runner P1 cho cung mot SQL."""
+    canonical = content.replace(b"\r\n", b"\n")
+    crlf = canonical.replace(b"\n", b"\r\n")
+    return frozenset(
+        hashlib.sha256(candidate).hexdigest()
+        for candidate in (canonical, crlf)
+    )
+
+
 def discover(migrations_dir: Path) -> list[Migration]:
     """Doc migration SQL, xac minh ten/version va bam noi dung LF canonical."""
     root = Path(migrations_dir)
@@ -48,12 +59,16 @@ def discover(migrations_dir: Path) -> list[Migration]:
         if version in seen_versions:
             raise MigrationError(f"trung version {version_text}: {path.name}")
         seen_versions.add(version)
-        found.append(Migration(
-            version=version,
-            name=name,
-            path=path,
-            checksum=_canonical_checksum(path.read_bytes()),
-        ))
+        content = path.read_bytes()
+        found.append(
+            Migration(
+                version=version,
+                name=name,
+                path=path,
+                checksum=_canonical_checksum(content),
+                compatible_checksums=_compatible_checksums(content),
+            )
+        )
 
     found.sort(key=lambda migration: migration.version)
     for expected, migration in enumerate(found, start=1):
@@ -100,7 +115,7 @@ def _validate_applied(
                 f"ten khong khop version {version:04d}: "
                 f"database={applied_name}, file={migration.name}"
             )
-        if applied_checksum != migration.checksum:
+        if applied_checksum not in migration.compatible_checksums:
             raise MigrationError(f"checksum khong khop version {version:04d}")
         applied_versions.add(version)
     return applied_versions
