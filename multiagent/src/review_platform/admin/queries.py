@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
+from uuid import UUID
 
+from review_platform.admin.sanitization import sanitize_text
 from review_platform.pricing import CostEstimate, estimate_usage
 
 
@@ -26,6 +28,55 @@ class PageView:
 
 
 @dataclass(frozen=True)
+class JobFilters:
+    status: str | None = None
+    site: str | None = None
+    source: str | None = None
+    external_id: str | None = None
+    date_from: date | None = None
+    date_to: date | None = None
+
+
+@dataclass(frozen=True)
+class JobListItem:
+    public_id: UUID
+    created_at: datetime
+    site_id: UUID
+    site_slug: str
+    external_content_id: str
+    status: str
+    attempts: int
+    source: str
+    policy_version: str
+
+
+@dataclass(frozen=True)
+class JobDetail:
+    public_id: UUID
+    created_at: datetime
+    updated_at: datetime
+    site_id: UUID
+    site_slug: str
+    site_name: str
+    profile_id: UUID
+    policy_version: str
+    external_content_id: str
+    external_revision_id: str | None
+    content_type: str
+    langcode: str
+    status: str
+    attempts: int
+    source: str
+    correlation_id: UUID
+    supersedes_job_public_id: UUID | None
+    last_error: str | None
+    run_public_id: UUID | None
+    writeback_status: str | None
+    run_scored_at: datetime | None
+    saved_result_available: bool
+
+
+@dataclass(frozen=True)
 class DashboardView:
     date_from: date
     date_to: date
@@ -39,6 +90,139 @@ class DashboardView:
     writeback_success_rate: Decimal | None
     worker_status: str = "unknown"
     connector_status: str = "unknown"
+
+
+def _validate_optional_text(name: str, value: str | None, max_length: int) -> None:
+    if value is None:
+        return
+    if not isinstance(value, str) or not value or len(value) > max_length:
+        raise ValueError(f"{name} khong hop le")
+
+
+def _as_utc(value: datetime | None) -> datetime | None:
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _job_where(filters: JobFilters) -> tuple[str, list]:
+    if not isinstance(filters, JobFilters):
+        raise ValueError("filters phai la JobFilters")
+    if filters.status is not None and filters.status not in QUEUE_STATUSES:
+        raise ValueError("status job khong hop le")
+    _validate_optional_text("site", filters.site, 100)
+    _validate_optional_text("source", filters.source, 100)
+    _validate_optional_text("external_id", filters.external_id, 100)
+    if (filters.date_from is None) != (filters.date_to is None):
+        raise ValueError("date_from/date_to phai di cung nhau")
+
+    clauses = []
+    params: list = []
+    if filters.status is not None:
+        clauses.append("j.status=%s")
+        params.append(filters.status)
+    if filters.site is not None:
+        try:
+            site_id = UUID(filters.site)
+        except ValueError:
+            clauses.append("s.slug=%s")
+            params.append(filters.site)
+        else:
+            clauses.append("j.site_id=%s")
+            params.append(site_id)
+    if filters.source is not None:
+        clauses.append("j.source=%s")
+        params.append(filters.source)
+    if filters.external_id is not None:
+        clauses.append("strpos(lower(j.external_content_id), lower(%s)) > 0")
+        params.append(filters.external_id)
+    if filters.date_from is not None:
+        start, end = _bounds(filters.date_from, filters.date_to)
+        clauses.extend(("j.created_at >= %s", "j.created_at < %s"))
+        params.extend((start, end))
+    return (" AND ".join(clauses) if clauses else "TRUE"), params
+
+
+def list_jobs(
+    conn,
+    filters: JobFilters,
+    page: int,
+    page_size: int,
+) -> PageView:
+    if isinstance(page, bool) or not isinstance(page, int) or page < 1:
+        raise ValueError("page phai >= 1")
+    if (
+        isinstance(page_size, bool)
+        or not isinstance(page_size, int)
+        or not 1 <= page_size <= 100
+    ):
+        raise ValueError("page_size phai trong 1..100")
+    where_sql, params = _job_where(filters)
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM review_job AS j JOIN site AS s ON s.id=j.site_id "
+            f"WHERE {where_sql}",
+            params,
+        )
+        total = int(cur.fetchone()[0])
+        cur.execute(
+            "SELECT j.public_id,j.created_at,j.site_id,s.slug,j.external_content_id,"
+            "j.status,j.attempts,j.source,j.policy_version "
+            "FROM review_job AS j JOIN site AS s ON s.id=j.site_id "
+            f"WHERE {where_sql} ORDER BY j.created_at DESC,j.id DESC "
+            "LIMIT %s OFFSET %s",
+            (*params, page_size, (page - 1) * page_size),
+        )
+        items = tuple(
+            JobListItem(row[0], _as_utc(row[1]), *row[2:])
+            for row in cur.fetchall()
+        )
+    return PageView(
+        items=items,
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=(total + page_size - 1) // page_size,
+    )
+
+
+def get_job(conn, public_id: UUID) -> JobDetail | None:
+    public_id = UUID(str(public_id))
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT j.public_id,j.created_at,j.updated_at,j.site_id,s.slug,s.name,"
+            "j.profile_id,j.policy_version,j.external_content_id,"
+            "j.external_revision_id,j.content_type,j.langcode,j.status,j.attempts,"
+            "j.source,j.correlation_id,parent.public_id,j.last_error,latest.public_id,"
+            "latest.writeback_status,latest.scored_at,"
+            "EXISTS (SELECT 1 FROM run_log AS reusable WHERE reusable.job_id=j.id "
+            "AND reusable.writeback_status='failed') "
+            "FROM review_job AS j JOIN site AS s ON s.id=j.site_id "
+            "LEFT JOIN review_job AS parent ON parent.id=j.supersedes_job_id "
+            "LEFT JOIN LATERAL (SELECT run.public_id,run.writeback_status,run.scored_at "
+            "FROM run_log AS run WHERE run.job_id=j.id "
+            "ORDER BY run.scored_at DESC,run.id DESC LIMIT 1) AS latest ON TRUE "
+            "WHERE j.public_id=%s",
+            (public_id,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        return None
+    last_error = None if row[17] is None else sanitize_text(row[17], max_length=1000)
+    normalized = (
+        row[0],
+        _as_utc(row[1]),
+        _as_utc(row[2]),
+        *row[3:17],
+        last_error,
+        row[18],
+        row[19],
+        _as_utc(row[20]),
+        row[21],
+    )
+    return JobDetail(*normalized)
 
 
 def _bounds(date_from: date, date_to: date) -> tuple[datetime, datetime]:

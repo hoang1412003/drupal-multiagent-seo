@@ -17,6 +17,7 @@ class AuditAction(str, Enum):
     USER_UNLOCKED = "user_unlocked"
     PASSWORD_RESET = "password_reset"
     LAST_ADMIN_DENIED = "last_admin_denied"
+    JOB_RETRIED = "job_retried"
 
 
 class AuditMetadataError(ValueError):
@@ -34,6 +35,9 @@ _ALLOWED_METADATA = {
     AuditAction.USER_UNLOCKED: frozenset(),
     AuditAction.PASSWORD_RESET: frozenset(),
     AuditAction.LAST_ADMIN_DENIED: frozenset({"operation"}),
+    AuditAction.JOB_RETRIED: frozenset(
+        {"saved_result_available", "new_job_public_id", "reason"}
+    ),
 }
 _SENSITIVE_KEY_PARTS = ("password", "token", "authorization", "cookie", "secret")
 _OUTCOMES = frozenset({"success", "denied", "failed"})

@@ -1,0 +1,58 @@
+<div id="jobs-table" class="jobs-table-region" aria-live="polite">
+{% if error %}
+  <p class="notice error" role="alert">{{ error }}</p>
+{% elif page %}
+  <div class="table-summary">
+    <p><strong>{{ "{:,}".format(page.total) }}</strong> job phù hợp</p>
+    <p>Trang {{ page.page }}{% if page.total_pages %}/{{ page.total_pages }}{% endif %}</p>
+  </div>
+  {% if page.items %}
+    <div class="table-shell" tabindex="0" aria-label="Bảng jobs, có thể cuộn ngang">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Thời gian</th>
+            <th scope="col">Website</th>
+            <th scope="col">External ID</th>
+            <th scope="col">Trạng thái</th>
+            <th scope="col">Lần thử</th>
+            <th scope="col">Nguồn</th>
+            <th scope="col">Policy</th>
+            <th scope="col"><span class="sr-only">Thao tác</span></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for job in page.items %}
+          <tr>
+            <td>
+              <time datetime="{{ job.created_at.isoformat() }}">
+                {{ job.created_at.strftime("%d/%m/%Y %H:%M") }} UTC
+              </time>
+            </td>
+            <td>{{ job.site_slug }}</td>
+            <td><code>{{ job.external_content_id }}</code></td>
+            <td><span class="status-badge status-{{ job.status }}">{{ job.status }}</span></td>
+            <td>{{ job.attempts }}</td>
+            <td>{{ job.source }}</td>
+            <td><code>{{ job.policy_version }}</code></td>
+            <td>
+              <a href="/admin/jobs/{{ job.public_id }}">
+                Chi tiết<span class="sr-only"> {{ job.public_id }}</span>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state"><strong>Không có job phù hợp</strong></div>
+  {% endif %}
+  {% if previous_url or next_url %}
+    <nav class="pagination" aria-label="Phân trang jobs">
+      {% if previous_url %}<a href="{{ previous_url }}">Trang trước</a>{% endif %}
+      {% if next_url %}<a href="{{ next_url }}">Trang sau</a>{% endif %}
+    </nav>
+  {% endif %}
+{% endif %}
+</div>

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from review_platform.admin import dashboard_routes, dependencies, rendering
+from review_platform.admin import dashboard_routes, dependencies, job_routes, rendering
 from review_platform.auth import audit_log, csrf, passwords, sessions, throttle, users
 
 
@@ -301,3 +301,4 @@ router.add_api_route(
     response_class=HTMLResponse,
 )
 router.include_router(dashboard_routes.router)
+router.include_router(job_routes.router)

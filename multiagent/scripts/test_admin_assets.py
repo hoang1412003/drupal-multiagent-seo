@@ -103,11 +103,11 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
     ).body.decode("utf-8")
     hrefs = set(re.findall(r'href="([^"]+)"', html))
     assert "/admin" in hrefs
+    assert "/admin/jobs" in hrefs
     assert "/admin/change-password" in hrefs
     assert ">Tổng quan</a>" in html
     assert ">Trang chủ</a>" not in html
     assert not hrefs & {
-        "/admin/jobs",
         "/admin/reviews",
         "/admin/config-kb",
         "/admin/evaluation",
@@ -116,7 +116,7 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
     }
     assert 'action="/admin/logout"' in html
     assert 'name="csrf_token" value="csrf-test"' in html
-    print("[PASS] nav Task 1 chi co route that va logout POST co CSRF")
+    print("[PASS] nav chi co route that qua Task 4 va logout POST co CSRF")
 
 
 def test_css_shell_co_accessibility_va_mobile_contract():

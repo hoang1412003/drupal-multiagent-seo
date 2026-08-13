@@ -15,6 +15,7 @@
     {% if user %}
     <nav class="primary-nav" aria-label="Điều hướng quản trị">
       <a href="/admin"{% if request.url.path == '/admin' %} aria-current="page"{% endif %}>Tổng quan</a>
+      <a href="/admin/jobs"{% if request.url.path.startswith('/admin/jobs') %} aria-current="page"{% endif %}>Jobs</a>
     </nav>
     <div class="session-nav">
       <p class="header-identity">
