@@ -14,6 +14,7 @@ import os
 import socket
 import sys
 import time
+from uuid import uuid4
 
 _SRC = os.path.dirname(os.path.abspath(__file__))
 if _SRC not in sys.path:
@@ -74,13 +75,21 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
     # CHOT CHAN TIEN: da cham dung noi dung nay roi thi chi ghi lai ket qua,
     # KHONG goi LLM. Duong nay xay ra khi lan truoc pipeline chay xong nhung
     # PATCH that bai. Cham lai ton $0,057 that.
-    cu = audit.da_cham(conn, node_id, chash)
+    cu = audit.find_reusable_writeback(conn, job=job)
     if cu is not None:
         if write_back_fn(node_id=node_id, **cu["payload"]):
-            q.complete(conn, job["id"])
+            with conn.transaction():
+                audit.mark_writeback(conn, cu["id"], status="succeeded")
+                q.complete(conn, job["id"])
             return q.DONE
-        return q.fail(conn, job["id"], "write-back that bai (ghi lai ket qua cu)",
-                      job["attempts"])
+        with conn.transaction():
+            audit.mark_writeback(
+                conn,
+                cu["id"],
+                status="failed",
+                error="write-back that bai (ghi lai ket qua cu)",
+            )
+            return q.fail(conn, job["id"], "write-back that bai (ghi lai ket qua cu)")
 
     if invoke is None:
         from graph import build_graph
@@ -100,8 +109,7 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
             # Worker dat them mot duong thu hai la dung lai dung cai bay vua dep.
             state = invoke({"node_id": node_id})
         except Exception as e:
-            return q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}",
-                          job["attempts"])
+            return q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}")
         duration_ms = int((time.monotonic() - bat_dau) * 1000)
 
         # Import o day (khong o dau module) de tranh nap ca chuoi phu thuoc
@@ -113,10 +121,13 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
 
         report = state.get("report") or {}
         if len(report.get("missing_agents") or []) >= len(graph.AGENT_LABELS):
-            return q.fail(conn, job["id"],
-                          "ca 4 agent khong tra ket qua - nghi hong ha tang",
-                          job["attempts"])
+            return q.fail(
+                conn,
+                job["id"],
+                "ca 4 agent khong tra ket qua - nghi hong ha tang",
+            )
 
+        run_public_id = uuid4()
         payload = _payload_tu_state(state)
         # config_meta phai tra theo DUNG cap khoa ma chinh lan cham nay dung -
         # goi graph.khoa_cua(state) chu KHONG duoc tu goi config.load() khong
@@ -132,7 +143,7 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         # dua sang needs_review (default_revision=false), revision mac dinh van
         # la ban CU da xuat ban - invoke() cham nham noi dung cu trong khi hook
         # gui hash cua ban nhap moi. Ghi theo `chash` trong truong hop do se
-        # ghi sai chinh nhat ky truy vet, va da_cham() sau nay se tra payload
+        # ghi sai chinh nhat ky truy vet, va reusable lookup sau nay se tra payload
         # sai cho hash do vinh vien, khong bao gio goi lai LLM de sua.
         hash_that = text_utils.content_hash(state.get("fields") or {})
         if hash_that != chash:
@@ -144,8 +155,11 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
                 job["id"], node_id, chash, hash_that,
             )
 
-        audit.ghi(
-            conn, job_id=job["id"], node_id=node_id, content_hash=hash_that,
+        run_db_id = audit.ghi_scoped(
+            conn,
+            run_public_id=run_public_id,
+            job=job,
+            content_hash=hash_that,
             duration_ms=duration_ms, report=report,
             config_meta=config.load(**khoa).get("meta") or {},
             usage=list(ai_core.USAGE_LOG), model=ai_core.MODEL, payload=payload,
@@ -153,9 +167,18 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         da_ghi_usage = True
 
         if write_back_fn(node_id=node_id, **payload):
-            q.complete(conn, job["id"])
+            with conn.transaction():
+                audit.mark_writeback(conn, run_db_id, status="succeeded")
+                q.complete(conn, job["id"])
             return q.DONE
-        return q.fail(conn, job["id"], "write-back that bai", job["attempts"])
+        with conn.transaction():
+            audit.mark_writeback(
+                conn,
+                run_db_id,
+                status="failed",
+                error="write-back that bai",
+            )
+            return q.fail(conn, job["id"], "write-back that bai")
     finally:
         # USAGE_LOG la list muc module, KHONG tu xoa (ai_core.py). Luon dam
         # bao no rong khi ra khoi ham, ke ca hai nhanh thoat som (invoke() nem
@@ -174,13 +197,13 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
 def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
     """Nhan va xu ly MOT job, neu hang doi con viec. Rong -> tra None.
 
-    Loi bat ngo trong chay_mot_job() (audit.ghi, q.complete, q.fail,
+    Loi bat ngo trong chay_mot_job() (audit.ghi_scoped, q.complete, q.fail,
     write_back_fn tu no rieng nem loi ...) KHONG duoc de thoat ra ngoai va
     giet ca vong_lap(): mot job hong khong duoc keo theo ca tien trinh, va
     job dang ket o `running` phai doi toi 15 phut moi duoc reclaim_stuck()
-    thu hoi. Kich ban te nhat: audit.ghi() nem loi SAU khi pipeline da chay
+    thu hoi. Kich ban te nhat: audit.ghi_scoped() nem loi SAU khi pipeline da chay
     ton tien nhung TRUOC khi INSERT xong run_log - khong dua job ve
-    queued/failed ngay o day thi lan sau da_cham() khong thay ban ghi, goi
+    queued/failed ngay o day thi lan sau reusable lookup khong thay ban ghi, goi
     lai LLM, tra tien lan hai - dung thu chot chan tien duoc dung ra de ngan.
     """
     job = q.claim(conn, ten)
@@ -193,8 +216,7 @@ def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
     except Exception as e:
         logging.error("[worker %s] job %s (node %s) loi ngoai y muon: %s",
                       ten, job["id"], job["node_id"], e)
-        ket = q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}",
-                     job["attempts"])
+        ket = q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}")
     logging.info("[worker %s] node %s -> %s", ten, job["node_id"], ket)
     return ket
 

@@ -6,15 +6,18 @@ Chay: .venv\\Scripts\\python.exe scripts\\test_audit.py
 import os
 from pathlib import Path
 import sys
+from uuid import UUID, uuid4
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import audit
 import db
-from review_platform import migrations
+import job_queue as q
+from review_platform import migrations, sites
 
 SCHEMA = "vf_test_audit"
 MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
+DEFAULT_SITE_ID = UUID("00000000-0000-4000-8000-000000000001")
 
 _REPORT = {
     "node_id": "uuid-1",
@@ -117,6 +120,279 @@ def test_khong_luu_bi_mat(conn):
     print("[PASS] schema khong co cot cho bi mat/toan van bai")
 
 
+def _default_context(conn):
+    return sites.select_review_context(conn, DEFAULT_SITE_ID, "cam_nang", "vi")
+
+
+def _second_context(conn):
+    site_id = UUID("00000000-0000-4000-8000-000000000010")
+    profile_id = UUID("00000000-0000-4000-8000-000000000011")
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO site (id, slug, name, connector_type, base_url, secret_ref) "
+            "VALUES (%s, 'audit-secondary', 'Audit secondary', 'drupal', "
+            "'http://audit-secondary.local', 'DRUPAL_AUDIT_SECONDARY') "
+            "ON CONFLICT DO NOTHING",
+            (site_id,),
+        )
+        cur.execute(
+            "INSERT INTO review_profile "
+            "(id, code, market_code, language_code, content_type, status, "
+            "policy_version, policy_snapshot) "
+            "VALUES (%s, 'audit-secondary', 'VN', 'vi', 'cam_nang', 'active', "
+            "'cam-nang-vn-v1', '{}'::jsonb) ON CONFLICT DO NOTHING",
+            (profile_id,),
+        )
+        cur.execute(
+            "INSERT INTO site_profile_assignment (site_id, profile_id) VALUES (%s, %s) "
+            "ON CONFLICT DO NOTHING",
+            (site_id, profile_id),
+        )
+    return sites.select_review_context(conn, site_id, "cam_nang", "vi")
+
+
+def _claim_job(conn, context, external_id, content_hash, source="event", **kwargs):
+    queued = q.enqueue_scoped(
+        conn,
+        context,
+        external_id,
+        content_hash,
+        source,
+        **kwargs,
+    )
+    assert queued["status"] == q.QUEUED, queued
+    job = q.claim(conn, "audit-test")
+    assert job["id"] == queued["job_id"], job
+    return job
+
+
+def _ghi_scoped(conn, job, payload=None):
+    return audit.ghi_scoped(
+        conn,
+        run_public_id=uuid4(),
+        job=job,
+        content_hash=job["content_hash"],
+        duration_ms=321,
+        report=_REPORT,
+        config_meta=_CONFIG_META,
+        usage=_USAGE,
+        model="claude-haiku-4-5-20251001",
+        payload=payload or _PAYLOAD,
+    )
+
+
+def test_scoped_audit_cach_ly_hai_site_va_ghi_du_metadata(conn):
+    primary = _default_context(conn)
+    secondary = _second_context(conn)
+    first = _claim_job(
+        conn,
+        primary,
+        "same-external",
+        "same-content",
+        external_revision_id="revision-primary-10",
+    )
+    first_run = _ghi_scoped(conn, first, dict(_PAYLOAD, suggestions="primary"))
+    q.complete(conn, first["id"])
+    second = _claim_job(conn, secondary, "same-external", "same-content")
+    second_run = _ghi_scoped(conn, second, dict(_PAYLOAD, suggestions="secondary"))
+
+    found_first = audit.da_cham_scoped(
+        conn,
+        site_id=primary.site.id,
+        external_content_id="same-external",
+        content_hash="same-content",
+        policy_version=primary.profile.policy_version,
+    )
+    found_second = audit.da_cham_scoped(
+        conn,
+        site_id=secondary.site.id,
+        external_content_id="same-external",
+        content_hash="same-content",
+        policy_version=secondary.profile.policy_version,
+    )
+    assert found_first["id"] == first_run, found_first
+    assert found_first["payload"]["suggestions"] == "primary", found_first
+    assert found_second["id"] == second_run, found_second
+    assert found_second["payload"]["suggestions"] == "secondary", found_second
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT site_id, profile_id, policy_version, external_content_id, "
+            "external_revision_id, content_type, langcode, correlation_id, "
+            "writeback_status, payload FROM run_log WHERE id=%s",
+            (first_run,),
+        )
+        row = cur.fetchone()
+    assert row[:8] == (
+        first["site_id"],
+        first["profile_id"],
+        first["policy_version"],
+        first["external_content_id"],
+        first["external_revision_id"],
+        first["content_type"],
+        first["langcode"],
+        first["correlation_id"],
+    ), row
+    assert row[8] == "pending", row
+    assert not ({"title", "body", "summary"} & set(row[9])), row[9]
+    q.complete(conn, second["id"])
+    print("[PASS] audit scoped cach ly site va ghi du job snapshot")
+
+
+def test_ghi_scoped_tu_choi_full_content_top_level(conn):
+    job = _claim_job(conn, _default_context(conn), "payload-guard", "payload-hash")
+    try:
+        _ghi_scoped(conn, job, dict(_PAYLOAD, body="toan van bai"))
+    except ValueError as exc:
+        assert "body" in str(exc), exc
+    else:
+        raise AssertionError("payload co full content phai bi tu choi")
+    q.complete(conn, job["id"])
+    print("[PASS] ghi_scoped chan full content top-level trong payload")
+
+
+def test_reusable_cung_job_pending_failed_va_mark_terminal(conn):
+    job = _claim_job(conn, _default_context(conn), "reusable-own", "reusable-hash")
+    run_public_id = uuid4()
+    run_db_id = audit.ghi_scoped(
+        conn,
+        run_public_id=run_public_id,
+        job=job,
+        content_hash=job["content_hash"],
+        duration_ms=100,
+        report=_REPORT,
+        config_meta=_CONFIG_META,
+        usage=_USAGE,
+        model="m",
+        payload=_PAYLOAD,
+    )
+    pending = audit.find_reusable_writeback(conn, job=job)
+    assert pending["id"] == run_db_id and pending["run_id"] == run_public_id, pending
+    assert pending["content_hash"] == job["content_hash"], pending
+    assert pending["policy_version"] == job["policy_version"], pending
+    assert pending["writeback_status"] == "pending", pending
+
+    audit.mark_writeback(conn, run_db_id, status="failed", error="x" * 1200)
+    failed = audit.find_reusable_writeback(conn, job=job)
+    assert failed["run_id"] == run_public_id and failed["writeback_status"] == "failed"
+    with conn.cursor() as cur:
+        cur.execute("SELECT length(writeback_error) FROM run_log WHERE id=%s", (run_db_id,))
+        assert cur.fetchone()[0] == 1000
+
+    audit.mark_writeback(conn, run_db_id, status="failed", error="retry van fail")
+    audit.mark_writeback(conn, run_db_id, status="succeeded")
+    assert audit.find_reusable_writeback(conn, job=job) is None
+    try:
+        audit.mark_writeback(conn, run_db_id, status="failed", error="mo lai")
+    except audit.AuditStateError as exc:
+        assert "succeeded" in str(exc), exc
+    else:
+        raise AssertionError("run succeeded khong duoc mo lai")
+    q.complete(conn, job["id"])
+    print("[PASS] reusable pending/failed va terminal transition dung")
+
+
+def test_unknown_va_superseded_la_terminal_khong_reusable(conn):
+    context = _default_context(conn)
+    unknown_job = _claim_job(conn, context, "legacy-unknown", "legacy-hash")
+    unknown_run = _ghi_scoped(conn, unknown_job)
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE run_log SET writeback_status='unknown' WHERE id=%s",
+            (unknown_run,),
+        )
+    assert audit.find_reusable_writeback(conn, job=unknown_job) is None
+    try:
+        audit.mark_writeback(conn, unknown_run, status="succeeded")
+    except audit.AuditStateError as exc:
+        assert "unknown" in str(exc), exc
+    else:
+        raise AssertionError("unknown phai terminal")
+    q.complete(conn, unknown_job["id"])
+
+    superseded_job = _claim_job(conn, context, "terminal-superseded", "terminal-hash")
+    superseded_run = _ghi_scoped(conn, superseded_job)
+    audit.mark_writeback(conn, superseded_run, status="superseded")
+    assert audit.find_reusable_writeback(conn, job=superseded_job) is None
+    try:
+        audit.mark_writeback(conn, superseded_run, status="failed")
+    except audit.AuditStateError as exc:
+        assert "superseded" in str(exc), exc
+    else:
+        raise AssertionError("superseded phai terminal")
+    q.complete(conn, superseded_job["id"])
+    print("[PASS] unknown/superseded la terminal va khong reusable")
+
+
+def test_admin_retry_reuse_failed_target_nhung_manual_force_khong_reuse(conn):
+    context = _default_context(conn)
+    failed_job = _claim_job(conn, context, "admin-target", "admin-target-hash")
+    failed_run = _ghi_scoped(conn, failed_job)
+    audit.mark_writeback(conn, failed_run, status="failed", error="callback fail")
+    with conn.cursor() as cur:
+        cur.execute("UPDATE review_job SET attempts=3 WHERE id=%s", (failed_job["id"],))
+    assert q.fail(conn, failed_job["id"], "callback fail") == q.FAILED
+
+    admin_retry = _claim_job(
+        conn,
+        context,
+        "admin-target",
+        "admin-target-hash",
+        source="admin_retry",
+        force=True,
+        supersedes_job_id=failed_job["id"],
+    )
+    reusable = audit.find_reusable_writeback(conn, job=admin_retry)
+    assert reusable["id"] == failed_run, reusable
+    q.complete(conn, admin_retry["id"])
+
+    done_job = _claim_job(conn, context, "manual-force", "manual-force-hash")
+    done_run = _ghi_scoped(conn, done_job)
+    audit.mark_writeback(conn, done_run, status="succeeded")
+    q.complete(conn, done_job["id"])
+    manual = _claim_job(
+        conn,
+        context,
+        "manual-force",
+        "manual-force-hash",
+        source="manual",
+        force=True,
+    )
+    assert audit.find_reusable_writeback(conn, job=manual) is None
+    q.complete(conn, manual["id"])
+    print("[PASS] admin_retry reuse failed target; manual force succeeded thi cham lai")
+
+
+def test_admin_retry_khong_reuse_run_cua_revision_cu(conn):
+    context = _default_context(conn)
+    failed_job = _claim_job(
+        conn,
+        context,
+        "admin-stale-revision",
+        "admin-stale-hash",
+        external_revision_id="revision-10",
+    )
+    failed_run = _ghi_scoped(conn, failed_job)
+    audit.mark_writeback(conn, failed_run, status="failed", error="callback fail")
+    with conn.cursor() as cur:
+        cur.execute("UPDATE review_job SET attempts=3 WHERE id=%s", (failed_job["id"],))
+    assert q.fail(conn, failed_job["id"], "callback fail") == q.FAILED
+
+    newer_revision = _claim_job(
+        conn,
+        context,
+        "admin-stale-revision",
+        "admin-stale-hash",
+        source="admin_retry",
+        external_revision_id="revision-11",
+        force=True,
+        supersedes_job_id=failed_job["id"],
+    )
+    assert audit.find_reusable_writeback(conn, job=newer_revision) is None
+    q.complete(conn, newer_revision["id"])
+    print("[PASS] admin_retry khong reuse failed run cua revision cu")
+
+
 if __name__ == "__main__":
     try:
         conn = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -133,10 +409,16 @@ if __name__ == "__main__":
         test_da_cham_tra_payload,
         test_da_cham_khac_hash_tra_none,
         test_khong_luu_bi_mat,
+        test_scoped_audit_cach_ly_hai_site_va_ghi_du_metadata,
+        test_ghi_scoped_tu_choi_full_content_top_level,
+        test_reusable_cung_job_pending_failed_va_mark_terminal,
+        test_unknown_va_superseded_la_terminal_khong_reusable,
+        test_admin_retry_reuse_failed_target_nhung_manual_force_khong_reuse,
+        test_admin_retry_khong_reuse_run_cua_revision_cu,
     ):
         try:
             fn(conn)
-        except AssertionError as e:
+        except Exception as e:
             failed = True
             print(f"[FAIL] {fn.__name__}: {e}")
     with conn.cursor() as cur:

@@ -8,6 +8,7 @@ import logging
 import os
 from pathlib import Path
 import sys
+from uuid import UUID
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -60,6 +61,8 @@ def test_job_thanh_cong_ghi_run_log_va_dong_job(conn):
         assert cur.fetchone()[0] == "done"
         cur.execute("SELECT count(*) FROM run_log WHERE node_id='uuid-1'")
         assert cur.fetchone()[0] == 1
+        cur.execute("SELECT writeback_status FROM run_log WHERE node_id='uuid-1'")
+        assert cur.fetchone()[0] == "succeeded"
     print("[PASS] job thanh cong -> run_log co ban ghi, job = done")
 
 
@@ -74,8 +77,10 @@ def test_write_back_that_bai_thi_job_xep_lai(conn):
         status, loi = cur.fetchone()
     assert status == "queued" and "write-back" in loi.lower(), (status, loi)
     with conn.cursor() as cur:
-        cur.execute("SELECT count(*) FROM run_log WHERE node_id='uuid-2'")
-        assert cur.fetchone()[0] == 1, "run_log phai ghi TRUOC khi write_back"
+        cur.execute("SELECT count(*), min(writeback_status) FROM run_log WHERE node_id='uuid-2'")
+        count, writeback_status = cur.fetchone()
+        assert count == 1, "run_log phai ghi TRUOC khi write_back"
+        assert writeback_status == "failed", writeback_status
     print("[PASS] write_back False -> job ve queued, run_log da ghi")
 
 
@@ -108,6 +113,9 @@ def test_da_co_run_log_thi_KHONG_goi_lai_pipeline(conn):
                               write_back_fn=lambda **kw: True)
     assert ket == "done", ket
     assert da_goi == [], "da goi lai pipeline du run_log da co ket qua"
+    with conn.cursor() as cur:
+        cur.execute("SELECT writeback_status FROM run_log WHERE job_id=%s", (job1["id"],))
+        assert cur.fetchone()[0] == "succeeded"
     print("[PASS] da co run_log -> chi write_back lai, khong goi LLM")
 
 
@@ -187,18 +195,18 @@ def test_usage_log_duoc_don_khi_ca_4_agent_loi(conn):
 
 
 def test_loi_bat_ngo_khong_lam_chet_vong_lap(conn):
-    """audit.ghi() nem loi SAU khi pipeline da chay ton tien nhung TRUOC khi
+    """audit.ghi_scoped() nem loi SAU khi pipeline da chay ton tien nhung TRUOC khi
     ghi xong run_log - _xu_ly_tiep_theo() phai bat duoc, dua job ve
     queued/failed, KHONG duoc de ngoai le thoat ra ngoai (se giet vong_lap)."""
     q.enqueue(conn, "uuid-10", "h10", "event")
-    ghi_that = audit.ghi
-    audit.ghi = lambda *a, **kw: (_ for _ in ()).throw(
+    ghi_that = audit.ghi_scoped
+    audit.ghi_scoped = lambda *a, **kw: (_ for _ in ()).throw(
         RuntimeError("mat ket noi Postgres giua chung"))
     try:
         ket = worker._xu_ly_tiep_theo(conn, "test-vonglap", invoke=lambda s: _STATE_XONG,
                                       write_back_fn=lambda **kw: True)
     finally:
-        audit.ghi = ghi_that
+        audit.ghi_scoped = ghi_that
     assert ket in (q.QUEUED, q.FAILED), ket
     with conn.cursor() as cur:
         cur.execute("SELECT status, last_error FROM review_job WHERE node_id='uuid-10'")
@@ -297,6 +305,125 @@ def test_usage_log_duoc_reset(conn):
     print("[PASS] USAGE_LOG duoc reset sau moi job")
 
 
+def test_worker_truyen_nguyen_job_snapshot_va_run_public_id(conn):
+    job = _job(conn, "uuid-30", text_utils.content_hash(_STATE_XONG["fields"]))
+    captured = {}
+    original_find = audit.find_reusable_writeback
+    original_write = audit.ghi_scoped
+    original_mark = audit.mark_writeback
+    audit.find_reusable_writeback = lambda _conn, *, job: None
+
+    def write_spy(_conn, **kwargs):
+        captured["write"] = kwargs
+        return 3030
+
+    def mark_spy(_conn, run_id, **kwargs):
+        captured["mark"] = (run_id, kwargs)
+
+    audit.ghi_scoped = write_spy
+    audit.mark_writeback = mark_spy
+    try:
+        result = worker.chay_mot_job(
+            conn,
+            job,
+            invoke=lambda state: _STATE_XONG,
+            write_back_fn=lambda **payload: True,
+        )
+    finally:
+        audit.find_reusable_writeback = original_find
+        audit.ghi_scoped = original_write
+        audit.mark_writeback = original_mark
+
+    assert result == q.DONE, result
+    assert captured["write"]["job"] is job, captured
+    assert isinstance(captured["write"]["run_public_id"], UUID), captured
+    assert captured["write"]["content_hash"] == text_utils.content_hash(
+        _STATE_XONG["fields"]
+    )
+    assert captured["mark"] == (3030, {"status": "succeeded"}), captured
+    print("[PASS] worker truyen job snapshot, app run UUID va mark dung run")
+
+
+def test_worker_reuse_saved_run_public_id_khong_goi_pipeline(conn):
+    job = _job(conn, "uuid-31", "saved-hash")
+    public_run_id = UUID("00000000-0000-4000-8000-000000000031")
+    saved_payload = {
+        "status": "needs_revision",
+        "score": 76.5,
+        "suggestions": "saved",
+        "report_json": {"version": 1},
+    }
+    saved = {
+        "id": 3131,
+        "run_id": public_run_id,
+        "payload": saved_payload,
+        "external_revision_id": job["external_revision_id"],
+        "content_hash": job["content_hash"],
+        "policy_version": job["policy_version"],
+        "writeback_status": "failed",
+    }
+    calls = {"invoke": 0, "write": [], "mark": []}
+    original_find = audit.find_reusable_writeback
+    original_mark = audit.mark_writeback
+    audit.find_reusable_writeback = lambda _conn, *, job: saved
+    audit.mark_writeback = lambda _conn, run_id, **kw: calls["mark"].append((run_id, kw))
+    try:
+        result = worker.chay_mot_job(
+            conn,
+            job,
+            invoke=lambda state: calls.__setitem__("invoke", calls["invoke"] + 1),
+            write_back_fn=lambda **payload: (calls["write"].append(payload), True)[1],
+        )
+    finally:
+        audit.find_reusable_writeback = original_find
+        audit.mark_writeback = original_mark
+
+    assert result == q.DONE, result
+    assert calls["invoke"] == 0, calls
+    assert calls["write"] == [{"node_id": job["node_id"], **saved_payload}], calls
+    assert calls["mark"] == [(3131, {"status": "succeeded"})], calls
+    assert saved["run_id"] == public_run_id
+    print("[PASS] worker reuse dung saved public run/precondition, khong goi pipeline")
+
+
+def test_callback_nem_loi_giu_pending_de_retry_khong_cham_lai(conn):
+    content_hash = text_utils.content_hash(_STATE_XONG["fields"])
+    q.enqueue(conn, "uuid-32", content_hash, "event")
+
+    def callback_timeout(**payload):
+        raise RuntimeError("response mat sau khi callback co the da apply")
+
+    first = worker._xu_ly_tiep_theo(
+        conn,
+        "callback-timeout",
+        invoke=lambda state: _STATE_XONG,
+        write_back_fn=callback_timeout,
+    )
+    assert first == q.QUEUED, first
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT job.id, run.id, run.writeback_status FROM review_job AS job "
+            "JOIN run_log AS run ON run.job_id=job.id WHERE job.node_id='uuid-32'"
+        )
+        job_id, run_id, status = cur.fetchone()
+        assert status == "pending", status
+        cur.execute("UPDATE review_job SET run_after=now() WHERE id=%s", (job_id,))
+
+    invoke_calls = []
+    second = worker._xu_ly_tiep_theo(
+        conn,
+        "callback-retry",
+        invoke=lambda state: invoke_calls.append(state),
+        write_back_fn=lambda **payload: True,
+    )
+    assert second == q.DONE, second
+    assert invoke_calls == [], invoke_calls
+    with conn.cursor() as cur:
+        cur.execute("SELECT writeback_status FROM run_log WHERE id=%s", (run_id,))
+        assert cur.fetchone()[0] == "succeeded"
+    print("[PASS] callback exception giu pending; retry saved payload khong cham lai")
+
+
 if __name__ == "__main__":
     try:
         conn = _dung_schema_sach()
@@ -319,6 +446,9 @@ if __name__ == "__main__":
         test_config_meta_theo_dung_khoa_cua_state,
         test_ghi_run_log_theo_hash_noi_dung_that_khong_theo_hash_job,
         test_usage_log_duoc_reset,
+        test_worker_truyen_nguyen_job_snapshot_va_run_public_id,
+        test_worker_reuse_saved_run_public_id_khong_goi_pipeline,
+        test_callback_nem_loi_giu_pending_de_retry_khong_cham_lai,
     ):
         try:
             fn(conn)

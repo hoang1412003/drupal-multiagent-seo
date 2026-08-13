@@ -6,6 +6,7 @@ chi thay cac bien ngoai (Drupal, LLM/agent, audit, queue) bang fake/spy.
 """
 import os
 import sys
+from contextlib import nullcontext
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -15,6 +16,11 @@ import graph
 import job_queue as q
 import text_utils
 import worker
+
+
+class _FakeConn:
+    def transaction(self):
+        return nullcontext()
 
 
 def _ket_qua(score):
@@ -54,8 +60,9 @@ def test_worker_voi_graph_mac_dinh_chi_patch_mot_lan():
          lambda article, **keys: _ket_qua(80.0)),
         (graph, "write_back", patch_spy),
         (drupal_client, "write_back", patch_spy),
-        (audit, "da_cham", lambda conn, node_id, content_hash: None),
-        (audit, "ghi", lambda conn, **data: 1),
+        (audit, "find_reusable_writeback", lambda conn, *, job: None),
+        (audit, "ghi_scoped", lambda conn, **data: 1),
+        (audit, "mark_writeback", lambda conn, run_id, **data: None),
         (q, "complete", lambda conn, job_id: None),
         (q, "fail", lambda *args: (_ for _ in ()).throw(
             AssertionError(f"job khong duoc fail: {args}"))),
@@ -65,7 +72,7 @@ def test_worker_voi_graph_mac_dinh_chi_patch_mot_lan():
     for obj, name, replacement in replacements:
         setattr(obj, name, replacement)
     try:
-        result = worker.chay_mot_job(None, job)
+        result = worker.chay_mot_job(_FakeConn(), job)
     finally:
         for obj, name, original in reversed(originals):
             setattr(obj, name, original)
