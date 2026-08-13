@@ -11,6 +11,7 @@ Chay (tu multiagent/): .venv\\Scripts\\python.exe src\\worker.py
 """
 import logging
 import os
+from pathlib import Path
 import socket
 import sys
 import time
@@ -23,13 +24,15 @@ if _SRC not in sys.path:
 import ai_core
 import audit
 import config
-import db
 import job_queue as q
 import reconcile
 import text_utils
+from review_platform import database as platform_database
+from review_platform import migrations
 
 NGU_KHI_RONG_GIAY = 2
 CHU_KY_DOI_SOAT_GIAY = 300
+_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 
 def _payload_tu_state(state: dict) -> dict:
@@ -221,12 +224,9 @@ def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
     return ket
 
 
-def vong_lap(conn=None, ten: str = "") -> None:
-    if conn is None:
-        conn = db.get_conn()
+def _vong_lap_voi_conn(conn, ten: str) -> None:
     ten = ten or f"{socket.gethostname()}:{os.getpid()}"
-    q.dam_bao_bang(conn)
-    audit.dam_bao_bang(conn)
+    migrations.require_current(conn, _MIGRATIONS_DIR)
 
     # Nap model NGAY luc khoi dong, khong de lazy trong lan cham dau
     # (docs/rag-design.md muc 6): lan cham dau se cham them vai giay va nguoi
@@ -251,6 +251,19 @@ def vong_lap(conn=None, ten: str = "") -> None:
 
         if _xu_ly_tiep_theo(conn, ten) is None:
             time.sleep(NGU_KHI_RONG_GIAY)
+
+
+def vong_lap(conn=None, ten: str = "") -> None:
+    """Chay worker tren mot connection rieng trong suot vong doi process.
+
+    Tham so ``conn`` chi giu cho test/compatibility; production khong chia se
+    connection cache cua KB/API.
+    """
+    if conn is not None:
+        _vong_lap_voi_conn(conn, ten)
+        return
+    with platform_database.open_connection() as dedicated_conn:
+        _vong_lap_voi_conn(dedicated_conn, ten)
 
 
 if __name__ == "__main__":

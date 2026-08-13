@@ -134,6 +134,7 @@ python -m venv .venv
 cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL, VF_SERVICE_TOKEN
 
 docker compose up -d                                # Postgres + pgvector (kho vector + hàng đợi + run_log)
+.venv\Scripts\python.exe scripts\migrate.py apply  # bắt buộc trước API, worker và build KB
 .venv\Scripts\python.exe src\kb\build_kb.py         # KB fact-check (4 chunk)
 .venv\Scripts\python.exe src\kb\build_brand_kb.py   # KB brand (1128 chunk, vài phút)
 ```

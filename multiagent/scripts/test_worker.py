@@ -5,6 +5,7 @@ Can Postgres that cho queue/run_log - [SKIP] neu khong co.
 Chay: .venv\\Scripts\\python.exe scripts\\test_worker.py
 """
 import logging
+from contextlib import contextmanager
 import os
 from pathlib import Path
 import sys
@@ -424,6 +425,64 @@ def test_callback_nem_loi_giu_pending_de_retry_khong_cham_lai(conn):
     print("[PASS] callback exception giu pending; retry saved payload khong cham lai")
 
 
+def test_worker_mo_dedicated_connection_va_gate_schema_truoc_model(conn):
+    assert hasattr(worker, "platform_database"), "worker chua co dedicated connection"
+    assert hasattr(worker, "migrations"), "worker chua co startup migration gate"
+    import embeddings
+
+    events = []
+
+    class DedicatedConnection:
+        closed = False
+
+    dedicated = DedicatedConnection()
+
+    @contextmanager
+    def open_connection():
+        events.append("open")
+        try:
+            yield dedicated
+        finally:
+            dedicated.closed = True
+            events.append("close")
+
+    class StopLoop(RuntimeError):
+        pass
+
+    original_open = worker.platform_database.open_connection
+    original_require = worker.migrations.require_current
+    original_embedder = embeddings.get_default_embedder
+    original_reclaim = q.reclaim_stuck
+    worker.platform_database.open_connection = open_connection
+    worker.migrations.require_current = lambda startup_conn, path: events.append(
+        "schema"
+    )
+    embeddings.get_default_embedder = lambda: events.append("model")
+
+    def stop_after_startup(loop_conn):
+        assert loop_conn is dedicated
+        events.append("loop")
+        raise StopLoop
+
+    q.reclaim_stuck = stop_after_startup
+    try:
+        try:
+            worker.vong_lap(ten="startup-test")
+        except StopLoop:
+            pass
+        else:
+            raise AssertionError("test phai dung o lan lap dau")
+    finally:
+        worker.platform_database.open_connection = original_open
+        worker.migrations.require_current = original_require
+        embeddings.get_default_embedder = original_embedder
+        q.reclaim_stuck = original_reclaim
+
+    assert events == ["open", "schema", "model", "loop", "close"], events
+    assert dedicated.closed
+    print("[PASS] worker gate schema truoc model va dong dedicated connection")
+
+
 if __name__ == "__main__":
     try:
         conn = _dung_schema_sach()
@@ -449,6 +508,7 @@ if __name__ == "__main__":
         test_worker_truyen_nguyen_job_snapshot_va_run_public_id,
         test_worker_reuse_saved_run_public_id_khong_goi_pipeline,
         test_callback_nem_loi_giu_pending_de_retry_khong_cham_lai,
+        test_worker_mo_dedicated_connection_va_gate_schema_truoc_model,
     ):
         try:
             fn(conn)
