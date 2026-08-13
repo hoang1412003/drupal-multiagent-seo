@@ -128,6 +128,7 @@ def test_nav_chi_tao_link_den_route_da_co_va_dung_role():
         error="qa",
     ).body.decode("utf-8")
     assert 'href="/admin/users"' in admin_html
+    assert 'href="/admin/audit"' in admin_html
     print("[PASS] nav chi link route da co, users chi admin va logout co CSRF")
 
 

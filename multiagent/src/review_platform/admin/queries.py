@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
+import json
 from pathlib import Path
 import re
 from collections.abc import Mapping
@@ -10,6 +11,7 @@ from uuid import UUID
 
 from review_platform.admin import sanitization
 from review_platform.admin.sanitization import sanitize_text
+from review_platform.auth import audit_log
 from review_platform.auth.rbac import Role
 from review_platform.pricing import CostEstimate, estimate_usage
 
@@ -21,6 +23,8 @@ MAX_RANGE_DAYS = 93
 PERCENTILE_MS_PRECISION = Decimal("0.01")
 QUEUE_STATUSES = ("queued", "running", "failed", "done", "superseded")
 WRITEBACK_STATUSES = ("succeeded", "failed", "superseded", "pending", "unknown")
+AUDIT_ACTIONS = tuple(action.value for action in audit_log.AuditAction)
+AUDIT_OUTCOMES = ("success", "denied", "failed")
 
 
 @dataclass(frozen=True)
@@ -156,6 +160,28 @@ class UserListItem:
     last_login_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+@dataclass(frozen=True)
+class AuditFilters:
+    action: str | None = None
+    outcome: str | None = None
+    actor: str | None = None
+    date_from: date | None = None
+    date_to: date | None = None
+
+
+@dataclass(frozen=True)
+class AuditEventView:
+    id: int
+    actor_user_id: UUID | None
+    actor_username: str
+    action: str
+    target_type: str
+    target_id: str | None
+    outcome: str
+    metadata_text: str
+    created_at: datetime
 
 
 @dataclass(frozen=True)
@@ -627,6 +653,98 @@ def list_users(conn, *, page: int, page_size: int) -> PageView:
                 last_login_at=_as_utc(row[5]),
                 created_at=_as_utc(row[6]),
                 updated_at=_as_utc(row[7]),
+            )
+            for row in cur.fetchall()
+        )
+    return PageView(
+        items=items,
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=(total + page_size - 1) // page_size,
+    )
+
+
+def _audit_where(filters: AuditFilters) -> tuple[str, list]:
+    if not isinstance(filters, AuditFilters):
+        raise ValueError("filters phai la AuditFilters")
+    if filters.action is not None and filters.action not in AUDIT_ACTIONS:
+        raise ValueError("action audit khong hop le")
+    if filters.outcome is not None and filters.outcome not in AUDIT_OUTCOMES:
+        raise ValueError("outcome audit khong hop le")
+    _validate_optional_text("actor", filters.actor, 100)
+    if (filters.date_from is None) != (filters.date_to is None):
+        raise ValueError("date_from/date_to phai di cung nhau")
+
+    clauses = []
+    params = []
+    if filters.action is not None:
+        clauses.append("action=%s")
+        params.append(filters.action)
+    if filters.outcome is not None:
+        clauses.append("outcome=%s")
+        params.append(filters.outcome)
+    if filters.actor is not None:
+        clauses.append("strpos(lower(actor_username),lower(%s)) > 0")
+        params.append(filters.actor)
+    if filters.date_from is not None:
+        start, end = _bounds(filters.date_from, filters.date_to)
+        clauses.extend(("created_at >= %s", "created_at < %s"))
+        params.extend((start, end))
+    return (" AND ".join(clauses) if clauses else "TRUE"), params
+
+
+def _audit_metadata_text(value) -> str:
+    if not isinstance(value, Mapping):
+        return sanitization.REDACTED
+    safe = sanitization.sanitize_mapping(
+        value,
+        max_depth=3,
+        max_items=50,
+        max_text_length=500,
+    )
+    return json.dumps(safe, ensure_ascii=False, sort_keys=True)
+
+
+def list_audit_events(
+    conn,
+    filters: AuditFilters,
+    page: int,
+    page_size: int,
+) -> PageView:
+    if isinstance(page, bool) or not isinstance(page, int) or page < 1:
+        raise ValueError("page phai >= 1")
+    if (
+        isinstance(page_size, bool)
+        or not isinstance(page_size, int)
+        or not 1 <= page_size <= 100
+    ):
+        raise ValueError("page_size phai trong 1..100")
+    where_sql, params = _audit_where(filters)
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT count(*) FROM admin_audit_log WHERE {where_sql}",
+            params,
+        )
+        total = int(cur.fetchone()[0])
+        cur.execute(
+            "SELECT id,actor_user_id,actor_username,action,target_type,target_id,"
+            "outcome,metadata,created_at FROM admin_audit_log "
+            f"WHERE {where_sql} ORDER BY created_at DESC,id DESC "
+            "LIMIT %s OFFSET %s",
+            (*params, page_size, (page - 1) * page_size),
+        )
+        items = tuple(
+            AuditEventView(
+                id=int(row[0]),
+                actor_user_id=row[1],
+                actor_username=sanitize_text(row[2], 200),
+                action=sanitize_text(row[3], 100),
+                target_type=sanitize_text(row[4], 100),
+                target_id=(None if row[5] is None else sanitize_text(row[5], 200)),
+                outcome=sanitize_text(row[6], 30),
+                metadata_text=_audit_metadata_text(row[7]),
+                created_at=_as_utc(row[8]),
             )
             for row in cur.fetchall()
         )

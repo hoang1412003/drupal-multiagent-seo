@@ -21,6 +21,7 @@
       <a href="/admin/evaluation"{% if request.url.path.startswith('/admin/evaluation') %} aria-current="page"{% endif %}>Đánh giá</a>
       {% if user.role.value == 'admin' %}
         <a href="/admin/users"{% if request.url.path.startswith('/admin/users') %} aria-current="page"{% endif %}>Người dùng</a>
+        <a href="/admin/audit"{% if request.url.path == '/admin/audit' %} aria-current="page"{% endif %}>Nhật ký</a>
       {% endif %}
     </nav>
     <div class="session-nav">
