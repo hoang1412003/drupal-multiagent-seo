@@ -11,26 +11,26 @@ Chay (tu multiagent/):
 import hmac
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
 
-import db
 import job_queue as q
+from review_platform import database as platform_database
+from review_platform import migrations
 
 load_dotenv()
+
+_MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
-    """Dam bao bang MOT LAN luc khoi dong, giong worker.vong_lap() - khong
-    phai moi request. Truoc day _conn() goi q.dam_bao_bang() tren MOI request
-    (ke ca GET /health): DDL (CREATE TABLE/INDEX IF NOT EXISTS) tuy idempotent
-    nhung ngang huong "tra loi trong vai ms" o docstring module nay, va
-    handler dong bo cua FastAPI chay trong threadpool nen nhieu request dong
-    thoi se cung phat DDL vao Postgres."""
-    q.dam_bao_bang(db.get_conn())
+    """Fail-fast neu schema chua current; startup khong tu apply migration."""
+    with platform_database.open_connection() as conn:
+        migrations.require_current(conn, _MIGRATIONS_DIR)
     yield
 
 
@@ -57,7 +57,9 @@ def kiem_token(authorization: str = Header(default="")) -> None:
 
 
 def _conn():
-    return db.get_conn()
+    """Moi request so huu mot connection va FastAPI dong no sau response."""
+    with platform_database.open_connection() as conn:
+        yield conn
 
 
 def tao_job(body: JobIn, conn) -> dict:
@@ -80,7 +82,7 @@ def health(conn) -> dict:
 
 
 @app.post("/jobs", dependencies=[Depends(kiem_token)])
-def post_jobs(body: JobIn, response: Response):
+def post_jobs(body: JobIn, response: Response, conn=Depends(_conn)):
     """Ma HTTP theo dung ket qua: spec muc 5.4 quy dinh job trung phai la 200,
     chi job MOI moi la 202. Truoc day status_code=202 khai bao co dinh tren
     decorator ep moi phan hoi thanh cong thanh 202 - dung, vi ServiceClient
@@ -92,7 +94,7 @@ def post_jobs(body: JobIn, response: Response):
     content_hash) nay da bo cuoc truoc do (het MAX_ATTEMPTS). Khong phai loi
     cua request nay - dung 409 chu khong phai 4xx/5xx khac de phan biet voi
     loi xac thuc (401) hay loi payload (422)."""
-    kq = tao_job(body, _conn())
+    kq = tao_job(body, conn)
     if kq["status"] == "dead_letter":
         response.status_code = 409
     elif kq["status"] == "duplicate":
@@ -103,10 +105,10 @@ def post_jobs(body: JobIn, response: Response):
 
 
 @app.get("/jobs/by-node/{node_id}", dependencies=[Depends(kiem_token)])
-def get_trang_thai(node_id: str):
-    return trang_thai(node_id, _conn())
+def get_trang_thai(node_id: str, conn=Depends(_conn)):
+    return trang_thai(node_id, conn)
 
 
 @app.get("/health")
-def get_health():
-    return health(_conn())
+def get_health(conn=Depends(_conn)):
+    return health(conn)

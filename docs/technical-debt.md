@@ -611,11 +611,11 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 ---
 
-## 8. BÀN GIAO — việc còn lại (cập nhật 2026-08-12)
+## 8. BÀN GIAO — việc còn lại (cập nhật 2026-08-13)
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`; full suite offline **41/41 test script xanh**. HEAD có thể là descendant chỉ thêm tài liệu, nhưng trước lượt đo phải xác minh diff agent/fact-check/graph/scoring/config/rule/retrieval/KB so với `04f10e1` rỗng và ghi HEAD thực tế vào evidence. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
+**Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`. Foundation code HEAD `4ff7824` đã chạy full suite offline **43/43 test script xanh**, 0 skip/fail, và diff score-path so với `04f10e1` rỗng; evidence ở `docs/evidence/platform-foundation-verification.txt`. Trước lượt đo vẫn phải ghi HEAD thực tế và xác minh lại vì nhánh có thể được integrate thêm. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
 
 **Trạng thái ngắn cho AI/model tiếp nhận:**
 
@@ -624,7 +624,7 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
 - ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
 - ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
-- 📝 **Productization/admin đã có design + implementation plan, chưa triển khai code:** làm song song nhưng không đổi score-path; đọc mục 8.9, design spec và plan tổng trước khi viết code. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên.
+- ✅ **Productization P1 Foundation đã qua checkpoint; admin chưa triển khai:** migration/site/profile/scoped queue-audit và connection lifecycle đã có trên nhánh feature; P2 Admin Auth là việc code tiếp theo sau khi integrate. Đọc mục 8.9 và evidence trước khi làm. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -761,11 +761,11 @@ Test tích hợp offline mới `scripts/test_worker_graph_integration.py` đã g
 
 Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **không làm mất hiệu lực quan hệ đo lường 8.1 → 8.2**. Trước production pilot vẫn phải đếm revision/request trên Drupal thật; test offline đóng lỗi ownership trong code nhưng không thay thế smoke test CMS.
 
-### 8.9. Productization service độc lập + trang quản trị — 📝 PLAN ĐÃ SỬA SAU REVIEW, CHƯA TRIỂN KHAI
+### 8.9. Productization service độc lập + trang quản trị — ✅ P1 FOUNDATION ĐÃ TRIỂN KHAI; P2–P5 CHƯA TRIỂN KHAI
 
 Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
-Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Plan có TDD, migration 0001–0004, checkpoint score freeze, cutover/rollback và ma trận 11 tiêu chí; đợt review tiếp theo đã sửa sáu khe hở bên dưới; **chưa task code nào được thực thi**.
+Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). **Plan 1 Foundation đã triển khai trên nhánh `feat/platform-foundation` qua các commit `81ce132` → `4ff7824`; evidence checkpoint ở [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt).** Plan 2–5 vẫn chỉ là kế hoạch, chưa được phép suy auth/admin UI, `/api/v1`, connector callback, bảng usage event hay hardening đã tồn tại.
 
 **Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
 
@@ -773,7 +773,7 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 
 **Bảo vệ phép đo:** không sửa agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml`. `prompt_version` phải giữ `020738e209017213`; nếu đổi thì dừng productization và xử lý theo `evaluation-plan.md` mục 3a. Không chen hạng mục này vào trước test–retest/E1 và không tự chạy phép đo trả phí.
 
-**Thứ tự triển khai được đặc tả trong plan, chưa thực thi:** (1) foundation migration/site/profile; (2) local auth/admin shell; (3) dashboard/jobs/history/users/config/KB/evaluation; (4) connector Drupal + `/api/v1`; (5) observability/security/integration/rollout. Migration phải nâng schema hiện hành không mất queue/run/KB. Service không lưu toàn văn bài nháp và không lưu secret plaintext.
+**Trạng thái triển khai theo thứ tự plan:** (1) foundation migration/site/profile/scoped queue/audit **đã xong và qua checkpoint**; (2) local auth/admin shell **là việc tiếp theo**; (3) dashboard/jobs/history/users/config/KB/evaluation chưa làm; (4) connector Drupal + `/api/v1` chưa làm; (5) observability/security/integration/rollout chưa làm. Migration 0001 đã nâng schema hiện hành mà giữ row count queue/run/KB; 6 run legacy được giữ `writeback_status=unknown`, không bịa kết quả write-back.
 
 **Sáu quyết định bắt buộc sau implementation review:**
 
@@ -784,7 +784,7 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 5. Run lịch sử backfill `writeback_status=unknown`, không bịa thành `succeeded` và không đưa vào tỷ lệ thành công/thất bại.
 6. Test connection kiểm pending feed + result capability + exact-revision read; generic collection GET không đủ để báo `ok`.
 
-**Việc tiếp theo của luồng productization:** plan đã qua lượt review/sửa này; khi bắt đầu code, thực thi Foundation Task 1 theo TDD. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy callback, bảng usage, CLI hoặc module trong spec/plan đã tồn tại.
+**Việc tiếp theo của luồng productization:** bắt đầu [`superpowers/plans/2026-08-12-platform-admin-auth.md`](superpowers/plans/2026-08-12-platform-admin-auth.md) Task 1 theo TDD, chỉ sau khi nhánh Foundation được review/integrate theo quyết định của chủ dự án. Không tự chạy E1/E5. Không được suy callback CAS, `llm_usage_event`, `/api/v1`, admin login/UI hoặc module Drupal mới đã tồn tại chỉ vì chúng có trong plan.
 
 ---
 
@@ -883,12 +883,12 @@ Các việc dưới đây là hardening dài hạn. Không chen chúng vào gi�
 - Ghi số lần thử, token và chi phí theo job/agent.
 - Có trần ngân sách hoặc số lần gọi để một job lỗi không tiêu tiền không kiểm soát.
 
-### H3. Migration và an toàn kết nối PostgreSQL
+### H3. Migration và an toàn kết nối PostgreSQL — ✅ PHẦN FOUNDATION ĐÃ ĐÓNG; POOL VẪN MỞ
 
-- Thay việc chỉ dựa vào `CREATE TABLE IF NOT EXISTS` bằng migration có version cho queue, audit và vector schema.
-- Kiểm thử nâng cấp từ schema đang tồn tại, không chỉ tạo database mới.
-- Xử lý khe hở `force=True` trên connection cache dùng chung đã ghi ở mục 6 trước khi có nhiều request đồng thời; ưu tiên transaction/connection riêng theo request hoặc pool có ranh giới rõ.
-- Phần migration site/profile/admin đã được đưa vào design productization mục 8.9; khi triển khai phải giải quyết cùng nợ này, không dựng cơ chế migration thứ hai.
+- ✅ Migration runner có version/checksum và migration 0001 đã thay runtime DDL cho queue/audit/vector schema; startup chỉ `require_current`, không tự apply.
+- ✅ Test nâng từ schema legacy và backup/dev row-count chứng minh không mất queue, run history, payload JSON hoặc KB. Evidence: [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt).
+- ✅ API dùng connection riêng theo request; worker dùng một dedicated connection và kiểm schema trước khi preload model. Enqueue thường/force và chuyển dead-letter được bảo vệ bằng transaction/row lock, có RED→GREEN regression.
+- ⚠️ Chưa có connection pool. Graph/retrieval legacy vẫn có cache connection riêng với queue/worker. Chỉ thêm pool khi tải thực tế hoặc hardening yêu cầu, với ownership/close/health rõ; không được ghi như thể pool đã tồn tại.
 
 ### H4. Khoá phiên bản dependency Python
 

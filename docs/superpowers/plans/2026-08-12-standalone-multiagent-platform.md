@@ -4,7 +4,7 @@
 
 **Goal:** Chuyển phần Multi-Agent hiện tại thành service độc lập có schema site/profile, API Drupal có version, trang quản trị local-auth và bộ công cụ vận hành, trong khi giữ nguyên hành vi chấm điểm của Sprint 3.
 
-**Architecture:** Triển khai theo modular monolith trong `multiagent/src/platform/`, giữ `multiagent/src/api.py` làm entrypoint FastAPI và worker là tiến trình riêng. Năm plan con tạo các lát phần mềm chạy được độc lập: nền dữ liệu → auth/admin shell → admin vận hành → API/connector Drupal → hardening và rollout.
+**Architecture:** Triển khai theo modular monolith trong `multiagent/src/review_platform/`, giữ `multiagent/src/api.py` làm entrypoint FastAPI và worker là tiến trình riêng. Năm plan con tạo các lát phần mềm chạy được độc lập: nền dữ liệu → auth/admin shell → admin vận hành → API/connector Drupal → hardening và rollout.
 
 **Tech Stack:** Python 3.12, FastAPI, Jinja2, HTMX 2.0.10, Argon2id, psycopg 3, PostgreSQL 17 + pgvector, Drupal 10.6, DDEV/PHP 8.4.
 
@@ -100,13 +100,13 @@ multiagent/
     └── site_credential.py
 ```
 
-Không tạo `platform/engine/` bằng một lần di chuyển hàng loạt. Trong MVP, engine boundary là adapter gọi `graph.build_graph(include_write_back=False)`; chỉ di chuyển agent/graph sau Sprint 3 bằng refactor riêng nếu thật sự cần.
+Không tạo `review_platform/engine/` bằng một lần di chuyển hàng loạt. Trong MVP, engine boundary là adapter gọi `graph.build_graph(include_write_back=False)`; chỉ di chuyển agent/graph sau Sprint 3 bằng refactor riêng nếu thật sự cần.
 
 ---
 
 ## Checkpoint liên plan
 
-- [ ] **Sau Plan 1:** migration nâng được schema cũ; dữ liệu không mất; legacy API/worker tests xanh; score-path diff rỗng.
+- [x] **Sau Plan 1:** migration nâng được schema cũ; dữ liệu không mất; legacy API/worker tests xanh; score-path diff rỗng. Evidence: `docs/evidence/platform-foundation-verification.txt`.
 - [ ] **Sau Plan 2:** đăng nhập/logout/đổi mật khẩu/RBAC/CSRF/rate-limit hoạt động; chưa có action vận hành ngoài logout/password.
 - [ ] **Sau Plan 3:** viewer xem được dữ liệu thật; operator/admin action đúng quyền; config/KB/evaluation không có đường ghi.
 - [ ] **Sau Plan 4:** Drupal Needs Review tạo đúng một scoped job, fetch đúng revision, result callback CAS/idempotent chỉ ghi một lần; job cũ không ghi đè job mới; endpoint/hash v1 vẫn chạy trong cửa sổ rollback.

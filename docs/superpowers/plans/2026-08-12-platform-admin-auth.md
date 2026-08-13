@@ -33,17 +33,17 @@
 | File | Trách nhiệm |
 |---|---|
 | `multiagent/migrations/0002_admin_auth.sql` | User/session/throttle/audit schema |
-| `multiagent/src/platform/auth/passwords.py` | Hash/verify/rehash/password policy |
-| `multiagent/src/platform/auth/users.py` | User repository + last-admin invariant |
-| `multiagent/src/platform/auth/sessions.py` | Issue/resolve/touch/revoke session |
-| `multiagent/src/platform/auth/csrf.py` | Session CSRF + signed pre-auth CSRF |
-| `multiagent/src/platform/auth/throttle.py` | Login attempt window/block |
-| `multiagent/src/platform/auth/rbac.py` | Role enum/rank/authorization |
-| `multiagent/src/platform/auth/audit_log.py` | Action enum + sanitized INSERT |
-| `multiagent/src/platform/admin/dependencies.py` | Session/RBAC/DB dependencies |
-| `multiagent/src/platform/admin/router.py` | Login/logout/change-password/admin home |
-| `multiagent/src/platform/admin/templates/` | Base/login/home/change-password/error |
-| `multiagent/src/platform/admin/static/admin.css` | UI shell accessible/responsive |
+| `multiagent/src/review_platform/auth/passwords.py` | Hash/verify/rehash/password policy |
+| `multiagent/src/review_platform/auth/users.py` | User repository + last-admin invariant |
+| `multiagent/src/review_platform/auth/sessions.py` | Issue/resolve/touch/revoke session |
+| `multiagent/src/review_platform/auth/csrf.py` | Session CSRF + signed pre-auth CSRF |
+| `multiagent/src/review_platform/auth/throttle.py` | Login attempt window/block |
+| `multiagent/src/review_platform/auth/rbac.py` | Role enum/rank/authorization |
+| `multiagent/src/review_platform/auth/audit_log.py` | Action enum + sanitized INSERT |
+| `multiagent/src/review_platform/admin/dependencies.py` | Session/RBAC/DB dependencies |
+| `multiagent/src/review_platform/admin/router.py` | Login/logout/change-password/admin home |
+| `multiagent/src/review_platform/admin/templates/` | Base/login/home/change-password/error |
+| `multiagent/src/review_platform/admin/static/admin.css` | UI shell accessible/responsive |
 | `multiagent/scripts/admin_user.py` | Bootstrap/reset/lock CLI interactive |
 
 ---
@@ -157,10 +157,10 @@ git commit -m "feat: add admin authentication schema"
 ### Task 2: Password và user repository với last-admin guard
 
 **Files:**
-- Create: `multiagent/src/platform/auth/__init__.py`
-- Create: `multiagent/src/platform/auth/passwords.py`
-- Create: `multiagent/src/platform/auth/users.py`
-- Create: `multiagent/src/platform/auth/rbac.py`
+- Create: `multiagent/src/review_platform/auth/__init__.py`
+- Create: `multiagent/src/review_platform/auth/passwords.py`
+- Create: `multiagent/src/review_platform/auth/users.py`
+- Create: `multiagent/src/review_platform/auth/rbac.py`
 - Create: `multiagent/scripts/test_admin_users.py`
 
 **Interfaces:**
@@ -210,7 +210,7 @@ Test username normalize bằng `unicodedata.normalize("NFKC", username).casefold
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_users.py
 .\.venv\Scripts\python.exe scripts\test_moi_test_deu_chay.py
-git -C .. add multiagent/src/platform/auth multiagent/scripts/test_admin_users.py
+git -C .. add multiagent/src/review_platform/auth multiagent/scripts/test_admin_users.py
 git commit -m "feat: add Argon2id admin users and role invariants"
 ```
 
@@ -219,8 +219,8 @@ git commit -m "feat: add Argon2id admin users and role invariants"
 ### Task 3: Session server-side và CSRF
 
 **Files:**
-- Create: `multiagent/src/platform/auth/sessions.py`
-- Create: `multiagent/src/platform/auth/csrf.py`
+- Create: `multiagent/src/review_platform/auth/sessions.py`
+- Create: `multiagent/src/review_platform/auth/csrf.py`
 - Create: `multiagent/scripts/test_admin_sessions.py`
 
 **Interfaces:**
@@ -247,7 +247,7 @@ Token format `nonce.signature` với nonce 32 bytes URL-safe, signature `HMAC-SH
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_sessions.py
-git -C .. add multiagent/src/platform/auth/sessions.py multiagent/src/platform/auth/csrf.py multiagent/scripts/test_admin_sessions.py
+git -C .. add multiagent/src/review_platform/auth/sessions.py multiagent/src/review_platform/auth/csrf.py multiagent/scripts/test_admin_sessions.py
 git commit -m "feat: add server-side admin sessions and CSRF"
 ```
 
@@ -256,8 +256,8 @@ git commit -m "feat: add server-side admin sessions and CSRF"
 ### Task 4: Login throttle và auth audit allowlist
 
 **Files:**
-- Create: `multiagent/src/platform/auth/throttle.py`
-- Create: `multiagent/src/platform/auth/audit_log.py`
+- Create: `multiagent/src/review_platform/auth/throttle.py`
+- Create: `multiagent/src/review_platform/auth/audit_log.py`
 - Create: `multiagent/scripts/test_admin_login_security.py`
 
 **Interfaces:**
@@ -284,7 +284,7 @@ Tối thiểu: `login_success`, `login_failed`, `logout`, `password_changed`, `u
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_login_security.py
-git -C .. add multiagent/src/platform/auth/throttle.py multiagent/src/platform/auth/audit_log.py multiagent/scripts/test_admin_login_security.py
+git -C .. add multiagent/src/review_platform/auth/throttle.py multiagent/src/review_platform/auth/audit_log.py multiagent/scripts/test_admin_login_security.py
 git commit -m "feat: rate limit and audit admin authentication"
 ```
 
@@ -293,15 +293,15 @@ git commit -m "feat: rate limit and audit admin authentication"
 ### Task 5: Admin router login/logout/password và RBAC dependency
 
 **Files:**
-- Create: `multiagent/src/platform/admin/__init__.py`
-- Create: `multiagent/src/platform/admin/dependencies.py`
-- Create: `multiagent/src/platform/admin/router.py`
-- Create: `multiagent/src/platform/admin/templates/base.html`
-- Create: `multiagent/src/platform/admin/templates/login.html`
-- Create: `multiagent/src/platform/admin/templates/home.html`
-- Create: `multiagent/src/platform/admin/templates/change_password.html`
-- Create: `multiagent/src/platform/admin/templates/403.html`
-- Create: `multiagent/src/platform/admin/static/admin.css`
+- Create: `multiagent/src/review_platform/admin/__init__.py`
+- Create: `multiagent/src/review_platform/admin/dependencies.py`
+- Create: `multiagent/src/review_platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/templates/base.html`
+- Create: `multiagent/src/review_platform/admin/templates/login.html`
+- Create: `multiagent/src/review_platform/admin/templates/home.html`
+- Create: `multiagent/src/review_platform/admin/templates/change_password.html`
+- Create: `multiagent/src/review_platform/admin/templates/403.html`
+- Create: `multiagent/src/review_platform/admin/static/admin.css`
 - Modify: `multiagent/src/api.py`
 - Create: `multiagent/scripts/test_admin_routes.py`
 
@@ -360,7 +360,7 @@ Jinja autoescape bật. Base có skip-link, semantic nav/main, visible focus, er
 - [ ] **Step 8: Commit**
 
 ```powershell
-git -C .. add multiagent/src/platform/admin multiagent/src/api.py multiagent/scripts/test_admin_routes.py
+git -C .. add multiagent/src/review_platform/admin multiagent/src/api.py multiagent/scripts/test_admin_routes.py
 git commit -m "feat: add secure admin login and role gate"
 ```
 

@@ -9,7 +9,13 @@ backoff, dead-letter - ma khong them mot container phai van hanh, backup va
 giai thich. Day la mau dung trong san pham that (pgmq, Oban, River,
 Solid Queue). Khac biet chi xuat hien o quy mo hang nghin job/giay.
 """
-import db
+import math
+from pathlib import Path
+import random
+from uuid import UUID, uuid4
+
+from review_platform.context import ReviewContext
+from review_platform import migrations, sites
 
 TEN_BANG = "review_job"
 
@@ -18,6 +24,7 @@ RUNNING = "running"
 DONE = "done"
 FAILED = "failed"
 SUPERSEDED = "superseded"
+DUPLICATE = "duplicate"
 
 MAX_ATTEMPTS = 3
 BACKOFF_GIAY = (60, 300)
@@ -25,110 +32,268 @@ KET_SAU_PHUT = 15
 
 
 def dam_bao_bang(conn) -> None:
-    """Tao bang neu chua co. Cung mau voi db.dam_bao_bang cho kb_chunk -
-    khong dung framework migration, o hai bang thi do la ha tang thua."""
+    """Compatibility guard: schema queue chi duoc tao boi migration runner."""
+    migrations.require_current(
+        conn,
+        Path(__file__).resolve().parents[1] / "migrations",
+    )
+
+
+DEFAULT_SITE_ID = UUID("00000000-0000-4000-8000-000000000001")
+DEFAULT_CONTENT_TYPE = "cam_nang"
+DEFAULT_LANGCODE = "vi"
+
+
+def _validate_non_empty(name: str, value: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{name} khong duoc rong")
+    return value
+
+
+def _insert_scoped(
+    conn,
+    context: ReviewContext,
+    external_content_id: str,
+    content_hash: str,
+    source: str,
+    external_revision_id: str | None,
+    correlation_id: UUID,
+    supersedes_job_id: int | None,
+):
     with conn.cursor() as cur:
         cur.execute(
-            f"CREATE TABLE IF NOT EXISTS {TEN_BANG} ("
-            "  id           bigserial PRIMARY KEY,"
-            "  node_id      text        NOT NULL,"
-            "  content_hash text        NOT NULL,"
-            "  status       text        NOT NULL,"
-            "  attempts     int         NOT NULL DEFAULT 0,"
-            "  run_after    timestamptz NOT NULL DEFAULT now(),"
-            "  claimed_at   timestamptz,"
-            "  claimed_by   text,"
-            "  last_error   text,"
-            "  source       text        NOT NULL,"
-            "  created_at   timestamptz NOT NULL DEFAULT now(),"
-            "  updated_at   timestamptz NOT NULL DEFAULT now()"
-            ")"
+            f"INSERT INTO {TEN_BANG} ("
+            "node_id, content_hash, status, source, site_id, profile_id, "
+            "policy_version, external_content_id, external_revision_id, "
+            "content_type, langcode, correlation_id, supersedes_job_id"
+            ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+            "ON CONFLICT DO NOTHING RETURNING id",
+            (
+                external_content_id,
+                content_hash,
+                QUEUED,
+                source,
+                context.site.id,
+                context.profile.id,
+                context.profile.policy_version,
+                external_content_id,
+                external_revision_id,
+                context.profile.content_type,
+                context.profile.language_code,
+                correlation_id,
+                supersedes_job_id,
+            ),
         )
-        # Index BO PHAN: chi rang buoc tren job chua ket thuc. Co y loai
-        # `failed` (job hong phai xep hang lai duoc) va `superseded` (danh
-        # rieng cho nut "Cham lai" thu cong).
+        return cur.fetchone()
+
+
+def _active_duplicate_id(
+    conn,
+    *,
+    site_id: UUID,
+    external_content_id: str,
+    content_hash: str,
+    policy_version: str,
+):
+    with conn.cursor() as cur:
         cur.execute(
-            f"CREATE UNIQUE INDEX IF NOT EXISTS {TEN_BANG}_dedup "
-            f"ON {TEN_BANG} (node_id, content_hash) "
-            f"WHERE status IN ('{QUEUED}', '{RUNNING}', '{DONE}')"
+            f"SELECT id FROM {TEN_BANG} "
+            "WHERE site_id=%s AND external_content_id=%s AND content_hash=%s "
+            "AND policy_version=%s AND status IN (%s,%s,%s) "
+            "ORDER BY created_at DESC, id DESC LIMIT 1",
+            (
+                site_id,
+                external_content_id,
+                content_hash,
+                policy_version,
+                QUEUED,
+                RUNNING,
+                DONE,
+            ),
         )
-        cur.execute(
-            f"CREATE INDEX IF NOT EXISTS {TEN_BANG}_claim "
-            f"ON {TEN_BANG} (status, run_after)"
+        row = cur.fetchone()
+    return None if row is None else row[0]
+
+
+def enqueue_scoped(
+    conn,
+    context: ReviewContext,
+    external_content_id: str,
+    content_hash: str,
+    source: str,
+    *,
+    external_revision_id: str | None = None,
+    force: bool = False,
+    correlation_id: UUID | None = None,
+    supersedes_job_id: int | None = None,
+) -> dict:
+    """Xep job voi snapshot site/profile/policy; dedup khong xuyen site."""
+    external_content_id = _validate_non_empty(
+        "external_content_id", external_content_id
+    )
+    content_hash = _validate_non_empty("content_hash", content_hash)
+    source = _validate_non_empty("source", source)
+    if external_revision_id is not None:
+        external_revision_id = _validate_non_empty(
+            "external_revision_id", external_revision_id
         )
+    if supersedes_job_id is not None and not force:
+        raise ValueError("supersedes_job_id chi hop le khi force=True")
+    correlation_id = correlation_id or uuid4()
 
-
-def enqueue(conn, node_id: str, content_hash: str, source: str,
-            force: bool = False) -> dict:
-    """Xep mot job. Trung dedup -> khong tao gi, tra status='duplicate'.
-
-    `force=True` (nut "Cham lai" thu cong): danh dau job `done` cua dung cap
-    (node_id, content_hash) thanh `superseded` de no roi khoi index dedup,
-    roi chen job moi. KHONG xoa ban ghi cu - lich su van tra duoc.
-
-    UPDATE (superseded) va INSERT (job moi) o nhanh force PHAI nguyen tu:
-    bao trong `conn.transaction()` de neu gian doan giua chung (crash, mat
-    ket noi) thi Postgres tu rollback - khong de lai job cu da `superseded`
-    ma khong co job thay the (nut "Cham lai" mat job im lang).
-
-    `force=False` va da co job `failed` cung cap (node_id, content_hash) ->
-    KHONG INSERT, tra {"status": "dead_letter", "job_id": <id job failed>}.
-    Truoc day phep kiem nay CHI co o vong doi soat (reconcile.py, spec muc
-    6.3.1), khong o day - nen mot bai da dead-letter, editor mo form bam Save
-    ma khong sua gi cung du de bat lai ca 3 luot thu, du Save khong phai thao
-    tac duoc phep tieu tien (quyen do danh rieng cho nut "Cham lai"). Index
-    dedup van CO Y loai `failed` (INSERT van thanh cong ve mat SQL) - phep
-    kiem o day chan TRUOC ca khi cham toi INSERT, o tang ung dung.
-    """
     if not force:
-        with conn.cursor() as cur:
-            cur.execute(
-                f"SELECT id FROM {TEN_BANG} "
-                f"WHERE node_id=%s AND content_hash=%s AND status=%s LIMIT 1",
-                (node_id, content_hash, FAILED),
-            )
-            that_bai = cur.fetchone()
-        if that_bai is not None:
-            return {"status": "dead_letter", "job_id": that_bai[0]}
-
-    if force:
+        # Khoa moi job co the anh huong quyet dinh truoc khi INSERT. Neu mot
+        # worker dang dua job running -> failed, hai transaction se xep hang
+        # tren cung row; khong con khe "kiem dead-letter -> job thanh failed
+        # -> INSERT queued" hoi sinh job da het retry.
         with conn.transaction():
             with conn.cursor() as cur:
                 cur.execute(
-                    f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
-                    f"WHERE node_id=%s AND content_hash=%s AND status=%s",
-                    (SUPERSEDED, node_id, content_hash, DONE),
+                    f"SELECT id, status FROM {TEN_BANG} "
+                    "WHERE site_id=%s AND external_content_id=%s "
+                    "AND content_hash=%s AND policy_version=%s "
+                    "AND status IN (%s,%s,%s,%s) "
+                    "ORDER BY created_at DESC, id DESC FOR UPDATE",
+                    (
+                        context.site.id,
+                        external_content_id,
+                        content_hash,
+                        context.profile.policy_version,
+                        QUEUED,
+                        RUNNING,
+                        DONE,
+                        FAILED,
+                    ),
                 )
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"INSERT INTO {TEN_BANG} (node_id, content_hash, status, source) "
-                    f"VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING id",
-                    (node_id, content_hash, QUEUED, source),
-                )
-                row = cur.fetchone()
+                existing = list(cur.fetchall())
+
+            failed_row = next(
+                (row for row in existing if row[1] == FAILED),
+                None,
+            )
+            if failed_row is not None:
+                return {"status": "dead_letter", "job_id": failed_row[0]}
+
+            active_row = next(
+                (row for row in existing if row[1] in (QUEUED, RUNNING, DONE)),
+                None,
+            )
+            if active_row is not None:
+                return {"status": DUPLICATE, "job_id": active_row[0]}
+
+            row = _insert_scoped(
+                conn,
+                context,
+                external_content_id,
+                content_hash,
+                source,
+                external_revision_id,
+                correlation_id,
+                supersedes_job_id,
+            )
     else:
-        with conn.cursor() as cur:
-            cur.execute(
-                f"INSERT INTO {TEN_BANG} (node_id, content_hash, status, source) "
-                f"VALUES (%s, %s, %s, %s) ON CONFLICT DO NOTHING RETURNING id",
-                (node_id, content_hash, QUEUED, source),
+        with conn.transaction():
+            target_id = supersedes_job_id
+            if target_id is not None:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT site_id, external_content_id, profile_id, "
+                        f"policy_version, status FROM {TEN_BANG} "
+                        "WHERE id=%s FOR UPDATE",
+                        (target_id,),
+                    )
+                    target = cur.fetchone()
+                expected = (
+                    context.site.id,
+                    external_content_id,
+                    context.profile.id,
+                    context.profile.policy_version,
+                )
+                if target is None or target[:4] != expected or target[4] not in (
+                    FAILED,
+                    DONE,
+                    SUPERSEDED,
+                ):
+                    raise ValueError("supersedes_job_id khong cung scope/trang thai")
+                if target[4] == DONE:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
+                            "WHERE id=%s",
+                            (SUPERSEDED, target_id),
+                        )
+            else:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT id FROM {TEN_BANG} "
+                        "WHERE site_id=%s AND external_content_id=%s "
+                        "AND profile_id=%s AND policy_version=%s "
+                        "AND content_hash=%s AND status=%s "
+                        "ORDER BY created_at DESC, id DESC LIMIT 1 FOR UPDATE",
+                        (
+                            context.site.id,
+                            external_content_id,
+                            context.profile.id,
+                            context.profile.policy_version,
+                            content_hash,
+                            DONE,
+                        ),
+                    )
+                    target = cur.fetchone()
+                if target is not None:
+                    target_id = target[0]
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
+                            "WHERE id=%s",
+                            (SUPERSEDED, target_id),
+                        )
+
+            row = _insert_scoped(
+                conn,
+                context,
+                external_content_id,
+                content_hash,
+                source,
+                external_revision_id,
+                correlation_id,
+                target_id,
             )
-            row = cur.fetchone()
+
     if row is None:
-        # PHAI loc ca content_hash, khong chi node_id: job_moi_nhat() tra ve
-        # job MOI NHAT CUA NODE (ngu nghia rieng, Task 8 dung cho API
-        # /jobs/by-node), khac voi "job dang trung dedup voi cap nay" - mot
-        # node co nhieu job active khac hash thi hai cau hoi tra ve hai id
-        # khac nhau.
-        with conn.cursor() as cur:
-            cur.execute(
-                f"SELECT id FROM {TEN_BANG} WHERE node_id=%s AND content_hash=%s "
-                f"AND status IN (%s, %s, %s) ORDER BY created_at DESC LIMIT 1",
-                (node_id, content_hash, QUEUED, RUNNING, DONE),
-            )
-            trung = cur.fetchone()
-        return {"status": "duplicate", "job_id": trung[0] if trung else None}
+        duplicate_id = _active_duplicate_id(
+            conn,
+            site_id=context.site.id,
+            external_content_id=external_content_id,
+            content_hash=content_hash,
+            policy_version=context.profile.policy_version,
+        )
+        return {"status": DUPLICATE, "job_id": duplicate_id}
     return {"status": QUEUED, "job_id": row[0]}
+
+
+def enqueue(
+    conn,
+    node_id: str,
+    content_hash: str,
+    source: str,
+    force: bool = False,
+) -> dict:
+    """Compatibility wrapper cho endpoint Drupal legacy mot site."""
+    context = sites.select_review_context(
+        conn,
+        DEFAULT_SITE_ID,
+        DEFAULT_CONTENT_TYPE,
+        DEFAULT_LANGCODE,
+    )
+    return enqueue_scoped(
+        conn,
+        context,
+        node_id,
+        content_hash,
+        source,
+        force=force,
+    )
 
 
 def claim(conn, worker_id: str):
@@ -139,19 +304,42 @@ def claim(conn, worker_id: str):
     """
     with conn.cursor() as cur:
         cur.execute(
-            f"UPDATE {TEN_BANG} SET status=%s, claimed_at=now(), claimed_by=%s, "
+            f"UPDATE {TEN_BANG} AS claimed SET status=%s, claimed_at=now(), claimed_by=%s, "
             f"attempts=attempts+1, updated_at=now() "
-            f"WHERE id = (SELECT id FROM {TEN_BANG} "
-            f"            WHERE status=%s AND run_after <= now() "
-            f"            ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1) "
-            f"RETURNING id, node_id, content_hash, attempts",
+            f"WHERE claimed.id = (SELECT job.id FROM {TEN_BANG} AS job "
+            f"            JOIN site AS owner ON owner.id=job.site_id "
+            f"            WHERE job.status=%s AND job.run_after <= now() "
+            f"              AND owner.active AND NOT owner.intake_paused "
+            f"            ORDER BY job.created_at, job.id "
+            f"            FOR UPDATE OF job SKIP LOCKED LIMIT 1) "
+            f"RETURNING claimed.id, claimed.public_id, claimed.site_id, "
+            f"claimed.profile_id, claimed.policy_version, "
+            f"claimed.external_content_id, claimed.external_revision_id, "
+            f"claimed.content_type, claimed.langcode, claimed.correlation_id, "
+            f"claimed.content_hash, claimed.attempts, claimed.source, "
+            f"claimed.supersedes_job_id",
             (RUNNING, worker_id, QUEUED),
         )
         row = cur.fetchone()
     if row is None:
         return None
-    return {"id": row[0], "node_id": row[1], "content_hash": row[2],
-            "attempts": row[3]}
+    return {
+        "id": row[0],
+        "public_id": row[1],
+        "site_id": row[2],
+        "profile_id": row[3],
+        "policy_version": row[4],
+        "external_content_id": row[5],
+        "node_id": row[5],
+        "external_revision_id": row[6],
+        "content_type": row[7],
+        "langcode": row[8],
+        "correlation_id": row[9],
+        "content_hash": row[10],
+        "attempts": row[11],
+        "source": row[12],
+        "supersedes_job_id": row[13],
+    }
 
 
 def complete(conn, job_id: int) -> None:
@@ -162,30 +350,59 @@ def complete(conn, job_id: int) -> None:
         )
 
 
-def fail(conn, job_id: int, loi: str, attempts: int) -> str:
+def fail(
+    conn,
+    job_id: int,
+    loi: str,
+    attempts: int | None = None,
+    *,
+    retry_after_seconds: float | None = None,
+    rng=random.random,
+) -> str:
     """That bai mot lan. Chua het luot -> xep lai voi backoff; het -> dead-letter.
 
-    `attempts` la so lan DA thu (claim() tang truoc khi chay), nen lan dau
-    that bai co attempts = 1 va dung BACKOFF_GIAY[0].
+    So lan thu duoc doc tu DB (claim tang truoc khi chay), khong tin du lieu
+    caller. Tham so `attempts` chi duoc giu tam de worker legacy chua gay API.
     """
-    if attempts >= MAX_ATTEMPTS:
+    del attempts
+    with conn.transaction():
         with conn.cursor() as cur:
             cur.execute(
-                f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, updated_at=now() "
-                f"WHERE id=%s",
-                (FAILED, loi, job_id),
+                f"SELECT attempts FROM {TEN_BANG} WHERE id=%s FOR UPDATE",
+                (job_id,),
             )
-        return FAILED
+            row = cur.fetchone()
+        if row is None:
+            raise ValueError(f"khong co job id={job_id}")
+        actual_attempts = row[0]
 
-    giay = BACKOFF_GIAY[min(attempts - 1, len(BACKOFF_GIAY) - 1)]
-    with conn.cursor() as cur:
-        cur.execute(
-            f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, "
-            f"run_after = now() + (%s * interval '1 second'), updated_at=now() "
-            f"WHERE id=%s",
-            (QUEUED, loi, giay, job_id),
-        )
-    return QUEUED
+        if actual_attempts >= MAX_ATTEMPTS:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, "
+                    f"updated_at=now() WHERE id=%s",
+                    (FAILED, loi, job_id),
+                )
+            return FAILED
+
+        base = BACKOFF_GIAY[
+            min(max(actual_attempts - 1, 0), len(BACKOFF_GIAY) - 1)
+        ]
+        jitter_ratio = 0.10
+        giay = base + (float(rng()) * base * jitter_ratio)
+        if retry_after_seconds is not None:
+            retry_after = float(retry_after_seconds)
+            if not math.isfinite(retry_after):
+                raise ValueError("retry_after_seconds phai la so huu han")
+            giay = max(giay, min(max(retry_after, 0.0), 600.0))
+        with conn.cursor() as cur:
+            cur.execute(
+                f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, "
+                f"run_after = now() + (%s * interval '1 second'), updated_at=now() "
+                f"WHERE id=%s",
+                (QUEUED, loi, giay, job_id),
+            )
+        return QUEUED
 
 
 def reclaim_stuck(conn) -> dict:

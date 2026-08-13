@@ -61,7 +61,7 @@ def _chieu_cua_bang(conn) -> "int | None":
 
 
 def dam_bao_bang(conn, dim: int) -> None:
-    """Tao bang kb_chunk neu chua co. Bang da co ma LECH so chieu -> nem loi.
+    """Validate bang KB da migrate va dimension; chi bo sung index loc KB.
 
     Ghim so chieu vao kieu cot (`vector(1024)`) chu khong de `vector` tran:
     doi model embedding la phai nhung lai toan bo KB (docs/rag-design.md muc
@@ -71,7 +71,12 @@ def dam_bao_bang(conn, dim: int) -> None:
     cua du an.
     """
     hien_co = _chieu_cua_bang(conn)
-    if hien_co is not None and hien_co != dim:
+    if hien_co is None:
+        raise RuntimeError(
+            f"Bang {TEN_BANG} chua ton tai; chay `python scripts/migrate.py apply` "
+            "truoc khi build KB."
+        )
+    if hien_co != dim:
         raise ValueError(
             f"Bang {TEN_BANG} dang ghim vector {hien_co} chieu, embedder hien "
             f"tai sinh {dim} chieu. Doi model embedding thi phai dung lai KB tu "
@@ -79,19 +84,6 @@ def dam_bao_bang(conn, dim: int) -> None:
             f"build_kb.py va src/kb/build_brand_kb.py."
         )
     with conn.cursor() as cur:
-        cur.execute("CREATE EXTENSION IF NOT EXISTS vector")
-        cur.execute(
-            f"CREATE TABLE IF NOT EXISTS {TEN_BANG} ("
-            "  collection   text NOT NULL,"
-            "  chunk_id     text NOT NULL,"
-            "  document     text NOT NULL,"
-            f"  embedding    vector({dim}) NOT NULL,"
-            "  content_type text NOT NULL,"
-            "  langcode     text NOT NULL,"
-            "  meta         jsonb NOT NULL DEFAULT '{}'::jsonb,"
-            "  PRIMARY KEY (collection, chunk_id)"
-            ")"
-        )
         # CO Y khong tao index vector (HNSW/IVFFlat). O 1.132 dong, quet toan bo
         # nhanh hon ca dung index, va quan trong hon: ket qua la lang gieng gan
         # nhat CHINH XAC, khong phai xap xi. Chi tao index khi KB vuot ~100.000

@@ -30,24 +30,24 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `multiagent/src/platform/admin/queries.py` | Dashboard/jobs/runs/audit read models |
-| `multiagent/src/platform/admin/evaluation.py` | Load/validate evidence manifest allowlist |
-| `multiagent/src/platform/reviews.py` | Retry service + transaction/audit |
-| `multiagent/src/platform/pricing.py` | Token → estimated USD từ config versioned |
+| `multiagent/src/review_platform/admin/queries.py` | Dashboard/jobs/runs/audit read models |
+| `multiagent/src/review_platform/admin/evaluation.py` | Load/validate evidence manifest allowlist |
+| `multiagent/src/review_platform/reviews.py` | Retry service + transaction/audit |
+| `multiagent/src/review_platform/pricing.py` | Token → estimated USD từ config versioned |
 | `multiagent/config/model_pricing.yaml` | Giá model + effective date + official source |
 | `docs/evidence/evaluation-manifest.json` | Trạng thái E1–E6 machine-readable |
-| `multiagent/src/platform/admin/templates/*.html` | Dashboard/list/detail/users/read-only pages |
-| `multiagent/src/platform/admin/static/vendor/htmx.min.js` | HTMX vendored, không CDN runtime |
-| `multiagent/src/platform/admin/static/admin.css` | Layout/table/badge/form responsive |
+| `multiagent/src/review_platform/admin/templates/*.html` | Dashboard/list/detail/users/read-only pages |
+| `multiagent/src/review_platform/admin/static/vendor/htmx.min.js` | HTMX vendored, không CDN runtime |
+| `multiagent/src/review_platform/admin/static/admin.css` | Layout/table/badge/form responsive |
 
 ---
 
 ### Task 1: Chốt UI shell và vendor HTMX
 
 **Files:**
-- Create: `multiagent/src/platform/admin/static/vendor/htmx-2.0.10.min.js`
-- Modify: `multiagent/src/platform/admin/templates/base.html`
-- Modify: `multiagent/src/platform/admin/static/admin.css`
+- Create: `multiagent/src/review_platform/admin/static/vendor/htmx-2.0.10.min.js`
+- Modify: `multiagent/src/review_platform/admin/templates/base.html`
+- Modify: `multiagent/src/review_platform/admin/static/admin.css`
 - Create: `multiagent/scripts/test_admin_assets.py`
 
 **Interfaces:**
@@ -61,7 +61,7 @@ Không sửa route/data ở bước này. Concept phải giữ: tiếng Việt, 
 - [ ] **Step 2: Tải đúng HTMX và kiểm integrity trước khi add**
 
 ```powershell
-$target = 'src/platform/admin/static/vendor/htmx-2.0.10.min.js'
+$target = 'src/review_platform/admin/static/vendor/htmx-2.0.10.min.js'
 New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
 Invoke-WebRequest 'https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js' -OutFile $target
 $bytes = [IO.File]::ReadAllBytes((Resolve-Path $target))
@@ -83,7 +83,7 @@ Nav: Tổng quan, Jobs, Lịch sử chấm, Cấu hình & KB, Đánh giá; Admin
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_assets.py
-git -C .. add multiagent/src/platform/admin/static multiagent/src/platform/admin/templates/base.html multiagent/scripts/test_admin_assets.py
+git -C .. add multiagent/src/review_platform/admin/static multiagent/src/review_platform/admin/templates/base.html multiagent/scripts/test_admin_assets.py
 git commit -m "feat: add accessible admin UI shell"
 ```
 
@@ -93,8 +93,8 @@ git commit -m "feat: add accessible admin UI shell"
 
 **Files:**
 - Create: `multiagent/config/model_pricing.yaml`
-- Create: `multiagent/src/platform/pricing.py`
-- Create: `multiagent/src/platform/admin/queries.py`
+- Create: `multiagent/src/review_platform/pricing.py`
+- Create: `multiagent/src/review_platform/admin/queries.py`
 - Create: `multiagent/scripts/test_admin_dashboard.py`
 
 **Interfaces:**
@@ -144,7 +144,7 @@ Date range là `[from 00:00 UTC, to+1 day 00:00 UTC)`. Tối đa 93 ngày/reques
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_dashboard.py
-git -C .. add multiagent/config/model_pricing.yaml multiagent/src/platform/pricing.py multiagent/src/platform/admin/queries.py multiagent/scripts/test_admin_dashboard.py
+git -C .. add multiagent/config/model_pricing.yaml multiagent/src/review_platform/pricing.py multiagent/src/review_platform/admin/queries.py multiagent/scripts/test_admin_dashboard.py
 git commit -m "feat: add traceable dashboard metrics and cost estimates"
 ```
 
@@ -153,9 +153,9 @@ git commit -m "feat: add traceable dashboard metrics and cost estimates"
 ### Task 3: Dashboard route/template
 
 **Files:**
-- Modify: `multiagent/src/platform/admin/router.py`
-- Modify: `multiagent/src/platform/admin/templates/home.html`
-- Create: `multiagent/src/platform/admin/templates/partials/dashboard_metrics.html`
+- Modify: `multiagent/src/review_platform/admin/router.py`
+- Modify: `multiagent/src/review_platform/admin/templates/home.html`
+- Create: `multiagent/src/review_platform/admin/templates/partials/dashboard_metrics.html`
 - Modify: `multiagent/scripts/test_admin_routes.py`
 
 **Interfaces:**
@@ -174,7 +174,7 @@ Default 7 ngày gần nhất UTC. Template cards: API/DB status, worker/connecto
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_routes.py
-git -C .. add multiagent/src/platform/admin/router.py multiagent/src/platform/admin/templates multiagent/scripts/test_admin_routes.py
+git -C .. add multiagent/src/review_platform/admin/router.py multiagent/src/review_platform/admin/templates multiagent/scripts/test_admin_routes.py
 git commit -m "feat: render operational dashboard from run data"
 ```
 
@@ -183,12 +183,12 @@ git commit -m "feat: render operational dashboard from run data"
 ### Task 4: Jobs list/detail và retry service
 
 **Files:**
-- Create: `multiagent/src/platform/reviews.py`
-- Create: `multiagent/src/platform/admin/templates/jobs.html`
-- Create: `multiagent/src/platform/admin/templates/job_detail.html`
-- Create: `multiagent/src/platform/admin/templates/partials/jobs_table.html`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/reviews.py`
+- Create: `multiagent/src/review_platform/admin/templates/jobs.html`
+- Create: `multiagent/src/review_platform/admin/templates/job_detail.html`
+- Create: `multiagent/src/review_platform/admin/templates/partials/jobs_table.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_jobs.py`
 
 **Interfaces:**
@@ -218,7 +218,7 @@ List columns: time, site, external ID, status, attempts, source, policy. Detail:
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_jobs.py
 .\.venv\Scripts\python.exe scripts\test_admin_routes.py
-git -C .. add multiagent/src/platform/reviews.py multiagent/src/platform/admin multiagent/scripts/test_admin_jobs.py
+git -C .. add multiagent/src/review_platform/reviews.py multiagent/src/review_platform/admin multiagent/scripts/test_admin_jobs.py
 git commit -m "feat: add admin job inspection and audited retry"
 ```
 
@@ -227,11 +227,11 @@ git commit -m "feat: add admin job inspection and audited retry"
 ### Task 5: Review history list/detail
 
 **Files:**
-- Create: `multiagent/src/platform/admin/templates/reviews.html`
-- Create: `multiagent/src/platform/admin/templates/review_detail.html`
-- Create: `multiagent/src/platform/admin/templates/partials/reviews_table.html`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/templates/reviews.html`
+- Create: `multiagent/src/review_platform/admin/templates/review_detail.html`
+- Create: `multiagent/src/review_platform/admin/templates/partials/reviews_table.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_reviews.py`
 
 **Interfaces:**
@@ -251,7 +251,7 @@ Table/filter và accordion `<details>` semantic; không render raw HTML evidence
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_reviews.py
-git -C .. add multiagent/src/platform/admin multiagent/scripts/test_admin_reviews.py
+git -C .. add multiagent/src/review_platform/admin multiagent/scripts/test_admin_reviews.py
 git commit -m "feat: add explainable review history pages"
 ```
 
@@ -260,9 +260,9 @@ git commit -m "feat: add explainable review history pages"
 ### Task 6: User management UI đúng last-admin invariant
 
 **Files:**
-- Create: `multiagent/src/platform/admin/templates/users.html`
-- Create: `multiagent/src/platform/admin/templates/user_form.html`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/templates/users.html`
+- Create: `multiagent/src/review_platform/admin/templates/user_form.html`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_user_routes.py`
 
 **Interfaces:**
@@ -282,7 +282,7 @@ Assert audit action/outcome/old-new role; no temp password in audit/log captured
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_user_routes.py
-git -C .. add multiagent/src/platform/admin multiagent/scripts/test_admin_user_routes.py
+git -C .. add multiagent/src/review_platform/admin multiagent/scripts/test_admin_user_routes.py
 git commit -m "feat: add guarded admin user management"
 ```
 
@@ -291,9 +291,9 @@ git commit -m "feat: add guarded admin user management"
 ### Task 7: Config và KB read-only
 
 **Files:**
-- Create: `multiagent/src/platform/admin/read_only_sources.py`
-- Create: `multiagent/src/platform/admin/templates/config_kb.html`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/read_only_sources.py`
+- Create: `multiagent/src/review_platform/admin/templates/config_kb.html`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_read_only.py`
 
 **Interfaces:**
@@ -316,7 +316,7 @@ Assert GET 200; POST 405; HTML không có `Save`, textarea editable, secret ref 
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_read_only.py
-git -C .. add multiagent/src/platform/admin/read_only_sources.py multiagent/src/platform/admin/templates/config_kb.html multiagent/src/platform/admin/router.py multiagent/scripts/test_admin_read_only.py
+git -C .. add multiagent/src/review_platform/admin/read_only_sources.py multiagent/src/review_platform/admin/templates/config_kb.html multiagent/src/review_platform/admin/router.py multiagent/scripts/test_admin_read_only.py
 git commit -m "feat: expose read-only policy and KB metadata"
 ```
 
@@ -331,9 +331,9 @@ git commit -m "feat: expose read-only policy and KB metadata"
 - Modify: `multiagent/scripts/eval_brand_retrieval.py`
 - Create: `multiagent/scripts/export_e2_evidence.py`
 - Create: `multiagent/scripts/test_e2_evidence_export.py`
-- Create: `multiagent/src/platform/admin/evaluation.py`
-- Create: `multiagent/src/platform/admin/templates/evaluation.html`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/evaluation.py`
+- Create: `multiagent/src/review_platform/admin/templates/evaluation.html`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_evaluation.py`
 
 **Interfaces:**
@@ -391,7 +391,7 @@ Hiển thị badge trạng thái, snapshot/prompt/model/run/evidence link. Histo
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_evaluation.py
 .\.venv\Scripts\python.exe scripts\test_e2_evidence_export.py
-git -C .. add docs/evidence/evaluation-manifest.json docs/evidence/e2_retrieval_summary.json multiagent/scripts/eval_retrieval.py multiagent/scripts/eval_brand_retrieval.py multiagent/scripts/export_e2_evidence.py multiagent/scripts/test_e2_evidence_export.py multiagent/src/platform/admin/evaluation.py multiagent/src/platform/admin/templates/evaluation.html multiagent/src/platform/admin/router.py multiagent/scripts/test_admin_evaluation.py
+git -C .. add docs/evidence/evaluation-manifest.json docs/evidence/e2_retrieval_summary.json multiagent/scripts/eval_retrieval.py multiagent/scripts/eval_brand_retrieval.py multiagent/scripts/export_e2_evidence.py multiagent/scripts/test_e2_evidence_export.py multiagent/src/review_platform/admin/evaluation.py multiagent/src/review_platform/admin/templates/evaluation.html multiagent/src/review_platform/admin/router.py multiagent/scripts/test_admin_evaluation.py
 git commit -m "feat: show versioned evaluation evidence read-only"
 ```
 
@@ -400,9 +400,9 @@ git commit -m "feat: show versioned evaluation evidence read-only"
 ### Task 9: Audit log page
 
 **Files:**
-- Create: `multiagent/src/platform/admin/templates/audit.html`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/router.py`
+- Create: `multiagent/src/review_platform/admin/templates/audit.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/router.py`
 - Create: `multiagent/scripts/test_admin_audit_page.py`
 
 **Interfaces:**
@@ -420,7 +420,7 @@ Show actor snapshot, action, target, outcome, safe metadata, timestamp. No delet
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_audit_page.py
-git -C .. add multiagent/src/platform/admin multiagent/scripts/test_admin_audit_page.py
+git -C .. add multiagent/src/review_platform/admin multiagent/scripts/test_admin_audit_page.py
 git commit -m "feat: add admin-only operational audit page"
 ```
 

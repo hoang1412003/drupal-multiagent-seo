@@ -10,7 +10,11 @@ buoc curl that o Step 6 cua brief (goi service that qua HTTP).
 Can Postgres that cho phan hang doi - [SKIP] neu khong co.
 Chay: .venv\\Scripts\\python.exe scripts\\test_api.py
 """
+import asyncio
+from contextlib import contextmanager
+import inspect
 import os
+from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -20,35 +24,56 @@ os.environ["VF_SERVICE_TOKEN"] = "token-test"
 import api
 import db
 import job_queue as q
+from fastapi.params import Depends as DependsParam
+from review_platform import migrations
 
 SCHEMA = "vf_test_api"
+MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 
 
-class _FakeCursorDDL:
-    """Con tro gia: khong tra du lieu gi, chi ghi lai cau SQL da chay."""
+class _TrackedConnection:
+    def __init__(self, number):
+        self.number = number
+        self.closed = False
 
-    def __init__(self, nhat_ky):
-        self._nhat_ky = nhat_ky
+
+class _ConnectionFactory:
+    def __init__(self):
+        self.connections = []
+
+    @contextmanager
+    def open(self):
+        conn = _TrackedConnection(len(self.connections) + 1)
+        self.connections.append(conn)
+        try:
+            yield conn
+        finally:
+            conn.closed = True
+
+
+class _MissingTableCursor:
+    def __init__(self, statements):
+        self.statements = statements
 
     def __enter__(self):
         return self
 
-    def __exit__(self, *a):
+    def __exit__(self, *args):
         return False
 
     def execute(self, sql, params=None):
-        self._nhat_ky.append(sql)
+        self.statements.append(sql)
+
+    def fetchone(self):
+        return None
 
 
-class _FakeConnDDL:
-    """Ket noi gia CHI de dem so cau SQL da chay - dung khoa lai chuyen
-    _conn() khong duoc tu phat DDL nua (xem test_conn_khong_phat_ddl_moi_lan)."""
-
+class _MissingTableConnection:
     def __init__(self):
-        self.nhat_ky = []
+        self.statements = []
 
     def cursor(self):
-        return _FakeCursorDDL(self.nhat_ky)
+        return _MissingTableCursor(self.statements)
 
 
 def _dung_schema_sach():
@@ -56,8 +81,8 @@ def _dung_schema_sach():
     with conn.cursor() as cur:
         cur.execute(f"DROP SCHEMA IF EXISTS {SCHEMA} CASCADE")
         cur.execute(f"CREATE SCHEMA {SCHEMA}")
-        cur.execute(f"SET search_path TO {SCHEMA}")
-    q.dam_bao_bang(conn)
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    migrations.apply_pending(conn, MIGRATIONS_DIR)
     return conn
 
 
@@ -125,6 +150,11 @@ def test_tao_job_tren_cap_da_dead_letter_tra_dead_letter(conn):
     """
     kq0 = api.tao_job(api.JobIn(node_id="u5", content_hash="h5"), conn)
     for lan in (1, 2, 3):
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE review_job SET attempts=%s, status='running' WHERE id=%s",
+                (lan, kq0["job_id"]),
+            )
         q.fail(conn, kq0["job_id"], f"loi {lan}", lan)
     assert q.job_moi_nhat(conn, "u5")["status"] == "failed"
 
@@ -151,27 +181,96 @@ def test_health_dem_theo_trang_thai(conn):
     print("[PASS] health tra so job theo tung trang thai")
 
 
-def test_conn_khong_phat_ddl_moi_lan_goi(conn):
-    """Khoa lai: _conn() TRUOC DAY goi q.dam_bao_bang() tren MOI request (ke
-    ca GET /health) - 3 cau DDL idempotent nhung ngang huong "tra loi trong
-    vai ms" o docstring api.py, va handler dong bo cua FastAPI chay trong
-    threadpool nen nhieu request dong thoi se cung phat DDL vao Postgres.
-
-    Sua: dam_bao_bang() chi chay MOT LAN o lifespan luc app khoi dong (giong
-    worker.vong_lap()), _conn() gio chi lay ket noi. Test nay khong di qua
-    lifespan (goi thang ham, khong qua TestClient/uvicorn - xem docstring
-    dau file), nen dung ket noi gia de dem: goi _conn() hai lan, xac nhan
-    khong co cau SQL nao duoc phat ra."""
-    fake = _FakeConnDDL()
-    that = db.get_conn
-    db.get_conn = lambda: fake
+def _goi_dependency_mot_lan(handler):
+    dependency = api._conn()
+    request_conn = next(dependency)
     try:
-        api._conn()
-        api._conn()
+        handler(request_conn)
     finally:
-        db.get_conn = that
-    assert fake.nhat_ky == [], fake.nhat_ky
-    print("[PASS] _conn() khong con tu phat DDL - dam_bao_bang() chi chay o lifespan")
+        try:
+            next(dependency)
+        except StopIteration:
+            pass
+        else:
+            raise AssertionError("connection dependency phai yield dung mot lan")
+    return request_conn
+
+
+def test_moi_request_mo_va_dong_connection_rieng(conn):
+    assert hasattr(api, "platform_database"), "api chua dung connection lifecycle moi"
+    factory = _ConnectionFactory()
+    original = api.platform_database.open_connection
+    api.platform_database.open_connection = factory.open
+    try:
+        first = _goi_dependency_mot_lan(lambda request_conn: None)
+        second = _goi_dependency_mot_lan(lambda request_conn: None)
+    finally:
+        api.platform_database.open_connection = original
+
+    assert first is not second
+    assert first.closed and second.closed
+    assert factory.connections == [first, second]
+    print("[PASS] moi request co connection rieng va luon dong sau response")
+
+
+def test_moi_route_database_deu_dung_dependency(conn):
+    for handler in (api.post_jobs, api.get_trang_thai, api.get_health):
+        parameter = inspect.signature(handler).parameters.get("conn")
+        assert parameter is not None, handler.__name__
+        assert isinstance(parameter.default, DependsParam), handler.__name__
+        assert parameter.default.dependency is api._conn, handler.__name__
+    print("[PASS] moi route database deu resolve connection qua Depends")
+
+
+def test_lifespan_chan_schema_pending_va_dong_connection(conn):
+    assert hasattr(api, "migrations"), "api chua co startup migration gate"
+    assert hasattr(api, "platform_database"), "api chua co startup connection scope"
+    factory = _ConnectionFactory()
+    original_open = api.platform_database.open_connection
+    original_require = api.migrations.require_current
+
+    class PendingMigration(RuntimeError):
+        pass
+
+    def reject_pending(startup_conn, migrations_dir):
+        assert startup_conn is factory.connections[-1]
+        raise PendingMigration("schema pending")
+
+    async def enter_lifespan():
+        async with api._lifespan(api.app):
+            raise AssertionError("lifespan khong duoc yield khi schema pending")
+
+    api.platform_database.open_connection = factory.open
+    api.migrations.require_current = reject_pending
+    try:
+        try:
+            asyncio.run(enter_lifespan())
+        except PendingMigration:
+            pass
+        else:
+            raise AssertionError("startup phai fail khi migration con pending")
+    finally:
+        api.platform_database.open_connection = original_open
+        api.migrations.require_current = original_require
+
+    assert len(factory.connections) == 1
+    assert factory.connections[0].closed
+    print("[PASS] lifespan chan schema pending truoc route va dong connection")
+
+
+def test_kb_guard_khong_am_tham_tao_schema_thieu(conn):
+    missing = _MissingTableConnection()
+    try:
+        db.dam_bao_bang(missing, 1024)
+    except RuntimeError as exc:
+        assert "migrate" in str(exc).lower(), exc
+    else:
+        raise AssertionError("kb guard phai fail khi chua migrate")
+
+    ddl = "\n".join(missing.statements).upper()
+    assert "CREATE TABLE" not in ddl, ddl
+    assert "CREATE EXTENSION" not in ddl, ddl
+    print("[PASS] KB guard khong tu tao schema khi migration con thieu")
 
 
 if __name__ == "__main__":
@@ -194,7 +293,10 @@ if __name__ == "__main__":
         test_trang_thai_node_chua_co_job,
         test_trang_thai_tra_job_moi_nhat,
         test_health_dem_theo_trang_thai,
-        test_conn_khong_phat_ddl_moi_lan_goi,
+        test_moi_request_mo_va_dong_connection_rieng,
+        test_moi_route_database_deu_dung_dependency,
+        test_lifespan_chan_schema_pending_va_dong_connection,
+        test_kb_guard_khong_am_tham_tao_schema_thieu,
     ):
         try:
             fn(conn)
