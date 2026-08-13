@@ -3,8 +3,12 @@ from dataclasses import dataclass
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
+import re
+from collections.abc import Mapping
+from urllib.parse import urlsplit
 from uuid import UUID
 
+from review_platform.admin import sanitization
 from review_platform.admin.sanitization import sanitize_text
 from review_platform.pricing import CostEstimate, estimate_usage
 
@@ -77,6 +81,71 @@ class JobDetail:
 
 
 @dataclass(frozen=True)
+class ReviewFilters:
+    decision: str | None = None
+    site: str | None = None
+    external_id: str | None = None
+    date_from: date | None = None
+    date_to: date | None = None
+
+
+@dataclass(frozen=True)
+class ReviewListItem:
+    public_id: UUID
+    scored_at: datetime
+    site_id: UUID
+    site_slug: str
+    external_content_id: str
+    decision: str | None
+    final_score: Decimal | None
+    profile_code: str
+    policy_version: str
+    model: str
+    is_fixture: bool
+
+
+@dataclass(frozen=True)
+class AgentResultView:
+    name: str
+    score: object
+    criteria: tuple[dict, ...]
+    issues: tuple[dict, ...]
+    evidence: tuple[dict, ...]
+
+
+@dataclass(frozen=True)
+class ReviewDetail:
+    public_id: UUID
+    scored_at: datetime
+    duration_ms: int | None
+    decision: str | None
+    final_score: Decimal | None
+    missing_agents: tuple[str, ...]
+    veto_reason: str | None
+    note: str | None
+    agents: tuple[AgentResultView, ...]
+    config_meta: object
+    cost_estimate: CostEstimate
+    usage_available: bool
+    model: str
+    writeback_status: str
+    writeback_error: str | None
+    site_id: UUID
+    site_slug: str
+    site_name: str
+    profile_id: UUID
+    profile_code: str
+    policy_version: str
+    external_content_id: str
+    external_revision_id: str | None
+    content_type: str
+    langcode: str
+    correlation_id: UUID
+    is_fixture: bool
+    drupal_url: str | None
+
+
+@dataclass(frozen=True)
 class DashboardView:
     date_from: date
     date_to: date
@@ -90,6 +159,143 @@ class DashboardView:
     writeback_success_rate: Decimal | None
     worker_status: str = "unknown"
     connector_status: str = "unknown"
+
+
+_AGENT_ORDER = ("content_quality", "seo", "brand", "compliance")
+_REVIEW_DECISIONS = ("publish", "needs_revision", "rejected", "unknown")
+
+
+def _review_value(value):
+    return sanitization.sanitize_mapping(
+        value,
+        max_depth=3,
+        max_items=50,
+        max_text_length=2000,
+    )
+
+
+def _review_entries(value, *, limit: int = 50) -> tuple[dict, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, Mapping):
+        raw_items = [
+            {"criterion": key, "value": nested}
+            for key, nested in list(value.items())[:limit]
+        ]
+    elif isinstance(value, (list, tuple)):
+        raw_items = list(value[:limit])
+    else:
+        raw_items = [value]
+
+    result = []
+    for item in raw_items:
+        normalized = _review_value(item)
+        result.append(normalized if isinstance(normalized, dict) else {"value": normalized})
+    return tuple(result)
+
+
+def normalize_agent_results(value) -> tuple[AgentResultView, ...]:
+    """Normalize JSONB legacy ma khong mutate, gioi han kich thuoc cho UI."""
+    if value is None:
+        return ()
+    if not isinstance(value, Mapping):
+        return (
+            AgentResultView(
+                name="legacy",
+                score=None,
+                criteria=(),
+                issues=_review_entries(value),
+                evidence=(),
+            ),
+        )
+
+    names = [name for name in _AGENT_ORDER if name in value]
+    names.extend(sorted(str(name) for name in value if str(name) not in names))
+    result = []
+    for name in names[:4]:
+        raw = value.get(name)
+        if isinstance(raw, Mapping):
+            score = _review_value(raw.get("score"))
+            criteria = _review_entries(raw.get("criteria"))
+            combined_issues = []
+            for key in ("issues", "flags"):
+                current = raw.get(key)
+                if isinstance(current, (list, tuple)):
+                    combined_issues.extend(current)
+                elif current is not None:
+                    combined_issues.append(current)
+            issues = _review_entries(combined_issues[:50])
+            evidence = _review_entries(raw.get("evidence"))
+        else:
+            score = None
+            criteria = ()
+            issues = _review_entries(raw)
+            evidence = ()
+        result.append(
+            AgentResultView(
+                name=sanitize_text(name, max_length=200),
+                score=score,
+                criteria=criteria,
+                issues=issues,
+                evidence=evidence,
+            )
+        )
+    return tuple(result)
+
+
+def _is_fixture(config_meta) -> bool:
+    if not isinstance(config_meta, Mapping):
+        return False
+    marker = config_meta.get("is_fixture")
+    return marker is True or (
+        isinstance(marker, str) and marker.casefold() == "true"
+    )
+
+
+def _drupal_node_url(base_url: str, external_id: str) -> str | None:
+    if re.fullmatch(r"[0-9]+", external_id) is None:
+        return None
+    try:
+        parsed = urlsplit(base_url)
+        port = parsed.port
+    except (TypeError, ValueError):
+        return None
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+    ):
+        return None
+    host = parsed.hostname
+    if ":" in host and not host.startswith("["):
+        host = f"[{host}]"
+    origin = f"{parsed.scheme}://{host}"
+    if port is not None:
+        origin += f":{port}"
+    return f"{origin}/node/{external_id}"
+
+
+def _normalize_usage(value) -> tuple[list[dict], bool]:
+    if not isinstance(value, list):
+        return [], False
+    try:
+        for row in value:
+            if not isinstance(row, dict):
+                raise ValueError
+            if not isinstance(row.get("model"), str) or not row["model"].strip():
+                raise ValueError
+            for key in ("input_tokens", "output_tokens"):
+                token_count = row.get(key)
+                if (
+                    isinstance(token_count, bool)
+                    or not isinstance(token_count, int)
+                    or token_count < 0
+                ):
+                    raise ValueError
+    except (KeyError, ValueError):
+        return [], False
+    return value, bool(value)
 
 
 def _validate_optional_text(name: str, value: str | None, max_length: int) -> None:
@@ -223,6 +429,161 @@ def get_job(conn, public_id: UUID) -> JobDetail | None:
         row[21],
     )
     return JobDetail(*normalized)
+
+
+def _review_where(filters: ReviewFilters) -> tuple[str, list]:
+    if not isinstance(filters, ReviewFilters):
+        raise ValueError("filters phai la ReviewFilters")
+    if filters.decision is not None and filters.decision not in _REVIEW_DECISIONS:
+        raise ValueError("decision khong hop le")
+    _validate_optional_text("site", filters.site, 100)
+    _validate_optional_text("external_id", filters.external_id, 100)
+    if (filters.date_from is None) != (filters.date_to is None):
+        raise ValueError("date_from/date_to phai di cung nhau")
+
+    clauses = []
+    params: list = []
+    if filters.decision == "unknown":
+        clauses.append(
+            "(r.decision IS NULL OR r.decision NOT IN "
+            "('publish','needs_revision','rejected'))"
+        )
+    elif filters.decision is not None:
+        clauses.append("r.decision=%s")
+        params.append(filters.decision)
+    if filters.site is not None:
+        try:
+            site_id = UUID(filters.site)
+        except ValueError:
+            clauses.append("s.slug=%s")
+            params.append(filters.site)
+        else:
+            clauses.append("r.site_id=%s")
+            params.append(site_id)
+    if filters.external_id is not None:
+        clauses.append("strpos(lower(r.external_content_id), lower(%s)) > 0")
+        params.append(filters.external_id)
+    if filters.date_from is not None:
+        start, end = _bounds(filters.date_from, filters.date_to)
+        clauses.extend(("r.scored_at >= %s", "r.scored_at < %s"))
+        params.extend((start, end))
+    return (" AND ".join(clauses) if clauses else "TRUE"), params
+
+
+def list_reviews(
+    conn,
+    filters: ReviewFilters,
+    page: int,
+    page_size: int,
+) -> PageView:
+    if isinstance(page, bool) or not isinstance(page, int) or page < 1:
+        raise ValueError("page phai >= 1")
+    if (
+        isinstance(page_size, bool)
+        or not isinstance(page_size, int)
+        or not 1 <= page_size <= 100
+    ):
+        raise ValueError("page_size phai trong 1..100")
+    where_sql, params = _review_where(filters)
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
+            f"JOIN review_profile AS p ON p.id=r.profile_id WHERE {where_sql}",
+            params,
+        )
+        total = int(cur.fetchone()[0])
+        cur.execute(
+            "SELECT r.public_id,r.scored_at,r.site_id,s.slug,r.external_content_id,"
+            "r.decision,r.final_score,p.code,r.policy_version,r.model,"
+            "lower(coalesce(r.config_meta->>'is_fixture','false'))='true' "
+            "FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
+            f"JOIN review_profile AS p ON p.id=r.profile_id WHERE {where_sql} "
+            "ORDER BY r.scored_at DESC,r.id DESC LIMIT %s OFFSET %s",
+            (*params, page_size, (page - 1) * page_size),
+        )
+        items = tuple(
+            ReviewListItem(row[0], _as_utc(row[1]), *row[2:])
+            for row in cur.fetchall()
+        )
+    return PageView(
+        items=items,
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=(total + page_size - 1) // page_size,
+    )
+
+
+def get_review(conn, public_id: UUID) -> ReviewDetail | None:
+    public_id = UUID(str(public_id))
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT r.public_id,r.scored_at,r.duration_ms,r.decision,r.final_score,"
+            "r.missing_agents,r.veto_reason,r.note,r.agent_results,r.config_meta,"
+            "r.usage,r.model,r.writeback_status,r.writeback_error,r.site_id,s.slug,"
+            "s.name,s.base_url,r.profile_id,p.code,r.policy_version,"
+            "r.external_content_id,r.external_revision_id,r.content_type,r.langcode,"
+            "r.correlation_id FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
+            "JOIN review_profile AS p ON p.id=r.profile_id WHERE r.public_id=%s",
+            (public_id,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        return None
+
+    missing_agents = (
+        tuple(
+            sanitize_text(item, max_length=2000)
+            for item in row[5][:20]
+            if item is not None
+        )
+        if isinstance(row[5], list)
+        else ()
+    )
+    usage, usage_available = _normalize_usage(row[10])
+    config_meta = sanitization.sanitize_mapping(
+        row[9],
+        max_depth=3,
+        max_items=50,
+        max_text_length=2000,
+    )
+    writeback_status = (
+        row[12] if row[12] in WRITEBACK_STATUSES else "unknown"
+    )
+    return ReviewDetail(
+        public_id=row[0],
+        scored_at=_as_utc(row[1]),
+        duration_ms=row[2],
+        decision=row[3],
+        final_score=row[4],
+        missing_agents=missing_agents,
+        veto_reason=(
+            None if row[6] is None else sanitize_text(row[6], max_length=2000)
+        ),
+        note=None if row[7] is None else sanitize_text(row[7], max_length=2000),
+        agents=normalize_agent_results(row[8]),
+        config_meta=config_meta,
+        cost_estimate=estimate_usage(usage, DEFAULT_PRICING_PATH),
+        usage_available=usage_available,
+        model=sanitize_text(row[11], max_length=200),
+        writeback_status=writeback_status,
+        writeback_error=(
+            None if row[13] is None else sanitize_text(row[13], max_length=1000)
+        ),
+        site_id=row[14],
+        site_slug=row[15],
+        site_name=row[16],
+        profile_id=row[18],
+        profile_code=row[19],
+        policy_version=row[20],
+        external_content_id=row[21],
+        external_revision_id=row[22],
+        content_type=row[23],
+        langcode=row[24],
+        correlation_id=row[25],
+        is_fixture=_is_fixture(row[9]),
+        drupal_url=_drupal_node_url(row[17], row[21]),
+    )
 
 
 def _bounds(date_from: date, date_to: date) -> tuple[datetime, datetime]:

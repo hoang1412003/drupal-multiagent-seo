@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Chi tiết lượt chấm{% endblock %}
+{% block content %}
+{% macro entries(title, values) %}
+  {% if values %}
+  <section class="agent-section">
+    <h4>{{ title }}</h4>
+    <ol class="evidence-list">
+    {% for item in values %}
+      <li>
+        <dl>
+        {% for key, value in item.items() %}
+          <div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>
+        {% endfor %}
+        </dl>
+      </li>
+    {% endfor %}
+    </ol>
+  </section>
+  {% endif %}
+{% endmacro %}
+
+{% if review %}
+<header class="page-heading detail-heading">
+  <div>
+    <p class="eyebrow">Review detail</p>
+    <h1>Chi tiết lượt chấm</h1>
+    <p class="lede"><code>{{ review.public_id }}</code></p>
+  </div>
+  <a class="secondary-link" href="/admin/reviews">Quay lại lịch sử</a>
+</header>
+
+{% if review.is_fixture %}
+  <p class="fixture-warning" role="status">Dữ liệu fixture — không phải kết quả AI thật</p>
+{% endif %}
+
+<section class="detail-band" aria-labelledby="review-overview-heading">
+  <h2 id="review-overview-heading">Quyết định và phạm vi</h2>
+  <dl class="detail-grid">
+    <div>
+      <dt>Quyết định</dt>
+      <dd>
+        <span class="status-badge status-{{ review.decision or 'unknown' }}">
+          {{ review.decision or "unknown" }}
+        </span>
+      </dd>
+    </div>
+    <div>
+      <dt>Điểm tổng</dt>
+      <dd>{{ review.final_score if review.final_score is not none else "Không có dữ liệu" }}</dd>
+    </div>
+    <div>
+      <dt>Thời gian xử lý</dt>
+      <dd>
+        {% if review.duration_ms is not none %}
+          {{ "{:,}".format(review.duration_ms) }} ms
+        {% else %}
+          Không có dữ liệu
+        {% endif %}
+      </dd>
+    </div>
+    <div><dt>Chấm lúc</dt><dd>{{ review.scored_at.strftime("%d/%m/%Y %H:%M:%S") }} UTC</dd></div>
+    <div><dt>Website</dt><dd>{{ review.site_name }} <small>({{ review.site_slug }})</small></dd></div>
+    <div>
+      <dt>External ID</dt>
+      <dd>
+        {% if review.drupal_url %}
+          <a href="{{ review.drupal_url }}" rel="noreferrer">{{ review.external_content_id }}</a>
+        {% else %}
+          <code>{{ review.external_content_id }}</code>
+        {% endif %}
+      </dd>
+    </div>
+    <div><dt>Revision</dt><dd>{{ review.external_revision_id or "Không có dữ liệu" }}</dd></div>
+    <div><dt>Profile</dt><dd>{{ review.profile_code }}<br><code>{{ review.policy_version }}</code></dd></div>
+    <div><dt>Content / ngôn ngữ</dt><dd>{{ review.content_type }} / {{ review.langcode }}</dd></div>
+    <div><dt>Correlation ID</dt><dd><code>{{ review.correlation_id }}</code></dd></div>
+    <div><dt>Model</dt><dd><code>{{ review.model }}</code></dd></div>
+    <div>
+      <dt>Write-back</dt>
+      <dd>
+        <span class="status-badge status-{{ review.writeback_status }}">
+          {{ review.writeback_status }}
+        </span>
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="detail-band" aria-labelledby="review-context-heading">
+  <h2 id="review-context-heading">Ghi chú quyết định</h2>
+  <dl class="detail-grid compact-detail-grid">
+    <div>
+      <dt>Agent thiếu</dt>
+      <dd>
+        {{ review.missing_agents|join(", ") if review.missing_agents else "Không có dữ liệu" }}
+      </dd>
+    </div>
+    <div><dt>Veto</dt><dd>{{ review.veto_reason or "Không có dữ liệu" }}</dd></div>
+    <div><dt>Ghi chú</dt><dd>{{ review.note or "Không có dữ liệu" }}</dd></div>
+  </dl>
+</section>
+
+<section class="detail-band" aria-labelledby="agents-heading">
+  <h2 id="agents-heading">Kết quả theo agent</h2>
+  {% if review.agents %}
+    <div class="agent-accordions">
+    {% for agent in review.agents %}
+      <details>
+        <summary>
+          <strong>{{ agent.name }}</strong>
+          <span>Điểm: {{ agent.score if agent.score is not none else "Không có dữ liệu" }}</span>
+        </summary>
+        <div class="agent-detail-body">
+          {{ entries("Tiêu chí", agent.criteria) }}
+          {{ entries("Vấn đề / cờ", agent.issues) }}
+          {{ entries("Bằng chứng", agent.evidence) }}
+          {% if not agent.criteria and not agent.issues and not agent.evidence %}
+            <p>Không có dữ liệu</p>
+          {% endif %}
+        </div>
+      </details>
+    {% endfor %}
+    </div>
+  {% else %}
+    <p>Không có dữ liệu</p>
+  {% endif %}
+</section>
+
+<section class="detail-band metric-columns review-usage" aria-label="Usage và chi phí">
+  <section>
+    <h3>Token của run đã lưu</h3>
+    {% if review.usage_available %}
+      <dl class="compact-metrics">
+        <div><dt>Input</dt><dd>{{ "{:,}".format(review.cost_estimate.input_tokens) }}</dd></div>
+        <div><dt>Output</dt><dd>{{ "{:,}".format(review.cost_estimate.output_tokens) }}</dd></div>
+      </dl>
+    {% else %}
+      <p>Không có dữ liệu</p>
+    {% endif %}
+  </section>
+  <section>
+    <h3>Chi phí ước tính</h3>
+    {% if not review.usage_available %}
+      <p>Không có dữ liệu</p>
+    {% elif review.cost_estimate.estimated_usd is none %}
+      <p class="metric-unavailable">Chưa thể ước tính</p>
+      <p class="metric-note">Chưa có giá: {{ review.cost_estimate.unknown_models|join(", ") }}</p>
+    {% else %}
+      <p class="metric-value">${{ "{:,.2f}".format(review.cost_estimate.estimated_usd) }} USD</p>
+    {% endif %}
+    <p class="metric-note">
+      Phiên bản giá {{ review.cost_estimate.pricing_version }} · hiệu lực
+      {{ review.cost_estimate.effective_at.strftime("%d/%m/%Y") }} ·
+      <a href="{{ review.cost_estimate.source }}" rel="noreferrer">Nguồn giá</a>
+    </p>
+  </section>
+</section>
+
+<section class="detail-band" aria-labelledby="config-heading">
+  <details>
+    <summary id="config-heading"><strong>Config metadata đã làm sạch</strong></summary>
+    <dl class="config-list">
+    {% if review.config_meta is mapping %}
+      {% for key, value in review.config_meta.items() %}
+        <div><dt>{{ key }}</dt><dd>{{ value }}</dd></div>
+      {% else %}
+        <div><dd>Không có dữ liệu</dd></div>
+      {% endfor %}
+    {% else %}
+      <div><dd>{{ review.config_meta }}</dd></div>
+    {% endif %}
+    </dl>
+  </details>
+</section>
+
+{% if review.writeback_error %}
+<section class="detail-band" aria-labelledby="writeback-error-heading">
+  <h2 id="writeback-error-heading">Lỗi write-back đã làm sạch</h2>
+  <pre class="safe-error">{{ review.writeback_error }}</pre>
+</section>
+{% endif %}
+{% else %}
+<p>Không có dữ liệu lượt chấm.</p>
+{% endif %}
+{% endblock %}

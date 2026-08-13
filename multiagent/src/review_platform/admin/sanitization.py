@@ -57,12 +57,24 @@ def sanitize_text(value, max_length: int = 1000) -> str:
     return text[:max_length]
 
 
-def sanitize_mapping(value, *, max_depth: int = 3, max_items: int = 50):
+def sanitize_mapping(
+    value,
+    *,
+    max_depth: int = 3,
+    max_items: int = 50,
+    max_text_length: int = 1000,
+):
     """Tra ve cau truc JSON-safe da redact; legacy sai kieu khong lam 500."""
     if isinstance(max_depth, bool) or not isinstance(max_depth, int) or max_depth < 1:
         raise ValueError("max_depth phai la so nguyen duong")
     if isinstance(max_items, bool) or not isinstance(max_items, int) or max_items < 1:
         raise ValueError("max_items phai la so nguyen duong")
+    if (
+        isinstance(max_text_length, bool)
+        or not isinstance(max_text_length, int)
+        or max_text_length < 1
+    ):
+        raise ValueError("max_text_length phai la so nguyen duong")
 
     def visit(current, depth: int):
         if isinstance(current, Mapping):
@@ -71,7 +83,7 @@ def sanitize_mapping(value, *, max_depth: int = 3, max_items: int = 50):
             result = {}
             entries = list(current.items())
             for raw_key, nested in entries[:max_items]:
-                key = sanitize_text(raw_key, max_length=200)
+                key = sanitize_text(raw_key, max_length=min(200, max_text_length))
                 result[key] = REDACTED if _is_sensitive_key(raw_key) else visit(
                     nested,
                     depth + 1,
@@ -87,9 +99,9 @@ def sanitize_mapping(value, *, max_depth: int = 3, max_items: int = 50):
                 result.append(TRUNCATED)
             return result
         if isinstance(current, (str, bytes)):
-            return sanitize_text(current)
+            return sanitize_text(current, max_length=max_text_length)
         if current is None or isinstance(current, (bool, int, float)):
             return current
-        return sanitize_text(current)
+        return sanitize_text(current, max_length=max_text_length)
 
     return visit(value, 0)
