@@ -20,6 +20,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 os.environ["VF_SERVICE_TOKEN"] = "token-test"
+os.environ["ADMIN_CSRF_KEY"] = "csrf-test-key-rieng-biet-du-32-byte"
+os.environ["ADMIN_THROTTLE_KEY"] = "throttle-test-key-rieng-biet-du-32-byte"
+os.environ["ADMIN_COOKIE_SECURE"] = "false"
 
 import api
 import db

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Trang quản trị{% endblock %}
+{% block content %}
+<section class="content-column" aria-labelledby="home-heading">
+  <h1 id="home-heading">Trang quản trị</h1>
+  <p class="identity"><strong>{{ user.username }}</strong><span aria-hidden="true"> · </span>{{ user.role.value }}</p>
+  <hr>
+  <p class="notice info">Các màn hình vận hành được thêm ở phase tiếp theo</p>
+</section>
+{% endblock %}

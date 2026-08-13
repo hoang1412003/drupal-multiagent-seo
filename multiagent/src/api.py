@@ -16,10 +16,13 @@ from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 
 import job_queue as q
 from review_platform import database as platform_database
 from review_platform import migrations
+from review_platform.admin import dependencies as admin_dependencies
+from review_platform.admin import router as admin_router
 
 load_dotenv()
 
@@ -29,12 +32,23 @@ _MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 @asynccontextmanager
 async def _lifespan(app: FastAPI):
     """Fail-fast neu schema chua current; startup khong tu apply migration."""
+    app.state.auth_config = admin_dependencies.load_auth_config()
     with platform_database.open_connection() as conn:
         migrations.require_current(conn, _MIGRATIONS_DIR)
     yield
 
 
 app = FastAPI(title="VF O2O Multi-Agent", lifespan=_lifespan)
+app.add_exception_handler(
+    admin_dependencies.AdminForbidden,
+    admin_router.forbidden_response,
+)
+app.include_router(admin_router.router)
+app.mount(
+    "/admin/static",
+    StaticFiles(directory=admin_router.STATIC_DIR),
+    name="admin-static",
+)
 
 
 class JobIn(BaseModel):

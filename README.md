@@ -21,7 +21,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 - [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
 - [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) — việc phải làm trước khi demo/bàn giao: cấu hình dev quên tắt, KB phải dựng lại trên máy mới, và cách nói đúng về ngưỡng chưa calibrate
-- [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **P1 Foundation đã triển khai, các phần admin/API v1/connector vẫn chưa**
+- [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **P1 Foundation và P2 Admin Auth đã triển khai, API v1/connector vẫn chưa**
 - [`docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md) — implementation plan tổng và 5 plan con; trạng thái thực thi/evidence nằm ở `docs/technical-debt.md` mục 8.9
 
 ### Dành cho AI/model tiếp nhận dự án
@@ -56,10 +56,10 @@ drupal-multiagent-seo/
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
 │   ├── docker-compose.yml        # Postgres + pgvector (kho vector + hàng đợi + run_log, tách khỏi Drupal)
-│   ├── migrations/               # SQL migration bất biến có version; hiện có 0001 Platform Foundation
+│   ├── migrations/               # SQL bất biến: 0001 Foundation, 0002 Auth, 0003 session-user index
 │   ├── .venv/
 │   ├── src/
-│   │   ├── review_platform/      # migration runner, connection lifecycle, site/profile context
+│   │   ├── review_platform/      # foundation + auth/RBAC/session + server-rendered admin
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
 │   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
@@ -77,12 +77,12 @@ drupal-multiagent-seo/
 │   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
 │   │   │   └── brand_voice.py       # đã triển khai (rubric BV1-BV7 + RAG) - Sprint 2
 │   │   ├── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
-│   │   ├── api.py                # service HTTP: chỉ nhận job + trả trạng thái, không chấm gì
+│   │   ├── api.py                # service HTTP: job/status/health + mount Platform Admin
 │   │   ├── job_queue.py          # hàng đợi Postgres (SKIP LOCKED, retry, dead-letter)
 │   │   ├── worker.py             # vòng lặp lấy job, gọi graph.py, ghi run_log, write-back
 │   │   ├── reconcile.py          # vòng đối soát định kỳ - lưới an toàn cho đường event
 │   │   └── audit.py              # nhật ký truy vết, ghi bảng run_log (Postgres)
-│   └── scripts/                  # migrate.py, seed dữ liệu mẫu và test offline/integration
+│   └── scripts/                  # migrate.py, admin_user.py, seed và test offline/integration
 │
 ├── docs/                         # tài liệu chung, tham chiếu cả 2 phía
 │   ├── research.md               # nghiên cứu Drupal CMS
@@ -92,11 +92,11 @@ drupal-multiagent-seo/
 └── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
 
-### Hướng productization đã duyệt — P1 Foundation đã triển khai
+### Hướng productization đã duyệt — P1 Foundation + P2 Admin Auth đã triển khai
 
-Song song với Sprint 3, phần Python đang được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith. P1 đã có migration versioned, `site`/`review_profile`, queue/audit scoped, startup schema gate và connection lifecycle. `/api/v1`, `/admin`, auth/RBAC và connector callback CAS vẫn thuộc các plan sau, chưa tồn tại. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema đã có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
+Song song với Sprint 3, phần Python đang được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith. P1 đã có migration versioned, `site`/`review_profile`, queue/audit scoped, startup schema gate và connection lifecycle. P2 đã có `/admin`, tài khoản local riêng, Argon2id, server-side session, CSRF, throttle, audit auth và ba role `viewer` / `operator` / `admin`. `/api/v1` và connector callback CAS vẫn thuộc các plan sau, chưa tồn tại. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema đã có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
 
-Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dự kiến dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); thứ tự TDD/checkpoint nằm trong [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Chỉ module có commit/evidence ở `docs/technical-debt.md` mục 8.9 mới được coi là đã tồn tại.
+Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation hiện chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); thứ tự TDD/checkpoint nằm trong [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Chỉ module có commit/evidence ở `docs/technical-debt.md` mục 8.9 mới được coi là đã tồn tại.
 
 ## Setup
 
@@ -133,10 +133,11 @@ Vì sao dùng script thay vì bấm tay: cấu hình bấm tay chỉ tồn tại
 cd multiagent
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
-cp ..\.env.example ..\.env   # rồi điền ANTHROPIC_API_KEY, DRUPAL_USER, DRUPAL_PASSWORD, DRUPAL_BASE_URL, VF_SERVICE_TOKEN
+cp ..\.env.example ..\.env   # điền API/Drupal/service token và hai ADMIN_*_KEY riêng
 
 docker compose up -d                                # Postgres + pgvector (kho vector + hàng đợi + run_log)
 .venv\Scripts\python.exe scripts\migrate.py apply  # bắt buộc trước API, worker và build KB
+.venv\Scripts\python.exe scripts\admin_user.py bootstrap --username admin
 .venv\Scripts\python.exe src\kb\build_kb.py         # KB fact-check (4 chunk)
 .venv\Scripts\python.exe src\kb\build_brand_kb.py   # KB brand (1128 chunk, vài phút)
 ```
@@ -156,6 +157,13 @@ rồi dán **cùng giá trị đó** vào:
 
 Đặt ở `settings.php` chứ **không** phải config của Drupal: config export ra file YAML là lộ bí mật vào git. Cả hai file đều đã nằm trong `.gitignore`.
 
+**Khóa và cookie cho Platform Admin:** sinh `ADMIN_CSRF_KEY` và
+`ADMIN_THROTTLE_KEY` bằng lệnh `secrets.token_urlsafe(32)` **hai lần**, không
+dùng lại `VF_SERVICE_TOKEN` và không đặt hai key giống nhau. Local HTTP để
+`ADMIN_COOKIE_SECURE=false`; production phải chạy HTTPS và đặt `true`.
+Lệnh `admin_user.py bootstrap` ở trên nhập mật khẩu hai lần bằng `getpass`,
+không nhận `--password`, và buộc đổi mật khẩu ở lần đăng nhập đầu.
+
 ⚠️ **Hai nơi lệch nhau là triệu chứng khó chẩn đoán nhất của hệ thống này:** mọi request từ Drupal sang service trả 401, nhưng Drupal **không hiện lỗi gì cho người soạn bài**, và bài vẫn được chấm — chỉ là chậm vài phút vì phải chờ vòng đối soát thay vì chạy ngay. Nhìn bên ngoài giống "hệ thống chạy đúng, chỉ hơi chậm". Kiểm khi nghi ngờ: `ddev drush watchdog:show` tìm dòng 401 từ `vf_ai_trigger`.
 
 **Chạy tự động hoá "Needs Review"** (service nhận job từ Drupal + worker chấm, cần chạy song song, mỗi lệnh một cửa sổ terminal — chi tiết và lệnh kiểm `/health`: [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục "Khởi động service và worker trước khi demo"):
@@ -164,6 +172,10 @@ rồi dán **cùng giá trị đó** vào:
 .venv\Scripts\python.exe -m uvicorn api:app --port 8900 --app-dir src
 .venv\Scripts\python.exe src\worker.py
 ```
+
+Sau khi service khởi động, Platform Admin ở `http://127.0.0.1:8900/admin`.
+Tài khoản này độc lập với tài khoản Drupal; người viết bài không cần và không
+được cấp tài khoản Platform Admin chỉ để gửi bài sang trạng thái Needs Review.
 
 ## Trạng thái Sprint 1
 

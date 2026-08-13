@@ -34,7 +34,7 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `multiagent/migrations/0003_api_connector.sql` | Site credential, connector health, hash version/source URL |
+| `multiagent/migrations/0004_api_connector.sql` | Site credential, connector health, hash version/source URL |
 | `multiagent/src/review_platform/api/auth.py` | Bearer token → `SitePrincipal` |
 | `multiagent/src/review_platform/api/models.py` | Pydantic request/response v1 |
 | `multiagent/src/review_platform/api/router.py` | `/api/v1/jobs` routes |
@@ -51,10 +51,10 @@
 
 ---
 
-### Task 1: Migration 0003, per-site credential và cấu hình connector
+### Task 1: Migration 0004, per-site credential và cấu hình connector
 
 **Files:**
-- Create: `multiagent/migrations/0003_api_connector.sql`
+- Create: `multiagent/migrations/0004_api_connector.sql`
 - Create: `multiagent/src/review_platform/api/__init__.py`
 - Create: `multiagent/src/review_platform/api/auth.py`
 - Create: `multiagent/scripts/site_config.py`
@@ -120,7 +120,7 @@ Parse đúng `Bearer <token>` không chấp nhận token rỗng/multiple scheme.
 .\.venv\Scripts\python.exe scripts\test_site_config.py
 .\.venv\Scripts\python.exe scripts\test_site_credentials.py
 .\.venv\Scripts\python.exe scripts\migrate.py apply
-git -C .. add multiagent/migrations/0003_api_connector.sql multiagent/src/review_platform/api multiagent/scripts/site_config.py multiagent/scripts/site_credential.py multiagent/scripts/test_migrations.py multiagent/scripts/test_site_config.py multiagent/scripts/test_site_credentials.py
+git -C .. add multiagent/migrations/0004_api_connector.sql multiagent/src/review_platform/api multiagent/scripts/site_config.py multiagent/scripts/site_credential.py multiagent/scripts/test_migrations.py multiagent/scripts/test_site_config.py multiagent/scripts/test_site_credentials.py
 git commit -m "feat: add per-site API credentials and connector config"
 ```
 

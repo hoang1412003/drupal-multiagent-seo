@@ -1,5 +1,7 @@
 # Platform Admin Authentication Implementation Plan
 
+**Trạng thái thực thi:** Hoàn thành trên nhánh `feat/platform-admin-auth`; code checkpoint `c35dc75`, evidence tại `docs/evidence/platform-admin-auth-verification.txt`. Các checkbox bên dưới đã được đối chiếu với commit/evidence sau re-review.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Cung cấp trang `/admin` có local account, Argon2id, server-side session, CSRF, rate-limit và RBAC `viewer/operator/admin` mà không phụ thuộc tài khoản Drupal.
@@ -59,7 +61,7 @@
 **Interfaces:**
 - Produces tables: `admin_user`, `admin_session`, `admin_login_throttle`, `admin_audit_log`.
 
-- [ ] **Step 1: Khai báo dependency tường minh**
+- [x] **Step 1: Khai báo dependency tường minh**
 
 Thêm runtime:
 
@@ -75,11 +77,11 @@ Sửa mô tả `requirements-dev.txt` vì file không còn chỉ cho chuẩn b�
 httpx>=0.28,<1
 ```
 
-- [ ] **Step 2: RED migration test**
+- [x] **Step 2: RED migration test**
 
 Sau apply `0001`, assert `0002` pending; apply rồi assert table/constraint/index tồn tại. Test insert role `owner` bị check constraint từ chối; duplicate normalized username bị unique index chặn.
 
-- [ ] **Step 3: Viết migration 0002 đầy đủ**
+- [x] **Step 3: Viết migration 0002 đầy đủ**
 
 ```sql
 CREATE TABLE admin_user (
@@ -135,7 +137,7 @@ CREATE INDEX admin_audit_log_time ON admin_audit_log (created_at DESC);
 CREATE INDEX admin_audit_log_actor ON admin_audit_log (actor_user_id, created_at DESC);
 ```
 
-- [ ] **Step 4: Install và GREEN**
+- [x] **Step 4: Install và GREEN**
 
 ```powershell
 .\.venv\Scripts\pip.exe install -r requirements.txt -r requirements-dev.txt
@@ -145,7 +147,7 @@ CREATE INDEX admin_audit_log_actor ON admin_audit_log (actor_user_id, created_at
 
 Expected: 0002 apply một lần; status current.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```powershell
 git -C .. add multiagent/requirements.txt multiagent/requirements-dev.txt multiagent/migrations/0002_admin_auth.sql multiagent/scripts/test_migrations.py
@@ -168,7 +170,7 @@ git commit -m "feat: add admin authentication schema"
 - Produces: `hash_password(password: str) -> str`, `verify_password(hash_value: str, password: str) -> bool`, `needs_rehash(hash_value: str) -> bool`.
 - Produces: `create_user`, `authenticate_candidate`, `set_role`, `set_active`, `reset_password`, `change_password`.
 
-- [ ] **Step 1: RED password policy và hash**
+- [x] **Step 1: RED password policy và hash**
 
 ```python
 def test_argon2id_va_policy():
@@ -182,7 +184,7 @@ def test_argon2id_va_policy():
 
 Test Unicode password giữ nguyên bytes; chuỗi chỉ khác khoảng trắng đầu/cuối không được tự trim thành giống nhau.
 
-- [ ] **Step 2: Implement Argon2id exact parameters**
+- [x] **Step 2: Implement Argon2id exact parameters**
 
 ```python
 HASHER = PasswordHasher(
@@ -197,15 +199,15 @@ HASHER = PasswordHasher(
 
 `verify_password` bắt `VerifyMismatchError`/`InvalidHashError` và trả False; không phân biệt lỗi cho caller.
 
-- [ ] **Step 3: RED repository invariants**
+- [x] **Step 3: RED repository invariants**
 
 Test username normalize bằng `unicodedata.normalize("NFKC", username).casefold().strip()`. Tạo `Admin` rồi `admin` phải conflict. Test không thể deactivate/hạ role admin active cuối; khi có hai admin thì được phép hạ một.
 
-- [ ] **Step 4: Implement repository transaction**
+- [x] **Step 4: Implement repository transaction**
 
 `set_role` và `set_active` lock toàn bộ active admin row bằng `SELECT ... FOR UPDATE` trong transaction trước khi quyết định. `reset_password` set `must_change_password=true`, update timestamp và revoke session cùng transaction. `change_password` set false và revoke mọi session trừ session hiện tại chỉ khi route sẽ tạo session mới; plan chọn revoke tất cả rồi buộc login lại.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_users.py
@@ -229,21 +231,21 @@ git commit -m "feat: add Argon2id admin users and role invariants"
 - Produces: `issue`, `resolve`, `touch`, `revoke`, `revoke_all_for_user`.
 - Produces pre-auth: `issue_login_csrf(signing_key: bytes) -> str`, `verify_login_csrf(cookie_token, form_token, signing_key) -> bool`.
 
-- [ ] **Step 1: RED raw-token rules**
+- [x] **Step 1: RED raw-token rules**
 
 Test `issue()` trả token URL-safe ít nhất 32 random bytes; DB chỉ chứa SHA-256 hex, không chứa raw token. Resolve đúng, token sai/expired/revoked trả None. Touch trượt idle expiry nhưng không vượt absolute expiry.
 
-- [ ] **Step 2: Implement session**
+- [x] **Step 2: Implement session**
 
 Raw token: `secrets.token_urlsafe(32)`. Hash: `hashlib.sha256(raw.encode("ascii")).hexdigest()`. CSRF: `secrets.token_urlsafe(32)` stored server-side per session and compare bằng `hmac.compare_digest`.
 
 Thời gian luôn timezone-aware UTC; injectable `now_fn` cho test, không monkeypatch `datetime` toàn module.
 
-- [ ] **Step 3: RED/implement login CSRF**
+- [x] **Step 3: RED/implement login CSRF**
 
 Token format `nonce.signature` với nonce 32 bytes URL-safe, signature `HMAC-SHA256(ADMIN_CSRF_KEY, nonce)`. Verify cookie == form bằng constant-time, rồi verify signature. Không đưa username/IP vào token.
 
-- [ ] **Step 4: GREEN + commit**
+- [x] **Step 4: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_sessions.py
@@ -264,23 +266,23 @@ git commit -m "feat: add server-side admin sessions and CSRF"
 - Produces: `LoginThrottle.check/record_failure/record_success`.
 - Produces: `AuditAction` enum and `write_event(..., metadata: Mapping) -> int`.
 
-- [ ] **Step 1: RED throttle window**
+- [x] **Step 1: RED throttle window**
 
 Test 4 fail chưa block, fail thứ 5 block 15 phút; username khác hoặc IP khác là subject khác; qua block + window reset được thử lại. Subject hash dùng HMAC `ADMIN_THROTTLE_KEY` thay SHA thuần để không dò username/IP từ DB.
 
-- [ ] **Step 2: Implement transaction throttle**
+- [x] **Step 2: Implement transaction throttle**
 
 `check()` không tăng counter. `record_failure()` upsert + row lock, reset window sau 15 phút, set blocked_until ở lần 5. `record_success()` xóa row. Route vẫn chạy dummy Argon2 verify khi username không tồn tại để giảm username timing leak.
 
-- [ ] **Step 3: RED audit secret rejection**
+- [x] **Step 3: RED audit secret rejection**
 
 Allow metadata keys theo action, ví dụ login chỉ `subject_hash`, `reason`; user change chỉ `old_role/new_role`. Test key chứa `password`, `token`, `authorization`, `cookie`, `secret` raise `AuditMetadataError`; value không được là bytes hoặc mapping lồng không allowlisted.
 
-- [ ] **Step 4: Implement audit action enum**
+- [x] **Step 4: Implement audit action enum**
 
 Tối thiểu: `login_success`, `login_failed`, `logout`, `password_changed`, `user_created`, `user_role_changed`, `user_locked`, `user_unlocked`, `password_reset`, `last_admin_denied`. Outcome exact `success|denied|failed`.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_login_security.py
@@ -309,7 +311,7 @@ git commit -m "feat: rate limit and audit admin authentication"
 - Produces routes: `GET/POST /admin/login`, `POST /admin/logout`, `GET /admin`, `GET/POST /admin/change-password`.
 - Produces dependencies: `current_user`, `require_role(Role)`, `require_csrf`.
 
-- [ ] **Step 1: RED HTTP behavior bằng TestClient**
+- [x] **Step 1: RED HTTP behavior bằng TestClient**
 
 Test app riêng include admin router với dependency override DB. Cases:
 
@@ -325,31 +327,31 @@ assert "SameSite=lax" in login_ok.headers["set-cookie"]
 
 Test inactive user, throttle, must-change redirect, logout CSRF, session revoke và viewer gọi dependency operator bị 403.
 
-- [ ] **Step 2: Implement dependencies và validate auth config**
+- [x] **Step 2: Implement dependencies và validate auth config**
 
 `current_user` resolve cookie + active user, touch session tối đa một lần mỗi 5 phút để tránh UPDATE mọi request. `require_role` dùng rank `viewer=10`, `operator=20`, `admin=30`; trả 403 server-side. Nếu `must_change_password`, chỉ cho logout/change-password/static.
 
 Lifespan gọi auth config validator: hai signing key phải tồn tại, mỗi key UTF-8 ít nhất 32 byte và không bằng nhau qua `hmac.compare_digest`. Throttle subject dùng `request.client.host`; không đọc header IP ở application layer.
 
-- [ ] **Step 3: Implement login/logout**
+- [x] **Step 3: Implement login/logout**
 
 GET login issue signed pre-auth token, set cookie `vf_admin_login_csrf` `HttpOnly=true`, `SameSite=Lax`, `Path=/admin/login`, max-age 600. POST verify token trước credential, throttle trước/after dummy Argon2, issue session, delete preauth cookie, 303 `/admin` hoặc `/admin/change-password`.
 
 Logout POST verify session CSRF, revoke, delete session cookie, 303 login. Không dùng GET cho logout.
 
-- [ ] **Step 4: Implement password change**
+- [x] **Step 4: Implement password change**
 
 Form fields current/new/confirm + CSRF. Generic errors, validate current password, equality confirm, policy. Success revoke all sessions, delete cookie, 303 login với one-time query-free flash cookie hoặc template message; không đưa message nhạy cảm vào URL.
 
-- [ ] **Step 5: Templates/CSS tối thiểu**
+- [x] **Step 5: Templates/CSS tối thiểu**
 
 Jinja autoescape bật. Base có skip-link, semantic nav/main, visible focus, error summary `role=alert`, không render `|safe` với dữ liệu runtime. Home hiển thị username/role và dòng “Các màn hình vận hành được thêm ở phase tiếp theo”, không tạo metric giả.
 
-- [ ] **Step 6: Gắn router vào app hiện hành**
+- [x] **Step 6: Gắn router vào app hiện hành**
 
 `api.py` include router và mount static `/admin/static`. Không chuyển/xóa legacy `/jobs`, `/health`. Test cũ API phải giữ nguyên.
 
-- [ ] **Step 7: GREEN + regressions**
+- [x] **Step 7: GREEN + regressions**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_routes.py
@@ -357,7 +359,7 @@ Jinja autoescape bật. Base có skip-link, semantic nav/main, visible focus, er
 .\.venv\Scripts\python.exe scripts\test_moi_test_deu_chay.py
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```powershell
 git -C .. add multiagent/src/review_platform/admin multiagent/src/api.py multiagent/scripts/test_admin_routes.py
@@ -377,15 +379,15 @@ git commit -m "feat: add secure admin login and role gate"
 **Interfaces:**
 - CLI subcommands: `bootstrap`, `create`, `reset-password`, `lock`, `unlock`, `set-role`.
 
-- [ ] **Step 1: RED parser và no-password-argument**
+- [x] **Step 1: RED parser và no-password-argument**
 
 Test parser từ chối `--password`; inject `getpass_fn` cho test. `bootstrap` chỉ chạy khi không có user; luôn tạo `admin`, `must_change_password=true`. `create` cần actor admin ID hoặc ghi actor `system-cli` rõ trong audit.
 
-- [ ] **Step 2: Implement CLI**
+- [x] **Step 2: Implement CLI**
 
 Password nhập hai lần bằng `getpass.getpass`, không echo. `reset-password` sinh bằng `secrets.token_urlsafe(18)`, in đúng một lần sau commit DB, không ghi audit value. Lock/set-role gọi cùng repository nên last-admin guard giữ nguyên.
 
-- [ ] **Step 3: Env và setup**
+- [x] **Step 3: Env và setup**
 
 `.env.example` thêm:
 
@@ -401,7 +403,7 @@ README hướng dẫn sinh hai key riêng bằng `secrets.token_urlsafe(32)`, pr
 .\.venv\Scripts\python.exe scripts\admin_user.py bootstrap --username admin
 ```
 
-- [ ] **Step 4: GREEN + commit**
+- [x] **Step 4: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_user_cli.py
@@ -420,19 +422,19 @@ git commit -m "feat: add interactive admin account CLI"
 **Interfaces:**
 - Produces evidence cho Plan 3.
 
-- [ ] **Step 1: Chạy focused suite và full offline suite**
+- [x] **Step 1: Chạy focused suite và full offline suite**
 
 Run mọi `test_admin_*.py`, `test_migrations.py`, `test_api.py`, rồi full `scripts/test_*.py` runner từ parent plan.
 
-- [ ] **Step 2: Security assertions tươi**
+- [x] **Step 2: Security assertions tươi**
 
 Dump schema row mẫu và assert không có raw password/session. Dùng TestClient assert CSRF 403, viewer 403 operator dependency, last-admin denial, cookie flags. Không chép hash/token vào evidence.
 
-- [ ] **Step 3: Score freeze**
+- [x] **Step 3: Score freeze**
 
 Chạy prompt/hash + score-path diff command ở parent plan. Expected unchanged.
 
-- [ ] **Step 4: Evidence/docs + commit**
+- [x] **Step 4: Evidence/docs + commit**
 
 ```powershell
 git -C .. add docs/evidence/platform-admin-auth-verification.txt docs/technical-debt.md

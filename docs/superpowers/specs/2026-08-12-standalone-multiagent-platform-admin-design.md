@@ -1,7 +1,7 @@
 # Thiết kế nền tảng Multi-Agent độc lập và trang quản trị
 
 **Ngày chốt thiết kế:** 2026-08-12
-**Trạng thái:** Đã được chủ dự án duyệt; **chưa triển khai code**
+**Trạng thái:** Đã được chủ dự án duyệt; **P1 Foundation và P2 Admin Auth đã triển khai/kiểm chứng, P3–P5 chưa triển khai**
 **Phạm vi MVP:** một công ty, thị trường Việt Nam, tiếng Việt, loại nội dung `cam_nang`, một website Drupal
 **Quan hệ với roadmap:** thực hiện song song với Sprint 3 nhưng không được làm thay đổi đường chấm điểm đang khóa
 **Bổ sung kỹ thuật sau implementation review:** reconciliation dùng Drupal pending metadata feed; write-back chuyển sang callback Drupal có kiểm tra revision/hash và idempotency; legacy hash v1 được giữ trong cửa sổ rollback; không thay đổi phạm vi nghiệp vụ MVP

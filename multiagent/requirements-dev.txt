@@ -1,3 +1,6 @@
-# Thư viện CHỈ dùng cho script chuẩn bị dữ liệu (chạy một lần), không phải
-# phụ thuộc của hệ multi-agent chạy thật - xem requirements.txt cho phần đó.
+# Thu vien CHI dung cho script chuan bi du lieu va test, khong phai phu thuoc
+# cua he multi-agent chay that - xem requirements.txt cho phan runtime.
 beautifulsoup4>=4.12.0
+
+# TestClient cua FastAPI/Starlette dung transport cua httpx.
+httpx>=0.28,<1

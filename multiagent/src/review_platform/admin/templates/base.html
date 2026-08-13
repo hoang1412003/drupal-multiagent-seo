@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Platform Admin{% endblock %} · VF O2O Multi-Agent</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Bỏ qua điều hướng</a>
+  <header class="site-header">
+    <a class="brand" href="/admin">VF O2O Multi-Agent</a>
+    {% if user %}
+    <nav aria-label="Điều hướng quản trị">
+      <a href="/admin"{% if request.url.path == '/admin' %} aria-current="page"{% endif %}>Trang chủ</a>
+      <a href="/admin/change-password"{% if request.url.path == '/admin/change-password' %} aria-current="page"{% endif %}>Đổi mật khẩu</a>
+      <form method="post" action="/admin/logout">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="nav-action" type="submit">Đăng xuất</button>
+      </form>
+    </nav>
+    {% endif %}
+  </header>
+  <main id="main-content" class="page-shell {% block shell_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
