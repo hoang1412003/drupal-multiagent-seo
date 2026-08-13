@@ -17,6 +17,7 @@
       <a href="/admin"{% if request.url.path == '/admin' %} aria-current="page"{% endif %}>Tổng quan</a>
       <a href="/admin/jobs"{% if request.url.path.startswith('/admin/jobs') %} aria-current="page"{% endif %}>Jobs</a>
       <a href="/admin/reviews"{% if request.url.path.startswith('/admin/reviews') %} aria-current="page"{% endif %}>Lịch sử chấm</a>
+      <a href="/admin/config-kb"{% if request.url.path == '/admin/config-kb' %} aria-current="page"{% endif %}>Cấu hình &amp; KB</a>
       {% if user.role.value == 'admin' %}
         <a href="/admin/users"{% if request.url.path.startswith('/admin/users') %} aria-current="page"{% endif %}>Người dùng</a>
       {% endif %}

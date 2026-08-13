@@ -7,6 +7,7 @@ from review_platform.admin import (
     dashboard_routes,
     dependencies,
     job_routes,
+    read_only_routes,
     rendering,
     review_routes,
     user_routes,
@@ -311,3 +312,4 @@ router.include_router(dashboard_routes.router)
 router.include_router(job_routes.router)
 router.include_router(review_routes.router)
 router.include_router(user_routes.router)
+router.include_router(read_only_routes.router)

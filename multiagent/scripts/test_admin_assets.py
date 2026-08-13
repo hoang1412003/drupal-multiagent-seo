@@ -91,7 +91,7 @@ def test_rendering_helper_autoescape_va_base_chi_goi_script_local():
     print("[PASS] helper render autoescape, identity va chi dung HTMX local")
 
 
-def test_nav_task_1_khong_tao_link_den_route_chua_co():
+def test_nav_chi_tao_link_den_route_da_co_va_dung_role():
     from review_platform.admin import rendering
 
     user = SimpleNamespace(username="operator.demo", role=Role.OPERATOR)
@@ -105,12 +105,12 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
     assert "/admin" in hrefs
     assert "/admin/jobs" in hrefs
     assert "/admin/reviews" in hrefs
+    assert "/admin/config-kb" in hrefs
     assert "/admin/users" not in hrefs
     assert "/admin/change-password" in hrefs
     assert ">Tổng quan</a>" in html
     assert ">Trang chủ</a>" not in html
     assert not hrefs & {
-        "/admin/config-kb",
         "/admin/evaluation",
         "/admin/users",
         "/admin/audit",
@@ -128,7 +128,7 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
         error="qa",
     ).body.decode("utf-8")
     assert 'href="/admin/users"' in admin_html
-    print("[PASS] nav Task 6 co route that, users chi admin va logout co CSRF")
+    print("[PASS] nav chi link route da co, users chi admin va logout co CSRF")
 
 
 def test_css_shell_co_accessibility_va_mobile_contract():
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     for fn in (
         test_vendor_htmx_dung_ban_da_khoa_va_static_phuc_vu_duoc,
         test_rendering_helper_autoescape_va_base_chi_goi_script_local,
-        test_nav_task_1_khong_tao_link_den_route_chua_co,
+        test_nav_chi_tao_link_den_route_da_co_va_dung_role,
         test_css_shell_co_accessibility_va_mobile_contract,
     ):
         try:
