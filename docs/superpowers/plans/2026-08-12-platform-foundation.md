@@ -18,6 +18,7 @@
 - Default IDs cố định: site `00000000-0000-4000-8000-000000000001`, profile `00000000-0000-4000-8000-000000000002`.
 - Default codes: site `drupal-vn-primary`, profile `cam-nang-vn`, policy `cam-nang-vn-v1`.
 - Migration đã apply không được sửa; mismatch checksum phải chặn startup.
+- Package mới dùng namespace `review_platform`; không dùng top-level `platform` vì sẽ che module chuẩn cùng tên của Python khi `src` đứng đầu `sys.path`.
 - Migration từ schema hiện hành phải backfill trước khi thêm `NOT NULL`/FK/index.
 - Không lưu trường nội dung đầy đủ trong cột mới.
 - Compatibility wrapper `/jobs` và worker hiện tại phải tiếp tục chạy tới Plan API/connector.
@@ -28,11 +29,11 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `multiagent/src/platform/__init__.py` | Đánh dấu package mới, không side effect |
-| `multiagent/src/platform/migrations.py` | Discover/checksum/status/apply/require migration |
-| `multiagent/src/platform/database.py` | Kết nối mới theo context, không dùng shared connection cho request |
-| `multiagent/src/platform/context.py` | Dataclass `SiteContext`, `ReviewProfileContext`, `ReviewContext` |
-| `multiagent/src/platform/sites.py` | Query site/profile assignment chính xác một kết quả |
+| `multiagent/src/review_platform/__init__.py` | Đánh dấu package mới, không side effect |
+| `multiagent/src/review_platform/migrations.py` | Discover/checksum/status/apply/require migration |
+| `multiagent/src/review_platform/database.py` | Kết nối mới theo context, không dùng shared connection cho request |
+| `multiagent/src/review_platform/context.py` | Dataclass `SiteContext`, `ReviewProfileContext`, `ReviewContext` |
+| `multiagent/src/review_platform/sites.py` | Query site/profile assignment chính xác một kết quả |
 | `multiagent/migrations/0001_platform_foundation.sql` | Baseline + backfill site/profile/job/run/KB |
 | `multiagent/scripts/migrate.py` | CLI `status`/`apply` |
 | `multiagent/scripts/test_migrations.py` | Unit discovery/checksum + integration upgrade |
@@ -46,9 +47,9 @@
 ### Task 1: Migration runner có checksum
 
 **Files:**
-- Create: `multiagent/src/platform/__init__.py`
-- Create: `multiagent/src/platform/migrations.py`
-- Create: `multiagent/src/platform/database.py`
+- Create: `multiagent/src/review_platform/__init__.py`
+- Create: `multiagent/src/review_platform/migrations.py`
+- Create: `multiagent/src/review_platform/database.py`
 - Create: `multiagent/scripts/migrate.py`
 - Create: `multiagent/scripts/test_migrations.py`
 
@@ -86,7 +87,7 @@ Set-Location D:\drupal-multiagent-seo\multiagent
 .\.venv\Scripts\python.exe scripts\test_migrations.py
 ```
 
-Expected: FAIL vì chưa có `platform.migrations`.
+Expected: FAIL vì chưa có `review_platform.migrations`.
 
 - [ ] **Step 3: Cài migration types và discovery**
 
@@ -154,7 +155,7 @@ Expected: discovery/checksum tests PASS; phần Postgres in `[SKIP]` nếu DB t�
 - [ ] **Step 7: Commit**
 
 ```powershell
-git -C .. add multiagent/src/platform multiagent/scripts/migrate.py multiagent/scripts/test_migrations.py
+git -C .. add multiagent/src/review_platform multiagent/scripts/migrate.py multiagent/scripts/test_migrations.py
 git commit -m "feat: add versioned SQL migration runner"
 ```
 
@@ -295,7 +296,7 @@ CREATE TABLE site_profile_assignment (
 
 Ngay trong migration tạo constraint trigger `site_profile_assignment_scope_guard` cho INSERT/UPDATE active assignment: lock row `site` tương ứng bằng `FOR UPDATE`, join `review_profile` và từ chối (`unique_violation`) nếu site đã có assignment active khác cùng `(content_type, language_code)`. Trigger thứ hai trên UPDATE `review_profile.content_type/language_code/status` chạy cùng phép kiểm để không tạo trùng bằng cách sửa profile sau khi assign. Migration test tạo profile thứ hai cùng `cam_nang/vi` và phải thấy DB từ chối assignment active, không chỉ chờ application phát hiện.
 
-Seed dùng `INSERT ... ON CONFLICT DO NOTHING`; `policy_snapshot` là literal bất biến sau (hash lowercase, tính từ snapshot `04f10e1`):
+Seed dùng `INSERT ... ON CONFLICT DO NOTHING`; `policy_snapshot` là literal bất biến sau (SHA-256 lowercase của Git blob tại snapshot `04f10e1`, không băm working tree vì `core.autocrlf` làm bytes khác nhau giữa Windows/Linux):
 
 ```json
 {
@@ -305,18 +306,18 @@ Seed dùng `INSERT ... ON CONFLICT DO NOTHING`; `policy_snapshot` là literal b�
   "rubric_version": "v1",
   "model": "claude-haiku-4-5-20251001",
   "scoring_key": "cam_nang:vi",
-  "scoring_sha256": "d9eeec581888a112fa20faaea545199e698a067209229eac9de0f0193adb90a3",
-  "compliance_rules_sha256": "c57be948ed14e1b500b270d4a3676c86c741b6ef555312c60eff9765bda55f4e",
-  "brand_rules_sha256": "6f89233c3ed371a62a64d5ae65a4cb3345e086c1bd957de0085dd0c01dbf82a5",
+  "scoring_sha256": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+  "compliance_rules_sha256": "edfd49d48e144f7e491ff8527650125370af72219e518222c4421c263ae4c6f6",
+  "brand_rules_sha256": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
   "factcheck_kb_specs_sha256": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
-  "brand_guideline_sha256": "9ecc02fde085e4109eff5e5a8f0582ac206afff5a7333bfe1f72293fd1376af2",
-  "brand_corpus_index_sha256": "b5fdbe4bf2095c7529b1ab3693896c10ac8dc8da6101268ccec49a1bf81f823b",
+  "brand_guideline_sha256": "4a2e6d92a54858be511c2307f967be823c1ff6499d640b1646a3941f0b7686e3",
+  "brand_corpus_index_sha256": "f0dcacda43765ebe858e1b12edeea910b828106f37ba9422bd313b9245c41175",
   "embedding_model": "BAAI/bge-m3",
   "embedding_dimension": 1024
 }
 ```
 
-Migration test tính lại từng hash từ file nguồn và so literal để chống tài liệu/migration chép sai. `base_url='http://drupal.ddev.site'`, `secret_ref='DRUPAL'` chỉ để giữ tương thích môi trường local hiện tại. Giá trị này không phải cấu hình staging/production; API/Connector Task 1 phải cung cấp CLI cấu hình site và cutover bắt buộc chạy CLI trước worker mới.
+Migration test đọc từng Git blob tại snapshot `04f10e1`, tính lại hash và so literal để chống tài liệu/migration chép sai mà không phụ thuộc line ending của checkout. `base_url='http://drupal.ddev.site'`, `secret_ref='DRUPAL'` chỉ để giữ tương thích môi trường local hiện tại. Giá trị này không phải cấu hình staging/production; API/Connector Task 1 phải cung cấp CLI cấu hình site và cutover bắt buộc chạy CLI trước worker mới.
 
 - [ ] **Step 5: ALTER/backfill job và run**
 
@@ -379,8 +380,8 @@ git commit -m "feat: migrate existing data to site and profile schema"
 ### Task 3: Site/profile context không fallback im lặng
 
 **Files:**
-- Create: `multiagent/src/platform/context.py`
-- Create: `multiagent/src/platform/sites.py`
+- Create: `multiagent/src/review_platform/context.py`
+- Create: `multiagent/src/review_platform/sites.py`
 - Create: `multiagent/scripts/test_platform_context.py`
 
 **Interfaces:**
@@ -418,7 +419,7 @@ Query profile phải join `site_profile_assignment`, `site`, `review_profile`, l
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_platform_context.py
-git -C .. add multiagent/src/platform/context.py multiagent/src/platform/sites.py multiagent/scripts/test_platform_context.py
+git -C .. add multiagent/src/review_platform/context.py multiagent/src/review_platform/sites.py multiagent/scripts/test_platform_context.py
 git commit -m "feat: resolve explicit site and review profile context"
 ```
 

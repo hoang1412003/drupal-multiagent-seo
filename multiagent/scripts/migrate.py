@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from platform import database, migrations
+from review_platform import database, migrations
 
 
 MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"

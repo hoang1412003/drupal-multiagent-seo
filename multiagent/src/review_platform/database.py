@@ -1,4 +1,4 @@
-"""Vong doi connection database cua platform service."""
+"""Vong doi connection database cua review platform service."""
 from contextlib import contextmanager
 
 import psycopg

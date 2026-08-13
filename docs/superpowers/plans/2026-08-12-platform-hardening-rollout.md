@@ -31,10 +31,10 @@
 | File | Trách nhiệm |
 |---|---|
 | `multiagent/migrations/0004_platform_observability.sql` | Worker heartbeat, durable LLM usage event và index/constraint hardening |
-| `multiagent/src/platform/worker_health.py` | Upsert/delete/read heartbeat |
-| `multiagent/src/platform/usage.py` | Context attribution, per-call/per-agent token summary |
-| `multiagent/src/platform/logging.py` | Structured event + recursive redaction |
-| `multiagent/src/platform/security.py` | Request ID, headers, safe exception response |
+| `multiagent/src/review_platform/worker_health.py` | Upsert/delete/read heartbeat |
+| `multiagent/src/review_platform/usage.py` | Context attribution, per-call/per-agent token summary |
+| `multiagent/src/review_platform/logging.py` | Structured event + recursive redaction |
+| `multiagent/src/review_platform/security.py` | Request ID, headers, safe exception response |
 | `drupal/scripts/configure_ai_roles.php` | Idempotent Drupal roles/permissions MVP |
 | `multiagent/scripts/test_platform_end_to_end.py` | API → queue → fake engine → run → one write-back |
 | `docs/operations.md` | Deploy, rotate, recover, backup và incident response |
@@ -46,10 +46,10 @@
 
 **Files:**
 - Create: `multiagent/migrations/0004_platform_observability.sql`
-- Create: `multiagent/src/platform/worker_health.py`
+- Create: `multiagent/src/review_platform/worker_health.py`
 - Modify: `multiagent/src/worker.py`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/templates/home.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/templates/home.html`
 - Modify: `multiagent/scripts/test_migrations.py`
 - Create: `multiagent/scripts/test_worker_heartbeat.py`
 - Modify: `multiagent/scripts/test_admin_dashboard.py`
@@ -115,7 +115,7 @@ Set-Location D:\drupal-multiagent-seo\multiagent
 .\.venv\Scripts\python.exe scripts\test_worker_heartbeat.py
 .\.venv\Scripts\python.exe scripts\test_admin_dashboard.py
 .\.venv\Scripts\python.exe scripts\migrate.py apply
-git add migrations/0004_platform_observability.sql src/platform/worker_health.py src/worker.py src/platform/admin/queries.py src/platform/admin/templates/home.html scripts/test_migrations.py scripts/test_worker_heartbeat.py scripts/test_admin_dashboard.py
+git add migrations/0004_platform_observability.sql src/review_platform/worker_health.py src/worker.py src/review_platform/admin/queries.py src/review_platform/admin/templates/home.html scripts/test_migrations.py scripts/test_worker_heartbeat.py scripts/test_admin_dashboard.py
 git commit -m "feat: report durable worker heartbeats"
 ```
 
@@ -124,12 +124,12 @@ git commit -m "feat: report durable worker heartbeats"
 ### Task 2: Structured logging, recursive redaction và security middleware
 
 **Files:**
-- Create: `multiagent/src/platform/logging.py`
-- Create: `multiagent/src/platform/security.py`
+- Create: `multiagent/src/review_platform/logging.py`
+- Create: `multiagent/src/review_platform/security.py`
 - Modify: `multiagent/src/api.py`
 - Modify: `multiagent/src/worker.py`
-- Modify: `multiagent/src/platform/admin/router.py`
-- Modify: `multiagent/src/platform/connectors/drupal.py`
+- Modify: `multiagent/src/review_platform/admin/router.py`
+- Modify: `multiagent/src/review_platform/connectors/drupal.py`
 - Modify: `drupal/web/modules/custom/vf_ai_trigger/src/ServiceClient.php`
 - Create: `multiagent/scripts/test_platform_logging.py`
 - Create: `multiagent/scripts/test_security_middleware.py`
@@ -182,7 +182,7 @@ Mọi Drupal JSON:API GET/PATCH do connector thực hiện gửi trusted `X-Corr
 Set-Location ..\drupal
 ddev exec php scripts/test_vf_ai_trigger.php
 Set-Location ..\multiagent
-git -C .. add multiagent/src/platform/logging.py multiagent/src/platform/security.py multiagent/src/api.py multiagent/src/worker.py multiagent/src/platform/admin/router.py multiagent/src/platform/connectors/drupal.py multiagent/scripts/test_platform_logging.py multiagent/scripts/test_security_middleware.py multiagent/scripts/test_drupal_connector.py drupal/web/modules/custom/vf_ai_trigger/src/ServiceClient.php drupal/scripts/test_vf_ai_trigger.php
+git -C .. add multiagent/src/review_platform/logging.py multiagent/src/review_platform/security.py multiagent/src/api.py multiagent/src/worker.py multiagent/src/review_platform/admin/router.py multiagent/src/review_platform/connectors/drupal.py multiagent/scripts/test_platform_logging.py multiagent/scripts/test_security_middleware.py multiagent/scripts/test_drupal_connector.py drupal/web/modules/custom/vf_ai_trigger/src/ServiceClient.php drupal/scripts/test_vf_ai_trigger.php
 git commit -m "feat: harden platform logs and HTTP responses"
 ```
 
@@ -191,11 +191,11 @@ git commit -m "feat: harden platform logs and HTTP responses"
 ### Task 3: Per-call/per-agent token, cost và correlation—không chạm score path
 
 **Files:**
-- Create: `multiagent/src/platform/usage.py`
+- Create: `multiagent/src/review_platform/usage.py`
 - Modify: `multiagent/src/worker.py`
 - Modify: `multiagent/src/audit.py`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/templates/review_detail.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/templates/review_detail.html`
 - Create: `multiagent/scripts/test_platform_usage.py`
 - Modify: `multiagent/scripts/test_worker_graph_integration.py`
 - Modify: `multiagent/scripts/test_admin_reviews.py`
@@ -247,7 +247,7 @@ Run real graph topology with fake transport responses; assert labels/counts foll
 .\.venv\Scripts\python.exe scripts\test_admin_reviews.py
 .\.venv\Scripts\python.exe -c "import sys; sys.path[:0]=['scripts','src']; import eval_calibration as e; assert e.prompt_version() == '020738e209017213'; print(e.prompt_version())"
 git -C .. diff --exit-code 04f10e1 -- multiagent/src/agents multiagent/src/ai_core.py multiagent/src/brand_analysis.py multiagent/src/config.py multiagent/src/embeddings.py multiagent/src/graph.py multiagent/src/retrieval.py multiagent/src/scoring.py multiagent/src/seo_analysis.py multiagent/src/state.py multiagent/src/text_utils.py multiagent/src/kb multiagent/config/scoring.yaml
-git -C .. add multiagent/src/platform/usage.py multiagent/src/worker.py multiagent/src/audit.py multiagent/src/platform/admin/queries.py multiagent/src/platform/admin/templates/review_detail.html multiagent/scripts/test_platform_usage.py multiagent/scripts/test_worker_graph_integration.py multiagent/scripts/test_admin_reviews.py
+git -C .. add multiagent/src/review_platform/usage.py multiagent/src/worker.py multiagent/src/audit.py multiagent/src/review_platform/admin/queries.py multiagent/src/review_platform/admin/templates/review_detail.html multiagent/scripts/test_platform_usage.py multiagent/scripts/test_worker_graph_integration.py multiagent/scripts/test_admin_reviews.py
 git commit -m "feat: attribute review usage without changing agents"
 ```
 

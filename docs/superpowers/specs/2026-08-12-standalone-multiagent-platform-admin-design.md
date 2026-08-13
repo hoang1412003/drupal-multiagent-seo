@@ -106,9 +106,9 @@ Việc thêm metadata `site/profile/policy`, authentication, migration, admin UI
 | `platform/connectors` | Interface nguồn nội dung/đích write-back; MVP có `drupal.py` |
 | `platform/reviews` | Enqueue, dedup, retry, pause intake, orchestration giữa job và worker |
 | `platform/profiles` | Chọn profile theo site/content/language và snapshot policy |
-| `platform/engine` | Bao quanh graph/agents/scoring hiện tại; không đổi hành vi chấm |
+| `review_platform/engine` | Bao quanh graph/agents/scoring hiện tại; không đổi hành vi chấm |
 
-Khi triển khai, các module mới đặt dưới `multiagent/src/platform/` theo đúng các nhánh trong bảng. Code engine hiện hành được bao bằng `platform/engine` theo từng bước nhỏ; không di chuyển đồng loạt agent/graph trong pha đầu nếu việc đó làm tăng rủi ro regression.
+Khi triển khai, các module mới đặt dưới `multiagent/src/review_platform/` theo đúng các nhánh trong bảng. Không đặt package top-level tên `platform`: khi `multiagent/src` đứng đầu `sys.path`, tên đó che module chuẩn `platform` của Python và làm các dependency như `zstandard/httpx` lỗi import. Code engine hiện hành được bao bằng `review_platform/engine` theo từng bước nhỏ; không di chuyển đồng loạt agent/graph trong pha đầu nếu việc đó làm tăng rủi ro regression.
 
 ### 4.2. Vì sao chọn modular monolith
 

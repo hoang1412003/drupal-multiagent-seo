@@ -35,14 +35,14 @@
 | File | Trách nhiệm |
 |---|---|
 | `multiagent/migrations/0003_api_connector.sql` | Site credential, connector health, hash version/source URL |
-| `multiagent/src/platform/api/auth.py` | Bearer token → `SitePrincipal` |
-| `multiagent/src/platform/api/models.py` | Pydantic request/response v1 |
-| `multiagent/src/platform/api/router.py` | `/api/v1/jobs` routes |
-| `multiagent/src/platform/connectors/base.py` | Protocol/dataclass connector |
-| `multiagent/src/platform/connectors/secrets.py` | Resolve env secret prefix |
-| `multiagent/src/platform/connectors/drupal.py` | Revision-aware fetch/list/write/health |
-| `multiagent/src/platform/connectors/runtime.py` | Context-local prepared document cho graph wrapper |
-| `multiagent/src/platform/fingerprint.py` | Canonical six-field fingerprint v2 |
+| `multiagent/src/review_platform/api/auth.py` | Bearer token → `SitePrincipal` |
+| `multiagent/src/review_platform/api/models.py` | Pydantic request/response v1 |
+| `multiagent/src/review_platform/api/router.py` | `/api/v1/jobs` routes |
+| `multiagent/src/review_platform/connectors/base.py` | Protocol/dataclass connector |
+| `multiagent/src/review_platform/connectors/secrets.py` | Resolve env secret prefix |
+| `multiagent/src/review_platform/connectors/drupal.py` | Revision-aware fetch/list/write/health |
+| `multiagent/src/review_platform/connectors/runtime.py` | Context-local prepared document cho graph wrapper |
+| `multiagent/src/review_platform/fingerprint.py` | Canonical six-field fingerprint v2 |
 | `multiagent/scripts/site_config.py` | Cấu hình/kiểm tra base URL và secret reference theo môi trường |
 | `multiagent/scripts/site_credential.py` | Import/rotate/revoke token, plaintext shown once |
 | `drupal/.../vf_ai_trigger/ServiceClient.php` | Gọi `/api/v1`, payload mới |
@@ -55,8 +55,8 @@
 
 **Files:**
 - Create: `multiagent/migrations/0003_api_connector.sql`
-- Create: `multiagent/src/platform/api/__init__.py`
-- Create: `multiagent/src/platform/api/auth.py`
+- Create: `multiagent/src/review_platform/api/__init__.py`
+- Create: `multiagent/src/review_platform/api/auth.py`
 - Create: `multiagent/scripts/site_config.py`
 - Create: `multiagent/scripts/site_credential.py`
 - Modify: `multiagent/scripts/test_migrations.py`
@@ -120,7 +120,7 @@ Parse đúng `Bearer <token>` không chấp nhận token rỗng/multiple scheme.
 .\.venv\Scripts\python.exe scripts\test_site_config.py
 .\.venv\Scripts\python.exe scripts\test_site_credentials.py
 .\.venv\Scripts\python.exe scripts\migrate.py apply
-git -C .. add multiagent/migrations/0003_api_connector.sql multiagent/src/platform/api multiagent/scripts/site_config.py multiagent/scripts/site_credential.py multiagent/scripts/test_migrations.py multiagent/scripts/test_site_config.py multiagent/scripts/test_site_credentials.py
+git -C .. add multiagent/migrations/0003_api_connector.sql multiagent/src/review_platform/api multiagent/scripts/site_config.py multiagent/scripts/site_credential.py multiagent/scripts/test_migrations.py multiagent/scripts/test_site_config.py multiagent/scripts/test_site_credentials.py
 git commit -m "feat: add per-site API credentials and connector config"
 ```
 
@@ -129,8 +129,8 @@ git commit -m "feat: add per-site API credentials and connector config"
 ### Task 2: API v1 contract và site-derived profile
 
 **Files:**
-- Create: `multiagent/src/platform/api/models.py`
-- Create: `multiagent/src/platform/api/router.py`
+- Create: `multiagent/src/review_platform/api/models.py`
+- Create: `multiagent/src/review_platform/api/router.py`
 - Modify: `multiagent/src/api.py`
 - Create: `multiagent/scripts/test_api_v1.py`
 
@@ -186,7 +186,7 @@ Chỉ áp `/api/v1`: Content-Length >16384 trả 413 trước parse; thiếu Con
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_api_v1.py
 .\.venv\Scripts\python.exe scripts\test_api.py
-git -C .. add multiagent/src/platform/api multiagent/src/api.py multiagent/scripts/test_api_v1.py
+git -C .. add multiagent/src/review_platform/api multiagent/src/api.py multiagent/scripts/test_api_v1.py
 git commit -m "feat: expose site-scoped review API v1"
 ```
 
@@ -195,11 +195,11 @@ git commit -m "feat: expose site-scoped review API v1"
 ### Task 3: Connector protocol, env secrets, revision fetch và result callback client
 
 **Files:**
-- Create: `multiagent/src/platform/connectors/__init__.py`
-- Create: `multiagent/src/platform/connectors/base.py`
-- Create: `multiagent/src/platform/connectors/secrets.py`
-- Create: `multiagent/src/platform/connectors/drupal.py`
-- Create: `multiagent/src/platform/connectors/runtime.py`
+- Create: `multiagent/src/review_platform/connectors/__init__.py`
+- Create: `multiagent/src/review_platform/connectors/base.py`
+- Create: `multiagent/src/review_platform/connectors/secrets.py`
+- Create: `multiagent/src/review_platform/connectors/drupal.py`
+- Create: `multiagent/src/review_platform/connectors/runtime.py`
 - Create: `multiagent/scripts/test_drupal_connector.py`
 
 **Interfaces:**
@@ -250,7 +250,7 @@ Không import env tại module load. `DrupalConnector(site, credentials, request
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_drupal_connector.py
-git -C .. add multiagent/src/platform/connectors multiagent/scripts/test_drupal_connector.py
+git -C .. add multiagent/src/review_platform/connectors multiagent/scripts/test_drupal_connector.py
 git commit -m "feat: add revision-aware Drupal connector"
 ```
 
@@ -259,7 +259,7 @@ git commit -m "feat: add revision-aware Drupal connector"
 ### Task 4: Fingerprint v2 phủ đủ sáu input, khớp Python/PHP
 
 **Files:**
-- Create: `multiagent/src/platform/fingerprint.py`
+- Create: `multiagent/src/review_platform/fingerprint.py`
 - Create: `multiagent/scripts/test_platform_fingerprint.py`
 - Create: `drupal/web/modules/custom/vf_ai_review/src/AiInputFingerprint.php`
 - Create: `drupal/scripts/input_fingerprint_v2_fixture.json`
@@ -318,7 +318,7 @@ Expected: hai bên cùng literal expected.
 - [ ] **Step 5: Commit**
 
 ```powershell
-git -C .. add multiagent/src/platform/fingerprint.py multiagent/scripts/test_platform_fingerprint.py drupal/web/modules/custom/vf_ai_review/src/AiInputFingerprint.php drupal/web/modules/custom/vf_ai_review/vf_ai_review.module drupal/scripts/input_fingerprint_v2_fixture.json drupal/scripts/test_ai_input_fingerprint.php drupal/scripts/test_ai_report_renderer.php
+git -C .. add multiagent/src/review_platform/fingerprint.py multiagent/scripts/test_platform_fingerprint.py drupal/web/modules/custom/vf_ai_review/src/AiInputFingerprint.php drupal/web/modules/custom/vf_ai_review/vf_ai_review.module drupal/scripts/input_fingerprint_v2_fixture.json drupal/scripts/test_ai_input_fingerprint.php drupal/scripts/test_ai_report_renderer.php
 git commit -m "fix: fingerprint every field used by review engine"
 ```
 
@@ -331,8 +331,8 @@ git commit -m "fix: fingerprint every field used by review engine"
 - Modify: `multiagent/src/worker.py`
 - Modify: `multiagent/src/job_queue.py`
 - Modify: `multiagent/src/audit.py`
-- Modify: `multiagent/src/platform/admin/queries.py`
-- Modify: `multiagent/src/platform/admin/templates/review_detail.html`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
+- Modify: `multiagent/src/review_platform/admin/templates/review_detail.html`
 - Modify: `multiagent/scripts/test_worker.py`
 - Modify: `multiagent/scripts/test_worker_graph_integration.py`
 - Modify: `multiagent/scripts/test_drupal_client_worker.py`
@@ -398,7 +398,7 @@ Expected: one fetch, one callback, mismatch zero invoke; stale job không ghi; r
 - [ ] **Step 8: Commit**
 
 ```powershell
-git -C .. add multiagent/src/drupal_client.py multiagent/src/worker.py multiagent/src/job_queue.py multiagent/src/audit.py multiagent/src/platform/admin/queries.py multiagent/src/platform/admin/templates/review_detail.html multiagent/scripts/test_worker.py multiagent/scripts/test_worker_graph_integration.py multiagent/scripts/test_drupal_client_worker.py multiagent/scripts/test_admin_dashboard.py multiagent/scripts/test_admin_reviews.py
+git -C .. add multiagent/src/drupal_client.py multiagent/src/worker.py multiagent/src/job_queue.py multiagent/src/audit.py multiagent/src/review_platform/admin/queries.py multiagent/src/review_platform/admin/templates/review_detail.html multiagent/scripts/test_worker.py multiagent/scripts/test_worker_graph_integration.py multiagent/scripts/test_drupal_client_worker.py multiagent/scripts/test_admin_dashboard.py multiagent/scripts/test_admin_reviews.py
 git commit -m "refactor: run worker through scoped Drupal connector"
 ```
 
@@ -548,9 +548,9 @@ git commit -m "feat: send revision-aware jobs to API v1"
 ### Task 8: Connection page, test connection và pause/resume
 
 **Files:**
-- Create: `multiagent/src/platform/admin/templates/connection.html`
-- Modify: `multiagent/src/platform/admin/router.py`
-- Modify: `multiagent/src/platform/admin/queries.py`
+- Create: `multiagent/src/review_platform/admin/templates/connection.html`
+- Modify: `multiagent/src/review_platform/admin/router.py`
+- Modify: `multiagent/src/review_platform/admin/queries.py`
 - Create: `multiagent/scripts/test_admin_connection.py`
 
 **Interfaces:**
@@ -574,7 +574,7 @@ Lock site row; idempotent pause/resume returns 200/303; reason optional max 300.
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_connection.py
-git -C .. add multiagent/src/platform/admin multiagent/scripts/test_admin_connection.py
+git -C .. add multiagent/src/review_platform/admin multiagent/scripts/test_admin_connection.py
 git commit -m "feat: operate Drupal connection and intake pause"
 ```
 

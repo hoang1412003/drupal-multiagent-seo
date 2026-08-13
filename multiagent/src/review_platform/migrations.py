@@ -1,4 +1,4 @@
-"""Migration SQL co version va checksum bat bien."""
+"""Migration SQL cua review platform co version va checksum bat bien."""
 from dataclasses import dataclass
 import hashlib
 from pathlib import Path
