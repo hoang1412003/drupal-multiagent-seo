@@ -46,17 +46,17 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 ## 3. Luồng song song: productization nền tảng Multi-Agent
 
-**Đã duyệt thiết kế ngày 2026-08-12; P1 Foundation đã triển khai và qua checkpoint ngày 2026-08-13, P2–P6 chưa triển khai.** Luồng này không thay thế và không tự mở rộng tiêu chí hoàn thành Sprint 3 do mentor giao. Mục tiêu là tách Multi-Agent thành service độc lập có API, connector Drupal, site/profile, trang quản trị và phân quyền để có thể tái sử dụng sau này. Phạm vi MVP vẫn chỉ là Việt Nam, tiếng Việt, bài `cam_nang` và một Drupal site.
+**Đã duyệt thiết kế ngày 2026-08-12; P1 Foundation, P2 Admin Auth và P3 Admin Operations đã triển khai/qua checkpoint ngày 2026-08-13; P4–P6 chưa triển khai.** Luồng này không thay thế và không tự mở rộng tiêu chí hoàn thành Sprint 3 do mentor giao. Mục tiêu là tách Multi-Agent thành service độc lập có API, connector Drupal, site/profile, trang quản trị và phân quyền để có thể tái sử dụng sau này. Phạm vi MVP vẫn chỉ là Việt Nam, tiếng Việt, bài `cam_nang` và một Drupal site.
 
 Thiết kế chuẩn: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Kế hoạch triển khai tổng và 5 plan con: [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Có plan không có nghĩa code đã được triển khai.
 
 | Pha | Kết quả |
 |---|---|
 | P1 — Nền dữ liệu — ✅ xong | Migration có version/checksum; site/profile mặc định; scoped queue/audit; nâng schema cũ không mất dữ liệu. Evidence: `docs/evidence/platform-foundation-verification.txt` |
-| P2 — Auth + admin shell | Local account, session, CSRF, RBAC, bootstrap admin, audit nền |
-| P3 — Vận hành | Dashboard, jobs, history, retry/dead-letter có cảnh báo chi phí |
+| P2 — Auth + admin shell — ✅ xong | Local account, session, CSRF, RBAC, bootstrap admin, audit nền. Evidence: `docs/evidence/platform-admin-auth-verification.txt` |
+| P3 — Vận hành — ✅ xong | Dashboard, jobs/history, retry có cảnh báo chi phí, users, config/KB/evaluation chỉ đọc và audit. Evidence: `docs/evidence/platform-admin-operations-verification.txt` |
 | P4 — API/connector | `/api/v1`, credential/config theo site, Drupal connector, result callback CAS/idempotent, legacy hash-v1 rollback, dedup và pause/resume |
-| P5 — Hoàn thiện MVP | Connection capability test, users, config/KB/evaluation chỉ đọc, metrics/correlation |
+| P5 — Hoàn thiện MVP | Connection capability/health thật, worker heartbeat, durable usage/metrics/correlation và các phần hoàn thiện còn lại |
 | P6 — Hardening | Durable failed-attempt usage, security/integration test, staging, migration/rollback rehearsal, tài liệu/demo |
 
 **Hàng rào với Sprint 3:** productization chỉ thay lớp bao quanh. Không sửa 4 agent, prompt, `fact_check.py`, `scoring.py`, Aggregator, rule, KB hoặc `scoring.yaml` trong lúc E1/E5 đang khóa. Nếu `prompt_version` khác `020738e209017213`, dừng luồng productization và đánh giá lại phép đo trước khi tiếp tục.

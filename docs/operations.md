@@ -190,7 +190,7 @@ Không còn thư mục `multiagent/logs/` hay vấn đề `.gitignore` cho file 
 
 ---
 
-## 6. Vận hành qua trang quản trị độc lập — thiết kế đã duyệt, chưa triển khai
+## 6. Vận hành qua trang quản trị độc lập — P3 đã qua checkpoint, connector/health thật chưa triển khai
 
 Thiết kế productization ngày 2026-08-12 đưa dữ liệu vận hành hiện có lên trang `/admin` của service, thay vì dựng trang quản trị trong Drupal. Nguồn sự thật chi tiết: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
@@ -205,6 +205,10 @@ Người viết bài không dùng trang này; họ tiếp tục làm việc tron
 Dashboard tối thiểu đọc dữ liệu thật để hiển thị health, queue depth, decision, latency, token/cost. Review detail hiển thị agent result/evidence/veto/profile/policy/model/prompt và link về Drupal. Service chỉ lưu external ID/revision/hash/kết quả/metadata; **không lưu toàn văn bài nháp** và không hiển thị secret trong UI/log/audit.
 
 Pause chặn enqueue mới và chặn worker claim job `queued`, nhưng để job đang chạy hoàn tất và giữ nguyên queue cho tới lúc resume. Retry write-back phải dùng lại kết quả đã lưu, không gọi LLM lần hai. Mọi job/run mới phải có correlation ID cùng site/profile/policy để điều tra xuyên Drupal → API → worker → write-back.
+
+**Trạng thái ngày 2026-08-13:** `/admin` hiện đã có dashboard đọc dữ liệu thật, jobs/detail + retry có role/CSRF/audit/cảnh báo chi phí, review history/detail, quản lý user, config/KB/evaluation chỉ đọc và audit admin-only. Evidence checkpoint: [`evidence/platform-admin-operations-verification.txt`](evidence/platform-admin-operations-verification.txt). Config/evaluation không có endpoint mutation; E2 đã xuất evidence $0 có commit, còn E1/E3/E6 pending và E5 lịch sử được đánh dấu hết hiệu lực.
+
+Chưa có ở P3: connection capability, pause/resume intake, `/api/v1`, Drupal result callback CAS, worker heartbeat và `llm_usage_event` bền vững cho attempt lỗi. Vì vậy dashboard phải tiếp tục hiển thị worker/connector là `unknown`; không được coi trang tồn tại là bằng chứng production-ready.
 
 ---
 

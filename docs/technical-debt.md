@@ -761,11 +761,11 @@ Test tích hợp offline mới `scripts/test_worker_graph_integration.py` đã g
 
 Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **không làm mất hiệu lực quan hệ đo lường 8.1 → 8.2**. Trước production pilot vẫn phải đếm revision/request trên Drupal thật; test offline đóng lỗi ownership trong code nhưng không thay thế smoke test CMS.
 
-### 8.9. Productization service độc lập + trang quản trị — ✅ P1 FOUNDATION + P2 ADMIN AUTH ĐÃ TRIỂN KHAI; P3–P5 CHƯA TRIỂN KHAI
+### 8.9. Productization service độc lập + trang quản trị — ✅ P1 + P2 + P3 ĐÃ QUA CHECKPOINT; P4–P6 CHƯA TRIỂN KHAI
 
 Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
-Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). **Plan 1 Foundation đã triển khai qua các commit `81ce132` → `4ff7824`, evidence ở [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt). Plan 2 Admin Auth đã triển khai trên nhánh `feat/platform-admin-auth` qua các commit `8ad1a2a` → `c35dc75`, evidence ở [`evidence/platform-admin-auth-verification.txt`](evidence/platform-admin-auth-verification.txt); re-review không còn Critical/Important.** Plan 3–5 vẫn chỉ là kế hoạch; chưa được phép suy dashboard vận hành, `/api/v1`, connector callback CAS, bảng usage event hay production hardening đã tồn tại.
+Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). **Plan 1 Foundation đã triển khai qua các commit `81ce132` → `4ff7824`, evidence ở [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt). Plan 2 Admin Auth đã triển khai qua các commit `8ad1a2a` → `c35dc75`, evidence ở [`evidence/platform-admin-auth-verification.txt`](evidence/platform-admin-auth-verification.txt). Plan 3 Admin Operations đã triển khai qua các commit `a98533f` → `e641123`, evidence ở [`evidence/platform-admin-operations-verification.txt`](evidence/platform-admin-operations-verification.txt); review trực tiếp không còn Critical/Important.** P4–P6 vẫn chỉ là kế hoạch; chưa được phép suy `/api/v1`, connector callback CAS, pause/resume, worker heartbeat, bảng usage event hay production hardening đã tồn tại.
 
 **Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
 
@@ -773,7 +773,7 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 
 **Bảo vệ phép đo:** không sửa agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml`. `prompt_version` phải giữ `020738e209017213`; nếu đổi thì dừng productization và xử lý theo `evaluation-plan.md` mục 3a. Không chen hạng mục này vào trước test–retest/E1 và không tự chạy phép đo trả phí.
 
-**Trạng thái triển khai theo thứ tự plan:** (1) foundation migration/site/profile/scoped queue/audit **đã xong và qua checkpoint**; (2) local auth/admin shell **đã xong và qua checkpoint**: migration 0002 tạo schema auth, migration 0003 thêm partial index revoke session theo user, Argon2id, server session, CSRF, throttle, auth audit, RBAC, `/admin`, đổi mật khẩu và CLI account; (3) dashboard/jobs/history/users/config/KB/evaluation **là việc tiếp theo, chưa làm**; (4) connector Drupal + `/api/v1` chưa làm và sẽ bắt đầu ở migration 0004; (5) observability/security/integration/rollout chưa làm và dự kiến dùng migration 0005. Migration 0001 giữ dữ liệu legacy; migration 0002/0003 không đụng queue/run/KB.
+**Trạng thái triển khai theo thứ tự plan:** (1) foundation migration/site/profile/scoped queue/audit **đã xong và qua checkpoint**; (2) local auth/admin shell **đã xong và qua checkpoint**: migration 0002 tạo schema auth, migration 0003 thêm partial index revoke session theo user, Argon2id, server session, CSRF, throttle, auth audit, RBAC, `/admin`, đổi mật khẩu và CLI account; (3) **Admin Operations đã xong và qua checkpoint**: dashboard metric thật, jobs/detail + retry audit, review history/detail, quản lý user, config/KB/evaluation chỉ đọc và audit admin-only. Evidence E2 mới đạt $0; E1/E3/E6 vẫn pending, E4 thiếu provenance đầy đủ, E5 là lịch sử hết hiệu lực. Dashboard cố ý để worker/connector `unknown` cho tới khi có health thật; (4) connector Drupal + `/api/v1` chưa làm và sẽ bắt đầu ở migration 0004; (5) observability/security/integration/rollout chưa làm và dự kiến dùng migration 0005. Migration 0001 giữ dữ liệu legacy; migration 0002/0003 không đụng queue/run/KB; P3 không tạo migration mới.
 
 **Sáu quyết định bắt buộc sau implementation review:**
 
@@ -784,7 +784,16 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 5. Run lịch sử backfill `writeback_status=unknown`, không bịa thành `succeeded` và không đưa vào tỷ lệ thành công/thất bại.
 6. Test connection kiểm pending feed + result capability + exact-revision read; generic collection GET không đủ để báo `ok`.
 
-**Việc tiếp theo của luồng productization:** review/integrate P2, sau đó bắt đầu [`superpowers/plans/2026-08-12-platform-admin-operations.md`](superpowers/plans/2026-08-12-platform-admin-operations.md) theo TDD. Không tự chạy E1/E5. Không được suy dashboard/jobs/history/users UI, callback CAS, `llm_usage_event`, `/api/v1` hoặc module Drupal mới đã tồn tại chỉ vì chúng có trong plan. Admin hiện chỉ có login/home shell/change-password; quản lý account dùng CLI tương tác.
+**Nợ/giới hạn còn mở sau checkpoint P3 — không được quên hoặc mô tả là đã xong:**
+
+- Worker/connector health chưa có nguồn thật nên dashboard trả `unknown`; P4/P5 phải thêm capability/heartbeat trước khi hiển thị `ok`.
+- Chi phí hiện ước tính từ usage snapshot của `run_log`; attempt lỗi trước khi có run chưa được ghi bền vững. `llm_usage_event` vẫn là việc bắt buộc ở pha observability và phải tránh cộng trùng với snapshot run.
+- Row `kb_chunk.meta` hiện không lưu embedding model/dimension. Trang Config & KB ghi đúng “Chưa version hóa” dù profile có giá trị *kỳ vọng*; migration/build KB sau phải lưu provenance thực tế rồi mới cho UI đối chiếu drift.
+- Chưa có request-body cap tổng thể/CSP và bộ security header production. Form đã giới hạn/sanitize ở biên nghiệp vụ, nhưng reverse proxy/app hardening vẫn phải hoàn tất trước rollout.
+- `StarletteDeprecationWarning` về FastAPI TestClient/httpx2 chưa được xử lý; cần khóa/nâng dependency có kiểm thử, không đổi package vội trong checkpoint feature.
+- Audit retention/export và SSO vẫn ngoài MVP. Audit page hiện admin-only, chỉ đọc và không có endpoint delete/export.
+
+**Việc tiếp theo của luồng productization:** review/integrate P3 rồi bắt đầu [`superpowers/plans/2026-08-12-platform-api-drupal-connector.md`](superpowers/plans/2026-08-12-platform-api-drupal-connector.md) theo TDD. Không tự chạy E1/E5. Không được suy callback CAS, `llm_usage_event`, `/api/v1`, pause/resume hoặc module Drupal mới đã tồn tại chỉ vì chúng có trong plan. Trang admin hiện đã đủ nhóm màn hình vận hành P3, nhưng health connector/worker thật và connection capability vẫn chưa có.
 
 ---
 

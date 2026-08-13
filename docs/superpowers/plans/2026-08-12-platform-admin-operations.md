@@ -10,6 +10,8 @@
 
 **Depends on:** Foundation và Admin Auth đã qua checkpoint.
 
+**Implementation status:** ✅ Hoàn tất và qua checkpoint ngày 2026-08-13 trên code HEAD `e641123`; evidence ở `docs/evidence/platform-admin-operations-verification.txt`. P4 API/Drupal Connector và hardening/rollout chưa nằm trong kết quả này.
+
 **Quy ước chạy lệnh:** Mỗi code block PowerShell chạy tại `D:\drupal-multiagent-seo\.worktrees\platform-admin-operations\multiagent`, trừ khi chính block có `Set-Location` tuyệt đối. Không kế thừa working directory từ block trước.
 
 ## Global Constraints
@@ -65,11 +67,11 @@
 - Produces: `render_template(request, name, *, status_code=200, **context)` và các hằng đường dẫn dùng chung.
 - Produces: base layout có nav theo role, flash/error region, responsive main.
 
-- [ ] **Step 1: Dùng frontend skill để tạo concept và khóa tokens**
+- [x] **Step 1: Dùng frontend skill để tạo concept và khóa tokens**
 
 Không sửa route/data ở bước này. Concept phải giữ: tiếng Việt, desktop-first nhưng dùng được 360px, high contrast, không gradient trang trí, không “AI neon”. Chốt CSS custom properties cho màu nền/card/text/muted/border/success/warning/danger, spacing, radius và max content width.
 
-- [ ] **Step 2: Tải đúng HTMX và kiểm integrity trước khi add**
+- [x] **Step 2: Tải đúng HTMX và kiểm integrity trước khi add**
 
 ```powershell
 $target = 'src/review_platform/admin/static/vendor/htmx-2.0.10.min.js'
@@ -82,15 +84,15 @@ if ($sha -ne 'H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V')
 
 Lệnh tải cần phê duyệt mạng khi execution. Runtime không gọi CDN vì file được commit.
 
-- [ ] **Step 3: RED asset/template test**
+- [x] **Step 3: RED asset/template test**
 
 Test base HTML chỉ tham chiếu path local, không chứa `http://`/`https://` script; mọi nav item đã hiển thị phải có route thật, active marker và role condition. Test CSS có `:focus-visible`, media query ≤700px và `.sr-only`. Test `rendering.py` giữ Jinja autoescape cho HTML/XML. Test auth route cũ vẫn import/re-export được `STATIC_DIR` để không phá app/test hiện có.
 
-- [ ] **Step 4: Implement base shell**
+- [x] **Step 4: Implement base shell**
 
 Tách Jinja setup/`TEMPLATE_DIR`/`STATIC_DIR` khỏi `router.py` sang `rendering.py`; parent router dùng helper mới nhưng vẫn re-export `STATIC_DIR`. Ở commit độc lập này nav chỉ hiển thị các route đã tồn tại: Tổng quan và Đổi mật khẩu. Header hiển thị username/role và form logout POST có CSRF. Mỗi task sau chỉ thêm nav item trong cùng commit tạo route tương ứng, nên không có giai đoạn link 404. Không render nav operation nếu role thiếu, nhưng server gate vẫn là nguồn quyền.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_assets.py
@@ -113,7 +115,7 @@ git commit -m "feat: add accessible admin UI shell"
 - Produces: `estimate_usage(usage: list[dict], pricing_path: Path) -> CostEstimate`.
 - Produces: `dashboard(conn, *, date_from: date, date_to: date, include_fixtures: bool = False) -> DashboardView`.
 
-- [ ] **Step 1: Tạo pricing config có xuất xứ**
+- [x] **Step 1: Tạo pricing config có xuất xứ**
 
 ```yaml
 version: 1
@@ -129,15 +131,15 @@ models:
 Không dùng giá cache/batch vì code hiện không bật hai chế độ đó.
 `effective_at=2025-10-15` và mức `$1/M input`, `$5/M output` được khóa theo trang chính thức Anthropic; test config bắt URL HTTPS + effective date, không chỉ kiểm con số.
 
-- [ ] **Step 2: RED pricing**
+- [x] **Step 2: RED pricing**
 
 Test 1.000.000 input + 1.000.000 output = 6 USD; nhiều call được sum; unknown model trả `estimated_usd=None` + list unknown, không tính 0 giả; negative/missing token bị validation error.
 
-- [ ] **Step 3: Implement pricing immutable Decimal**
+- [x] **Step 3: Implement pricing immutable Decimal**
 
 Dùng `Decimal`, không float cho USD. `CostEstimate` gồm input_tokens, output_tokens, estimated_usd, pricing_version/effective_at, unknown_models. UI luôn thêm chữ “ước tính”.
 
-- [ ] **Step 4: RED dashboard SQL**
+- [x] **Step 4: RED dashboard SQL**
 
 Seed run ở trong/ngoài date range, đủ decision, NULL score, usage unknown model và một run có `config_meta={"is_fixture": true}`. Assert:
 
@@ -150,11 +152,11 @@ Seed run ở trong/ngoài date range, đủ decision, NULL score, usage unknown 
 - write-back outcome distribution tách `succeeded|failed|superseded`; success rate chỉ lấy mẫu số `succeeded+failed`, còn `unknown|pending|superseded` bị loại khỏi rate. Legacy `unknown` không được trình bày là thành công;
 - health không tự bịa worker/connector ở phase này: status `unknown` đến Plan 4–5.
 
-- [ ] **Step 5: Implement dashboard read model**
+- [x] **Step 5: Implement dashboard read model**
 
 Date range là `[from 00:00 UTC, to+1 day 00:00 UTC)`. Tối đa 93 ngày/request. Điều kiện loại fixture dùng phép so sánh an toàn trên JSON text (`lower(coalesce(config_meta->>'is_fixture','false')) <> 'true'`), không cast boolean để row legacy malformed không làm hỏng dashboard. Query aggregate SQL, không load toàn `agent_results`. Giá ở P3 mới tính từ aggregate `run_log.usage` và UI ghi rõ đây là usage của run đã lưu; P5 chuyển nguồn metric sang `llm_usage_event` để bao gồm attempt lỗi và chống cộng trùng. Với quy mô hiện tại có thể query `jsonb_array_elements(usage)`.
 
-- [ ] **Step 6: GREEN + commit**
+- [x] **Step 6: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_dashboard.py
@@ -178,15 +180,15 @@ git commit -m "feat: add traceable dashboard metrics and cost estimates"
 - Route: `GET /admin?from=YYYY-MM-DD&to=YYYY-MM-DD` viewer+.
 - Fragment: cùng route trả partial khi header `HX-Request: true`.
 
-- [ ] **Step 1: RED render/no-data/invalid-range**
+- [x] **Step 1: RED render/no-data/invalid-range**
 
 Test viewer 200; unauth redirect; invalid/missing-bound date trả trang HTML 422 có error (không rơi ra JSON validation mặc định); range >93 ngày bị từ chối; no-data không chứa `0 ms`/`$0` gây hiểu lầm mà có “Chưa có dữ liệu”. HTMX response không chứa full `<html>`. Fixture-only range cũng phải hiện no-data ở metric chấm.
 
-- [ ] **Step 2: Implement route**
+- [x] **Step 2: Implement route**
 
 `dashboard_routes.py` parse hai query string cùng nhau rồi gọi read-model; default 7 ngày gần nhất UTC. Template cards: API status từ chính request hiện hành, DB status từ query thành công, worker/connector `Chưa xác minh`; queue; total; decision; tokens; estimated USD; p50/p95. Mỗi metric có `title`/caption nguồn dữ liệu và ghi fixture bị loại mặc định. Thêm nav “Tổng quan” active vào `base.html`; parent `router.py` include child router sau khi định nghĩa xong auth routes.
 
-- [ ] **Step 3: GREEN + commit**
+- [x] **Step 3: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_routes.py
@@ -217,27 +219,27 @@ git commit -m "feat: render operational dashboard from run data"
 - Service: `retry_failed(conn, *, job_public_id: UUID, actor: AdminUser, reason: str | None) -> RetryResult`.
 - Routes: `GET /admin/jobs`, `GET /admin/jobs/{public_id}`, `POST /admin/jobs/{public_id}/retry`.
 
-- [ ] **Step 1: RED filter/sort/site isolation**
+- [x] **Step 1: RED filter/sort/site isolation**
 
 Allow status exact queue states, site UUID/slug exact, source, external ID substring tối đa 100 chars, date range. Page là số nguyên ≥1, page size mặc định 25/tối đa 100; sort cố định `created_at DESC, id DESC`. Invalid filter trả HTML 422. Query uses parameter binding. Detail returns run linkage và `last_error` đã làm sạch, không bao giờ render raw traceback/Authorization/cookie/token.
 
 `sanitization.py` cung cấp `sanitize_text(value, max_length=1000)` và `sanitize_mapping(value, *, max_depth=3, max_items=50)`: key được casefold/bỏ dấu phân cách trước khi dò `password|token|authorization|cookie|secret|apikey`, rồi thay value bằng `[đã ẩn]`; chuỗi che `Bearer ...` và các cặp header/key nhạy cảm trước khi truncate. Dữ liệu sai kiểu không gây 500. Test cả secret ở key, ở scalar string và legacy nested metadata.
 
-- [ ] **Step 2: RED retry permissions/state/cost audit**
+- [x] **Step 2: RED retry permissions/state/cost audit**
 
 Viewer POST → 403; operator without CSRF → 403; thiếu `confirm_cost=yes` → 400; retry non-failed → 409; failed → new queued job linked `supersedes_job_id`. `saved_result_available=true` chỉ khi failed job có run `writeback_status='failed'`; lỗi connector/engine chưa có reusable run phải false. Response/audit ghi bool, new job public ID và reason đã làm sạch/tối đa 500 ký tự, không chứa payload.
 
 Thêm `AuditAction.JOB_RETRIED = "job_retried"` với allowlist đúng ba key `saved_result_available`, `new_job_public_id`, `reason`. Test audit insert fail làm rollback job mới; không được trả thành công khi chỉ enqueue hoặc chỉ audit đã commit.
 
-- [ ] **Step 3: Implement retry transaction**
+- [x] **Step 3: Implement retry transaction**
 
 Trong một outer `conn.transaction()`: lock failed job theo `public_id`, đọc site/profile đúng `site_id`/`profile_id` snapshot và xác nhận `policy_version`, content type, language khớp job; reject nếu site inactive hoặc snapshot không còn hợp lệ. Query reusable run của chính failed job để quyết warning, rồi call `enqueue_scoped(... force=True, supersedes_job_id=failed_job.id)` với source `admin_retry`; sau đó ghi `JOB_RETRIED` trong cùng transaction. Worker vẫn kiểm lại eligibility trước reuse; web request không import/gọi engine hay LLM.
 
-- [ ] **Step 4: Implement UI**
+- [x] **Step 4: Implement UI**
 
 `job_routes.py` sở hữu ba route và được parent include. List columns: time, site, external ID, status, attempts, source, policy. Detail: correlation, revision, error đã làm sạch, run link, write-back status. Filter form chạy được như GET chuẩn; khi có `HX-Request: true` chỉ trả `partials/jobs_table.html`. Retry form chỉ operator/admin thấy, có checkbox xác nhận câu chi phí và CSRF; server bắt `confirm_cost=yes`, không chỉ JavaScript confirm. Thêm nav “Jobs” trong cùng commit; POST success redirect 303 về detail job mới để refresh không retry lần hai.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_jobs.py
@@ -265,15 +267,15 @@ git commit -m "feat: add admin job inspection and audited retry"
 - Query: `get_review(conn, public_id: UUID) -> ReviewDetail | None`.
 - Routes: `GET /admin/reviews`, `GET /admin/reviews/{public_id}` viewer+.
 
-- [ ] **Step 1: RED read model**
+- [x] **Step 1: RED read model**
 
 Assert list lọc decision/site/external ID/date, pagination ổn định 25/100 và viewer+ access. Detail có agent scores/criteria/issues/evidence/veto/missing/model/config meta/profile/policy/token/cost/duration/write-back/link Drupal. `writeback_status='unknown'` và missing/legacy fields render `Không có dữ liệu`, không KeyError; không dùng badge thành công cho `unknown`. Run có `config_meta.is_fixture=true` vẫn tra cứu được nhưng phải có cảnh báo nổi bật “Dữ liệu fixture — không phải kết quả AI thật”.
 
-- [ ] **Step 2: Implement safe normalization**
+- [x] **Step 2: Implement safe normalization**
 
 `normalize_agent_results(jsonb)` chỉ chấp nhận dict/list/scalar và giới hạn hiển thị: max 4 agents, max 50 criteria/issues mỗi agent, mỗi text 2000 chars qua helper sanitization. Không mutate DB. Drupal URL được dựng từ origin đã validate của `site.base_url` + `/node/<external>` chỉ khi external ID chỉ gồm chữ số; template không nhận URL tùy ý từ JSON. Với UUID, context phải lưu `source_url` ở P4; trước đó hiển thị external ID không link.
 
-- [ ] **Step 3: Implement UI + GREEN**
+- [x] **Step 3: Implement UI + GREEN**
 
 `review_routes.py` sở hữu hai GET route và được parent include. Filter form chạy được như GET chuẩn; HTMX chỉ thay `partials/reviews_table.html`. Table/filter và accordion `<details>` semantic; không render raw HTML evidence. Token/cost có pricing version/effective date và nhãn “ước tính”. Thêm nav “Lịch sử chấm” trong cùng commit.
 
@@ -301,15 +303,15 @@ git commit -m "feat: add explainable review history pages"
 - Query: `list_users(conn, *, page: int, page_size: int) -> PageView`, sort `created_at DESC, id DESC`.
 - Routes admin-only: `GET /admin/users`, `GET /admin/users/new`, `POST /admin/users`, `POST /admin/users/{id}/role`, `/lock`, `/unlock`, `/reset-password`.
 
-- [ ] **Step 1: RED role/server enforcement**
+- [x] **Step 1: RED role/server enforcement**
 
 Viewer/operator GET/POST users → 403. Admin create normalizes username, role allowlist. Invalid UUID/user/role có response HTML an toàn. Reset/create trả temporary password chỉ trong response POST thành công; subsequent GET/list/detail không có field để hiện lại. Last active admin không thể bị lock/hạ role, kể cả hai request đồng thời.
 
-- [ ] **Step 2: Implement forms**
+- [x] **Step 2: Implement forms**
 
 `user_routes.py` sở hữu routes và được parent include. Tất cả POST có CSRF. Create/reset generate temporary password bằng `secrets.token_urlsafe(18)`, set must-change. POST success render `user_temporary_password.html` trực tiếp với header `Cache-Control: no-store, private` và `Pragma: no-cache`; page nói rõ phải truyền password qua kênh an toàn. Không lưu temporary password vào cookie/session/audit/log và không gửi email. Thêm nav “Người dùng” chỉ cho admin trong cùng commit.
 
-- [ ] **Step 3: Audit và GREEN**
+- [x] **Step 3: Audit và GREEN**
 
 Mỗi create/role/lock/unlock/reset bọc repository call + `audit_log.write_event()` trong cùng outer transaction; audit failure phải rollback thay đổi user/session. Nếu repository từ chối last-admin và rollback, mở transaction mới chỉ để ghi `LAST_ADMIN_DENIED`, rồi trả 409. Assert audit action/outcome/old-new role; no temp password in audit/log/HTML ngoài đúng response POST đầu tiên.
 
@@ -335,19 +337,19 @@ git commit -m "feat: add guarded admin user management"
 - Route: `GET /admin/config-kb` viewer+.
 - No POST/PUT/PATCH/DELETE route under this path.
 
-- [ ] **Step 1: RED allowlist/path traversal**
+- [x] **Step 1: RED allowlist/path traversal**
 
 Loader API không nhận path từ route. `REPO_ROOT` được suy từ `Path(__file__).resolve()`, rồi compile-time allowlist chỉ gồm `config/scoring.yaml`, `src/agents/compliance_rules.json`, `src/agents/brand_rules.json`, `src/kb/specs.json`; resolve mỗi file phải còn trong repository. KB DB query chỉ aggregate collection/content_type/langcode/count + metadata excerpt đã sanitize tối đa 500 chars, không select/render cột `document` hoặc vector. Request `?path=../../.env` không ảnh hưởng output và không mở file.
 
-- [ ] **Step 2: Implement read-only snapshot**
+- [x] **Step 2: Implement read-only snapshot**
 
 Parse YAML bằng `yaml.safe_load` và JSON phòng thủ, trả file SHA-256, modified timestamp UTC và metadata allowlist cần hiển thị; không đưa full prompt/rule corpus. KB show collection counts, embedding dimension/model từ metadata nếu có; nếu thiếu ghi “Chưa version hóa”, không bịa. `read_only_routes.py` sở hữu GET route, parent include và base thêm nav “Cấu hình & KB”.
 
-- [ ] **Step 3: Route method regression**
+- [x] **Step 3: Route method regression**
 
 Assert GET 200; POST 405; HTML không có `Save`, textarea editable, secret ref value hoặc full environment.
 
-- [ ] **Step 4: GREEN + commit**
+- [x] **Step 4: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_read_only.py
@@ -378,7 +380,7 @@ git commit -m "feat: expose read-only policy and KB metadata"
 - Route: `GET /admin/evaluation/evidence/{experiment}` viewer+, chỉ map E1–E6 qua manifest; không nhận file path.
 - Loader: `load_manifest(path=REPO/docs/evidence/evaluation-manifest.json) -> tuple[ExperimentView, ...]`.
 
-- [ ] **Step 1: RED rồi refactor hai phép E2 thành hàm trả dữ liệu**
+- [x] **Step 1: RED rồi refactor hai phép E2 thành hàm trả dữ liệu**
 
 Viết test fixture trước, chạy để thấy fail vì chưa có `evaluate()`/export schema, sau đó mới thêm implementation:
 
@@ -389,7 +391,7 @@ Giữ output CLI và exit code hiện hành, nhưng thêm:
 
 Không đổi pairs, ground truth, chunking, embedding hoặc retrieval. `test_e2_evidence_export.py` monkeypatch retrieval/DB bằng fixture tất định để chứng minh refactor chỉ tách dữ liệu khỏi `print` và schema summary đúng.
 
-- [ ] **Step 2: GREEN refactor rồi commit code trước khi đo**
+- [x] **Step 2: GREEN refactor rồi commit code trước khi đo**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_e2_evidence_export.py
@@ -399,7 +401,7 @@ git commit -m "refactor: make E2 evidence exportable"
 
 Phải có commit này trước khi export để `head_commit` trong evidence thật sự chứa code vừa đo; không ghi SHA của commit cũ khi refactor còn uncommitted.
 
-- [ ] **Step 3: Export E2 evidence $0 với tên cố định**
+- [x] **Step 3: Export E2 evidence $0 với tên cố định**
 
 `export_e2_evidence.py` gọi hai hàm trên, ghi atomically đúng `docs/evidence/e2_retrieval_summary.json` với schema:
 
@@ -424,21 +426,21 @@ $env:HF_HUB_OFFLINE = '1'
 
 Sau export, test xác nhận `head_commit` đúng `git rev-parse HEAD`, file UTF-8/JSON hợp lệ và không có dữ liệu secret. Tuyệt đối không chạy E1/E5/E3/E6 trong task này.
 
-- [ ] **Step 4: Tạo manifest đúng trạng thái hiện hành**
+- [x] **Step 4: Tạo manifest đúng trạng thái hiện hành**
 
 Schema mỗi entry: `experiment`, `status` (`valid|pending|historical_invalid`), `score_path_snapshot`, `head_commit`, `prompt_version`, `model`, `run_at`, `evidence_path`, `metadata_complete`, `summary`. Field provenance không có trong evidence cũ phải để `null` và `metadata_complete=false`, không suy từ file hiện hành.
 
 E1/E3/E6 pending và có `evidence_path=null`, `run_at=null`. E2 trỏ chính xác `docs/evidence/e2_retrieval_summary.json`. E4 trỏ `docs/evidence/e1_e4_report.txt`; do evidence E4 cũ không nhúng commit/prompt exact, các field đó để null và page cảnh báo provenance chưa đầy đủ dù phép đo chi phí vẫn được evaluation plan công nhận. E5 trỏ `docs/evidence/e5_sau_sua_cp3_cp4.json`, prompt `0bdc5ab12ec65f89`, model `claude-haiku-4-5-20251001`, status historical invalid và summary nói rõ không phải code hiện hành. Không tự chạy E1/E5.
 
-- [ ] **Step 5: RED loader security**
+- [x] **Step 5: RED loader security**
 
 Reject duplicate experiment, unknown status, non-E1..E6, evidence path tuyệt đối/`..`/ngoài `docs/evidence`, missing file cho valid/invalid status. Pending bắt evidence/run_at null. `metadata_complete=true` bắt buộc mọi provenance field non-null; false phải hiển thị warning. Manifest không được tham chiếu `.env`. Evidence route lấy path từ entry đã validate, E pending/không tồn tại trả 404; response chỉ `text/plain` hoặc `application/json`, có `X-Content-Type-Options: nosniff` và `Cache-Control: no-store`.
 
-- [ ] **Step 6: Implement page**
+- [x] **Step 6: Implement page**
 
 `evaluation_routes.py` sở hữu hai GET route và được parent include. Hiển thị badge trạng thái, snapshot/prompt/model/run/evidence link qua route allowlist. Historical invalid có cảnh báo rõ “không phải kết quả code hiện hành”. Không có form/button chạy test, không import eval scripts vào web process. Thêm nav “Đánh giá” trong cùng commit.
 
-- [ ] **Step 7: GREEN + commit evidence/page**
+- [x] **Step 7: GREEN + commit evidence/page**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_evaluation.py
@@ -463,15 +465,15 @@ git commit -m "feat: show versioned evaluation evidence read-only"
 - Query: `list_audit_events(conn, filters: AuditFilters, page: int, page_size: int) -> PageView`.
 - Route: `GET /admin/audit` admin-only.
 
-- [ ] **Step 1: RED permissions/redaction/pagination**
+- [x] **Step 1: RED permissions/redaction/pagination**
 
 Viewer/operator 403. Admin filter action từ `AuditAction`, outcome allowlist, actor substring tối đa 100, date; invalid filter trả HTML 422. Pagination 25/tối đa 100, sort `created_at DESC, id DESC`. Metadata output qua `sanitize_mapping`, không chứa keys/values matching secret patterns; malformed legacy metadata rendered as `[đã ẩn]` thay vì gây 500.
 
-- [ ] **Step 2: Implement query/template**
+- [x] **Step 2: Implement query/template**
 
 `audit_routes.py` sở hữu GET route, require admin và được parent include. Show actor snapshot, action, target, outcome, safe metadata, timestamp. Thêm nav “Nhật ký” chỉ cho admin. No delete/export endpoint in MVP.
 
-- [ ] **Step 3: GREEN + commit**
+- [x] **Step 3: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_admin_audit_page.py
@@ -490,7 +492,7 @@ git commit -m "feat: add admin-only operational audit page"
 **Interfaces:**
 - Produces evidence cho cutover API/connector.
 
-- [ ] **Step 1: Chạy mọi admin test + full offline suite**
+- [x] **Step 1: Chạy mọi admin test + full offline suite**
 
 Chạy `test_admin_*.py`, meta-test, rồi mọi `test_*.py`; ghi pass/skip/fail theo file thật, `[SKIP]` không được tính `[PASS]`:
 
@@ -502,15 +504,15 @@ Get-ChildItem scripts\test_*.py | Sort-Object Name | ForEach-Object {
 }
 ```
 
-- [ ] **Step 2: Browser/manual accessibility smoke**
+- [x] **Step 2: Browser/manual accessibility smoke**
 
 Dùng `build-web-apps:frontend-testing-debugging`: kiểm Browser plugin trước; nếu không có thì ghi lý do và dùng Playwright/Edge headless fallback. Khởi động service local, kiểm login/dashboard/jobs/reviews/users/config/eval/audit ở 1280px và 360px; tab keyboard, focus visible, error alert, viewer/operator/admin. Không bấm retry trên job thật; retry seeded failed row và dừng worker để bảo đảm không thể gọi LLM.
 
-- [ ] **Step 3: Security/source assertions**
+- [x] **Step 3: Security/source assertions**
 
 Search HTML/log response không có `ANTHROPIC_API_KEY`, Authorization, password/token hash, `.env`, raw cookie. POST config/eval trả 405.
 
-- [ ] **Step 4: Score freeze và evidence commit**
+- [x] **Step 4: Score freeze và evidence commit**
 
 Chạy prompt version, score gate đầy đủ dưới đây và `git diff --check`; ghi code HEAD, commit list, HTMX SHA-384, pricing version/effective/source, migration status 0001–0003, fixture assertions và evidence E2. Không chạy E1/E5/E3/E6, không gọi Anthropic.
 
