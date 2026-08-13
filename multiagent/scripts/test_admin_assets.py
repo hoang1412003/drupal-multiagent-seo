@@ -106,12 +106,12 @@ def test_nav_chi_tao_link_den_route_da_co_va_dung_role():
     assert "/admin/jobs" in hrefs
     assert "/admin/reviews" in hrefs
     assert "/admin/config-kb" in hrefs
+    assert "/admin/evaluation" in hrefs
     assert "/admin/users" not in hrefs
     assert "/admin/change-password" in hrefs
     assert ">Tổng quan</a>" in html
     assert ">Trang chủ</a>" not in html
     assert not hrefs & {
-        "/admin/evaluation",
         "/admin/users",
         "/admin/audit",
     }
