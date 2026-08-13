@@ -3,11 +3,14 @@
 Chay: .venv\\Scripts\\python.exe scripts\\test_admin_routes.py
 """
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import hashlib
+import json
 import os
 from pathlib import Path
 import sys
 import threading
+from uuid import uuid4
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -25,6 +28,9 @@ MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
 SCHEMA = "vf_test_admin_routes"
 CSRF_KEY = b"csrf-key-rieng-biet-du-32-byte-2026"
 THROTTLE_KEY = b"throttle-key-rieng-biet-du-32-byte"
+DEFAULT_SITE_ID = "00000000-0000-4000-8000-000000000001"
+DEFAULT_PROFILE_ID = "00000000-0000-4000-8000-000000000002"
+KNOWN_MODEL = "claude-haiku-4-5-20251001"
 
 
 @contextmanager
@@ -101,6 +107,34 @@ def _session_csrf(conn, client) -> str:
             (token_hash,),
         )
         return cur.fetchone()[0]
+
+
+def _insert_dashboard_run(conn, index: int, *, is_fixture: bool):
+    usage = [{"model": KNOWN_MODEL, "input_tokens": 1_000_000, "output_tokens": 0}]
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO run_log ("
+            "node_id, content_hash, scored_at, duration_ms, decision, final_score, "
+            "agent_results, config_meta, usage, model, payload, site_id, profile_id, "
+            "policy_version, external_content_id, content_type, langcode, "
+            "correlation_id, writeback_status"
+            ") VALUES ("
+            "%s,%s,%s,1200,'publish',91,'{}'::jsonb,%s::jsonb,%s::jsonb,%s,"
+            "'{}'::jsonb,%s,%s,'cam-nang-vn-v1',%s,'cam_nang','vi',%s,'succeeded'"
+            ")",
+            (
+                f"dashboard-route-{index}",
+                f"hash-dashboard-route-{index}",
+                datetime(2026, 8, index, 12, tzinfo=timezone.utc),
+                json.dumps({"is_fixture": is_fixture}),
+                json.dumps(usage),
+                KNOWN_MODEL,
+                DEFAULT_SITE_ID,
+                DEFAULT_PROFILE_ID,
+                f"dashboard-route-{index}",
+                uuid4(),
+            ),
+        )
 
 
 def test_auth_config_fail_fast_key_thieu_ngan_trung_va_bool_sai(conn):
@@ -261,11 +295,96 @@ def test_login_ok_cookie_flags_home_va_static(conn):
     home = client.get("/admin")
     assert home.status_code == 200
     assert "operator.user" in home.text and "operator" in home.text
-    assert "Các màn hình vận hành được thêm ở phase tiếp theo" in home.text
+    assert "Tổng quan vận hành" in home.text
+    assert "Chưa có dữ liệu" in home.text
+    assert "0 ms" not in home.text and "$0" not in home.text
     static = client.get("/admin/static/admin.css")
     assert static.status_code == 200
     assert "focus-visible" in static.text
     print("[PASS] login cookie flags, home that va static CSS")
+
+
+def test_dashboard_date_validation_html_va_htmx_fragment(conn):
+    _reset_schema(conn)
+    users.create_user(
+        conn,
+        "dashboard.viewer",
+        "Mat-khau-dashboard-viewer",
+        Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    assert _login(client, "dashboard.viewer", "Mat-khau-dashboard-viewer").status_code == 303
+
+    cases = (
+        ("/admin?from=2026-08-01", "đồng thời"),
+        ("/admin?from=01-08-2026&to=2026-08-02", "YYYY-MM-DD"),
+        ("/admin?from=2026-08-03&to=2026-08-02", "không được trước"),
+        ("/admin?from=2026-01-01&to=2026-04-04", "tối đa 93 ngày"),
+    )
+    for url, message in cases:
+        response = client.get(url)
+        assert response.status_code == 422, (url, response.status_code, response.text)
+        assert response.headers["content-type"].startswith("text/html")
+        assert "<!doctype html>" in response.text
+        assert message in response.text
+        assert '{"detail"' not in response.text
+
+    fragment = client.get(
+        "/admin?from=2026-08-03&to=2026-08-02",
+        headers={"HX-Request": "true"},
+    )
+    assert fragment.status_code == 422
+    assert "<html" not in fragment.text.lower()
+    assert 'id="dashboard-metrics"' in fragment.text
+    assert 'role="alert"' in fragment.text
+    print("[PASS] dashboard date loi tra HTML/HTMX 422, khong roi ra JSON")
+
+
+def test_dashboard_loai_fixture_va_render_metric_that(conn):
+    _reset_schema(conn)
+    users.create_user(
+        conn,
+        "dashboard.operator",
+        "Mat-khau-dashboard-operator",
+        Role.OPERATOR,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    assert _login(
+        client,
+        "dashboard.operator",
+        "Mat-khau-dashboard-operator",
+    ).status_code == 303
+
+    _insert_dashboard_run(conn, 1, is_fixture=True)
+    fixture_only = client.get("/admin?from=2026-08-01&to=2026-08-02")
+    assert fixture_only.status_code == 200
+    assert "Chưa có dữ liệu" in fixture_only.text
+    assert "0 ms" not in fixture_only.text and "$0" not in fixture_only.text
+    assert "Đã loại dữ liệu fixture" in fixture_only.text
+
+    _insert_dashboard_run(conn, 2, is_fixture=False)
+    full = client.get("/admin?from=2026-08-01&to=2026-08-02")
+    assert full.status_code == 200
+    assert "1,000,000" in full.text
+    assert "1,200.00 ms" in full.text
+    assert "$1.00 USD" in full.text
+    assert "ước tính" in full.text
+    assert "Phiên bản giá 1" in full.text
+    assert "15/10/2025" in full.text
+    assert "Chưa xác minh" in full.text
+    assert 'action="/admin"' in full.text and 'method="get"' in full.text
+    assert 'hx-get="/admin"' in full.text
+
+    fragment = client.get(
+        "/admin?from=2026-08-01&to=2026-08-02",
+        headers={"HX-Request": "true"},
+    )
+    assert fragment.status_code == 200
+    assert "<html" not in fragment.text.lower()
+    assert 'id="dashboard-metrics"' in fragment.text
+    print("[PASS] dashboard loai fixture, render metric that va HTMX partial")
 
 
 def test_inactive_throttle_va_must_change_redirect(conn):
@@ -654,6 +773,8 @@ if __name__ == "__main__":
             test_login_csrf_chay_truoc_form_validation,
             test_login_tu_choi_password_qua_dai_truoc_argon2,
             test_login_ok_cookie_flags_home_va_static,
+            test_dashboard_date_validation_html_va_htmx_fragment,
+            test_dashboard_loai_fixture_va_render_metric_that,
             test_inactive_throttle_va_must_change_redirect,
             test_logout_csrf_revoke_va_viewer_bi_operator_gate,
             test_change_password_generic_error_revoke_va_bat_login_lai,

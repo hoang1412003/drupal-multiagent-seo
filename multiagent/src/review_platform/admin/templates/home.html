@@ -1,10 +1,29 @@
 {% extends "base.html" %}
-{% block title %}Trang quản trị{% endblock %}
+{% block title %}Tổng quan vận hành{% endblock %}
 {% block content %}
-<section class="content-column" aria-labelledby="home-heading">
-  <h1 id="home-heading">Trang quản trị</h1>
-  <p class="identity"><strong>{{ user.username }}</strong><span aria-hidden="true"> · </span>{{ user.role.value }}</p>
-  <hr>
-  <p class="notice info">Các màn hình vận hành được thêm ở phase tiếp theo</p>
-</section>
+<header class="dashboard-heading">
+  <div>
+    <p class="eyebrow">Platform Admin</p>
+    <h1>Tổng quan vận hành</h1>
+    <p class="lede">Theo dõi hàng đợi, kết quả chấm và trạng thái ghi về Drupal.</p>
+  </div>
+  <form
+    class="date-filter"
+    action="/admin"
+    method="get"
+    hx-get="/admin"
+    hx-target="#dashboard-metrics"
+    hx-swap="outerHTML"
+    aria-label="Lọc tổng quan theo ngày"
+  >
+    <label for="dashboard-from">Từ ngày</label>
+    <input id="dashboard-from" name="from" type="date" value="{{ filter_from }}" required>
+    <label for="dashboard-to">Đến ngày</label>
+    <input id="dashboard-to" name="to" type="date" value="{{ filter_to }}" required>
+    <button class="secondary-button" type="submit">Áp dụng</button>
+  </form>
+</header>
+{% if not error %}
+  {% include "partials/dashboard_metrics.html" %}
+{% endif %}
 {% endblock %}

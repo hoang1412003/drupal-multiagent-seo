@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from review_platform.admin import dependencies, rendering
+from review_platform.admin import dashboard_routes, dependencies, rendering
 from review_platform.auth import audit_log, csrf, passwords, sessions, throttle, users
 
 
@@ -198,20 +198,6 @@ def login(
     return response
 
 
-@router.get("", response_class=HTMLResponse)
-@router.get("/", response_class=HTMLResponse, include_in_schema=False)
-def home(
-    request: Request,
-    resolved=Depends(dependencies.current_session),
-):
-    return _template(
-        request,
-        "home.html",
-        user=resolved.user,
-        csrf_token=resolved.csrf_token,
-    )
-
-
 @router.post("/logout", dependencies=[Depends(dependencies.require_csrf)])
 def logout(
     request: Request,
@@ -306,3 +292,12 @@ def change_password(
         path="/admin/login",
     )
     return response
+
+
+router.add_api_route(
+    "",
+    dashboard_routes.dashboard_page,
+    methods=["GET"],
+    response_class=HTMLResponse,
+)
+router.include_router(dashboard_routes.router)
