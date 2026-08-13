@@ -30,7 +30,7 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `multiagent/migrations/0004_platform_observability.sql` | Worker heartbeat, durable LLM usage event và index/constraint hardening |
+| `multiagent/migrations/0005_platform_observability.sql` | Worker heartbeat, durable LLM usage event và index/constraint hardening |
 | `multiagent/src/review_platform/worker_health.py` | Upsert/delete/read heartbeat |
 | `multiagent/src/review_platform/usage.py` | Context attribution, per-call/per-agent token summary |
 | `multiagent/src/review_platform/logging.py` | Structured event + recursive redaction |
@@ -42,10 +42,10 @@
 
 ---
 
-### Task 1: Migration 0004, durable LLM usage event và worker heartbeat
+### Task 1: Migration 0005, durable LLM usage event và worker heartbeat
 
 **Files:**
-- Create: `multiagent/migrations/0004_platform_observability.sql`
+- Create: `multiagent/migrations/0005_platform_observability.sql`
 - Create: `multiagent/src/review_platform/worker_health.py`
 - Modify: `multiagent/src/worker.py`
 - Modify: `multiagent/src/review_platform/admin/queries.py`
@@ -115,7 +115,7 @@ Set-Location D:\drupal-multiagent-seo\multiagent
 .\.venv\Scripts\python.exe scripts\test_worker_heartbeat.py
 .\.venv\Scripts\python.exe scripts\test_admin_dashboard.py
 .\.venv\Scripts\python.exe scripts\migrate.py apply
-git add migrations/0004_platform_observability.sql src/review_platform/worker_health.py src/worker.py src/review_platform/admin/queries.py src/review_platform/admin/templates/home.html scripts/test_migrations.py scripts/test_worker_heartbeat.py scripts/test_admin_dashboard.py
+git add migrations/0005_platform_observability.sql src/review_platform/worker_health.py src/worker.py src/review_platform/admin/queries.py src/review_platform/admin/templates/home.html scripts/test_migrations.py scripts/test_worker_heartbeat.py scripts/test_admin_dashboard.py
 git commit -m "feat: report durable worker heartbeats"
 ```
 

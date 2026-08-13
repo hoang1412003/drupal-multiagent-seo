@@ -56,7 +56,7 @@ drupal-multiagent-seo/
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
 │   ├── docker-compose.yml        # Postgres + pgvector (kho vector + hàng đợi + run_log, tách khỏi Drupal)
-│   ├── migrations/               # SQL migration bất biến: 0001 Foundation, 0002 Admin Auth
+│   ├── migrations/               # SQL bất biến: 0001 Foundation, 0002 Auth, 0003 session-user index
 │   ├── .venv/
 │   ├── src/
 │   │   ├── review_platform/      # foundation + auth/RBAC/session + server-rendered admin

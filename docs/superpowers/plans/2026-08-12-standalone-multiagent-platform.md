@@ -50,8 +50,9 @@ multiagent/
 ├── migrations/
 │   ├── 0001_platform_foundation.sql
 │   ├── 0002_admin_auth.sql
-│   ├── 0003_api_connector.sql
-│   └── 0004_platform_observability.sql
+│   ├── 0003_admin_session_user_index.sql
+│   ├── 0004_api_connector.sql
+│   └── 0005_platform_observability.sql
 ├── config/
 │   ├── scoring.yaml                 # giữ nguyên
 │   └── model_pricing.yaml           # read-only, có effective date/source
@@ -107,7 +108,7 @@ Không tạo `review_platform/engine/` bằng một lần di chuyển hàng lo�
 ## Checkpoint liên plan
 
 - [x] **Sau Plan 1:** migration nâng được schema cũ; dữ liệu không mất; legacy API/worker tests xanh; score-path diff rỗng. Evidence: `docs/evidence/platform-foundation-verification.txt`.
-- [ ] **Sau Plan 2:** đăng nhập/logout/đổi mật khẩu/RBAC/CSRF/rate-limit hoạt động; chưa có action vận hành ngoài logout/password.
+- [x] **Sau Plan 2:** đăng nhập/logout/đổi mật khẩu/RBAC/CSRF/rate-limit hoạt động; chưa có action vận hành ngoài logout/password. Evidence: `docs/evidence/platform-admin-auth-verification.txt` (code checkpoint `c35dc75`).
 - [ ] **Sau Plan 3:** viewer xem được dữ liệu thật; operator/admin action đúng quyền; config/KB/evaluation không có đường ghi.
 - [ ] **Sau Plan 4:** Drupal Needs Review tạo đúng một scoped job, fetch đúng revision, result callback CAS/idempotent chỉ ghi một lần; job cũ không ghi đè job mới; endpoint/hash v1 vẫn chạy trong cửa sổ rollback.
 - [ ] **Sau Plan 5:** security/integration suite xanh; usage của attempt lỗi được ghi bền vững; migration, site configuration và rollback rehearsal có evidence; tài liệu khởi động/rotate/recover hoàn chỉnh.

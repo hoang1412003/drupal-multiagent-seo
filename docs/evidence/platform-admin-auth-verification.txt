@@ -1,16 +1,16 @@
 PLATFORM ADMIN AUTH (P2) - VERIFICATION EVIDENCE
 =================================================
 
-Thoi diem: 2026-08-13T16:23:55+07:00 (Asia/Saigon)
+Thoi diem: 2026-08-13T16:58:12+07:00 (Asia/Saigon)
 Nhanh: feat/platform-admin-auth
-Code HEAD da kiem: 36795999df3834e85af90c513067470fde1cce8c
+Code HEAD da kiem: c35dc758e97f69590d332e000c82d7845bf330a5
 Base da merge: b8d738e (P1 Foundation)
 Protected score-path snapshot: 04f10e1
 
 Pham vi
 --------
 
-P2 Admin Auth Tasks 1-6: migration 0002, local admin user + role, Argon2id,
+P2 Admin Auth Tasks 1-6 va review hardening: migration 0002/0003, local admin user + role, Argon2id,
 server-side session, login/session CSRF, login throttle, auth audit allowlist,
 server-rendered /admin, login/logout/change-password/RBAC va CLI account.
 
@@ -28,19 +28,21 @@ Commit code trong checkpoint
   fb5aab1 feat: rate limit and audit admin authentication
   0cdf3a5 feat: add secure admin login and role gate
   3679599 feat: add interactive admin account CLI
+  c35dc75 fix: harden admin authentication transactions
 
 Migration va schema
 -------------------
 
 Migration status tren database dev tai checkpoint:
-  applied: 0001, 0002
+  applied: 0001, 0002, 0003
   pending: none
 
 Migration 0002 tao admin_user, admin_session, admin_login_throttle va
-admin_audit_log. Integration test khoa role viewer/operator/admin, unique
-username_normalized va partial active-session token index. Migration runner
-canonical hoa LF/CRLF truoc khi bam checksum; regression test chay RED ->
-GREEN va status tren checkout Windows khong con bao sai checksum 0001.
+admin_audit_log; migration 0003 them partial index admin_session(user_id) cho
+revoke-all. Integration test khoa role viewer/operator/admin, unique
+username_normalized va cac partial session index. Migration runner canonical
+hoa LF/CRLF; van chap nhan checksum raw CRLF do runner P1 cu luu, nhung sua
+noi dung SQL that van bi chan. Regression test da chay RED -> GREEN.
 
 Security sample trong schema tam (schema da DROP trong finally):
   security_sample_rows=1
@@ -67,10 +69,13 @@ Chay truc tiep 7 file sau tren PostgreSQL local, exit 0 tung file:
 
 Security assertions da xanh gom:
   - Argon2id m=19456, t=2, p=1; password 12-128, khong trim.
-  - Username NFKC/casefold/strip; last active admin khong the lock/ha role.
+  - Login reject password >128 truoc Argon2; malformed Argon2 PHC tra false.
+  - Username NFKC/casefold/strip; last active admin khong the lock/ha role,
+    ke ca hai request dong thoi.
   - Raw session token chi tra mot lan; DB chi luu SHA-256; idle 30 phut,
     absolute 8 gio; touch toi da mot lan/5 phut; revoke/expiry dung.
   - Signed double-submit login CSRF va session CSRF; request sai tra 403.
+    Login thieu field CSRF cung tra 403 truoc form/credential validation.
   - Fail thu 5 block 15 phut; subject la HMAC(username, IP); application bo
     qua X-Forwarded-For va dung request.client.host.
   - Cookie vf_admin_session co HttpOnly, SameSite=Lax, Path=/admin; Secure do
@@ -81,6 +86,9 @@ Security assertions da xanh gom:
   - CLI khong co --password; bootstrap lock/recheck; reset chi in password
     tam mot lan sau commit, audit khong ghi secret.
   - Legacy /jobs, /health va startup migration gate van xanh.
+  - Login row-lock serialize voi reset/change-password; session tao truoc
+    revoke-all bi thu hoi. Login/logout/change-password va audit cung mot
+    transaction, rollback state neu audit that bai.
 
 Full offline/integration suite
 ------------------------------
@@ -132,6 +140,17 @@ Score/prompt freeze
   prompt_version=020738e209017213
   score_path_diff_exit=0
 
+Security review
+---------------
+
+Review lan dau tren 9e54df1 phat hien 5 Important: race login voi password
+reset/change, auth state tach audit, checksum P1 CRLF khong tuong thich, CSRF
+thieu field tra 422 va password login khong gioi han. Commit c35dc75 sua ca
+nam va them regression. Re-review range 9e54df1..c35dc75 ket luan:
+  Critical=0
+  Important=0
+  Code ready; chi con refresh docs/evidence (da thuc hien trong commit docs sau).
+
 Lenh score-path bao gom agents, ai_core, brand_analysis, config, embeddings,
 graph, retrieval, scoring, seo_analysis, state, text_utils, kb va scoring.yaml
 so voi 04f10e1. Khong co file duoc bao ve nao thay doi.
@@ -141,5 +160,6 @@ Ket luan checkpoint
 
 P2 Admin Auth dat checkpoint cua
 docs/superpowers/plans/2026-08-12-platform-admin-auth.md tren code HEAD da
-ghi. Buoc productization tiep theo la Plan 3 Admin Operations; khong duoc suy
+ghi va da qua re-review. Buoc productization tiep theo la Plan 3 Admin
+Operations; khong duoc suy
 /api/v1, connector callback CAS, usage event hay production hardening da co.

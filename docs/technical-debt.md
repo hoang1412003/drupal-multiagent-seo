@@ -1,9 +1,9 @@
 # Nợ kỹ thuật và giới hạn đã biết
 
-**Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; 2026-08-11 thêm B14 và mục 8; **2026-08-12 đóng CP4/N1 và cập nhật bàn giao đo lường**)
+**Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; 2026-08-11 thêm B14 và mục 8; **2026-08-13 cập nhật checkpoint P2 Admin Auth sau security review**)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
-> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-12) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
+> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-13) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
 
@@ -615,7 +615,7 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
-**Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`. Productization P2 code HEAD `3679599` đã chạy full suite offline/integration **48/48 test script xanh**, 0 skip/fail, và diff score-path so với `04f10e1` rỗng; evidence P1 ở `docs/evidence/platform-foundation-verification.txt`, P2 ở `docs/evidence/platform-admin-auth-verification.txt`. Trước lượt đo vẫn phải ghi HEAD thực tế và xác minh lại vì nhánh có thể được integrate thêm. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
+**Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`. Productization P2 code checkpoint `c35dc75` đã chạy full suite offline/integration **48/48 test script xanh**, 0 skip/fail, qua re-review không còn Critical/Important, và diff score-path so với `04f10e1` rỗng; evidence P1 ở `docs/evidence/platform-foundation-verification.txt`, P2 ở `docs/evidence/platform-admin-auth-verification.txt`. Trước lượt đo vẫn phải ghi HEAD thực tế và xác minh lại vì nhánh có thể được integrate thêm. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
 
 **Trạng thái ngắn cho AI/model tiếp nhận:**
 
@@ -765,7 +765,7 @@ Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **kh�
 
 Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
-Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). **Plan 1 Foundation đã triển khai qua các commit `81ce132` → `4ff7824`, evidence ở [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt). Plan 2 Admin Auth đã triển khai trên nhánh `feat/platform-admin-auth` qua các commit `8ad1a2a` → `3679599`, evidence ở [`evidence/platform-admin-auth-verification.txt`](evidence/platform-admin-auth-verification.txt).** Plan 3–5 vẫn chỉ là kế hoạch; chưa được phép suy dashboard vận hành, `/api/v1`, connector callback CAS, bảng usage event hay production hardening đã tồn tại.
+Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). **Plan 1 Foundation đã triển khai qua các commit `81ce132` → `4ff7824`, evidence ở [`evidence/platform-foundation-verification.txt`](evidence/platform-foundation-verification.txt). Plan 2 Admin Auth đã triển khai trên nhánh `feat/platform-admin-auth` qua các commit `8ad1a2a` → `c35dc75`, evidence ở [`evidence/platform-admin-auth-verification.txt`](evidence/platform-admin-auth-verification.txt); re-review không còn Critical/Important.** Plan 3–5 vẫn chỉ là kế hoạch; chưa được phép suy dashboard vận hành, `/api/v1`, connector callback CAS, bảng usage event hay production hardening đã tồn tại.
 
 **Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
 
@@ -773,7 +773,7 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 
 **Bảo vệ phép đo:** không sửa agent, prompt, fact-check, scoring, Aggregator, rule, KB hoặc `scoring.yaml`. `prompt_version` phải giữ `020738e209017213`; nếu đổi thì dừng productization và xử lý theo `evaluation-plan.md` mục 3a. Không chen hạng mục này vào trước test–retest/E1 và không tự chạy phép đo trả phí.
 
-**Trạng thái triển khai theo thứ tự plan:** (1) foundation migration/site/profile/scoped queue/audit **đã xong và qua checkpoint**; (2) local auth/admin shell **đã xong và qua checkpoint**: migration 0002, Argon2id, server session, CSRF, throttle, auth audit, RBAC, `/admin`, đổi mật khẩu và CLI account; (3) dashboard/jobs/history/users/config/KB/evaluation **là việc tiếp theo, chưa làm**; (4) connector Drupal + `/api/v1` chưa làm; (5) observability/security/integration/rollout chưa làm. Migration 0001 giữ dữ liệu legacy; migration 0002 chỉ thêm schema auth, không đụng queue/run/KB.
+**Trạng thái triển khai theo thứ tự plan:** (1) foundation migration/site/profile/scoped queue/audit **đã xong và qua checkpoint**; (2) local auth/admin shell **đã xong và qua checkpoint**: migration 0002 tạo schema auth, migration 0003 thêm partial index revoke session theo user, Argon2id, server session, CSRF, throttle, auth audit, RBAC, `/admin`, đổi mật khẩu và CLI account; (3) dashboard/jobs/history/users/config/KB/evaluation **là việc tiếp theo, chưa làm**; (4) connector Drupal + `/api/v1` chưa làm và sẽ bắt đầu ở migration 0004; (5) observability/security/integration/rollout chưa làm và dự kiến dùng migration 0005. Migration 0001 giữ dữ liệu legacy; migration 0002/0003 không đụng queue/run/KB.
 
 **Sáu quyết định bắt buộc sau implementation review:**
 
@@ -935,6 +935,7 @@ State/config có hai chiều này nhưng luồng runtime hiện tối ưu cho `c
 - Giữ quyền manual rescore tách khỏi quyền chỉ xem báo cáo; test CSRF, bundle guard và việc `last_error` kỹ thuật không lộ cho editor thường.
 - Duy trì regression test escape mọi dữ liệu report do LLM sinh trước khi render trong Drupal.
 - ✅ Local admin auth đã có code/test/evidence: role `viewer/operator/admin`, Argon2id, server-side session hash, CSRF, login throttle HMAC, audit allowlist, last-admin guard và CLI không nhận password qua argv. Evidence: [`evidence/platform-admin-auth-verification.txt`](evidence/platform-admin-auth-verification.txt).
+- ⚠️ Login đã từ chối password dài hơn 128 ký tự trước Argon2, nhưng giới hạn kích thước toàn bộ HTTP request/body ở reverse proxy và ứng dụng vẫn thuộc Plan 5 hardening.
 - ⚠️ Per-site connector token hash, Drupal callback CAS, rotation shared token, security header/proxy deployment và hardening production vẫn thuộc Plan 4–5; không được coi đã đóng theo checkpoint auth local.
 
 ### H11. Vòng phản hồi của biên tập viên
