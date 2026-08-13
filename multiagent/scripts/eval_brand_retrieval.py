@@ -63,6 +63,7 @@ GOLD_TOPICS = {
     "G-019": "ung_dung", "G-020": "ung_dung",
 }
 TOP_K = 3
+THRESHOLD_RATIO = 1.5
 
 
 def ti_trong_chunk() -> dict[str, float]:
@@ -86,7 +87,7 @@ def ti_trong_chunk() -> dict[str, float]:
     return {g: n / tong for g, n in dem.items()}
 
 
-if __name__ == "__main__":
+def _evaluate_with_details():
     moc = ti_trong_chunk()
     tong_trung, tong_doan, dong = 0, 0, []
 
@@ -105,31 +106,70 @@ if __name__ == "__main__":
         tong_doan += len(hits)
         dong.append((sample_id, chu_de, trung, len(hits), moc.get(chu_de, 0.0)))
 
+    ti_le = tong_trung / tong_doan if tong_doan else 0.0
+    moc_tb = sum(row[4] for row in dong) / len(dong) if dong else 0.0
+    ratio = ti_le / moc_tb if moc_tb else 0.0
+    result = {
+        "query_count": len(dong),
+        "top_k": TOP_K,
+        "same_topic_hits": tong_trung,
+        "total_chunks": tong_doan,
+        "same_topic_rate": ti_le,
+        "random_baseline": moc_tb,
+        "ratio_to_baseline": ratio,
+        "threshold_ratio": THRESHOLD_RATIO,
+        "passed": bool(tong_doan and moc_tb and ratio > THRESHOLD_RATIO),
+    }
+    return result, dong, moc
+
+
+def evaluate() -> dict:
+    result, _rows, _baseline_by_topic = _evaluate_with_details()
+    return result
+
+
+def print_report(result: dict, rows, baseline_by_topic) -> int:
+    if not result["total_chunks"]:
+        return 0
+
     print(f"{'Bai':<8}{'Nhom chu de':<20}{'Trung/top-3':<14}{'Moc ngau nhien'}")
     print("-" * 62)
-    for sample_id, chu_de, trung, n, m in dong:
+    for sample_id, chu_de, trung, n, m in rows:
         print(f"{sample_id:<8}{chu_de:<20}{trung}/{n:<12}{m:.0%}")
 
-    if tong_doan:
-        ti_le = tong_trung / tong_doan
-        # Moc ngau nhien cua ca bo = trung binh co trong so theo so truy van
-        moc_tb = sum(r[4] for r in dong) / len(dong)
-        print("-" * 62)
-        print(f"Ti le doan cung chu de   : {ti_le:.1%}  ({tong_trung}/{tong_doan})")
-        print(f"Moc ngau nhien trung binh: {moc_tb:.1%}")
-        print(f"Cao hon moc              : {ti_le / moc_tb:.1f} lan" if moc_tb else "")
-        print(f"Ket luan: {'DAT' if ti_le > moc_tb * 1.5 else 'CAN XEM LAI'}")
+    print("-" * 62)
+    print(
+        f"Ti le doan cung chu de   : {result['same_topic_rate']:.1%}  "
+        f"({result['same_topic_hits']}/{result['total_chunks']})"
+    )
+    print(f"Moc ngau nhien trung binh: {result['random_baseline']:.1%}")
+    print(f"Cao hon moc              : {result['ratio_to_baseline']:.1f} lan")
+    print(f"Ket luan: {'DAT' if result['passed'] else 'CAN XEM LAI'}")
 
-        print()
-        print("Chi tiet theo nhom chu de:")
-        theo_nhom = collections.defaultdict(lambda: [0, 0])
-        for _, chu_de, trung, n, _m in dong:
-            theo_nhom[chu_de][0] += trung
-            theo_nhom[chu_de][1] += n
-        for chu_de, (t, n) in sorted(theo_nhom.items()):
-            print(f"  {chu_de:<20} {t}/{n} = {t / n:.0%}   (moc {moc.get(chu_de, 0):.0%})")
+    print()
+    print("Chi tiet theo nhom chu de:")
+    theo_nhom = collections.defaultdict(lambda: [0, 0])
+    for _, chu_de, trung, n, _m in rows:
+        theo_nhom[chu_de][0] += trung
+        theo_nhom[chu_de][1] += n
+    for chu_de, (trung, total) in sorted(theo_nhom.items()):
+        print(
+            f"  {chu_de:<20} {trung}/{total} = {trung / total:.0%}   "
+            f"(moc {baseline_by_topic.get(chu_de, 0):.0%})"
+        )
 
-        print()
-        print("LUU Y: con so tren la CHAN DUOI. Ground truth chi cho mot nhom chu de")
-        print("moi bai, nen bai thuoc hai nhom bi tinh la truot du retrieval tra ve")
-        print("dung noi dung. Xem docstring dau file de biet vi du cu the.")
+    print()
+    print("LUU Y: con so tren la CHAN DUOI. Ground truth chi cho mot nhom chu de")
+    print("moi bai, nen bai thuoc hai nhom bi tinh la truot du retrieval tra ve")
+    print("dung noi dung. Xem docstring dau file de biet vi du cu the.")
+    # Script cu khong sys.exit theo ket qua; giu exit code 0 cho CLI compatibility.
+    return 0
+
+
+def main() -> int:
+    result, rows, baseline_by_topic = _evaluate_with_details()
+    return print_report(result, rows, baseline_by_topic)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
