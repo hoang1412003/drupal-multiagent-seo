@@ -125,7 +125,7 @@ def get_user(conn, user_id: UUID) -> AdminUser:
     return _from_row(row)
 
 
-def authenticate_candidate(conn, username: str, password: str) -> AdminUser | None:
+def find_by_username(conn, username: str) -> AdminUser | None:
     normalized = normalize_username(username)
     with conn.cursor() as cur:
         cur.execute(
@@ -134,8 +134,29 @@ def authenticate_candidate(conn, username: str, password: str) -> AdminUser | No
             (normalized,),
         )
         row = cur.fetchone()
-    if row is None or not passwords.verify_password(row[3], password):
+    return None if row is None else _from_row(row)
+
+
+def authenticate_candidate(conn, username: str, password: str) -> AdminUser | None:
+    candidate = find_by_username(conn, username)
+    if candidate is None or not passwords.verify_password(
+        candidate.password_hash,
+        password,
+    ):
         return None
+    return candidate
+
+
+def mark_login_success(conn, user_id: UUID) -> AdminUser:
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE admin_user SET last_login_at=now(), updated_at=now() "
+            f"WHERE id=%s RETURNING {_USER_COLUMNS}",
+            (user_id,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        raise UserNotFoundError("không tìm thấy admin user")
     return _from_row(row)
 
 
