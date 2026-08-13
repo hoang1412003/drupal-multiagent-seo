@@ -21,14 +21,14 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/roadmap.md`](docs/roadmap.md) — lộ trình 3 sprint theo kế hoạch mentor giao
 - [`docs/technical-debt.md`](docs/technical-debt.md) — nợ kỹ thuật và giới hạn đã biết, kèm bằng chứng và thứ tự xử lý đề xuất
 - [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) — việc phải làm trước khi demo/bàn giao: cấu hình dev quên tắt, KB phải dựng lại trên máy mới, và cách nói đúng về ngưỡng chưa calibrate
-- [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **chưa triển khai code**
-- [`docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md) — implementation plan tổng và 5 plan con; **mới là kế hoạch, chưa phải module đang tồn tại**
+- [`docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) — thiết kế đã duyệt để tách Multi-Agent thành service độc lập và thêm trang quản trị; **P1 Foundation đã triển khai, các phần admin/API v1/connector vẫn chưa**
+- [`docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md) — implementation plan tổng và 5 plan con; trạng thái thực thi/evidence nằm ở `docs/technical-debt.md` mục 8.9
 
 ### Dành cho AI/model tiếp nhận dự án
 
 Không suy trạng thái hiện hành từ ngày sửa file hoặc từ các báo cáo lịch sử. Trước khi đề xuất việc tiếp theo, model phải đọc theo thứ tự:
 
-1. [`docs/technical-debt.md` mục 8 — BÀN GIAO](docs/technical-debt.md#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-12) — **nguồn sự thật cho trạng thái đang làm**, việc kế tiếp, lệnh chạy, cổng chi phí và các việc tuyệt đối chưa được suy đoán là đã xong.
+1. [`docs/technical-debt.md` mục 8 — BÀN GIAO](docs/technical-debt.md#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-13) — **nguồn sự thật cho trạng thái đang làm**, việc kế tiếp, lệnh chạy, cổng chi phí và các việc tuyệt đối chưa được suy đoán là đã xong.
 2. [`docs/evaluation-plan.md` mục 3a và 4](docs/evaluation-plan.md#3a-khoá-code-chấm-điểm--2026-08-12-bản-4) — hợp đồng đo lường, bộ code/prompt/model đã khoá và cách phân biệt kết quả hiện hành với số lịch sử.
 3. Tài liệu chuyên biệt theo việc đang làm; riêng gán nhãn/test–retest phải đọc [`docs/goldset/annotation-guideline.md` mục 8](docs/goldset/annotation-guideline.md#8-đo-độ-tin-cậy-của-chính-nhãn).
 
@@ -56,13 +56,15 @@ drupal-multiagent-seo/
 ├── multiagent/                  # PHÍA PYTHON - hệ Multi-Agent AI
 │   ├── requirements.txt
 │   ├── docker-compose.yml        # Postgres + pgvector (kho vector + hàng đợi + run_log, tách khỏi Drupal)
+│   ├── migrations/               # SQL migration bất biến có version; hiện có 0001 Platform Foundation
 │   ├── .venv/
 │   ├── src/
+│   │   ├── review_platform/      # migration runner, connection lifecycle, site/profile context
 │   │   ├── ai_core.py            # gọi Claude API dùng chung cho cả 4 agent (structured output)
 │   │   ├── state.py              # ContentReviewState (đối tượng trạng thái dùng chung)
 │   │   ├── drupal_client.py      # gọi JSON:API Drupal (fetch/patch nội dung)
 │   │   ├── embeddings.py         # interface Embedder + BGE-M3 self-host (cho cả 2 KB RAG)
-│   │   ├── db.py                 # kết nối Postgres + pgvector, tạo bảng kb_chunk
+│   │   ├── db.py                 # kết nối Postgres + pgvector; validate KB đã được migrate
 │   │   ├── retrieval.py          # truy vấn KB theo (content_type, langcode)
 │   │   ├── scoring.py            # quy mức rubric 0/1/2/NA ra điểm 0-100 (tất định)
 │   │   ├── brand_analysis.py     # đếm đặc trưng brand + kiểm định nhị thức (dùng chung)
@@ -80,7 +82,7 @@ drupal-multiagent-seo/
 │   │   ├── worker.py             # vòng lặp lấy job, gọi graph.py, ghi run_log, write-back
 │   │   ├── reconcile.py          # vòng đối soát định kỳ - lưới an toàn cho đường event
 │   │   └── audit.py              # nhật ký truy vết, ghi bảng run_log (Postgres)
-│   └── scripts/                  # seed dữ liệu mẫu + test thủ công
+│   └── scripts/                  # migrate.py, seed dữ liệu mẫu và test offline/integration
 │
 ├── docs/                         # tài liệu chung, tham chiếu cả 2 phía
 │   ├── research.md               # nghiên cứu Drupal CMS
@@ -90,11 +92,11 @@ drupal-multiagent-seo/
 └── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
 
-### Hướng productization đã duyệt — chưa triển khai
+### Hướng productization đã duyệt — P1 Foundation đã triển khai
 
-Song song với Sprint 3, phần Python sẽ được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith: `/api/v1` cho Drupal, `/admin` cho người vận hành, worker riêng và PostgreSQL chung. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema sẽ có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
+Song song với Sprint 3, phần Python đang được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith. P1 đã có migration versioned, `site`/`review_profile`, queue/audit scoped, startup schema gate và connection lifecycle. `/api/v1`, `/admin`, auth/RBAC và connector callback CAS vẫn thuộc các plan sau, chưa tồn tại. MVP vẫn chỉ có một site Drupal tại Việt Nam; schema đã có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
 
-Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); thứ tự TDD/checkpoint nằm trong [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Cây thư mục/module trong hai tài liệu là kiến trúc mục tiêu, **không phải trạng thái code hiện tại**.
+Người viết vẫn chỉ đăng nhập Drupal bằng role `content_editor`. Trang quản trị Multi-Agent dự kiến dùng tài khoản riêng và ba role `viewer` / `operator` / `admin`; config, KB và evaluation chỉ đọc. Thiết kế này tuyệt đối không được làm thay đổi agent/prompt/rubric/scoring đang khóa cho E1/E5. Chi tiết và tiêu chí hoàn thành nằm trong [design spec ngày 2026-08-12](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md); thứ tự TDD/checkpoint nằm trong [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Chỉ module có commit/evidence ở `docs/technical-debt.md` mục 8.9 mới được coi là đã tồn tại.
 
 ## Setup
 

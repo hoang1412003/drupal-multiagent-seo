@@ -106,7 +106,7 @@ Không tạo `review_platform/engine/` bằng một lần di chuyển hàng lo�
 
 ## Checkpoint liên plan
 
-- [ ] **Sau Plan 1:** migration nâng được schema cũ; dữ liệu không mất; legacy API/worker tests xanh; score-path diff rỗng.
+- [x] **Sau Plan 1:** migration nâng được schema cũ; dữ liệu không mất; legacy API/worker tests xanh; score-path diff rỗng. Evidence: `docs/evidence/platform-foundation-verification.txt`.
 - [ ] **Sau Plan 2:** đăng nhập/logout/đổi mật khẩu/RBAC/CSRF/rate-limit hoạt động; chưa có action vận hành ngoài logout/password.
 - [ ] **Sau Plan 3:** viewer xem được dữ liệu thật; operator/admin action đúng quyền; config/KB/evaluation không có đường ghi.
 - [ ] **Sau Plan 4:** Drupal Needs Review tạo đúng một scoped job, fetch đúng revision, result callback CAS/idempotent chỉ ghi một lần; job cũ không ghi đè job mới; endpoint/hash v1 vẫn chạy trong cửa sổ rollback.
