@@ -1,0 +1,145 @@
+PLATFORM ADMIN AUTH (P2) - VERIFICATION EVIDENCE
+=================================================
+
+Thoi diem: 2026-08-13T16:23:55+07:00 (Asia/Saigon)
+Nhanh: feat/platform-admin-auth
+Code HEAD da kiem: 36795999df3834e85af90c513067470fde1cce8c
+Base da merge: b8d738e (P1 Foundation)
+Protected score-path snapshot: 04f10e1
+
+Pham vi
+--------
+
+P2 Admin Auth Tasks 1-6: migration 0002, local admin user + role, Argon2id,
+server-side session, login/session CSRF, login throttle, auth audit allowlist,
+server-rendered /admin, login/logout/change-password/RBAC va CLI account.
+
+Khong nam trong checkpoint: dashboard/job/history/user-management UI (Plan 3),
+/api/v1 va Drupal result callback CAS (Plan 4), llm_usage_event/observability/
+production rollout (Plan 5). Khong chay E1, E5 hay LLM API tra phi.
+
+Commit code trong checkpoint
+----------------------------
+
+  8ad1a2a fix: canonicalize migration checksums across line endings
+  e32eeaa feat: add admin authentication schema
+  6c8db6c feat: add Argon2id admin users and role invariants
+  bc548b4 feat: add server-side admin sessions and CSRF
+  fb5aab1 feat: rate limit and audit admin authentication
+  0cdf3a5 feat: add secure admin login and role gate
+  3679599 feat: add interactive admin account CLI
+
+Migration va schema
+-------------------
+
+Migration status tren database dev tai checkpoint:
+  applied: 0001, 0002
+  pending: none
+
+Migration 0002 tao admin_user, admin_session, admin_login_throttle va
+admin_audit_log. Integration test khoa role viewer/operator/admin, unique
+username_normalized va partial active-session token index. Migration runner
+canonical hoa LF/CRLF truoc khi bam checksum; regression test chay RED ->
+GREEN va status tren checkout Windows khong con bao sai checksum 0001.
+
+Security sample trong schema tam (schema da DROP trong finally):
+  security_sample_rows=1
+  argon2id_hash_only=true
+  session_hash_length_64=true
+  session_hash_matches_sha256=true
+  raw_session_not_stored=true
+  forbidden_raw_secret_columns=0
+
+Khong password, password hash, raw session token, CSRF secret hay signing key
+nao duoc in/chep vao evidence nay.
+
+Focused suite
+-------------
+
+Chay truc tiep 7 file sau tren PostgreSQL local, exit 0 tung file:
+  scripts/test_admin_login_security.py
+  scripts/test_admin_routes.py
+  scripts/test_admin_sessions.py
+  scripts/test_admin_user_cli.py
+  scripts/test_admin_users.py
+  scripts/test_migrations.py
+  scripts/test_api.py
+
+Security assertions da xanh gom:
+  - Argon2id m=19456, t=2, p=1; password 12-128, khong trim.
+  - Username NFKC/casefold/strip; last active admin khong the lock/ha role.
+  - Raw session token chi tra mot lan; DB chi luu SHA-256; idle 30 phut,
+    absolute 8 gio; touch toi da mot lan/5 phut; revoke/expiry dung.
+  - Signed double-submit login CSRF va session CSRF; request sai tra 403.
+  - Fail thu 5 block 15 phut; subject la HMAC(username, IP); application bo
+    qua X-Forwarded-For va dung request.client.host.
+  - Cookie vf_admin_session co HttpOnly, SameSite=Lax, Path=/admin; Secure do
+    ADMIN_COOKIE_SECURE dieu khien; inactive/must-change/logout dung.
+  - Viewer bi operator role gate 403 va render trang 403 server-side.
+  - Audit metadata reject password/token/authorization/cookie/secret, bytes,
+    nested mapping va key ngoai allowlist.
+  - CLI khong co --password; bootstrap lock/recheck; reset chi in password
+    tam mot lan sau commit, audit khong ghi secret.
+  - Legacy /jobs, /health va startup migration gate van xanh.
+
+Full offline/integration suite
+------------------------------
+
+Lenh chay tu multiagent/:
+
+  Get-ChildItem scripts\test_*.py | Sort-Object Name | ForEach-Object {
+    & $python $_.FullName
+    if ($LASTEXITCODE -ne 0) { throw "test failed: $($_.Name)" }
+  }
+
+Ket qua file-level tren code HEAD o tren:
+  PASS=48
+  SKIP_MARKER=0
+  FAIL=0
+
+Meta-test cung xac nhan moi ham test_* moi duoc goi trong __main__.
+
+Rendered UI QA
+--------------
+
+Concept tham chieu va implementation deu duoc inspect bang view_image.
+Browser plugin khong co trong session. Cai Python Playwright bi nghen hai lan;
+lan thu hai exit 124 sau 184 giay, nen rendered fallback dung Microsoft Edge
+headless co san, khong tai browser va khong them Playwright vao requirements.
+
+Viewport da inspect:
+  desktop=1440x900
+  mobile breakpoint=500x844
+
+Da doi chieu: visible copy; header/form hierarchy; true-white/navy/#2C72C6
+palette; border/shadow/radius; focus-visible; control typography; mobile
+spacing/overflow. Khong co metric, dashboard, remember-login, footer gia,
+official logo hay anh raster trong UI. Server log cuoi co GET /admin/login=200
+va GET /admin/static/admin.css=200; data-URI favicon loai request 404.
+
+Playwright/Browser console capture khong co do blocker tren. UI khong ship
+JavaScript; HTTP interaction proof duoc TestClient thuc hien tren PostgreSQL
+that. Anh QA nam trong thu muc temp, khong commit vao repository.
+
+Canh bao dependency khong chan checkpoint: FastAPI TestClient hien in
+StarletteDeprecationWarning rang transport httpx se chuyen sang httpx2. Tat ca
+assertion van xanh; can theo doi khi khoa/nang dependency, khong doi package
+vo i trong checkpoint nay.
+
+Score/prompt freeze
+-------------------
+
+  prompt_version=020738e209017213
+  score_path_diff_exit=0
+
+Lenh score-path bao gom agents, ai_core, brand_analysis, config, embeddings,
+graph, retrieval, scoring, seo_analysis, state, text_utils, kb va scoring.yaml
+so voi 04f10e1. Khong co file duoc bao ve nao thay doi.
+
+Ket luan checkpoint
+-------------------
+
+P2 Admin Auth dat checkpoint cua
+docs/superpowers/plans/2026-08-12-platform-admin-auth.md tren code HEAD da
+ghi. Buoc productization tiep theo la Plan 3 Admin Operations; khong duoc suy
+/api/v1, connector callback CAS, usage event hay production hardening da co.
