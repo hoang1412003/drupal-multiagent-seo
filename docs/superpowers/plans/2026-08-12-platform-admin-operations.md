@@ -133,11 +133,12 @@ Seed run ở trong/ngoài date range, đủ decision, NULL score, usage unknown 
 - decision distribution;
 - p50/p95 duration bằng `percentile_cont`;
 - token/cost chỉ từ rows trong range;
+- write-back outcome distribution tách `succeeded|failed|superseded`; success rate chỉ lấy mẫu số `succeeded+failed`, còn `unknown|pending|superseded` bị loại khỏi rate. Legacy `unknown` không được trình bày là thành công;
 - health không tự bịa worker/connector ở phase này: status `unknown` đến Plan 4–5.
 
 - [ ] **Step 5: Implement dashboard read model**
 
-Date range là `[from 00:00 UTC, to+1 day 00:00 UTC)`. Tối đa 93 ngày/request. Query aggregate SQL, không load toàn `agent_results`. Giá tính từ aggregate usage entries; với quy mô hiện tại có thể query `jsonb_array_elements(usage)`.
+Date range là `[from 00:00 UTC, to+1 day 00:00 UTC)`. Tối đa 93 ngày/request. Query aggregate SQL, không load toàn `agent_results`. Giá ở Plan 3 mới tính từ aggregate `run_log.usage` và UI ghi rõ đây là usage của run đã lưu; Hardening Task 3 chuyển nguồn metric sang `llm_usage_event` để bao gồm attempt lỗi và chống cộng trùng. Với quy mô hiện tại có thể query `jsonb_array_elements(usage)`.
 
 - [ ] **Step 6: GREEN + commit**
 
@@ -238,7 +239,7 @@ git commit -m "feat: add admin job inspection and audited retry"
 
 - [ ] **Step 1: RED read model**
 
-Assert detail có agent scores/criteria/issues/evidence/veto/missing/model/config meta/profile/policy/token/cost/duration/write-back/link Drupal. Missing/legacy fields render `Không có dữ liệu`, không KeyError.
+Assert detail có agent scores/criteria/issues/evidence/veto/missing/model/config meta/profile/policy/token/cost/duration/write-back/link Drupal. `writeback_status='unknown'` và missing/legacy fields render `Không có dữ liệu`, không KeyError; không dùng badge thành công cho `unknown`.
 
 - [ ] **Step 2: Implement safe normalization**
 

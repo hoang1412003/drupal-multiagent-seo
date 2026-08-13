@@ -30,7 +30,7 @@
 
 | File | Trách nhiệm |
 |---|---|
-| `multiagent/migrations/0004_platform_observability.sql` | Worker heartbeat và index/constraint hardening |
+| `multiagent/migrations/0004_platform_observability.sql` | Worker heartbeat, durable LLM usage event và index/constraint hardening |
 | `multiagent/src/platform/worker_health.py` | Upsert/delete/read heartbeat |
 | `multiagent/src/platform/usage.py` | Context attribution, per-call/per-agent token summary |
 | `multiagent/src/platform/logging.py` | Structured event + recursive redaction |
@@ -42,7 +42,7 @@
 
 ---
 
-### Task 1: Migration 0004 và worker heartbeat
+### Task 1: Migration 0004, durable LLM usage event và worker heartbeat
 
 **Files:**
 - Create: `multiagent/migrations/0004_platform_observability.sql`
@@ -74,9 +74,26 @@ CREATE TABLE worker_heartbeat (
   CONSTRAINT worker_heartbeat_version_len CHECK (char_length(version) BETWEEN 1 AND 128)
 );
 CREATE INDEX worker_heartbeat_last_seen_idx ON worker_heartbeat (last_seen_at);
+
+CREATE TABLE llm_usage_event (
+  id bigserial PRIMARY KEY,
+  job_id bigint NOT NULL REFERENCES review_job(id),
+  attempt smallint NOT NULL,
+  sequence_no smallint NOT NULL,
+  correlation_id uuid NOT NULL,
+  agent text NOT NULL,
+  phase text NOT NULL,
+  model text NOT NULL,
+  input_tokens integer NOT NULL CHECK (input_tokens >= 0),
+  output_tokens integer NOT NULL CHECK (output_tokens >= 0),
+  is_fixture boolean NOT NULL DEFAULT false,
+  recorded_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (job_id, attempt, sequence_no)
+);
+CREATE INDEX llm_usage_event_recorded_at_idx ON llm_usage_event (recorded_at);
 ```
 
-Upgrade preserves every existing job/run/KB/auth row; second migration run is no-op through `schema_migration`.
+Upgrade preserves every existing job/run/KB/auth row; second migration run is no-op through `schema_migration`. `llm_usage_event` không có payload/prompt/output text và không FK vào `run_log`, vì engine attempt có thể lỗi trước khi run tồn tại.
 
 - [ ] **Step 2: RED repository/time semantics**
 
@@ -185,8 +202,9 @@ git commit -m "feat: harden platform logs and HTTP responses"
 
 **Interfaces:**
 - `install_worker_usage_instrumentation() -> UsageCollector` is idempotent.
-- `usage_scope(job_public_id, correlation_id)` context manager; collector chỉ cho một job active vì worker MVP xử lý tuần tự.
+- `usage_scope(job_public_id, correlation_id, attempt, is_fixture=False)` context manager; collector chỉ cho một job active vì worker MVP xử lý tuần tự.
 - Usage entry exact keys: `agent`, `phase`, `model`, `input_tokens`, `output_tokens`; internal context keys stripped before persistence.
+- `record_usage_event(dsn, *, job_id, attempt, sequence_no, correlation_id, is_fixture, entry) -> None`; idempotent theo `(job_id, attempt, sequence_no)` và dùng short-lived connection riêng, không dùng worker connection chung giữa executor threads.
 - Parent labels: `content_quality`, `seo`, `brand`, `compliance`; phases `main`, `fact_check_extract`, `fact_check_compare`.
 
 - [ ] **Step 1: RED collector/context isolation**
@@ -203,7 +221,7 @@ agents.fact_check.call_agent      → compliance/fact_check_extract|fact_check_c
 
 Because both fact-check phases use the same imported function, wrapper derives phase by SHA-256 of the exact `system_prompt` against the two current prompt objects loaded at installation; unknown prompt records `compliance/unknown` and emits warning, never guesses.
 
-`UsageCollector` stores exactly one active job/correlation under a lock; `begin()` raises nếu một scope khác còn mở. Agent/phase là `ContextVar` được wrapper set/reset ngay trong chính executor thread gọi `ai_core.call_agent`, nên không phụ thuộc parent context có tự truyền qua thread hay không. Test cho nhiều agent thread trong cùng job và hai job tuần tự; entry không được lẫn agent/job/correlation.
+`UsageCollector` stores exactly one active job/correlation/attempt under a lock; `begin()` raises nếu một scope khác còn mở. Agent/phase là `ContextVar` được wrapper set/reset ngay trong chính executor thread gọi `ai_core.call_agent`, nên không phụ thuộc parent context có tự truyền qua thread hay không. Test cho nhiều agent thread trong cùng job và hai job tuần tự; entry không được lẫn agent/job/correlation. Mỗi append nhận sequence tăng trong attempt và gọi persistence sink ngay sau khi usage response tồn tại; sink mở connection riêng từ DSN vì worker connection hiện không an toàn để dùng đồng thời giữa thread. Insert lặp cùng key là no-op; lỗi DB làm attempt fail an toàn với safe error `usage_persistence_failed` thay vì mất chi phí im lặng.
 
 - [ ] **Step 2: RED compatibility and output equivalence**
 
@@ -211,15 +229,15 @@ Replace `ai_core.USAGE_LOG` only inside worker with a list-compatible synchroniz
 
 - [ ] **Step 3: Implement worker lifecycle**
 
-Install once at worker startup. Before graph invoke, enter single active usage scope with job/correlation; collector must be empty from lượt trước. In `finally`, copy entries even if one agent fails, close scope và clear collector. Persist sanitized entries through `ghi_scoped`; never persist prompt/content/output. Saved-result write-back retry copies previous usage and adds no new entry.
+Install once at worker startup. Before graph invoke, enter single active usage scope with job/correlation/attempt; collector must be empty from lượt trước. Mỗi `append` ghi sanitized event vào `llm_usage_event` ngay, kể cả sau đó agent/graph fail và không có `run_log`. In `finally`, copy entries cho snapshot tương thích của run thành công, close scope và clear collector. `ghi_scoped` có thể giữ snapshot usage nhưng đó không còn là nguồn metric chính; never persist prompt/content/output. Saved-result write-back retry không tạo usage event mới.
 
 - [ ] **Step 4: Admin aggregation/cost**
 
-Review detail groups token counts/cost by parent `agent`, shows phase rows, total, pricing version and “ước tính”. Legacy entry without agent groups under `unknown`; unknown model remains “Không tính được”, not `$0`.
+Dashboard/cost query dùng duy nhất `llm_usage_event WHERE is_fixture=false` cho dữ liệu mới, group token counts/cost by parent `agent`, phase, attempt và job; không cộng thêm `run_log.usage`. Legacy run chưa có event được đọc từ snapshot cũ trong một nhánh fallback có nhãn `legacy`, không union cả hai nguồn cho cùng job. Unknown agent/model remains “Không tính được”, not `$0`. Review detail hiển thị attempt lỗi dù không có run result; fixture detail có banner nhưng không vào production metric.
 
 - [ ] **Step 5: Graph integration regression**
 
-Run real graph topology with fake transport responses; assert labels/counts follow invoked calls, report/decision/write-back payload exactly match baseline fixture, one PATCH, same correlation in job/run/log fields. Do not import or edit agent files to make test pass.
+Run real graph topology with fake transport responses; assert labels/counts follow invoked calls, report/decision/write-back payload exactly match baseline fixture, one callback, same correlation in job/run/event/log fields. Thêm case một agent ghi usage rồi graph raise: không có run nhưng event/token/cost vẫn tồn tại đúng một lần; retry attempt mới có attempt number mới. Do not import or edit agent files to make test pass.
 
 - [ ] **Step 6: GREEN + score gate + commit**
 
@@ -242,6 +260,8 @@ Nếu score diff không rỗng, output không tương đương hoặc attributio
 **Files:**
 - Create: `drupal/scripts/configure_ai_roles.php`
 - Create: `drupal/scripts/test_ai_roles.php`
+- Read/verify: `drupal/scripts/configure_ai_service_role.php`
+- Read/verify: `drupal/scripts/test_ai_service_role.php`
 - Modify: `drupal/web/modules/custom/vf_ai_trigger/vf_ai_trigger.permissions.yml`
 - Modify: `docs/operations.md`
 
@@ -255,7 +275,7 @@ Assert:
 
 - `content_editor`: create/edit own article, use Needs Review transition, view AI report/status; no force-rescore/administer users/publish bypass.
 - `site_admin`: Drupal/module/workflow management + `force ai rescore`; not automatically Administrator role bypass.
-- `ai_service` exact allowlist: `access content`, `view any unpublished content`, `view latest version`, `view article revisions`, `edit any article content`, `access vf ai integration feed`. Không có delete, workflow transition/publish, create content, administer users/site/config. `edit any article content` là quyền rộng bắt buộc bởi giới hạn field-level của JSON:API và phải được ghi residual risk.
+- `ai_service` giữ exact allowlist đã được Plan 4 áp dụng: `access content`, `view any unpublished content`, `view latest version`, `view article revisions`, `access vf ai integration feed`, `access vf ai integration capabilities`, `submit vf ai integration result`. Không có `edit any article content`, delete, workflow transition/publish, create content, administer users/site/config. Result callback là ranh giới duy nhất được quyền set bốn AI fields sau compare-and-set. Full role script không được mở rộng allowlist machine so với script Plan 4.
 
 Test fails if `administer nodes`, `bypass node access`, `administer permissions`, `administer users` or delete permissions appear on `ai_service`.
 
@@ -263,9 +283,9 @@ Test fails if `administer nodes`, `bypass node access`, `administer permissions`
 
 Use Drupal role/entity APIs and permission names that exist in installed modules; fail closed if a required permission/transition is missing. Script đọc biến `$extra` do `drush php:script ... -- --apply` cung cấp; chỉ update sau khi đã in diff và thấy đúng literal `--apply`, còn mặc định là dry-run. It never changes UID 1 or provisions credentials.
 
-- [ ] **Step 3: Document JSON:API field-level limitation**
+- [ ] **Step 3: Document callback privilege boundary**
 
-Operations doc states core JSON:API update permission may allow more article fields than the four AI fields. Compensating controls: dedicated non-publishing account, long random password in secret store, log/audit, no UI login for service account, rotate procedure. Dedicated callback endpoint remains post-MVP hardening, not claimed implemented.
+Operations doc states JSON:API is read-only for `ai_service`; write-back only goes through `/vf-ai/integration/v1/results`. Callback rejects extra fields, checks revision/hash atomically and is idempotent by run ID. Compensating controls remain: dedicated non-publishing account, long random password in secret store, log/audit, no UI login for service account and rotate procedure. Any reintroduction of `edit any article content` fails the least-privilege test and requires a new design review.
 
 - [ ] **Step 4: GREEN on DDEV + commit**
 
@@ -296,13 +316,13 @@ Run first on local/staging only; production role diff requires site owner approv
 
 - [ ] **Step 1: RED happy path contract**
 
-With site token and exact revision/fingerprint: POST returns 202 + trusted correlation; duplicate returns same effective job; worker fetches once, invokes fake engine once, writes run once, PATCHes once and completes. Assert site/profile/policy/revision/hash version/correlation across job/run and response. Assert response/admin HTML escapes LLM-like `<script>`.
+With site token and exact revision/fingerprint: POST returns 202 + trusted correlation; duplicate returns same effective job; worker fetches once, invokes fake engine once, writes run once, callback applies once and completes. Assert site/profile/policy/revision/hash version/correlation across job/run/usage event/response. Assert response/admin HTML escapes LLM-like `<script>`.
 
 - [ ] **Step 2: RED failure matrix**
 
-Table-drive these cases with expected state/retry/invoke/PATCH counts:
+Table-drive these cases with expected state/retry/invoke/callback counts:
 
-| Case | State | Auto retry | Engine | PATCH |
+| Case | State | Auto retry | Engine | Callback apply |
 |---|---|---:|---:|---:|
 | Site paused | no new job / queued held | no | 0 | 0 |
 | Wrong/revoked token | 401/no job | no | 0 | 0 |
@@ -311,13 +331,17 @@ Table-drive these cases with expected state/retry/invoke/PATCH counts:
 | Fingerprint mismatch | failed | no | 0 | 0 |
 | Connector timeout before engine | queued/backoff | yes ≤3 | 0 | 0 |
 | Engine transient error | queued/backoff | yes ≤3 | 1/attempt | 0 |
-| Write-back timeout after run | queued write-back retry | yes ≤3 | 1 total | 1/attempt |
-| Lease crash/reclaim | running→queued→done | once | controlled | 1 success |
+| Engine records usage then fails | queued/backoff | yes ≤3 | 1/attempt; usage durable | 0 |
+| Result callback applied but response lost | queued write-back retry | yes ≤3 | 1 total | 1 total; retry `already_applied` |
+| Older revision finishes after newer revision | superseded | no | 1 | 0 |
+| Legacy v1 rollback job | done | normal | 1 using v1 hash | 1 |
+| Lease crash after run saved, before/during callback | running→queued→done | reclaim | 1 total via pending-run reuse | 1 apply max |
+| Lease crash before run saved | running→queued→done | reclaim | controlled per attempt | 1 success |
 | Dead-letter manual retry | new linked job | explicit | depends saved result | controlled |
 
 - [ ] **Step 3: RED persistence/log/HTML leak scan**
 
-Use canary strings for title/body/prompt/token/password/cookie/database URL. After all cases, inspect `review_job`, `run_log`, `admin_audit_log`, captured logs and rendered admin HTML. Full draft/prompt/secrets must be absent; allowed are content hash, safe excerpt/evidence already part of report policy, token prefix and secret **name**. This test must fail if canary appears anywhere outside the in-memory fake connector.
+Use canary strings for title/body/prompt/token/password/cookie/database URL. After all cases, inspect `review_job`, `run_log`, `llm_usage_event`, `admin_audit_log`, captured logs and rendered admin HTML. Full draft/prompt/secrets must be absent; allowed are content hash, safe excerpt/evidence already part of report policy, token prefix and secret **name**. This test must fail if canary appears anywhere outside the in-memory fake connector. Cost assertion sums `llm_usage_event` exactly once, includes failed attempts and does not add duplicate `run_log.usage` snapshots.
 
 - [ ] **Step 4: Trả failure về đúng task sở hữu**
 
@@ -403,7 +427,7 @@ git commit -m "ci: run complete offline platform test groups"
 
 - [ ] **Step 1: Write environment and process contract**
 
-Document required/optional env by process, owner and secret status: database URL, Anthropic key/model, admin session settings, HTTPS flag, worker instance/release, default Drupal outbound secret reference and site inbound credential. Include API/admin/worker start commands, migration `status/apply`, readiness checks and log locations. Never show real values.
+Document required/optional env by process, owner and secret status: database URL, Anthropic key/model, admin session settings, HTTPS flag, worker instance/release, `DRUPAL_BASE_URL`, outbound secret reference and site inbound credential. Include `site_config.py set-from-env/show` trước API/worker, capability test, start commands, migration `status/apply`, readiness checks and log locations. Mọi môi trường phải khớp allowlist của chính nó; production fail nếu là `.ddev.site`, local DDEV được phép khi được ghi rõ là local, staging DDEV chỉ hợp lệ cho rehearsal nội bộ đã khai báo chứ không được gọi là production-like. Never show real secret values.
 
 - [ ] **Step 2: Pre-migration backup on local/staging**
 
@@ -458,7 +482,7 @@ Record release SHA, IDs/hash/count/status only. Do not run on production without
 
 - [ ] **Step 5: Rollback rehearsal**
 
-Stop new intake via admin, let running job finish, revert application/Drupal commits in reverse deploy order, keep migrations/data, restore prior API/worker version, resume only after legacy smoke green. Database restore is disaster recovery—not normal app rollback. Rotate any credential exposed during rehearsal.
+Stop new intake via admin, let running job finish, revert client cutover/application commits in reverse deploy order nhưng giữ Drupal result/capability endpoints cho worker mới trong rollback window, keep migrations/data, restore prior API/worker version only according to the compatibility matrix. Resume only after a real legacy v1 job reaches done through v1 fingerprint + callback; HTTP acceptance alone is not green. Database restore is disaster recovery—not normal app rollback. Rotate any credential exposed during rehearsal.
 
 - [ ] **Step 6: Commit docs/evidence**
 
@@ -490,7 +514,7 @@ For each criterion in design spec §14, record `criterion`, `automated_test`, `e
 
 - [ ] **Step 2: Update status without rewriting history**
 
-Architecture links to design + umbrella plan and marks modules actually present. Roadmap/technical debt mark completed tasks with commit/evidence and retain open limitations: one site/market, JSON:API field-level permissions, local auth/no SSO, legacy endpoint removal, dedicated callback và H4 dependency lock. Plan này không tạo lock file nên H4 vẫn mở. Evaluation plan retains test–retest → E1 → E5 and does not claim paid results from this rollout.
+Architecture links to design + umbrella plan and marks modules actually present. Roadmap/technical debt mark completed tasks with commit/evidence and retain open limitations: one site/market, local auth/no SSO, legacy endpoint removal và H4 dependency lock. Result callback không còn được ghi như nợ post-MVP sau khi Task 7 Plan 4 triển khai; residual risk đúng là callback custom phải được security-test và duy trì contract. Plan này không tạo lock file nên H4 vẫn mở. Evaluation plan retains test–retest → E1 → E5 and does not claim paid results from this rollout.
 
 - [ ] **Step 3: AI handoff guardrails**
 

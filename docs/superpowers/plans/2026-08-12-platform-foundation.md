@@ -316,7 +316,7 @@ Seed dùng `INSERT ... ON CONFLICT DO NOTHING`; `policy_snapshot` là literal b�
 }
 ```
 
-Migration test tính lại từng hash từ file nguồn và so literal để chống tài liệu/migration chép sai. `base_url='http://drupal.ddev.site'`, `secret_ref='DRUPAL'` để giữ tương thích env hiện tại.
+Migration test tính lại từng hash từ file nguồn và so literal để chống tài liệu/migration chép sai. `base_url='http://drupal.ddev.site'`, `secret_ref='DRUPAL'` chỉ để giữ tương thích môi trường local hiện tại. Giá trị này không phải cấu hình staging/production; API/Connector Task 1 phải cung cấp CLI cấu hình site và cutover bắt buộc chạy CLI trước worker mới.
 
 - [ ] **Step 5: ALTER/backfill job và run**
 
@@ -336,7 +336,7 @@ UPDATE review_job SET
   correlation_id = COALESCE(correlation_id, gen_random_uuid());
 ```
 
-`run_log` backfill tương tự, gồm `public_id=gen_random_uuid()` cho row cũ; `writeback_status` mặc định `succeeded` cho run cũ vì chúng chỉ được ghi trước write-back nhưng không có dữ liệu đủ để suy thất bại — policy snapshot phải ghi `legacy_assumption` để admin không trình bày như sự thật chắc chắn. Sau khi assert không còn NULL, mới `SET NOT NULL` và thêm FK/check/unique cho `public_id` của cả hai bảng.
+`run_log` backfill tương tự, gồm `public_id=gen_random_uuid()` cho row cũ và `writeback_status='unknown'`. Code cũ ghi run trước PATCH nên không có dữ liệu để suy thành công hay thất bại; CHECK exact là `writeback_status IN ('unknown','pending','succeeded','failed','superseded')`, không được đổi `unknown` thành `succeeded`. Migration test assert row legacy là `unknown`; dashboard loại nó khỏi cả tử số và mẫu số tỷ lệ write-back, review detail hiển thị `Không có dữ liệu`. Sau khi assert không còn NULL, mới `SET NOT NULL` và thêm FK/check/unique cho `public_id` của cả hai bảng.
 
 Drop index legacy `review_job_dedup`, tạo partial unique:
 
@@ -499,7 +499,7 @@ git commit -m "feat: scope review queue by site and policy"
 - Modify: `multiagent/scripts/test_worker_graph_integration.py`
 
 **Interfaces:**
-- Produces: `ghi_scoped(conn, *, job: dict, content_hash: str, duration_ms: int, report: dict, config_meta: dict, usage: list, model: str, payload: dict) -> int`.
+- Produces: `ghi_scoped(conn, *, run_public_id: UUID, job: dict, content_hash: str, duration_ms: int, report: dict, config_meta: dict, usage: list, model: str, payload: dict) -> int`.
 - Produces: `da_cham_scoped(conn, *, site_id: UUID, external_content_id: str, content_hash: str, policy_version: str) -> dict | None`.
 - Produces: `find_reusable_writeback(conn, *, job: dict) -> dict | None`.
 - Keeps compatibility wrappers `ghi()` and `da_cham()` until worker test migration is complete.
@@ -508,26 +508,32 @@ git commit -m "feat: scope review queue by site and policy"
 
 Test hai site cùng external/hash/policy có payload khác; `da_cham_scoped` chỉ trả đúng site. Assert row có site/profile/policy/correlation/external revision và không có key nội dung `title/body/summary` trong payload.
 
-`find_reusable_writeback` chỉ trả run có payload khi: (a) run thuộc chính job hiện tại và `writeback_status='failed'`, hoặc (b) job có `source='admin_retry'`, `supersedes_job_id` trỏ đúng failed job cùng scope và run của target có `writeback_status='failed'`. Manual `force` sau một run `succeeded` phải trả None và thực sự chấm lại; không reuse rộng chỉ vì cùng content hash.
+`find_reusable_writeback` chỉ trả run có payload khi: (a) run thuộc chính job hiện tại và `writeback_status IN ('pending','failed')`, hoặc (b) job có `source='admin_retry'`, `supersedes_job_id` trỏ đúng failed job cùng scope và run của target có `writeback_status='failed'`. Nhánh `pending` cùng job xử lý crash/reclaim sau audit nhưng trước hoặc trong callback; phải retry saved payload/idempotency thay vì trả tiền LLM lại. Kết quả gồm `run_id` public UUID, payload, external revision, content hash/version để Plan 4 retry callback bằng đúng idempotency/precondition cũ. Manual `force` sau một run `succeeded` phải trả None và thực sự chấm lại; run `unknown|superseded|succeeded` không reusable; không reuse rộng chỉ vì cùng content hash.
 
 - [ ] **Step 2: RED worker metadata**
 
-Fake job trong `test_worker.py` phải có scoped fields; spy `audit.ghi_scoped` assert nguyên job snapshot được truyền. Test reusable write-back dùng đủ scope và phân biệt `admin_retry` với `manual force`.
+Fake job trong `test_worker.py` phải có scoped fields; spy `audit.ghi_scoped` assert nguyên job snapshot và application-generated `run_public_id` được truyền. Test reusable write-back dùng đủ scope, trả lại đúng public run ID/precondition và phân biệt `admin_retry` với `manual force`.
 
 - [ ] **Step 3: Implement audit scoped**
 
-INSERT giữ append-only, set `writeback_status='pending'`. Thêm:
+Caller tạo UUID trước khi dựng payload; INSERT dùng UUID đó, giữ append-only và set `writeback_status='pending'`. Unique constraint bảo vệ trùng public ID. Thêm:
 
 ```python
-def mark_writeback(conn, run_id: int, *, succeeded: bool, error: str | None = None) -> None:
+def mark_writeback(
+    conn,
+    run_id: int,
+    *,
+    status: Literal["succeeded", "failed", "superseded"],
+    error: str | None = None,
+) -> None:
     ...
 ```
 
-Đây là UPDATE duy nhất được phép trên run: chỉ đổi trạng thái transport, không sửa decision/agent result/payload. Error được cắt tối đa 1000 ký tự và redaction ở Plan 5.
+Đây là UPDATE duy nhất được phép trên run: chỉ đổi trạng thái transport, không sửa decision/agent result/payload. Cho phép `pending → succeeded|failed|superseded` và `failed → succeeded|failed|superseded` để saved-result callback retry có thể chốt lại chính run cũ; `succeeded|superseded|unknown` là terminal và không được mở lại. Error được cắt tối đa 1000 ký tự và redaction ở Plan 5; `superseded` dành cho callback từ chối kết quả revision cũ ở Plan 4.
 
 - [ ] **Step 4: Worker dùng run ID để mark write-back**
 
-Worker flow: trước graph gọi `find_reusable_writeback`. Có reusable run thì PATCH payload đã lưu, mark chính run đó rồi complete/fail mà không tạo run/usage mới. Không có thì `run_id=ghi_scoped(...)` → PATCH → `mark_writeback(succeeded=True)` → complete; PATCH fail → `mark_writeback(False, "write-back that bai")` → q.fail. Tuyệt đối không reuse run succeeded cho manual force.
+Worker flow ở giai đoạn compatibility: trước graph gọi `find_reusable_writeback`. Có reusable run `pending|failed` của chính job (hoặc failed run được admin link rõ) thì ghi payload đã lưu, mark chính run đó rồi complete/fail mà không tạo run/usage mới. Không có thì `run_id=ghi_scoped(...)` → write-back → `mark_writeback(status="succeeded")` → complete; write-back fail → `mark_writeback(status="failed", error="write-back that bai")` → q.fail. API/Connector Plan 4 thay transport bằng callback CAS và dùng thêm terminal `superseded`. Tuyệt đối không reuse run succeeded cho manual force.
 
 - [ ] **Step 5: GREEN regression**
 

@@ -298,6 +298,8 @@ Productization được làm **song song với Sprint 3**, nhưng chỉ ở lớ
 
 PostgreSQL hiện có là tiền đề tốt, nhưng schema hiện hành chưa tenant-aware và chưa có migration version. Việc triển khai phải nâng dữ liệu cũ về một default site/profile, không mất queue/run/KB; Drupal tiếp tục là nguồn sự thật của nội dung và service **không lưu toàn văn bài nháp**.
 
+**Bổ sung sau review plan:** write-back mục tiêu không PATCH generic JSON:API article. Worker gọi callback Drupal chỉ nhận bốn field AI; callback khóa node, compare-and-set expected revision/hash và idempotent theo run UUID để job cũ không ghi đè report mới. Worker giữ nhánh hash v1 trong cửa sổ rollback; staging/production phải cấu hình `site.base_url` bằng CLI thay vì dùng seed DDEV; usage từng LLM call được lưu kể cả attempt lỗi và run legacy có trạng thái write-back `unknown`. Đây đều là planned state cho tới commit triển khai tương ứng.
+
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 
 Node cuối cùng nhận đủ 4 kết quả, tổng hợp thành một điểm số tổng và một quyết định duy nhất.

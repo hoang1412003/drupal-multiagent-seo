@@ -761,11 +761,11 @@ Test tích hợp offline mới `scripts/test_worker_graph_integration.py` đã g
 
 Phép kiểm này tốn **$0** và không đổi score/prompt/rubric, nên **không làm mất hiệu lực quan hệ đo lường 8.1 → 8.2**. Trước production pilot vẫn phải đếm revision/request trên Drupal thật; test offline đóng lỗi ownership trong code nhưng không thay thế smoke test CMS.
 
-### 8.9. Productization service độc lập + trang quản trị — 📝 THIẾT KẾ ĐÃ DUYỆT, CHƯA TRIỂN KHAI
+### 8.9. Productization service độc lập + trang quản trị — 📝 PLAN ĐÃ SỬA SAU REVIEW, CHƯA TRIỂN KHAI
 
 Chủ dự án đã duyệt hướng làm song song với Sprint 3: Multi-Agent trở thành service độc lập, Drupal là connector đầu tiên, có trang `/admin` và tài khoản local riêng. Nguồn sự thật đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
-Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Plan có TDD, migration 0001–0004, checkpoint score freeze, cutover/rollback và ma trận 11 tiêu chí; **chưa task code nào được thực thi**.
+Implementation plan đã được tách thành plan tổng + 5 plan con tại [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Plan có TDD, migration 0001–0004, checkpoint score freeze, cutover/rollback và ma trận 11 tiêu chí; đợt review tiếp theo đã sửa sáu khe hở bên dưới; **chưa task code nào được thực thi**.
 
 **Phạm vi MVP đã khóa:** một công ty, một Drupal site, Việt Nam, tiếng Việt, bài `cam_nang`; modular monolith FastAPI (`/api/v1` + `/admin`), worker riêng, PostgreSQL chung. Schema có `site_id`/`review_profile` để mở rộng sau nhưng UI chưa quản lý nhiều site và chưa có thị trường/CMS thứ hai.
 
@@ -775,7 +775,16 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 
 **Thứ tự triển khai được đặc tả trong plan, chưa thực thi:** (1) foundation migration/site/profile; (2) local auth/admin shell; (3) dashboard/jobs/history/users/config/KB/evaluation; (4) connector Drupal + `/api/v1`; (5) observability/security/integration/rollout. Migration phải nâng schema hiện hành không mất queue/run/KB. Service không lưu toàn văn bài nháp và không lưu secret plaintext.
 
-**Việc tiếp theo của luồng productization:** người dùng review/chọn cách thực thi plan; sau đó bắt đầu Foundation Task 1. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy module/bảng trong spec/plan đã tồn tại.
+**Sáu quyết định bắt buộc sau implementation review:**
+
+1. Write-back MVP dùng Drupal result callback compare-and-set theo revision/hash và idempotency theo `run_id`; không PATCH generic JSON:API article. Job revision cũ phải thành `superseded`, không được ghi đè report mới.
+2. Worker hỗ trợ cả `content_hash_version=1` và `2` trong cửa sổ rollback; rollback chỉ đạt khi một job legacy đi hết worker, không chỉ khi `/jobs` trả 2xx.
+3. Seed `.ddev.site` chỉ là bootstrap local; staging/production bắt buộc chạy `site_config.py` rồi capability test trước worker mới.
+4. Usage từng LLM call được ghi bền vững vào `llm_usage_event`, kể cả attempt lỗi trước khi có `run_log`; dashboard không cộng trùng snapshot run.
+5. Run lịch sử backfill `writeback_status=unknown`, không bịa thành `succeeded` và không đưa vào tỷ lệ thành công/thất bại.
+6. Test connection kiểm pending feed + result capability + exact-revision read; generic collection GET không đủ để báo `ok`.
+
+**Việc tiếp theo của luồng productization:** plan đã qua lượt review/sửa này; khi bắt đầu code, thực thi Foundation Task 1 theo TDD. Trạng thái mục này vẫn là “chưa triển khai” cho tới commit code đầu tiên; không được suy callback, bảng usage, CLI hoặc module trong spec/plan đã tồn tại.
 
 ---
 

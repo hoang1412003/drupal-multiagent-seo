@@ -34,7 +34,7 @@ Không suy trạng thái hiện hành từ ngày sửa file hoặc từ các bá
 
 Nếu các tài liệu mâu thuẫn, dừng và đối chiếu bằng commit, `prompt_version` do code tính và file evidence; không tự chọn con số thuận lợi hơn. Những mục có nhãn **hết hiệu lực/lịch sử** chỉ dùng để giải thích quá trình, không được báo cáo như kết quả của code hiện hành.
 
-Với công việc liên quan service độc lập, admin, auth, site/connector hoặc profile thị trường, phải đọc [thiết kế productization đã duyệt](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md) rồi [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Không suy cấu trúc “planned” là code đã tồn tại; chỉ task có commit/evidence mới được đánh dấu triển khai.
+Với công việc liên quan service độc lập, admin, auth, site/connector hoặc profile thị trường, phải đọc [thiết kế productization đã duyệt](docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md), [implementation plan tổng](docs/superpowers/plans/2026-08-12-standalone-multiagent-platform.md), rồi sáu quyết định sau review ở `docs/technical-debt.md` mục 8.9. Đặc biệt không thay result callback CAS bằng JSON:API PATCH, không bỏ legacy hash v1 trong cửa sổ rollback và không coi cấu trúc “planned” là code đã tồn tại; chỉ task có commit/evidence mới được đánh dấu triển khai.
 
 ## Cấu trúc project
 

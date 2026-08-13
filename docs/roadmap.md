@@ -55,9 +55,9 @@ Thiết kế chuẩn: [`superpowers/specs/2026-08-12-standalone-multiagent-platf
 | P1 — Nền dữ liệu | Migration có version; site/profile mặc định; nâng schema cũ không mất dữ liệu |
 | P2 — Auth + admin shell | Local account, session, CSRF, RBAC, bootstrap admin, audit nền |
 | P3 — Vận hành | Dashboard, jobs, history, retry/dead-letter có cảnh báo chi phí |
-| P4 — API/connector | `/api/v1`, credential theo site, Drupal connector, dedup và pause/resume |
-| P5 — Hoàn thiện MVP | Connection, users, config/KB/evaluation chỉ đọc, metrics/correlation |
-| P6 — Hardening | Security/integration test, staging, migration/rollback rehearsal, tài liệu/demo |
+| P4 — API/connector | `/api/v1`, credential/config theo site, Drupal connector, result callback CAS/idempotent, legacy hash-v1 rollback, dedup và pause/resume |
+| P5 — Hoàn thiện MVP | Connection capability test, users, config/KB/evaluation chỉ đọc, metrics/correlation |
+| P6 — Hardening | Durable failed-attempt usage, security/integration test, staging, migration/rollback rehearsal, tài liệu/demo |
 
 **Hàng rào với Sprint 3:** productization chỉ thay lớp bao quanh. Không sửa 4 agent, prompt, `fact_check.py`, `scoring.py`, Aggregator, rule, KB hoặc `scoring.yaml` trong lúc E1/E5 đang khóa. Nếu `prompt_version` khác `020738e209017213`, dừng luồng productization và đánh giá lại phép đo trước khi tiếp tục.
 

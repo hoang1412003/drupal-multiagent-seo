@@ -4,7 +4,7 @@
 **Trạng thái:** Đã được chủ dự án duyệt; **chưa triển khai code**
 **Phạm vi MVP:** một công ty, thị trường Việt Nam, tiếng Việt, loại nội dung `cam_nang`, một website Drupal
 **Quan hệ với roadmap:** thực hiện song song với Sprint 3 nhưng không được làm thay đổi đường chấm điểm đang khóa
-**Bổ sung kỹ thuật sau implementation review:** reconciliation dùng Drupal pending metadata feed vì JSON:API không hỗ trợ collection revision; không thay đổi phạm vi MVP
+**Bổ sung kỹ thuật sau implementation review:** reconciliation dùng Drupal pending metadata feed; write-back chuyển sang callback Drupal có kiểm tra revision/hash và idempotency; legacy hash v1 được giữ trong cửa sổ rollback; không thay đổi phạm vi nghiệp vụ MVP
 
 ---
 
@@ -179,6 +179,7 @@ Không role nào được sửa policy đã calibrate trên web. Một người 
 | `site_profile_assignment` | `site_id`, `profile_id`, `active`, timestamps | Gắn site với profile được phép dùng; unique theo cặp site/profile và chỉ một profile active cho cùng phạm vi tại một site |
 | `review_job` | các cột hiện có + `site_id`, `profile_id`, `policy_version`, `external_content_id`, `external_revision_id`, attempt/backoff fields | Queue bền vững, nhận diện nguồn không phụ thuộc Drupal `node_id` |
 | `run_log` | các cột hiện có + site/profile/policy/external ID, token/cost/latency và trạng thái write-back | Lịch sử bất biến, dùng cho dashboard và điều tra |
+| `llm_usage_event` | `job_id`, attempt/sequence, correlation ID, agent/phase/model, input/output token, timestamp | Nhật ký từng lần gọi LLM, kể cả attempt lỗi trước khi tạo được `run_log` |
 | `worker_heartbeat` | `instance_id`, `started_at`, `last_seen_at`, `version`, `current_job_id` | Cho dashboard phân biệt worker đang sống với queue chỉ đang trống |
 | `admin_user` | `id`, `username_normalized`, `password_hash`, `role`, `active`, `must_change_password`, timestamps | Tài khoản quản trị local |
 | `admin_session` | `id`, `user_id`, `token_hash`, `csrf_secret`, idle/absolute expiry, revoked fields | Session server-side |
@@ -194,6 +195,8 @@ Khóa chính public dùng UUID để không lộ số lượng bản ghi và tr�
 - `market_code = VN`, `language_code = vi`, `content_type = cam_nang`.
 - `policy_version` là mã phát hành bất biến của bộ prompt/rubric/scoring/rules/KB hiện hành; bản ghi run lưu cả metadata thành phần để kiểm chứng.
 
+Migration có thể seed `base_url=http://drupal.ddev.site` để giữ môi trường local hiện tại, nhưng đây chỉ là giá trị bootstrap. Trước khi deploy API/worker mới ở staging hoặc production, operator bắt buộc dùng `site_config.py` để ghi `base_url` và `secret_ref` của đúng môi trường, rồi chạy capability test. Không có đường triển khai nào được coi là sẵn sàng chỉ vì giá trị DDEV mặc định tồn tại trong database.
+
 ### 6.3. Migration có phiên bản
 
 Không tiếp tục chỉ dựa vào `CREATE TABLE IF NOT EXISTS`. Dùng các file SQL đánh số tăng dần trong thư mục migration và bảng `schema_migration` để ghi version đã áp dụng. Migration runner chạy transaction cho từng file, từ chối version trùng/đảo thứ tự và có lệnh kiểm tra trạng thái.
@@ -207,6 +210,8 @@ Migration đầu tiên phải:
 5. mới chuyển cột cần thiết sang `NOT NULL` và thêm constraint/index.
 
 Test migration phải bắt đầu từ schema/database giống bản hiện hành và chứng minh số dòng, payload JSON, trạng thái queue và run history không mất.
+
+`run_log` lịch sử được ghi trước thao tác PATCH nên không đủ bằng chứng để suy write-back thành công hay thất bại. Migration phải backfill các row này thành `writeback_status=unknown`; dashboard không được tính chúng vào tỷ lệ thành công/thất bại và UI phải hiển thị “Không có dữ liệu”. Không được đổi sự kiện chưa biết thành `succeeded` để làm đẹp metric.
 
 ### 6.4. Dữ liệu nội dung
 
@@ -267,7 +272,11 @@ Khi job có `external_revision_id`, connector đọc đúng revision bằng `?re
 
 JSON:API không cung cấp collection các revision/working copy để reconciliation quét hàng loạt. Vì vậy module Drupal cung cấp read-only feed `GET /vf-ai/integration/v1/pending`, chỉ cho machine permission riêng. Feed dùng entity query `latestRevision()` để liệt kê revision mới nhất đang `needs_review`, trả UUID, revision ID, content type, langcode, fingerprint v2 và link nguồn; **không trả title/body/summary**. Connector lấy danh sách metadata từ feed rồi fetch từng revision cụ thể qua JSON:API. `rel:working-copy` chỉ là fallback cho một external ID legacy không có revision ID, không phải collection discovery. Drupal Entity API định nghĩa `latestRevision()` là default revision hoặc pending revision mới hơn: <https://api.drupal.org/api/drupal/core%21lib%21Drupal%21Core%21Entity%21Query%21QueryInterface.php/function/QueryInterface%3A%3AlatestRevision/10>.
 
-Write-back chỉ ghi bốn field kết quả AI hiện hành, không chuyển moderation state và không publish. MVP có thể tiếp tục dùng JSON:API với machine account quyền tối thiểu; giới hạn đã biết là Drupal core khó khóa quyền sửa theo field. Dedicated callback endpoint chỉ nhận đúng AI fields là hardening sau MVP, không được trình bày như đã có.
+Write-back dùng callback `POST /vf-ai/integration/v1/results`, không PATCH JSON:API article trực tiếp. Request chỉ được chứa run UUID, external content ID, expected revision ID, expected content hash/version và bốn field kết quả AI hiện hành; callback không nhận moderation state, title/body hay field tùy ý. Machine role có permission riêng cho callback và không cần quyền `edit any article content`.
+
+Callback phải thực hiện compare-and-set trong transaction: khóa node, đọc lại latest revision, rồi chỉ ghi khi revision và fingerprint đầu vào vẫn khớp expected values. Nếu nội dung đã đổi, trả conflict `content_superseded`, không ghi field AI; worker đánh dấu run/job là `superseded` và để event/reconciliation xử lý revision mới. Mỗi request mang `run_id`; nếu latest report đã có đúng `run_id`, callback trả `already_applied` như thành công để retry sau timeout không tạo revision hoặc PATCH thứ hai. Kiểm tra này phải nằm phía Drupal tại cùng ranh giới ghi để không có khe TOCTOU giữa GET lại và write-back.
+
+Trong cửa sổ rollback, endpoint `/jobs` cũ vẫn tạo job `content_hash_version=1`. Worker phải chọn đúng thuật toán theo version: v2 dùng fingerprint sáu field và exact revision; v1 dùng `text_utils.content_hash()` bốn field, fetch working copy khi job legacy thiếu revision ID, đồng thời lấy revision ID thực từ response trước callback. Không được so hash v1 bằng công thức v2.
 
 ---
 
@@ -284,7 +293,7 @@ content_editor lưu/chuyển Needs Review trong Drupal
 → connector đọc revision hiện hành từ Drupal
 → engine 4 agent + Aggregator chạy như hiện tại
 → ghi run_log trước write-back
-→ connector PATCH kết quả đúng một lần
+→ callback Drupal so revision/hash và ghi kết quả idempotent đúng một lần
 → Drupal hiển thị báo cáo; content_editor sửa hoặc publish
 ```
 
@@ -292,7 +301,7 @@ Người viết không cần tài khoản Multi-Agent và không thấy site API
 
 ### 8.2. Nội dung thay đổi
 
-Khi trường đầu vào thay đổi, `content_hash` đổi và Drupal tự enqueue job mới. Chỉ thay đổi field kết quả AI không được tạo vòng enqueue. Kết quả cũ vẫn giữ trong run history; UI Drupal phải cảnh báo báo cáo cũ nếu hash không còn khớp.
+Khi trường đầu vào thay đổi, `content_hash` đổi và Drupal tự enqueue job mới. Chỉ thay đổi field kết quả AI không được tạo vòng enqueue. Kết quả cũ vẫn giữ trong run history; UI Drupal phải cảnh báo báo cáo cũ nếu hash không còn khớp. Job của revision cũ hoàn thành muộn không được ghi đè báo cáo của revision mới: callback trả `content_superseded`, worker không retry LLM/write-back cho payload cũ và reconciliation bảo đảm revision hiện hành có job riêng.
 
 ### 8.3. Pause/resume
 
@@ -314,6 +323,7 @@ Mọi pause/resume có actor, thời điểm, lý do tùy chọn trong audit.
 - Tối đa 3 attempt tự động; hết giới hạn chuyển `failed`/dead-letter.
 - Operator/admin có thể retry thủ công sau màn xác nhận nêu rõ có thể phát sinh chi phí LLM.
 - Nếu chỉ write-back thất bại sau khi đã có run result, retry phải dùng lại kết quả đã lưu, không gọi lại LLM.
+- Retry callback dùng cùng `run_id`: `already_applied` là thành công idempotent; `content_superseded` là kết thúc không retry và không ghi payload cũ.
 
 ---
 
@@ -327,7 +337,7 @@ UI dùng template server-rendered với Jinja2, HTMX cho tương tác nhỏ và 
 2. **Dashboard:** health API/worker/database/connector; queue depth; tổng lượt chấm; phân bố decision; token/chi phí/độ trễ theo khoảng thời gian.
 3. **Jobs:** lọc theo trạng thái/site/thời gian/external ID; xem attempt/error; retry với xác nhận chi phí; liên kết review/run.
 4. **Review history/detail:** điểm từng agent/tiêu chí, evidence, veto, missing agent, model, prompt/profile/policy, token, chi phí, thời gian, trạng thái write-back và link Drupal.
-5. **Drupal connection:** hiển thị đúng site MVP, trạng thái/last success; test connection; pause/resume intake. Không có UI thêm nhiều site ở MVP.
+5. **Drupal connection:** hiển thị đúng site MVP, trạng thái/last success; test capability không mutation; pause/resume intake. Test phải xác minh quyền pending feed, callback result và khả năng đọc exact revision khi có item, không được báo `ok` chỉ từ một GET collection JSON:API. Không có UI thêm nhiều site ở MVP.
 6. **Config & KB:** chỉ đọc metadata scoring, rules, profile, KB version/chunk metadata; không có nút Save và không hiển thị secret.
 7. **Users:** admin tạo tài khoản, gán role, khóa/mở khóa, reset mật khẩu tạm; mỗi user tự đổi mật khẩu.
 8. **Evaluation:** chỉ đọc trạng thái/evidence E1–E6 và cảnh báo kết quả lịch sử/hết hiệu lực; không chạy phép đo trả phí từ UI. Nguồn là `docs/evidence/evaluation-manifest.json` được version-control, mỗi entry có `experiment`, `status`, `score_path_snapshot`, `prompt_version`, `model`, `run_at`, `evidence_path`, `metadata_complete`; provenance không tồn tại trong evidence cũ phải để `null` và cảnh báo, không suy diễn. Loader chỉ nhận đường dẫn dưới `docs/evidence/`, không quét/mở file tùy ý từ request web.
@@ -370,7 +380,7 @@ Thị trường mới phải có profile, nguồn luật/brand/KB, gold set, cal
 - Connector nhận 401/403 dừng sớm, đánh dấu lỗi cấu hình và cảnh báo operator; không retry đến hết ngân sách.
 - Một agent lỗi dùng đúng cơ chế degrade hiện tại; thiếu Compliance không bao giờ dẫn tới auto-publish.
 - Ghi correlation ID xuyên Drupal → API → job → worker → agent → run → write-back.
-- Ghi token/cost theo agent và tổng job; thao tác trả phí của operator có audit.
+- Ghi từng usage event ngay sau mỗi response LLM vào bảng riêng, gắn job/attempt/agent/phase/correlation; vì vậy attempt engine lỗi trước `run_log` vẫn được tính token/cost. `run_log.usage` có thể giữ snapshot tương thích nhưng dashboard không được cộng trùng hai nguồn. Thao tác trả phí của operator có audit.
 - Không log nội dung đầy đủ, Authorization header, cookie, password hay response chứa secret.
 
 ---
@@ -389,6 +399,7 @@ Thị trường mới phải có profile, nguồn luật/brand/KB, gold set, cal
 - Nâng từ schema hiện hành có dữ liệu thật mô phỏng.
 - Bảo toàn số job/run/KB row và JSON payload.
 - Backfill đúng site/profile mặc định; chạy migration lần hai không phá dữ liệu.
+- Backfill write-back lịch sử thành `unknown`, không tính như thành công.
 - Constraint/index được tạo sau backfill.
 
 ### 12.3. API và connector
@@ -396,7 +407,10 @@ Thị trường mới phải có profile, nguồn luật/brand/KB, gold set, cal
 - Token sai/revoked trả 401; không thể giả `site_id` trong body.
 - Site pause chặn job mới nhưng không xóa queue.
 - Cùng dedup key không tạo hai job.
-- Connector đọc đúng sáu field, ghi đúng bốn field AI, đúng một PATCH, không publish.
+- Connector đọc đúng sáu field; callback chỉ ghi bốn field AI, đúng một lần, không publish.
+- Job A của revision cũ hoàn thành sau job B không thể ghi đè report B; callback idempotent trả `already_applied` sau timeout mơ hồ.
+- Legacy endpoint/hash v1 vẫn hoàn tất được một job trong cửa sổ rollback; không bị so bằng fingerprint v2.
+- Capability test thất bại nếu thiếu feed/result/revision-read dù GET article thông thường còn hoạt động.
 - Write-back retry dùng lại saved result và không phát sinh lần gọi LLM thứ hai.
 
 ### 12.4. Worker và tích hợp
@@ -405,6 +419,7 @@ Thị trường mới phải có profile, nguồn luật/brand/KB, gold set, cal
 - Crash/reclaim, backoff, max attempt, dead-letter và retry thủ công.
 - Reconciliation cùng dedup không tạo job trùng với event-driven.
 - Mọi run gắn site/profile/policy/version và correlation ID.
+- Usage của engine attempt thất bại vẫn tồn tại và dashboard không cộng trùng snapshot successful run.
 
 ### 12.5. Admin UI
 
@@ -464,9 +479,9 @@ MVP chỉ được coi là xong khi:
 
 1. Người viết vẫn chỉ cần dùng Drupal và một lần chuyển Needs Review tạo đúng một job.
 2. Job được gắn đúng site/profile/policy và dedup đúng.
-3. Một lần chấm thành công chỉ write-back đúng một lần.
+3. Một lần chấm thành công chỉ write-back đúng một lần; kết quả revision cũ không thể ghi đè revision mới và retry timeout là idempotent.
 4. Viewer/operator/admin bị giới hạn đúng quyền cả ở UI lẫn server endpoint.
-5. Dashboard/jobs/history đọc dữ liệu thật; không có metric giả.
+5. Dashboard/jobs/history đọc dữ liệu thật; không có metric giả, không coi write-back legacy là thành công và không bỏ chi phí của engine attempt thất bại.
 6. Operator xử lý được failed/dead-letter mà không vô tình trả tiền LLM lần hai cho lỗi write-back.
 7. Config, KB và evaluation chỉ đọc.
 8. Database không lưu toàn văn bài nháp và không có secret trong Git/log/audit/UI.
@@ -481,7 +496,7 @@ MVP chỉ được coi là xong khi:
 - **Local auth tạo thêm kho tài khoản**, nhưng phù hợp MVP độc lập và tránh phụ thuộc Drupal; SSO là bước sau khi có hạ tầng danh tính công ty.
 - **Một modular monolith chưa phải microservice**, nhưng đã đủ ranh giới để tái sử dụng; tách sớm sẽ tăng chi phí vận hành mà chưa có tải thật.
 - **Một site trong UI nhưng schema nhiều site** tạo thêm metadata ngay từ đầu; đổi lại tránh gắn `node_id` toàn cục và credential toàn cục thêm lần nữa.
-- **JSON:API write-back bằng machine account** chưa có field-level restriction hoàn hảo. Giữ quyền tối thiểu, giám sát và không cấp publish; dedicated callback endpoint là hardening sau MVP.
+- **Callback Drupal làm MVP lớn hơn một chút**, nhưng đây là ranh giới nhỏ, chỉ nhận bốn field AI và đổi lại có compare-and-set, idempotency và quyền theo endpoint. JSON:API vẫn dùng để đọc exact revision; không dùng generic article PATCH cho write-back.
 - **Không lưu snapshot nội dung** giảm khả năng tái dựng nguyên văn khi Drupal xóa revision, nhưng giảm đáng kể rủi ro sao chép dữ liệu nhạy cảm. MVP ưu tiên Drupal revision + hash + evidence.
 - **Productization song song Sprint 3** tăng nguy cơ trôi measurement. Hàng rào score-path freeze và regression/prompt-version gate là điều kiện bắt buộc, không phải khuyến nghị.
 
