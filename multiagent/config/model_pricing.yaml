@@ -1,0 +1,8 @@
+version: 1
+currency: USD
+effective_at: "2025-10-15"
+source: "https://www.anthropic.com/claude/haiku"
+models:
+  claude-haiku-4-5-20251001:
+    input_usd_per_million: 1.00
+    output_usd_per_million: 5.00
