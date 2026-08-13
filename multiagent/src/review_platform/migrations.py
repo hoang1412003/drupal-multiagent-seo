@@ -26,8 +26,14 @@ class MigrationError(RuntimeError):
     pass
 
 
+def _canonical_checksum(content: bytes) -> str:
+    """Bam SQL dang LF de Git autocrlf khong lam sai checksum migration."""
+    canonical = content.replace(b"\r\n", b"\n")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def discover(migrations_dir: Path) -> list[Migration]:
-    """Doc migration SQL, xac minh ten/version va bam dung bytes tren disk."""
+    """Doc migration SQL, xac minh ten/version va bam noi dung LF canonical."""
     root = Path(migrations_dir)
     found: list[Migration] = []
     seen_versions: set[int] = set()
@@ -46,7 +52,7 @@ def discover(migrations_dir: Path) -> list[Migration]:
             version=version,
             name=name,
             path=path,
-            checksum=hashlib.sha256(path.read_bytes()).hexdigest(),
+            checksum=_canonical_checksum(path.read_bytes()),
         ))
 
     found.sort(key=lambda migration: migration.version)

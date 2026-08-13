@@ -38,7 +38,7 @@ def expect(exc_type, message: str):
         raise AssertionError(f"khong nem {exc_type.__name__}")
 
 
-def test_discover_sap_xep_va_checksum_dung_bytes():
+def test_discover_sap_xep_va_checksum_canonical():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "0002_second.sql").write_bytes(b"SELECT 2;\r\n")
@@ -49,8 +49,24 @@ def test_discover_sap_xep_va_checksum_dung_bytes():
         assert [m.version for m in found] == [1, 2], found
         assert [m.name for m in found] == ["first", "second"], found
         assert found[0].checksum == hashlib.sha256(b"SELECT 1;\n").hexdigest()
-        assert found[1].checksum == hashlib.sha256(b"SELECT 2;\r\n").hexdigest()
-    print("[PASS] discover sap xep version va bam dung bytes tren disk")
+        assert found[1].checksum == hashlib.sha256(b"SELECT 2;\n").hexdigest()
+    print("[PASS] discover sap xep version va bam noi dung LF canonical")
+
+
+def test_discover_checksum_khong_phu_thuoc_lf_hay_crlf():
+    with tempfile.TemporaryDirectory() as lf_tmp, tempfile.TemporaryDirectory() as crlf_tmp:
+        lf_root = Path(lf_tmp)
+        crlf_root = Path(crlf_tmp)
+        (lf_root / "0001_first.sql").write_bytes(b"SELECT 1;\nSELECT 2;\n")
+        (crlf_root / "0001_first.sql").write_bytes(
+            b"SELECT 1;\r\nSELECT 2;\r\n"
+        )
+
+        lf_checksum = migrations.discover(lf_root)[0].checksum
+        crlf_checksum = migrations.discover(crlf_root)[0].checksum
+
+        assert lf_checksum == crlf_checksum, (lf_checksum, crlf_checksum)
+    print("[PASS] checksum migration khong doi khi Git checkout LF/CRLF")
 
 
 def test_discover_chan_version_trung():
@@ -485,7 +501,8 @@ if __name__ == "__main__":
 
     failed = False
     for fn in (
-        test_discover_sap_xep_va_checksum_dung_bytes,
+        test_discover_sap_xep_va_checksum_canonical,
+        test_discover_checksum_khong_phu_thuoc_lf_hay_crlf,
         test_discover_chan_version_trung,
         test_discover_chan_ten_file_sql_sai_quy_uoc,
         test_discover_chan_khoang_trong_version,
