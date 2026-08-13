@@ -221,7 +221,13 @@ def _reusable_result(row):
 
 
 def find_reusable_writeback(conn, *, job: dict):
-    """Tim saved callback result chi theo lien ket job tuong minh."""
+    """Tim saved callback result chi theo lien ket job tuong minh.
+
+    ``run.content_hash`` la hash noi dung thuc te da cham, co the khac hash
+    mong doi tren job legacy. Phai tra nguyen precondition da audit de result
+    callback CAS o Plan 4 tu choi stale data; khong doi hash va khong goi LLM
+    lan hai cho chinh job da co saved result.
+    """
     with conn.cursor() as cur:
         cur.execute(
             f"SELECT id, public_id, payload, external_revision_id, content_hash, "

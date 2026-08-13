@@ -219,6 +219,62 @@ def test_enqueue_force_false_tren_cap_da_dead_letter_khong_tao_job(conn):
     print("[PASS] force=False tren cap da dead-letter -> khong tao job, tra dead_letter")
 
 
+def test_enqueue_khong_hoi_sinh_job_neu_dead_letter_xay_ra_giua_chung(conn):
+    """Mo phong dung khe race cu: job running thanh failed sau phep kiem
+    dead-letter nhung truoc INSERT cua request enqueue khac."""
+    context = _default_context(conn)
+    queued = q.enqueue_scoped(
+        conn,
+        context,
+        "dead-letter-race",
+        "dead-letter-race-hash",
+        "event",
+    )
+    running = q.claim(conn, "w-dead-letter-race")
+    assert running["id"] == queued["job_id"]
+    with conn.cursor() as cur:
+        cur.execute("UPDATE review_job SET attempts=3 WHERE id=%s", (running["id"],))
+
+    second = _mo_conn()
+    original_insert = q._insert_scoped
+
+    def fail_then_insert(*args, **kwargs):
+        assert q.fail(second, running["id"], "terminal during enqueue") == q.FAILED
+        return original_insert(*args, **kwargs)
+
+    q._insert_scoped = fail_then_insert
+    try:
+        result = q.enqueue_scoped(
+            conn,
+            context,
+            "dead-letter-race",
+            "dead-letter-race-hash",
+            "event",
+        )
+    finally:
+        q._insert_scoped = original_insert
+        second.close()
+
+    assert result["status"] != q.QUEUED, result
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) FILTER (WHERE status='queued'), count(*) "
+            "FROM review_job WHERE site_id=%s AND external_content_id=%s "
+            "AND content_hash=%s AND policy_version=%s",
+            (
+                context.site.id,
+                "dead-letter-race",
+                "dead-letter-race-hash",
+                context.profile.policy_version,
+            ),
+        )
+        queued_count, total_count = cur.fetchone()
+    assert queued_count == 0 and total_count == 1, (queued_count, total_count)
+    if result["status"] == q.DUPLICATE:
+        q.complete(conn, running["id"])
+    print("[PASS] enqueue khong hoi sinh job khi dead-letter chuyen trang thai giua chung")
+
+
 def test_enqueue_force_true_tren_cap_da_dead_letter_van_tao_job(conn):
     """force=True (nut "Cham lai" thu cong) van phai vuot qua duoc chan tren -
     do la luc con nguoi CHU DONG quyet dinh thu lai, dung tinh than tach
@@ -562,6 +618,7 @@ if __name__ == "__main__":
         test_skip_locked_hai_worker_khong_giam_chan,
         test_fail_backoff_roi_dead_letter,
         test_enqueue_force_false_tren_cap_da_dead_letter_khong_tao_job,
+        test_enqueue_khong_hoi_sinh_job_neu_dead_letter_xay_ra_giua_chung,
         test_enqueue_force_true_tren_cap_da_dead_letter_van_tao_job,
         test_co_job_that_bai,
         test_thu_hoi_job_ket_vuot_max_attempts_thi_dead_letter,

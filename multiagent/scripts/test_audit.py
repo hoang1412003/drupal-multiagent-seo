@@ -292,6 +292,37 @@ def test_reusable_cung_job_pending_failed_va_mark_terminal(conn):
     print("[PASS] reusable pending/failed va terminal transition dung")
 
 
+def test_reusable_cung_job_giu_nguyen_hash_thuc_te_da_audit(conn):
+    job = _claim_job(
+        conn,
+        _default_context(conn),
+        "reusable-actual-hash",
+        "hash-job-mong-doi",
+        external_revision_id="revision-expected",
+    )
+    run_id = audit.ghi_scoped(
+        conn,
+        run_public_id=uuid4(),
+        job=job,
+        content_hash="hash-noi-dung-thuc-te-da-cham",
+        duration_ms=100,
+        report=_REPORT,
+        config_meta=_CONFIG_META,
+        usage=_USAGE,
+        model="m",
+        payload=_PAYLOAD,
+    )
+
+    reusable = audit.find_reusable_writeback(conn, job=job)
+    assert reusable["id"] == run_id, reusable
+    assert reusable["content_hash"] == "hash-noi-dung-thuc-te-da-cham", reusable
+    assert reusable["content_hash"] != job["content_hash"]
+    assert reusable["external_revision_id"] == "revision-expected", reusable
+    audit.mark_writeback(conn, run_id, status="superseded")
+    q.complete(conn, job["id"])
+    print("[PASS] reusable giu exact hash/revision da audit cho callback CAS Plan 4")
+
+
 def test_unknown_va_superseded_la_terminal_khong_reusable(conn):
     context = _default_context(conn)
     unknown_job = _claim_job(conn, context, "legacy-unknown", "legacy-hash")
@@ -412,6 +443,7 @@ if __name__ == "__main__":
         test_scoped_audit_cach_ly_hai_site_va_ghi_du_metadata,
         test_ghi_scoped_tu_choi_full_content_top_level,
         test_reusable_cung_job_pending_failed_va_mark_terminal,
+        test_reusable_cung_job_giu_nguyen_hash_thuc_te_da_audit,
         test_unknown_va_superseded_la_terminal_khong_reusable,
         test_admin_retry_reuse_failed_target_nhung_manual_force_khong_reuse,
         test_admin_retry_khong_reuse_run_cua_revision_cu,

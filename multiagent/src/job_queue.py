@@ -142,34 +142,55 @@ def enqueue_scoped(
     correlation_id = correlation_id or uuid4()
 
     if not force:
-        with conn.cursor() as cur:
-            cur.execute(
-                f"SELECT id FROM {TEN_BANG} "
-                "WHERE site_id=%s AND external_content_id=%s AND content_hash=%s "
-                "AND policy_version=%s AND status=%s "
-                "ORDER BY created_at DESC, id DESC LIMIT 1",
-                (
-                    context.site.id,
-                    external_content_id,
-                    content_hash,
-                    context.profile.policy_version,
-                    FAILED,
-                ),
-            )
-            failed_row = cur.fetchone()
-        if failed_row is not None:
-            return {"status": "dead_letter", "job_id": failed_row[0]}
+        # Khoa moi job co the anh huong quyet dinh truoc khi INSERT. Neu mot
+        # worker dang dua job running -> failed, hai transaction se xep hang
+        # tren cung row; khong con khe "kiem dead-letter -> job thanh failed
+        # -> INSERT queued" hoi sinh job da het retry.
+        with conn.transaction():
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT id, status FROM {TEN_BANG} "
+                    "WHERE site_id=%s AND external_content_id=%s "
+                    "AND content_hash=%s AND policy_version=%s "
+                    "AND status IN (%s,%s,%s,%s) "
+                    "ORDER BY created_at DESC, id DESC FOR UPDATE",
+                    (
+                        context.site.id,
+                        external_content_id,
+                        content_hash,
+                        context.profile.policy_version,
+                        QUEUED,
+                        RUNNING,
+                        DONE,
+                        FAILED,
+                    ),
+                )
+                existing = list(cur.fetchall())
 
-        row = _insert_scoped(
-            conn,
-            context,
-            external_content_id,
-            content_hash,
-            source,
-            external_revision_id,
-            correlation_id,
-            supersedes_job_id,
-        )
+            failed_row = next(
+                (row for row in existing if row[1] == FAILED),
+                None,
+            )
+            if failed_row is not None:
+                return {"status": "dead_letter", "job_id": failed_row[0]}
+
+            active_row = next(
+                (row for row in existing if row[1] in (QUEUED, RUNNING, DONE)),
+                None,
+            )
+            if active_row is not None:
+                return {"status": DUPLICATE, "job_id": active_row[0]}
+
+            row = _insert_scoped(
+                conn,
+                context,
+                external_content_id,
+                content_hash,
+                source,
+                external_revision_id,
+                correlation_id,
+                supersedes_job_id,
+            )
     else:
         with conn.transaction():
             target_id = supersedes_job_id
