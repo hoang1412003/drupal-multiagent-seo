@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Cấu hình & KB{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Policy snapshot</p>
+    <h1>Cấu hình &amp; KB</h1>
+    <p class="lede">Đối chiếu profile, dấu vết file policy và metadata kho tri thức đang lưu.</p>
+  </div>
+</header>
+
+<p class="notice warning" role="note">
+  Trang này chỉ đọc. Thay đổi policy hoặc KB phải đi qua quy trình version hóa, kiểm thử và calibration tương ứng.
+</p>
+
+<section aria-labelledby="profiles-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Phạm vi đang gán</p>
+      <h2 id="profiles-heading">Website &amp; review profile</h2>
+    </div>
+  </header>
+  {% for profile in profiles %}
+  <article class="detail-band">
+    <h3>{{ profile.site_name }} · {{ profile.profile_code }}</h3>
+    <dl class="detail-grid compact-detail-grid">
+      <div><dt>Site slug</dt><dd><code>{{ profile.site_slug }}</code></dd></div>
+      <div><dt>Connector</dt><dd>{{ profile.connector_type }}</dd></div>
+      <div><dt>Site</dt><dd>{{ "active" if profile.site_active else "inactive" }}</dd></div>
+      <div><dt>Intake</dt><dd>{{ "paused" if profile.intake_paused else "running" }}</dd></div>
+      <div><dt>Thị trường</dt><dd>{{ profile.market_code }}</dd></div>
+      <div><dt>Ngôn ngữ</dt><dd>{{ profile.language_code }}</dd></div>
+      <div><dt>Content type</dt><dd>{{ profile.content_type }}</dd></div>
+      <div><dt>Profile</dt><dd>{{ profile.profile_status }}</dd></div>
+      <div><dt>Policy version</dt><dd><code>{{ profile.policy_version }}</code></dd></div>
+    </dl>
+    <details>
+      <summary>Metadata policy đã khóa</summary>
+      <dl class="config-list">
+        {% for label, value in profile.policy_metadata %}
+        <div><dt>{{ label }}</dt><dd><code>{{ value }}</code></dd></div>
+        {% endfor %}
+      </dl>
+    </details>
+  </article>
+  {% else %}
+  <div class="empty-state"><strong>Không có site/profile assignment active.</strong></div>
+  {% endfor %}
+</section>
+
+<section aria-labelledby="policy-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Nguồn version-control</p>
+      <h2 id="policy-heading">File policy trong allowlist</h2>
+    </div>
+  </header>
+  {% for file in policy_files %}
+  <article class="detail-band">
+    <h3>{{ file.label }}</h3>
+    {% if file.error %}<p class="notice error" role="alert">{{ file.error }}</p>{% endif %}
+    <dl class="config-list">
+      <div><dt>Đường dẫn</dt><dd><code>{{ file.relative_path }}</code></dd></div>
+      <div><dt>SHA-256</dt><dd><code>{{ file.sha256 }}</code></dd></div>
+      <div><dt>Sửa lúc</dt><dd>{{ file.modified_at.strftime("%d/%m/%Y %H:%M:%S") }} UTC</dd></div>
+      {% for label, value in file.metadata %}
+      <div><dt>{{ label }}</dt><dd>{{ value }}</dd></div>
+      {% endfor %}
+    </dl>
+  </article>
+  {% endfor %}
+</section>
+
+<section aria-labelledby="kb-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Dữ liệu dẫn xuất</p>
+      <h2 id="kb-heading">Kho tri thức trong PostgreSQL</h2>
+    </div>
+  </header>
+  {% for kb in kb_summaries %}
+  <article class="detail-band">
+    <h3>{{ kb.collection }}</h3>
+    <dl class="detail-grid compact-detail-grid">
+      <div><dt>Content type</dt><dd>{{ kb.content_type }}</dd></div>
+      <div><dt>Ngôn ngữ</dt><dd>{{ kb.langcode }}</dd></div>
+      <div><dt>Số chunk</dt><dd>{{ kb.chunk_count }}</dd></div>
+      <div><dt>Embedding model thực tế</dt><dd>{{ kb.embedding_model or "Chưa version hóa" }}</dd></div>
+      <div><dt>Embedding dimension thực tế</dt><dd>{{ kb.embedding_dimension or "Chưa version hóa" }}</dd></div>
+    </dl>
+    <details>
+      <summary>Metadata mẫu đã lọc</summary>
+      <code>{{ kb.metadata_excerpt }}</code>
+    </details>
+  </article>
+  {% else %}
+  <div class="empty-state"><strong>KB chưa có chunk.</strong></div>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from retrieval import retrieve
 
 PAIRS = os.path.join(os.path.dirname(__file__), "retrieval_eval_pairs.json")
+THRESHOLD = 0.9
 
 
 def recall_at_k(pairs, k):
@@ -28,13 +29,40 @@ def recall_at_k(pairs, k):
     return hit / len(pairs)
 
 
-if __name__ == "__main__":
-    with open(PAIRS, encoding="utf-8") as f:
-        pairs = json.load(f)
+def load_pairs():
+    with open(PAIRS, encoding="utf-8") as handle:
+        return json.load(handle)
 
+
+def evaluate(pairs=None) -> dict:
+    pairs = load_pairs() if pairs is None else pairs
+    if not isinstance(pairs, list) or not pairs:
+        raise ValueError("E2 fact-check can it nhat mot query")
     r1 = recall_at_k(pairs, 1)
     r3 = recall_at_k(pairs, 3)
+    return {
+        "query_count": len(pairs),
+        "recall_at_1": r1,
+        "recall_at_3": r3,
+        "threshold": THRESHOLD,
+        "passed": r3 >= THRESHOLD,
+    }
+
+
+def print_report(result: dict) -> int:
+    r1 = result["recall_at_1"]
+    r3 = result["recall_at_3"]
+    threshold = result["threshold"]
+    passed = result["passed"]
     print(f"\nrecall@1 = {r1:.2f}")
-    print(f"recall@3 = {r3:.2f}  (tieu chi >= 0.90)")
-    print("DAT" if r3 >= 0.9 else "CHUA DAT - sua chunking truoc, doi embedding sau (rag-design muc 5)")
-    sys.exit(0 if r3 >= 0.9 else 1)
+    print(f"recall@3 = {r3:.2f}  (tieu chi >= {threshold:.2f})")
+    print("DAT" if passed else "CHUA DAT - sua chunking truoc, doi embedding sau (rag-design muc 5)")
+    return 0 if passed else 1
+
+
+def main() -> int:
+    return print_report(evaluate())
+
+
+if __name__ == "__main__":
+    sys.exit(main())

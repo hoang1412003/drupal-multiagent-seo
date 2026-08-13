@@ -1,34 +1,40 @@
 """Login/logout/home/change-password routes cho Platform Admin MVP."""
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from jinja2 import select_autoescape
 
-from review_platform.admin import dependencies
+from review_platform.admin import (
+    audit_routes,
+    dashboard_routes,
+    dependencies,
+    evaluation_routes,
+    job_routes,
+    read_only_routes,
+    rendering,
+    review_routes,
+    user_routes,
+)
 from review_platform.auth import audit_log, csrf, passwords, sessions, throttle, users
 
 
 SESSION_COOKIE = dependencies.SESSION_COOKIE
 LOGIN_CSRF_COOKIE = "vf_admin_login_csrf"
 FLASH_COOKIE = "vf_admin_flash"
-TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+TEMPLATE_DIR = rendering.TEMPLATE_DIR
+STATIC_DIR = rendering.STATIC_DIR
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-templates = Jinja2Templates(directory=TEMPLATE_DIR)
-templates.env.autoescape = select_autoescape(("html", "xml"), default=True)
+templates = rendering.templates
 
 _DUMMY_PASSWORD_HASH = passwords.hash_password("Dummy-password-not-a-user-2026")
 
 
 def _template(request: Request, name: str, *, status_code=200, **context):
-    return templates.TemplateResponse(
-        request=request,
-        name=name,
-        context=context,
+    return rendering.render_template(
+        request,
+        name,
         status_code=status_code,
+        **context,
     )
 
 
@@ -202,20 +208,6 @@ def login(
     return response
 
 
-@router.get("", response_class=HTMLResponse)
-@router.get("/", response_class=HTMLResponse, include_in_schema=False)
-def home(
-    request: Request,
-    resolved=Depends(dependencies.current_session),
-):
-    return _template(
-        request,
-        "home.html",
-        user=resolved.user,
-        csrf_token=resolved.csrf_token,
-    )
-
-
 @router.post("/logout", dependencies=[Depends(dependencies.require_csrf)])
 def logout(
     request: Request,
@@ -310,3 +302,18 @@ def change_password(
         path="/admin/login",
     )
     return response
+
+
+router.add_api_route(
+    "",
+    dashboard_routes.dashboard_page,
+    methods=["GET"],
+    response_class=HTMLResponse,
+)
+router.include_router(dashboard_routes.router)
+router.include_router(job_routes.router)
+router.include_router(review_routes.router)
+router.include_router(user_routes.router)
+router.include_router(read_only_routes.router)
+router.include_router(evaluation_routes.router)
+router.include_router(audit_routes.router)

@@ -1,0 +1,74 @@
+[
+  {
+    "experiment": "E1",
+    "status": "pending",
+    "score_path_snapshot": "04f10e1",
+    "head_commit": null,
+    "prompt_version": "020738e209017213",
+    "model": "claude-haiku-4-5-20251001",
+    "run_at": null,
+    "evidence_path": null,
+    "metadata_complete": false,
+    "summary": "Bản 4 chưa chạy. Chỉ được chạy sau test–retest mù và xác nhận chi phí riêng."
+  },
+  {
+    "experiment": "E2",
+    "status": "valid",
+    "score_path_snapshot": "04f10e1",
+    "head_commit": "5e74e49a2a57f00733911ea6bce067e2649f952c",
+    "prompt_version": "not_applicable",
+    "model": "BAAI/bge-m3",
+    "run_at": "2026-08-13T16:06:44Z",
+    "evidence_path": "docs/evidence/e2_retrieval_summary.json",
+    "metadata_complete": true,
+    "summary": "Đạt: fact-check recall@3 = 1,00; Brand cùng chủ đề 47/60 (78,33%), cao 3,61 lần baseline. E2 không gọi LLM nên prompt_version không áp dụng."
+  },
+  {
+    "experiment": "E3",
+    "status": "pending",
+    "score_path_snapshot": "04f10e1",
+    "head_commit": null,
+    "prompt_version": "020738e209017213",
+    "model": "claude-haiku-4-5-20251001",
+    "run_at": null,
+    "evidence_path": null,
+    "metadata_complete": false,
+    "summary": "Chưa chạy baseline single-agent; không có kết quả để suy diễn."
+  },
+  {
+    "experiment": "E4",
+    "status": "valid",
+    "score_path_snapshot": null,
+    "head_commit": null,
+    "prompt_version": null,
+    "model": null,
+    "run_at": null,
+    "evidence_path": "docs/evidence/e1_e4_report.txt",
+    "metadata_complete": false,
+    "summary": "Phép đo chi phí/độ trễ lịch sử vẫn được evaluation plan công nhận, nhưng file cũ không nhúng commit, prompt, model và thời điểm chính xác."
+  },
+  {
+    "experiment": "E5",
+    "status": "historical_invalid",
+    "score_path_snapshot": null,
+    "head_commit": null,
+    "prompt_version": "0bdc5ab12ec65f89",
+    "model": "claude-haiku-4-5-20251001",
+    "run_at": null,
+    "evidence_path": "docs/evidence/e5_sau_sua_cp3_cp4.json",
+    "metadata_complete": false,
+    "summary": "Kết quả bản 3 đã hết hiệu lực sau thay đổi CP4; đây không phải kết quả của code hiện hành và không mở cổng calibration."
+  },
+  {
+    "experiment": "E6",
+    "status": "pending",
+    "score_path_snapshot": "04f10e1",
+    "head_commit": null,
+    "prompt_version": "020738e209017213",
+    "model": "claude-haiku-4-5-20251001",
+    "run_at": null,
+    "evidence_path": null,
+    "metadata_complete": false,
+    "summary": "Chưa chạy shadow-test; cần hoàn tất các cổng E1 và E5 hiện hành trước."
+  }
+]

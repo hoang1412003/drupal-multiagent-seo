@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Chi tiết job{% endblock %}
+{% block content %}
+{% if job %}
+<header class="page-heading detail-heading">
+  <div>
+    <p class="eyebrow">Job detail</p>
+    <h1>Chi tiết job</h1>
+    <p class="lede"><code>{{ job.public_id }}</code></p>
+  </div>
+  <a class="secondary-link" href="/admin/jobs">Quay lại danh sách</a>
+</header>
+
+<section class="detail-band" aria-labelledby="job-overview-heading">
+  <h2 id="job-overview-heading">Thông tin xử lý</h2>
+  <dl class="detail-grid">
+    <div>
+      <dt>Trạng thái</dt>
+      <dd><span class="status-badge status-{{ job.status }}">{{ job.status }}</span></dd>
+    </div>
+    <div><dt>Website</dt><dd>{{ job.site_name }} <small>({{ job.site_slug }})</small></dd></div>
+    <div><dt>External ID</dt><dd><code>{{ job.external_content_id }}</code></dd></div>
+    <div><dt>Revision</dt><dd>{{ job.external_revision_id or "Không có dữ liệu" }}</dd></div>
+    <div><dt>Nguồn</dt><dd>{{ job.source }}</dd></div>
+    <div><dt>Số lần thử</dt><dd>{{ job.attempts }}</dd></div>
+    <div><dt>Policy</dt><dd><code>{{ job.policy_version }}</code></dd></div>
+    <div><dt>Content / ngôn ngữ</dt><dd>{{ job.content_type }} / {{ job.langcode }}</dd></div>
+    <div><dt>Correlation ID</dt><dd><code>{{ job.correlation_id }}</code></dd></div>
+    <div><dt>Tạo lúc</dt><dd>{{ job.created_at.strftime("%d/%m/%Y %H:%M:%S") }} UTC</dd></div>
+    <div><dt>Cập nhật lúc</dt><dd>{{ job.updated_at.strftime("%d/%m/%Y %H:%M:%S") }} UTC</dd></div>
+    <div><dt>Job trước</dt><dd>{{ job.supersedes_job_public_id or "Không có dữ liệu" }}</dd></div>
+  </dl>
+</section>
+
+<section class="detail-band" aria-labelledby="job-run-heading">
+  <h2 id="job-run-heading">Run liên kết và write-back</h2>
+  <dl class="detail-grid compact-detail-grid">
+    <div><dt>Run public ID</dt><dd>{{ job.run_public_id or "Không có dữ liệu" }}</dd></div>
+    <div><dt>Write-back</dt><dd>{{ job.writeback_status or "Không có dữ liệu" }}</dd></div>
+    <div>
+      <dt>Chấm lúc</dt>
+      <dd>
+        {% if job.run_scored_at %}
+          {{ job.run_scored_at.strftime("%d/%m/%Y %H:%M:%S") }} UTC
+        {% else %}
+          Không có dữ liệu
+        {% endif %}
+      </dd>
+    </div>
+  </dl>
+</section>
+
+{% if job.last_error %}
+<section class="detail-band" aria-labelledby="job-error-heading">
+  <h2 id="job-error-heading">Lỗi gần nhất đã làm sạch</h2>
+  <pre class="safe-error">{{ job.last_error }}</pre>
+</section>
+{% endif %}
+
+{% if can_retry %}
+<section class="detail-band retry-panel" aria-labelledby="job-retry-heading">
+  <div>
+    <p class="eyebrow">Operator action</p>
+    <h2 id="job-retry-heading">Retry job thất bại</h2>
+    {% if job.saved_result_available %}
+      <p class="notice info">Đã có kết quả chấm lưu sẵn. Worker sẽ ưu tiên ghi lại kết quả này.</p>
+    {% else %}
+      <p class="notice warning">
+        Chưa có kết quả ghi lại được. Retry có thể gọi mô hình và phát sinh chi phí.
+      </p>
+    {% endif %}
+  </div>
+  <form method="post" action="/admin/jobs/{{ job.public_id }}/retry" class="stacked-form retry-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="retry-reason">Lý do (không bắt buộc)</label>
+    <textarea id="retry-reason" name="reason" maxlength="500" rows="3"></textarea>
+    <label class="checkbox-row">
+      <input type="checkbox" name="confirm_cost" value="yes" required>
+      Tôi hiểu retry có thể phát sinh chi phí mô hình.
+    </label>
+    <button class="danger-button" type="submit">Tạo job retry</button>
+  </form>
+</section>
+{% endif %}
+{% else %}
+<p>Không có dữ liệu job.</p>
+{% endif %}
+{% endblock %}

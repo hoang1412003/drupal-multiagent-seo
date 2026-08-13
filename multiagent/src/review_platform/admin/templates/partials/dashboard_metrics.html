@@ -1,0 +1,125 @@
+<div id="dashboard-metrics" class="dashboard-metrics" aria-live="polite">
+{% if error %}
+  <p class="notice error" role="alert">{{ error }}</p>
+{% elif view %}
+  <section class="status-rail" aria-labelledby="system-status-heading">
+    <header class="band-heading">
+      <div>
+        <p class="eyebrow">Sức khỏe hệ thống</p>
+        <h2 id="system-status-heading">Trạng thái dịch vụ</h2>
+      </div>
+      <p>Nguồn: request hiện tại và truy vấn database vừa hoàn tất.</p>
+    </header>
+    <dl class="status-list">
+      <div><dt>Admin API</dt><dd class="status-ok">Đang hoạt động</dd></div>
+      <div><dt>PostgreSQL</dt><dd class="status-ok">Kết nối thành công</dd></div>
+      <div><dt>Worker</dt><dd class="status-unknown">Chưa xác minh</dd></div>
+      <div><dt>Drupal connector</dt><dd class="status-unknown">Chưa xác minh</dd></div>
+    </dl>
+  </section>
+
+  <section class="dashboard-band" aria-labelledby="queue-heading">
+    <header class="band-heading">
+      <div>
+        <p class="eyebrow">Thời điểm hiện tại</p>
+        <h2 id="queue-heading">Hàng đợi xử lý</h2>
+      </div>
+      <p>Nguồn: trạng thái hiện tại trong <code>review_job</code>.</p>
+    </header>
+    <dl class="metric-strip queue-strip">
+      <div><dt>Đang chờ</dt><dd>{{ "{:,}".format(view.queue_counts.queued) }}</dd></div>
+      <div><dt>Đang chạy</dt><dd>{{ "{:,}".format(view.queue_counts.running) }}</dd></div>
+      <div><dt>Thất bại</dt><dd>{{ "{:,}".format(view.queue_counts.failed) }}</dd></div>
+      <div><dt>Hoàn tất</dt><dd>{{ "{:,}".format(view.queue_counts.done) }}</dd></div>
+      <div><dt>Đã thay thế</dt><dd>{{ "{:,}".format(view.queue_counts.superseded) }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="dashboard-band" aria-labelledby="review-heading">
+    <header class="band-heading">
+      <div>
+        <p class="eyebrow">
+          {{ view.date_from.strftime("%d/%m/%Y") }}–{{ view.date_to.strftime("%d/%m/%Y") }} UTC
+        </p>
+        <h2 id="review-heading">Kết quả chấm</h2>
+      </div>
+      <p>Nguồn: các run đã lưu trong <code>run_log</code>. Đã loại dữ liệu fixture.</p>
+    </header>
+    {% if view.total_reviews == 0 %}
+      <div class="empty-state">
+        <strong>Chưa có dữ liệu</strong>
+        <p>Không có run thật trong khoảng ngày đã chọn.</p>
+      </div>
+    {% else %}
+      <dl class="metric-strip review-strip">
+        <div><dt>Tổng lượt chấm</dt><dd>{{ "{:,}".format(view.total_reviews) }}</dd></div>
+        <div><dt>Được xuất bản</dt><dd>{{ "{:,}".format(view.decision_counts.publish) }}</dd></div>
+        <div><dt>Cần chỉnh sửa</dt><dd>{{ "{:,}".format(view.decision_counts.needs_revision) }}</dd></div>
+        <div><dt>Từ chối</dt><dd>{{ "{:,}".format(view.decision_counts.rejected) }}</dd></div>
+        <div><dt>Chưa xác định</dt><dd>{{ "{:,}".format(view.decision_counts.unknown) }}</dd></div>
+      </dl>
+
+      <div class="metric-columns">
+        <section aria-labelledby="duration-heading">
+          <h3 id="duration-heading">Thời gian xử lý</h3>
+          {% if view.duration_p50_ms is none %}
+            <p class="metric-unavailable">Chưa có dữ liệu thời gian</p>
+          {% else %}
+            <dl class="compact-metrics">
+              <div><dt>P50</dt><dd>{{ "{:,.2f}".format(view.duration_p50_ms) }} ms</dd></div>
+              <div><dt>P95</dt><dd>{{ "{:,.2f}".format(view.duration_p95_ms) }} ms</dd></div>
+            </dl>
+          {% endif %}
+        </section>
+
+        <section aria-labelledby="usage-heading">
+          <h3 id="usage-heading">Token của run đã lưu</h3>
+          <dl class="compact-metrics">
+            <div><dt>Input</dt><dd>{{ "{:,}".format(view.cost_estimate.input_tokens) }}</dd></div>
+            <div><dt>Output</dt><dd>{{ "{:,}".format(view.cost_estimate.output_tokens) }}</dd></div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="cost-heading">
+          <h3 id="cost-heading">Chi phí ước tính</h3>
+          {% if view.cost_estimate.estimated_usd is none %}
+            <p class="metric-unavailable">Chưa thể ước tính</p>
+            <p class="metric-note">Chưa có giá: {{ view.cost_estimate.unknown_models|join(", ") }}</p>
+          {% else %}
+            <p class="metric-value">${{ "{:,.2f}".format(view.cost_estimate.estimated_usd) }} USD</p>
+          {% endif %}
+          <p class="metric-note">
+            Phiên bản giá {{ view.cost_estimate.pricing_version }} · hiệu lực
+            {{ view.cost_estimate.effective_at.strftime("%d/%m/%Y") }} ·
+            <a href="{{ view.cost_estimate.source }}" rel="noreferrer">Nguồn giá</a>
+          </p>
+        </section>
+      </div>
+
+      <section class="writeback-section" aria-labelledby="writeback-heading">
+        <div>
+          <h3 id="writeback-heading">Ghi kết quả về Drupal</h3>
+          <p>Success rate chỉ tính mẫu số thành công + thất bại.</p>
+        </div>
+        <dl class="compact-metrics writeback-metrics">
+          <div><dt>Thành công</dt><dd>{{ view.writeback_counts.succeeded }}</dd></div>
+          <div><dt>Thất bại</dt><dd>{{ view.writeback_counts.failed }}</dd></div>
+          <div><dt>Đã thay thế</dt><dd>{{ view.writeback_counts.superseded }}</dd></div>
+          <div><dt>Đang chờ</dt><dd>{{ view.writeback_counts.pending }}</dd></div>
+          <div><dt>Legacy/không rõ</dt><dd>{{ view.writeback_counts.unknown }}</dd></div>
+          <div>
+            <dt>Tỷ lệ thành công</dt>
+            <dd>
+              {% if view.writeback_success_rate is none %}
+                Chưa có dữ liệu
+              {% else %}
+                {{ "{:.1f}".format(view.writeback_success_rate * 100) }}%
+              {% endif %}
+            </dd>
+          </div>
+        </dl>
+      </section>
+    {% endif %}
+  </section>
+{% endif %}
+</div>

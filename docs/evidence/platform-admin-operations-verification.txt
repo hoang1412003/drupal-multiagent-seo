@@ -1,0 +1,215 @@
+PLATFORM ADMIN OPERATIONS (P3) - VERIFICATION EVIDENCE
+======================================================
+
+Thoi diem: 2026-08-13T23:25:59+07:00 (Asia/Saigon)
+Nhanh: feat/platform-admin-operations
+Code HEAD da kiem: e641123973086bf5c3249743a6a023d39482ecc2
+Base da merge: 44487123c3392dbd2b1e845b75c22759d3e8566d (P2 Admin Auth)
+Protected score-path snapshot: 04f10e1
+
+Pham vi
+--------
+
+P3 Admin Operations Tasks 1-9: UI shell responsive; dashboard metric that;
+jobs/list/detail; retry failed job co role, CSRF, xac nhan chi phi va audit;
+review history/detail; user management; config/KB read-only; evaluation
+manifest/evidence read-only; audit page admin-only.
+
+Khong nam trong checkpoint: /api/v1, credential theo site, Drupal connector,
+result callback CAS/idempotency, pause/resume intake, connection capability,
+worker heartbeat, llm_usage_event ben vung cho attempt loi, security staging va
+rollout production. Dashboard vi vay hien worker/connector la unknown, khong
+gia trang thai ok. Khong chay E1, E5, E3, E6 hay Anthropic API tra phi.
+
+Commit trong checkpoint
+------------------------
+
+  9272460 docs: align platform phases with implementation plan
+  bf1a506 docs: harden admin operations implementation plan
+  a98533f feat: add accessible admin UI shell
+  4c7fa91 feat: add traceable dashboard metrics and cost estimates
+  c2010a1 feat: render operational dashboard from run data
+  c47edd5 feat: add admin job inspection and audited retry
+  a404871 feat: add explainable review history pages
+  641ae11 feat: add guarded admin user management
+  5879130 feat: expose read-only policy and KB metadata
+  5e74e49 refactor: make E2 evidence exportable
+  a008b46 feat: show versioned evaluation evidence read-only
+  e641123 feat: add admin-only operational audit page
+
+Database va migration
+---------------------
+
+Migration status tren database dev tai checkpoint:
+  applied: 0001, 0002, 0003
+  pending: none
+
+Row count chi de doi chieu, khong phai fixture UI:
+  review_job=8
+  run_log=6
+  kb_chunk=1133
+  admin_user=0
+  admin_audit_log=0
+  active_assignments=1
+
+Dev database khong co admin account that. Route/integration QA tao account va
+data trong schema test rieng, DROP schema trong finally; rendered visual QA
+dung app fixture local. Khong sua/xoa job, run hay KB hien hanh.
+
+Full offline/integration suite
+------------------------------
+
+Meta-test scripts/test_moi_test_deu_chay.py liet ke 57/57 file test va exit 0.
+
+Vong suite trong sandbox:
+  PASS=53
+  SKIP=0
+  FAIL do assertion/code=0
+  TEMP_ACL_BLOCKED=4
+
+Bon file bi Windows managed sandbox chan ngay khi tao file/thu muc trong
+%TEMP%: test_config.py, test_eval_calibration_dataset.py,
+test_extract_gold_sample.py, test_migrations.py. Khong file nao cham assertion
+P3 truoc loi PermissionError. Chay lai dung bon file ngoai sandbox:
+  PASS=4
+  SKIP=0
+  FAIL=0
+
+Phan loai cuoi cung theo file:
+  PASS=57
+  SKIP=0
+  FAIL=0
+
+Sau khi cap nhat tai lieu/evidence, da chay lai mot luot duy nhat toan bo 57
+file ngoai sandbox de tranh ACL %TEMP%, exit 0:
+  SUMMARY PASS=57 SKIP=0 FAIL=0 TOTAL=57
+
+StarletteDeprecationWarning ve TestClient/httpx2 van xuat hien nhu checkpoint
+P2; assertion van xanh. Day la dependency warning can xu ly khi khoa/nang
+dependency, khong phai loi P3.
+
+Security va RBAC assertions
+---------------------------
+
+  - Tat ca admin GET can server-side session. Retry can operator+; user va
+    audit can admin. Viewer/operator goi truc tiep endpoint cam deu nhan 403.
+  - Moi POST co hieu ung phu dung CSRF. Retry chi nhan failed job, lock row,
+    bat confirm_cost=yes, tao linked superseding job va audit cung transaction.
+  - Hai request dong thoi khong the lock/ha role het active admin; mot request
+    thanh cong, mot request 409, van con dung mot active admin.
+  - User create/reset chi hien password tam mot lan, response no-store/private;
+    password/audit/session rollback neu audit that bai.
+  - Jinja autoescape bat; khong co |safe cho error/evidence/username. Error,
+    agent result va legacy metadata duoc gioi han/redact truoc khi render.
+  - Config loader khong nhan path tu request; allowlist dung 4 file. KB query
+    khong SELECT document/vector. Site query khong SELECT secret_ref/base_url.
+  - Evaluation evidence chi map E1-E6 qua manifest; path tuyet doi, '..', .env,
+    duplicate/status/provenance sai deu bi chan. Evidence response no-store,
+    nosniff va chi application/json hoac text/plain.
+  - POST /admin/config-kb va /admin/evaluation tra 405. Query path=../../.env
+    khong anh huong response cua config/KB hay evidence E2.
+  - Audit metadata legacy sai kieu hien [da an]; password, Authorization Bearer
+    va api_key o ca key/value deu bi redact. Filter action/outcome allowlist,
+    actor toi da 100, date UTC inclusive va pagination stable.
+  - Literal scan template + manifest + E2 evidence khong co ANTHROPIC_API_KEY,
+    Authorization header, password_hash, token_hash, Set-Cookie, Cookie hay .env.
+
+Pricing va dashboard provenance
+-------------------------------
+
+  pricing_version=1
+  currency=USD
+  effective_at=2025-10-15
+  source=https://www.anthropic.com/claude/haiku
+  claude-haiku-4-5-20251001 input=$1/M, output=$5/M
+
+Tinh gia dung Decimal. Neu bat ky model nao khong co bang gia, estimated USD
+la unknown thay vi tinh thieu. Dashboard dung khoang ngay UTC toi da 93 ngay,
+loai config_meta.is_fixture=true khoi metric mac dinh; review detail van hien
+fixture warning. Write-back rate khong biet legacy duoc de unknown, khong bia
+thanh succeeded.
+
+HTMX va rendered UI QA
+----------------------
+
+  htmx_version=2.0.10
+  sha384_base64=H5SrcfygHmAuTDZphMHqBJLc3FhssKjG7w/CeCpFReSfwBWDTKpkzPP8c+cLsK+V
+  runtime_CDN=false
+
+Browser plugin khong co trong session va Playwright package khong co trong
+venv, nen dung Microsoft Edge headless co san lam fallback; khong tai browser
+runtime. Edge headless tren may nay co viewport CSS toi thieu xap xi 492px,
+nen mobile capture dung 500px thay vi ghi khong dung la 360px.
+
+Da inspect anh rendered desktop/mobile cho login shell, dashboard, jobs,
+job detail, reviews, review detail, users/password tam, config/KB, evaluation
+va audit. Ket qua: khong overflow toan trang; bang rong nam trong vung cuon
+co tabindex; hash/UUID xuong dong; nav active dung; warning/error/status co
+phan cap mau va text, khong chi dua vao mau. Anh QA nam trong img-for-ai-see/
+duoc gitignore; server/profile/script QA tam da xoa.
+
+Keyboard QA that qua Chrome DevTools Protocol local tren Edge headless:
+  [PASS] Tab dau focus skip-link "Bo qua dieu huong", outline 3px va link hien.
+  [PASS] Tab tiep theo focus brand dung thu tu DOM, outline 3px.
+
+HTML error role=alert, success role=status, viewer/operator/admin va response
+method da duoc TestClient kiem tren PostgreSQL schema test. Khong bam retry
+tren job dev that va khong co worker nao duoc khoi dong trong QA.
+
+E2 evidence $0
+---------------
+
+Refactor code do duoc commit truoc tai 5e74e49. Lan chay dau voi
+HF_HUB_OFFLINE=1 dung an toan vi BAAI/bge-m3 chua co cache va khong tao JSON.
+Sau khi duoc phep tai model open-source vao cache local, chay lai voi
+HF_HUB_OFFLINE=1, PostgreSQL/KB hien hanh, khong import ai_core va khong goi
+LLM API. Evidence ghi atomically tai docs/evidence/e2_retrieval_summary.json:
+
+  run_at=2026-08-13T16:06:44Z
+  head_commit=5e74e49a2a57f00733911ea6bce067e2649f952c
+  factcheck query_count=12, recall@1=1.0, recall@3=1.0, threshold=0.9, PASS
+  brand query_count=20, hits=47/60, rate=0.7833333333333333
+  random_baseline=0.21702127659574472, ratio=3.6094771241830057,
+  threshold_ratio=1.5, PASS
+  aggregate=PASS
+
+Manifest khong suy provenance cu: E1/E3/E6 pending; E2 valid; E4 valid nhung
+metadata_complete=false; E5 historical_invalid va ghi ro khong phai code hien
+hanh. Khong chay E1/E5 de "lam dep" trang.
+
+Score/prompt freeze
+-------------------
+
+  prompt_version=020738e209017213
+  score_path_diff_exit=0
+  git_diff_check_exit=0
+
+Lenh score-path so voi 04f10e1 bao gom agents, ai_core, brand_analysis,
+config, embeddings, graph, retrieval, scoring, seo_analysis, state,
+text_utils, kb va scoring.yaml. Khong co file score path duoc bao ve nao doi.
+
+Code review
+-----------
+
+Theo lua chon inline cua chu du an, review thuc hien truc tiep tren range
+4448712..e641123, khong goi sub-agent. Da ra route auth/RBAC/CSRF, transaction
+retry/user, SQL scope/pagination, Jinja escaping, path allowlist, evidence
+headers, metadata redaction, pricing va score freeze.
+
+Ket qua review truoc docs commit:
+  Critical=0
+  Important=0
+
+Gioi han co y giu mo cho plan sau: body/request size cap va CSP/security
+headers tong the; worker heartbeat/connector capability; durable usage event
+cho attempt loi; production secret/site setup va retention audit. Khong danh
+dau cac gioi han nay la da xong trong P3.
+
+Ket luan checkpoint
+-------------------
+
+P3 Admin Operations dat checkpoint cua
+docs/superpowers/plans/2026-08-12-platform-admin-operations.md tren code HEAD
+da ghi. Buoc productization tiep theo la P4 API/Drupal Connector. P4/P5/P6
+chua trien khai; khong duoc suy /api/v1, callback CAS, pause/resume,
+connection health that hay production hardening da ton tai tu checkpoint nay.

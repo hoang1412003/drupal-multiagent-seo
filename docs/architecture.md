@@ -278,7 +278,7 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 **Trạng thái (cập nhật 2026-08-04): đã triển khai.** `multiagent/config/scoring.yaml` giữ trọng số và ngưỡng, tra theo khoá `(content_type, langcode)`; `src/config.py` nạp và phát cảnh báo lúc chạy; `graph.py` đọc từ config thay vì hằng số `WEIGHTS`; `state.py` đã có `content_type`/`langcode`. Bằng chứng đây là refactor thuần: `label_helper.py` chạy lại trên 33 mẫu gold set cho ra file giống hệt từng byte với báo cáo đã commit. Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
 
-### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — thiết kế đã duyệt, chưa triển khai
+### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — P1–P3 đã qua checkpoint, P4–P6 chưa triển khai
 
 **Quyết định mới ngày 2026-08-12 thay thế đề xuất cũ đặt trang quản trị trong Drupal.** Multi-Agent sẽ là một service độc lập; Drupal là connector/client đầu tiên. Trang quản trị nằm tại `/admin` của service và dùng tài khoản local riêng trong MVP. Thiết kế đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Thứ tự migration/auth/admin/connector/hardening và checkpoint TDD: [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Các module trong hai tài liệu vẫn là planned state cho tới commit triển khai tương ứng.
 
@@ -299,6 +299,10 @@ Productization được làm **song song với Sprint 3**, nhưng chỉ ở lớ
 PostgreSQL hiện có là tiền đề tốt, nhưng schema hiện hành chưa tenant-aware và chưa có migration version. Việc triển khai phải nâng dữ liệu cũ về một default site/profile, không mất queue/run/KB; Drupal tiếp tục là nguồn sự thật của nội dung và service **không lưu toàn văn bài nháp**.
 
 **Bổ sung sau review plan:** write-back mục tiêu không PATCH generic JSON:API article. Worker gọi callback Drupal chỉ nhận bốn field AI; callback khóa node, compare-and-set expected revision/hash và idempotent theo run UUID để job cũ không ghi đè report mới. Worker giữ nhánh hash v1 trong cửa sổ rollback; staging/production phải cấu hình `site.base_url` bằng CLI thay vì dùng seed DDEV; usage từng LLM call được lưu kể cả attempt lỗi và run legacy có trạng thái write-back `unknown`. Đây đều là planned state cho tới commit triển khai tương ứng.
+
+**Trạng thái triển khai ngày 2026-08-13:** P1 đã tạo migration/site/profile/scoped queue-audit; P2 đã tạo local auth/session/CSRF/RBAC/admin shell; P3 đã thêm dashboard/jobs/reviews/users/config-KB/evaluation/audit và retry có transaction/audit. Evidence tương ứng nằm ở `docs/evidence/platform-*-verification.txt`. P3 không đổi score path; `prompt_version` vẫn `020738e209017213`. E2 local mới đạt và có manifest; không có E1/E5 trả phí mới.
+
+Ranh giới còn mở phải đọc đúng: `/api/v1`, connector Drupal mới, callback CAS/idempotency, pause/resume và migration 0004 thuộc P4; heartbeat, durable failed-attempt usage, capability/security/staging/rollout thuộc các pha sau. Do đó health worker/connector trên dashboard hiện là `unknown`, không phải tín hiệu lỗi cũng không phải tín hiệu healthy.
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 

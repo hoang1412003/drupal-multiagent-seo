@@ -10,6 +10,8 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md` — đã duyệt ngày 2026-08-12.
 
+**Implementation status (2026-08-13):** ✅ Plan 1 Foundation, Plan 2 Admin Auth và Plan 3 Admin Operations đã qua checkpoint. Plan 4 API/Drupal Connector và Plan 5 Hardening/Rollout chưa triển khai. Evidence lần lượt ở `docs/evidence/platform-foundation-verification.txt`, `platform-admin-auth-verification.txt` và `platform-admin-operations-verification.txt`.
+
 ## Global Constraints
 
 - Chưa được gọi Anthropic hoặc chạy E1/E5/E3/E6 trong bất kỳ task triển khai nào; test mặc định phải offline và không cần secret trả phí.
