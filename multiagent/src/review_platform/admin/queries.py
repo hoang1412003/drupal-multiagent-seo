@@ -10,6 +10,7 @@ from uuid import UUID
 
 from review_platform.admin import sanitization
 from review_platform.admin.sanitization import sanitize_text
+from review_platform.auth.rbac import Role
 from review_platform.pricing import CostEstimate, estimate_usage
 
 
@@ -143,6 +144,18 @@ class ReviewDetail:
     correlation_id: UUID
     is_fixture: bool
     drupal_url: str | None
+
+
+@dataclass(frozen=True)
+class UserListItem:
+    id: UUID
+    username: str
+    role: Role
+    active: bool
+    must_change_password: bool
+    last_login_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
 
 
 @dataclass(frozen=True)
@@ -583,6 +596,46 @@ def get_review(conn, public_id: UUID) -> ReviewDetail | None:
         correlation_id=row[25],
         is_fixture=_is_fixture(row[9]),
         drupal_url=_drupal_node_url(row[17], row[21]),
+    )
+
+
+def list_users(conn, *, page: int, page_size: int) -> PageView:
+    if isinstance(page, bool) or not isinstance(page, int) or page < 1:
+        raise ValueError("page phai >= 1")
+    if (
+        isinstance(page_size, bool)
+        or not isinstance(page_size, int)
+        or not 1 <= page_size <= 100
+    ):
+        raise ValueError("page_size phai trong 1..100")
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_user")
+        total = int(cur.fetchone()[0])
+        cur.execute(
+            "SELECT id,username,role,active,must_change_password,last_login_at,"
+            "created_at,updated_at FROM admin_user "
+            "ORDER BY created_at DESC,id DESC LIMIT %s OFFSET %s",
+            (page_size, (page - 1) * page_size),
+        )
+        items = tuple(
+            UserListItem(
+                id=row[0],
+                username=row[1],
+                role=Role(row[2]),
+                active=row[3],
+                must_change_password=row[4],
+                last_login_at=_as_utc(row[5]),
+                created_at=_as_utc(row[6]),
+                updated_at=_as_utc(row[7]),
+            )
+            for row in cur.fetchall()
+        )
+    return PageView(
+        items=items,
+        page=page,
+        page_size=page_size,
+        total=total,
+        total_pages=(total + page_size - 1) // page_size,
     )
 
 

@@ -105,6 +105,7 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
     assert "/admin" in hrefs
     assert "/admin/jobs" in hrefs
     assert "/admin/reviews" in hrefs
+    assert "/admin/users" not in hrefs
     assert "/admin/change-password" in hrefs
     assert ">Tổng quan</a>" in html
     assert ">Trang chủ</a>" not in html
@@ -116,7 +117,18 @@ def test_nav_task_1_khong_tao_link_den_route_chua_co():
     }
     assert 'action="/admin/logout"' in html
     assert 'name="csrf_token" value="csrf-test"' in html
-    print("[PASS] nav chi co route that qua Task 5 va logout POST co CSRF")
+    admin_html = rendering.render_template(
+        _request("/admin"),
+        "home.html",
+        user=SimpleNamespace(username="admin.demo", role=Role.ADMIN),
+        csrf_token="csrf-test",
+        view=None,
+        filter_from="",
+        filter_to="",
+        error="qa",
+    ).body.decode("utf-8")
+    assert 'href="/admin/users"' in admin_html
+    print("[PASS] nav Task 6 co route that, users chi admin va logout co CSRF")
 
 
 def test_css_shell_co_accessibility_va_mobile_contract():

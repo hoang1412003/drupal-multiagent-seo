@@ -9,6 +9,7 @@ from review_platform.admin import (
     job_routes,
     rendering,
     review_routes,
+    user_routes,
 )
 from review_platform.auth import audit_log, csrf, passwords, sessions, throttle, users
 
@@ -309,3 +310,4 @@ router.add_api_route(
 router.include_router(dashboard_routes.router)
 router.include_router(job_routes.router)
 router.include_router(review_routes.router)
+router.include_router(user_routes.router)
