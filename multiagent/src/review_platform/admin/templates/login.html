@@ -4,8 +4,6 @@
 {% block content %}
 <section class="auth-panel" aria-labelledby="login-heading">
   <h1 id="login-heading">Đăng nhập quản trị</h1>
-  {% if flash %}<p class="notice success" role="status">{{ flash }}</p>{% endif %}
-  {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
   <form method="post" action="/admin/login" class="stacked-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="username">Tên đăng nhập</label>

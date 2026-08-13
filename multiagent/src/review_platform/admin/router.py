@@ -1,34 +1,30 @@
 """Login/logout/home/change-password routes cho Platform Admin MVP."""
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from jinja2 import select_autoescape
 
-from review_platform.admin import dependencies
+from review_platform.admin import dependencies, rendering
 from review_platform.auth import audit_log, csrf, passwords, sessions, throttle, users
 
 
 SESSION_COOKIE = dependencies.SESSION_COOKIE
 LOGIN_CSRF_COOKIE = "vf_admin_login_csrf"
 FLASH_COOKIE = "vf_admin_flash"
-TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
-STATIC_DIR = Path(__file__).resolve().parent / "static"
+TEMPLATE_DIR = rendering.TEMPLATE_DIR
+STATIC_DIR = rendering.STATIC_DIR
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-templates = Jinja2Templates(directory=TEMPLATE_DIR)
-templates.env.autoescape = select_autoescape(("html", "xml"), default=True)
+templates = rendering.templates
 
 _DUMMY_PASSWORD_HASH = passwords.hash_password("Dummy-password-not-a-user-2026")
 
 
 def _template(request: Request, name: str, *, status_code=200, **context):
-    return templates.TemplateResponse(
-        request=request,
-        name=name,
-        context=context,
+    return rendering.render_template(
+        request,
+        name,
         status_code=status_code,
+        **context,
     )
 
 
