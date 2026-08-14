@@ -347,7 +347,7 @@ def claim(conn, worker_id: str):
             f"claimed.external_content_id, claimed.external_revision_id, "
             f"claimed.content_type, claimed.langcode, claimed.correlation_id, "
             f"claimed.content_hash, claimed.attempts, claimed.source, "
-            f"claimed.supersedes_job_id",
+            f"claimed.supersedes_job_id, claimed.content_hash_version",
             (RUNNING, worker_id, QUEUED),
         )
         row = cur.fetchone()
@@ -369,6 +369,7 @@ def claim(conn, worker_id: str):
         "attempts": row[11],
         "source": row[12],
         "supersedes_job_id": row[13],
+        "content_hash_version": row[14],
     }
 
 
@@ -433,6 +434,40 @@ def fail(
                 (QUEUED, loi, giay, job_id),
             )
         return QUEUED
+
+
+def fail_permanent(conn, job_id: int, error_code: str, safe_message: str = "") -> str:
+    """Vao thang dead-letter, KHONG di qua backoff/attempts.
+
+    Danh cho loi ma thu lai chac chan cung sai: sai quyen, revision da bien
+    mat, hash khong khop, response sai hop dong. De chung di duong retil
+    thuong nghia la goi LLM ba lan roi that bai ba lan - ton tien va lam cham
+    hang doi ma khong doi ket qua.
+    """
+    loi = error_code if not safe_message else f"{error_code}: {safe_message}"
+    with conn.cursor() as cur:
+        cur.execute(
+            f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, updated_at=now() "
+            "WHERE id=%s AND status IN (%s,%s)",
+            (FAILED, loi[:1000], job_id, RUNNING, QUEUED),
+        )
+    return FAILED
+
+
+def supersede(conn, job_id: int, reason_code: str = "content_superseded") -> str:
+    """Ket thuc job vi noi dung da co revision moi hon.
+
+    KHONG phai that bai: job nay da lam dung viec cua no, chi la ket qua khong
+    con ap dung duoc nua. De no thanh `failed` se lam dead-letter va bao cao
+    do hong day nhung ca ma thuc ra he thong xu ly dung.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            f"UPDATE {TEN_BANG} SET status=%s, last_error=%s, updated_at=now() "
+            "WHERE id=%s AND status IN (%s,%s)",
+            (SUPERSEDED, reason_code, job_id, RUNNING, QUEUED),
+        )
+    return SUPERSEDED
 
 
 def reclaim_stuck(conn) -> dict:
