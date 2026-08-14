@@ -49,21 +49,33 @@ class PendingController extends ControllerBase {
     // latestRevision(): bài đã xuất bản rồi tạo bản nháp needs_review có
     // revision mới nhất KHÔNG phải revision mặc định - query mặc định sẽ bỏ
     // sót đúng nhóm bài này.
+    //
+    // KHÔNG lọc moderation_state trong entity query: đó là field TÍNH TOÁN,
+    // Drupal ném QueryException "'moderation_state' not found" và trả HTTP
+    // 500. Cùng một cái bẫy đã ghi ở drupal_client.py (kiểm chứng 2026-08-07)
+    // và lặp lại đúng như vậy ở đây. Cách đúng: lọc thô bằng vid ở tầng SQL,
+    // rồi lọc tinh bằng PHP trên chính entity đã load.
     $vids = $storage->getQuery()
       ->accessCheck(TRUE)
       ->latestRevision()
       ->condition('type', 'article')
-      ->condition('moderation_state', self::STATE)
       ->condition('vid', $sau, '>')
       ->sort('vid', 'ASC')
       ->range(0, $limit)
       ->execute();
 
     $items = [];
-    $cuoi = NULL;
+    $da_xet = NULL;
     foreach (array_keys($vids) as $vid) {
+      // Ghi nhận MỌI revision đã xét, kể cả bản bị lọc bỏ: con trỏ phải tiến
+      // qua chúng, nếu không vòng đối soát sẽ quét lại mãi cùng một đoạn.
+      $da_xet = (int) $vid;
       $node = $storage->loadRevision($vid);
       if (!$node instanceof NodeInterface) {
+        continue;
+      }
+      if (!$node->hasField('moderation_state')
+        || $node->get('moderation_state')->value !== self::STATE) {
         continue;
       }
       $items[] = [
@@ -75,14 +87,14 @@ class PendingController extends ControllerBase {
         'content_hash_version' => 2,
         'source_url' => $node->toUrl('canonical', ['absolute' => TRUE])->toString(),
       ];
-      $cuoi = (int) $node->getRevisionId();
     }
 
     return $this->khongLuu([
       'items' => $items,
-      // Hết trang thì trả NULL để client biết dừng, không để nó tự đoán bằng
-      // cách so count() với limit (sai khi trang cuối vừa đúng bằng limit).
-      'next_after_revision_id' => count($items) === $limit ? $cuoi : NULL,
+      // Con trỏ tính theo số revision ĐÃ XÉT, không theo số item trả về: một
+      // trang có thể lọc hết sạch mà vẫn còn dữ liệu ở phía sau. Trả NULL chỉ
+      // khi cửa sổ chưa đầy, tức chắc chắn đã hết.
+      'next_after_revision_id' => count($vids) === $limit ? $da_xet : NULL,
     ]);
   }
 

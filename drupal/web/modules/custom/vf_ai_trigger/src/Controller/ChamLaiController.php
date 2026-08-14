@@ -4,7 +4,7 @@ namespace Drupal\vf_ai_trigger\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\node\NodeInterface;
-use Drupal\vf_ai_review\AiReportRenderer;
+use Drupal\vf_ai_review\AiInputFingerprint;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
@@ -30,9 +30,17 @@ class ChamLaiController extends ControllerBase {
       return new JsonResponse(['ok' => FALSE], 403);
     }
 
-    $hash = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
-    $ok = \Drupal::service('vf_ai_trigger.client')
-      ->guiJob($node->uuid(), $hash, 'manual', TRUE);
+    // Chấm lại ĐÚNG revision đang hiển thị, không phải revision mặc định:
+    // người duyệt bấm nút khi đang đọc bản nháp needs_review.
+    $hash = AiInputFingerprint::hash(vf_ai_review_input_fields($node));
+    $ok = \Drupal::service('vf_ai_trigger.client')->guiJob(
+      $node->uuid(),
+      (string) $node->getRevisionId(),
+      $node->language()->getId(),
+      $hash,
+      'manual',
+      TRUE
+    );
 
     return new JsonResponse(['ok' => $ok], $ok ? 202 : 503);
   }
