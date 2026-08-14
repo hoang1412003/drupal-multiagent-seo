@@ -291,6 +291,63 @@ Ba chốt chặn: phải truyền đúng `--confirm-staging-fixture`; base URL c
 
 ---
 
+## 6.3. Biến môi trường theo từng tiến trình
+
+Ba tiến trình đọc ba tập biến khác nhau. Thiếu biến của tiến trình nào thì chỉ tiến trình đó chết — và một số kiểu chết rất im lặng, nên bảng này ghi rõ hậu quả.
+
+| Biến | Tiến trình | Bắt buộc | Là secret | Thiếu thì sao |
+|---|---|---|---|---|
+| `PG_DSN` | api, worker, script | không (có mặc định) | **có** | Mặc định trỏ container local; sai ở production là nối nhầm database |
+| `ANTHROPIC_API_KEY` | worker | **có** | **có** | Worker chết ngay lần chấm đầu |
+| `ANTHROPIC_MODEL` | worker | không | không | Rơi về `claude-haiku-4-5-20251001`; đổi model **làm mất hiệu lực ngưỡng calibrate** |
+| `ADMIN_CSRF_KEY`, `ADMIN_THROTTLE_KEY` | api | **có**, ≥32 byte, phải khác nhau | **có** | API **không khởi động được** |
+| `ADMIN_COOKIE_SECURE` | api | không | không | `false` ở local; production HTTPS phải đặt `true` |
+| `VF_HTTPS_ONLY` | api | không | không | `1` mới bật HSTS. Bật ở HTTP local sẽ khoá máy dev vào HTTPS |
+| `VF_SERVICE_TOKEN` | api (legacy), import credential | **có** | **có** | Lệch với `settings.php` → mọi POST 401 **mà editor không thấy lỗi gì** |
+| `DRUPAL_BASE_URL` | script `site_config.py` | **có** | không | Không cấu hình được site |
+| `DRUPAL_USER`, `DRUPAL_PASSWORD` | worker (qua `secret_ref`) | **có** | **có** | Connector 401; job vào dead-letter với `connector_auth` |
+| `VF_WORKER_INSTANCE_ID` | worker | không | không | Mặc định `<hostname>:<pid>`; đặt cố định để theo dõi xuyên restart |
+| `VF_RELEASE_SHA` | worker | không | không | Heartbeat ghi `unknown`, không truy được version đang chạy |
+
+Database **không** lưu giá trị secret nào — chỉ lưu **tên biến** (`site.secret_ref`) và hash token. Xem `site_config.py show`.
+
+## 6.4. Thứ tự triển khai và khôi phục
+
+**Rollout (thuận nghịch từng bước):**
+
+1. Backup + `migrate.py status` — xem mục 6.5.
+2. `migrate.py apply` (migration là append-only).
+3. Deploy API/admin → kiểm `/health` và trang admin đã xác thực.
+4. Deploy worker → **chờ heartbeat chuyển sang "Đang chạy"** trên dashboard.
+5. Test connection ở `/admin/connection` → phải đủ ba năng lực.
+6. Deploy module/role Drupal.
+7. Một bài staging không thuộc gold set → Needs Review → chạy `staging_connector_smoke.py` (**engine giả, không gọi Anthropic**).
+8. Kiểm đúng một job, một run, một revision AI mới, correlation xuyên suốt, không rò nội dung.
+
+Ghi lại release SHA, ID/hash/count/status. **Không chạy trên production khi chưa có phê duyệt của chủ site.** Pilot gọi LLM thật là hoạt động riêng, cần cổng chi phí của người dùng.
+
+**Rollback ứng dụng** — xem mục 6.1. Nhắc lại điều quan trọng nhất: giữ nguyên commit endpoint Drupal, chỉ revert commit client; và rollback chỉ **đạt** khi một job legacy v1 đi hết đường worker.
+
+## 6.5. Backup và khôi phục thảm hoạ
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\multiagent
+docker compose exec -T db pg_dump -U vf_agent -d vf_agent -Fc -f /tmp/platform_pre_rollout.dump
+docker compose exec -T db pg_restore --list /tmp/platform_pre_rollout.dump
+docker compose exec -T db sha256sum /tmp/platform_pre_rollout.dump
+docker compose exec -T db stat -c %s /tmp/platform_pre_rollout.dump
+```
+
+Cả bốn lệnh phải exit 0. **Archive list rỗng hoặc size 0 thì dừng**, không rollout tiếp.
+
+Khôi phục luôn vào một database **tên mới**, không bao giờ đè database đang chạy. Kiểm `pg_database` trước và **dừng nếu tên đích đã tồn tại** — nó có thể là evidence của người khác.
+
+⚠️ **Dump chứa toàn bộ database**, gồm hash mật khẩu admin và hash token. Không commit vào Git, không để trong `docs/evidence/` — evidence chỉ ghi timestamp/SHA-256/kích thước/số dòng.
+
+Restore database là **khôi phục thảm hoạ**, không phải đường rollback thường ngày. Diễn tập đã chạy: [`evidence/platform-backup-restore-rehearsal.txt`](evidence/platform-backup-restore-rehearsal.txt) — 11/11 bảng khớp tuyệt đối.
+
+---
+
 ## 7. Chưa chốt
 
 | Hạng mục | Ghi chú |

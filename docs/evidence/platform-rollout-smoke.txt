@@ -1,0 +1,98 @@
+PLATFORM ROLLOUT SMOKE - VERIFICATION EVIDENCE
+==============================================
+
+Thoi diem: 2026-08-14 (Asia/Saigon)
+Nhanh: feat/platform-hardening-rollout
+Moi truong: LOCAL DEV (DDEV v1.25.3 + Docker compose pgvector pg17)
+
+⚠️ PHAM VI VA GIOI HAN - doc truoc khi trich bat ky con so nao
+--------------------------------------------------------------
+
+Day la dien tap tren MAY DEV. Khong co staging server rieng, khong co
+production. Moi ket luan o day la ve QUY TRINH chay duoc, khong phai ve hieu
+nang hay do on dinh o quy mo that.
+
+Cu the KHONG duoc suy ra tu tai lieu nay:
+- Khong co lan goi Anthropic nao. Engine trong smoke la ham GIA.
+- Khong co ket qua cham diem that nao. Run smoke deu `is_fixture=true`.
+- Khong do duoc do tre/thong luong duoi tai.
+- Chua chay tren mot host khac may dev, nen chua kiem duoc cau hinh
+  `site_config.py` cho moi truong khong phai `.ddev.site`.
+
+Thu tu rollout da di qua
+------------------------
+
+1. Backup + migration status
+   -> evidence rieng: platform-backup-restore-rehearsal.txt
+   -> archive 100 muc, 5814391 byte, sha256 d52257b8...adb39e
+   -> 11/11 bang khop sau restore
+
+2. Apply migration (append-only)
+   -> applied: 0001, 0002, 0003, 0004, 0005 | pending: none
+   -> migration 0005 chi THEM hai bang moi (worker_heartbeat,
+      llm_usage_event), khong sua/xoa bang cu
+
+3. API/admin
+   -> /health tra 200 {"ok": true, ...}
+   -> /admin/connection va /admin (dashboard) render duoc sau khi dang nhap
+   -> moi response mang CSP/Referrer-Policy/nosniff/X-Frame-Options
+      (test_security_middleware.py, 6/6 PASS)
+
+4. Worker heartbeat
+   -> `Dang chay` khi co nhip moi hon 30 giay
+   -> `Qua han` khi nhip cu hon 30 giay
+   -> `Khong co heartbeat` khi chua tung chay
+   -> test_worker_heartbeat.py 9/9 PASS
+   NOTE: tren database dev hien khong co worker production nao chay, nen
+   dashboard hien "Khong co heartbeat". Do la SU THAT, khong phai loi.
+
+5. Test connection Drupal
+   -> capabilities tra pending_feed/result_callback/revision_read = true
+   -> go tam quyen `view latest version` khoi role -> revision_read thanh
+      false; tra lai quyen -> true
+   -> chung to capability doc quyen THAT, khong phai hang so
+   -> site.last_health_status = 'ok', audit ghi connection_tested/success
+
+6. Role Drupal
+   -> configure_ai_roles.php dry-run mac dinh, chi apply voi literal --apply
+   -> chay lai lan hai: "Ba role da dung, khong co gi de doi" (idempotent)
+   -> test_ai_roles.php PASS
+   -> content_editor 29 quyen, site_admin 18 quyen, ai_service 7 quyen,
+      khong role nao bat co is_admin
+
+   PHAT HIEN: truoc lan nay content_editor THIEU
+   `use kiem_duyet_noi_dung transition gui_duyet`, tuc nguoi viet that khong
+   dua duoc bai sang Needs Review. Loi khong lo ra vi moi thu nghiem truoc do
+   deu chay bang UID 1 - tai khoan bo qua moi kiem tra quyen.
+
+7. Smoke mot bai bang engine gia
+   -> da chay o Plan 4, evidence: platform-api-cutover-verification.txt
+   -> job public 40ce0ff2-..., run 5fe53f79-..., revision 93 -> 94
+   -> dung MOT revision AI moi, title/moderation_state khong doi
+   -> run_is_fixture = true, bi loai khoi metric production
+
+8. Kiem khong ro ri
+   -> test_no_sensitive_persistence.py: 7 chuoi canary khong xuat hien trong
+      7 bang, trong log (ke ca tren duong loi), va trong HTML admin
+   -> gia tri duoc phep van doc duoc: content_hash 64 hex, revision, token
+      prefix 12 ky tu, TEN bien secret
+
+Bo test tai thoi diem rollout
+-----------------------------
+
+  python scripts/run_test_group.py all-offline
+    -> tong: 72   hong: 0   co [SKIP]: 0
+    -> nhom pure: 43 file, nhom postgres: 29 file
+
+  Cong bao ve score path:
+    prompt_version = 020738e209017213  (khong doi)
+    git diff score-path vs 04f10e1     = RONG
+
+Viec CHUA lam, phai lam truoc khi goi la production-ready
+---------------------------------------------------------
+
+- Chay tren mot host that khac may dev, voi base URL khong phai .ddev.site.
+- Do do tre/thong luong duoi tai that.
+- Dien tap khoi phuc khi dump bi hong.
+- Pilot goi LLM that - can cong chi phi rieng cua chu du an.
+- Khoa phien ban dependency (no H4) va pin digest image PostgreSQL.
