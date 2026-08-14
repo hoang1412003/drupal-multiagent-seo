@@ -16,6 +16,7 @@ import socket
 import sys
 import threading
 import time
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -32,6 +33,7 @@ import text_utils
 from review_platform import database as platform_database
 from review_platform import fingerprint as platform_fingerprint
 from review_platform import migrations, sites, worker_health
+from review_platform import usage as platform_usage
 from review_platform.connectors import base as connector_base
 from review_platform.connectors import runtime as connector_runtime
 
@@ -252,6 +254,55 @@ def _gui_ket_qua(
     return q.SUPERSEDED
 
 
+def _cai_dat_usage():
+    """Cai wrapper gan nhan usage. Chi goi o worker, khong o script thu cong.
+
+    Sink mo CONNECTION RIENG cho moi event: ham nay chay trong executor thread
+    cua LangGraph, con connection cua worker dang do chinh worker dung.
+
+    Loi ghi usage duoc de NOI LEN chu khong nuot: mat am tham du lieu chi phi
+    nghia la bao cao chi phi thap hon thuc te ma khong ai biet. Attempt that
+    bai co the retry; con so sai thi khong ai phat hien.
+    """
+    def sink(**tham_so):
+        try:
+            platform_usage.record_usage_event(
+                platform_database.open_connection, **tham_so
+            )
+        except Exception as exc:
+            logging.error(
+                "[worker] usage_persistence_failed job=%s attempt=%s: %s",
+                tham_so.get("job_id"), tham_so.get("attempt"),
+                exc.__class__.__name__,
+            )
+            raise
+
+    return platform_usage.install_worker_usage_instrumentation(sink=sink)
+
+
+@contextmanager
+def _pham_vi_usage(job: dict, fixture_run: bool):
+    """Mo scope gan nhan usage cho job nay, neu instrumentation da duoc cai.
+
+    No-op khi chua cai (script thu cong, test cu) de duong goi khong doi hanh
+    vi. Scope dong lai trong `finally`, nen entry cua job nay khong bao gio
+    dinh sang job sau.
+    """
+    collector = getattr(ai_core, "USAGE_LOG", None)
+    if not isinstance(collector, platform_usage.UsageCollector):
+        yield
+        return
+    with platform_usage.usage_scope(
+        collector,
+        job_public_id=job.get("public_id"),
+        job_db_id=job["id"],
+        correlation_id=job.get("correlation_id"),
+        attempt=job.get("attempts") or 1,
+        is_fixture=fixture_run,
+    ):
+        yield
+
+
 def chay_mot_job(
     conn,
     job: dict,
@@ -329,6 +380,7 @@ def chay_mot_job(
     da_ghi_usage = False
     bat_dau = time.monotonic()
     try:
+      with _pham_vi_usage(job, fixture_run):
         try:
             # Truyen tuong minh cap khoa CUA JOB thay vi de graph roi ve mac
             # dinh: tu Plan 4, scope den tu profile cua site chu khong con la
@@ -482,6 +534,7 @@ def _vong_lap_voi_conn(conn, ten: str) -> None:
     from embeddings import get_default_embedder
 
     get_default_embedder()
+    _cai_dat_usage()
 
     instance_id, version = danh_tinh_worker()
     nhip = NhipTim(instance_id=instance_id, version=version)
