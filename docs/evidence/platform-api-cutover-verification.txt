@@ -1,0 +1,238 @@
+PLATFORM API v1 CUTOVER + ROLLBACK REHEARSAL - VERIFICATION EVIDENCE
+====================================================================
+
+Thoi diem: 2026-08-14T14:40+07:00 (Asia/Saigon)
+Nhanh: feat/platform-api-drupal-connector
+Code HEAD da kiem: 8167998df68e75e431624b6eec531a2bc15db5ca
+Protected score-path snapshot: 04f10e1
+prompt_version do code tinh: 020738e209017213  (KHONG doi)
+score-path diff vs 04f10e1: RONG
+
+Moi truong: DDEV v1.25.3 (Drupal 10, PHP 8.4), PostgreSQL 17 + pgvector
+(container vf-agent-db), Python 3.12 venv local.
+
+Pham vi
+-------
+
+Plan 4 Task 9: cau hinh site theo moi truong, import credential, smoke cutover
+mot bai bang engine GIA (khong goi LLM), dien tap rollback ve endpoint legacy
+va roll forward tro lai.
+
+KHONG nam trong lan kiem nay: E1/E5/E3/E6, bat ky lan goi Anthropic tra phi,
+worker heartbeat that (Plan 5), llm_usage_event ben vung cho attempt loi
+(Plan 5), security header/reverse proxy hardening (Plan 5).
+
+Migration va credential
+-----------------------
+
+  migrate.py status  -> applied: 0001, 0002, 0003, 0004 | pending: none
+
+  site_config.py set-from-env --site drupal-vn-primary \
+      --base-url-env DRUPAL_BASE_URL --secret-ref DRUPAL
+    -> base_url=http://drupal.ddev.site  secret_ref=DRUPAL
+    -> `show` chi in slug/base_url/ten bien secret/active/pause; KHONG in
+       gia tri DRUPAL_USER hay DRUPAL_PASSWORD.
+
+  site_credential.py import-env --site drupal-vn-primary --env VF_SERVICE_TOKEN
+    -> credential id 6f4d4c2f-1233-4cdc-b3e3-a14fd7fd1c82
+    -> token_prefix CytljZjjg9EX (12 ky tu dau); raw token KHONG duoc in.
+    -> `list` chi in prefix/trang thai/thoi gian.
+
+Row count tren database dev sau khi kiem (chi de doi chieu):
+  review_job=10  run_log=8  kb_chunk=1133  site_api_credential(active)=1
+  run_log where is_fixture=true -> 2  (hai run cua smoke duoi day)
+
+Tai khoan machine (least privilege)
+-----------------------------------
+
+TRUOC lan kiem nay, DRUPAL_USER=admin, tuc UID 1 voi role administrator. UID 1
+cua Drupal BO QUA moi kiem tra quyen, nen endpoint capabilities se tra true cho
+ca ba nang luc BAT KE role co dung hay khong -> "test connection" xanh gia.
+
+Da xu ly trong lan kiem nay:
+  - configure_ai_service_role.php: dry-run mac dinh, chi apply voi literal
+    `--apply`. Da tao role `ai_service` voi DUNG bay quyen:
+      access content
+      view any unpublished content
+      view latest version
+      view article revisions
+      access vf ai integration feed
+      access vf ai integration capabilities
+      submit vf ai integration result
+    Chay lai lan hai -> "Role da dung, khong co gi de doi" (idempotent).
+  - test_ai_service_role.php: 6/6 PASS. Khong quyen nao bat dau bang dong tu
+    ghi/quan tri; khong quyen nao trong danh sach cam tuyet doi; role khong
+    phai admin.
+  - Tao user Drupal `ai_service` uid=13, roles = authenticated + ai_service
+    (KHONG co administrator). DRUPAL_USER/DRUPAL_PASSWORD trong .env da tro
+    sang tai khoan nay.
+
+Capability test co y nghia thuc (khong con xanh gia)
+---------------------------------------------------
+
+  GET /vf-ai/integration/v1/capabilities (basic auth, user ai_service uid 13)
+    -> {"version":1,"pending_feed":true,"result_callback":true,"revision_read":true}
+
+  Go tam quyen `view latest version` khoi role:
+    -> {"version":1,"pending_feed":true,"result_callback":true,"revision_read":false}
+  Tra lai quyen:
+    -> revision_read tro lai true
+
+  Ket luan: capability doc quyen THAT chu khong phai hang so. Day la dieu mot
+  GET collection JSON:API tra 200 khong bao gio chung minh duoc.
+
+  Khong co header Authorization -> HTTP 401.
+  after_revision_id=abc -> HTTP 400 (khong phai 500).
+
+Pending feed
+------------
+
+  GET /vf-ai/integration/v1/pending?after_revision_id=0&limit=3 -> HTTP 200
+    3 item, next_after_revision_id=79
+    Moi item CHI co: external_content_id, external_revision_id, content_type,
+    langcode, content_hash, content_hash_version, source_url.
+    KHONG co title/body/summary trong feed.
+
+  LOI DA BAT VA SUA trong lan kiem nay: ban dau controller loc
+  `condition('moderation_state', 'needs_review')` trong entity query ->
+  QueryException "'moderation_state' not found" -> HTTP 500. `moderation_state`
+  la field TINH TOAN, khong query duoc bang SQL. Day la LAN THU HAI du an gap
+  dung cai bay nay (lan dau o drupal_client.py, kiem chung 2026-08-07). Da sua
+  sang loc tho bang vid o tang SQL + loc tinh bang PHP, va ghi chu lai trong
+  code. Chi test offline KHONG bat duoc loi nay - no chi lo ra khi goi HTTP that.
+
+Doi chieu fingerprint v2 giua PHP va Python
+-------------------------------------------
+
+  Fixture dung chung drupal/scripts/input_fingerprint_v2_fixture.json
+    expected_sha256 = 7535d604a944a7b8c9529d7f2b7d518e491c2730866413227fce265bc00fb9f6
+    Python test_platform_fingerprint.py -> 6/6 PASS, khop expected
+    PHP    test_ai_input_fingerprint.php -> 24/24 PASS, khop expected
+
+  Tren NODE THAT (manh hon fixture): 5/5 node article khop hash giua
+  AiInputFingerprint::hash(vf_ai_review_input_fields($node)) ben PHP va
+  input_fingerprint(connector.fetch_content(uuid).fields) ben Python, gom ca
+  node co url_alias va node KHONG co alias.
+
+  Hash trong pending feed cung khop hash Python tinh lai tu JSON:API cho cung
+  UUID (vi du e3af1db4-... -> c084f7f10893...).
+
+Smoke cutover mot bai (engine GIA, khong goi LLM)
+------------------------------------------------
+
+Bai tam duoc tao rieng cho lan kiem, KHONG thuoc gold set/E1, va da xoa sau khi
+kiem xong:
+  nid=30 uuid=51e4cd79-0cc4-4271-8cf2-47c1e4554f42
+  revision ban dau vid=93
+  hash v2 = 5f0a2658ef2667084b4af92e8c147da9617e1f3a9f3bf4901a24fa1d48618333
+
+1) Luu bai o trang thai needs_review -> hook Drupal goi POST /api/v1/jobs.
+   Job tao ra:
+     public_id            40ce0ff2-a55e-4507-bb44-a2ff64cd3e22
+     external_revision_id 93        <- EXACT revision, khong phai mac dinh
+     content_hash_version 2
+     content_hash         5f0a2658... (khop hash PHP tinh)
+     source               event
+   Payload KHONG mang site_id (site suy tu credential).
+
+2) staging_connector_smoke.py --job-id 40ce0ff2-... --confirm-staging-fixture
+     host                 drupal.ddev.site (trong allowlist staging)
+     job_status           done
+     run_public_id        5fe53f79-4571-4337-a3da-8693e7ffbdf4
+     run_is_fixture       True
+     writeback_status     succeeded
+     run_revision_id      93
+     content_hash_version 2
+   Engine la ham gia; ai_core.get_client khong duoc goi (test khoa bang ham
+   raise). Khong ton chi phi API.
+
+3) Kiem phia Drupal sau smoke:
+     so revision = 2  (93, 94)   <- DUNG MOT revision moi
+     latest_vid = 94
+     title       KHONG doi
+     moderation_state = needs_review   <- he thong khong tu xuat ban
+     field_ai_status = needs_revision, field_ai_score = 50
+     report_json.platform_run_id = 5fe53f79-4571-4337-a3da-8693e7ffbdf4
+     report_json.content_hash_version = 2
+     report_json.note = "STAGING FIXTURE - khong phai danh gia AI"
+
+Dien tap rollback ve endpoint legacy
+-----------------------------------
+
+Cach lam: `git checkout 50dc9d1 -- ServiceClient.php vf_ai_trigger.module
+ChamLaiController.php` (tra RIENG commit client, GIU nguyen commit
+pending/capability/result callback), roi `drush cr`.
+
+4) Luu lai bai -> hook cu goi POST /jobs legacy. Job tao ra:
+     public_id            0c929354-b9fc-4895-b3bb-f4db6833f88e
+     external_revision_id NULL      <- client cu khong biet revision
+     content_hash_version 1
+     content_hash         94a718c99f9b... (hash BON field cua v1)
+     source               event
+
+5) Chay worker that tren job legacy do:
+     job_status           done
+     writeback_status     succeeded
+     run_revision_id      95        <- worker fetch rel:working-copy roi LAY
+                                       revision that tu response
+     content_hash_version 1         <- di dung nhanh hash v1, khong bao
+                                       input_hash_mismatch
+   Day moi la bang chung rollback: chi nhan HTTP 2xx tu /jobs KHONG du.
+
+6) Roll forward: `git checkout HEAD -- <cung ba file>` + `drush cr`. Luu bai
+   lan nua -> job moi co external_revision_id=97, content_hash_version=2.
+   Cua so rollback thong ca hai chieu.
+
+Connector health tren cau hinh dev
+----------------------------------
+
+  connector_cho_site(conn, site).health()
+    -> ok=True status=200 error=None at=2026-08-14T07:40:26+00:00
+  Health goi capability + pending feed, va fetch exact revision khi feed co
+  item. KHONG goi result callback, KHONG tao revision.
+
+  LUU Y: cot site.last_health_status tren database dev van la NULL, vi no chi
+  duoc ghi khi mot operator bam nut o /admin/connection (co CSRF + audit).
+  Database dev khong co admin account thuc, nen khong ai bam. Dashboard vi vay
+  hien connector = "unknown", KHONG phai "ok" - dung nhu thiet ke: chua kiem
+  bao gio thi khong duoc hien mau xanh.
+
+Bo test
+-------
+
+Python offline suite: chay tung file trong multiagent/scripts/test_*.py
+  -> 0 file loi, 0 [SKIP].
+
+File test moi cua Plan 4 va so assertion:
+  test_site_config.py                    6 PASS
+  test_site_credentials.py               9 PASS
+  test_api_v1.py                        12 PASS
+  test_drupal_connector.py              23 PASS
+  test_platform_fingerprint.py           6 PASS
+  test_admin_connection.py               7 PASS
+  test_staging_connector_smoke.py        9 PASS
+  test_migrations.py                    18 PASS (tang tu 17: them 0004)
+  test_worker.py                        25 PASS (tang tu 16)
+  test_reconcile.py                     10 PASS
+  test_worker_graph_integration.py       1 PASS (khoa 1 fetch / 0 PATCH tu
+                                          graph / 1 callback)
+
+Drupal PHP:
+  test_ai_input_fingerprint.php         24 PASS
+  test_ai_result_callback.php           29 PASS (node + revision THAT)
+  test_ai_service_role.php               6 PASS
+  test_vf_ai_trigger.php                13 PASS
+  test_ai_report_renderer.php           toan bo PASS (khong doi)
+
+Nhung dieu KHONG duoc suy ra tu tai lieu nay
+--------------------------------------------
+
+- Khong co ket qua cham diem THAT nao trong lan kiem nay. Hai run trong
+  run_log deu is_fixture=true voi diem 50 do engine gia dat. Tuyet doi khong
+  trinh bay chung nhu ket qua chat luong.
+- E1/E5/E3/E6 van chua chay. prompt_version giu 020738e209017213 va score-path
+  diff rong, nen quan he do luong test-retest -> E1 -> E5 KHONG bi anh huong.
+- Worker heartbeat, llm_usage_event ben vung cho attempt loi, pause/resume o
+  muc nhieu site, security header production: chua lam, thuoc Plan 5.
+- Smoke chay bang mot job moi luot, khong phai kiem tai. Chua do do tre/thong
+  luong duoi tai that.

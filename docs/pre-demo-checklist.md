@@ -102,6 +102,31 @@ Kỳ vọng `{"ok": true, "queued": ..., "running": ..., "failed": ...}`. Không
 
 Thiết kế đầy đủ: `docs/superpowers/specs/2026-08-07-needs-review-automation-design.md`.
 
+### 2c. Từ 2026-08-14: credential theo site và tài khoản machine (P4)
+
+Drupal nay gửi job sang `/api/v1/jobs` bằng **credential riêng theo site**, không còn dùng chung một token toàn cục ở tầng ứng dụng. Trên máy mới, sau khi `migrate.py apply`, phải chạy thêm:
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\multiagent
+.\.venv\Scripts\python.exe scripts\site_config.py set-from-env --site drupal-vn-primary --base-url-env DRUPAL_BASE_URL --secret-ref DRUPAL
+.\.venv\Scripts\python.exe scripts\site_credential.py import-env --site drupal-vn-primary --env VF_SERVICE_TOKEN
+```
+
+**Thiếu bước này thì mọi POST sang `/api/v1/jobs` trả 401** — và giống hệt cái bẫy token lệch ở trên, editor không thấy lỗi nào; bài chỉ được chấm chậm qua vòng đối soát. Kiểm nhanh: `site_credential.py list --site drupal-vn-primary` phải in ra một dòng `active`.
+
+Phía Drupal cần role machine và một tài khoản riêng cho nó:
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\drupal
+ddev drush php:script scripts/configure_ai_service_role.php               # xem trước
+ddev drush php:script scripts/configure_ai_service_role.php -- --apply
+ddev drush php:script scripts/test_ai_service_role.php
+```
+
+⚠️ **`DRUPAL_USER` không được là `admin` (UID 1).** UID 1 bỏ qua mọi kiểm tra quyền, nên trang `/admin/connection` sẽ báo "kết nối đạt" kể cả khi role sai hoàn toàn — đúng loại xanh giả mà nút đó sinh ra để chống. Tạo một user riêng, gán **chỉ** role `ai_service`, rồi trỏ `DRUPAL_USER`/`DRUPAL_PASSWORD` sang tài khoản đó.
+
+Platform Admin ở `http://127.0.0.1:8900/admin`, trang **Kết nối** có nút kiểm tra. Kiểm chứng và giới hạn đã biết: [`docs/evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
+
 ---
 
 ## 3. Nói đúng về ngưỡng: CHƯA calibrate
