@@ -373,7 +373,11 @@ def test_dashboard_loai_fixture_va_render_metric_that(conn):
     assert "ước tính" in full.text
     assert "Phiên bản giá 1" in full.text
     assert "15/10/2025" in full.text
-    assert "Chưa xác minh" in full.text
+    # Schema test chua co heartbeat va chua ai bam test connection, nen ca hai
+    # phai bao "chua biet" - tuyet doi khong duoc mac dinh thanh khoe.
+    assert "Không có heartbeat" in full.text, "worker phai bao chua co heartbeat"
+    assert "Chưa kiểm tra bao giờ" in full.text, "connector phai bao chua kiem"
+    assert "Đang chạy</dd>" not in full.text, "khong duoc bao worker khoe gia"
     assert 'action="/admin"' in full.text and 'method="get"' in full.text
     assert 'hx-get="/admin"' in full.text
 

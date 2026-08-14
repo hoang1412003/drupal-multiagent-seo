@@ -266,7 +266,11 @@ def test_dashboard_range_fixture_usage_va_writeback(conn):
         "unknown": 1,
     }
     assert view.writeback_success_rate == Decimal("0.5")
-    assert view.worker_status == "unknown" and view.connector_status == "unknown"
+    # Chua co heartbeat va chua ai bam test connection -> phai la "chua biet",
+    # tuyet doi khong duoc mac dinh thanh khoe.
+    assert view.worker_status == "unavailable", view.worker_status
+    assert view.connector_status == "unknown", view.connector_status
+    assert view.worker_running == 0 and view.worker_stale == 0
     print("[PASS] dashboard dung UTC range, percentile, usage va writeback semantics")
 
 
@@ -304,7 +308,7 @@ def test_template_dashboard_hien_dung_trang_thai_connector_da_luu():
 
     template = rendering.templates.env.get_template("partials/dashboard_metrics.html")
 
-    def _render(trang_thai):
+    def _render(trang_thai, *, worker="unknown", worker_stale=0):
         # Dung DashboardView THAT chu khong bia mot fake: fake thieu field thi
         # template nem Undefined va test do vi ly do khong lien quan, che mat
         # chinh dieu can kiem.
@@ -324,6 +328,8 @@ def test_template_dashboard_hien_dung_trang_thai_connector_da_luu():
                 writeback_counts=dict.fromkeys(queries.WRITEBACK_STATUSES, 0),
                 writeback_success_rate=None,
                 connector_status=trang_thai,
+                worker_status=worker,
+                worker_stale=worker_stale,
             ),
         )
 
@@ -344,7 +350,33 @@ def test_template_dashboard_hien_dung_trang_thai_connector_da_luu():
 
     css = (rendering.STATIC_DIR / "admin.css").read_text(encoding="utf-8")
     assert ".status-error" in css, "class bao loi phai co dinh nghia trong CSS"
-    print("[PASS] template dashboard hien dung ba trang thai connector da luu")
+
+    # Worker: cung khe ho, cung ba trang thai. Truoc P5 dong nay viet cung
+    # "Chua xac minh"; gio phai doc worker_status that.
+    #
+    # CHI xet trong khoi <dl class="status-list">: chuoi "Dang chay" con la
+    # nhan mot COT CUA HANG DOI, nen assert tren ca trang se khop nham va
+    # test thanh vo nghia. (Da bat duoc dung loi do khi viet test nay.)
+    def _khoi_trang_thai(html):
+        return html.split('<dl class="status-list">', 1)[1].split("</dl>", 1)[0]
+
+    chay = _khoi_trang_thai(_render("ok", worker="running"))
+    assert "Đang chạy" in chay, chay
+    assert "Không có heartbeat" not in chay
+
+    treo = _khoi_trang_thai(_render("ok", worker="stale"))
+    assert "Quá hạn" in treo, treo
+    assert "status-error" in treo
+    assert "Đang chạy" not in treo
+
+    chua_bat = _khoi_trang_thai(_render("ok", worker="unavailable"))
+    assert "Không có heartbeat" in chua_bat, chua_bat
+    assert "Quá hạn" not in chua_bat
+
+    # Con instance treo thi van phai bao, khong duoc giau di.
+    lan_lon = _khoi_trang_thai(_render("ok", worker="running", worker_stale=2))
+    assert "2 instance quá hạn" in lan_lon, lan_lon
+    print("[PASS] template dashboard hien dung trang thai connector VA worker")
 
 
 def test_dashboard_chan_date_range_sai_truoc_khi_query():

@@ -746,9 +746,25 @@ def test_worker_mo_dedicated_connection_va_gate_schema_truoc_model(conn):
         embeddings.get_default_embedder = original_embedder
         q.reclaim_stuck = original_reclaim
 
-    assert events == ["open", "schema", "model", "loop", "close"], events
+    # Thu tu bat buoc: gate schema TRUOC khi nap model (~2GB), roi moi vao vong.
+    #
+    # Cap open/close xen giua la cua HEARTBEAT, va do la dung thiet ke: nhip
+    # dap trong thread rieng nen phai co connection RIENG. psycopg connection
+    # khong an toan khi hai thread dung chung, nen neu heartbeat muon connection
+    # cua worker thi ca hai duong deu hong luc graph dang chay.
+    assert events == [
+        "open",             # connection rieng cua worker
+        "schema",           # gate migration
+        "model",            # nap embedder
+        "open", "close",    # heartbeat: nhip dau tien
+        "loop",             # vong lap (test nem StopLoop o day)
+        "open", "close",    # heartbeat: xoa nhip khi tat
+        "close",            # dong connection cua worker
+    ], events
     assert dedicated.closed
-    print("[PASS] worker gate schema truoc model va dong dedicated connection")
+    # Heartbeat KHONG duoc cham vao connection cua worker.
+    assert events.index("open") == 0 and events[-1] == "close"
+    print("[PASS] worker gate schema truoc model, heartbeat dung connection rieng")
 
 
 if __name__ == "__main__":
