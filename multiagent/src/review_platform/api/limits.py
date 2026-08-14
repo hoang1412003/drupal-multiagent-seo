@@ -17,22 +17,39 @@ DUONG_DAN = "/api/v1"
 
 
 class RequestSizeLimitMiddleware:
-    def __init__(self, app, *, max_bytes: int = MAX_BYTES, path_prefix: str = DUONG_DAN):
+    """Gioi han body theo tung nhom duong dan.
+
+    `gioi_han` la tuple (prefix, so_byte). Duong dan khong khop prefix nao thi
+    di thang, khong bi buffer - GET tra vai tram KB HTML khong duoc dong vao
+    bo nho vi mot middleware chan body request.
+    """
+
+    def __init__(self, app, *, max_bytes: int = MAX_BYTES,
+                 path_prefix: str = DUONG_DAN, gioi_han=None):
         self.app = app
-        self.max_bytes = max_bytes
-        self.path_prefix = path_prefix
+        self.gioi_han = tuple(gioi_han) if gioi_han else ((path_prefix, max_bytes),)
+
+    def _tran(self, path: str):
+        for prefix, so_byte in self.gioi_han:
+            if path.startswith(prefix):
+                return so_byte
+        return None
 
     async def __call__(self, scope, receive, send):
-        if scope.get("type") != "http" or not scope.get("path", "").startswith(
-            self.path_prefix
-        ):
+        if scope.get("type") != "http":
+            return await self.app(scope, receive, send)
+        # Bien CUC BO, khong gan vao self: middleware la mot instance dung
+        # chung cho moi request, gan vao self se lam hai request dong thoi
+        # ghi de nguong cua nhau.
+        tran = self._tran(scope.get("path", ""))
+        if tran is None:
             return await self.app(scope, receive, send)
 
         headers = dict(scope.get("headers") or ())
         khai_bao = headers.get(b"content-length")
         if khai_bao is not None:
             try:
-                if int(khai_bao) > self.max_bytes:
+                if int(khai_bao) > tran:
                     return await self._tra_413(send)
             except ValueError:
                 return await self._tra_413(send)
@@ -44,7 +61,7 @@ class RequestSizeLimitMiddleware:
             if message["type"] != "http.request":
                 break
             body += message.get("body", b"")
-            if len(body) > self.max_bytes:
+            if len(body) > tran:
                 return await self._tra_413(send)
             con_nua = message.get("more_body", False)
 

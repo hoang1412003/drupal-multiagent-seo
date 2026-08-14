@@ -535,4 +535,12 @@ def vong_lap(conn=None, ten: str = "") -> None:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s")
+    # Cai filter che secret o ROOT handler, khong chi cho logger cua du an:
+    # requests/psycopg/langgraph ghi log theo cach cua chung va khong biet gi
+    # ve quy uoc o day. Vi du that: chuoi loi cua psycopg co the chua DSN kem
+    # mat khau.
+    from review_platform.logging import RedactingFilter
+
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(RedactingFilter())
     vong_lap()
