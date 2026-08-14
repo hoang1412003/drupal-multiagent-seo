@@ -255,6 +255,29 @@ Endpoint legacy `/jobs` và `/jobs/by-node/{uuid}` vẫn chạy, response có he
 
 **Không rollback migration bằng cách xoá cột/bảng.** Migration đã apply là append-only; sửa lỗi bằng migration số mới.
 
+### 6.1b. Ba role Drupal và ranh giới ghi
+
+`drupal/scripts/configure_ai_roles.php` là nguồn sự thật cho quyền của ba role. Ma trận nằm ở `drupal/scripts/ai_roles_matrix.php`, dùng chung với `test_ai_roles.php` để hai bên không trôi lệch.
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\drupal
+ddev drush php:script scripts/configure_ai_roles.php               # xem trước
+ddev drush php:script scripts/configure_ai_roles.php -- --apply
+ddev drush php:script scripts/test_ai_roles.php
+```
+
+| Role | Làm được | Không làm được |
+|---|---|---|
+| `content_editor` | Viết/sửa bài của mình, đưa sang Needs Review (`gui_duyet`), publish **qua workflow**, xem báo cáo AI | Bấm "Chấm lại" (tốn tiền API), quản trị user/quyền, publish vòng qua workflow |
+| `site_admin` | Quản trị nội dung/workflow/alias, xem mọi revision, **bấm "Chấm lại"** | Tự cấp quyền cho mình (`administer permissions`), `bypass node access` |
+| `ai_service` | Đọc feed, đọc capability, đọc đúng revision, **ghi kết quả qua result callback** | Mọi thứ còn lại — không sửa bài, không transition, không tạo/xoá |
+
+**Ranh giới ghi:** với `ai_service`, JSON:API là **chỉ đọc**. Đường ghi duy nhất là `POST /vf-ai/integration/v1/results`, và endpoint đó từ chối key lạ, so revision + hash trong cùng một transaction, idempotent theo `run_id`. Nếu ai đó cấp lại `edit any article content` cho role này thì `test_ai_roles.php` sẽ đỏ — và đó là thay đổi cần review thiết kế lại, không phải sửa test.
+
+**Bù trừ kiểm soát:** tài khoản machine không đăng nhập UI, mật khẩu ngẫu nhiên dài nằm trong secret store, mọi lần ghi đều để lại revision có log, và quy trình rotate nằm ở mục 6.1.
+
+⚠️ **Phát hiện 2026-08-14:** trước lần này `content_editor` **thiếu** `use kiem_duyet_noi_dung transition gui_duyet`, tức người viết thật không đưa được bài sang Needs Review. Lỗi không lộ ra vì mọi thử nghiệm đều chạy bằng UID 1 — tài khoản bỏ qua mọi kiểm tra quyền. Bài học: thử quy trình bằng đúng role định giao cho người dùng, đừng thử bằng admin.
+
 ### 6.2. Smoke cutover không tốn tiền
 
 `multiagent/scripts/staging_connector_smoke.py` chạy đúng một job qua worker thật với engine **giả**, để kiểm đường ống mà không gọi LLM:
