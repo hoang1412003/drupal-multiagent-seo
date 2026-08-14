@@ -9,6 +9,7 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\vf_ai_review\AiInputFingerprint;
 use Drupal\vf_ai_review\AiReportRenderer;
 
 /**
@@ -73,9 +74,17 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
   // So hash để biết bài có bị sửa sau khi chấm không. Dùng hash chứ KHÔNG
   // dùng mốc `changed` của node: chính lệnh PATCH của write_back() làm mốc
   // đó nhảy, nên so nó sẽ luôn báo "đã thay đổi" ngay sau khi chấm.
+  //
+  // Phải chọn thuật toán theo ĐÚNG phiên bản ghi trong chính báo cáo. Báo cáo
+  // cũ (không có khoá version, hoặc version 1) được băm bằng bốn field; đem
+  // fingerprint v2 sáu field ra so với nó thì bài nào cũng bị báo "đã thay
+  // đổi". Ngược lại cũng vậy. Hai đường phải cùng sống suốt cửa sổ rollback.
   $stale = FALSE;
   if ($report !== NULL && !empty($report['content_hash'])) {
-    $hien_tai = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
+    $phien_ban = (int) ($report['content_hash_version'] ?? 1);
+    $hien_tai = $phien_ban === AiInputFingerprint::VERSION
+      ? AiInputFingerprint::hash(vf_ai_review_input_fields($node))
+      : AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
     $stale = ($hien_tai !== $report['content_hash']);
   }
 
@@ -141,4 +150,59 @@ function vf_ai_review_hash_fields($node): array {
     'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
     'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
   ];
+}
+
+/**
+ * SÁU input của fingerprint v2, lấy ra khỏi node.
+ *
+ * Khác vf_ai_review_hash_fields() (v1, bốn field) ở chỗ có thêm `url_alias`
+ * và `image_alt` - hai thứ SEO Agent thực sự chấm nhưng v1 bỏ sót (nợ N2).
+ *
+ * Phải đọc y hệt cách _fields_tu_resource() bên Python đọc JSON:API, nếu
+ * không hai bên ra hai hash khác nhau và vòng đối soát chấm lại vô hạn.
+ */
+function vf_ai_review_input_fields($node): array {
+  $body = _vf_ai_review_gia_tri($node, 'body');
+  return [
+    'title' => (string) $node->label(),
+    'body' => $body,
+    'summary' => _vf_ai_review_gia_tri($node, 'body', 'summary'),
+    'url_alias' => _vf_ai_review_url_alias($node),
+    'meta_description' => _vf_ai_review_gia_tri($node, 'field_meta_description'),
+    'image_alt' => AiInputFingerprint::imageAltLines(
+      _vf_ai_review_alt_anh_dai_dien($node),
+      $body
+    ),
+  ];
+}
+
+/**
+ * URL alias của node, hoặc chuỗi rỗng nếu chưa có alias.
+ *
+ * JSON:API trả `path.alias` = "" khi không có alias, còn service của Drupal
+ * trả lại chính đường hệ thống (/node/12). Quy về cùng một biểu diễn ở đây,
+ * nếu không hai bên lệch hash trên đúng những bài chưa đặt alias.
+ */
+function _vf_ai_review_url_alias($node): string {
+  if ($node->isNew() || !$node->id()) {
+    return '';
+  }
+  $duong_he_thong = '/node/' . $node->id();
+  $alias = \Drupal::service('path_alias.manager')
+    ->getAliasByPath($duong_he_thong, $node->language()->getId());
+  return $alias === $duong_he_thong ? '' : $alias;
+}
+
+/**
+ * Alt của ảnh đại diện; NULL nghĩa là bài không có ảnh đại diện.
+ *
+ * Phân biệt NULL với chuỗi rỗng là có chủ đích: NULL -> không sinh dòng nào,
+ * chuỗi rỗng -> có ảnh nhưng THIẾU alt (vẫn phải sinh dòng để lỗi B6 nhìn
+ * thấy được). Khớp cách Python đọc relationships.field_image.data.
+ */
+function _vf_ai_review_alt_anh_dai_dien($node): ?string {
+  if (!$node->hasField('field_image') || $node->get('field_image')->isEmpty()) {
+    return NULL;
+  }
+  return (string) ($node->get('field_image')->alt ?? '');
 }

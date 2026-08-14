@@ -40,6 +40,20 @@ def load_site_by_slug(conn, slug: str) -> SiteContext:
     return _site(rows[0])
 
 
+def load_site_by_id(conn, site_id: UUID) -> SiteContext:
+    """Nap site theo id de worker dung connector cua dung site so huu job."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, slug, connector_type, base_url, secret_ref, active, "
+            "intake_paused FROM site WHERE id=%s",
+            (site_id,),
+        )
+        row = cur.fetchone()
+    if row is None:
+        raise ContextSelectionError(f"khong co site voi id '{site_id}'")
+    return _site(row)
+
+
 def select_review_context(
     conn,
     site_id: UUID,

@@ -28,7 +28,10 @@ import job_queue as q
 import reconcile
 import text_utils
 from review_platform import database as platform_database
-from review_platform import migrations
+from review_platform import fingerprint as platform_fingerprint
+from review_platform import migrations, sites
+from review_platform.connectors import base as connector_base
+from review_platform.connectors import runtime as connector_runtime
 
 NGU_KHI_RONG_GIAY = 2
 CHU_KY_DOI_SOAT_GIAY = 300
@@ -66,33 +69,156 @@ def _payload_tu_state(state: dict) -> dict:
     return da_bat
 
 
-def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
-    """Xu ly mot job da claim. Tra trang thai cuoi: done / queued / failed."""
-    from drupal_client import write_back as _write_back_that
+def _connector_cho_job(conn, job: dict):
+    """Connector cua DUNG site so huu job; secret lay tu env theo secret_ref."""
+    from review_platform.connectors.factory import connector_cho_site
 
-    if write_back_fn is None:
-        write_back_fn = _write_back_that
+    return connector_cho_site(conn, job["site_id"])
 
-    node_id, chash = job["node_id"], job["content_hash"]
 
-    # CHOT CHAN TIEN: da cham dung noi dung nay roi thi chi ghi lai ket qua,
-    # KHONG goi LLM. Duong nay xay ra khi lan truoc pipeline chay xong nhung
-    # PATCH that bai. Cham lai ton $0,057 that.
-    cu = audit.find_reusable_writeback(conn, job=job)
-    if cu is not None:
-        if write_back_fn(node_id=node_id, **cu["payload"]):
-            with conn.transaction():
-                audit.mark_writeback(conn, cu["id"], status="succeeded")
-                q.complete(conn, job["id"])
-            return q.DONE
+def _fingerprint(fields: dict, version: int) -> str:
+    """Chon thuat toan theo DUNG version cua job.
+
+    Job legacy mang version 1 (bon field, `text_utils.content_hash`); job tu
+    /api/v1 mang version 2 (sau field). Ep job v1 di qua v2 se lam moi job
+    legacy bao `input_hash_mismatch` - tuc cua so rollback coi nhu khong co.
+    """
+    if int(version) == platform_fingerprint.VERSION:
+        return platform_fingerprint.input_fingerprint(fields)
+    return text_utils.content_hash(fields)
+
+
+def _loi_connector_thanh_trang_thai(conn, job: dict, exc: Exception) -> str:
+    """Loi thu lai duoc -> queued co backoff. Loi khong thu lai duoc -> dead-letter.
+
+    Phan biet o day de mot job sai quyen khong goi LLM ba lan roi that bai ba
+    lan. `q.fail` la tang DUY NHAT quyet dinh backoff va tran so lan thu.
+    """
+    if isinstance(exc, connector_base.ConnectorTransientError):
+        return q.fail(
+            conn,
+            job["id"],
+            f"llm_transient: {exc}",
+            retry_after_seconds=exc.retry_after_seconds,
+        )
+    if isinstance(exc, connector_base.ConnectorError):
+        return q.fail_permanent(conn, job["id"], exc.ma, str(exc))
+    raise exc
+
+
+def _gui_ket_qua(
+    conn,
+    job: dict,
+    connector,
+    *,
+    run_db_id: int,
+    run_public_id,
+    payload: dict,
+    expected_revision_id,
+    content_hash: str,
+    content_hash_version: int,
+) -> str:
+    """Goi result callback DUNG MOT LAN va quy ket qua ve trang thai job."""
+    yeu_cau = connector_base.WriteBackRequest(
+        run_id=run_public_id,
+        external_content_id=job["external_content_id"],
+        expected_revision_id=expected_revision_id,
+        content_hash=content_hash,
+        content_hash_version=content_hash_version,
+        status=payload.get("status"),
+        score=payload.get("score"),
+        suggestions=payload.get("suggestions") or "",
+        report_json=payload.get("report_json") or {},
+    )
+    try:
+        ket_qua = connector.write_back(yeu_cau)
+    except connector_base.ConnectorError as exc:
         with conn.transaction():
             audit.mark_writeback(
-                conn,
-                cu["id"],
-                status="failed",
-                error="write-back that bai (ghi lai ket qua cu)",
+                conn, run_db_id, status="failed", error=f"writeback_failed: {exc}"
             )
-            return q.fail(conn, job["id"], "write-back that bai (ghi lai ket qua cu)")
+        return _loi_connector_thanh_trang_thai(conn, job, exc)
+
+    if ket_qua.outcome in ("applied", "already_applied"):
+        with conn.transaction():
+            audit.mark_writeback(conn, run_db_id, status="succeeded")
+            q.complete(conn, job["id"])
+        return q.DONE
+
+    # content_superseded: noi dung da co revision moi hon. Job nay ket thuc o
+    # trang thai `superseded` - KHONG retry payload cu len noi dung moi, va
+    # cung khong tinh la that bai. Hai buoc nam trong cung mot transaction de
+    # khong bao gio ton tai trang thai nua voi.
+    with conn.transaction():
+        audit.mark_writeback(conn, run_db_id, status="superseded")
+        q.supersede(conn, job["id"])
+    return q.SUPERSEDED
+
+
+def chay_mot_job(
+    conn,
+    job: dict,
+    *,
+    invoke=None,
+    connector=None,
+    connector_factory=None,
+    fixture_run: bool = False,
+) -> str:
+    """Xu ly mot job da claim. Tra trang thai cuoi: done/queued/failed/superseded."""
+    node_id = job["external_content_id"]
+    chash = job["content_hash"]
+    version = int(job.get("content_hash_version") or 1)
+
+    # CHOT CHAN TIEN: da cham dung noi dung nay roi thi chi gui lai ket qua,
+    # KHONG goi LLM. Duong nay xay ra khi lan truoc pipeline chay xong nhung
+    # callback that bai. Cham lai ton $0,057 that.
+    cu = audit.find_reusable_writeback(conn, job=job)
+
+    if connector is None:
+        try:
+            connector = (connector_factory or _connector_cho_job)(conn, job)
+        except (connector_base.ConnectorError, sites.ContextSelectionError) as exc:
+            return q.fail_permanent(conn, job["id"], "connector_auth", str(exc))
+
+    if cu is not None:
+        # Dung DUNG run_id/precondition cu: nho vay Drupal nhan ra day la lan
+        # gui lai cua cung mot run va tra `already_applied` thay vi tao them
+        # mot revision thu hai.
+        return _gui_ket_qua(
+            conn,
+            job,
+            connector,
+            run_db_id=cu["id"],
+            run_public_id=cu["run_id"],
+            payload=cu["payload"],
+            expected_revision_id=cu["external_revision_id"],
+            content_hash=cu["content_hash"],
+            content_hash_version=version,
+        )
+
+    # Prefetch TRUOC khi goi LLM. Job v2 luon biet revision; job legacy v1
+    # khong biet nen phai doc working copy roi lay revision that tu response.
+    try:
+        tai_lieu = connector.fetch_content(
+            node_id,
+            external_revision_id=job.get("external_revision_id"),
+            working_copy=job.get("external_revision_id") is None,
+        )
+    except connector_base.ConnectorError as exc:
+        return _loi_connector_thanh_trang_thai(conn, job, exc)
+
+    # Kiem fingerprint TRUOC LLM. Lech nghia la noi dung tren Drupal khong con
+    # la noi dung ma job mo ta - cham no roi ghi ket qua duoi nhan cua hash cu
+    # se tao mot ban ghi noi doi ma khong ai phat hien duoc.
+    thuc_te = _fingerprint(tai_lieu.fields, version)
+    if thuc_te != chash:
+        return q.fail_permanent(
+            conn,
+            job["id"],
+            "input_hash_mismatch",
+            f"job mong doi {chash[:12]} nhung noi dung hien tai la {thuc_te[:12]} "
+            f"(hash version {version})",
+        )
 
     if invoke is None:
         from graph import build_graph
@@ -107,12 +233,21 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
     bat_dau = time.monotonic()
     try:
         try:
-            # CHI truyen node_id. content_type/langcode do graph._khoa_cua() suy
-            # ra - do la CHO DUY NHAT duoc phep suy ra cap khoa nay (no B6).
-            # Worker dat them mot duong thu hai la dung lai dung cai bay vua dep.
-            state = invoke({"node_id": node_id})
+            # Truyen tuong minh cap khoa CUA JOB thay vi de graph roi ve mac
+            # dinh: tu Plan 4, scope den tu profile cua site chu khong con la
+            # hang so. graph._khoa_cua() van do mac dinh cho script thu cong.
+            #
+            # `runtime.activate` cho graph dung lai chinh tai lieu vua fetch,
+            # nen ca job chi doc Drupal DUNG MOT LAN va khong the doc trung
+            # hai revision khac nhau.
+            with connector_runtime.activate(connector, node_id, tai_lieu):
+                state = invoke({
+                    "node_id": node_id,
+                    "content_type": job["content_type"],
+                    "langcode": job["langcode"],
+                })
         except Exception as e:
-            return q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}")
+            return q.fail(conn, job["id"], f"internal: {e.__class__.__name__}: {e}")
         duration_ms = int((time.monotonic() - bat_dau) * 1000)
 
         # Import o day (khong o dau module) de tranh nap ca chuoi phu thuoc
@@ -140,48 +275,53 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         # scoring.yaml duoc dung ra de chan (config-spec.md muc 1).
         khoa = graph.khoa_cua(state)
 
-        # CRITICAL: ghi run_log theo hash NOI DUNG THAT DA CHAM (state["fields"]),
-        # KHONG theo job["content_hash"] (`chash`). fetch_content() lay revision
-        # MAC DINH cua node, khong co resourceVersion: voi bai DA XUAT BAN roi
-        # dua sang needs_review (default_revision=false), revision mac dinh van
-        # la ban CU da xuat ban - invoke() cham nham noi dung cu trong khi hook
-        # gui hash cua ban nhap moi. Ghi theo `chash` trong truong hop do se
-        # ghi sai chinh nhat ky truy vet, va reusable lookup sau nay se tra payload
-        # sai cho hash do vinh vien, khong bao gio goi lai LLM de sua.
-        hash_that = text_utils.content_hash(state.get("fields") or {})
+        # Hash da duoc kiem KHOP truoc khi goi LLM, nen tu day tro di
+        # job["content_hash"] chinh la hash cua noi dung vua cham. Con canh
+        # bao lech o duong cu la vi luc do worker chua fetch truoc va graph
+        # co the doc phai revision mac dinh; nay khong con kha nang do.
+        hash_that = _fingerprint(state.get("fields") or tai_lieu.fields, version)
         if hash_that != chash:
             logging.warning(
-                "[worker] job %s (node %s): hash job=%s nhung hash noi dung "
-                "THAT DA CHAM=%s - lech nhau. Nguyen nhan co the la "
-                "fetch_content() tra ve revision MAC DINH (ban da xuat ban) "
-                "thay vi ban nhap moi qua JSON:API.",
-                job["id"], node_id, chash, hash_that,
+                "[worker] job %s (node %s): graph tra ve fields co hash %s "
+                "khac hash da kiem %s - kiem lai runtime prepared document.",
+                job["id"], node_id, hash_that, chash,
             )
+
+        # Bao cao ghi sang Drupal phai mang dung ba thu de callback CAS so
+        # duoc: hash cua job, version cua hash do, va run ID cong khai lam
+        # khoa idempotency.
+        report_json = dict(payload.get("report_json") or {})
+        report_json["content_hash"] = chash
+        report_json["content_hash_version"] = version
+        report_json["platform_run_id"] = str(run_public_id)
+        payload["report_json"] = report_json
 
         run_db_id = audit.ghi_scoped(
             conn,
             run_public_id=run_public_id,
             job=job,
-            content_hash=hash_that,
+            content_hash=chash,
             duration_ms=duration_ms, report=report,
             config_meta=config.load(**khoa).get("meta") or {},
             usage=list(ai_core.USAGE_LOG), model=ai_core.MODEL, payload=payload,
+            content_hash_version=version,
+            source_url=tai_lieu.source_url,
+            is_fixture=fixture_run,
+            external_revision_id=tai_lieu.external_revision_id,
         )
         da_ghi_usage = True
 
-        if write_back_fn(node_id=node_id, **payload):
-            with conn.transaction():
-                audit.mark_writeback(conn, run_db_id, status="succeeded")
-                q.complete(conn, job["id"])
-            return q.DONE
-        with conn.transaction():
-            audit.mark_writeback(
-                conn,
-                run_db_id,
-                status="failed",
-                error="write-back that bai",
-            )
-            return q.fail(conn, job["id"], "write-back that bai")
+        return _gui_ket_qua(
+            conn,
+            job,
+            connector,
+            run_db_id=run_db_id,
+            run_public_id=run_public_id,
+            payload=payload,
+            expected_revision_id=tai_lieu.external_revision_id,
+            content_hash=chash,
+            content_hash_version=version,
+        )
     finally:
         # USAGE_LOG la list muc module, KHONG tu xoa (ai_core.py). Luon dam
         # bao no rong khi ra khoi ham, ke ca hai nhanh thoat som (invoke() nem
@@ -197,7 +337,8 @@ def chay_mot_job(conn, job: dict, *, invoke=None, write_back_fn=None) -> str:
         ai_core.USAGE_LOG.clear()
 
 
-def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
+def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, connector=None,
+                     connector_factory=None):
     """Nhan va xu ly MOT job, neu hang doi con viec. Rong -> tra None.
 
     Loi bat ngo trong chay_mot_job() (audit.ghi_scoped, q.complete, q.fail,
@@ -215,11 +356,14 @@ def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, write_back_fn=None):
     logging.info("[worker %s] cham node %s (lan %d)", ten, job["node_id"],
                  job["attempts"])
     try:
-        ket = chay_mot_job(conn, job, invoke=invoke, write_back_fn=write_back_fn)
+        ket = chay_mot_job(
+            conn, job, invoke=invoke, connector=connector,
+            connector_factory=connector_factory,
+        )
     except Exception as e:
         logging.error("[worker %s] job %s (node %s) loi ngoai y muon: %s",
                       ten, job["id"], job["node_id"], e)
-        ket = q.fail(conn, job["id"], f"{e.__class__.__name__}: {e}")
+        ket = q.fail(conn, job["id"], f"internal: {e.__class__.__name__}: {e}")
     logging.info("[worker %s] node %s -> %s", ten, job["node_id"], ket)
     return ket
 
@@ -242,9 +386,14 @@ def _vong_lap_voi_conn(conn, ten: str) -> None:
         if time.monotonic() - lan_doi_soat >= CHU_KY_DOI_SOAT_GIAY:
             lan_doi_soat = time.monotonic()
             try:
-                them = reconcile.quet(conn)
-                if them:
-                    logging.info("[worker %s] doi soat them %d job", ten, them)
+                tom_tat = reconcile.quet(conn)
+                if tom_tat.enqueued or tom_tat.errors:
+                    logging.info(
+                        "[worker %s] doi soat %d site: them %d job, "
+                        "bo qua %d dead-letter, loi %s",
+                        ten, tom_tat.sites_scanned, tom_tat.enqueued,
+                        tom_tat.skipped_dead_letter, tom_tat.errors,
+                    )
             except Exception as e:
                 # Doi soat hong KHONG duoc lam chet worker - duong event van chay
                 logging.warning("[worker %s] doi soat loi: %s", ten, e)

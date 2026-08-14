@@ -1,0 +1,174 @@
+PLATFORM API + CONNECTOR (P4) - CHECKPOINT VERIFICATION EVIDENCE
+================================================================
+
+Thoi diem: 2026-08-14T14:55+07:00 (Asia/Saigon)
+Nhanh: feat/platform-api-drupal-connector
+Base da merge: 378cce9 (P3 Admin Operations)
+Protected score-path snapshot: 04f10e1
+
+Cong bao ve phep do - kiem TRUOC va SAU khi lam P4
+--------------------------------------------------
+
+  prompt_version do eval_calibration.prompt_version() tinh: 020738e209017213
+  Ky vong: 020738e209017213  -> KHOP
+
+  git diff --exit-code 04f10e1 -- multiagent/src/agents multiagent/src/ai_core.py
+    multiagent/src/brand_analysis.py multiagent/src/config.py
+    multiagent/src/embeddings.py multiagent/src/graph.py
+    multiagent/src/retrieval.py multiagent/src/scoring.py
+    multiagent/src/seo_analysis.py multiagent/src/state.py
+    multiagent/src/text_utils.py multiagent/src/kb multiagent/config/scoring.yaml
+  -> exit 0, diff RONG.
+
+  Ket luan: P4 khong cham duong cham diem. Quan he do luong
+  test-retest -> E1 -> E5 giu nguyen hieu luc. `text_utils.content_hash()`
+  KHONG doi mot ky tu; fingerprint v2 la ham MOI o lop platform.
+
+Commit trong checkpoint
+-----------------------
+
+  4eab54a feat: add per-site API credentials and connector config
+  b35a969 feat: expose site-scoped review API v1
+  dc80e7b feat: add revision-aware Drupal connector
+  cfd6036 fix: fingerprint every field used by review engine
+  9cc0f1b refactor: run worker through scoped Drupal connector
+  21b2f0b feat: reconcile pending content per active site
+  50dc9d1 feat: add revision-safe Drupal integration callbacks
+  ecc144b feat: send revision-aware jobs to API v1
+  8167998 feat: operate Drupal connection and intake pause
+  e8bd0dc docs: record API v1 cutover and rollback rehearsal
+
+Hai commit phia Drupal duoc tach co chu dich: `50dc9d1` la ENDPOINT (deploy
+truoc, KHONG revert khi rollback), `ecc144b` la CLIENT cutover (revert rieng
+commit nay de rollback).
+
+Database va migration
+---------------------
+
+  migrate.py status -> applied: 0001, 0002, 0003, 0004 | pending: none
+
+  Migration 0004 chi THEM, khong sua/xoa:
+    + bang site_api_credential (token_hash char(64) UNIQUE, index prefix
+      partial where active)
+    + review_job.content_hash_version smallint NOT NULL DEFAULT 1, CHECK IN (1,2)
+    + run_log.content_hash_version / source_url / is_fixture
+    + site.last_health_status / last_health_checked_at / last_health_error
+
+  Test nang tu schema legacy: row job/run cu giu content_hash_version=1,
+  is_fixture=false, source_url NULL. Khong rewrite hash lich su.
+
+  Row count tren database dev tai checkpoint (chi de doi chieu):
+    review_job=10  run_log=8  kb_chunk=1133
+    site_api_credential(active)=1
+    run_log where is_fixture=true -> 2 (hai run smoke, xem cutover evidence)
+
+Bo test day du
+--------------
+
+  Python offline: chay tung file trong multiagent/scripts/test_*.py
+    -> 64 file, 0 loi, 0 [SKIP].
+
+  Drupal PHP:
+    test_ai_report_renderer.php    PASS=31 FAIL=0   (PHP thuan)
+    test_ai_input_fingerprint.php  PASS=24 FAIL=0   (PHP thuan)
+    test_vf_ai_trigger.php         PASS=13 FAIL=0   (PHP thuan)
+    test_ai_result_callback.php    PASS=29 FAIL=0   (bootstrap Drupal, node/revision THAT)
+    test_ai_service_role.php       PASS=6  FAIL=0   (bootstrap Drupal)
+
+  Ghi chu lech so voi plan: plan de nghi chay test_ai_result_callback.php bang
+  `ddev exec php`. Test do can tao revision that nen phai bootstrap Drupal, vi
+  vay chay bang `ddev drush php:script`. Danh doi nay LAM MANH bang chung chu
+  khong lam yeu: no kiem hanh vi entity that thay vi chi kiem ham thuan.
+
+Data/privacy assertions
+-----------------------
+
+Quet tren database dev:
+
+  run_log: 0/8 run co title/body/summary/meta_description o top-level payload.
+  review_job: 23 cot, run_log: 30 cot - khong cot nao ten title/body/summary/
+    content/draft. Service khong luu toan van bai nhap.
+  admin_audit_log: khong key nao chua password/token/authorization/cookie/secret.
+    (Allowlist metadata duoc kiem o tang code: audit_log._validate_metadata.)
+  site_api_credential: chi luu token_hash 64 hex + prefix 12 ky tu. Khong co
+    cot nao chua raw token.
+  review_job/run_log: 0 row thieu site_id/profile_id/policy_version/
+    correlation_id/content_hash_version. Moi job va run deu co du scope de
+    dieu tra xuyen Drupal -> API -> worker -> callback.
+
+Quet tren file da commit (git grep tren HEAD):
+  VF_SERVICE_TOKEN, DRUPAL_PASSWORD, ADMIN_CSRF_KEY hien tai -> 0 file.
+  .env va .venv/ khong bi track.
+  git diff --check -> sach.
+
+Nhung bat bien duoc khoa bang test
+----------------------------------
+
+  Mot lan cham thanh cong ghi DUNG MOT LAN:
+    test_worker_graph_integration.py - worker + topology LangGraph that:
+    connector fetch = 1, graph tu PATCH = 0, callback = 1. Test se do neu
+    graph noi lai node write_back hoac worker them mot duong ghi thu hai.
+    Them mot lop khoa: `drupal_client._request_with_retry` bi thay bang ham
+    nem loi, nen bat ky lan goi HTTP thu hai nao cung lam test do.
+
+  Hash lech thi DUNG TRUOC khi goi LLM:
+    test_worker.py::test_hash_lech_thi_dung_TRUOC_khi_goi_LLM - 0 lan invoke,
+    0 callback, 0 run_log, job vao dead-letter voi ma input_hash_mismatch.
+
+  Cua so rollback that su chay:
+    test_worker.py::test_job_legacy_v1_doc_working_copy_va_dung_hash_bon_field
+    test_worker.py::test_so_v1_bang_thuat_toan_v2_phai_do  (test AM, chung minh
+      hai thuat toan khac nhau tren cung du lieu nen viec chon nhanh co nghia)
+
+  Stale write khong ghi de:
+    test_worker.py::test_stale_write_race_ket_thuc_superseded_khong_ghi_de
+    test_ai_result_callback.php - tren revision THAT: khong tao revision, bon
+      field AI giu nguyen.
+
+  Retry mo ho idempotent:
+    test_worker.py::test_timeout_mo_ho_retry_cung_run_id_nhan_already_applied
+    test_staging_connector_smoke.py::test_retry_mo_ho_dung_lai_run_id_...
+    test_ai_result_callback.php - gui lai cung run_id khong tao revision thu hai.
+
+  Khong lo secret:
+    test_site_credentials.py - import-env/rotate/list khong in raw token/hash.
+    test_site_config.py - `show` khong in DRUPAL_PASSWORD.
+    test_admin_connection.py - trang chi in prefix + TEN bien secret.
+    test_drupal_connector.py - ConnectorSecretError neu ten bien thieu, va
+      khong bao gio in gia tri bien con lai.
+
+  Site suy tu credential, khong tu body:
+    test_api_v1.py - body mang site_id -> 422; token site A doc job site B -> 404
+    (khong phai 403, de khong xac nhan UUID co ton tai).
+
+Loi da bat trong lan lam P4
+---------------------------
+
+1. PendingController loc `moderation_state` trong entity query -> HTTP 500
+   ("'moderation_state' not found"). Field tinh toan, khong query duoc. Day la
+   LAN THU HAI du an gap (lan dau 2026-08-07 o drupal_client.py). Chi lo ra khi
+   goi HTTP that. Da sua + ghi chu trong code + ghi vao technical-debt 8.9.
+
+2. DRUPAL_USER=admin (UID 1). UID 1 bo qua moi kiem tra quyen -> capability
+   test xanh gia. Da chuyen sang user rieng chi co role `ai_service`, roi chung
+   minh capability doi theo quyen that (go `view latest version` -> revision_read
+   false; tra lai -> true).
+
+3. test_ai_service_role.php ban dau dung str_contains de tim tu nguy hiem, lam
+   `view any unpublished content` bi bao do oan (chuoi con "publish"). Da doi
+   sang so khop DONG TU DAU. Mot test do oan lau ngay se bi tat di va mat luon
+   hang rao that.
+
+Nhung dieu KHONG duoc suy ra tu tai lieu nay
+--------------------------------------------
+
+- Chua co ket qua cham diem THAT nao tu P4. Hai run trong run_log deu
+  is_fixture=true, diem 50 do engine gia dat.
+- E1/E5/E3/E6 van chua chay. Thu tu bat buoc van la test-retest -> E1 -> E5.
+- P5 chua lam: worker heartbeat, llm_usage_event ben vung cho attempt loi,
+  request-body cap tong the/CSP/security header, reverse proxy hardening,
+  audit retention/export, SSO.
+- Chua do do tre/thong luong duoi tai that. Smoke chay mot job moi luot.
+- `site.last_health_status` tren database dev van NULL vi chua co operator bam
+  nut; dashboard hien connector `unknown`, dung nhu thiet ke.
+- StarletteDeprecationWarning ve TestClient/httpx2 van chua xu ly (no H1/H4).

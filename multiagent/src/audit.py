@@ -45,8 +45,17 @@ def ghi_scoped(
     usage: list,
     model: str,
     payload: dict,
+    content_hash_version: int = 1,
+    source_url: str | None = None,
+    is_fixture: bool = False,
+    external_revision_id: str | None = None,
 ) -> int:
-    """Ghi immutable review result cung snapshot scope cua job."""
+    """Ghi immutable review result cung snapshot scope cua job.
+
+    `is_fixture=True` danh dau run do script smoke tao ra voi engine gia. No
+    PHAI bi loai khoi moi metric production; neu khong, mot lan dien tap
+    cutover se lam sai bao cao chi phi va ty le quyet dinh.
+    """
     forbidden = {"title", "body", "summary"} & set(payload)
     if forbidden:
         raise ValueError(
@@ -61,10 +70,11 @@ def ghi_scoped(
             "missing_agents, veto_reason, note, agent_results, config_meta, "
             "usage, model, payload, public_id, site_id, profile_id, policy_version, "
             "external_content_id, external_revision_id, content_type, langcode, "
-            "correlation_id, writeback_status"
+            "correlation_id, writeback_status, content_hash_version, source_url, "
+            "is_fixture"
             ") VALUES ("
             "%s,%s,%s,%s,%s,%s,%s::jsonb,%s,%s,%s::jsonb,%s::jsonb,"
-            "%s::jsonb,%s,%s::jsonb,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
+            "%s::jsonb,%s,%s::jsonb,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s"
             ") RETURNING id",
             (
                 job["id"],
@@ -86,11 +96,21 @@ def ghi_scoped(
                 job["profile_id"],
                 job["policy_version"],
                 job["external_content_id"],
-                job.get("external_revision_id"),
+                # Job legacy khong biet revision truoc khi fetch, nen revision
+                # THAT phai do caller truyen vao. Ghi NULL o day se lam retry
+                # sau nay gui precondition rong va callback CAS khong so duoc.
+                (
+                    external_revision_id
+                    if external_revision_id is not None
+                    else job.get("external_revision_id")
+                ),
                 job["content_type"],
                 job["langcode"],
                 job["correlation_id"],
                 "pending",
+                content_hash_version,
+                source_url,
+                is_fixture,
             ),
         )
         return cur.fetchone()[0]

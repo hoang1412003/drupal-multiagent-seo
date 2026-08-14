@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "fields": {
+    "title": "Hướng dẫn sạc pin ô tô điện VinFast",
+    "body": "<p>Nội dung bài viết mẫu.</p>",
+    "summary": "Tóm tắt ngắn",
+    "url_alias": "/huong-dan-sac-pin",
+    "meta_description": "Mô tả cho SEO",
+    "image_alt": "Ảnh đại diện: Xe điện đang sạc\nẢnh 1 trong bài: Cổng sạc VF e34"
+  },
+  "expected_sha256": "7535d604a944a7b8c9529d7f2b7d518e491c2730866413227fce265bc00fb9f6"
+}

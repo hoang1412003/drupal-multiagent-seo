@@ -12,6 +12,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
+use Drupal\vf_ai_review\AiInputFingerprint;
 use Drupal\vf_ai_review\AiReportRenderer;
 
 /**
@@ -55,25 +56,44 @@ function _vf_ai_trigger_ban_job(NodeInterface $node): void {
     return;
   }
 
-  $hash = AiReportRenderer::contentHash(vf_ai_review_hash_fields($node));
+  // Hash v2 phủ đủ SÁU input mà hệ chấm điểm đọc (thêm url_alias và
+  // image_alt so với v1). Đây là lúc duy nhất được đổi sang v2: cùng commit
+  // với ServiceClient gọi /api/v1. Gửi hash v2 vào endpoint legacy version 1
+  // sẽ làm worker chọn nhầm thuật toán và mọi job báo input_hash_mismatch.
+  $hash = AiInputFingerprint::hash(vf_ai_review_input_fields($node));
 
   // Bỏ qua nếu nội dung hiện tại đã được chấm đúng hash này rồi. Chặn CHÍNH
-  // write_back() của Multi-Agent tự bắn lại job: PATCH 4 field AI cũng là
-  // một lần node->save(), nên hook này chạy lại ngay bên trong lượt ghi kết
-  // quả. Không chặn thì mỗi lần chấm xong tốn thêm một cú gọi mạng, và vì
-  // hook chạy đồng bộ trong save() nên nó cộng luôn vào thời gian phản hồi
-  // của chính PATCH write_back mà worker đang chờ.
+  // write-back của Multi-Agent tự bắn lại job: ghi 4 field AI cũng là một lần
+  // node->save(), nên hook này chạy lại ngay bên trong lượt ghi kết quả.
+  // Không chặn thì mỗi lần chấm xong tốn thêm một cú gọi mạng, và vì hook
+  // chạy đồng bộ trong save() nên nó cộng luôn vào thời gian phản hồi của
+  // chính callback mà worker đang chờ.
+  //
+  // Chỉ coi là ĐÃ CHẤM khi báo cáo mang ĐÚNG version 2 và hash khớp. Báo cáo
+  // cũ (v1) sẽ được chấm lại đúng một lượt sau cutover để nâng lên v2 - đó là
+  // chi phí có chủ đích, đổi lấy việc từ đó về sau url_alias/image_alt đổi là
+  // bài được chấm lại (nợ N2).
   //
   // JSON hỏng (có dữ liệu nhưng decode() trả NULL) thì coi như CHƯA CHẤM và
   // vẫn gọi service — không được vì một field hỏng mà bỏ chấm bài.
   $tho = _vf_ai_review_gia_tri($node, 'field_ai_report_json');
   $report = (new AiReportRenderer())->decode($tho);
-  if ($report !== NULL && ($report['content_hash'] ?? NULL) === $hash) {
+  if ($report !== NULL
+    && (int) ($report['content_hash_version'] ?? 1) === AiInputFingerprint::VERSION
+    && ($report['content_hash'] ?? NULL) === $hash) {
     return;
   }
 
   // uuid() chứ KHÔNG phải id(): pipeline gọi /jsonapi/node/article/{uuid}.
-  \Drupal::service('vf_ai_trigger.client')->guiJob($node->uuid(), $hash);
+  // getRevisionId() để service fetch ĐÚNG revision vừa lưu, không phải
+  // revision mặc định (bài đã xuất bản rồi tạo bản nháp needs_review có
+  // revision mới nhất KHÔNG phải revision mặc định).
+  \Drupal::service('vf_ai_trigger.client')->guiJob(
+    $node->uuid(),
+    (string) $node->getRevisionId(),
+    $node->language()->getId(),
+    $hash
+  );
 }
 
 /**

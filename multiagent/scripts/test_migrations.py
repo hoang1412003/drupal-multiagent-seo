@@ -378,7 +378,7 @@ def test_migration_0001_nang_legacy_bao_toan_du_lieu(conn):
     _reset_schema(conn, schema)
     try:
         _create_legacy_schema(conn)
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
 
         assert _scalar(conn, "SELECT count(*) FROM review_job") == 1
         assert _scalar(conn, "SELECT count(*) FROM run_log") == 1
@@ -412,7 +412,7 @@ def test_migration_0001_tao_fresh_schema_va_seed(conn):
     schema = "vf_test_migration_fresh"
     _reset_schema(conn, schema)
     try:
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
         assert _scalar(conn, "SELECT count(*) FROM site") == 1
         assert _scalar(conn, "SELECT count(*) FROM review_profile") == 1
         assert _scalar(conn, "SELECT count(*) FROM site_profile_assignment") == 1
@@ -524,8 +524,8 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
             assert migrations.apply_pending(conn, first_only) == [1]
 
         before = migrations.status(conn, MIGRATIONS_DIR)
-        assert before.applied == (1,) and before.pending == (2, 3), before
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2, 3]
+        assert before.applied == (1,) and before.pending == (2, 3, 4), before
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2, 3, 4]
 
         expected_tables = {
             "admin_user",
@@ -585,6 +585,79 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
     print("[PASS] migration 0002/0003 tao schema, rang buoc va index admin auth")
 
 
+def test_migration_0004_tao_credential_va_hash_version(conn):
+    schema = "vf_test_migration_api_connector"
+    _reset_schema(conn, schema)
+    try:
+        _create_legacy_schema(conn)
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
+
+        # Row legacy giu version 1: khong duoc rewrite hash lich su thanh v2.
+        assert _scalar(conn, "SELECT content_hash_version FROM review_job") == 1
+        assert _scalar(conn, "SELECT content_hash_version FROM run_log") == 1
+        assert _scalar(conn, "SELECT is_fixture FROM run_log") is False
+        assert _scalar(conn, "SELECT source_url FROM run_log") is None
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT column_name, data_type, is_nullable FROM information_schema.columns "
+                "WHERE table_schema=current_schema() AND table_name='site_api_credential' "
+                "ORDER BY column_name"
+            )
+            columns = {row[0]: (row[1], row[2]) for row in cur.fetchall()}
+        assert set(columns) == {
+            "id", "site_id", "token_prefix", "token_hash", "active",
+            "created_at", "last_used_at", "revoked_at",
+        }, columns
+        assert columns["token_hash"][0] == "character", columns["token_hash"]
+        assert columns["last_used_at"][1] == "YES", columns["last_used_at"]
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT indexdef FROM pg_indexes WHERE schemaname=current_schema() "
+                "AND indexname='site_api_credential_prefix'"
+            )
+            prefix_index = cur.fetchone()
+        assert prefix_index is not None, "thieu index prefix"
+        assert "where (active" in prefix_index[0].lower(), prefix_index[0]
+
+        # token_hash duy nhat tren toan bang: hai site khong duoc trung token.
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO site_api_credential (site_id, token_prefix, token_hash) "
+                "VALUES (%s, 'abc123def456', %s)",
+                (DEFAULT_SITE_ID, "a" * 64),
+            )
+        with expect(db.psycopg.errors.UniqueViolation, "token_hash"):
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO site_api_credential (site_id, token_prefix, token_hash) "
+                    "VALUES (%s, 'khac-prefix', %s)",
+                    (DEFAULT_SITE_ID, "a" * 64),
+                )
+
+        # Hash version chi duoc phep 1 hoac 2.
+        with expect(db.psycopg.errors.CheckViolation, "content_hash_version"):
+            with conn.cursor() as cur:
+                cur.execute("UPDATE review_job SET content_hash_version=3")
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema=current_schema() AND table_name='site' "
+                "AND column_name LIKE 'last_health%'"
+            )
+            health_columns = {row[0] for row in cur.fetchall()}
+        assert health_columns == {
+            "last_health_status", "last_health_checked_at", "last_health_error",
+        }, health_columns
+
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == []
+    finally:
+        _drop_schema(conn, schema)
+    print("[PASS] migration 0004 tao credential, hash version va cot health")
+
+
 if __name__ == "__main__":
     try:
         postgres_conn = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -622,6 +695,7 @@ if __name__ == "__main__":
             test_policy_snapshot_khop_hash_nguon_khoa,
             test_migration_0001_checksum_guard_tren_database,
             test_migration_0002_tao_schema_admin_auth_va_rang_buoc,
+            test_migration_0004_tao_credential_va_hash_version,
         ):
             try:
                 fn(postgres_conn)

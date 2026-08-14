@@ -2,3 +2,6 @@ services:
   vf_ai_trigger.client:
     class: Drupal\vf_ai_trigger\ServiceClient
     arguments: ['@http_client', '@config.factory', '@logger.factory']
+  vf_ai_trigger.result_writer:
+    class: Drupal\vf_ai_trigger\Service\AiResultWriter
+    arguments: ['@entity_type.manager', '@database']

@@ -9,57 +9,149 @@ nguyen ly reconciliation loop ma Kubernetes dung.
 
 Chu ky 5 phut chu khong phai 30 giay: quet thua thi tiet kiem goi API vo ich,
 va do tre xau nhat 5 phut chi xay ra trong tinh huong da hong.
+
+Tu Plan 4, vong quet chay THEO SITE: moi site co connector, base URL va
+credential rieng. Site tam dung intake khong duoc cham toi - neu van quet no,
+"tam dung" chi con dung voi duong event con vong doi soat van bom job vao,
+tuc nut tam dung khong con nghia gi.
 """
+from dataclasses import dataclass, field
 import logging
 
 import job_queue as q
+from review_platform import sites
 
 logger = logging.getLogger(__name__)
 
+MAX_ITEM_MOI_TRANG = 50
+# Tran so trang cho MOT site trong mot luot: feed hong tra cursor lap lai se
+# lam vong quet chay mai va giu connection den het chu ky.
+MAX_TRANG_MOI_SITE = 100
 
-def quet(conn, *, liet_ke=None, enqueue_fn=None, co_that_bai=None) -> int:
-    """Quet mot vong, tra so job da xep them.
 
-    Ba phu thuoc tiem duoc de test khong can Drupal lan Postgres.
+@dataclass(frozen=True)
+class ReconcileSummary:
+    sites_scanned: int = 0
+    enqueued: int = 0
+    skipped_dead_letter: int = 0
+    errors: tuple = field(default=())
 
-    Loi tu liet_ke() (Drupal API, mang loi, ...) se VAN VA RA NGOAI. Day la
-    loi nguon - neu quet() tu nuot thi tao tang nuot loi them, va khong ai
-    biet doi soat da ngung. worker.py co try/except bao quanh quet() de ghi
-    log dung chung.
+    def __bool__(self) -> bool:
+        return bool(self.enqueued)
 
-    Loi tu XU LY MOT NODE (KeyError, ValueError, ...) thi LOG VA SKIP NODE DO,
-    sao cho nhung node con lai PHAI van duoc xu ly - mot node hong khong giet
-    ca luot quyet. Worker se thay log va biet mot node co van de, nhung che
-    duoc coi la tinh huong binh thuong cua mot luot (khong phai tat ca, chi
-    mot) - dung duoc nhu gap Drupal co node rot.
-    """
-    if liet_ke is None:
-        from drupal_client import liet_ke_can_cham
 
-        liet_ke = liet_ke_can_cham
-    if enqueue_fn is None:
-        enqueue_fn = q.enqueue
-    if co_that_bai is None:
-        co_that_bai = q.co_job_that_bai
+def _sites_can_quet(conn):
+    """Chi site dang bat VA khong tam dung intake."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT id FROM site WHERE active AND NOT intake_paused ORDER BY slug"
+        )
+        return [row[0] for row in cur.fetchall()]
 
+
+def _quet_mot_site(conn, site_id, connector, enqueue_fn, co_that_bai) -> tuple:
     da_xep = 0
-    for bai in liet_ke():
-        try:
-            node_id = bai["node_id"]
-            chash = bai["content_hash"]
-            if bai["hash_da_cham"] == chash:
-                continue      # da cham dung noi dung nay roi
-            if co_that_bai(conn, node_id, chash):
-                # TUYET DOI khong hoi sinh job da dead-letter (spec muc 6.3.1).
-                # Bai do chi chay lai duoc qua nut "Cham lai" thu cong, tuc phai
-                # co nguoi quyet dinh - dung tinh than "bam cham lai la tieu tien
-                # API that".
+    bo_qua = 0
+    moc = 0
+    for _ in range(MAX_TRANG_MOI_SITE):
+        page = connector.list_pending(
+            after_revision_id=moc, limit=MAX_ITEM_MOI_TRANG
+        )
+        for item in page.items:
+            try:
+                context = sites.select_review_context(
+                    conn, site_id, item.content_type, item.langcode
+                )
+            except sites.ContextSelectionError as exc:
+                # Khong co profile khop thi KHONG duoc roi ve profile mac dinh:
+                # cham bang policy cua scope khac la sai ket qua am tham.
+                logger.warning(
+                    "Doi soat bo qua %s: %s", item.external_content_id, exc
+                )
                 continue
-            kq = enqueue_fn(conn, node_id, chash, "reconcile")
-            if kq and kq.get("status") == q.QUEUED:
-                da_xep += 1
-        except Exception as e:
-            # Mot node trong luot quyet khong xep duoc - KHONG duoc giet ca
-            # luot. Log, skip node do, roi tiep tuc phia sau.
-            logger.warning("Doi soat loi xu ly node %s: %s", bai, e)
-    return da_xep
+
+            try:
+                if co_that_bai(
+                    conn,
+                    site_id=site_id,
+                    external_content_id=item.external_content_id,
+                    content_hash=item.content_hash,
+                    policy_version=context.profile.policy_version,
+                ):
+                    # TUYET DOI khong hoi sinh job da dead-letter (spec 6.3.1).
+                    # Bai do chi chay lai duoc qua nut "Cham lai" thu cong, tuc
+                    # phai co nguoi quyet dinh - dung tinh than "bam cham lai
+                    # la tieu tien API that".
+                    bo_qua += 1
+                    continue
+
+                ket_qua = enqueue_fn(
+                    conn,
+                    context,
+                    item.external_content_id,
+                    item.content_hash,
+                    "reconcile",
+                    external_revision_id=item.external_revision_id,
+                    content_hash_version=item.content_hash_version,
+                )
+                if ket_qua and ket_qua.get("status") == q.QUEUED:
+                    da_xep += 1
+            except Exception as exc:
+                # Mot item hong khong duoc giet ca luot quet cua site.
+                logger.warning(
+                    "Doi soat loi xu ly %s: %s", item.external_content_id, exc
+                )
+
+        if page.next_after_revision_id is None:
+            break
+        moc = page.next_after_revision_id
+    return da_xep, bo_qua
+
+
+def quet(
+    conn,
+    *,
+    site_loader=None,
+    connector_factory=None,
+    enqueue_fn=None,
+    co_that_bai=None,
+) -> ReconcileSummary:
+    """Quet mot vong tren moi site dang bat, tra tom tat da lam gi.
+
+    Loi cua MOT site (Drupal tat, sai credential) khong duoc lam bo qua cac
+    site sau: mot site hong se lam ca he thong ngung doi soat.
+    """
+    if site_loader is None:
+        site_loader = _sites_can_quet
+    if connector_factory is None:
+        from review_platform.connectors.factory import connector_cho_site
+
+        connector_factory = connector_cho_site
+    if enqueue_fn is None:
+        enqueue_fn = q.enqueue_scoped
+    if co_that_bai is None:
+        co_that_bai = q.co_job_that_bai_scoped
+
+    tong_xep = 0
+    tong_bo_qua = 0
+    loi = []
+    site_ids = list(site_loader(conn))
+
+    for site_id in site_ids:
+        try:
+            connector = connector_factory(conn, site_id)
+            da_xep, bo_qua = _quet_mot_site(
+                conn, site_id, connector, enqueue_fn, co_that_bai
+            )
+            tong_xep += da_xep
+            tong_bo_qua += bo_qua
+        except Exception as exc:
+            loi.append((str(site_id), exc.__class__.__name__))
+            logger.warning("Doi soat loi o site %s: %s", site_id, exc)
+
+    return ReconcileSummary(
+        sites_scanned=len(site_ids),
+        enqueued=tong_xep,
+        skipped_dead_letter=tong_bo_qua,
+        errors=tuple(loi),
+    )

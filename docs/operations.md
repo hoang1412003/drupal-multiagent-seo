@@ -190,7 +190,7 @@ Không còn thư mục `multiagent/logs/` hay vấn đề `.gitignore` cho file 
 
 ---
 
-## 6. Vận hành qua trang quản trị độc lập — P3 đã qua checkpoint, connector/health thật chưa triển khai
+## 6. Vận hành qua trang quản trị độc lập — P3 và P4 đã qua checkpoint; worker heartbeat thật chưa triển khai
 
 Thiết kế productization ngày 2026-08-12 đưa dữ liệu vận hành hiện có lên trang `/admin` của service, thay vì dựng trang quản trị trong Drupal. Nguồn sự thật chi tiết: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 
@@ -208,7 +208,63 @@ Pause chặn enqueue mới và chặn worker claim job `queued`, nhưng để jo
 
 **Trạng thái ngày 2026-08-13:** `/admin` hiện đã có dashboard đọc dữ liệu thật, jobs/detail + retry có role/CSRF/audit/cảnh báo chi phí, review history/detail, quản lý user, config/KB/evaluation chỉ đọc và audit admin-only. Evidence checkpoint: [`evidence/platform-admin-operations-verification.txt`](evidence/platform-admin-operations-verification.txt). Config/evaluation không có endpoint mutation; E2 đã xuất evidence $0 có commit, còn E1/E3/E6 pending và E5 lịch sử được đánh dấu hết hiệu lực.
 
-Chưa có ở P3: connection capability, pause/resume intake, `/api/v1`, Drupal result callback CAS, worker heartbeat và `llm_usage_event` bền vững cho attempt lỗi. Vì vậy dashboard phải tiếp tục hiển thị worker/connector là `unknown`; không được coi trang tồn tại là bằng chứng production-ready.
+**Cập nhật ngày 2026-08-14 (P4 đã qua checkpoint):** `/api/v1`, connector Drupal revision-aware, result callback compare-and-set, trang `/admin/connection` với test connection và pause/resume intake đã triển khai. Evidence: [`evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
+
+- Connector health đọc **quyền thật** của tài khoản machine qua `GET /vf-ai/integration/v1/capabilities`, rồi gọi pending feed và fetch đúng một revision. Thiếu bất kỳ năng lực nào cũng là chưa đạt. Đã kiểm chứng: gỡ `view latest version` khỏi role thì `revision_read` chuyển `false`, trả lại thì `true`.
+- `site.last_health_status` chỉ được ghi khi operator bấm nút ở `/admin/connection` (có CSRF và audit). Chưa ai bấm thì cột đó `NULL` và dashboard hiển thị connector `unknown` — **không** hiển thị `ok`.
+- Worker health vẫn `unknown`: heartbeat thật thuộc Plan 5.
+
+### 6.1. Cutover sang `/api/v1` và cửa sổ rollback
+
+Thứ tự deploy bắt buộc — sai thứ tự thì bài không được chấm mà không ai thấy lỗi:
+
+1. Deploy commit **endpoint** phía Drupal (`pending`/`capabilities`/`results` + `AiResultWriter`) trước. Commit này phải **không** bị revert khi rollback client.
+2. Cấu hình site cho đúng môi trường rồi import credential:
+
+   ```powershell
+   Set-Location D:\drupal-multiagent-seo\multiagent
+   .\.venv\Scripts\python.exe scripts\site_config.py set-from-env --site drupal-vn-primary --base-url-env DRUPAL_BASE_URL --secret-ref DRUPAL
+   .\.venv\Scripts\python.exe scripts\site_config.py show --site drupal-vn-primary
+   .\.venv\Scripts\python.exe scripts\site_credential.py import-env --site drupal-vn-primary --env VF_SERVICE_TOKEN
+   ```
+
+   `set-from-env` chỉ nhận URL tuyệt đối http/https, không userinfo/query/fragment. Seed migration đặt `http://drupal.ddev.site` **chỉ để bootstrap máy dev**; staging/production quên chạy lệnh này thì connector sẽ gọi vào Drupal trên máy lập trình viên.
+3. Cấp role machine, rồi gán cho đúng tài khoản trong `DRUPAL_USER`:
+
+   ```powershell
+   Set-Location D:\drupal-multiagent-seo\drupal
+   ddev drush php:script scripts/configure_ai_service_role.php               # dry-run
+   ddev drush php:script scripts/configure_ai_service_role.php -- --apply
+   ddev drush php:script scripts/test_ai_service_role.php
+   ```
+
+   ⚠️ **Không dùng UID 1 làm tài khoản tích hợp.** UID 1 của Drupal bỏ qua mọi kiểm tra quyền, nên `capabilities` sẽ trả `true` cho cả ba năng lực bất kể role đúng hay sai — test connection xanh giả. Phải là một user riêng chỉ có role `ai_service`.
+4. Restart API/worker, chạy test connection ở `/admin/connection`, xác nhận đủ feed + result callback + revision read.
+5. Chỉ sau bước 4 mới deploy commit **client** (`ServiceClient` + hook) để Drupal gửi sang `/api/v1`.
+
+**Rollback trong cửa sổ chuyển đổi:** revert *riêng* commit client về endpoint legacy, **giữ nguyên** commit endpoint:
+
+```powershell
+git checkout <commit-truoc-cutover> -- drupal/web/modules/custom/vf_ai_trigger/src/ServiceClient.php drupal/web/modules/custom/vf_ai_trigger/vf_ai_trigger.module drupal/web/modules/custom/vf_ai_trigger/src/Controller/ChamLaiController.php
+ddev drush cr
+```
+
+Rollback chỉ được coi là **đạt** khi một job legacy đi hết đường worker: job mang `content_hash_version=1` và `external_revision_id` rỗng, worker fetch `rel:working-copy`, lấy revision thật từ response, dùng hash bốn field và callback hoàn tất. Nhận HTTP 2xx từ `/jobs` **chưa** chứng minh điều đó — đó chỉ là tầng nhận request.
+
+Endpoint legacy `/jobs` và `/jobs/by-node/{uuid}` vẫn chạy, response có header `Deprecation: true`. **Chưa** phát `Sunset` và **chưa** xoá endpoint: việc đó cần quyết định riêng sau khi production đã qua cửa sổ rollback, không nằm trong commit cutover.
+
+**Không rollback migration bằng cách xoá cột/bảng.** Migration đã apply là append-only; sửa lỗi bằng migration số mới.
+
+### 6.2. Smoke cutover không tốn tiền
+
+`multiagent/scripts/staging_connector_smoke.py` chạy đúng một job qua worker thật với engine **giả**, để kiểm đường ống mà không gọi LLM:
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\multiagent
+.\.venv\Scripts\python.exe scripts\staging_connector_smoke.py --job-id <uuid> --confirm-staging-fixture
+```
+
+Ba chốt chặn: phải truyền đúng `--confirm-staging-fixture`; base URL của site phải là host staging (`.ddev.site`); hàng đợi phải sạch (đúng một job `queued`, không có job `running`). Run tạo ra được đánh dấu `is_fixture=true` nên bị loại khỏi mọi metric production, và báo cáo mang note `STAGING FIXTURE`. **Tuyệt đối không trình bày điểm của run fixture như kết quả chất lượng.**
 
 ---
 

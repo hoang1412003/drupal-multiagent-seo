@@ -534,7 +534,8 @@ def list_reviews(
         cur.execute(
             "SELECT r.public_id,r.scored_at,r.site_id,s.slug,r.external_content_id,"
             "r.decision,r.final_score,p.code,r.policy_version,r.model,"
-            "lower(coalesce(r.config_meta->>'is_fixture','false'))='true' "
+            "(coalesce(r.is_fixture,false) OR "
+            "lower(coalesce(r.config_meta->>'is_fixture','false'))='true') "
             "FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
             f"JOIN review_profile AS p ON p.id=r.profile_id WHERE {where_sql} "
             "ORDER BY r.scored_at DESC,r.id DESC LIMIT %s OFFSET %s",
@@ -562,7 +563,8 @@ def get_review(conn, public_id: UUID) -> ReviewDetail | None:
             "r.usage,r.model,r.writeback_status,r.writeback_error,r.site_id,s.slug,"
             "s.name,s.base_url,r.profile_id,p.code,r.policy_version,"
             "r.external_content_id,r.external_revision_id,r.content_type,r.langcode,"
-            "r.correlation_id FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
+            "r.correlation_id,r.is_fixture "
+            "FROM run_log AS r JOIN site AS s ON s.id=r.site_id "
             "JOIN review_profile AS p ON p.id=r.profile_id WHERE r.public_id=%s",
             (public_id,),
         )
@@ -620,7 +622,7 @@ def get_review(conn, public_id: UUID) -> ReviewDetail | None:
         content_type=row[23],
         langcode=row[24],
         correlation_id=row[25],
-        is_fixture=_is_fixture(row[9]),
+        is_fixture=_is_fixture(row[9]) or bool(row[26]),
         drupal_url=_drupal_node_url(row[17], row[21]),
     )
 
@@ -771,9 +773,18 @@ def _bounds(date_from: date, date_to: date) -> tuple[datetime, datetime]:
 
 
 def _fixture_clause(include_fixtures: bool) -> str:
+    """Loai run fixture khoi metric production.
+
+    Doc CA HAI nguon: cot `is_fixture` (migration 0004, duong chinh tu Plan 4)
+    va marker cu trong `config_meta` (P3). Bo marker cu se lam cac run danh
+    dau truoc migration lang le quay lai bang thong ke.
+    """
     if include_fixtures:
         return ""
-    return " AND lower(coalesce(config_meta->>'is_fixture','false')) <> 'true'"
+    return (
+        " AND NOT (coalesce(is_fixture,false) OR "
+        "lower(coalesce(config_meta->>'is_fixture','false'))='true')"
+    )
 
 
 def _duration_percentile(value) -> Decimal | None:
@@ -862,4 +873,24 @@ def dashboard(
         cost_estimate=estimate_usage(usage, DEFAULT_PRICING_PATH),
         writeback_counts=writeback_counts,
         writeback_success_rate=success_rate,
+        # Worker van `unknown` cho toi khi co heartbeat that (Plan 5). Connector
+        # doc ket qua test connection DA LUU chu khong tu goi Drupal: dashboard
+        # phai tra loi nhanh va khong duoc bien moi lan mo trang thanh mot
+        # request ra ngoai.
+        connector_status=_connector_status(conn),
     )
+
+
+def _connector_status(conn) -> str:
+    """Trang thai connector theo lan test gan nhat. NULL -> `unknown`.
+
+    `unknown` khac han `ok`: chua kiem bao gio khong duoc hien thanh mau xanh.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT last_health_status FROM site WHERE active ORDER BY slug LIMIT 1"
+        )
+        row = cur.fetchone()
+    if row is None or row[0] is None:
+        return "unknown"
+    return row[0]

@@ -211,7 +211,8 @@ def test_enqueue_force_false_tren_cap_da_dead_letter_khong_tao_job(conn):
     assert job_cu["status"] == "failed", job_cu  # da dead-letter tu test truoc
 
     kq = q.enqueue(conn, "uuid-5", "h5", "event")
-    assert kq == {"status": "dead_letter", "job_id": job_cu["id"]}, kq
+    assert kq["status"] == "dead_letter" and kq["job_id"] == job_cu["id"], kq
+    assert set(kq) == {"status", "job_id", "public_id"}, kq
     with conn.cursor() as cur:
         cur.execute(
             "SELECT count(*) FROM review_job WHERE node_id='uuid-5' AND content_hash='h5'")
@@ -419,7 +420,11 @@ def test_scoped_cung_site_hash_policy_tra_duplicate(conn):
     context = _default_context(conn)
     first = q.enqueue_scoped(conn, context, "scoped-duplicate", "hash-scoped", "event")
     second = q.enqueue_scoped(conn, context, "scoped-duplicate", "hash-scoped", "reconcile")
-    assert second == {"status": q.DUPLICATE, "job_id": first["job_id"]}, second
+    assert second == {
+        "status": q.DUPLICATE,
+        "job_id": first["job_id"],
+        "public_id": first["public_id"],
+    }, second
     job = q.claim(conn, "w-don-scoped")
     q.complete(conn, job["id"])
     print("[PASS] scoped dedup dung site/external/hash/policy")

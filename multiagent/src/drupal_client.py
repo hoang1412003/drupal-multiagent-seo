@@ -103,7 +103,22 @@ def fetch_content(node_id: str) -> dict:
 
     Tự retry khi Drupal không phản hồi (docs/architecture.md mục 7); nếu hết
     retry vẫn lỗi, exception văng ra ngoài để dừng pipeline.
+
+    Khi worker đã fetch sẵn đúng revision (Plan 4), hàm này trả lại chính bản
+    đó thay vì gọi HTTP lần hai. Không làm vậy thì một job đọc Drupal hai lần,
+    và tệ hơn: hai lần đó có thể trả về HAI REVISION KHÁC NHAU nếu editor lưu
+    bài xen giữa - lúc đó fingerprint đã kiểm không còn mô tả nội dung vừa
+    chấm. Script thủ công không bật runtime nên vẫn đi đường cũ nguyên vẹn.
     """
+    from review_platform.connectors import runtime
+
+    da_chuan_bi = runtime.prepared_for(node_id)
+    if da_chuan_bi is not None:
+        return {
+            "fields": da_chuan_bi.fields,
+            "raw_content": da_chuan_bi.raw_content,
+        }
+
     url = f"{BASE_URL}/jsonapi/node/article/{node_id}"
     response = _request_with_retry(
         requests.get, url, headers=JSONAPI_HEADERS, auth=AUTH, timeout=REQUEST_TIMEOUT_SECONDS
