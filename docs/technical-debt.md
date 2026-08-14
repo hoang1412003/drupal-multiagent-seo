@@ -798,7 +798,11 @@ Implementation plan đã được tách thành plan tổng + 5 plan con tại [`
 - `StarletteDeprecationWarning` về FastAPI TestClient/httpx2 chưa được xử lý; cần khóa/nâng dependency có kiểm thử, không đổi package vội trong checkpoint feature.
 - Audit retention/export và SSO vẫn ngoài MVP. Audit page hiện admin-only, chỉ đọc và không có endpoint delete/export.
 
-**Việc tiếp theo của luồng productization:** review/integrate P4 rồi bắt đầu [`superpowers/plans/2026-08-12-platform-hardening-rollout.md`](superpowers/plans/2026-08-12-platform-hardening-rollout.md) theo TDD. Không tự chạy E1/E5. Không được suy `llm_usage_event`, worker heartbeat, security header/reverse proxy hay rollout production đã tồn tại chỉ vì chúng có trong plan.
+**Luồng productization ĐÃ KẾT THÚC.** Không còn plan con nào chưa thực thi. Ma trận nghiệm thu 11/11 pass: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md).
+
+**Việc tiếp theo của DỰ ÁN không còn là productization mà là ĐO LƯỜNG:** test–retest nhãn → E1 → E5, theo đúng mục 8.1–8.3 ở trên. Không tự chạy phép đo trả phí.
+
+Nếu sau này quay lại nền tảng, những thứ **chưa** làm và không được suy là đã có: khoá phiên bản dependency (H4), gỡ endpoint legacy `/jobs` (cần quyết định riêng sau cửa sổ rollback), provenance embedding cho `kb_chunk.meta` (H6), connection pool (H3), SSO, và chạy trên host thật khác máy dev.
 
 **Riêng với P4, những gì đã được kiểm bằng hệ thống thật (không phải chỉ unit test):** Drupal lưu bài → job qua `/api/v1` mang đúng revision và hash v2 → worker fetch exact revision → callback tạo **đúng một** revision AI mới, `moderation_state` không đổi; gửi lại cùng `run_id` trả `already_applied` và **không** tạo revision thứ hai; job của revision cũ nhận `content_superseded` và **không** ghi đè; diễn tập rollback về `/jobs` legacy đi hết đường worker với hash v1 + `rel:working-copy`. Chi tiết và giới hạn: [`evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
 

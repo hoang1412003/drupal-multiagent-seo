@@ -190,7 +190,7 @@ Không còn thư mục `multiagent/logs/` hay vấn đề `.gitignore` cho file 
 
 ---
 
-## 6. Vận hành qua trang quản trị độc lập — P3 và P4 đã qua checkpoint; worker heartbeat thật chưa triển khai
+## 6. Vận hành qua trang quản trị độc lập — P1→P5 đã hoàn tất (2026-08-14)
 
 Thiết kế productization ngày 2026-08-12 đưa dữ liệu vận hành hiện có lên trang `/admin` của service, thay vì dựng trang quản trị trong Drupal. Nguồn sự thật chi tiết: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md).
 

@@ -1,7 +1,13 @@
 # Kế hoạch thí nghiệm và đo lường
 
 **Phiên bản:** v1 (2026-07-27)
-**Trạng thái:** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. Preflight E1 bản 4 đã đạt trên snapshot `04f10e1`/prompt `020738e209017213`, nhưng **không gọi API, không tạo output và không phải kết quả E1**; lượt trả phí được hoãn sang 2026-08-13. Cùng ngày phải làm test–retest mù **trước khi xem/chạy output E1**. E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test-retest nhãn.
+**Trạng thái (cập nhật 2026-08-14):** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. Preflight E1 bản 4 đã đạt trên snapshot `04f10e1`/prompt `020738e209017213`, nhưng **không gọi API, không tạo output và không phải kết quả E1**.
+
+⚠️ **Tính đến 2026-08-14, test–retest và E1 bản 4 VẪN CHƯA CHẠY.** Lượt trả phí từng được xếp cho 2026-08-13 nhưng chưa diễn ra; đừng đọc mốc ngày cũ thành "đã làm xong". Thứ tự bắt buộc không đổi: **test–retest mù trước, rồi mới E1**, và không được xem output E1 trước khi người gán khoá nhãn lượt hai.
+
+E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test–retest nhãn.
+
+**Luồng productization P1→P5 (hoàn tất 2026-08-14) KHÔNG ảnh hưởng hợp đồng đo lường này:** `prompt_version` vẫn `020738e209017213`, `git diff` score-path so với `04f10e1` vẫn rỗng, và không lần gọi Anthropic nào phát sinh. Mọi run sinh ra trong P1→P5 đều `is_fixture=true` do engine giả — **không phải kết quả chấm điểm** và không được đưa vào bất kỳ phép đo nào.
 
 Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
 

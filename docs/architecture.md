@@ -278,7 +278,7 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 **Trạng thái (cập nhật 2026-08-04): đã triển khai.** `multiagent/config/scoring.yaml` giữ trọng số và ngưỡng, tra theo khoá `(content_type, langcode)`; `src/config.py` nạp và phát cảnh báo lúc chạy; `graph.py` đọc từ config thay vì hằng số `WEIGHTS`; `state.py` đã có `content_type`/`langcode`. Bằng chứng đây là refactor thuần: `label_helper.py` chạy lại trên 33 mẫu gold set cho ra file giống hệt từng byte với báo cáo đã commit. Điều quan trọng đã đúng ngay từ đầu: 4 agent nhận nội dung qua tham số, không nhúng cứng giả định về một loại nội dung, nên khi tách config sẽ không phải viết lại logic agent.
 
-### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — P1–P3 đã qua checkpoint, P4–P6 chưa triển khai
+### 5.7. Nền tảng Multi-Agent độc lập + trang quản trị — P1→P5 ĐÃ HOÀN TẤT (2026-08-14)
 
 **Quyết định mới ngày 2026-08-12 thay thế đề xuất cũ đặt trang quản trị trong Drupal.** Multi-Agent sẽ là một service độc lập; Drupal là connector/client đầu tiên. Trang quản trị nằm tại `/admin` của service và dùng tài khoản local riêng trong MVP. Thiết kế đầy đủ: [`superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md`](superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md). Thứ tự migration/auth/admin/connector/hardening và checkpoint TDD: [`superpowers/plans/2026-08-12-standalone-multiagent-platform.md`](superpowers/plans/2026-08-12-standalone-multiagent-platform.md). Các module trong hai tài liệu vẫn là planned state cho tới commit triển khai tương ứng.
 
@@ -302,7 +302,16 @@ PostgreSQL hiện có là tiền đề tốt, nhưng schema hiện hành chưa t
 
 **Trạng thái triển khai ngày 2026-08-13:** P1 đã tạo migration/site/profile/scoped queue-audit; P2 đã tạo local auth/session/CSRF/RBAC/admin shell; P3 đã thêm dashboard/jobs/reviews/users/config-KB/evaluation/audit và retry có transaction/audit. Evidence tương ứng nằm ở `docs/evidence/platform-*-verification.txt`. P3 không đổi score path; `prompt_version` vẫn `020738e209017213`. E2 local mới đạt và có manifest; không có E1/E5 trả phí mới.
 
-Ranh giới còn mở phải đọc đúng: `/api/v1`, connector Drupal mới, callback CAS/idempotency, pause/resume và migration 0004 thuộc P4; heartbeat, durable failed-attempt usage, capability/security/staging/rollout thuộc các pha sau. Do đó health worker/connector trên dashboard hiện là `unknown`, không phải tín hiệu lỗi cũng không phải tín hiệu healthy.
+**Trạng thái 2026-08-14: cả năm pha đã triển khai và có evidence.** Ma trận nghiệm thu 11/11 pass: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Module thực sự tồn tại trong `multiagent/src/review_platform/`: `migrations`, `database`, `context`, `sites`, `reviews`, `pricing`, `fingerprint`, `worker_health`, `usage`, `logging`, `security`, `api/`, `connectors/`, `admin/`.
+
+Health trên dashboard nay đọc **nguồn thật**: worker từ bảng `worker_heartbeat` (`Đang chạy` / `Quá hạn` / `Không có heartbeat`), connector từ lần bấm "Kiểm tra kết nối" gần nhất. Chưa kiểm bao giờ thì hiện "chưa biết" — **không** hiện xanh.
+
+Hai điều **không** được suy ra từ việc nền tảng đã xong:
+
+- **Chưa có kết quả chấm điểm thật nào** sinh ra trong P1→P5. Mọi run đều `is_fixture=true` do engine giả đặt điểm.
+- **Thứ tự đo lường không đổi**: test–retest nhãn → E1 → E5. `prompt_version` vẫn `020738e209017213`, score-path diff vẫn rỗng.
+
+Nợ còn mở sau MVP: một site/một thị trường, local auth chưa SSO, chưa khoá phiên bản dependency (H4), endpoint legacy `/jobs` chưa gỡ (cần cho cửa sổ rollback), `kb_chunk.meta` chưa lưu provenance embedding (H6).
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 
