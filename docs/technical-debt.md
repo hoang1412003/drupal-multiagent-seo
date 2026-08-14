@@ -624,7 +624,8 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
 - ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
 - ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
-- ✅ **Productization P1 → P4 đã qua checkpoint:** foundation, admin auth, admin operations, và (2026-08-14) `/api/v1` + connector Drupal revision-aware + result callback CAS + trang `/admin/connection`. Việc code tiếp theo là **P5 hardening/rollout**. Đọc mục 8.9 và bốn file evidence trước khi làm. Việc này không thay đổi thứ tự test–retest → E1 → E5 ở trên: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng.
+- ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
+- 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
@@ -884,12 +885,24 @@ Test này sẽ đỏ nếu worker bỏ `include_write_back=False`, nếu graph b
 
 Các việc dưới đây là hardening dài hạn. Không chen chúng vào giữa E1 → E5 chỉ để làm hệ thống “đẹp hơn”; chỉ nâng ưu tiên khi có sự cố thực tế, yêu cầu production hoặc mentor đổi phạm vi.
 
-### H1. Một test runner và CI thống nhất
+### H1. Một test runner và CI thống nhất — ✅ ĐÃ ĐÓNG (2026-08-14)
+
+`scripts/run_test_group.py pure|postgres|all-offline` chạy toàn bộ test offline bằng một lệnh và báo pass/fail/skip nhất quán trên Windows. `scripts/test_groups.json` xếp **mọi** file `test_*.py` vào đúng một nhóm; runner đối chiếu manifest với thư mục thật và **báo lỗi nếu có file chưa xếp nhóm** — không file nào bị bỏ quên im lặng. Script gọi API trả phí (`eval_*`, `smoke_test_*`, `seed_*`) bị chặn khỏi manifest, và tiến trình con bị xoá `ANTHROPIC_API_KEY`.
+
+`[SKIP]` mặc định làm runner **thất bại**: thiếu dịch vụ thì phải sửa môi trường, không được báo xanh giả. CI (`.github/workflows/platform-offline-tests.yml`) dùng `pull_request` (không phải `pull_request_target`), `permissions: contents: read`, pin action theo full SHA, **không tham chiếu secret nào**.
+
+Nội dung cũ của mục này giữ lại bên dưới để đối chiếu lịch sử:
+
+<details><summary>Yêu cầu ban đầu</summary>
 
 - Có một lệnh chạy toàn bộ test offline, báo pass/fail/skip nhất quán trên Windows.
 - Tách marker/nhóm: unit, PostgreSQL integration, Drupal integration, LLM/evaluation trả phí.
 - CI mặc định chỉ chạy nhóm không cần secret và không tốn API; test trả phí phải có phê duyệt rõ.
 - Hai test của đợt rà soát N5 dừng ở thao tác tạo thư mục tạm: trước tiên tái hiện ngoài sandbox để phân biệt giới hạn môi trường với lỗi project. Chỉ sửa helper/path nếu chứng minh code chọn nơi ghi không phù hợp; nếu là giới hạn sandbox thì cấu hình `TEMP`/workspace hoặc đánh dấu skip có lý do. Nợ bare filename của `ghi_ket_qua()` đã ghi ở mục 8.0, không tạo ticket trùng.
+
+</details>
+
+**Còn mở:** nhóm `manual_ddev` hiện rỗng — năm test PHP cần Drupal thật (`test_ai_result_callback.php`, `test_ai_roles.php`, `test_ai_input_fingerprint.php`, `test_vf_ai_trigger.php`, `test_ai_report_renderer.php`) chạy qua `ddev`, nằm ngoài runner Python và **phải chạy tay** trước khi bàn giao. CI không báo PASS hộ chúng.
 
 ### H2. Timeout, retry và ngân sách cho LLM
 
