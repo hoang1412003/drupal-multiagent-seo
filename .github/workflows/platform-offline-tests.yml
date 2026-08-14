@@ -1,0 +1,91 @@
+name: Platform offline tests
+
+# Chi chay bo test OFFLINE. Khong tham chieu secret nao, khong goi Anthropic,
+# khong goi Drupal. Test can Drupal that duoc danh dau `manual_ddev` trong
+# scripts/test_groups.json va PHAI chay tay - CI khong bao gio bao PASS ho.
+#
+# Dung `pull_request` chu KHONG dung `pull_request_target`: cai sau chay voi
+# quyen cua repo dich va co the doc secret, nen mot PR tu fork se doc duoc.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        # Cung tag voi multiagent/docker-compose.yml. Pin theo digest thuoc
+        # no H4 (khoa dependency) va van dang mo - khong duoc coi H4 la da dong.
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: vf_agent
+          POSTGRES_PASSWORD: vf_agent
+          POSTGRES_DB: vf_agent
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U vf_agent"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PG_DSN: postgresql://vf_agent:vf_agent@127.0.0.1:5433/vf_agent
+      HF_HUB_OFFLINE: "1"
+      VF_ALLOW_PAID_EVAL: "0"
+      # Khoa gia CHI de app khoi dong duoc. Khong phai secret that, va bo test
+      # offline khong goi mang nen chung khong duoc dung vao dau.
+      ADMIN_CSRF_KEY: ci-csrf-key-chi-de-khoi-dong-32byte
+      ADMIN_THROTTLE_KEY: ci-throttle-key-chi-de-khoi-dong-32b
+      ADMIN_COOKIE_SECURE: "false"
+      VF_SERVICE_TOKEN: ci-token-khong-dung-that
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            multiagent/requirements.txt
+            multiagent/requirements-dev.txt
+
+      - name: Cai dependency
+        working-directory: multiagent
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Apply migration
+        working-directory: multiagent
+        run: python scripts/migrate.py apply
+
+      - name: Cong bao ve score path
+        working-directory: multiagent
+        run: |
+          python -c "import sys; sys.path[:0]=['scripts','src']; import eval_calibration as e; v=e.prompt_version(); assert v=='020738e209017213', f'prompt_version doi: {v}'; print(v)"
+          git diff --exit-code 04f10e1 -- src/agents src/ai_core.py src/brand_analysis.py src/config.py src/embeddings.py src/graph.py src/retrieval.py src/scoring.py src/seo_analysis.py src/state.py src/text_utils.py src/kb config/scoring.yaml
+
+      - name: Chay toan bo test offline
+        working-directory: multiagent
+        # KHONG truyen --cho-phep-skip: test bi SKIP se lam job do, khong bao
+        # xanh gia. Thieu dich vu thi phai sua workflow, khong phai ha chuan.
+        run: python scripts/run_test_group.py all-offline
+
+      - name: Tom tat
+        if: always()
+        working-directory: multiagent
+        run: cat test_group_summary.json || true
