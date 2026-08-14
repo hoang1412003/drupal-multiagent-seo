@@ -23,6 +23,8 @@ from review_platform import database as platform_database
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import router as admin_router
+from review_platform.api import router as api_v1_router
+from review_platform.api.limits import RequestSizeLimitMiddleware
 
 load_dotenv()
 
@@ -44,6 +46,8 @@ app.add_exception_handler(
     admin_router.forbidden_response,
 )
 app.include_router(admin_router.router)
+app.include_router(api_v1_router.router)
+app.add_middleware(RequestSizeLimitMiddleware)
 app.mount(
     "/admin/static",
     StaticFiles(directory=admin_router.STATIC_DIR),
@@ -107,7 +111,13 @@ def post_jobs(body: JobIn, response: Response, conn=Depends(_conn)):
     `dead_letter` -> 409 Conflict: job khong duoc tao vi cap (node_id,
     content_hash) nay da bo cuoc truoc do (het MAX_ATTEMPTS). Khong phai loi
     cua request nay - dung 409 chu khong phai 4xx/5xx khac de phan biet voi
-    loi xac thuc (401) hay loi payload (422)."""
+    loi xac thuc (401) hay loi payload (422).
+
+    Endpoint nay da DEPRECATED tu khi co /api/v1/jobs, nhung phai song suot
+    cua so rollback: neu Drupal quay ve client cu ma endpoint nay da bi go
+    thi bai se khong duoc cham va khong ai thay loi. Chua phat `Sunset` vi
+    chua co ngay go duoc phe duyet."""
+    response.headers["Deprecation"] = "true"
     kq = tao_job(body, conn)
     if kq["status"] == "dead_letter":
         response.status_code = 409
@@ -119,7 +129,8 @@ def post_jobs(body: JobIn, response: Response, conn=Depends(_conn)):
 
 
 @app.get("/jobs/by-node/{node_id}", dependencies=[Depends(kiem_token)])
-def get_trang_thai(node_id: str, conn=Depends(_conn)):
+def get_trang_thai(node_id: str, response: Response, conn=Depends(_conn)):
+    response.headers["Deprecation"] = "true"
     return trang_thai(node_id, conn)
 
 

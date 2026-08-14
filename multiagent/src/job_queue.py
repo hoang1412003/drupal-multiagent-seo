@@ -59,15 +59,17 @@ def _insert_scoped(
     external_revision_id: str | None,
     correlation_id: UUID,
     supersedes_job_id: int | None,
+    content_hash_version: int,
 ):
     with conn.cursor() as cur:
         cur.execute(
             f"INSERT INTO {TEN_BANG} ("
             "node_id, content_hash, status, source, site_id, profile_id, "
             "policy_version, external_content_id, external_revision_id, "
-            "content_type, langcode, correlation_id, supersedes_job_id"
-            ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
-            "ON CONFLICT DO NOTHING RETURNING id",
+            "content_type, langcode, correlation_id, supersedes_job_id, "
+            "content_hash_version"
+            ") VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) "
+            "ON CONFLICT DO NOTHING RETURNING id, public_id",
             (
                 external_content_id,
                 content_hash,
@@ -82,6 +84,7 @@ def _insert_scoped(
                 context.profile.language_code,
                 correlation_id,
                 supersedes_job_id,
+                content_hash_version,
             ),
         )
         return cur.fetchone()
@@ -97,7 +100,7 @@ def _active_duplicate_id(
 ):
     with conn.cursor() as cur:
         cur.execute(
-            f"SELECT id FROM {TEN_BANG} "
+            f"SELECT id, public_id FROM {TEN_BANG} "
             "WHERE site_id=%s AND external_content_id=%s AND content_hash=%s "
             "AND policy_version=%s AND status IN (%s,%s,%s) "
             "ORDER BY created_at DESC, id DESC LIMIT 1",
@@ -111,8 +114,7 @@ def _active_duplicate_id(
                 DONE,
             ),
         )
-        row = cur.fetchone()
-    return None if row is None else row[0]
+        return cur.fetchone()
 
 
 def enqueue_scoped(
@@ -126,8 +128,17 @@ def enqueue_scoped(
     force: bool = False,
     correlation_id: UUID | None = None,
     supersedes_job_id: int | None = None,
+    content_hash_version: int = 1,
 ) -> dict:
-    """Xep job voi snapshot site/profile/policy; dedup khong xuyen site."""
+    """Xep job voi snapshot site/profile/policy; dedup khong xuyen site.
+
+    `content_hash_version` mac dinh 1 de duong legacy `/jobs` giu nguyen hanh
+    vi bon field. Chi `/api/v1/jobs` moi truyen 2 (sau field). Worker chon
+    thuat toan fingerprint theo dung cot nay, nen sai o day la sai o ca cua
+    so rollback.
+    """
+    if content_hash_version not in (1, 2):
+        raise ValueError("content_hash_version chi duoc la 1 hoac 2")
     external_content_id = _validate_non_empty(
         "external_content_id", external_content_id
     )
@@ -149,7 +160,7 @@ def enqueue_scoped(
         with conn.transaction():
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT id, status FROM {TEN_BANG} "
+                    f"SELECT id, status, public_id FROM {TEN_BANG} "
                     "WHERE site_id=%s AND external_content_id=%s "
                     "AND content_hash=%s AND policy_version=%s "
                     "AND status IN (%s,%s,%s,%s) "
@@ -172,14 +183,22 @@ def enqueue_scoped(
                 None,
             )
             if failed_row is not None:
-                return {"status": "dead_letter", "job_id": failed_row[0]}
+                return {
+                    "status": "dead_letter",
+                    "job_id": failed_row[0],
+                    "public_id": failed_row[2],
+                }
 
             active_row = next(
                 (row for row in existing if row[1] in (QUEUED, RUNNING, DONE)),
                 None,
             )
             if active_row is not None:
-                return {"status": DUPLICATE, "job_id": active_row[0]}
+                return {
+                    "status": DUPLICATE,
+                    "job_id": active_row[0],
+                    "public_id": active_row[2],
+                }
 
             row = _insert_scoped(
                 conn,
@@ -190,6 +209,7 @@ def enqueue_scoped(
                 external_revision_id,
                 correlation_id,
                 supersedes_job_id,
+                content_hash_version,
             )
     else:
         with conn.transaction():
@@ -225,10 +245,10 @@ def enqueue_scoped(
             else:
                 with conn.cursor() as cur:
                     cur.execute(
-                        f"SELECT id FROM {TEN_BANG} "
+                        f"SELECT id, status FROM {TEN_BANG} "
                         "WHERE site_id=%s AND external_content_id=%s "
                         "AND profile_id=%s AND policy_version=%s "
-                        "AND content_hash=%s AND status=%s "
+                        "AND content_hash=%s AND status IN (%s,%s) "
                         "ORDER BY created_at DESC, id DESC LIMIT 1 FOR UPDATE",
                         (
                             context.site.id,
@@ -237,17 +257,22 @@ def enqueue_scoped(
                             context.profile.policy_version,
                             content_hash,
                             DONE,
+                            FAILED,
                         ),
                     )
                     target = cur.fetchone()
                 if target is not None:
                     target_id = target[0]
-                    with conn.cursor() as cur:
-                        cur.execute(
-                            f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
-                            "WHERE id=%s",
-                            (SUPERSEDED, target_id),
-                        )
+                    # Job DONE bi thay the nen chuyen `superseded`. Job FAILED
+                    # thi GIU nguyen `failed`: no la bang chung dead-letter,
+                    # job moi chi tro nguoc ve no qua supersedes_job_id.
+                    if target[1] == DONE:
+                        with conn.cursor() as cur:
+                            cur.execute(
+                                f"UPDATE {TEN_BANG} SET status=%s, updated_at=now() "
+                                "WHERE id=%s",
+                                (SUPERSEDED, target_id),
+                            )
 
             row = _insert_scoped(
                 conn,
@@ -258,18 +283,23 @@ def enqueue_scoped(
                 external_revision_id,
                 correlation_id,
                 target_id,
+                content_hash_version,
             )
 
     if row is None:
-        duplicate_id = _active_duplicate_id(
+        duplicate = _active_duplicate_id(
             conn,
             site_id=context.site.id,
             external_content_id=external_content_id,
             content_hash=content_hash,
             policy_version=context.profile.policy_version,
         )
-        return {"status": DUPLICATE, "job_id": duplicate_id}
-    return {"status": QUEUED, "job_id": row[0]}
+        return {
+            "status": DUPLICATE,
+            "job_id": None if duplicate is None else duplicate[0],
+            "public_id": None if duplicate is None else duplicate[1],
+        }
+    return {"status": QUEUED, "job_id": row[0], "public_id": row[1]}
 
 
 def enqueue(
@@ -468,6 +498,58 @@ def job_moi_nhat(conn, node_id: str):
         return None
     return {"id": row[0], "status": row[1], "attempts": row[2],
             "last_error": row[3], "created_at": row[4], "updated_at": row[5]}
+
+
+_COT_TRANG_THAI = (
+    "public_id, status, attempts, last_error, external_content_id, "
+    "external_revision_id, content_hash, content_hash_version, "
+    "policy_version, source, created_at, updated_at"
+)
+
+
+def _trang_thai_tu_row(row) -> dict:
+    return {
+        "public_id": row[0],
+        "status": row[1],
+        "attempts": row[2],
+        "last_error": row[3],
+        "external_content_id": row[4],
+        "external_revision_id": row[5],
+        "content_hash": row[6],
+        "content_hash_version": row[7],
+        "policy_version": row[8],
+        "source": row[9],
+        "created_at": row[10],
+        "updated_at": row[11],
+    }
+
+
+def job_theo_public_id(conn, *, site_id: UUID, public_id: UUID):
+    """Tra job theo UUID cong khai, LUON loc theo site cua credential.
+
+    Loc site o day chu khong o caller: mot job cua site khac phai khong tim
+    thay duoc, de client khong do duoc UUID nao ton tai tren he thong.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT {_COT_TRANG_THAI} FROM {TEN_BANG} "
+            "WHERE public_id=%s AND site_id=%s",
+            (public_id, site_id),
+        )
+        row = cur.fetchone()
+    return None if row is None else _trang_thai_tu_row(row)
+
+
+def job_moi_nhat_scoped(conn, *, site_id: UUID, external_content_id: str):
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT {_COT_TRANG_THAI} FROM {TEN_BANG} "
+            "WHERE site_id=%s AND external_content_id=%s "
+            "ORDER BY created_at DESC, id DESC LIMIT 1",
+            (site_id, external_content_id),
+        )
+        row = cur.fetchone()
+    return None if row is None else _trang_thai_tu_row(row)
 
 
 def thong_ke(conn) -> dict:
