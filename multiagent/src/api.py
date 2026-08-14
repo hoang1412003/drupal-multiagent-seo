@@ -23,6 +23,7 @@ from review_platform import database as platform_database
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import router as admin_router
+from review_platform import security as platform_security
 from review_platform.api import router as api_v1_router
 from review_platform.api.limits import RequestSizeLimitMiddleware
 
@@ -47,7 +48,14 @@ app.add_exception_handler(
 )
 app.include_router(admin_router.router)
 app.include_router(api_v1_router.router)
-app.add_middleware(RequestSizeLimitMiddleware)
+# Thu tu quan trong: add_middleware xep tu trong ra ngoai, nen SecurityMiddleware
+# them SAU se boc NGOAI limiter. Nho vay exception cua chinh limiter cung duoc
+# quy ve response an toan, va moi response deu co security header.
+app.add_middleware(
+    RequestSizeLimitMiddleware,
+    gioi_han=(("/api/v1", 16 * 1024), ("/admin", platform_security.MAX_ADMIN_BODY)),
+)
+app.add_middleware(platform_security.SecurityMiddleware)
 app.mount(
     "/admin/static",
     StaticFiles(directory=admin_router.STATIC_DIR),

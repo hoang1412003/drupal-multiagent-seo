@@ -14,6 +14,7 @@ from review_platform.admin.sanitization import sanitize_text
 from review_platform.auth import audit_log
 from review_platform.auth.rbac import Role
 from review_platform.pricing import CostEstimate, estimate_usage
+from review_platform import worker_health
 
 
 DEFAULT_PRICING_PATH = (
@@ -196,8 +197,13 @@ class DashboardView:
     cost_estimate: CostEstimate
     writeback_counts: dict[str, int]
     writeback_success_rate: Decimal | None
-    worker_status: str = "unknown"
+    # Tu vung worker theo dung worker_health: running | stale | unavailable.
+    # `stale` (vua chet) KHAC `unavailable` (chua bao gio chay).
+    worker_status: str = "unavailable"
     connector_status: str = "unknown"
+    worker_running: int = 0
+    worker_stale: int = 0
+    worker_last_seen_at: datetime | None = None
 
 
 _AGENT_ORDER = ("content_quality", "seo", "brand", "compliance")
@@ -873,12 +879,27 @@ def dashboard(
         cost_estimate=estimate_usage(usage, DEFAULT_PRICING_PATH),
         writeback_counts=writeback_counts,
         writeback_success_rate=success_rate,
-        # Worker van `unknown` cho toi khi co heartbeat that (Plan 5). Connector
-        # doc ket qua test connection DA LUU chu khong tu goi Drupal: dashboard
-        # phai tra loi nhanh va khong duoc bien moi lan mo trang thanh mot
-        # request ra ngoai.
+        # Connector doc ket qua test connection DA LUU chu khong tu goi Drupal:
+        # dashboard phai tra loi nhanh va khong duoc bien moi lan mo trang
+        # thanh mot request ra ngoai.
         connector_status=_connector_status(conn),
+        **_worker_health_fields(conn),
     )
+
+
+def _worker_health_fields(conn) -> dict:
+    """Trang thai worker tu bang heartbeat.
+
+    Doc nguon THAT thay vi suy tu "API con song": api.py va worker.py la hai
+    tien trinh doc lap, worker chet thi API van tra 200.
+    """
+    view = worker_health.list_worker_health(conn, now=datetime.now(timezone.utc))
+    return {
+        "worker_status": view.status,
+        "worker_running": view.running_count,
+        "worker_stale": view.stale_count,
+        "worker_last_seen_at": view.last_seen_at,
+    }
 
 
 def _connector_status(conn) -> str:

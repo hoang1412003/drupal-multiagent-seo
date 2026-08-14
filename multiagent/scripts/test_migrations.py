@@ -378,7 +378,7 @@ def test_migration_0001_nang_legacy_bao_toan_du_lieu(conn):
     _reset_schema(conn, schema)
     try:
         _create_legacy_schema(conn)
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4, 5]
 
         assert _scalar(conn, "SELECT count(*) FROM review_job") == 1
         assert _scalar(conn, "SELECT count(*) FROM run_log") == 1
@@ -412,7 +412,7 @@ def test_migration_0001_tao_fresh_schema_va_seed(conn):
     schema = "vf_test_migration_fresh"
     _reset_schema(conn, schema)
     try:
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4, 5]
         assert _scalar(conn, "SELECT count(*) FROM site") == 1
         assert _scalar(conn, "SELECT count(*) FROM review_profile") == 1
         assert _scalar(conn, "SELECT count(*) FROM site_profile_assignment") == 1
@@ -524,8 +524,8 @@ def test_migration_0002_tao_schema_admin_auth_va_rang_buoc(conn):
             assert migrations.apply_pending(conn, first_only) == [1]
 
         before = migrations.status(conn, MIGRATIONS_DIR)
-        assert before.applied == (1,) and before.pending == (2, 3, 4), before
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2, 3, 4]
+        assert before.applied == (1,) and before.pending == (2, 3, 4, 5), before
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [2, 3, 4, 5]
 
         expected_tables = {
             "admin_user",
@@ -590,7 +590,7 @@ def test_migration_0004_tao_credential_va_hash_version(conn):
     _reset_schema(conn, schema)
     try:
         _create_legacy_schema(conn)
-        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4]
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4, 5]
 
         # Row legacy giu version 1: khong duoc rewrite hash lich su thanh v2.
         assert _scalar(conn, "SELECT content_hash_version FROM review_job") == 1
@@ -658,6 +658,82 @@ def test_migration_0004_tao_credential_va_hash_version(conn):
     print("[PASS] migration 0004 tao credential, hash version va cot health")
 
 
+def test_migration_0005_tao_heartbeat_va_usage_event(conn):
+    schema = "vf_test_migration_observability"
+    _reset_schema(conn, schema)
+    try:
+        _create_legacy_schema(conn)
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == [1, 2, 3, 4, 5]
+
+        # Du lieu legacy phai con nguyen sau khi them hai bang moi.
+        assert _scalar(conn, "SELECT count(*) FROM review_job") == 1
+        assert _scalar(conn, "SELECT count(*) FROM run_log") == 1
+        assert _scalar(conn, "SELECT payload->>'status' FROM run_log") == "needs_revision"
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema=current_schema() AND table_name='worker_heartbeat'"
+            )
+            heartbeat_cols = {row[0] for row in cur.fetchall()}
+        assert heartbeat_cols == {
+            "instance_id", "started_at", "last_seen_at", "version", "current_job_id",
+        }, heartbeat_cols
+
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema=current_schema() AND table_name='llm_usage_event'"
+            )
+            usage_cols = {row[0] for row in cur.fetchall()}
+        assert usage_cols == {
+            "id", "job_id", "attempt", "sequence_no", "correlation_id", "agent",
+            "phase", "model", "input_tokens", "output_tokens", "is_fixture",
+            "recorded_at",
+        }, usage_cols
+        # Tuyet doi khong co cot nao chua prompt/output/noi dung bai.
+        assert not (usage_cols & {"prompt", "output", "body", "content", "payload"})
+
+        with expect(db.psycopg.errors.CheckViolation, "instance_len"):
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO worker_heartbeat "
+                    "(instance_id, started_at, last_seen_at, version) "
+                    "VALUES ('', now(), now(), 'v1')"
+                )
+
+        job_id = _scalar(conn, "SELECT id FROM review_job LIMIT 1")
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO llm_usage_event (job_id, attempt, sequence_no, "
+                "correlation_id, agent, phase, model, input_tokens, output_tokens) "
+                "VALUES (%s, 1, 1, gen_random_uuid(), 'seo', 'main', 'm', 10, 5)",
+                (job_id,),
+            )
+        # Ghi lai cung (job, attempt, sequence) phai bi chan: khong cong doi chi phi.
+        with expect(db.psycopg.errors.UniqueViolation, "llm_usage_event"):
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO llm_usage_event (job_id, attempt, sequence_no, "
+                    "correlation_id, agent, phase, model, input_tokens, output_tokens) "
+                    "VALUES (%s, 1, 1, gen_random_uuid(), 'seo', 'main', 'm', 99, 99)",
+                    (job_id,),
+                )
+        with expect(db.psycopg.errors.CheckViolation, "input_tokens"):
+            with conn.cursor() as cur:
+                cur.execute(
+                    "INSERT INTO llm_usage_event (job_id, attempt, sequence_no, "
+                    "correlation_id, agent, phase, model, input_tokens, output_tokens) "
+                    "VALUES (%s, 1, 2, gen_random_uuid(), 'seo', 'main', 'm', -1, 0)",
+                    (job_id,),
+                )
+
+        assert migrations.apply_pending(conn, MIGRATIONS_DIR) == []
+    finally:
+        _drop_schema(conn, schema)
+    print("[PASS] migration 0005 tao heartbeat/usage event, giu du lieu cu")
+
+
 if __name__ == "__main__":
     try:
         postgres_conn = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -696,6 +772,7 @@ if __name__ == "__main__":
             test_migration_0001_checksum_guard_tren_database,
             test_migration_0002_tao_schema_admin_auth_va_rang_buoc,
             test_migration_0004_tao_credential_va_hash_version,
+            test_migration_0005_tao_heartbeat_va_usage_event,
         ):
             try:
                 fn(postgres_conn)

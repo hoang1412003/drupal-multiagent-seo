@@ -96,7 +96,7 @@ drupal-multiagent-seo/
 └── .env.example                  # copy thành .env và điền ANTHROPIC_API_KEY, VF_SERVICE_TOKEN
 ```
 
-### Hướng productization đã duyệt — P1→P4 đã triển khai, P5 hardening chưa
+### Hướng productization đã duyệt — P1→P5 ĐÃ HOÀN TẤT (2026-08-14)
 
 Song với Sprint 3, phần Python được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith:
 
@@ -104,9 +104,22 @@ Song với Sprint 3, phần Python được tổ chức thành **nền tảng Mu
 - **P2 Admin Auth:** `/admin`, tài khoản local riêng, Argon2id, server-side session, CSRF, throttle, audit auth, ba role `viewer` / `operator` / `admin`.
 - **P3 Admin Operations:** dashboard đọc dữ liệu thật, jobs/detail + retry có audit, review history, quản lý user, config/KB/evaluation chỉ đọc, audit admin-only.
 - **P4 API/Connector:** `/api/v1` với credential riêng theo site, connector Drupal đọc **đúng revision**, **result callback compare-and-set** (không PATCH JSON:API), fingerprint v2 phủ sáu field, trang `/admin/connection` có test connection và pause/resume intake. Endpoint legacy `/jobs` vẫn chạy kèm header `Deprecation: true` để rollback được.
-- **P5 hardening/rollout:** worker heartbeat, `llm_usage_event` bền vững cho attempt lỗi, security header/reverse proxy — **chưa làm**.
+- **P5 Hardening/Rollout:** worker heartbeat thật, `llm_usage_event` bền vững (ghi cả attempt lỗi), redaction đệ quy + security header (CSP/HSTS có điều kiện), usage bóc tách **theo từng agent** mà không đổi một dòng nào của agent, ba role Drupal least-privilege, E2E giả lập + **ma trận 14 case hỏng hóc** + quét rò rỉ canary, test runner một lệnh + CI không dùng secret, diễn tập backup/restore.
+
+**Ma trận nghiệm thu 11/11 pass:** [`docs/evidence/platform-mvp-acceptance.md`](docs/evidence/platform-mvp-acceptance.md).
+
+⚠️ **Nền tảng xong KHÔNG có nghĩa là đã có kết quả chấm điểm.** Mọi run sinh ra trong P1→P5 đều là `is_fixture=true` do engine giả tạo. E1/E3/E5/E6 vẫn chưa chạy, và thứ tự bắt buộc vẫn là **test–retest nhãn → E1 → E5**.
 
 MVP vẫn chỉ có một site Drupal tại Việt Nam; schema đã có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
+
+**Chạy toàn bộ test offline bằng một lệnh:**
+
+```
+cd multiagent
+.venv\Scripts\python.exe scripts\run_test_group.py all-offline    # 72 file, phải 0 hỏng 0 skip
+```
+
+Năm test PHP cần Drupal thật (`ddev drush php:script scripts/test_*.php`) nằm ngoài runner và phải chạy tay.
 
 ⚠️ **Tài khoản tích hợp không được là UID 1.** Drupal cho UID 1 bỏ qua mọi kiểm tra quyền, nên "test connection" sẽ báo đạt dù role sai hoàn toàn. Dùng role `ai_service` (đúng bảy quyền, có script kiểm) gán cho một user riêng — xem [`docs/pre-demo-checklist.md`](docs/pre-demo-checklist.md) mục 2c.
 

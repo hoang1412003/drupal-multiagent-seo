@@ -35,3 +35,4 @@ drupal/web/*
 !drupal/web/modules/
 drupal/web/modules/*
 !drupal/web/modules/custom/
+test_group_summary.json

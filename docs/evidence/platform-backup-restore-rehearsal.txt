@@ -1,0 +1,120 @@
+PLATFORM BACKUP / RESTORE REHEARSAL - VERIFICATION EVIDENCE
+============================================================
+
+Thoi diem: 2026-08-14T17:1x+07:00 (Asia/Saigon)
+Nhanh: feat/platform-hardening-rollout
+Moi truong: LOCAL DEV (Docker compose, pgvector/pgvector:pg17, cong 5433)
+
+⚠️ Day la dien tap tren may DEV, khong phai staging va khong phai production.
+Con so o day chung minh QUY TRINH chay duoc, khong chung minh gi ve dung
+luong hay thoi gian o moi truong that.
+
+Pham vi
+-------
+
+Plan 5 Task 7 buoc 2-3: backup truoc rollout, xac minh archive doc duoc,
+restore sang mot database RIENG, apply migration, va doi chieu bat bien.
+
+KHONG nam trong lan nay: rollout production, pilot goi LLM that, do thoi gian
+restore o quy mo that.
+
+1. Backup truoc rollout
+-----------------------
+
+  docker compose exec -T db pg_dump -U vf_agent -d vf_agent -Fc \
+      -f /tmp/platform_pre_rollout.dump
+
+  exit 0.
+
+  Dump nam TRONG container, o /tmp - CO Y de ngoai thu muc repo duoc mount.
+  Khong bao gio commit dump vao Git: no chua toan bo noi dung database, gom
+  ca hash mat khau admin va token hash.
+
+2. Xac minh archive doc duoc
+----------------------------
+
+  docker compose exec -T db pg_restore --list /tmp/platform_pre_rollout.dump
+
+  exit 0. So muc trong archive: 100.
+
+  12 bang co TABLE DATA:
+    admin_audit_log, admin_login_throttle, admin_session, admin_user,
+    kb_chunk, llm_usage_event, review_job, review_profile, run_log,
+    schema_migration, site, site_api_credential
+
+  sha256 : d52257b8c242e1d50c48e53189d1d60eeb525aeb4c80063baeeb99b171adb39e
+  so byte: 5814391
+
+  Archive list rong hoac size 0 se CHAN buoc restore/rollout. O day ca hai
+  deu hop le.
+
+3. Restore sang database RIENG
+------------------------------
+
+  Ten muc tieu: vf_agent_restore_rehearsal  (literal, khong phai bien)
+
+  Truoc khi tao, query pg_database va DUNG neu ten do da ton tai:
+
+    SELECT 1 FROM pg_database WHERE datname='vf_agent_restore_rehearsal'
+    -> khong co row -> an toan de tao
+
+  Khong bao gio tu drop mot rehearsal database cu: no co the la evidence cua
+  nguoi khac dang lam do.
+
+    CREATE DATABASE vf_agent_restore_rehearsal OWNER vf_agent   -> exit 0
+    pg_restore -d vf_agent_restore_rehearsal --exit-on-error    -> exit 0
+
+  Migration tren database vua restore:
+
+    migrate.py status -> applied: 0001..0005 | pending: none
+    migrate.py apply  -> applied now: none      (dung: dump da o ban moi nhat)
+    migrate.py status -> applied: 0001..0005 | pending: none
+
+4. Doi chieu bat bien goc vs restore
+------------------------------------
+
+  bang                    goc     restore   ket qua
+  ----------------------  ------  --------  -------
+  admin_audit_log         16      16        KHOP
+  admin_user              1       1         KHOP
+  kb_chunk                1133    1133      KHOP
+  llm_usage_event         0       0         KHOP
+  review_job              10      10        KHOP
+  review_profile          1       1         KHOP
+  run_log                 8       8         KHOP
+  schema_migration        5       5         KHOP
+  site                    1       1         KHOP
+  site_api_credential     1       1         KHOP
+  worker_heartbeat        0       0         KHOP
+
+  11/11 bang khop tuyet doi (diff tren toan bo ket qua query: rong).
+
+  Bat bien noi dung tren ban restore:
+    site    : drupal-vn-primary | http://drupal.ddev.site | DRUPAL
+    profile : cam-nang-vn | cam-nang-vn-v1
+
+  Luu y doc so lieu: `llm_usage_event` va `worker_heartbeat` deu bang 0 vi
+  hai bang do vua duoc tao o migration 0005 va chua co worker production nao
+  chay tren database dev. Bang 0 o day KHONG chung minh duoc gi ve viec ghi
+  usage/heartbeat - dieu do do test_platform_usage.py va test_worker_heartbeat.py
+  chung minh.
+
+5. Don dep
+----------
+
+  Database vf_agent_restore_rehearsal da DROP sau khi ghi xong evidence, bang
+  dung ten literal. Dump /tmp/platform_pre_rollout.dump nam trong container va
+  se mat khi container bi tao lai - do la chu dich cho dien tap local; backup
+  that o staging/production phai duoc chuyen ra ngoai va co chinh sach luu tru
+  rieng.
+
+Gioi han da biet
+----------------
+
+- Dien tap nay chay tren DEV. Thoi gian restore o day (vai giay) khong noi
+  duoc gi ve database production lon hon nhieu lan.
+- Chua dien tap khoi phuc khi dump BI HONG (truncate, sai checksum). Do la
+  kich ban dang lam nhung ngoai pham vi Plan 5.
+- Restore database la DISASTER RECOVERY, khong phai duong rollback binh
+  thuong cua ung dung. Rollback ung dung di theo mo ta o docs/operations.md
+  muc 6.1 va da duoc dien tap rieng o Plan 4.

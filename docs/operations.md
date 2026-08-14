@@ -255,6 +255,29 @@ Endpoint legacy `/jobs` và `/jobs/by-node/{uuid}` vẫn chạy, response có he
 
 **Không rollback migration bằng cách xoá cột/bảng.** Migration đã apply là append-only; sửa lỗi bằng migration số mới.
 
+### 6.1b. Ba role Drupal và ranh giới ghi
+
+`drupal/scripts/configure_ai_roles.php` là nguồn sự thật cho quyền của ba role. Ma trận nằm ở `drupal/scripts/ai_roles_matrix.php`, dùng chung với `test_ai_roles.php` để hai bên không trôi lệch.
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\drupal
+ddev drush php:script scripts/configure_ai_roles.php               # xem trước
+ddev drush php:script scripts/configure_ai_roles.php -- --apply
+ddev drush php:script scripts/test_ai_roles.php
+```
+
+| Role | Làm được | Không làm được |
+|---|---|---|
+| `content_editor` | Viết/sửa bài của mình, đưa sang Needs Review (`gui_duyet`), publish **qua workflow**, xem báo cáo AI | Bấm "Chấm lại" (tốn tiền API), quản trị user/quyền, publish vòng qua workflow |
+| `site_admin` | Quản trị nội dung/workflow/alias, xem mọi revision, **bấm "Chấm lại"** | Tự cấp quyền cho mình (`administer permissions`), `bypass node access` |
+| `ai_service` | Đọc feed, đọc capability, đọc đúng revision, **ghi kết quả qua result callback** | Mọi thứ còn lại — không sửa bài, không transition, không tạo/xoá |
+
+**Ranh giới ghi:** với `ai_service`, JSON:API là **chỉ đọc**. Đường ghi duy nhất là `POST /vf-ai/integration/v1/results`, và endpoint đó từ chối key lạ, so revision + hash trong cùng một transaction, idempotent theo `run_id`. Nếu ai đó cấp lại `edit any article content` cho role này thì `test_ai_roles.php` sẽ đỏ — và đó là thay đổi cần review thiết kế lại, không phải sửa test.
+
+**Bù trừ kiểm soát:** tài khoản machine không đăng nhập UI, mật khẩu ngẫu nhiên dài nằm trong secret store, mọi lần ghi đều để lại revision có log, và quy trình rotate nằm ở mục 6.1.
+
+⚠️ **Phát hiện 2026-08-14:** trước lần này `content_editor` **thiếu** `use kiem_duyet_noi_dung transition gui_duyet`, tức người viết thật không đưa được bài sang Needs Review. Lỗi không lộ ra vì mọi thử nghiệm đều chạy bằng UID 1 — tài khoản bỏ qua mọi kiểm tra quyền. Bài học: thử quy trình bằng đúng role định giao cho người dùng, đừng thử bằng admin.
+
 ### 6.2. Smoke cutover không tốn tiền
 
 `multiagent/scripts/staging_connector_smoke.py` chạy đúng một job qua worker thật với engine **giả**, để kiểm đường ống mà không gọi LLM:
@@ -265,6 +288,63 @@ Set-Location D:\drupal-multiagent-seo\multiagent
 ```
 
 Ba chốt chặn: phải truyền đúng `--confirm-staging-fixture`; base URL của site phải là host staging (`.ddev.site`); hàng đợi phải sạch (đúng một job `queued`, không có job `running`). Run tạo ra được đánh dấu `is_fixture=true` nên bị loại khỏi mọi metric production, và báo cáo mang note `STAGING FIXTURE`. **Tuyệt đối không trình bày điểm của run fixture như kết quả chất lượng.**
+
+---
+
+## 6.3. Biến môi trường theo từng tiến trình
+
+Ba tiến trình đọc ba tập biến khác nhau. Thiếu biến của tiến trình nào thì chỉ tiến trình đó chết — và một số kiểu chết rất im lặng, nên bảng này ghi rõ hậu quả.
+
+| Biến | Tiến trình | Bắt buộc | Là secret | Thiếu thì sao |
+|---|---|---|---|---|
+| `PG_DSN` | api, worker, script | không (có mặc định) | **có** | Mặc định trỏ container local; sai ở production là nối nhầm database |
+| `ANTHROPIC_API_KEY` | worker | **có** | **có** | Worker chết ngay lần chấm đầu |
+| `ANTHROPIC_MODEL` | worker | không | không | Rơi về `claude-haiku-4-5-20251001`; đổi model **làm mất hiệu lực ngưỡng calibrate** |
+| `ADMIN_CSRF_KEY`, `ADMIN_THROTTLE_KEY` | api | **có**, ≥32 byte, phải khác nhau | **có** | API **không khởi động được** |
+| `ADMIN_COOKIE_SECURE` | api | không | không | `false` ở local; production HTTPS phải đặt `true` |
+| `VF_HTTPS_ONLY` | api | không | không | `1` mới bật HSTS. Bật ở HTTP local sẽ khoá máy dev vào HTTPS |
+| `VF_SERVICE_TOKEN` | api (legacy), import credential | **có** | **có** | Lệch với `settings.php` → mọi POST 401 **mà editor không thấy lỗi gì** |
+| `DRUPAL_BASE_URL` | script `site_config.py` | **có** | không | Không cấu hình được site |
+| `DRUPAL_USER`, `DRUPAL_PASSWORD` | worker (qua `secret_ref`) | **có** | **có** | Connector 401; job vào dead-letter với `connector_auth` |
+| `VF_WORKER_INSTANCE_ID` | worker | không | không | Mặc định `<hostname>:<pid>`; đặt cố định để theo dõi xuyên restart |
+| `VF_RELEASE_SHA` | worker | không | không | Heartbeat ghi `unknown`, không truy được version đang chạy |
+
+Database **không** lưu giá trị secret nào — chỉ lưu **tên biến** (`site.secret_ref`) và hash token. Xem `site_config.py show`.
+
+## 6.4. Thứ tự triển khai và khôi phục
+
+**Rollout (thuận nghịch từng bước):**
+
+1. Backup + `migrate.py status` — xem mục 6.5.
+2. `migrate.py apply` (migration là append-only).
+3. Deploy API/admin → kiểm `/health` và trang admin đã xác thực.
+4. Deploy worker → **chờ heartbeat chuyển sang "Đang chạy"** trên dashboard.
+5. Test connection ở `/admin/connection` → phải đủ ba năng lực.
+6. Deploy module/role Drupal.
+7. Một bài staging không thuộc gold set → Needs Review → chạy `staging_connector_smoke.py` (**engine giả, không gọi Anthropic**).
+8. Kiểm đúng một job, một run, một revision AI mới, correlation xuyên suốt, không rò nội dung.
+
+Ghi lại release SHA, ID/hash/count/status. **Không chạy trên production khi chưa có phê duyệt của chủ site.** Pilot gọi LLM thật là hoạt động riêng, cần cổng chi phí của người dùng.
+
+**Rollback ứng dụng** — xem mục 6.1. Nhắc lại điều quan trọng nhất: giữ nguyên commit endpoint Drupal, chỉ revert commit client; và rollback chỉ **đạt** khi một job legacy v1 đi hết đường worker.
+
+## 6.5. Backup và khôi phục thảm hoạ
+
+```powershell
+Set-Location D:\drupal-multiagent-seo\multiagent
+docker compose exec -T db pg_dump -U vf_agent -d vf_agent -Fc -f /tmp/platform_pre_rollout.dump
+docker compose exec -T db pg_restore --list /tmp/platform_pre_rollout.dump
+docker compose exec -T db sha256sum /tmp/platform_pre_rollout.dump
+docker compose exec -T db stat -c %s /tmp/platform_pre_rollout.dump
+```
+
+Cả bốn lệnh phải exit 0. **Archive list rỗng hoặc size 0 thì dừng**, không rollout tiếp.
+
+Khôi phục luôn vào một database **tên mới**, không bao giờ đè database đang chạy. Kiểm `pg_database` trước và **dừng nếu tên đích đã tồn tại** — nó có thể là evidence của người khác.
+
+⚠️ **Dump chứa toàn bộ database**, gồm hash mật khẩu admin và hash token. Không commit vào Git, không để trong `docs/evidence/` — evidence chỉ ghi timestamp/SHA-256/kích thước/số dòng.
+
+Restore database là **khôi phục thảm hoạ**, không phải đường rollback thường ngày. Diễn tập đã chạy: [`evidence/platform-backup-restore-rehearsal.txt`](evidence/platform-backup-restore-rehearsal.txt) — 11/11 bảng khớp tuyệt đối.
 
 ---
 

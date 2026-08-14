@@ -13,10 +13,15 @@
     <dl class="status-list">
       <div><dt>Admin API</dt><dd class="status-ok">Đang hoạt động</dd></div>
       <div><dt>PostgreSQL</dt><dd class="status-ok">Kết nối thành công</dd></div>
-      {# Worker vẫn viết cứng: chưa có heartbeat thật, và bịa "đang chạy" thì
-         tệ hơn nhiều so với thừa nhận chưa biết. Bỏ dòng này chỉ khi P5 có
-         nguồn thật. #}
-      <div><dt>Worker</dt><dd class="status-unknown">Chưa xác minh</dd></div>
+      {# Đọc bảng worker_heartbeat. Ba trạng thái phải phân biệt được:
+         chưa từng chạy, đang chạy, và quá hạn (nghi đã chết). #}
+      {% if view.worker_status == 'running' %}
+      <div><dt>Worker</dt><dd class="status-ok">Đang chạy{% if view.worker_stale %} ({{ view.worker_stale }} instance quá hạn){% endif %}</dd></div>
+      {% elif view.worker_status == 'stale' %}
+      <div><dt>Worker</dt><dd class="status-error">Quá hạn — nghi đã dừng</dd></div>
+      {% else %}
+      <div><dt>Worker</dt><dd class="status-unknown">Không có heartbeat</dd></div>
+      {% endif %}
       {% if view.connector_status == 'ok' %}
       <div><dt>Drupal connector</dt><dd class="status-ok">Đạt</dd></div>
       {% elif view.connector_status in (none, '', 'unknown') %}

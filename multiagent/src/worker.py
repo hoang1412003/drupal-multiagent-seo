@@ -14,7 +14,10 @@ import os
 from pathlib import Path
 import socket
 import sys
+import threading
 import time
+from contextlib import contextmanager
+from datetime import datetime, timezone
 from uuid import uuid4
 
 _SRC = os.path.dirname(os.path.abspath(__file__))
@@ -29,13 +32,109 @@ import reconcile
 import text_utils
 from review_platform import database as platform_database
 from review_platform import fingerprint as platform_fingerprint
-from review_platform import migrations, sites
+from review_platform import migrations, sites, worker_health
+from review_platform import usage as platform_usage
 from review_platform.connectors import base as connector_base
 from review_platform.connectors import runtime as connector_runtime
 
 NGU_KHI_RONG_GIAY = 2
 CHU_KY_DOI_SOAT_GIAY = 300
+CHU_KY_NHIP_GIAY = 10
 _MIGRATIONS_DIR = Path(__file__).resolve().parents[1] / "migrations"
+
+
+def danh_tinh_worker() -> tuple:
+    """(instance_id, version) cua tien trinh nay.
+
+    Mac dinh `<hostname>:<pid>` de hai worker tren cung may khong ghi de nhip
+    cua nhau. Deploy that nen dat VF_WORKER_INSTANCE_ID on dinh de theo doi
+    xuyen lan restart.
+    """
+    instance_id = os.environ.get("VF_WORKER_INSTANCE_ID") or (
+        f"{socket.gethostname()}:{os.getpid()}"
+    )
+    return instance_id[:128], (os.environ.get("VF_RELEASE_SHA") or "unknown")[:128]
+
+
+class NhipTim:
+    """Dap nhip trong thread rieng, voi CONNECTION RIENG.
+
+    Vi sao khong dung connection cua worker: trong luc graph chay, worker giu
+    connection do cho viec cua no. psycopg connection khong an toan khi dung
+    dong thoi tu hai thread - chia se se hong ca hai duong.
+
+    Vi sao phai dap ngay CA KHI dang cham bai: mot bai cham 30-60 giay, ma
+    nguong stale la 30 giay. Neu chi dap giua cac job thi worker dang chay
+    binh thuong cung bi bao "qua han".
+
+    Heartbeat hong KHONG duoc lam chet worker - nhung cung khong duoc bao khoe
+    gia: khong ghi duoc thi dashboard se thay stale, va do la su that.
+    """
+
+    def __init__(self, *, instance_id, version, chu_ky=CHU_KY_NHIP_GIAY,
+                 open_conn=None, now_fn=None):
+        self.instance_id = instance_id
+        self.version = version
+        self.chu_ky = chu_ky
+        self._open_conn = open_conn or platform_database.open_connection
+        self._now = now_fn or (lambda: datetime.now(timezone.utc))
+        self.started_at = self._now()
+        self._job_hien_tai = None
+        self._dung_lai = threading.Event()
+        self._thread = None
+
+    def _nhip(self) -> None:
+        try:
+            with self._open_conn() as nhip_conn:
+                worker_health.beat(
+                    nhip_conn,
+                    instance_id=self.instance_id,
+                    started_at=self.started_at,
+                    version=self.version,
+                    current_job_id=self._job_hien_tai,
+                    now=self._now(),
+                )
+        except Exception as exc:
+            # Chi log LOAI loi, khong log noi dung: chuoi loi cua driver co the
+            # chua DSN kem mat khau.
+            logging.warning(
+                "[worker %s] khong ghi duoc heartbeat: %s",
+                self.instance_id, exc.__class__.__name__,
+            )
+
+    def bat_dau(self) -> None:
+        self._nhip()
+        self._thread = threading.Thread(
+            target=self._vong_nhip, name="worker-heartbeat", daemon=True
+        )
+        self._thread.start()
+
+    def _vong_nhip(self) -> None:
+        while not self._dung_lai.wait(self.chu_ky):
+            self._nhip()
+
+    def dat_job(self, job_public_id) -> None:
+        """Doi job dang chay va dap ngay, de dashboard khong tre mot chu ky."""
+        self._job_hien_tai = job_public_id
+        self._nhip()
+
+    def dung(self) -> None:
+        """Tat co trat tu: dung thread roi XOA nhip.
+
+        Xoa han thay vi de nguyen: mot worker tat co chu dich khong nen hien
+        la "qua han" - do la trang thai danh cho worker chet ngoai y muon.
+        """
+        self._dung_lai.set()
+        if self._thread is not None:
+            self._thread.join(timeout=self.chu_ky + 5)
+        try:
+            with self._open_conn() as nhip_conn:
+                worker_health.forget(nhip_conn, instance_id=self.instance_id)
+        except Exception as exc:
+            logging.warning(
+                "[worker %s] khong xoa duoc heartbeat luc tat: %s",
+                self.instance_id, exc.__class__.__name__,
+            )
 
 
 def _payload_tu_state(state: dict) -> dict:
@@ -155,6 +254,55 @@ def _gui_ket_qua(
     return q.SUPERSEDED
 
 
+def _cai_dat_usage():
+    """Cai wrapper gan nhan usage. Chi goi o worker, khong o script thu cong.
+
+    Sink mo CONNECTION RIENG cho moi event: ham nay chay trong executor thread
+    cua LangGraph, con connection cua worker dang do chinh worker dung.
+
+    Loi ghi usage duoc de NOI LEN chu khong nuot: mat am tham du lieu chi phi
+    nghia la bao cao chi phi thap hon thuc te ma khong ai biet. Attempt that
+    bai co the retry; con so sai thi khong ai phat hien.
+    """
+    def sink(**tham_so):
+        try:
+            platform_usage.record_usage_event(
+                platform_database.open_connection, **tham_so
+            )
+        except Exception as exc:
+            logging.error(
+                "[worker] usage_persistence_failed job=%s attempt=%s: %s",
+                tham_so.get("job_id"), tham_so.get("attempt"),
+                exc.__class__.__name__,
+            )
+            raise
+
+    return platform_usage.install_worker_usage_instrumentation(sink=sink)
+
+
+@contextmanager
+def _pham_vi_usage(job: dict, fixture_run: bool):
+    """Mo scope gan nhan usage cho job nay, neu instrumentation da duoc cai.
+
+    No-op khi chua cai (script thu cong, test cu) de duong goi khong doi hanh
+    vi. Scope dong lai trong `finally`, nen entry cua job nay khong bao gio
+    dinh sang job sau.
+    """
+    collector = getattr(ai_core, "USAGE_LOG", None)
+    if not isinstance(collector, platform_usage.UsageCollector):
+        yield
+        return
+    with platform_usage.usage_scope(
+        collector,
+        job_public_id=job.get("public_id"),
+        job_db_id=job["id"],
+        correlation_id=job.get("correlation_id"),
+        attempt=job.get("attempts") or 1,
+        is_fixture=fixture_run,
+    ):
+        yield
+
+
 def chay_mot_job(
     conn,
     job: dict,
@@ -232,6 +380,7 @@ def chay_mot_job(
     da_ghi_usage = False
     bat_dau = time.monotonic()
     try:
+      with _pham_vi_usage(job, fixture_run):
         try:
             # Truyen tuong minh cap khoa CUA JOB thay vi de graph roi ve mac
             # dinh: tu Plan 4, scope den tu profile cua site chu khong con la
@@ -338,7 +487,7 @@ def chay_mot_job(
 
 
 def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, connector=None,
-                     connector_factory=None):
+                     connector_factory=None, nhip=None):
     """Nhan va xu ly MOT job, neu hang doi con viec. Rong -> tra None.
 
     Loi bat ngo trong chay_mot_job() (audit.ghi_scoped, q.complete, q.fail,
@@ -355,6 +504,8 @@ def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, connector=None,
         return None
     logging.info("[worker %s] cham node %s (lan %d)", ten, job["node_id"],
                  job["attempts"])
+    if nhip is not None:
+        nhip.dat_job(job["public_id"])
     try:
         ket = chay_mot_job(
             conn, job, invoke=invoke, connector=connector,
@@ -364,6 +515,11 @@ def _xu_ly_tiep_theo(conn, ten: str, *, invoke=None, connector=None,
         logging.error("[worker %s] job %s (node %s) loi ngoai y muon: %s",
                       ten, job["id"], job["node_id"], e)
         ket = q.fail(conn, job["id"], f"internal: {e.__class__.__name__}: {e}")
+    finally:
+        # Luon tra ve "ranh" ke ca khi job loi: de nguyen job cu tren nhip se
+        # lam dashboard bao worker dang cham mot bai da xong tu lau.
+        if nhip is not None:
+            nhip.dat_job(None)
     logging.info("[worker %s] node %s -> %s", ten, job["node_id"], ket)
     return ket
 
@@ -378,8 +534,22 @@ def _vong_lap_voi_conn(conn, ten: str) -> None:
     from embeddings import get_default_embedder
 
     get_default_embedder()
-    logging.info("[worker %s] san sang", ten)
+    _cai_dat_usage()
 
+    instance_id, version = danh_tinh_worker()
+    nhip = NhipTim(instance_id=instance_id, version=version)
+    nhip.bat_dau()
+    logging.info(
+        "[worker %s] san sang (instance=%s version=%s)", ten, instance_id, version
+    )
+
+    try:
+        _vong_lap_chinh(conn, ten, nhip)
+    finally:
+        nhip.dung()
+
+
+def _vong_lap_chinh(conn, ten: str, nhip) -> None:
     lan_doi_soat = 0.0
     while True:
         q.reclaim_stuck(conn)
@@ -398,7 +568,7 @@ def _vong_lap_voi_conn(conn, ten: str) -> None:
                 # Doi soat hong KHONG duoc lam chet worker - duong event van chay
                 logging.warning("[worker %s] doi soat loi: %s", ten, e)
 
-        if _xu_ly_tiep_theo(conn, ten) is None:
+        if _xu_ly_tiep_theo(conn, ten, nhip=nhip) is None:
             time.sleep(NGU_KHI_RONG_GIAY)
 
 
@@ -418,4 +588,12 @@ def vong_lap(conn=None, ten: str = "") -> None:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s")
+    # Cai filter che secret o ROOT handler, khong chi cho logger cua du an:
+    # requests/psycopg/langgraph ghi log theo cach cua chung va khong biet gi
+    # ve quy uoc o day. Vi du that: chuoi loi cua psycopg co the chua DSN kem
+    # mat khau.
+    from review_platform.logging import RedactingFilter
+
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(RedactingFilter())
     vong_lap()
