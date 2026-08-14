@@ -78,7 +78,7 @@
   {% if can_operate %}
   <form method="post" action="/admin/connection/test">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <button type="submit" class="button">Kiểm tra kết nối</button>
+    <button type="submit" class="primary-button">Kiểm tra kết nối</button>
   </form>
   {% else %}
   <p class="hint">Cần quyền operator trở lên để chạy kiểm tra.</p>
@@ -101,7 +101,9 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label for="reason">Lý do (không bắt buộc)</label>
     <input type="text" id="reason" name="reason" maxlength="300">
-    <button type="submit" class="button">
+    {# Tạm dừng là action gây gián đoạn -> danger-button, cùng quy ước với nút
+       retry ở job_detail.html. Mở lại là phục hồi vận hành bình thường. #}
+    <button type="submit" class="{{ 'primary-button' if connection.intake_paused else 'danger-button' }}">
       {{ "Mở lại nhận bài" if connection.intake_paused else "Tạm dừng nhận bài" }}
     </button>
   </form>

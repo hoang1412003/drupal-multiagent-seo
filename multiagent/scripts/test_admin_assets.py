@@ -154,6 +154,41 @@ def test_css_shell_co_accessibility_va_mobile_contract():
     print("[PASS] CSS co focus, sr-only, mobile <=700px va reduced-motion")
 
 
+def test_moi_class_button_trong_template_deu_co_dinh_nghia_trong_css():
+    """Nut dung class khong ton tai thi hien ra dang mac dinh cua trinh duyet.
+
+    Loi nay KHONG lam test nao khac do: route van 200, HTML van dung, RBAC van
+    dung. No chi lo ra khi co nguoi mo trang bang mat. Da xay ra that o
+    connection.html (dung `class="button"`, ma admin.css chi dinh nghia
+    `.primary-button`/`.secondary-button`/`.danger-button`/`.table-button`).
+    """
+    from review_platform.admin import rendering
+
+    css = (rendering.STATIC_DIR / "admin.css").read_text(encoding="utf-8")
+    # Tien to phai la `*` chu KHONG phai `[a-z][a-z0-9-]*`: dang sau doi it
+    # nhat mot ky tu truoc chu "button", nen chinh chuoi `button` dung mot
+    # minh - dung truong hop can bat - lai lot qua. Test dau tien viet o day
+    # da vacuous vi loi nay.
+    da_dinh_nghia = set(re.findall(r"\.([a-z0-9-]*button)\b", css))
+    assert "primary-button" in da_dinh_nghia, da_dinh_nghia
+    assert "button" not in da_dinh_nghia, "admin.css khong dinh nghia .button tran"
+
+    thieu = {}
+    for template in sorted(rendering.TEMPLATE_DIR.rglob("*.html")):
+        noi_dung = template.read_text(encoding="utf-8")
+        # Chi doc trong thuoc tinh class. Quet ca file se bat nham chinh ten
+        # the `<button`. Bat trong dau nhay kep nen van thay class do Jinja
+        # chon dieu kien: class="{{ 'a-button' if x else 'b-button' }}".
+        for gia_tri in re.findall(r'class="([^"]*)"', noi_dung):
+            for ten in re.findall(r"[a-z0-9-]*button", gia_tri):
+                if ten not in da_dinh_nghia:
+                    thieu.setdefault(template.name, set()).add(ten)
+
+    assert not thieu, f"class button khong co trong admin.css: {thieu}"
+    print(f"[PASS] moi class button trong template deu co trong admin.css "
+          f"({len(da_dinh_nghia)} class)")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -161,6 +196,7 @@ if __name__ == "__main__":
         test_rendering_helper_autoescape_va_base_chi_goi_script_local,
         test_nav_chi_tao_link_den_route_da_co_va_dung_role,
         test_css_shell_co_accessibility_va_mobile_contract,
+        test_moi_class_button_trong_template_deu_co_dinh_nghia_trong_css,
     ):
         try:
             fn()
