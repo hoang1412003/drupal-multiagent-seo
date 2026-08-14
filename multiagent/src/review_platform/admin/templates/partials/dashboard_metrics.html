@@ -8,13 +8,22 @@
         <p class="eyebrow">Sức khỏe hệ thống</p>
         <h2 id="system-status-heading">Trạng thái dịch vụ</h2>
       </div>
-      <p>Nguồn: request hiện tại và truy vấn database vừa hoàn tất.</p>
+      <p>Nguồn: Admin API và PostgreSQL từ chính request này; Drupal connector từ lần bấm &ldquo;Kiểm tra kết nối&rdquo; gần nhất.</p>
     </header>
     <dl class="status-list">
       <div><dt>Admin API</dt><dd class="status-ok">Đang hoạt động</dd></div>
       <div><dt>PostgreSQL</dt><dd class="status-ok">Kết nối thành công</dd></div>
+      {# Worker vẫn viết cứng: chưa có heartbeat thật, và bịa "đang chạy" thì
+         tệ hơn nhiều so với thừa nhận chưa biết. Bỏ dòng này chỉ khi P5 có
+         nguồn thật. #}
       <div><dt>Worker</dt><dd class="status-unknown">Chưa xác minh</dd></div>
-      <div><dt>Drupal connector</dt><dd class="status-unknown">Chưa xác minh</dd></div>
+      {% if view.connector_status == 'ok' %}
+      <div><dt>Drupal connector</dt><dd class="status-ok">Đạt</dd></div>
+      {% elif view.connector_status in (none, '', 'unknown') %}
+      <div><dt>Drupal connector</dt><dd class="status-unknown">Chưa kiểm tra bao giờ</dd></div>
+      {% else %}
+      <div><dt>Drupal connector</dt><dd class="status-error">Chưa đạt: {{ view.connector_status }}</dd></div>
+      {% endif %}
     </dl>
   </section>
 

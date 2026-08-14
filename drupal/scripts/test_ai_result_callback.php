@@ -40,11 +40,21 @@ function uuid4_gia(string $duoi): string {
 $writer = \Drupal::service('vf_ai_trigger.result_writer');
 $storage = \Drupal::entityTypeManager()->getStorage('node');
 
+// Tao o trang thai `draft`, KHONG phai `needs_review`.
+//
+// Chu the cua test nay la AiResultWriter, khong phai hook trigger. Neu de
+// `needs_review` thi moi lan node->save() se bat hook, hook goi service, va
+// hang doi co them mot job tro toi mot node ma test se XOA ngay sau do - job
+// mo coi ton lai vinh vien va lam sai so lieu "Dang cho" tren dashboard.
+// Da xay ra that: hai job queued mo coi sau lan chay dau.
+//
+// Doi sang `draft` khong lam yeu test: writer khong doc moderation state, va
+// khang dinh "state khong bi doi" van kiem duoc y nguyen.
 $node = Node::create([
   'type' => 'article',
   'title' => 'TAM - test result callback',
   'body' => ['value' => '<p>Noi dung tam de test callback.</p>', 'summary' => 'Tom tat'],
-  'moderation_state' => 'needs_review',
+  'moderation_state' => 'draft',
   'langcode' => 'vi',
 ]);
 $node->save();
