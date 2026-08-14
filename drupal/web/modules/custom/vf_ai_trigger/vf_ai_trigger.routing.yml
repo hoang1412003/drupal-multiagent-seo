@@ -23,3 +23,40 @@ vf_ai_trigger.cham_lai:
     parameters:
       node:
         type: entity:node
+
+# --- Integration API cho service Multi-Agent -------------------------------
+# Basic auth + permission riêng, KHÔNG dùng quyền của editor. Ba route đều
+# tắt cache theo user và trả no-store: quyền và danh sách chờ đổi theo request.
+
+vf_ai_trigger.integration_pending:
+  path: '/vf-ai/integration/v1/pending'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\PendingController::pending'
+  methods: [GET]
+  requirements:
+    _permission: 'access vf ai integration feed'
+  options:
+    _auth: ['basic_auth']
+    no_cache: TRUE
+
+vf_ai_trigger.integration_capabilities:
+  path: '/vf-ai/integration/v1/capabilities'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\CapabilitiesController::capabilities'
+  methods: [GET]
+  requirements:
+    _permission: 'access vf ai integration capabilities'
+  options:
+    _auth: ['basic_auth']
+    no_cache: TRUE
+
+vf_ai_trigger.integration_results:
+  path: '/vf-ai/integration/v1/results'
+  defaults:
+    _controller: '\Drupal\vf_ai_trigger\Controller\ResultController::results'
+  methods: [POST]
+  requirements:
+    _permission: 'submit vf ai integration result'
+  options:
+    _auth: ['basic_auth']
+    no_cache: TRUE
