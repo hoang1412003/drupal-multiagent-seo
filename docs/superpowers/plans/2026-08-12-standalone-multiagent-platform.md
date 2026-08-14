@@ -10,7 +10,7 @@
 
 **Spec:** `docs/superpowers/specs/2026-08-12-standalone-multiagent-platform-admin-design.md` — đã duyệt ngày 2026-08-12.
 
-**Implementation status (2026-08-14):** ✅ Plan 1 Foundation, Plan 2 Admin Auth, Plan 3 Admin Operations và Plan 4 API/Drupal Connector đã qua checkpoint. Plan 5 Hardening/Rollout chưa triển khai. Evidence lần lượt ở `docs/evidence/platform-foundation-verification.txt`, `platform-admin-auth-verification.txt`, `platform-admin-operations-verification.txt`, và `platform-api-cutover-verification.txt` + `platform-api-connector-verification.txt`.
+**Implementation status (2026-08-14):** ✅ TOÀN BỘ Plan 1–5 đã qua checkpoint. Ma trận nghiệm thu MVP 11/11 pass. Evidence lần lượt ở `docs/evidence/platform-foundation-verification.txt`, `platform-admin-auth-verification.txt`, `platform-admin-operations-verification.txt`, `platform-api-cutover-verification.txt` + `platform-api-connector-verification.txt`, và `platform-backup-restore-rehearsal.txt` + `platform-rollout-smoke.txt` + `platform-mvp-acceptance.md`.
 
 ## Global Constraints
 
@@ -113,7 +113,7 @@ Không tạo `review_platform/engine/` bằng một lần di chuyển hàng lo�
 - [x] **Sau Plan 2:** đăng nhập/logout/đổi mật khẩu/RBAC/CSRF/rate-limit hoạt động; chưa có action vận hành ngoài logout/password. Evidence: `docs/evidence/platform-admin-auth-verification.txt` (code checkpoint `c35dc75`).
 - [x] **Sau Plan 3:** viewer xem được dữ liệu thật; operator/admin action đúng quyền; config/KB/evaluation không có đường ghi. Evidence: `docs/evidence/platform-admin-operations-verification.txt`.
 - [x] **Sau Plan 4:** Drupal Needs Review tạo đúng một scoped job, fetch đúng revision, result callback CAS/idempotent chỉ ghi một lần; job cũ không ghi đè job mới; endpoint/hash v1 vẫn chạy trong cửa sổ rollback. Đã kiểm trên Drupal thật (2 revision: gốc → AI, `moderation_state` không đổi; gửi lại cùng `run_id` → `already_applied` không tạo revision thứ hai; revision cũ → `content_superseded`; rollback về `/jobs` đi hết đường worker với hash v1 + `rel:working-copy`). Evidence: `docs/evidence/platform-api-cutover-verification.txt` (code checkpoint `e8bd0dc`).
-- [ ] **Sau Plan 5:** security/integration suite xanh; usage của attempt lỗi được ghi bền vững; migration, site configuration và rollback rehearsal có evidence; tài liệu khởi động/rotate/recover hoàn chỉnh.
+- [x] **Sau Plan 5:** security/integration suite xanh (72 file offline, 0 hỏng 0 skip); usage của attempt lỗi được ghi bền vững vào `llm_usage_event`; migration 0005, site configuration và diễn tập backup/restore có evidence (11/11 bảng khớp); tài liệu khởi động/rotate/recover hoàn chỉnh ở `docs/operations.md` mục 6.3–6.5. Evidence: `docs/evidence/platform-mvp-acceptance.md` (code checkpoint `948a25c`).
 
 Tại mọi checkpoint chạy:
 

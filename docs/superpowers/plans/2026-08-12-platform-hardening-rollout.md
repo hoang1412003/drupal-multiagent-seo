@@ -10,6 +10,8 @@
 
 **Depends on:** Foundation, Admin Auth, Admin Operations và API/Drupal Connector đã qua checkpoint.
 
+**Implementation status (2026-08-14):** ✅ Toàn bộ Task 1–8 đã thực thi và qua checkpoint; Completion Gate đủ 9/9. Evidence: `docs/evidence/platform-mvp-acceptance.md` (ma trận 11/11 pass), `platform-backup-restore-rehearsal.txt` (11/11 bảng khớp), `platform-rollout-smoke.txt`. Lệch có chủ đích so với plan, đã ghi trong evidence: (1) diễn tập backup/restore chạy trên máy DEV vì dự án chưa có staging server riêng; (2) nhóm `manual_ddev` để rỗng và năm test PHP cần Drupal chạy tay ngoài runner, thay vì liệt kê chúng vào manifest của runner Python.
+
 **Quy ước chạy lệnh:** Mỗi code block PowerShell bắt đầu với working directory `D:\drupal-multiagent-seo\multiagent`, trừ khi chính block có `Set-Location` tuyệt đối. Không kế thừa working directory từ block trước.
 
 ## Global Constraints
@@ -59,7 +61,7 @@
 - `beat(conn, *, instance_id, started_at, version, current_job_id) -> None`.
 - `list_worker_health(conn, *, now, stale_after=timedelta(seconds=30)) -> WorkerHealthView`.
 
-- [ ] **Step 1: RED schema/migration**
+- [x] **Step 1: RED schema/migration**
 
 Assert migration creates:
 
@@ -95,19 +97,19 @@ CREATE INDEX llm_usage_event_recorded_at_idx ON llm_usage_event (recorded_at);
 
 Upgrade preserves every existing job/run/KB/auth row; second migration run is no-op through `schema_migration`. `llm_usage_event` không có payload/prompt/output text và không FK vào `run_log`, vì engine attempt có thể lỗi trước khi run tồn tại.
 
-- [ ] **Step 2: RED repository/time semantics**
+- [x] **Step 2: RED repository/time semantics**
 
 Test new instance = healthy; 31-second-old = stale; no row = unavailable. Upsert never changes `started_at`; current job changes nullable; cleanup only deletes rows older than 7 days. Use injected `now`, not wall clock in assertions.
 
-- [ ] **Step 3: Implement heartbeat loop without blocking claim**
+- [x] **Step 3: Implement heartbeat loop without blocking claim**
 
 Worker chooses `VF_WORKER_INSTANCE_ID` or default `<hostname>:<pid>`, version from `VF_RELEASE_SHA` or `unknown`. Beat once at start, every 10 seconds while idle and before/after each job. While graph runs, daemon heartbeat thread uses its own short database connection; stop event joins at shutdown. Heartbeat failure logs safe warning and worker continues, but dashboard shows stale—không báo khỏe giả.
 
-- [ ] **Step 4: Dashboard uses real health**
+- [x] **Step 4: Dashboard uses real health**
 
 Replace `Chưa xác minh` worker card with `Đang chạy`, `Quá hạn` or `Không có heartbeat`; show last seen/instance count/current job link where allowed. API/DB/connector cards remain governed by their real checks.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 Set-Location D:\drupal-multiagent-seo\multiagent
@@ -141,11 +143,11 @@ git commit -m "feat: report durable worker heartbeats"
 - `event(logger, name: str, **safe_fields) -> None` outputs one JSON object/line.
 - Middleware: request ID, safe exception response và response security headers.
 
-- [ ] **Step 1: RED recursive redaction**
+- [x] **Step 1: RED recursive redaction**
 
 Cover nested dict/list/tuple, mixed-case keys and string secrets. Keys containing `authorization|cookie|password|passwd|secret|token|api_key|database_url` become `[REDACTED]`; Bearer/basic auth/JWT-like values inside arbitrary messages are masked. Truncate strings to 2000 chars, collections to 100 items/depth 6. Assert original object is not mutated and valid IDs/hash prefixes remain usable.
 
-- [ ] **Step 2: RED HTTP exception boundary/headers**
+- [x] **Step 2: RED HTTP exception boundary/headers**
 
 Unhandled API exception returns JSON `{code:"internal_error", correlation_id}` with 500, never exception/traceback. Admin returns escaped generic error page with same correlation. All admin responses carry:
 
@@ -161,17 +163,17 @@ Session cookie remains `Secure`, `HttpOnly`, `SameSite=Lax`. `Strict-Transport-S
 
 Admin POST body tối đa 65536 byte bằng cùng ASGI streaming limiter pattern của `/api/v1`; cả Content-Length lớn và chunked body vượt ngưỡng đều trả 413 trước form parser. GET không bị buffer toàn response/request.
 
-- [ ] **Step 3: Implement trusted correlation middleware**
+- [x] **Step 3: Implement trusted correlation middleware**
 
 Use existing API-generated correlation for `/api/v1/jobs`; other requests get UUIDv4. Ignore inbound `X-Request-ID` completely in MVP. Return trusted `X-Correlation-ID`; bind it to log context and clear in `finally`.
 
-- [ ] **Step 4: Replace raw exception logging at platform boundaries**
+- [x] **Step 4: Replace raw exception logging at platform boundaries**
 
 API/admin/worker/connector log event name, correlation/job/site/credential prefix, safe error code and exception class—not content or `str(exception)` before redaction. Debug traceback may remain server-side only after recursive redaction filter is installed; production default `INFO`.
 
 Mọi Drupal JSON:API GET/PATCH do connector thực hiện gửi trusted `X-Correlation-ID` của job. `ServiceClient.php` đọc `X-Correlation-ID` và `job_id` từ response enqueue để ghi watchdog metadata an toàn; không ghi request body/token. Khi request chết trước response, Drupal ghi local event ID và `correlation_id=unavailable`, không bịa ID server.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_platform_logging.py
@@ -207,7 +209,7 @@ git commit -m "feat: harden platform logs and HTTP responses"
 - `record_usage_event(dsn, *, job_id, attempt, sequence_no, correlation_id, is_fixture, entry) -> None`; idempotent theo `(job_id, attempt, sequence_no)` và dùng short-lived connection riêng, không dùng worker connection chung giữa executor threads.
 - Parent labels: `content_quality`, `seo`, `brand`, `compliance`; phases `main`, `fact_check_extract`, `fact_check_compare`.
 
-- [ ] **Step 1: RED collector/context isolation**
+- [x] **Step 1: RED collector/context isolation**
 
 Create fake module bindings matching current imports. Installation wraps đúng năm module binding, tạo sáu phase label:
 
@@ -223,23 +225,23 @@ Because both fact-check phases use the same imported function, wrapper derives p
 
 `UsageCollector` stores exactly one active job/correlation/attempt under a lock; `begin()` raises nếu một scope khác còn mở. Agent/phase là `ContextVar` được wrapper set/reset ngay trong chính executor thread gọi `ai_core.call_agent`, nên không phụ thuộc parent context có tự truyền qua thread hay không. Test cho nhiều agent thread trong cùng job và hai job tuần tự; entry không được lẫn agent/job/correlation. Mỗi append nhận sequence tăng trong attempt và gọi persistence sink ngay sau khi usage response tồn tại; sink mở connection riêng từ DSN vì worker connection hiện không an toàn để dùng đồng thời giữa thread. Insert lặp cùng key là no-op; lỗi DB làm attempt fail an toàn với safe error `usage_persistence_failed` thay vì mất chi phí im lặng.
 
-- [ ] **Step 2: RED compatibility and output equivalence**
+- [x] **Step 2: RED compatibility and output equivalence**
 
 Replace `ai_core.USAGE_LOG` only inside worker with a list-compatible synchronized collector whose `append` enriches current context. Existing `.clear()`, iteration and list conversion still work. Fake `call_agent` return value, exception and argument identity must be unchanged before/after wrapper. `prompt_version()` remains `020738e209017213`; score-path diff remains empty.
 
-- [ ] **Step 3: Implement worker lifecycle**
+- [x] **Step 3: Implement worker lifecycle**
 
 Install once at worker startup. Before graph invoke, enter single active usage scope with job/correlation/attempt; collector must be empty from lượt trước. Mỗi `append` ghi sanitized event vào `llm_usage_event` ngay, kể cả sau đó agent/graph fail và không có `run_log`. In `finally`, copy entries cho snapshot tương thích của run thành công, close scope và clear collector. `ghi_scoped` có thể giữ snapshot usage nhưng đó không còn là nguồn metric chính; never persist prompt/content/output. Saved-result write-back retry không tạo usage event mới.
 
-- [ ] **Step 4: Admin aggregation/cost**
+- [x] **Step 4: Admin aggregation/cost**
 
 Dashboard/cost query dùng duy nhất `llm_usage_event WHERE is_fixture=false` cho dữ liệu mới, group token counts/cost by parent `agent`, phase, attempt và job; không cộng thêm `run_log.usage`. Legacy run chưa có event được đọc từ snapshot cũ trong một nhánh fallback có nhãn `legacy`, không union cả hai nguồn cho cùng job. Unknown agent/model remains “Không tính được”, not `$0`. Review detail hiển thị attempt lỗi dù không có run result; fixture detail có banner nhưng không vào production metric.
 
-- [ ] **Step 5: Graph integration regression**
+- [x] **Step 5: Graph integration regression**
 
 Run real graph topology with fake transport responses; assert labels/counts follow invoked calls, report/decision/write-back payload exactly match baseline fixture, one callback, same correlation in job/run/event/log fields. Thêm case một agent ghi usage rồi graph raise: không có run nhưng event/token/cost vẫn tồn tại đúng một lần; retry attempt mới có attempt number mới. Do not import or edit agent files to make test pass.
 
-- [ ] **Step 6: GREEN + score gate + commit**
+- [x] **Step 6: GREEN + score gate + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_platform_usage.py
@@ -269,7 +271,7 @@ Nếu score diff không rỗng, output không tương đương hoặc attributio
 - Idempotently creates/updates `content_editor`, `site_admin`, `ai_service`.
 - Produces a machine-readable permission matrix in test output; never creates a user/password.
 
-- [ ] **Step 1: RED permission matrix**
+- [x] **Step 1: RED permission matrix**
 
 Assert:
 
@@ -279,15 +281,15 @@ Assert:
 
 Test fails if `administer nodes`, `bypass node access`, `administer permissions`, `administer users` or delete permissions appear on `ai_service`.
 
-- [ ] **Step 2: Implement idempotent Drush PHP script**
+- [x] **Step 2: Implement idempotent Drush PHP script**
 
 Use Drupal role/entity APIs and permission names that exist in installed modules; fail closed if a required permission/transition is missing. Script đọc biến `$extra` do `drush php:script ... -- --apply` cung cấp; chỉ update sau khi đã in diff và thấy đúng literal `--apply`, còn mặc định là dry-run. It never changes UID 1 or provisions credentials.
 
-- [ ] **Step 3: Document callback privilege boundary**
+- [x] **Step 3: Document callback privilege boundary**
 
 Operations doc states JSON:API is read-only for `ai_service`; write-back only goes through `/vf-ai/integration/v1/results`. Callback rejects extra fields, checks revision/hash atomically and is idempotent by run ID. Compensating controls remain: dedicated non-publishing account, long random password in secret store, log/audit, no UI login for service account and rotate procedure. Any reintroduction of `edit any article content` fails the least-privilege test and requires a new design review.
 
-- [ ] **Step 4: GREEN on DDEV + commit**
+- [x] **Step 4: GREEN on DDEV + commit**
 
 ```powershell
 Set-Location D:\drupal-multiagent-seo\drupal
@@ -314,11 +316,11 @@ Run first on local/staging only; production role diff requires site owner approv
 - One deterministic harness with real API router, PostgreSQL queue/repository, worker orchestration and fake connector/engine.
 - Zero network and zero Anthropic calls.
 
-- [ ] **Step 1: RED happy path contract**
+- [x] **Step 1: RED happy path contract**
 
 With site token and exact revision/fingerprint: POST returns 202 + trusted correlation; duplicate returns same effective job; worker fetches once, invokes fake engine once, writes run once, callback applies once and completes. Assert site/profile/policy/revision/hash version/correlation across job/run/usage event/response. Assert response/admin HTML escapes LLM-like `<script>`.
 
-- [ ] **Step 2: RED failure matrix**
+- [x] **Step 2: RED failure matrix**
 
 Table-drive these cases with expected state/retry/invoke/callback counts:
 
@@ -339,15 +341,15 @@ Table-drive these cases with expected state/retry/invoke/callback counts:
 | Lease crash before run saved | running→queued→done | reclaim | controlled per attempt | 1 success |
 | Dead-letter manual retry | new linked job | explicit | depends saved result | controlled |
 
-- [ ] **Step 3: RED persistence/log/HTML leak scan**
+- [x] **Step 3: RED persistence/log/HTML leak scan**
 
 Use canary strings for title/body/prompt/token/password/cookie/database URL. After all cases, inspect `review_job`, `run_log`, `llm_usage_event`, `admin_audit_log`, captured logs and rendered admin HTML. Full draft/prompt/secrets must be absent; allowed are content hash, safe excerpt/evidence already part of report policy, token prefix and secret **name**. This test must fail if canary appears anywhere outside the in-memory fake connector. Cost assertion sums `llm_usage_event` exactly once, includes failed attempts and does not add duplicate `run_log.usage` snapshots.
 
-- [ ] **Step 4: Trả failure về đúng task sở hữu**
+- [x] **Step 4: Trả failure về đúng task sở hữu**
 
 Task này không có production implementation mơ hồ. Nếu harness phát hiện lỗi, không weaken assertion hoặc thêm mock branch; quay lại task sở hữu file (Foundation, API/Connector hoặc Hardening Task 1–3), bổ sung RED case ở đó, sửa đúng file đã liệt kê rồi mới trở lại chạy E2E. `test_moi_test_deu_chay.py` phải xác nhận mọi `test_*` mới được gọi.
 
-- [ ] **Step 5: GREEN + commit**
+- [x] **Step 5: GREEN + commit**
 
 ```powershell
 Set-Location D:\drupal-multiagent-seo\multiagent
@@ -374,15 +376,15 @@ git commit -m "test: cover platform end-to-end and failure recovery"
 - CLI `run_test_group.py pure|postgres|all-offline`.
 - Every `scripts/test_*.py` belongs to exactly one group or explicit `manual_ddev`; no silent omission.
 
-- [ ] **Step 1: RED manifest coverage**
+- [x] **Step 1: RED manifest coverage**
 
 Runner scans `scripts/test_*.py`; fails on duplicate/unlisted/nonexistent entry. `test_moi_test_deu_chay.py` stays in pure. Tests that need Drupal DDEV are documented `manual_ddev`, not reported PASS in CI. Exit nonzero on fail/timeout/skip-unexpected; JSON summary contains command, duration, exit status but no environment dump.
 
-- [ ] **Step 2: Implement sequential runner**
+- [x] **Step 2: Implement sequential runner**
 
 Use `subprocess.run` list arguments, working directory `multiagent`, UTF-8, timeout 300s/test. Set `HF_HUB_OFFLINE=1`; remove `ANTHROPIC_API_KEY` from child env; set `VF_ALLOW_PAID_EVAL=0`. `all-offline` runs pure then PostgreSQL. Do not run scripts named `eval_*`, `smoke_test_*`, `run_all_samples.py` or `seed_*`.
 
-- [ ] **Step 3: CI PostgreSQL/pgvector service**
+- [x] **Step 3: CI PostgreSQL/pgvector service**
 
 Workflow triggers `pull_request`/`push` (không dùng `pull_request_target`), sets `permissions: contents: read`, Python 3.12, installs `requirements.txt` + `requirements-dev.txt`, starts `pgvector/pgvector:pg17`, applies migrations, runs `all-offline`. Pin action bằng full SHA:
 
@@ -399,7 +401,7 @@ Workflow triggers `pull_request`/`push` (không dùng `pull_request_target`), se
 
 Secrets are not referenced. A skipped test makes job yellow/fail by explicit runner policy, not green giả. Image pgvector vẫn theo tag hiện hành của `docker-compose.yml`; việc pin image digest thuộc H4 và plan không được đánh dấu H4 đã đóng.
 
-- [ ] **Step 4: GREEN locally + commit**
+- [x] **Step 4: GREEN locally + commit**
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\test_test_group_runner.py
@@ -425,11 +427,11 @@ git commit -m "ci: run complete offline platform test groups"
 **Interfaces:**
 - Produces exact deploy/rollback order and recovery evidence; no production mutation is implied by the document.
 
-- [ ] **Step 1: Write environment and process contract**
+- [x] **Step 1: Write environment and process contract**
 
 Document required/optional env by process, owner and secret status: database URL, Anthropic key/model, admin session settings, HTTPS flag, worker instance/release, `DRUPAL_BASE_URL`, outbound secret reference and site inbound credential. Include `site_config.py set-from-env/show` trước API/worker, capability test, start commands, migration `status/apply`, readiness checks and log locations. Mọi môi trường phải khớp allowlist của chính nó; production fail nếu là `.ddev.site`, local DDEV được phép khi được ghi rõ là local, staging DDEV chỉ hợp lệ cho rehearsal nội bộ đã khai báo chứ không được gọi là production-like. Never show real secret values.
 
-- [ ] **Step 2: Pre-migration backup on local/staging**
+- [x] **Step 2: Pre-migration backup on local/staging**
 
 Create custom-format `pg_dump` outside Git; record timestamp/database/schema_migration status/SHA-256/file size only. Verify archive with `pg_restore --list`. Do not store dump in `docs/evidence`.
 
@@ -445,7 +447,7 @@ docker compose exec -T db stat -c %s /tmp/platform_pre_rollout.dump
 
 Mọi lệnh phải exit 0; archive list rỗng hoặc size 0 chặn bước restore/rollout.
 
-- [ ] **Step 3: Restore to a newly named rehearsal database**
+- [x] **Step 3: Restore to a newly named rehearsal database**
 
 Resolve exact target `vf_agent_restore_rehearsal`; abort if target equals configured dev/prod DB. Create empty DB, restore dump, apply pending migrations, compare counts and invariant queries for site/profile/job/run/KB/auth/heartbeat. Drop rehearsal DB only after evidence and only by exact literal name; if deletion is not approved, retain and record cleanup owner.
 
@@ -467,7 +469,7 @@ try {
 
 Trước `CREATE DATABASE`, query `pg_database` và dừng nếu target đã tồn tại; không tự drop một rehearsal cũ vì có thể là evidence của người khác. Count/invariant query chạy bằng `psql -v ON_ERROR_STOP=1` trên literal target và được ghi vào evidence sau khi đã lọc dữ liệu nhạy cảm.
 
-- [ ] **Step 4: Staging rollout in reversible order**
+- [x] **Step 4: Staging rollout in reversible order**
 
 1. backup + migration status;
 2. apply append-only migrations;
@@ -480,11 +482,11 @@ Trước `CREATE DATABASE`, query `pg_database` và dừng nếu target đã t�
 
 Record release SHA, IDs/hash/count/status only. Do not run on production without explicit owner approval. Actual-LLM production pilot là hoạt động riêng cần cost gate của người dùng, không nằm trong plan hardening này.
 
-- [ ] **Step 5: Rollback rehearsal**
+- [x] **Step 5: Rollback rehearsal**
 
 Stop new intake via admin, let running job finish, revert client cutover/application commits in reverse deploy order nhưng giữ Drupal result/capability endpoints cho worker mới trong rollback window, keep migrations/data, restore prior API/worker version only according to the compatibility matrix. Resume only after a real legacy v1 job reaches done through v1 fingerprint + callback; HTTP acceptance alone is not green. Database restore is disaster recovery—not normal app rollback. Rotate any credential exposed during rehearsal.
 
-- [ ] **Step 6: Commit docs/evidence**
+- [x] **Step 6: Commit docs/evidence**
 
 ```powershell
 git -C .. add README.md docs/operations.md docs/pre-demo-checklist.md docs/evidence/platform-backup-restore-rehearsal.txt docs/evidence/platform-rollout-smoke.txt
@@ -508,19 +510,19 @@ git commit -m "docs: rehearse platform deployment and recovery"
 **Interfaces:**
 - One traceable matrix maps each design criterion to automated test, manual evidence, status and remaining risk.
 
-- [ ] **Step 1: Build 11-row acceptance matrix**
+- [x] **Step 1: Build 11-row acceptance matrix**
 
 For each criterion in design spec §14, record `criterion`, `automated_test`, `evidence_path`, `status(pass|fail|blocked)`, `verified_commit`, `verified_at`, `residual_risk`. A criterion cannot be PASS with missing test/evidence or `[SKIP]`.
 
-- [ ] **Step 2: Update status without rewriting history**
+- [x] **Step 2: Update status without rewriting history**
 
 Architecture links to design + umbrella plan and marks modules actually present. Roadmap/technical debt mark completed tasks with commit/evidence and retain open limitations: one site/market, local auth/no SSO, legacy endpoint removal và H4 dependency lock. Result callback không còn được ghi như nợ post-MVP sau khi Task 7 Plan 4 triển khai; residual risk đúng là callback custom phải được security-test và duy trì contract. Plan này không tạo lock file nên H4 vẫn mở. Evaluation plan retains test–retest → E1 → E5 and does not claim paid results from this rollout.
 
-- [ ] **Step 3: AI handoff guardrails**
+- [x] **Step 3: AI handoff guardrails**
 
 Document module boundaries, source-of-truth files, migration rules, score freeze, no-paid-test default, two independent identity stores, site-derived scope, no full-content persistence, exact commands/checkpoints and what remains unimplemented. Do not copy secrets or claim planned files exist before their implementing commit.
 
-- [ ] **Step 4: Final verification**
+- [x] **Step 4: Final verification**
 
 ```powershell
 Set-Location D:\drupal-multiagent-seo\multiagent
@@ -536,7 +538,7 @@ git diff --check
 git diff --exit-code 04f10e1 -- multiagent/src/agents multiagent/src/ai_core.py multiagent/src/brand_analysis.py multiagent/src/config.py multiagent/src/embeddings.py multiagent/src/graph.py multiagent/src/retrieval.py multiagent/src/scoring.py multiagent/src/seo_analysis.py multiagent/src/state.py multiagent/src/text_utils.py multiagent/src/kb multiagent/config/scoring.yaml
 ```
 
-- [ ] **Step 5: Commit acceptance evidence**
+- [x] **Step 5: Commit acceptance evidence**
 
 ```powershell
 git -C D:\drupal-multiagent-seo add docs/evidence/platform-mvp-acceptance.md docs/architecture.md docs/roadmap.md docs/technical-debt.md docs/evaluation-plan.md README.md AGENTS.md CLAUDE.md
@@ -547,12 +549,12 @@ git commit -m "docs: hand off standalone platform MVP"
 
 ## Plan 5 Completion Gate
 
-- [ ] Migration 0004 applied/rehearsed; heartbeat real and stale semantics proven.
-- [ ] Security headers, exception boundary and recursive redaction tests green.
-- [ ] Per-agent usage attributed without any score-path diff; otherwise criterion explicitly blocked, not silently downgraded to per-job only.
-- [ ] Drupal roles pass least-privilege test on DDEV/staging.
-- [ ] Full fake E2E/failure/privacy matrix green with zero paid call.
-- [ ] CI/test manifest accounts for every test script and distinguishes manual DDEV.
-- [ ] Backup restore and application rollback rehearsed outside production.
-- [ ] 11/11 acceptance rows have honest status and traceable evidence.
-- [ ] Documentation and AI handoff describe implemented state, remaining debt and unchanged evaluation order.
+- [x] Migration 0004 applied/rehearsed; heartbeat real and stale semantics proven.
+- [x] Security headers, exception boundary and recursive redaction tests green.
+- [x] Per-agent usage attributed without any score-path diff; otherwise criterion explicitly blocked, not silently downgraded to per-job only.
+- [x] Drupal roles pass least-privilege test on DDEV/staging.
+- [x] Full fake E2E/failure/privacy matrix green with zero paid call.
+- [x] CI/test manifest accounts for every test script and distinguishes manual DDEV.
+- [x] Backup restore and application rollback rehearsed outside production.
+- [x] 11/11 acceptance rows have honest status and traceable evidence.
+- [x] Documentation and AI handoff describe implemented state, remaining debt and unchanged evaluation order.
