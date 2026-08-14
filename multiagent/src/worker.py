@@ -71,11 +71,9 @@ def _payload_tu_state(state: dict) -> dict:
 
 def _connector_cho_job(conn, job: dict):
     """Connector cua DUNG site so huu job; secret lay tu env theo secret_ref."""
-    from review_platform.connectors import secrets as connector_secrets
-    from review_platform.connectors.drupal import DrupalConnector
+    from review_platform.connectors.factory import connector_cho_site
 
-    site = sites.load_site_by_id(conn, job["site_id"])
-    return DrupalConnector(site, connector_secrets.resolve(site.secret_ref))
+    return connector_cho_site(conn, job["site_id"])
 
 
 def _fingerprint(fields: dict, version: int) -> str:
@@ -388,9 +386,14 @@ def _vong_lap_voi_conn(conn, ten: str) -> None:
         if time.monotonic() - lan_doi_soat >= CHU_KY_DOI_SOAT_GIAY:
             lan_doi_soat = time.monotonic()
             try:
-                them = reconcile.quet(conn)
-                if them:
-                    logging.info("[worker %s] doi soat them %d job", ten, them)
+                tom_tat = reconcile.quet(conn)
+                if tom_tat.enqueued or tom_tat.errors:
+                    logging.info(
+                        "[worker %s] doi soat %d site: them %d job, "
+                        "bo qua %d dead-letter, loi %s",
+                        ten, tom_tat.sites_scanned, tom_tat.enqueued,
+                        tom_tat.skipped_dead_letter, tom_tat.errors,
+                    )
             except Exception as e:
                 # Doi soat hong KHONG duoc lam chet worker - duong event van chay
                 logging.warning("[worker %s] doi soat loi: %s", ten, e)

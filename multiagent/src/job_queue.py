@@ -521,6 +521,30 @@ def co_job_that_bai(conn, node_id: str, content_hash: str) -> bool:
         return cur.fetchone() is not None
 
 
+def co_job_that_bai_scoped(
+    conn,
+    *,
+    site_id: UUID,
+    external_content_id: str,
+    content_hash: str,
+    policy_version: str,
+) -> bool:
+    """Da co job dead-letter cho dung scope nay chua?
+
+    Ban scoped cua `co_job_that_bai`: hai site co the co cung external ID va
+    cung hash ma khong lien quan gi den nhau. Hoi khong scope se lam mot site
+    bi chan chi vi site khac tung that bai.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT 1 FROM {TEN_BANG} "
+            "WHERE site_id=%s AND external_content_id=%s AND content_hash=%s "
+            "AND policy_version=%s AND status=%s LIMIT 1",
+            (site_id, external_content_id, content_hash, policy_version, FAILED),
+        )
+        return cur.fetchone() is not None
+
+
 def job_moi_nhat(conn, node_id: str):
     with conn.cursor() as cur:
         cur.execute(
