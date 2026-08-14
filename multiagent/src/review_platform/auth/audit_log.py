@@ -18,6 +18,9 @@ class AuditAction(str, Enum):
     PASSWORD_RESET = "password_reset"
     LAST_ADMIN_DENIED = "last_admin_denied"
     JOB_RETRIED = "job_retried"
+    CONNECTION_TESTED = "connection_tested"
+    INTAKE_PAUSED = "intake_paused"
+    INTAKE_RESUMED = "intake_resumed"
 
 
 class AuditMetadataError(ValueError):
@@ -38,6 +41,12 @@ _ALLOWED_METADATA = {
     AuditAction.JOB_RETRIED: frozenset(
         {"saved_result_available", "new_job_public_id", "reason"}
     ),
+    # `error_code` la ma an toan (auth_failed/capability_missing/...), khong
+    # phai message tho; `site_slug` khong phai bi mat. Tuyet doi khong co cho
+    # nao cho token/base URL day du.
+    AuditAction.CONNECTION_TESTED: frozenset({"site_slug", "ok", "error_code"}),
+    AuditAction.INTAKE_PAUSED: frozenset({"site_slug", "reason"}),
+    AuditAction.INTAKE_RESUMED: frozenset({"site_slug", "reason"}),
 }
 _SENSITIVE_KEY_PARTS = ("password", "token", "authorization", "cookie", "secret")
 _OUTCOMES = frozenset({"success", "denied", "failed"})

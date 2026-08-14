@@ -5,6 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 from review_platform.admin import (
     audit_routes,
+    connection_routes,
     dashboard_routes,
     dependencies,
     evaluation_routes,
@@ -314,6 +315,7 @@ router.include_router(dashboard_routes.router)
 router.include_router(job_routes.router)
 router.include_router(review_routes.router)
 router.include_router(user_routes.router)
+router.include_router(connection_routes.router)
 router.include_router(read_only_routes.router)
 router.include_router(evaluation_routes.router)
 router.include_router(audit_routes.router)

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Kết nối Drupal{% endblock %}
+{% block content %}
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Connector</p>
+    <h1>Kết nối Drupal</h1>
+    <p class="lede">Kiểm tra quyền thật của tài khoản tích hợp và tạm dừng nhận bài khi cần.</p>
+  </div>
+</header>
+
+{% if error %}
+<p class="notice error" role="alert">{{ error }}</p>
+{% endif %}
+{% if notice %}
+<p class="notice success" role="status">{{ notice }}</p>
+{% endif %}
+
+{% if connection is none %}
+<p class="notice warning" role="note">Chưa cấu hình site nào.</p>
+{% else %}
+<section aria-labelledby="ket-noi-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Cấu hình hiện tại</p>
+      <h2 id="ket-noi-heading">{{ connection.name }}</h2>
+    </div>
+  </header>
+  <dl class="detail-grid compact-detail-grid">
+    <div><dt>Site slug</dt><dd><code>{{ connection.slug }}</code></dd></div>
+    <div><dt>Base URL</dt><dd><code>{{ connection.base_url }}</code></dd></div>
+    {# CHỈ tên biến môi trường, không bao giờ là giá trị. #}
+    <div><dt>Secret reference</dt><dd><code>{{ connection.secret_ref }}</code> <span class="hint">(tên biến môi trường)</span></dd></div>
+    <div><dt>Site</dt><dd>{{ "active" if connection.active else "inactive" }}</dd></div>
+    <div><dt>Intake</dt><dd>{{ "đang tạm dừng" if connection.intake_paused else "đang nhận bài" }}</dd></div>
+    <div><dt>Profile</dt><dd>{{ connection.profile_code or "—" }}</dd></div>
+    <div><dt>Policy version</dt><dd><code>{{ connection.policy_version or "—" }}</code></dd></div>
+  </dl>
+</section>
+
+<section aria-labelledby="token-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Credential</p>
+      <h2 id="token-heading">Token đang hoạt động</h2>
+    </div>
+  </header>
+  {% if connection.token_prefixes %}
+  <ul class="config-list">
+    {% for prefix in connection.token_prefixes %}
+    <li><code>{{ prefix }}…</code></li>
+    {% endfor %}
+  </ul>
+  <p class="hint">Chỉ hiển thị 12 ký tự đầu. Giá trị đầy đủ chỉ hiện đúng một lần lúc rotate.</p>
+  {% else %}
+  <p class="notice warning" role="note">Chưa có credential nào đang hoạt động cho site này.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="health-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Kiểm tra gần nhất</p>
+      <h2 id="health-heading">Trạng thái kết nối</h2>
+    </div>
+  </header>
+  <dl class="detail-grid compact-detail-grid">
+    <div><dt>Kết quả</dt><dd>{{ connection.last_health_status or "chưa kiểm bao giờ" }}</dd></div>
+    <div><dt>Thời điểm</dt><dd>{{ connection.last_health_checked_at or "—" }}</dd></div>
+    <div><dt>Mã lỗi</dt><dd>{{ connection.last_health_error or "—" }}</dd></div>
+  </dl>
+  <p class="hint">
+    Kiểm tra gọi capability, feed chờ chấm và đọc đúng một revision. Thiếu bất kỳ
+    năng lực nào cũng là chưa đạt — một GET danh sách trả 200 không chứng minh
+    được worker chạy được. Kiểm tra không bao giờ ghi vào Drupal.
+  </p>
+
+  {% if can_operate %}
+  <form method="post" action="/admin/connection/test">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button type="submit" class="button">Kiểm tra kết nối</button>
+  </form>
+  {% else %}
+  <p class="hint">Cần quyền operator trở lên để chạy kiểm tra.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="intake-heading">
+  <header class="section-heading">
+    <div>
+      <p class="eyebrow">Vận hành</p>
+      <h2 id="intake-heading">Tạm dừng nhận bài</h2>
+    </div>
+  </header>
+  <p class="hint">
+    Tạm dừng thì job đang chạy vẫn chạy nốt và job đã xếp hàng vẫn giữ nguyên;
+    chỉ chặn nhận bài mới và chặn vòng đối soát. Mở lại không tạo job trùng.
+  </p>
+  {% if can_operate %}
+  <form method="post" action="/admin/connection/{{ 'resume' if connection.intake_paused else 'pause' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="reason">Lý do (không bắt buộc)</label>
+    <input type="text" id="reason" name="reason" maxlength="300">
+    <button type="submit" class="button">
+      {{ "Mở lại nhận bài" if connection.intake_paused else "Tạm dừng nhận bài" }}
+    </button>
+  </form>
+  {% else %}
+  <p class="hint">Cần quyền operator trở lên để đổi trạng thái nhận bài.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}
