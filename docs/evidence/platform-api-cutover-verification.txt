@@ -191,11 +191,27 @@ Connector health tren cau hinh dev
   Health goi capability + pending feed, va fetch exact revision khi feed co
   item. KHONG goi result callback, KHONG tao revision.
 
-  LUU Y: cot site.last_health_status tren database dev van la NULL, vi no chi
-  duoc ghi khi mot operator bam nut o /admin/connection (co CSRF + audit).
-  Database dev khong co admin account thuc, nen khong ai bam. Dashboard vi vay
-  hien connector = "unknown", KHONG phai "ok" - dung nhu thiet ke: chua kiem
-  bao gio thi khong duoc hien mau xanh.
+  Cap nhat 2026-08-14 (sau khi chu du an tu bam nut tren trinh duyet):
+    site.last_health_status = 'ok', last_health_checked_at co gia tri,
+    last_health_error = NULL.
+    admin_audit_log co 3 dong action='connection_tested' outcome='success',
+    metadata chi gom {site_slug, ok, error_code} - khong co token/base URL.
+
+  ⚠️ LOI DA BAT O BUOC NAY, va no lam mot cau trong ban truoc cua chinh file
+  nay thanh SAI: dashboard VAN hien "Chua xac minh" du database da co 'ok'.
+  Nguyen nhan: `queries.dashboard()` co tra `connector_status`, va
+  test_admin_dashboard.py co assert gia tri do - nhung TEMPLATE
+  `partials/dashboard_metrics.html` viet CUNG chuoi "Chua xac minh", khong he
+  doc bien do. Toan bo phan Python la code chet.
+
+  Bai hoc: assert o tang read-model KHONG chung minh gi ve cai nguoi dung nhin
+  thay. Da sua template va them
+  test_template_dashboard_hien_dung_trang_thai_connector_da_luu (render that
+  template voi ba trang thai: 'ok' -> "Dat", NULL/'unknown' -> "Chua kiem tra
+  bao gio", ma loi -> hien nguyen ma + class .status-error). Da xac minh test
+  do RED khi tra template ve ban hard-code.
+
+  Worker van hien "Chua xac minh" va do la co y: chua co heartbeat that (P5).
 
 Bo test
 -------

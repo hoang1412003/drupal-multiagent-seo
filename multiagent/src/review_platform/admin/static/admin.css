@@ -369,6 +369,10 @@ textarea { resize: vertical; }
 
 .status-ok { color: var(--success) !important; font-weight: 700; }
 .status-unknown { color: var(--warning) !important; font-weight: 700; }
+/* "Chua kiem bao gio" va "kiem roi nhung HONG" phai nhin khac nhau ngay:
+   dung chung mot mau se lam mot connector dang loi trong giong mot connector
+   chua ai dung toi. */
+.status-error { color: var(--danger) !important; font-weight: 700; }
 
 .empty-state {
   padding: 2.5rem 1.25rem;
