@@ -8,8 +8,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from eval_calibration import quet, quyet_dinh  # noqa: E402
-from eval_kfold import PUBLISH_CO_DINH, chay_cv, chia_fold, chon_nguong  # noqa: E402
+from eval_calibration import gold_ids, quet, quyet_dinh  # noqa: E402
+from eval_kfold import (  # noqa: E402
+    PUBLISH_CO_DINH, chay_cv, chia_fold, chon_nguong, doc_mau,
+)
 
 _hong = False
 
@@ -217,5 +219,17 @@ check(f"du doan {sid0} dung nguong cua fold 0",
 
 kiem("chay lai cung seed cho ket qua y het",
      chay_cv(kq, nhan, mau_cv, W, so_fold=5, seed=20260816) == cv)
+
+
+# --- doc_mau() PHAI khop dung tap mau ma E5 cham ------------------------
+# Neu doc_mau() lay tap mau khac gold_ids() thi fold se chua mau khong co
+# diem (hoac bo sot mau co diem), va Kappa CV tinh tren tap khac Kappa
+# in-sample - hai con so bao cao canh nhau se khong so duoc voi nhau.
+
+mau_that = doc_mau()
+check("doc_mau() khop chinh xac gold_ids() cua E5",
+      sorted(m["sample_id"] for m in mau_that), sorted(gold_ids()))
+kiem("moi mau co du source_url va label",
+     all(m.get("source_url") and m.get("label") for m in mau_that))
 
 sys.exit(1 if _hong else 0)

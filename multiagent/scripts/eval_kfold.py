@@ -160,3 +160,123 @@ def chay_cv(ket_qua: dict, nhan_that: dict, mau: list[dict], w: dict,
         "du_doan_oof": du_doan,
         "nguong_tung_fold": nguong_tung_fold,
     }
+
+
+def doc_mau(labels_path: str | None = None) -> list[dict]:
+    """Doc gold set thanh dang chia_fold() can: sample_id, source_url, label.
+
+    Dung CHUNG `_gold_rows()` cua eval_calibration chu khong tu doc CSV:
+    tap mau cua k-fold phai la DUNG tap ma E5 da cham. Lech mot mau la fold
+    chua mau khong co diem (hoac bo sot mau co diem), va luc do Kappa CV voi
+    Kappa in-sample tinh tren hai tap khac nhau - hai con so bao cao canh
+    nhau khong con so duoc voi nhau.
+    """
+    from eval_calibration import LABELS, _gold_rows
+
+    return [{"sample_id": r["sample_id"], "source_url": r["source_url"],
+             "label": r["label"].strip()}
+            for r in _gold_rows(labels_path or LABELS)]
+
+
+def in_bao_cao(kq_e5: dict, mau: list[dict], w: dict,
+               so_fold: int = 5, seed: int = 20260816) -> dict:
+    """In hai con so canh nhau va bo nguong cua tung fold.
+
+    Bao cao mot minh con so in-sample la giau dung thu E6 sinh ra de do:
+    khoang cach giua hai con so CHINH LA muc selection bias cua viec lay max
+    tren 441 to hop (evaluation-plan.md muc 4.6.1).
+    """
+    from eval_calibration import cohen_kappa, f1_theo_lop, quet, quyet_dinh
+
+    nhan = {m["sample_id"]: m["label"] for m in mau}
+    ids = sorted(s for s in kq_e5 if s in nhan)
+    that = [nhan[s] for s in ids]
+
+    bang = [r for r in quet(kq_e5, nhan, w)
+            if r["nguong"]["publish"] == PUBLISH_CO_DINH]
+    ng_in = chon_nguong(bang)
+    dd_in = [quyet_dinh(kq_e5[s]["diem"], kq_e5[s]["co_critical"], w, ng_in)
+             for s in ids]
+    kappa_in = cohen_kappa(that, dd_in)
+
+    cv = chay_cv(kq_e5, nhan, mau, w, so_fold=so_fold, seed=seed)
+    folds = chia_fold(mau, so_fold=so_fold, seed=seed)
+
+    print("=" * 78)
+    print(f"E6 - k-fold CROSS-VALIDATION  ({len(ids)} mau, {so_fold} fold, "
+          f"seed {seed})")
+    print("=" * 78)
+    print("Thiet ke dang ky truoc: evaluation-plan.md muc 4.6.1\n")
+
+    print(f"{'fold':>5}{'mau':>5}{'rej':>5}{'nr':>4}   nguong chon (veto/nr)")
+    for i, f in enumerate(folds):
+        c = sum(nhan[s] == "rejected" for s in f)
+        g = cv["nguong_tung_fold"][i]
+        print(f"{i:>5}{len(f):>5}{c:>5}{len(f)-c:>4}   "
+              f"veto={g['veto']:<3} nr={g['nr']}")
+
+    veto_set = {g["veto"] for g in cv["nguong_tung_fold"]}
+    nr_set = {g["nr"] for g in cv["nguong_tung_fold"]}
+    print(f"\n  Do phan tan nguong giua cac fold: veto {sorted(veto_set)}, "
+          f"nr {sorted(nr_set)}")
+    print("  (phan tan manh = nguong KHONG xac dinh duoc tu du lieu nay)")
+
+    print("\n" + "-" * 78)
+    print(f"  Kappa in-sample (quet tren ca {len(ids)}, lay max)  = "
+          f"{kappa_in:.3f}   <- LAC QUAN")
+    print(f"  Kappa CV        ({len(cv['du_doan_oof'])} du doan out-of-fold) = "
+          f"{cv['kappa_cv']:.3f}   <- tong quat hoa")
+    print(f"  Khoang cach = {kappa_in - cv['kappa_cv']:+.3f}  "
+          f"= muc selection bias cua viec lay max tren {len(bang)} to hop")
+    print("-" * 78)
+    print(f"\n  Accuracy in-sample {sum(t==d for t,d in zip(that,dd_in))/len(ids):.3f}"
+          f"   |   Accuracy CV {cv['accuracy']:.3f}")
+    print("  F1 CV  " + "  ".join(
+        f"{l}={f1_theo_lop(that, [cv['du_doan_oof'][s] for s in ids], l):.2f}"
+        for l in ("rejected", "needs_revision", "publish")))
+
+    print(f"\n  Nguong in-sample (KHONG phai thu dem dung ngay): {ng_in}")
+    print("  publish_min khong calibrate duoc (0 mau publish), giu nguyen "
+          f"{PUBLISH_CO_DINH} va ghi ro la CHUA calibrate.")
+
+    return {
+        "so_fold": so_fold, "seed": seed,
+        "kappa_in_sample": kappa_in,
+        "kappa_cv": cv["kappa_cv"],
+        "selection_bias": kappa_in - cv["kappa_cv"],
+        "accuracy_cv": cv["accuracy"],
+        "nguong_in_sample": ng_in,
+        "nguong_tung_fold": cv["nguong_tung_fold"],
+        "fold": {str(i): sorted(f) for i, f in enumerate(folds)},
+        "du_doan_oof": cv["du_doan_oof"],
+    }
+
+
+if __name__ == "__main__":
+    import argparse
+    import json
+    import os
+    import sys
+
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    sys.path.insert(0, os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+
+    import config
+    from eval_calibration import REPO, nap_ket_qua
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ket-qua", required=True,
+                    help="file ket qua PHA 1 cua E5 (trong docs/evidence/)")
+    ap.add_argument("--ra", default="e6_kfold.json")
+    a = ap.parse_args()
+
+    path = (a.ket_qua if os.path.isabs(a.ket_qua)
+            else os.path.join(REPO, "docs", "evidence", a.ket_qua))
+
+    tom_tat = in_bao_cao(nap_ket_qua(path), doc_mau(), config.load()["weights"])
+
+    ra = os.path.join(REPO, "docs", "evidence", a.ra)
+    with open(ra, "w", encoding="utf-8") as f:
+        json.dump(tom_tat, f, ensure_ascii=False, indent=1)
+    print(f"\nKet qua -> {ra}")
