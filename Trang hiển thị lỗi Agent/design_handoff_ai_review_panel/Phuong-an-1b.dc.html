@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin:0; font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif; font-size:16px; line-height:1.5; color:#232429; background:#fff; -webkit-font-smoothing:antialiased; }
+  a { color:#003ecc; text-decoration:underline; }
+  a:hover { color:#0036b1; }
+  summary { list-style:none; }
+  summary::-webkit-details-marker { display:none; }
+  @keyframes vfflash { 0%,100% { box-shadow:0 0 0 0 rgba(0,62,204,0); } 30% { box-shadow:0 0 0 4px rgba(0,62,204,.28); } }
+  @keyframes vfspin { to { transform: rotate(360deg); } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#fff;">
+
+  <div style="display:flex; align-items:stretch; height:39px; background:#0f0f0f; color:#ddd; font-size:13px;">
+    <div style="display:flex; align-items:center; padding:0 20px; background:#fff; color:#000; font-weight:700;">Manage</div>
+    <div style="display:flex; align-items:center; padding:0 20px;">Shortcuts</div>
+    <div style="display:flex; align-items:center; padding:0 20px;">admin</div>
+  </div>
+  <div style="display:flex; align-items:center; gap:24px; height:40px; padding:0 24px; background:#f5f5f5; border-bottom:1px solid #e5e5e5; color:#434343; font-size:13px;">
+    <span style="color:#000; font-weight:700;">Content</span><span>Structure</span><span>Appearance</span><span>Extend</span><span>Configuration</span><span>People</span><span>Reports</span><span>Help</span>
+  </div>
+
+  <div style="background:#f3f4f9; padding:22px 24px 0;">
+    <nav style="display:flex; align-items:center; gap:8px; font-size:13px; color:#55565b;">
+      <a href="#" style="color:#003ecc; text-decoration:none;">Home</a>
+      <img src="claro/arrow-breadcrumb.svg" alt="" style="width:6px; height:9px;" />
+      <a href="#" style="color:#003ecc; text-decoration:none;">Administration</a>
+      <img src="claro/arrow-breadcrumb.svg" alt="" style="width:6px; height:9px;" />
+      <span>Content</span>
+    </nav>
+    <h1 style="margin:12px 0 0; font-size:2.027rem; line-height:1.3; font-weight:700;">Edit Article <em>Hướng dẫn sạc pin ô tô điện VinFast VF8 tại nhà</em></h1>
+    <div style="display:flex; gap:0; margin-top:12px;">
+      <a href="#" style="display:flex; align-items:center; min-height:48px; padding:12px 32px; font-size:16px; font-weight:700; color:#55565b; text-decoration:none;">View</a>
+      <a href="#" style="display:flex; align-items:center; min-height:48px; padding:12px 32px; font-size:16px; font-weight:700; color:#003ecc; text-decoration:none; border-bottom:3px solid #003ecc;">Edit</a>
+      <a href="#" style="display:flex; align-items:center; min-height:48px; padding:12px 32px; font-size:16px; font-weight:700; color:#55565b; text-decoration:none;">Delete</a>
+      <a href="#" style="display:flex; align-items:center; min-height:48px; padding:12px 32px; font-size:16px; font-weight:700; color:#55565b; text-decoration:none;">Revisions</a>
+    </div>
+  </div>
+
+  <div id="band" style="position:sticky; top:0; z-index:20; border-bottom:1px solid #dedfe4; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.1);">
+
+  <div data-band="chua_cham" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px;">
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#eceef2; color:#4a4b50; font-size:13px; font-weight:700;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#8e929c;"></span>Chưa chấm
+    </span>
+    <span style="font-size:14.5px; color:#3d3e44;">Bài chưa gửi sang hệ Multi-Agent. Lưu ở trạng thái <strong>Needs Review</strong> để bắt đầu chấm.</span>
+    <button type="button" style="margin-left:auto; padding:10px 15px; cursor:pointer; color:#232429; border:1px solid #919297; border-radius:2px; background:#fff; font-size:13.5px; font-weight:700; font-family:inherit;">Chấm ngay</button>
+  </div>
+
+  <div data-band="dang_cham" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px;">
+    <span style="display:inline-flex; align-items:center; gap:8px; padding:4px 11px; border-radius:13px; background:#e9eefc; color:#12307e; font-size:13px; font-weight:700;">
+      <span style="width:12px; height:12px; border:2px solid #b9c7ee; border-top-color:#003ecc; border-radius:50%; animation:vfspin .9s linear infinite;"></span>Đang chấm
+    </span>
+    <span style="display:flex; align-items:center; gap:12px; font-size:13.5px; color:#3d3e44;">
+      <span style="display:flex; align-items:center; gap:6px;"><img src="claro/checkmark-ffffff.svg" alt="" style="width:13px; height:13px; padding:2px; border-radius:50%; background:#3f7a52;" />SEO</span>
+      <span style="display:flex; align-items:center; gap:6px;"><img src="claro/checkmark-ffffff.svg" alt="" style="width:13px; height:13px; padding:2px; border-radius:50%; background:#3f7a52;" />Chất lượng</span>
+      <span style="display:flex; align-items:center; gap:6px;"><span style="width:13px; height:13px; border:2px solid #c3c5cc; border-top-color:#003ecc; border-radius:50%; animation:vfspin .9s linear infinite;"></span>Brand Voice</span>
+      <span style="display:flex; align-items:center; gap:6px; color:#8b8c92;"><span style="width:13px; height:13px; border:1px solid #c3c5cc; border-radius:50%;"></span>Tuân thủ</span>
+    </span>
+    <span style="flex:1; min-width:120px; max-width:220px; height:5px; border-radius:3px; background:#e8e9ee;"><span style="display:block; width:62%; height:5px; border-radius:3px; background:#003ecc;"></span></span>
+    <span style="font-size:12.5px; color:#6a6b70;">còn ~40 giây · bạn vẫn có thể sửa bài</span>
+  </div>
+
+  <div data-band="dat" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px;">
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#e3f3e6; color:#265c35; font-size:13px; font-weight:700;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#3f7a52;"></span>Đạt
+    </span>
+    <span style="font-size:15px;"><strong>Không phát hiện vấn đề</strong> <span style="color:#55565b;">— cả 4 agent</span></span>
+    <span style="width:1px; height:22px; background:#dedfe4;"></span>
+    <span style="font-size:13.5px; color:#55565b;">Điểm <strong style="color:#232429; font-size:15px;">92.0</strong>/100</span>
+    <span style="margin-left:auto; font-size:13px; color:#3f7a52;">Có thể chuyển sang Published.</span>
+  </div>
+
+  <div data-band="veto" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px; background:#fdf5f5;">
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#d72222; color:#fff; font-size:13px; font-weight:700;">VETO</span>
+    <span style="font-size:15px;"><strong style="color:#8f1717;">Bài bị từ chối</strong> <span style="color:#55565b;">— 1 lỗi nghiêm trọng ở Tuân thủ</span></span>
+    <span style="width:1px; height:22px; background:#f0c9c9;"></span>
+    <span style="font-size:13.5px; color:#55565b;">Điểm tổng không tính khi còn veto</span>
+    <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+      <span style="font-size:13.5px; color:#55565b;">Lỗi 1/1</span>
+      <button type="button" style="padding:10px 15px; cursor:pointer; color:#232429; border:1px solid #919297; border-radius:2px; background:#fff; font-size:13.5px; font-weight:700; font-family:inherit;">Chấm lại</button>
+    </div>
+  </div>
+
+  <div data-band="stale" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px; background:#fbfbfd;">
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#eceef2; color:#4a4b50; font-size:13px; font-weight:700;">Kết quả đã cũ</span>
+    <span style="font-size:14.5px; color:#3d3e44;">Bài đã sửa sau lần chấm (bản #7 → #8). Danh sách lỗi bên dưới có thể không còn đúng.</span>
+    <button type="button" style="margin-left:auto; padding:10px 15px; cursor:pointer; color:#fff; border:1px solid transparent; border-radius:2px; background:#003ecc; font-size:13.5px; font-weight:700; font-family:inherit;">Chấm lại bản mới</button>
+  </div>
+
+  <div data-band="thieu" style="display:none; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px;">
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#fdeaea; color:#a51b1b; font-size:13px; font-weight:700;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#d72222;"></span>Cần sửa
+    </span>
+    <span style="font-size:15px;"><strong>4 vấn đề</strong> <span style="color:#55565b;">trên 3 trường</span></span>
+    <span style="width:1px; height:22px; background:#dedfe4;"></span>
+    <span style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px; border-radius:12px; background:#eceef2; color:#4a4b50; font-size:12.5px; font-weight:700;">3/4 agent — Brand Voice lỗi</span>
+    <span style="font-size:13px; color:#6a6b70;">timeout sau 30s · job #4182</span>
+    <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+      <button type="button" style="padding:10px 15px; cursor:pointer; color:#232429; border:1px solid #919297; border-radius:2px; background:#fff; font-size:13.5px; font-weight:700; font-family:inherit;">Chấm lại</button>
+      <a href="#" style="font-size:13px; text-decoration:none;">Báo cho admin</a>
+    </div>
+  </div>
+
+  <div data-band="co_loi" style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:12px 24px;">
+    <span id="band-verdict" style="display:inline-flex; align-items:center; gap:7px; padding:4px 11px; border-radius:13px; background:#fdeaea; color:#a51b1b; font-size:13px; font-weight:700;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#d72222;"></span>Cần sửa
+    </span>
+    <span style="font-size:15px;"><strong id="band-count">5 vấn đề</strong> <span id="band-fields" style="color:#55565b;">trên 3 trường</span></span>
+    <span style="width:1px; height:22px; background:#dedfe4;"></span>
+    <span style="display:flex; align-items:center; gap:6px;">
+      <button type="button" data-chip="all" onClick="{{ filter }}" style="padding:5px 11px; cursor:pointer; border:1px solid #003ecc; border-radius:12px; background:#003ecc; color:#fff; font-size:12.5px; font-weight:600; font-family:inherit;">Tất cả</button>
+      <button type="button" data-chip="block" onClick="{{ filter }}" style="padding:5px 11px; cursor:pointer; border:1px solid #dedfe4; border-radius:12px; background:#fff; color:#3d3e44; font-size:12.5px; font-weight:600; font-family:inherit;">Chặn <span data-n="block">1</span></button>
+      <button type="button" data-chip="fix" onClick="{{ filter }}" style="padding:5px 11px; cursor:pointer; border:1px solid #dedfe4; border-radius:12px; background:#fff; color:#3d3e44; font-size:12.5px; font-weight:600; font-family:inherit;">Cần sửa <span data-n="fix">3</span></button>
+      <button type="button" data-chip="tip" onClick="{{ filter }}" style="padding:5px 11px; cursor:pointer; border:1px solid #dedfe4; border-radius:12px; background:#fff; color:#3d3e44; font-size:12.5px; font-weight:600; font-family:inherit;">Gợi ý <span data-n="tip">1</span></button>
+    </span>
+    <span style="width:1px; height:22px; background:#dedfe4;"></span>
+    <span style="font-size:13.5px; color:#55565b;">Điểm <strong style="color:#232429; font-size:15px;">76.5</strong>/<span id="band-nguong">100</span></span>
+    <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+      <span id="band-pos" style="min-width:64px; font-size:13.5px; color:#55565b;">Lỗi 1/5</span>
+      <button type="button" onClick="{{ prev }}" title="Lỗi trước" style="width:36px; height:36px; cursor:pointer; border:1px solid #919297; border-radius:2px; background:#fff; color:#3d3e44; font-size:15px; font-family:inherit;">↑</button>
+      <button type="button" onClick="{{ next }}" title="Lỗi tiếp theo" style="width:36px; height:36px; cursor:pointer; border:1px solid #919297; border-radius:2px; background:#fff; color:#3d3e44; font-size:15px; font-family:inherit;">↓</button>
+      <button type="button" style="padding:10px 15px; cursor:pointer; color:#232429; border:1px solid #919297; border-radius:2px; background:#fff; font-size:13.5px; font-weight:700; font-family:inherit;">Chấm lại</button>
+      <a href="#" onClick="{{ toggleAll }}" style="font-size:13px; text-decoration:none;" id="band-toggle">Ẩn báo cáo</a>
+    </div>
+  </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:28px; padding:24px 24px 56px; max-width:1600px;">
+
+    <div style="min-width:0;">
+
+      <div data-globalnote="1" style="display:none; align-items:center; gap:10px; margin-bottom:20px; padding:11px 14px; border:1px solid #dedfe4; border-left:3px solid #8e929c; border-radius:3px; background:#fbfbfd; font-size:13.5px; color:#3d3e44;"></div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; margin-bottom:5px; font-size:0.889rem; font-weight:700;">Title<span style="color:#dc2323;">*</span></label>
+        <input id="f-title" data-fieldbox="title" type="text" value="Hướng dẫn sạc pin ô tô điện VinFast VF8 tại nhà" style="box-sizing:border-box; width:100%; padding:11px 15px; border:1px solid #b7791f; border-radius:2px; font-size:16px; line-height:24px; font-family:inherit; color:#232429;" />
+        <div data-ok="title" style="display:none; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#3f7a52;">
+          <img src="claro/checkmark-ffffff.svg" alt="" style="width:14px; height:14px; padding:2px; border-radius:50%; background:#3f7a52;" />Không phát hiện vấn đề
+        </div>
+        <div data-report="title" style="margin-top:8px; border:1px solid #dedfe4; border-radius:3px; overflow:hidden;">
+          <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8f9fc; border-bottom:1px solid #e6e7ed; font-size:12.5px; font-weight:700; color:#55565b;">
+            <span data-fieldhead="title">AI phát hiện 2 vấn đề ở trường này</span>
+            <a href="#" data-collapse="title" onClick="{{ collapse }}" style="margin-left:auto; font-size:12.5px; text-decoration:none; font-weight:600;">Thu gọn ▴</a>
+          </div>
+          <div data-cards="title">
+            <div data-issue="1" data-sev="fix" data-field="title" data-target="f-title" style="display:flex; gap:12px; padding:12px; border-left:3px solid #b7791f; border-bottom:1px solid #e6e7ed; background:#fff;">
+              <span style="padding:2px 7px; height:20px; border-radius:3px; background:#fdf3d6; color:#7a5410; font-size:11px; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">BV1</span>
+              <div style="flex:1;">
+                <div style="font-size:14.5px; font-weight:600;">Sai cách viết tên model <span style="font-weight:400; color:#6a6b70;">· Brand Voice</span></div>
+                <div style="margin-top:3px; font-size:13.5px; color:#55565b;">Đang viết “VF8”, chuẩn thương hiệu là “VF 8”.</div>
+                <div data-excerpt="1" style="margin-top:7px; padding:6px 9px; border-left:2px solid #dedfe4; background:#fafafb; font-size:13px; color:#6a6b70; font-style:italic;">… ô tô điện VinFast VF8 tại nhà</div>
+                <div style="display:flex; align-items:center; gap:14px; margin-top:9px; font-size:13px;">
+                  <button type="button" onClick="{{ applyFix }}" style="padding:6px 11px; cursor:pointer; border:1px solid #003ecc; border-radius:2px; background:#fff; color:#003ecc; font-size:12.5px; font-weight:700; font-family:inherit;">Sửa thành “VF 8”</button>
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:#3d3e44;"><input type="checkbox" onChange="{{ done }}" style="margin:0; width:15px; height:15px;" /> Đã xử lý</label>
+                  <a href="#" style="text-decoration:none; color:#55565b;">Không đồng ý</a>
+                </div>
+              </div>
+            </div>
+            <div data-issue="2" data-sev="tip" data-field="title" data-target="f-title" style="display:flex; gap:12px; padding:12px; border-left:3px solid #8e929c; background:#fff;">
+              <span style="padding:2px 7px; height:20px; border-radius:3px; background:#eceef2; color:#4a4b50; font-size:11px; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">SEO1</span>
+              <div style="flex:1;">
+                <div style="font-size:14.5px; font-weight:600;">Tiêu đề 47 ký tự <span style="font-weight:400; color:#6a6b70;">· SEO</span></div>
+                <div style="margin-top:3px; font-size:13.5px; color:#55565b;">Dải lý tưởng 50-60 ký tự để không bị Google cắt.</div>
+                <div style="display:flex; align-items:center; gap:14px; margin-top:9px; font-size:13px;">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:#3d3e44;"><input type="checkbox" onChange="{{ done }}" style="margin:0; width:15px; height:15px;" /> Đã xử lý</label>
+                  <a href="#" style="text-decoration:none; color:#55565b;">Không đồng ý</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; margin-bottom:5px; font-size:0.889rem; font-weight:700;">Body</label>
+        <div data-fieldbox="body" style="border:1px solid #d72222; border-radius:2px; overflow:hidden;">
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:2px; padding:6px 8px; background:#fafafa; border-bottom:1px solid #dedfe4; font-size:13px; color:#55565b;">
+            <span style="padding:4px 8px;">Paragraph ▾</span>
+            <span style="width:1px; height:18px; background:#dedfe4; margin:0 6px;"></span>
+            <span style="padding:4px 8px; font-weight:700;">B</span><span style="padding:4px 8px; font-style:italic;">I</span><span style="padding:4px 8px; text-decoration:underline;">U</span>
+            <span style="width:1px; height:18px; background:#dedfe4; margin:0 6px;"></span>
+            <span style="padding:4px 8px;">Link</span><span style="padding:4px 8px;">• List</span><span style="padding:4px 8px;">1. List</span><span style="padding:4px 8px;">Quote</span><span style="padding:4px 8px;">Table</span><span style="padding:4px 8px;">Image</span>
+            <span style="width:1px; height:18px; background:#dedfe4; margin:0 6px;"></span>
+            <span style="padding:4px 8px;">Source</span>
+          </div>
+          <div style="padding:16px; min-height:220px; font-size:16px; line-height:1.65;">
+            <h2 style="margin:0 0 12px; font-size:1.602rem; line-height:1.3;">Sạc pin VF8 tại nhà cần chuẩn bị gì</h2>
+            <p style="margin:0 0 14px;"><span id="hl-cq3" style="background:#fdf3d6; box-shadow:0 1px 0 #d9ad3c;">Trước khi cắm sạc, bạn nên kiểm tra ổ điện, dây dẫn và bộ sạc theo hướng dẫn của nhà sản xuất, đồng thời bảo đảm khu vực đỗ xe khô ráo, thoáng khí và không có vật dễ cháy ở gần đầu sạc, vì đây là bước mà phần lớn người dùng mới thường bỏ qua khi mang xe về nhà lần đầu.</span></p>
+            <p style="margin:0 0 14px;">Với bộ sạc di động kèm theo xe, <span id="hl-cp8" style="background:#fbdcdc; box-shadow:0 1px 0 #d78585;">thời gian sạc từ 10% lên 70% khoảng 24 phút</span>. Bạn nên duy trì mức pin trong khoảng 20-80% cho các lần sạc hằng ngày.</p>
+            <h2 style="margin:18px 0 12px; font-size:1.602rem; line-height:1.3;">Các mức sạc phổ biến</h2>
+            <p style="margin:0;">Trụ sạc nhanh phù hợp cho chuyến đi dài, còn sạc tại nhà phù hợp cho nhu cầu đi lại hằng ngày.</p>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:8px 12px; border-top:1px solid #dedfe4; font-size:13px; color:#55565b;">
+            <span style="font-weight:700;">Text format</span>
+            <span style="padding:3px 10px; border:1px solid #919297; border-radius:2px; background:#fff;">Basic HTML ▾</span>
+            <a href="#" style="margin-left:auto; font-size:13px;">About text formats</a>
+          </div>
+        </div>
+        <div data-ok="body" style="display:none; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#3f7a52;">
+          <img src="claro/checkmark-ffffff.svg" alt="" style="width:14px; height:14px; padding:2px; border-radius:50%; background:#3f7a52;" />Không phát hiện vấn đề
+        </div>
+        <div data-report="body" style="margin-top:8px; border:1px solid #dedfe4; border-radius:3px; overflow:hidden;">
+          <div style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:#f8f9fc; border-bottom:1px solid #e6e7ed; font-size:12.5px; font-weight:700; color:#55565b;">
+            <span data-fieldhead="body">AI phát hiện 2 vấn đề ở trường này</span>
+            <span style="color:#8b8c92; font-weight:400;">· đoạn liên quan đã được tô trong bài</span>
+            <a href="#" data-collapse="body" onClick="{{ collapse }}" style="margin-left:auto; font-size:12.5px; text-decoration:none; font-weight:600;">Thu gọn ▴</a>
+          </div>
+          <div data-cards="body">
+            <div data-issue="3" data-sev="block" data-field="body" data-target="hl-cp8" style="display:flex; gap:12px; padding:12px; border-left:3px solid #d72222; border-bottom:1px solid #e6e7ed; background:#fffafa;">
+              <span style="padding:2px 7px; height:20px; border-radius:3px; background:#fdeaea; color:#a51b1b; font-size:11px; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">CP8</span>
+              <div style="flex:1;">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                  <div style="font-size:14.5px; font-weight:600;">Số liệu định lượng không dẫn nguồn <span style="font-weight:400; color:#6a6b70;">· Tuân thủ</span></div>
+                  <span style="padding:1px 7px; border-radius:3px; background:#d72222; color:#fff; font-size:10.5px; font-weight:700;">CHẶN XUẤT BẢN</span>
+                </div>
+                <div style="margin-top:3px; font-size:13.5px; color:#55565b;">Nêu rõ nguồn công bố cho con số này, hoặc bỏ khỏi bài.</div>
+                <div data-excerpt="3" style="margin-top:7px; padding:6px 9px; border-left:2px solid #dedfe4; background:#fff; font-size:13px; color:#6a6b70; font-style:italic;">…thời gian sạc từ 10% lên 70% khoảng 24 phút</div>
+                <div style="display:flex; align-items:center; gap:14px; margin-top:9px; font-size:13px;">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:#3d3e44;"><input type="checkbox" onChange="{{ done }}" style="margin:0; width:15px; height:15px;" /> Đã xử lý</label>
+                  <a href="#" style="text-decoration:none; color:#55565b;">Không đồng ý</a>
+                  <a href="#" style="text-decoration:none; color:#55565b;">Xem quy tắc CP8</a>
+                </div>
+              </div>
+            </div>
+            <div data-issue="4" data-sev="fix" data-field="body" data-target="hl-cq3" style="display:flex; gap:12px; padding:12px; border-left:3px solid #b7791f; background:#fff;">
+              <span style="padding:2px 7px; height:20px; border-radius:3px; background:#fdf3d6; color:#7a5410; font-size:11px; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">CQ3</span>
+              <div style="flex:1;">
+                <div style="font-size:14.5px; font-weight:600;">Câu quá dài — 61 từ <span style="font-weight:400; color:#6a6b70;">· Chất lượng</span></div>
+                <div style="margin-top:3px; font-size:13.5px; color:#55565b;">Ngưỡng 40 từ. Tách thành 2-3 câu ngắn để dễ đọc trên mobile.</div>
+                <div style="display:flex; align-items:center; gap:14px; margin-top:9px; font-size:13px;">
+                  <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:#3d3e44;"><input type="checkbox" onChange="{{ done }}" style="margin:0; width:15px; height:15px;" /> Đã xử lý</label>
+                  <a href="#" style="text-decoration:none; color:#55565b;">Không đồng ý</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; margin-bottom:5px; font-size:0.889rem; font-weight:700;">Meta description</label>
+        <textarea id="f-meta" data-fieldbox="meta" rows="3" style="box-sizing:border-box; width:100%; padding:11px 15px; border:1px solid #b7791f; border-radius:2px; font-size:16px; line-height:24px; font-family:inherit; resize:vertical;"></textarea>
+        <div data-ok="meta" style="display:none; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#3f7a52;">
+          <img src="claro/checkmark-ffffff.svg" alt="" style="width:14px; height:14px; padding:2px; border-radius:50%; background:#3f7a52;" />Không phát hiện vấn đề
+        </div>
+        <div data-report="meta" style="margin-top:8px;">
+          <div data-issue="5" data-sev="fix" data-field="meta" data-target="f-meta" style="display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:10px 12px; border:1px solid #dedfe4; border-left:3px solid #b7791f; border-radius:3px; background:#fff; font-size:13.5px;">
+            <span style="padding:2px 7px; border-radius:3px; background:#fdf3d6; color:#7a5410; font-size:11px; font-weight:700; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">SEO3</span>
+            <strong style="font-weight:600;">Meta description đang trống</strong>
+            <span style="color:#55565b;">Thêm mô tả 120-160 ký tự chứa từ khoá chính.</span>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; color:#3d3e44; font-size:13px;"><input type="checkbox" onChange="{{ done }}" style="margin:0; width:15px; height:15px;" /> Đã xử lý</label>
+            <a href="#" style="margin-left:auto; font-size:13px; text-decoration:none;">Gợi ý bản nháp</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; margin-bottom:5px; font-size:0.889rem; font-weight:700;">Tags</label>
+        <input type="text" value="sạc pin, VF 8, hướng dẫn" style="box-sizing:border-box; width:100%; padding:11px 15px; border:1px solid #919297; border-radius:2px; font-size:16px; line-height:24px; font-family:inherit;" />
+        <div style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#3f7a52;">
+          <img src="claro/checkmark-ffffff.svg" alt="" style="width:14px; height:14px; padding:2px; border-radius:50%; background:#3f7a52;" />
+          Không phát hiện vấn đề
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; margin-bottom:5px; font-size:0.889rem; font-weight:700;">Save as</label>
+        <div style="display:inline-flex; align-items:center; gap:8px; padding:11px 15px; border:1px solid #919297; border-radius:2px; background:#fff; font-size:16px; line-height:24px;">Needs Review <span style="color:#55565b;">▾</span></div>
+        <div style="margin-top:6px; color:#55565b; font-size:0.79rem;">Lưu ở trạng thái này sẽ gửi bài sang hệ Multi-Agent để chấm lại.</div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding-top:4px;">
+        <button type="button" style="padding:15px 23px; cursor:pointer; color:#fff; border:1px solid transparent; border-radius:2px; background:#003ecc; font-size:16px; font-weight:700; line-height:1rem; box-shadow:0 1px 2px rgba(0,0,0,.25); font-family:inherit;">Save</button>
+        <button type="button" style="padding:15px 23px; cursor:pointer; color:#232429; border:1px solid transparent; border-radius:2px; background:#d3d4d9; font-size:16px; font-weight:700; line-height:1rem; box-shadow:0 1px 2px rgba(0,0,0,.25); font-family:inherit;">Preview</button>
+        <span id="block-note" style="font-size:13.5px; color:#55565b;">Còn <strong style="color:#d72222;">1 lỗi chặn xuất bản</strong> — không thể chuyển sang Published.</span>
+        <a href="#" style="margin-left:auto; color:#dc2323;">Delete</a>
+      </div>
+    </div>
+
+    <div>
+      <div style="padding:16px 20px; border:1px solid #dedfe4; border-radius:2px; background:#fff;">
+        <div style="font-size:1.231em; font-weight:700;">Not published</div>
+        <div style="margin-top:10px; font-size:15px;"><strong>Last saved:</strong> 14/08/2026 - 15:20</div>
+        <div style="margin-top:5px; font-size:15px;"><strong>Author:</strong> admin</div>
+      </div>
+
+      <div style="margin-top:20px; border:1px solid #dedfe4; border-radius:2px; background:#fff; overflow:hidden;">
+        <div style="padding:13px 18px; border-bottom:1px solid #dedfe4; background:#fbfbfd; font-size:15px; font-weight:700;">Điểm theo agent</div>
+        <div style="padding:14px 18px;">
+          <div data-agent="seo" style="display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px;"><span style="flex:1;">SEO</span><span style="width:80px; height:5px; border-radius:3px; background:#e8e9ee;"><span data-bar="seo" style="display:block; width:82%; height:5px; border-radius:3px; background:#3f7a52;"></span></span><strong data-val="seo" style="width:58px; text-align:right;">82</strong></div>
+          <div data-agent="cq" style="display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px;"><span style="flex:1;">Chất lượng</span><span style="width:80px; height:5px; border-radius:3px; background:#e8e9ee;"><span data-bar="cq" style="display:block; width:71%; height:5px; border-radius:3px; background:#b7791f;"></span></span><strong data-val="cq" style="width:58px; text-align:right;">71</strong></div>
+          <div data-agent="bv" style="display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px;"><span style="flex:1;">Brand Voice</span><span style="width:80px; height:5px; border-radius:3px; background:#e8e9ee;"><span data-bar="bv" style="display:block; width:68%; height:5px; border-radius:3px; background:#b7791f;"></span></span><strong data-val="bv" style="width:58px; text-align:right;">68</strong></div>
+          <div data-agent="cp" style="display:flex; align-items:center; gap:10px; padding:5px 0; font-size:13.5px;"><span style="flex:1;">Tuân thủ</span><span style="width:80px; height:5px; border-radius:3px; background:#e8e9ee;"><span data-bar="cp" style="display:block; width:54%; height:5px; border-radius:3px; background:#d72222;"></span></span><strong data-val="cp" style="width:58px; text-align:right;">54</strong></div>
+          <div data-agentnote="1" style="margin-top:12px; padding-top:12px; border-top:1px solid #e6e7ed; font-size:12.5px; color:#6a6b70;">Chấm lúc 15:22 hôm nay · bản nội dung #7 · <a href="#" style="font-size:12.5px;">xem báo cáo đầy đủ</a></div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <details style="display:block; margin:0 0 -1px; border:1px solid #dedfe4; border-radius:2px 2px 0 0; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />Revision log message</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px;"><textarea rows="4" style="box-sizing:border-box; width:100%; padding:11px 15px; border:1px solid #919297; border-radius:2px; font-size:16px; font-family:inherit;"></textarea></div></div>
+        </details>
+        <details style="display:block; margin:0 0 -1px; border:1px solid #dedfe4; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />Menu settings</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px; font-size:0.889rem; color:#55565b;">Not in menu</div></div>
+        </details>
+        <details style="display:block; margin:0 0 -1px; border:1px solid #dedfe4; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />Comment settings</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px; font-size:0.889rem; color:#55565b;">Closed</div></div>
+        </details>
+        <details style="display:block; margin:0 0 -1px; border:1px solid #dedfe4; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />URL alias</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px;"><input type="text" value="/huong-dan-sac-pin-vf8" style="box-sizing:border-box; width:100%; padding:11px 15px; border:1px solid #919297; border-radius:2px; font-size:16px; font-family:inherit;" /></div></div>
+        </details>
+        <details style="display:block; margin:0 0 -1px; border:1px solid #dedfe4; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />Authoring information</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px; font-size:0.889rem; color:#55565b;">By admin on 14/08/2026 - 09:12</div></div>
+        </details>
+        <details style="display:block; margin:0; border:1px solid #dedfe4; border-radius:0 0 2px 2px; background:#fff;">
+          <summary style="position:relative; padding:20px 24px 20px 36px; cursor:pointer; color:#55565b; font-size:16px; line-height:24px;"><img src="claro/chevron-right-545560.svg" alt="" style="position:absolute; top:50%; left:12px; width:16px; height:16px; margin-top:-8px;" />Promotion options</summary>
+          <div style="border-top:1px solid #dedfe4; background:rgba(243,244,249,.4);"><div style="margin:16px; font-size:0.889rem; color:#55565b;">Promoted to front page</div></div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:fixed; right:16px; bottom:16px; z-index:60; display:flex; flex-wrap:wrap; align-items:center; gap:6px; max-width:420px; padding:10px 12px; border:1px solid #3d3e44; border-radius:4px; background:rgba(24,25,29,.95); box-shadow:0 8px 24px rgba(0,0,0,.3);">
+    <span style="margin-right:4px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#9a9ba1;">Xem thử trạng thái</span>
+    <button type="button" data-go="co_loi" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:#003ecc; color:#fff; font-size:12px; font-weight:600; font-family:inherit;">Có lỗi</button>
+    <button type="button" data-go="chua_cham" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Chưa chấm</button>
+    <button type="button" data-go="dang_cham" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Đang chấm</button>
+    <button type="button" data-go="dat" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Đạt</button>
+    <button type="button" data-go="veto" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Bị từ chối</button>
+    <button type="button" data-go="stale" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Đã sửa sau chấm</button>
+    <button type="button" data-go="thieu" onClick="{{ setState }}" style="padding:5px 10px; cursor:pointer; border:1px solid #5b5c63; border-radius:12px; background:transparent; color:#e8e9ee; font-size:12px; font-weight:600; font-family:inherit;">Thiếu agent</button>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;trangThai&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;co_loi&quot;,&quot;options&quot;:[&quot;co_loi&quot;,&quot;chua_cham&quot;,&quot;dang_cham&quot;,&quot;dat&quot;,&quot;veto&quot;,&quot;stale&quot;,&quot;thieu&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Báo cáo AI&quot;},&quot;moRongThe&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Báo cáo AI&quot;},&quot;hienTrichDan&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Báo cáo AI&quot;},&quot;vienTruongTheoMuc&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Báo cáo AI&quot;},&quot;nguongDat&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:80,&quot;min&quot;:50,&quot;max&quot;:100,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Báo cáo AI&quot;}}">
+const NHAN = { block: 'Chặn xuất bản', fix: 'Cần sửa', tip: 'Gợi ý' };
+
+class Component extends DCLogic {
+  cur = -1;
+  sev = 'all';
+
+  componentDidMount() {
+    this.root = this.el ? this.el.ownerDocument : document;
+    if (this.props.hienTrichDan === false) {
+      this.root.querySelectorAll('[data-excerpt]').forEach((n) => { n.style.display = 'none'; });
+    }
+    if (this.props.moRongThe === false) {
+      this.root.querySelectorAll('[data-cards]').forEach((n) => {
+        n.style.display = 'none';
+        const link = this.root.querySelector('[data-collapse="' + n.dataset.cards + '"]');
+        if (link) link.textContent = 'Mở rộng ▾';
+      });
+    }
+    if (this.props.vienTruongTheoMuc === false) {
+      this.root.querySelectorAll('[data-fieldbox]').forEach((n) => { n.style.borderColor = '#919297'; });
+    }
+    const nguong = this.root.querySelector('#band-nguong');
+    if (nguong && this.props.nguongDat) nguong.textContent = String(this.props.nguongDat);
+    this.recount();
+    this.apply(this.props.trangThai || 'co_loi');
+  }
+
+  apply = (name) => {
+    this.stateName = name;
+    const q = (s) => Array.from(this.root.querySelectorAll(s));
+    q('[data-band]').forEach((n) => { n.style.display = n.dataset.band === name ? 'flex' : 'none'; });
+    q('[data-go]').forEach((b) => {
+      const on = b.dataset.go === name;
+      b.style.background = on ? '#003ecc' : 'transparent';
+      b.style.color = on ? '#fff' : '#e8e9ee';
+      b.style.borderColor = on ? '#003ecc' : '#5b5c63';
+    });
+
+    const hienBaoCao = name === 'co_loi' || name === 'veto' || name === 'stale' || name === 'thieu';
+    q('[data-report]').forEach((n) => { n.style.display = hienBaoCao ? 'block' : 'none'; });
+    q('[data-ok]').forEach((n) => { n.style.display = name === 'dat' ? 'flex' : 'none'; });
+
+    // Veto: chỉ còn lỗi nghiêm trọng. Thiếu agent: ẩn kết quả Brand Voice.
+    q('[data-issue]').forEach((el) => {
+      let hien = true;
+      if (name === 'veto') hien = el.dataset.sev === 'block';
+      if (name === 'thieu') hien = el.dataset.issue !== '1';
+      el.style.display = hien ? 'flex' : 'none';
+      el.style.opacity = name === 'stale' ? '.5' : (el.dataset.resolved === '1' ? '.45' : '1');
+    });
+
+    const note = this.root.querySelector('[data-globalnote]');
+    if (note) {
+      const txt = {
+        stale: '<strong>Kết quả cho bản #7.</strong> Bài đã sửa sau lần chấm nên các lỗi dưới đây chỉ để tham khảo.',
+        thieu: '<strong>Brand Voice chưa có kết quả.</strong> Ba agent còn lại đã chấm xong và vẫn dùng được.',
+        veto: '<strong>Bài đang bị chặn xuất bản.</strong> Sửa lỗi nghiêm trọng dưới đây rồi bấm Chấm lại.',
+      }[name];
+      note.innerHTML = txt || '';
+      note.style.display = txt ? 'flex' : 'none';
+      note.style.borderLeftColor = name === 'veto' ? '#d72222' : '#8e929c';
+      note.style.background = name === 'veto' ? '#fdf7f7' : '#fbfbfd';
+    }
+
+    this.syncBlockNote(name);
+
+    const fieldBorder = { chua_cham: '#919297', dang_cham: '#919297', dat: '#3f7a52' }[name];
+    q('[data-fieldbox]').forEach((n) => { if (fieldBorder) n.style.borderColor = fieldBorder; });
+
+    this.cur = -1;
+    if (name === 'co_loi') this.recount();
+    else this.syncFields(name);
+    this.syncAgents(name);
+    this.pos();
+  };
+
+  // Đếm lại tiêu đề + ẩn hộp báo cáo rỗng cho các trạng thái không phải co_loi.
+  syncFields = (name) => {
+    if (!(name === 'veto' || name === 'stale' || name === 'thieu')) return;
+    ['title', 'body', 'meta'].forEach((f) => {
+      const vis = Array.from(this.root.querySelectorAll('[data-issue][data-field="' + f + '"]'))
+        .filter((e) => e.style.display !== 'none' && e.dataset.resolved !== '1');
+      const report = this.root.querySelector('[data-report="' + f + '"]');
+      if (report) report.style.display = vis.length ? 'block' : 'none';
+      const head = this.root.querySelector('[data-fieldhead="' + f + '"]');
+      if (head) head.textContent = 'AI phát hiện ' + vis.length + ' vấn đề ở trường này';
+      const box = this.root.querySelector('[data-fieldbox="' + f + '"]');
+      if (box && this.props.vienTruongTheoMuc !== false) {
+        const sevs = vis.map((e) => e.dataset.sev);
+        box.style.borderColor = sevs.includes('block') ? '#d72222' : sevs.length ? '#b7791f' : '#919297';
+      }
+    });
+  };
+
+  // Dòng cạnh nút Save luôn tính từ số lỗi chặn ĐANG hiện, không phụ thuộc thứ tự xem.
+  syncBlockNote = (name) => {
+    const el = this.root.querySelector('#block-note');
+    if (!el) return;
+    if (name === 'chua_cham') { el.innerHTML = '<span style="color:#55565b">Chưa có kết quả chấm cho bài này.</span>'; return; }
+    if (name === 'dang_cham') { el.innerHTML = '<span style="color:#55565b">Đang chờ kết quả chấm…</span>'; return; }
+    const n = Array.from(this.root.querySelectorAll('[data-issue][data-sev="block"]'))
+      .filter((e) => e.dataset.resolved !== '1' && e.offsetParent !== null).length;
+    if (!n) { el.innerHTML = '<span style="color:#3f7a52">Không còn lỗi chặn — có thể chuyển sang Published.</span>'; return; }
+    el.innerHTML = 'Còn <strong style="color:#d72222">' + n + ' lỗi chặn xuất bản</strong> — không thể chuyển sang Published.'
+      + (name === 'stale' ? ' <span style="color:#8b8c92">(theo bản #7)</span>' : '');
+  };
+
+  syncAgents = (name) => {
+    const D = {
+      co_loi: { seo: 82, cq: 71, bv: 68, cp: 54, note: 'Chấm lúc 15:22 hôm nay · bản nội dung #7' },
+      stale: { seo: 82, cq: 71, bv: 68, cp: 54, note: 'Kết quả cho bản nội dung #7 — bài đã sửa sang bản #8' },
+      veto: { seo: 82, cq: 71, bv: 68, cp: 'veto', note: 'Điểm tổng không được tính khi còn veto' },
+      thieu: { seo: 82, cq: 71, bv: 'loi', cp: 54, note: 'Brand Voice lỗi: timeout sau 30s · job #4182' },
+      dat: { seo: 95, cq: 90, bv: 92, cp: 91, note: 'Chấm lúc 15:22 hôm nay · bản nội dung #9' },
+      chua_cham: { seo: null, cq: null, bv: null, cp: null, note: 'Chưa có kết quả chấm cho bài này' },
+      dang_cham: { seo: 82, cq: 71, bv: 'chay', cp: 'cho', note: 'Đang chấm… kết quả sẽ tự hiện khi xong' },
+    }[name] || {};
+
+    ['seo', 'cq', 'bv', 'cp'].forEach((k) => {
+      const v = D[k];
+      const bar = this.root.querySelector('[data-bar="' + k + '"]');
+      const val = this.root.querySelector('[data-val="' + k + '"]');
+      const row = this.root.querySelector('[data-agent="' + k + '"]');
+      if (!bar || !val || !row) return;
+      row.style.opacity = name === 'stale' ? '.55' : '1';
+      if (typeof v === 'number') {
+        bar.style.width = v + '%';
+        bar.style.background = v >= 80 ? '#3f7a52' : v >= 60 ? '#b7791f' : '#d72222';
+        val.textContent = String(v);
+        val.style.color = '#232429';
+        val.style.fontSize = '13.5px';
+      } else {
+        bar.style.width = '0%';
+        val.style.color = '#8b8c92';
+        val.style.fontSize = '11.5px';
+        val.textContent = { veto: 'veto', loi: 'lỗi', chay: 'đang chạy', cho: 'chờ' }[v] || '—';
+        if (v === 'veto') { bar.style.width = '100%'; bar.style.background = '#d72222'; val.style.color = '#a51b1b'; }
+      }
+    });
+
+    const note = this.root.querySelector('[data-agentnote]');
+    if (note) {
+      note.innerHTML = D.note
+        ? D.note + (name === 'chua_cham' ? '' : ' · <a href="#" style="font-size:12.5px">xem báo cáo đầy đủ</a>')
+        : '';
+    }
+  };
+
+  setState = (e) => {
+    e.preventDefault();
+    this.apply(e.currentTarget.dataset.go);
+  };
+
+  live = () => Array.from(this.root.querySelectorAll('[data-issue]')).filter((n) => n.dataset.resolved !== '1');
+
+  recount = () => {
+    const all = this.live();
+    const n = { block: 0, fix: 0, tip: 0 };
+    const fields = new Set();
+    all.forEach((el) => { n[el.dataset.sev] += 1; fields.add(el.dataset.field); });
+    const total = all.length;
+
+    const set = (sel, txt) => { const e = this.root.querySelector(sel); if (e) e.textContent = txt; };
+    set('#band-count', total ? total + ' vấn đề' : 'Không còn vấn đề');
+    set('#band-fields', total ? 'trên ' + fields.size + ' trường' : 'tất cả đã xử lý');
+    Object.keys(n).forEach((k) => set('[data-n="' + k + '"]', String(n[k])));
+
+    const verdict = this.root.querySelector('#band-verdict');
+    if (verdict) {
+      const ok = total === 0;
+      verdict.style.background = ok ? '#e3f3e6' : '#fdeaea';
+      verdict.style.color = ok ? '#265c35' : '#a51b1b';
+      verdict.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:' + (ok ? '#3f7a52' : '#d72222') + '"></span>' + (ok ? 'Đã xử lý hết' : 'Cần sửa');
+    }
+
+    this.syncBlockNote(this.stateName || 'co_loi');
+
+    ['title', 'body', 'meta'].forEach((f) => {
+      const left = all.filter((e) => e.dataset.field === f).length;
+      const head = this.root.querySelector('[data-fieldhead="' + f + '"]');
+      if (head) head.textContent = left ? 'AI phát hiện ' + left + ' vấn đề ở trường này' : 'Đã xử lý hết vấn đề ở trường này';
+      const box = this.root.querySelector('[data-fieldbox="' + f + '"]');
+      if (box && this.props.vienTruongTheoMuc !== false) {
+        const sevs = all.filter((e) => e.dataset.field === f).map((e) => e.dataset.sev);
+        box.style.borderColor = sevs.includes('block') ? '#d72222' : sevs.length ? '#b7791f' : '#919297';
+      }
+    });
+
+    this.pos();
+    this.syncAgents(this.stateName || 'co_loi');
+    if (this.stateName && this.stateName !== 'co_loi') this.syncFields(this.stateName);
+  };
+
+  pos = () => {
+    const vis = this.live().filter((e) => e.style.display !== 'none');
+    const e = this.root.querySelector('#band-pos');
+    if (!e) return;
+    e.textContent = vis.length ? 'Lỗi ' + (this.cur < 0 ? 1 : (this.cur % vis.length) + 1) + '/' + vis.length : 'Hết lỗi';
+  };
+
+  go = (step) => {
+    const vis = this.live().filter((e) => e.style.display !== 'none');
+    if (!vis.length) return;
+    this.cur = this.cur < 0 ? 0 : (this.cur + step + vis.length) % vis.length;
+    const card = vis[this.cur];
+    vis.forEach((el) => { el.style.outline = el === card ? '2px solid #003ecc' : 'none'; el.style.outlineOffset = '-1px'; });
+    const target = this.root.getElementById(card.dataset.target) || card;
+    const win = this.root.defaultView;
+    win.scrollTo({ top: win.scrollY + target.getBoundingClientRect().top - 160, behavior: 'smooth' });
+    target.style.animation = 'none';
+    void target.offsetWidth;
+    target.style.animation = 'vfflash 1.1s ease-out 2';
+    this.pos();
+  };
+
+  next = () => this.go(1);
+  prev = () => this.go(-1);
+
+  done = (e) => {
+    const box = e.currentTarget;
+    const card = box.closest('[data-issue]');
+    card.dataset.resolved = box.checked ? '1' : '0';
+    card.style.opacity = box.checked ? '.45' : '1';
+    card.style.borderLeftColor = box.checked ? '#8e929c' : { block: '#d72222', fix: '#b7791f', tip: '#8e929c' }[card.dataset.sev];
+    this.cur = -1;
+    this.recount();
+  };
+
+  applyFix = (e) => {
+    const card = e.currentTarget.closest('[data-issue]');
+    const input = this.root.querySelector('#f-title');
+    if (input) input.value = input.value.replace('VF8', 'VF 8');
+    const ex = card.querySelector('[data-excerpt]');
+    if (ex) ex.textContent = '… ô tô điện VinFast VF 8 tại nhà';
+    const box = card.querySelector('input[type="checkbox"]');
+    if (box) { box.checked = true; this.done({ currentTarget: box }); }
+    e.currentTarget.textContent = 'Đã sửa';
+    e.currentTarget.disabled = true;
+    e.currentTarget.style.color = '#6a6b70';
+    e.currentTarget.style.borderColor = '#dedfe4';
+  };
+
+  filter = (e) => {
+    e.preventDefault();
+    this.sev = e.currentTarget.dataset.chip;
+    this.root.querySelectorAll('[data-chip]').forEach((b) => {
+      const on = b.dataset.chip === this.sev;
+      b.style.background = on ? '#003ecc' : '#fff';
+      b.style.color = on ? '#fff' : '#3d3e44';
+      b.style.borderColor = on ? '#003ecc' : '#dedfe4';
+    });
+    this.root.querySelectorAll('[data-issue]').forEach((el) => {
+      el.style.display = this.sev === 'all' || el.dataset.sev === this.sev ? 'flex' : 'none';
+    });
+    this.cur = -1;
+    this.pos();
+  };
+
+  collapse = (e) => {
+    e.preventDefault();
+    const f = e.currentTarget.dataset.collapse;
+    const cards = this.root.querySelector('[data-cards="' + f + '"]');
+    const hidden = cards.style.display === 'none';
+    cards.style.display = hidden ? 'block' : 'none';
+    e.currentTarget.textContent = hidden ? 'Thu gọn ▴' : 'Mở rộng ▾';
+  };
+
+  toggleAll = (e) => {
+    e.preventDefault();
+    const link = e.currentTarget;
+    const hide = link.textContent.indexOf('Ẩn') === 0;
+    this.root.querySelectorAll('[data-report]').forEach((n) => { n.style.display = hide ? 'none' : 'block'; });
+    link.textContent = hide ? 'Hiện báo cáo' : 'Ẩn báo cáo';
+  };
+
+  renderVals() {
+    return {
+      next: this.next, prev: this.prev, done: this.done, applyFix: this.applyFix,
+      filter: this.filter, collapse: this.collapse, toggleAll: this.toggleAll,
+      setState: this.setState,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
