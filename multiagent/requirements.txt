@@ -4,6 +4,10 @@ python-dotenv>=1.0.0
 requests>=2.31.0
 sentence-transformers>=3.0.0
 
+# Client goi embedding qua HuggingFace Space thay vi nap BGE-M3 local
+# (RemoteEmbedder trong src/embeddings.py, dung khi dat EMBEDDING_SPACE_URL).
+gradio_client>=1.0.0
+
 # Kho vector: Postgres + pgvector (thay Chroma tu 2026-08-05). Xem
 # multiagent/docker-compose.yml va src/db.py.
 psycopg[binary]>=3.2.0
