@@ -1,0 +1,1298 @@
+{
+ "_meta": {
+  "prompt_version": "020738e209017213"
+ },
+ "G-001": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 95.0,
+   "brand": 83.3,
+   "compliance": 58.3
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7985,
+    "output_tokens": 772
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8820,
+    "output_tokens": 642
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7657,
+    "output_tokens": 309
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8481,
+    "output_tokens": 587
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7639,
+    "output_tokens": 169
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1043,
+    "output_tokens": 98
+   }
+  ]
+ },
+ "G-002": {
+  "diem": {
+   "content_quality": 85.7,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9753,
+    "output_tokens": 618
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10433,
+    "output_tokens": 506
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9509,
+    "output_tokens": 276
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10192,
+    "output_tokens": 409
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9353,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-003": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 95.0,
+   "brand": 80.0,
+   "compliance": 66.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10194,
+    "output_tokens": 2512
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 11019,
+    "output_tokens": 506
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9847,
+    "output_tokens": 214
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10701,
+    "output_tokens": 591
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9862,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-004": {
+  "diem": {
+   "content_quality": 68.8,
+   "seo": 95.0,
+   "brand": 80.0,
+   "compliance": 66.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4795,
+    "output_tokens": 967
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5379,
+    "output_tokens": 508
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4450,
+    "output_tokens": 295
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5324,
+    "output_tokens": 836
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4485,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-005": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 100.0,
+   "brand": 91.7,
+   "compliance": 66.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5384,
+    "output_tokens": 1512
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5927,
+    "output_tokens": 545
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5276,
+    "output_tokens": 183
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5855,
+    "output_tokens": 1105
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5016,
+    "output_tokens": 421
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1506,
+    "output_tokens": 324
+   }
+  ]
+ },
+ "G-006": {
+  "diem": {
+   "content_quality": 93.8,
+   "seo": 95.0,
+   "brand": 90.0,
+   "compliance": 41.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6332,
+    "output_tokens": 575
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6741,
+    "output_tokens": 415
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6031,
+    "output_tokens": 341
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6749,
+    "output_tokens": 1188
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5913,
+    "output_tokens": 2195
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5143,
+    "output_tokens": 2164
+   }
+  ]
+ },
+ "G-007": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 95.0,
+   "brand": 80.0,
+   "compliance": 58.3
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 11324,
+    "output_tokens": 1120
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12114,
+    "output_tokens": 468
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 11084,
+    "output_tokens": 205
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 11816,
+    "output_tokens": 1188
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10983,
+    "output_tokens": 1982
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4201,
+    "output_tokens": 1278
+   }
+  ]
+ },
+ "G-008": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 100.0,
+   "brand": 91.7,
+   "compliance": 64.3
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9435,
+    "output_tokens": 1336
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10049,
+    "output_tokens": 439
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9676,
+    "output_tokens": 365
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9918,
+    "output_tokens": 1230
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9079,
+    "output_tokens": 684
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1614,
+    "output_tokens": 421
+   }
+  ]
+ },
+ "G-009": {
+  "diem": {
+   "content_quality": 56.2,
+   "seo": 90.0,
+   "brand": 83.3,
+   "compliance": 71.4
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5895,
+    "output_tokens": 1065
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6409,
+    "output_tokens": 474
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5632,
+    "output_tokens": 277
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6507,
+    "output_tokens": 692
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5668,
+    "output_tokens": 504
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2217,
+    "output_tokens": 709
+   }
+  ]
+ },
+ "G-010": {
+  "diem": {
+   "content_quality": 78.6,
+   "seo": 100.0,
+   "brand": 70.0,
+   "compliance": 40.0
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9312,
+    "output_tokens": 699
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10226,
+    "output_tokens": 590
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8997,
+    "output_tokens": 325
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9802,
+    "output_tokens": 834
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8963,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-011": {
+  "diem": {
+   "content_quality": 68.8,
+   "seo": 95.0,
+   "brand": 80.0,
+   "compliance": 60.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13257,
+    "output_tokens": 745
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 14175,
+    "output_tokens": 525
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13081,
+    "output_tokens": 213
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13767,
+    "output_tokens": 632
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12931,
+    "output_tokens": 414
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1256,
+    "output_tokens": 354
+   }
+  ]
+ },
+ "G-012": {
+  "diem": {
+   "content_quality": 87.5,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 75.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10020,
+    "output_tokens": 1432
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10664,
+    "output_tokens": 470
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9753,
+    "output_tokens": 221
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10491,
+    "output_tokens": 975
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9652,
+    "output_tokens": 751
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1045,
+    "output_tokens": 148
+   }
+  ]
+ },
+ "G-013": {
+  "diem": {
+   "content_quality": 68.8,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 66.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7920,
+    "output_tokens": 1230
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8567,
+    "output_tokens": 530
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7528,
+    "output_tokens": 256
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8372,
+    "output_tokens": 1016
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7533,
+    "output_tokens": 191
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1045,
+    "output_tokens": 83
+   }
+  ]
+ },
+ "G-014": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 90.0,
+   "brand": 83.3,
+   "compliance": 75.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9103,
+    "output_tokens": 958
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9818,
+    "output_tokens": 481
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8630,
+    "output_tokens": 202
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9624,
+    "output_tokens": 1626
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8785,
+    "output_tokens": 306
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1042,
+    "output_tokens": 201
+   }
+  ]
+ },
+ "G-015": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 100.0,
+   "brand": 83.3,
+   "compliance": 66.7
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5849,
+    "output_tokens": 702
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6400,
+    "output_tokens": 444
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5645,
+    "output_tokens": 297
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6326,
+    "output_tokens": 1007
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5484,
+    "output_tokens": 185
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1270,
+    "output_tokens": 206
+   }
+  ]
+ },
+ "G-016": {
+  "diem": {
+   "content_quality": 87.5,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 50.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4704,
+    "output_tokens": 1440
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5216,
+    "output_tokens": 519
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4334,
+    "output_tokens": 231
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5188,
+    "output_tokens": 989
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4349,
+    "output_tokens": 191
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1044,
+    "output_tokens": 186
+   }
+  ]
+ },
+ "G-017": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 85.0,
+   "brand": 91.7,
+   "compliance": 58.3
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12782,
+    "output_tokens": 1154
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13764,
+    "output_tokens": 565
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12419,
+    "output_tokens": 202
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13289,
+    "output_tokens": 567
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12447,
+    "output_tokens": 615
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2460,
+    "output_tokens": 689
+   }
+  ]
+ },
+ "G-018": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 80.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3336,
+    "output_tokens": 574
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3793,
+    "output_tokens": 577
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2990,
+    "output_tokens": 248
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3821,
+    "output_tokens": 397
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2985,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-019": {
+  "diem": {
+   "content_quality": 78.6,
+   "seo": 95.0,
+   "brand": 83.3,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8811,
+    "output_tokens": 1306
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10079,
+    "output_tokens": 578
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8593,
+    "output_tokens": 253
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9284,
+    "output_tokens": 483
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8439,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "G-020": {
+  "diem": {
+   "content_quality": 92.9,
+   "seo": 100.0,
+   "brand": 83.3,
+   "compliance": 60.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8242,
+    "output_tokens": 319
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9312,
+    "output_tokens": 562
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8032,
+    "output_tokens": 265
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8743,
+    "output_tokens": 544
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7907,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "P-001a": {
+  "diem": {
+   "content_quality": 78.6,
+   "seo": 100.0,
+   "brand": 80.0,
+   "compliance": 50.0
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4894,
+    "output_tokens": 1034
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5303,
+    "output_tokens": 495
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4784,
+    "output_tokens": 333
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5271,
+    "output_tokens": 486
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4435,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "P-001b": {
+  "diem": {
+   "content_quality": 85.7,
+   "seo": 88.9,
+   "brand": 80.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4854,
+    "output_tokens": 1038
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5186,
+    "output_tokens": 526
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4747,
+    "output_tokens": 288
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5154,
+    "output_tokens": 495
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4312,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "P-002a": {
+  "diem": {
+   "content_quality": 68.8,
+   "seo": 90.0,
+   "brand": 91.7,
+   "compliance": 58.3
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8858,
+    "output_tokens": 928
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 10461,
+    "output_tokens": 550
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8500,
+    "output_tokens": 220
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 9315,
+    "output_tokens": 414
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8482,
+    "output_tokens": 87
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 923,
+    "output_tokens": 135
+   }
+  ]
+ },
+ "P-003a": {
+  "diem": {
+   "content_quality": 68.8,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 57.1
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6545,
+    "output_tokens": 1388
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7147,
+    "output_tokens": 471
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6214,
+    "output_tokens": 221
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6987,
+    "output_tokens": 1193
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6145,
+    "output_tokens": 297
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1158,
+    "output_tokens": 248
+   }
+  ]
+ },
+ "P-004a": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 95.0,
+   "brand": 70.0,
+   "compliance": 60.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5422,
+    "output_tokens": 369
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5962,
+    "output_tokens": 525
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5663,
+    "output_tokens": 305
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5948,
+    "output_tokens": 785
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5112,
+    "output_tokens": 739
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2125,
+    "output_tokens": 614
+   }
+  ]
+ },
+ "P-004b": {
+  "diem": {
+   "content_quality": 93.8,
+   "seo": 95.0,
+   "brand": 70.0,
+   "compliance": 50.0
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5431,
+    "output_tokens": 528
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5971,
+    "output_tokens": 558
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5675,
+    "output_tokens": 285
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5954,
+    "output_tokens": 612
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5121,
+    "output_tokens": 739
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2125,
+    "output_tokens": 614
+   }
+  ]
+ },
+ "P-005a": {
+  "diem": {
+   "content_quality": 87.5,
+   "seo": 85.0,
+   "brand": 75.0,
+   "compliance": 37.5
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5192,
+    "output_tokens": 1200
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5725,
+    "output_tokens": 529
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5110,
+    "output_tokens": 260
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5666,
+    "output_tokens": 956
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4830,
+    "output_tokens": 177
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1155,
+    "output_tokens": 237
+   }
+  ]
+ },
+ "P-006a": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 42.9
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6038,
+    "output_tokens": 887
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6411,
+    "output_tokens": 480
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5836,
+    "output_tokens": 367
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6508,
+    "output_tokens": 926
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5666,
+    "output_tokens": 299
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1249,
+    "output_tokens": 278
+   }
+  ]
+ },
+ "P-007a": {
+  "diem": {
+   "content_quality": 87.5,
+   "seo": 90.0,
+   "brand": 75.0,
+   "compliance": 25.0
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6655,
+    "output_tokens": 1023
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7257,
+    "output_tokens": 484
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6517,
+    "output_tokens": 345
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7104,
+    "output_tokens": 768
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6268,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "P-007b": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 62.5
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6619,
+    "output_tokens": 1151
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7224,
+    "output_tokens": 466
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6521,
+    "output_tokens": 370
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7071,
+    "output_tokens": 992
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6226,
+    "output_tokens": 8
+   }
+  ]
+ },
+ "P-008a": {
+  "diem": {
+   "content_quality": 62.5,
+   "seo": 100.0,
+   "brand": 80.0,
+   "compliance": 33.3
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7678,
+    "output_tokens": 869
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8441,
+    "output_tokens": 390
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7496,
+    "output_tokens": 392
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8282,
+    "output_tokens": 829
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7437,
+    "output_tokens": 527
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1443,
+    "output_tokens": 318
+   }
+  ]
+ },
+ "P-009a": {
+  "diem": {
+   "content_quality": 75.0,
+   "seo": 80.0,
+   "brand": 91.7,
+   "compliance": 66.7
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7795,
+    "output_tokens": 930
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8669,
+    "output_tokens": 355
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7504,
+    "output_tokens": 363
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 8171,
+    "output_tokens": 1426
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 7332,
+    "output_tokens": 235
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 1515,
+    "output_tokens": 331
+   }
+  ]
+ },
+ "P-010a": {
+  "diem": {
+   "content_quality": 62.5,
+   "seo": 100.0,
+   "brand": 91.7,
+   "compliance": 50.0
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13010,
+    "output_tokens": 1013
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 15419,
+    "output_tokens": 509
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12616,
+    "output_tokens": 247
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 13479,
+    "output_tokens": 600
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 12634,
+    "output_tokens": 8
+   }
+  ]
+ }
+}

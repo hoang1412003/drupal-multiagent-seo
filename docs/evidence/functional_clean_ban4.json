@@ -1,0 +1,3027 @@
+{
+ "_meta": {
+  "prompt_version": "020738e209017213"
+ },
+ "C-001": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3207,
+    "output_tokens": 366
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3661,
+    "output_tokens": 515
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2925,
+    "output_tokens": 423
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3703,
+    "output_tokens": 256
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2867,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "hệ thống phanh trên ô tô điện",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 47 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Lưu ý khi sử dụng hệ thống phanh trên ô tô điện"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 515 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "515 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Lưu ý khi sử dụng hệ thống phanh trên ô tô điện"
+       }
+      ],
+      "suggestion": "Tiêu đề 47 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "515 từ"
+       }
+      ],
+      "suggestion": "Bài 515 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-002": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 90.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3263,
+    "output_tokens": 378
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3740,
+    "output_tokens": 592
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2971,
+    "output_tokens": 407
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3765,
+    "output_tokens": 278
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2926,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "kinh nghiệm đi xe máy điện đường dài an toàn",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 46 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "5 kinh nghiệm đi xe máy điện đường dài an toàn"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 533 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "533 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "5 kinh nghiệm đi xe máy điện đường dài an toàn"
+       }
+      ],
+      "suggestion": "Tiêu đề 46 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "533 từ"
+       }
+      ],
+      "suggestion": "Bài 533 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 90.0,
+    "issues": [
+     {
+      "field": "title",
+      "type": "Tiêu đề sai quy ước viết hoa (BV5)",
+      "suggestion": "Tiêu đề dùng kiểu LOWERCASE, chuẩn thương hiệu là SENTENCE_CASE.",
+      "excerpt": "5 kinh nghiệm đi xe máy điện đường dài an toàn"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "5 kinh nghiệm đi xe máy điện đường dài an toàn"
+       }
+      ],
+      "suggestion": "Tiêu đề dùng kiểu LOWERCASE, chuẩn thương hiệu là SENTENCE_CASE.",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-003": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 95.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3099,
+    "output_tokens": 354
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3568,
+    "output_tokens": 429
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2839,
+    "output_tokens": 219
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3599,
+    "output_tokens": 256
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2763,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 95.0,
+    "main_keyword": "chế độ Sport xe máy điện VinFast",
+    "issues": [
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 495 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "495 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "495 từ"
+       }
+      ],
+      "suggestion": "Bài 495 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-004": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 90.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3025,
+    "output_tokens": 313
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3497,
+    "output_tokens": 475
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3032,
+    "output_tokens": 363
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3530,
+    "output_tokens": 651
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2694,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "Chế độ Eco trên xe máy điện",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 49 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Chế độ Eco trên xe máy điện VinFast: Cách sử dụng"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 464 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "464 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Chế độ Eco trên xe máy điện VinFast: Cách sử dụng"
+       }
+      ],
+      "suggestion": "Tiêu đề 49 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "464 từ"
+       }
+      ],
+      "suggestion": "Bài 464 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 90.0,
+    "issues": [
+     {
+      "field": "body",
+      "type": "Giọng văn lệch chuẩn thương hiệu (BV6)",
+      "suggestion": "Giọng văn bài cần đánh giá hơi lệch so với các đoạn mẫu. Bài mẫu sử dụng giọng văn trang trọng, tập trung vào lợi ích thực tế (\"tối ưu năng lượng\", \"giải pháp tối ưu\", \"tiêu tốn ít nguyên liệu\"), trong khi bài cần đánh giá sử dụng giọng văn kỹ thuật hơn, tập trung vào mô tả chức năng (\"tạo phản hồi tay ga\", \"đặc tính tăng tốc\"). Ngoài ra, bài cần đánh giá có nhiều cảnh báo an toàn và lưu ý kỹ thuật chi tiết hơn, tạo cảm giác trang trọng hơn so với giọng văn thân thiện, hướng dẫn thực tế của các đoạn mẫu.",
+      "excerpt": "Eco là chế độ lái được thiết kế để tạo phản hồi tay ga nhẹ nhàng và hỗ trợ quản lý mức tiêu thụ năng lượng"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Eco là chế độ lái được thiết kế để tạo phản hồi tay ga nhẹ nhàng và hỗ trợ quản lý mức tiêu thụ năng lượng"
+       }
+      ],
+      "suggestion": "Giọng văn bài cần đánh giá hơi lệch so với các đoạn mẫu. Bài mẫu sử dụng giọng văn trang trọng, tập trung vào lợi ích thực tế (\"tối ưu năng lượng\", \"giải pháp tối ưu\", \"tiêu tốn ít nguyên liệu\"), trong khi bài cần đánh giá sử dụng giọng văn kỹ thuật hơn, tập trung vào mô tả chức năng (\"tạo phản hồi tay ga\", \"đặc tính tăng tốc\"). Ngoài ra, bài cần đánh giá có nhiều cảnh báo an toàn và lưu ý kỹ thuật chi tiết hơn, tạo cảm giác trang trọng hơn so với giọng văn thân thiện, hướng dẫn thực tế của các đoạn mẫu.",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-005": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 90.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3434,
+    "output_tokens": 322
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4054,
+    "output_tokens": 547
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3208,
+    "output_tokens": 221
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3944,
+    "output_tokens": 332
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3105,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "pin trên Ứng dụng VinFast",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Sử dụng tính năng pin trên Ứng dụng VinFast"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 576 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "576 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Sử dụng tính năng pin trên Ứng dụng VinFast"
+       }
+      ],
+      "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "576 từ"
+       }
+      ],
+      "suggestion": "Bài 576 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 90.0,
+    "issues": [
+     {
+      "field": "body",
+      "type": "Xưng hô không nhất quán (BV3)",
+      "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+      "excerpt": "khách hàng, người dùng"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "khách hàng"
+       },
+       {
+        "field": "body",
+        "text": "người dùng"
+       }
+      ],
+      "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-006": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 95.0,
+   "brand": 90.0,
+   "compliance": 83.3
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3585,
+    "output_tokens": 396
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4126,
+    "output_tokens": 563
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3456,
+    "output_tokens": 333
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 4078,
+    "output_tokens": 413
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3239,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 95.0,
+    "main_keyword": "pin xe máy điện VinFast",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 45 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Câu hỏi thường gặp về pin xe máy điện VinFast"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Câu hỏi thường gặp về pin xe máy điện VinFast"
+       }
+      ],
+      "suggestion": "Tiêu đề 45 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 90.0,
+    "issues": [
+     {
+      "field": "body",
+      "type": "Giọng văn lệch chuẩn thương hiệu (BV6)",
+      "suggestion": "Giọng văn bài viết hơi lệch so với các đoạn mẫu. Bài mẫu sử dụng cụm từ \"quý khách hàng\" và \"hỗ trợ một cách nhanh chóng và kịp thời nhất\" với tông chuyên nghiệp, ấm áp hơn. Bài cần đánh giá dùng \"Người dùng\" thay vì \"quý khách hàng\" và giọng văn trang trọng, kỹ thuật hơn (ví dụ: \"không tự mở pin hoặc sửa chữa hệ thống điện\"). Phần kết luận cũng thiếu đi yếu tố gọi hành động và sự chăm sóc khách hàng đặc trưng của các đoạn mẫu.",
+      "excerpt": "Người dùng cần đối chiếu tài liệu hướng dẫn, sử dụng đúng bộ sạc và liên hệ cơ sở dịch vụ khi có dấu hiệu bất thường."
+     }
+    ],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Người dùng cần đối chiếu tài liệu hướng dẫn, sử dụng đúng bộ sạc và liên hệ cơ sở dịch vụ khi có dấu hiệu bất thường."
+       }
+      ],
+      "suggestion": "Giọng văn bài viết hơi lệch so với các đoạn mẫu. Bài mẫu sử dụng cụm từ \"quý khách hàng\" và \"hỗ trợ một cách nhanh chóng và kịp thời nhất\" với tông chuyên nghiệp, ấm áp hơn. Bài cần đánh giá dùng \"Người dùng\" thay vì \"quý khách hàng\" và giọng văn trang trọng, kỹ thuật hơn (ví dụ: \"không tự mở pin hoặc sửa chữa hệ thống điện\"). Phần kết luận cũng thiếu đi yếu tố gọi hành động và sự chăm sóc khách hàng đặc trưng của các đoạn mẫu.",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 83.3,
+    "flags": [
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Chính sách pin thiếu điều kiện/phí/thời hạn (CP7)",
+      "excerpt": "Thời hạn và điều kiện bảo hành phụ thuộc vào sản phẩm, thời điểm mua và chính sách đang áp dụng.",
+      "suggestion": "Bài nhắc tới chính sách bảo hành pin nhưng chỉ nêu điều kiện chung chung, không nêu cụ thể thời hạn bảo hành, phí bảo hành hoặc các điều kiện chi tiết. Thiếu 2 trong 3 yếu tố (điều kiện, phí, thời hạn)"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Thời hạn và điều kiện bảo hành phụ thuộc vào sản phẩm, thời điểm mua và chính sách đang áp dụng."
+       }
+      ],
+      "reason": "Bài nhắc tới chính sách bảo hành pin nhưng chỉ nêu điều kiện chung chung, không nêu cụ thể thời hạn bảo hành, phí bảo hành hoặc các điều kiện chi tiết. Thiếu 2 trong 3 yếu tố (điều kiện, phí, thời hạn)"
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-007": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3215,
+    "output_tokens": 376
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3746,
+    "output_tokens": 506
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2826,
+    "output_tokens": 241
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3727,
+    "output_tokens": 616
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2891,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "trụ sạc ô tô điện",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Tìm hiểu các loại trụ sạc ô tô điện VinFast"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 518 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "518 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Tìm hiểu các loại trụ sạc ô tô điện VinFast"
+       }
+      ],
+      "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "518 từ"
+       }
+      ],
+      "suggestion": "Bài 518 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-008": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 95.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3298,
+    "output_tokens": 327
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3820,
+    "output_tokens": 492
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3216,
+    "output_tokens": 254
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3814,
+    "output_tokens": 256
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2975,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 95.0,
+    "main_keyword": "bảo dưỡng ô tô điện",
+    "issues": [
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 556 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "556 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "556 từ"
+       }
+      ],
+      "suggestion": "Bài 556 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-009": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3217,
+    "output_tokens": 330
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3735,
+    "output_tokens": 469
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2850,
+    "output_tokens": 248
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3734,
+    "output_tokens": 296
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2895,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "lốp ô tô điện",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 48 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Lưu ý giúp lốp ô tô điện bền và vận hành an toàn"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 525 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "525 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Lưu ý giúp lốp ô tô điện bền và vận hành an toàn"
+       }
+      ],
+      "suggestion": "Tiêu đề 48 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "525 từ"
+       }
+      ],
+      "suggestion": "Bài 525 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ },
+ "C-010": {
+  "diem": {
+   "content_quality": 100.0,
+   "seo": 90.0,
+   "brand": 100.0,
+   "compliance": 100.0
+  },
+  "co_critical": false,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3264,
+    "output_tokens": 323
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3803,
+    "output_tokens": 512
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3001,
+    "output_tokens": 280
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 3775,
+    "output_tokens": 256
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 2933,
+    "output_tokens": 8
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": null,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 90.0,
+    "main_keyword": "đèn cảnh báo ô tô điện",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 44 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "Ý nghĩa các loại đèn cảnh báo trên ô tô điện"
+     },
+     {
+      "field": "body",
+      "type": "Nội dung quá ngắn so với chuẩn SEO (SEO7)",
+      "suggestion": "Bài 557 từ. Đạt chuẩn là từ 600 từ.",
+      "excerpt": "557 từ"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "Ý nghĩa các loại đèn cảnh báo trên ô tô điện"
+       }
+      ],
+      "suggestion": "Tiêu đề 44 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "557 từ"
+       }
+      ],
+      "suggestion": "Bài 557 từ. Đạt chuẩn là từ 600 từ."
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 100.0,
+    "issues": [],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 100.0,
+    "flags": [],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": null,
+      "occurrences": [],
+      "reason": "Bài không có claim định lượng để đối chiếu."
+     },
+     {
+      "id": "CP4",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP5",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP8",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     }
+    ]
+   }
+  }
+ }
+}

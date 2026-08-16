@@ -1,0 +1,572 @@
+{
+ "_meta": {
+  "prompt_version": "020738e209017213",
+  "sample_id": "P-006a"
+ },
+ "P-006a": {
+  "diem": {
+   "content_quality": 81.2,
+   "seo": 95.0,
+   "brand": 91.7,
+   "compliance": 42.9
+  },
+  "co_critical": true,
+  "usage": [
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6035,
+    "output_tokens": 935
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6411,
+    "output_tokens": 476
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5839,
+    "output_tokens": 239
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 6505,
+    "output_tokens": 877
+   },
+   {
+    "model": "claude-haiku-4-5-20251001",
+    "input_tokens": 5675,
+    "output_tokens": 260
+   }
+  ],
+  "chi_tiet": {
+   "content_quality": {
+    "score": 81.2,
+    "issues": [
+     {
+      "field": "body",
+      "type": "Lỗi chính tả (CQ1)",
+      "suggestion": "Thiếu chữ 'tin' sau 'thông'. Nên sửa thành: 'Để có thêm thông tin hoặc cần hỗ trợ tư vấn'",
+      "excerpt": "Để có thêm thông hoặc cần hỗ trợ tư vấn"
+     },
+     {
+      "field": "body",
+      "type": "Câu quá dài (CQ3)",
+      "suggestion": "3 câu dài hơn 45 tiếng. Tách thành câu ngắn hơn để dễ đọc.",
+      "excerpt": "Đặc biệt, khi chọn mua ô tô điện VinFast, khách hàng có cơ hội tiếp cận các gói thuê bao pin tiết kiệm với nhiều lợi ích như tối ưu giá xe, tiết kiệm "
+     },
+     {
+      "field": "body",
+      "type": "Câu quá dài (CQ3)",
+      "suggestion": "3 câu dài hơn 45 tiếng. Tách thành câu ngắn hơn để dễ đọc.",
+      "excerpt": "Thay vì điều chỉnh giá thuê bao pin tương ứng với giá xăng, dầu và giá điện thay đổi hàng năm, VinFast áp dụng cố định mức phí thuê pin trong suốt vòn"
+     },
+     {
+      "field": "body",
+      "type": "Câu quá dài (CQ3)",
+      "suggestion": "3 câu dài hơn 45 tiếng. Tách thành câu ngắn hơn để dễ đọc.",
+      "excerpt": "Chính sách thuê pin xe điện VinFast giúp khách hàng tiết kiệm chi phí vận hành xe điện \n VinFast áp dụng một gói thuê bao cố định với mức phí 350.000 "
+     }
+    ],
+    "criteria": [
+     {
+      "id": "CQ1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Để có thêm thông hoặc cần hỗ trợ tư vấn"
+       }
+      ],
+      "suggestion": "Thiếu chữ 'tin' sau 'thông'. Nên sửa thành: 'Để có thêm thông tin hoặc cần hỗ trợ tư vấn'"
+     },
+     {
+      "id": "CQ2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ3",
+      "level": 0,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Đặc biệt, khi chọn mua ô tô điện VinFast, khách hàng có cơ hội tiếp cận các gói thuê bao pin tiết kiệm với nhiều lợi ích như tối ưu giá xe, tiết kiệm "
+       },
+       {
+        "field": "body",
+        "text": "Thay vì điều chỉnh giá thuê bao pin tương ứng với giá xăng, dầu và giá điện thay đổi hàng năm, VinFast áp dụng cố định mức phí thuê pin trong suốt vòn"
+       },
+       {
+        "field": "body",
+        "text": "Chính sách thuê pin xe điện VinFast giúp khách hàng tiết kiệm chi phí vận hành xe điện \n VinFast áp dụng một gói thuê bao cố định với mức phí 350.000 "
+       }
+      ],
+      "suggestion": "3 câu dài hơn 45 tiếng. Tách thành câu ngắn hơn để dễ đọc."
+     },
+     {
+      "id": "CQ4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "CQ8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ],
+    "strengths": []
+   },
+   "seo": {
+    "score": 95.0,
+    "main_keyword": "so sánh xe điện và xe xăng",
+    "issues": [
+     {
+      "field": "title",
+      "type": "Độ dài tiêu đề chưa tối ưu (SEO1)",
+      "suggestion": "Tiêu đề 46 ký tự. Dải lý tưởng là 50-60 ký tự.",
+      "excerpt": "So sánh xe điện và xe xăng về chi phí vận hành"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "SEO1",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "title",
+        "text": "So sánh xe điện và xe xăng về chi phí vận hành"
+       }
+      ],
+      "suggestion": "Tiêu đề 46 ký tự. Dải lý tưởng là 50-60 ký tự."
+     },
+     {
+      "id": "SEO2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO3",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO4",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO8",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO9",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     },
+     {
+      "id": "SEO10",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": ""
+     }
+    ]
+   },
+   "brand": {
+    "score": 91.7,
+    "issues": [
+     {
+      "field": "body",
+      "type": "Xưng hô không nhất quán (BV3)",
+      "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+      "excerpt": "khách hàng, người dùng"
+     }
+    ],
+    "criteria": [
+     {
+      "id": "BV1",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV2",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV3",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "khách hàng"
+       },
+       {
+        "field": "body",
+        "text": "người dùng"
+       }
+      ],
+      "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV4",
+      "level": null,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV5",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV6",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     },
+     {
+      "id": "BV7",
+      "level": 2,
+      "occurrences": [],
+      "suggestion": "",
+      "truy_van": "",
+      "reference": ""
+     }
+    ]
+   },
+   "compliance": {
+    "score": 42.9,
+    "flags": [
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố",
+      "excerpt": "ô tô điện hạng C VinFast VF e34 có công suất tiêu thụ là 13,4 kWh/100km",
+      "suggestion": "Không tìm thấy thông số công bố tương ứng trong knowledge base - cần người kiểm chứng thủ công."
+     },
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố",
+      "excerpt": "gói 657.500 đồng cho quãng đường di chuyển 500km",
+      "suggestion": "Không tìm thấy thông số công bố tương ứng trong knowledge base - cần người kiểm chứng thủ công."
+     },
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố",
+      "excerpt": "tổng mệnh giá voucher được thanh toán lớn hơn 150 triệu đối với VF 8 Eco",
+      "suggestion": "Không tìm thấy thông số công bố tương ứng trong knowledge base - cần người kiểm chứng thủ công."
+     },
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố",
+      "excerpt": "200 triệu đối với VF 8 Plus",
+      "suggestion": "Không tìm thấy thông số công bố tương ứng trong knowledge base - cần người kiểm chứng thủ công."
+     },
+     {
+      "field": "body",
+      "severity": "critical",
+      "rule": "Khuyến mại thiếu thời hạn/điều kiện (CP4)",
+      "excerpt": "Trước 6/4/2022, khách hàng đặt cọc 2 mẫu xe VinFast VF 8 và VinFast VF 9 sẽ được nhận ưu đãi lên đến 250 triệu đồng.",
+      "suggestion": "Bài nêu giá trị cụ thể khuyến mại (250 triệu đồng) nhưng thiếu điều kiện áp dụng chi tiết. Chỉ nêu thời hạn (trước 6/4/2022) và sản phẩm (VF 8, VF 9) mà không rõ điều kiện cụ thể để nhận ưu đãi này (ví dụ: mức cọc tối thiểu, điều kiện khác)."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "100km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "100km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "500km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "100km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "1km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "80km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "medium",
+      "rule": "Tầm hoạt động thiếu điều kiện đo (CP5)",
+      "excerpt": "1km",
+      "suggestion": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Chính sách pin thiếu điều kiện/phí/thời hạn (CP7)",
+      "excerpt": "VinFast áp dụng một gói thuê bao cố định với mức phí 350.000 đồng/tháng, (không giới hạn quãng đường di chuyển) cho các dòng xe Klara S (áp dụng gói thuê 02 pin), Theon, Vento và các xe thế hệ mới",
+      "suggestion": "Bài nêu được phí (350.000 đồng/tháng) và thời hạn (cố định), nhưng thiếu nêu rõ điều kiện áp dụng chính sách (chỉ nêu danh sách xe áp dụng mà không nêu điều kiện khác như thời gian cam kết, điều kiện bảo hành pin, v.v.)."
+     },
+     {
+      "field": "body",
+      "severity": "low",
+      "rule": "Số liệu định lượng không nguồn (CP8)",
+      "excerpt": "Khoảng 90% người dùng xe điện cho biết họ hài lòng với chi phí vận hành thấp hơn so với xe xăng.",
+      "suggestion": "Bài có số liệu định lượng (90%, 7,8 lít/100km, 13,4 kWh/100km, 2,5 lít/100km, 3 số điện/80km, v.v.) nhưng không nêu nguồn cho bất kỳ số liệu nào. Chỉ có một số liệu có ghi chú nguồn là giá xăng (Petrolimex ngày 17/3/2022) và giá điện (Bộ Công Thương ngày 20/3/2019), nhưng phần lớn số liệu khác không có nguồn."
+     }
+    ],
+    "criteria": [
+     {
+      "id": "CP1",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP2",
+      "level": 2,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP3",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "ô tô điện hạng C VinFast VF e34 có công suất tiêu thụ là 13,4 kWh/100km",
+        "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố"
+       },
+       {
+        "field": "body",
+        "text": "gói 657.500 đồng cho quãng đường di chuyển 500km",
+        "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố"
+       },
+       {
+        "field": "body",
+        "text": "tổng mệnh giá voucher được thanh toán lớn hơn 150 triệu đối với VF 8 Eco",
+        "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố"
+       },
+       {
+        "field": "body",
+        "text": "200 triệu đối với VF 8 Plus",
+        "rule": "Số liệu chưa kiểm chứng được bằng thông số công bố"
+       }
+      ],
+      "reason": "Không tìm thấy thông số công bố tương ứng trong knowledge base - cần người kiểm chứng thủ công."
+     },
+     {
+      "id": "CP4",
+      "level": 0,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Trước 6/4/2022, khách hàng đặt cọc 2 mẫu xe VinFast VF 8 và VinFast VF 9 sẽ được nhận ưu đãi lên đến 250 triệu đồng."
+       }
+      ],
+      "reason": "Bài nêu giá trị cụ thể khuyến mại (250 triệu đồng) nhưng thiếu điều kiện áp dụng chi tiết. Chỉ nêu thời hạn (trước 6/4/2022) và sản phẩm (VF 8, VF 9) mà không rõ điều kiện cụ thể để nhận ưu đãi này (ví dụ: mức cọc tối thiểu, điều kiện khác)."
+     },
+     {
+      "id": "CP5",
+      "level": 0,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "100km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "100km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "500km"
+       },
+       {
+        "field": "body",
+        "text": "100km"
+       },
+       {
+        "field": "body",
+        "text": "1km"
+       },
+       {
+        "field": "body",
+        "text": "80km"
+       },
+       {
+        "field": "body",
+        "text": "1km"
+       }
+      ],
+      "reason": "Claim quãng đường không kèm chuẩn đo lẫn lưu ý nào. Bổ sung chuẩn đo (NEDC, WLTP, EPA, CLTC) hoặc ít nhất lưu ý quãng đường thực tế thay đổi theo điều kiện vận hành."
+     },
+     {
+      "id": "CP6",
+      "level": null,
+      "occurrences": [],
+      "reason": ""
+     },
+     {
+      "id": "CP7",
+      "level": 1,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "VinFast áp dụng một gói thuê bao cố định với mức phí 350.000 đồng/tháng, (không giới hạn quãng đường di chuyển) cho các dòng xe Klara S (áp dụng gói thuê 02 pin), Theon, Vento và các xe thế hệ mới"
+       }
+      ],
+      "reason": "Bài nêu được phí (350.000 đồng/tháng) và thời hạn (cố định), nhưng thiếu nêu rõ điều kiện áp dụng chính sách (chỉ nêu danh sách xe áp dụng mà không nêu điều kiện khác như thời gian cam kết, điều kiện bảo hành pin, v.v.)."
+     },
+     {
+      "id": "CP8",
+      "level": 0,
+      "occurrences": [
+       {
+        "field": "body",
+        "text": "Khoảng 90% người dùng xe điện cho biết họ hài lòng với chi phí vận hành thấp hơn so với xe xăng."
+       }
+      ],
+      "reason": "Bài có số liệu định lượng (90%, 7,8 lít/100km, 13,4 kWh/100km, 2,5 lít/100km, 3 số điện/80km, v.v.) nhưng không nêu nguồn cho bất kỳ số liệu nào. Chỉ có một số liệu có ghi chú nguồn là giá xăng (Petrolimex ngày 17/3/2022) và giá điện (Bộ Công Thương ngày 20/3/2019), nhưng phần lớn số liệu khác không có nguồn."
+     }
+    ]
+   }
+  }
+ }
+}

@@ -495,6 +495,42 @@ CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn
 
 **Còn sót ở bản 3, đã xử lý trong bản 4 (2026-08-12):** **P-006a** vẫn là báo động giả của CP4 dù câu đó đã được nêu **làm ví dụ ngay trong prompt**. Đây là **giới hạn của sửa-bằng-prompt**. Bản 4 dùng regex chốt thời hạn trong evidence hoặc vùng lân cận có giới hạn; xem mục 8.4.
 
+⚠️ **Đính chính 2026-08-16:** chốt regex **có** chạy đúng trên câu đó, nhưng P-006a **vẫn `critical`** — nay từ vế *điều kiện áp dụng* do LLM chấm, không phải vế thời hạn. Chẩn đoán đầy đủ ở mục 8.4 và [`evidence/chan_doan_p006a_report.md`](evidence/chan_doan_p006a_report.md).
+
+### B15. CP5 khớp MỌI con số có "km" — ⚠️ MỚI PHÁT HIỆN 2026-08-16, **chưa sửa**
+
+**Lần thứ TƯ của đúng cái bẫy ở B14** — và B14 chỉ sửa cho **CP3**, không đụng CP5.
+
+`compliance_analysis.claim_tam_hoat_dong()` trả về mọi lần khớp của `_KM = <số> + "km"`, **không kiểm ngữ cảnh một chút nào**:
+
+```python
+_KM = re.compile(_SO + r"\s*(?:km|ki-?lô-?mét)\b", re.IGNORECASE)
+
+def claim_tam_hoat_dong(text_theo_field):
+    return _tim(_KM, text_theo_field)      # KHÔNG kiểm ngữ cảnh
+```
+
+So với `claim_thoi_gian_sac()` (CP6) ngay bên dưới, vốn **có** kiểm — chỉ nhận mốc thời gian khi có chữ `"sạc"` trong bán kính 120 ký tự. **CP6 biết ngữ cảnh, CP5 thì không.**
+
+**Đo được trên P-006a** (bài so sánh chi phí vận hành): CP5 nổ **12 cờ**, phần lớn sai —
+
+| Đoạn khớp | Thực chất |
+|---|---|
+| `13,4 kWh/100km` | mức tiêu thụ điện |
+| `7,8 lít/100km` | mức tiêu hao xăng |
+| `chi phí … trong 1km` | chi phí mỗi km |
+| `quãng đường di chuyển 80km` | ✅ đúng là quãng đường |
+
+**Ảnh hưởng:** CP5 mức 0 kéo Compliance của P-006a xuống **42,9**; nếu NA thì 50,0, nếu đạt mức 2 thì 57,1 — tức mất **7–14 điểm** Compliance, **2–4 điểm** `final_score`. Không quyết định nhãn của P-006a (cờ `critical` của CP4 mới quyết), nhưng bóp méo điểm trên **mọi** bài so sánh chi phí. Thêm nữa 12 cờ trùng lặp trên một bài là nhiễu nặng cho người soạn.
+
+**Chưa sửa vì nằm trong đường chấm điểm** — sửa bây giờ làm mất hiệu lực E1/E5/E6 vừa chạy.
+
+**Cách sửa khi được phép** (có tiền lệ ngay trong cùng file): thêm cổng ngữ cảnh giống CP6 — chỉ nhận số có `km` khi gần đó có từ chỉ tầm hoạt động (*"quãng đường"*, *"đi được"*, *"tầm hoạt động"*, *"sau một lần sạc"*), và loại trừ mẫu tỉ lệ (`/100km`, `đồng/km`, `lít/100km`, `kWh/100km`).
+
+**Xong khi:** test literal trên P-006a xác nhận `13,4 kWh/100km` và `chi phí trong 1km` **không** sinh cờ CP5, trong khi `quãng đường di chuyển 80km` vẫn sinh. Và phải đo lại E1/E5/E6 sau khi sửa.
+
+⚠️ **Mới quan sát trên MỘT bài.** Muốn biết CP5 bóp méo bao nhiêu bài phải chấm lại với `giu_chi_tiet=True`.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -516,7 +552,7 @@ CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn
 |---|---|---|
 | **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt, đo lại 2026-08-11** sau khi cả 4 agent dùng rubric + thêm VF e34 vào KB: σ `final_score` = **1,79** < 2. ⚠️ Nhưng tỉ lệ giữ nguyên quyết định tụt **100% → 88%**, và σ riêng của `content_quality` (4,38) với `compliance` (4,68) chưa đạt. Chẩn đoán ban đầu — *"8/10 bài có điểm Compliance sát ngưỡng veto 50, ngưỡng đặt sai chỗ chứ agent không hỏng"* — **E5 chứng minh là SAI một nửa**: ngưỡng đúng là đặt sai chỗ, nhưng agent **cũng** hỏng thật (B14, CP3 báo động giả 8/9). ⚠️ **Số 1,79 nay đã hết hiệu lực** — code chấm điểm đổi sau khi sửa B14, phải đo lại. Chi tiết: `evaluation-plan.md` mục 4.1 |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
-| **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
+| **E3** | Multi-agent có hơn single-agent không | ✅ **đã chạy 2026-08-16, 4 agent THẮNG**: Kappa CV 0,406 so với 0,302; baseline sai thêm 4 bài và không thắng bài nào. Cái giá: +63% chi phí. Chi tiết mục 8.7 |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
 | **E5** | Ngưỡng quyết định tối ưu (calibration) | ⚠️ **đã chạy 2 lần trên bản 3 (2026-08-11), nay hết hiệu lực với bản 4.** Lần 1 Kappa 0,264 → phát hiện B14; lần 2 Kappa **0,713**, accuracy 0,879, sai 4/33 → để lại P-006a/G-008 và dẫn tới chốt CP4. Bản 4 chưa chạy E5; `meta.calibrated` vẫn `false`. Chi tiết: `evaluation-plan.md` mục 4.5 và mục 8.4 dưới đây |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
@@ -621,9 +657,16 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 
 - ✅ **Code cần cho lượt đo đã xong:** CP4 và N1 đã merge; không còn việc sửa code nào phải chen vào trước E1.
 - ✅ **Preflight E1 bản 4 đã đạt ngày 2026-08-12:** legacy guard từ chối file cũ trước đường trả phí; model/prompt/sample/output target đúng; API key chỉ được xác nhận là có cấu hình, không ghi giá trị secret.
-- ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
-- ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
-- ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
+- ✅ **Test–retest nhãn đã xong 2026-08-15:** đồng thuận 4/4, Kappa = 1,000, đạt ngưỡng ≥ 0,80. **Bắt buộc trích kèm ba giới hạn** ở mục 8.3 — con số 1,000 đứng một mình là nói sai về mức tin cậy của nhãn. Evidence: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md).
+- ✅ **E1 bản 4 đã chạy 2026-08-16 và ĐẠT:** σ `final_score` = **1,60** < 2 (bản 2 là 1,79), tỉ lệ cùng `decision` 92% (bản 2: 88%), chi phí thật **$3,07**. Dự đoán σ compliance giảm đã được xác nhận (4,68 → 4,02). Evidence: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md). Chi tiết và cảnh báo diễn giải ở mục 8.1.
+- ✅ **Thiết kế E6 đã chốt và đăng ký trước (2026-08-16): k-fold**, không tách cứng — 5 fold, chia theo nhóm `source_url` (33 mẫu chỉ từ 30 nguồn), phân tầng theo nhãn, seed `20260816`, kèm quy tắc phá hoà cố định trước. Đầy đủ căn cứ và thiết kế: [`evaluation-plan.md` mục 4.6.1](evaluation-plan.md). Commit của quyết định này **phải là tổ tiên** của commit chứa kết quả E5.
+- ✅ **E5 + E6 đã chạy 2026-08-16 ($1,87) — nhưng ⛔ KHÔNG chốt được ngưỡng.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. Selection bias +0,000. Nguyên nhân: `publish_min=80` làm 27% bài bị đề xuất đăng sai, mà gold set không có mẫu `publish` nào để chọn giá trị đúng. Chi tiết bốn phát hiện: mục 8.2. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
+- ✅ **Functional-clean đã chạy 2026-08-16 ($0,24): `publish_rate` 10/10, 0 bài chặn oan, 22 issue.** Và nó **giải thích luôn kết quả E5**: `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có B8, tức **bộ phát hiện chạy đúng**. Lệch là do **cách gộp**: người dùng quy tắc dừng sớm (một mã B là đủ loại khỏi publish), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm `final_score`. Chi tiết: mục 8.6 và [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md).
+- 🔴 **CẦN MENTOR QUYẾT — không phải việc sửa ngay:** có thêm cổng *"bất kỳ tiêu chí mức 0 → trần `needs_revision`"* để khớp quy tắc người gán nhãn không? Đó là đổi `graph.aggregator_node`, tức **đường chấm điểm**, sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Ba lựa chọn kèm cái giá ở mục 8.6.
+- ✅ **Chẩn đoán P-006a xong 2026-08-16 ($0,044).** Chốt thời hạn của CP4 **chạy đúng**; cờ `critical` đến từ vế *điều kiện áp dụng* do LLM chấm. Mục 8.4 đã được chỉnh phát biểu. Cùng lúc phát hiện **B15: CP5 khớp mọi con số có `km` không kiểm ngữ cảnh** — lần thứ tư của bẫy B14, và B14 chỉ sửa CP3. Chưa sửa vì nằm trong đường chấm điểm.
+- ✅ **E3 đã chạy 2026-08-16 ($1,15): kiến trúc 4 agent THẮNG.** Kappa CV **0,406** so với **0,302** của baseline gộp một lượt gọi; tập bài sai của baseline là **tập cha** của tập bài sai hệ 4 agent (sai thêm 4 bài, không thắng bài nào). Cái giá: +63% chi phí. Chi tiết mục 8.7, evidence [`evidence/e3_baseline_single_report.md`](evidence/e3_baseline_single_report.md).
+- 🏁 **CẢ SÁU PHÉP ĐO ĐÃ CHẠY XONG.** E1 ✅ đạt · E2 ✅ · E3 ✅ · E4 ✅ (thu kèm E1, có provenance) · E5 ✅ đo xong nhưng ⛔ không chốt được ngưỡng · E6 ✅. Việc còn lại **không còn là đo** mà là **hai quyết định thiết kế cần mentor** (xem hai gạch đầu dòng 🔴 ở trên) và các nợ kỹ thuật B15/CP5.
+- ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
 
@@ -649,7 +692,29 @@ Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự
 
 **Nợ Minor không chặn CLI:** helper `ghi_ket_qua(data, path)` hiện gọi `os.makedirs(os.path.dirname(path))`; nếu code khác import trực tiếp helper rồi truyền đúng một filename tương đối như `"e1.json"`, `dirname` rỗng và lệnh tạo thư mục sẽ lỗi. CLI không dính vì luôn chuẩn hoá `--ket-qua` thành đường dẫn tuyệt đối. Khi sửa, chỉ gọi `os.makedirs()` nếu `dirname` khác rỗng và thêm test cho bare filename.
 
-### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
+### 8.1. Đo lại E1 — ✅ ĐÃ CHẠY 2026-08-16, **ĐẠT**, $3,07
+
+**σ `final_score` = 1,60 < 2 → ĐẠT. Cổng sang E5 mở.** Báo cáo đầy đủ: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md); số liệu thô: [`evidence/e1_sau_cp4_deadline_guard.json`](evidence/e1_sau_cp4_deadline_guard.json) (mang `_meta.prompt_version = 020738e209017213`).
+
+Truy vết: HEAD `08cebe3`, snapshot đường chấm `04f10e1` (đã xác minh là tổ tiên, diff rỗng với một ngoại lệ `model_pricing.yaml` đã kiểm chứng là ngoài đường chấm), model `claude-haiku-4-5-20251001`, `calibrated: false`, mẫu `G-001..G-010` × 5 lượt.
+
+| Đại lượng | σ tb | Đạt < 2? | Bản 2 → bản 4 |
+|---|---|---|---|
+| `content_quality` | 3,27 | ❌ | 4,38 → 3,27 |
+| `seo` | 0,22 | ✅ | 0,27 → 0,22 |
+| `brand` | 0,89 | ✅ | 1,44 → 0,89 |
+| `compliance` | 4,02 | ❌ | 4,68 → 4,02 |
+| **`final_score`** | **1,60** | ✅ **ĐẠT** | 1,79 → 1,60 |
+
+Tỉ lệ ra cùng `decision`: **92%** (bản 2: 88%).
+
+**Dự đoán về CP4 được xác nhận.** Mục này trước lượt đo đã ghi *"σ compliance nên giảm so với 4,68… không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra"* — thực tế giảm còn 4,02. Đây là bằng chứng độc lập cho chẩn đoán B14/CP4. ⚠️ Nhưng **cả bốn agent đều giảm**, kể cả `seo` vốn không bị CP4 chạm tới, nên không được quy toàn bộ mức giảm cho CP4; chỉ khẳng định được là **giảm, đúng chiều dự đoán**.
+
+**Hai agent vẫn trượt ngưỡng riêng** (`content_quality` 3,27 và `compliance` 4,02) — **không chặn E5**, vì tiêu chí áp cho `final_score`, đại lượng mà E5 quét ngưỡng lên. Đóng góp phương sai: compliance 67%, content_quality 31%, brand 2%, seo 0%.
+
+**Thu được kèm — E4 có provenance đầy đủ:** $0,0614/lượt, 42.331 input token, 3.815 output token, 5,6 lần gọi LLM, 39,3 giây/lượt (4 agent chạy **tuần tự** trong script; pipeline thật chạy song song nên nhanh hơn). Khác số E4 cũ mà mục 8.9 ghi là thiếu provenance.
+
+<details><summary>Lệnh và tiêu chí đã dùng (giữ lại để tái lập)</summary>
 
 ```powershell
 cd multiagent
@@ -657,30 +722,44 @@ $env:HF_HUB_OFFLINE = '1'
 .\.venv\Scripts\python.exe scripts\eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json  # đọc 8.0 TRƯỚC
 ```
 
-**Preflight đã chạy ngày 2026-08-12, không gọi API và không tạo output:**
+**Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent.
 
-| Kiểm tra | Kết quả |
-|---|---|
-| Legacy guard | `REJECTED_BEFORE_PAID_PATH` |
-| Commit được kiểm | `04f10e1` |
-| Prompt version | `020738e209017213` |
-| Model | `claude-haiku-4-5-20251001` |
-| Cấu hình calibration | `calibrated: false` |
-| Mẫu / số lượt dự kiến | `G-001..G-010` / `10 × 5 = 50` |
-| File đích | `e1_sau_cp4_deadline_guard.json` — **chưa tồn tại** |
-| Chi phí phát sinh trong preflight | **0 USD** |
+**Nếu σ ≥ 2:** dừng, **đừng chốt ngưỡng**. Bước nhảy quét của E5 là 2 điểm; σ lớn hơn bước nhảy thì ngưỡng chọn ra chỉ là nhiễu. Chẩn đoán theo mẫu B14: tìm **lỗi cụ thể**, đừng nhắm vào σ — tiền lệ B5 sửa mò cho kết quả 7,70 → 7,29.
 
-Kết luận preflight chỉ chứng minh lệnh **sẵn sàng chạy an toàn**; nó không phải kết quả E1 và không mở cổng E5. Trước lượt chạy ngày 2026-08-13 vẫn phải xác nhận riêng chi phí dự kiến khoảng 3 USD.
+Preflight ngày 2026-08-12 (không gọi API): legacy guard `REJECTED_BEFORE_PAID_PATH`, commit `04f10e1`, prompt version `020738e209017213`, `calibrated: false`, file đích chưa tồn tại, chi phí 0 USD.
 
-**Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên code cũ. B14 rồi chốt CP4 đã đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
+⚠️ **Lỗi môi trường đã gặp ở preflight lượt chạy thật:** `.env` có **BOM** ở đầu file nên `python-dotenv` đọc tên biến đầu tiên thành `﻿ANTHROPIC_API_KEY`; `os.environ.get("ANTHROPIC_API_KEY")` trả `None` và E1 sẽ chết ở lần gọi API đầu tiên, sau khi đã nạp BGE-M3. Kiểm bằng `load_dotenv()` rồi đọc biến, **không** bằng `grep` trên file. BOM quay lại được nếu sửa `.env` bằng Notepad hoặc `Out-File`.
 
-**Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent — vì `final_score` mới là đại lượng E5 quét ngưỡng lên.
+</details>
 
-**Nếu σ ≥ 2:** dừng, **đừng chốt ngưỡng**. Bước nhảy quét của E5 là 2 điểm; σ lớn hơn bước nhảy thì ngưỡng chọn ra chỉ là nhiễu. Chẩn đoán theo mẫu B14: tìm **lỗi cụ thể**, đừng nhắm vào σ. σ cao là *triệu chứng*, không phải thứ để sửa trực tiếp — tiền lệ B5 sửa mò cho kết quả 7,70 → 7,29.
+### 8.2. E5 + E6 — ✅ ĐÃ CHẠY 2026-08-16, $1,87 — ⛔ NHƯNG KHÔNG CHỐT ĐƯỢC NGƯỠNG
 
-**Kỳ vọng:** σ compliance nên **giảm** so với 4,68 — CP3 bớt báo động giả thì bớt lật mức giữa các lượt. Giảm là bằng chứng thêm cho B14; không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra.
+**Đã đo xong. Kết luận: không chốt bộ ngưỡng nào vào `scoring.yaml`, không bật `meta.calibrated`.** Báo cáo đầy đủ: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
 
-### 8.2. Đo lại E5 rồi mới chốt ngưỡng — sau 8.1
+| Phép đo | Kappa | Accuracy |
+|---|---|---|
+| Ngưỡng đang chạy (`veto=50, nr=50, publish=80`) | 0,369 | 0,606 |
+| E6 **bản chính** (đăng ký trước, `publish` cố định 80) — CV | **0,406** | 0,636 |
+| E6 **phân tích phụ** (quét cả `publish`) — CV | **0,713** | 0,879 |
+
+Selection bias = **+0,000** ở cả hai: dự đoán out-of-fold trùng khít in-sample trên cả 33 mẫu.
+
+**Vì sao không chốt được — bốn phát hiện:**
+
+1. **`publish_min` là toàn bộ khoảng cách 0,406 → 0,713.** Với `publish=80`, hệ thống đề xuất `publish` cho **9/33 bài (27%)**, **sai cả 9** (8 `needs_revision`, 1 `rejected`). `final_score` cao nhất là 93,3, nên quét tự do chọn `publish=96` — tức **vô hiệu hoá đường ra `publish`**, không phải calibrate nó. Đúng cảnh báo vốn đã ghi ở mục này.
+2. **`needs_revision_min = 50` được xác nhận** — cả 5 fold ở cả hai phân tích đều chọn 50, đúng giá trị đang chạy. Đây là ngưỡng duy nhất có bằng chứng.
+3. **`compliance_veto_below` gần như không xác định được.** Fold chọn 34 (×4) và 40 (×1), nhưng chỉ **một** mẫu (`P-005a` = 37,5) nằm trong `[34,40)` và nó ở fold đã chọn 34 → chênh lệch **không đổi dự đoán nào**. Đổi veto 50→34 chỉ được +0,037 Kappa, trong khi publish 80→96 được +0,307.
+4. **Selection bias bằng 0 nghĩa là không overfit, nhưng cũng nghĩa là quét 441 tổ hợp hầu như không chọn ra thông tin gì** — ngưỡng nằm trên plateau rộng. Ngưỡng ổn định vì dữ liệu không đủ sức phân biệt, không phải vì đã hội tụ.
+
+**⚠️ Kappa 0,713 / accuracy 0,879 trùng khít số bản 3 — nhưng KHÔNG phải vì không có gì đổi.** 13/33 mẫu đổi điểm Compliance, và **2 dự đoán lật**: `G-008` `rejected`→`needs_revision` (**sửa đúng**, đúng ca false-critical mà chốt CP4 nhắm tới — mục 8.5) và `G-015` `needs_revision`→`rejected` (**hỏng đi**). Cùng số lỗi nên chỉ số tổng hợp không đổi, thành phần thì khác. Không được kết luận "CP4 vô tác dụng" từ hai con số bằng nhau.
+
+**Bốn lỗi còn lại chia đúng hai nhóm đối xứng:** `G-011` và `G-020` **bỏ sót A1** (claim tuyệt đối) → đoán nhẹ hơn nhãn người; `G-015` và `P-006a` bị gắn **`critical` sai** → đoán nặng hơn. Đây là hai lỗi hệ thống cụ thể, không phải nhiễu.
+
+**Câu hỏi mở — mục 8.4 chưa đóng hoàn toàn:** mục đó ghi chốt CP4 xử lý **cả P-006a lẫn G-008**. G-008 đã sửa được, **P-006a thì chưa**. File E5 chỉ lưu `co_critical` dạng boolean, không lưu flag sinh ra nó, nên không truy được nguyên nhân từ dữ liệu đã có. **Chưa kết luận CP4 hỏng** — cờ có thể đến từ CP1/CP2/CP3/CP9. Chẩn đoán cần chấm lại riêng P-006a với output flag đầy đủ, ~$0,06.
+
+**Việc nên làm tiếp:** chạy bộ **functional-clean 10 mẫu** (~$0,6, mục 8.6) — đó là bộ **duy nhất** có mẫu kỳ vọng `publish`, và là thứ duy nhất trả lời được câu gold set không trả lời nổi: ngưỡng `publish` có khả thi không. Rồi chẩn đoán P-006a, rồi xem lại recall của CP1.
+
+<details><summary>Bối cảnh trước lượt đo (giữ lại)</summary>
 
 Không được chốt kết quả E5 bản 3 vào `multiagent/config/scoring.yaml`: CP4 đã đổi cả prompt lẫn đường sinh cờ `critical`, đúng đại lượng quyết định nhãn. Chạy E5 vào **file mới** sau khi E1 đạt và có xác nhận riêng cho chi phí; guard phải từ chối file cũ trước API.
 
@@ -703,20 +782,34 @@ meta:
 
 Sau E5 bản 4, chỉ chốt ngưỡng mới nếu điều kiện đo đạt; `prompt_version` phải là hash do code tính tại lần đo. Việc xử lý ngưỡng `publish` vẫn cần mentor quyết vì calibration gold set không có lớp publish.
 
-### 8.3. Test-retest nhãn — từ **2026-08-13**, $0
+</details>
 
-Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**.
+**Ngưỡng `publish` vẫn cần mentor quyết** — nay có thêm số liệu để quyết: giữ **80** thì 27% bài bị đề xuất đăng sai; đẩy lên **96** thì nhánh `publish` không bao giờ chạy (trên trần `final_score` = 93,3). Gold set không thể chọn hộ vì nó không có mẫu `publish` nào.
 
-**Thứ tự bắt buộc trong phiên 2026-08-13 (để AI/model không vô tình làm hỏng phép đo):**
+### 8.3. Test-retest nhãn — ✅ ĐÃ CHẠY 2026-08-15, $0
 
-1. Chọn ngẫu nhiên 4 `sample_id`, chỉ đưa bài gốc và guideline cho người gán; không hiển thị `label`, `defect_codes`, `notes` cũ, báo cáo AI hoặc output E1.
-2. Lưu nhãn lượt hai vào **file evidence mới**, không ghi đè `docs/goldset/labels.csv`. Tệp đề xuất: `docs/evidence/test_retest_2026-08-13.csv`, tối thiểu có `sample_id,retest_label,annotator,date,notes` và ghi cách chọn mẫu/seed để tái lập.
+**Kết quả: đồng thuận 4/4, Kappa = 1,000 — đạt ngưỡng ≥ 0,80.** Evidence đầy đủ kèm ba giới hạn bắt buộc nêu kèm: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md). Nhãn lượt hai khoá tại commit `cc872d6` **trước** khi mở `labels.csv`.
+
+⚠️ **Không trích con số 1,000 mà bỏ ba giới hạn đi.** Tóm tắt: (1) cả 3 mẫu `gold-real` cùng là `needs_revision` ở hai lượt nên `pe = 1` và Kappa **không xác định** trên tập đó — phần cần phán đoán thật không phân biệt được người gán với máy luôn trả một nhãn; (2) toàn bộ phương sai nhãn đến từ đúng mẫu `P-007a`, vốn thuộc `gold-pert` nên đồng thuận **do cấu tạo**; (3) với n = 4, chỉ một mẫu lệch là Kappa rơi xuống 0,50 (hoặc 0,00 nếu mẫu lệch là `P-007a`) — phép đo thực chất nhị phân, không có vùng trung gian.
+
+**Hệ quả khi dùng làm trần cho E5:** trần = 1,000 là **hướng an toàn** (guideline mục 8.2: trần cao hơn thật khiến AI trông kém hơn, không thổi phồng), nhưng nó **mất chức năng chẩn đoán** — với trần 1,000 thì không bao giờ kích hoạt được cảnh báo "AI cao bất thường so với trần". Câu phải viết trong báo cáo Sprint 3 đã soạn sẵn trong file evidence, dùng nguyên văn.
+
+**Đã cân nhắc và bác bỏ việc bốc thêm mẫu:** mở rộng cỡ mẫu *sau khi* đã thấy kết quả là optional stopping, cùng lỗi đã bác ở ca "thu thêm corpus để đẩy p qua ngưỡng" (mục 6). Muốn ước lượng ổn định hơn thì chạy một lượt **riêng, khai báo cỡ mẫu trước**, báo cáo cạnh kết quả này chứ không thay thế.
+
+<details><summary>Giao thức đã dùng (giữ lại để tái lập)</summary>
+
+Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**. Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ — lượt hai chạy 2026-08-15, cách 5 ngày.
+
+1. Chọn ngẫu nhiên 4 `sample_id`, chỉ đưa bài gốc và guideline cho người gán; không hiển thị `label`, `defect_codes`, `notes` cũ, báo cáo AI hoặc output E1. Đã bốc từ pool **cả 33 mẫu**, seed `20260815`, chỉ bốc một lần → G-002, G-006, G-019, P-007a.
+2. Lưu nhãn lượt hai vào **file evidence mới**, không ghi đè `docs/goldset/labels.csv`: [`evidence/test_retest_2026-08-15.csv`](evidence/test_retest_2026-08-15.csv), kèm cách chọn mẫu/seed để tái lập.
 3. Chỉ sau khi file lượt hai đã khóa mới mở nhãn lượt một để tính Cohen's Kappa và ghi kết quả/evidence.
 4. Sau test–retest mới chuyển sang E1; xin người dùng xác nhận riêng chi phí trước khi gọi API. Hai phép đo độc lập: một phép bị chặn không được làm mất bằng chứng của phép còn lại.
 
-**Vì sao chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Trần 0,75 thì 0,713 là rất tốt; trần 0,95 thì còn khoảng cách lớn. **Chưa có trần thì 0,713 không nói lên điều gì** — đừng đưa vào báo cáo mentor.
+⚠️ **Cạm bẫy công cụ đã gặp:** `scripts/quet_ung_vien.py` đọc `labels.csv` và **in thẳng nhãn suy ra** cho mẫu `gold-pert` (`quet_ung_vien.py:171-174`). Đây là lý do mẫu pert đồng thuận do cấu tạo. `label_helper.py` thì sạch — không đọc `labels.csv`. Lần sau nếu muốn test–retest đo đúng độ nhất quán của người gán thì bốc riêng từ 20 mẫu `gold-real`.
 
-Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ.
+</details>
+
+**Vì sao mục này từng chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Nay đã có trần, nhưng vì trần bằng 1,000 nên nó chỉ nói được "0,713 còn cách trần khá xa", không nói được nhiều hơn.
 
 ### 8.4. Chốt chặn tất định cho CP4 — ✅ ĐÃ SỬA (2026-08-12)
 
@@ -729,6 +822,18 @@ Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn 
 Regex nhận ngày cụ thể, khoảng ngày, tháng kết thúc, thời lượng và “đến khi hết hàng”; không nhận giá/tháng, km/tháng hay phút sạc. Nó không quét toàn bài và không mượn ngày từ field khác. Test khóa P-006a, G-008, thiếu điều kiện, thiếu thời hạn, NA và evidence bịa. Thiết kế: `superpowers/specs/2026-08-12-cp4-deterministic-deadline-guard-design.md`.
 
 **Hệ quả đo lường:** prompt version hiện hành là `020738e209017213`; E1 và E5 bản 3 đều hết hiệu lực, phải đo lại vào file mới.
+
+⚠️ **Cập nhật 2026-08-16 — đã chẩn đoán xong ($0,044), và phát biểu của mục này cần chỉnh.** Báo cáo: [`evidence/chan_doan_p006a_report.md`](evidence/chan_doan_p006a_report.md).
+
+**Vế thời hạn do code kiểm CHẠY ĐÚNG.** Kiểm trực tiếp: `_CP4_MOC_THOI_HAN` khớp `"trước 6/4/2022"`, và `_cp4_co_thoi_han()` trả `True` với mọi biến thể evidence (kể cả khi evidence không chứa ngày — cửa sổ 240 ký tự bắt được). G-008 đã hết báo oan.
+
+**Nhưng P-006a vẫn `critical`, từ vế LLM.** Nhánh `muc in (0, 1)` của `_chot_cp4` kích hoạt vì LLM cho rằng *điều kiện áp dụng* chưa đủ chi tiết. Lý do do chính LLM viết: *"Chỉ nêu **thời hạn (trước 6/4/2022)** và sản phẩm (VF 8, VF 9) mà không rõ điều kiện cụ thể…"* — nó **tự xác nhận thời hạn có mặt**.
+
+**Phát biểu đúng của mục này phải là:** *"CP4 vế thời hạn đã tất định hoá và hết báo oan; vế điều kiện vẫn là phán đoán thuần LLM và vẫn có thể một mình sinh `critical`."* Kết quả người dùng nhìn thấy ở P-006a **không đổi** — cùng câu, vẫn bị chặn, chỉ khác lý do.
+
+**Vấn đề cấu trúc:** dự án đã khoá *"LLM không được tự chọn severity"* (bảng tra `scoring.severity_for`), nhưng chưa khoá *"LLM không được một mình đẩy bài sang trạng thái bị chặn"*. Và ở đây LLM **bất đồng với người gán nhãn** chứ không bịa: người gán P-006a `needs_revision` với `defect_codes = B10`, **không** ghi A4. Người coi *"đặt cọc VF 8/VF 9"* là điều kiện đủ rõ; LLM thì không.
+
+Việc này nên gộp với câu hỏi *"có thêm cổng bất-kỳ-tiêu-chí-mức-0 không"* ở mục 8.6 thành **một quyết định thiết kế cho mentor** — cả hai đều là câu hỏi *ai được quyền chặn xuất bản*.
 
 ### 8.5. Chẩn đoán G-008 — ✅ ĐÃ XONG, $0
 
@@ -746,15 +851,49 @@ Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa
 
 Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
 
-**Trạng thái: đã dựng 10 mẫu, chưa chạy pipeline.** Manifest nằm tại `docs/functional-tests/clean_labels.csv`; cần chạy pipeline rồi báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues` để chứng minh hệ thống có đường ra `publish` mà không làm sai phép calibration.
+**Trạng thái: ✅ ĐÃ CHẠY 2026-08-16, $0,24.** Báo cáo đầy đủ: [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md). Runner: `scripts/eval_functional_clean.py` (14 test, viết trước).
+
+| Chỉ số | Giá trị |
+|---|---|
+| `publish_rate` | **1,000 (10/10)** |
+| `false_positive_articles` | **0** |
+| `false_positive_issues` | **22** |
+
+**Đã trả lời được "phản biện mạnh nhất" ở mục 6:** hệ thống **không** báo lỗi giả ở mức quyết định trên bài sạch. Đường ra `publish` hoạt động, ngưỡng 80 không chặn oan.
+
+22 issue tập trung ở SEO (17), trong đó **9 là SEO7 — tiêu chí người gán nhãn không hề đánh giá** (không mã A/B nào ánh xạ tới độ dài bài). Không phải báo động giả lung tung mà là chiều đo con người không xét.
+
+🔑 **Phát hiện quyết định — giải thích luôn kết quả E5:** `content_quality` = **100,0** trên bộ sạch, nhưng 78,6–85,7 trên các bài gold có mã B8. **Bộ phát hiện chạy đúng.** Vấn đề của E5 không phải hệ thống mù, mà là **hai cách gộp khác nhau về bản chất**: người gán nhãn dùng quy tắc dừng sớm (*một* mã B là đủ loại khỏi `publish`), hệ thống dùng *trung bình có trọng số*. Một tiêu chí trượt trong 7-8 tiêu chí chỉ làm `final_score` giảm ~3,6 điểm. Ví dụ G-002: người tìm 6 lỗi chính tả, hệ thống **có** trừ điểm (CQ 85,7) nhưng `final_score` vẫn 93,3 — để rơi xuống dưới 80 thì CQ phải tụt tới 32,3, tức gần như mọi tiêu chí đều trượt.
+
+Đó chính là lý do quét ngưỡng đẩy `publish` lên 96: đó là cách duy nhất để một trung bình có trọng số bắt chước được quy tắc "một khiếm khuyết là đủ".
+
+⛔ **Không tự sửa cách gộp.** Thêm cổng "bất kỳ tiêu chí mức 0 → trần `needs_revision`" là đổi `graph.aggregator_node`, tức **đường chấm điểm** — sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Đây là **quyết định thiết kế cần mentor**; ba lựa chọn kèm cái giá đã liệt kê trong file evidence.
+
+⚠️ **Giới hạn:** n=10 nên `publish_rate` 1,000 không loại trừ được tỉ lệ chặn oan thật cỡ 10-20%. Và mẫu là bài **đã được chính người gán nhãn sửa**, nên nó kiểm *cơ chế*, không chứng minh hệ thống xử lý đúng bài sạch **tự nhiên** — dự án chưa có bài nào như vậy (0/20 bài thật đạt `publish`).
 
 **Chốt chặn đã có test:** extractor từ chối ghi đè bản corrected trừ khi truyền `--force` và route HTML functional về đúng thư mục functional-clean; E5 lấy đầu vào từ manifest `docs/goldset/labels.csv`, chỉ nhận allowlist split `gold-real` và `gold-pert`, nên functional-clean không thể lọt vào phép tính dù có tệp lạ ở gần dữ liệu gold.
 
 ⚠️ **Đúng thao tác "sửa bài cho sạch" mà mục 6 đã BÁC BỎ với gold set.** Hợp lệ ở đây **chỉ vì** bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*, không tham gia calibration, không tính Kappa. **Tuyệt đối không** thêm bài này vào `labels.csv`.
 
-### 8.7. E3 và E6 — sau 8.1 và 8.3
+### 8.7. E3 và E6 — ✅ CẢ HAI ĐÃ CHẠY 2026-08-16
 
-`evaluation-plan.md` mục 4.3 và 4.6. E3 so multi-agent với single-agent; E6 held-out test. Cả hai cần ngưỡng đã chốt và trần Kappa.
+**E6** đã chạy cùng E5 bằng k-fold theo thiết kế đăng ký trước — xem mục 8.2.
+
+**E3 — kiến trúc 4 agent THẮNG, $1,15.** Báo cáo: [`evidence/e3_baseline_single_report.md`](evidence/e3_baseline_single_report.md). Code: `scripts/eval_baseline_single.py` (16 test, viết trước).
+
+| Chế độ ngưỡng | 4 agent | baseline 1 gọi |
+|---|---|---|
+| Ngưỡng đang chạy | **0,369** | 0,270 |
+| Ngưỡng tốt nhất của chính mỗi hệ | **0,406** | 0,302 |
+| k-fold CV | **0,406** | 0,302 |
+
+**Kết quả mạnh hơn con số:** tập bài sai của baseline là **tập cha** của tập bài sai hệ 4 agent — baseline sai thêm **4 bài** (`G-007`, `P-007b`, `P-009a`, `P-010a`, ba trong đó là mẫu perturbation có lỗi chèn có chủ đích) và **không thắng ở bài nào**.
+
+**Cơ chế đọc được:** baseline chấm rộng tay hơn ở đúng hai agent do LLM chi phối (CQ +2,1; Compliance +2,7) và gần như không đổi ở hai agent chủ yếu do máy đo (SEO −0,3; Brand −0,2); nó gắn `critical` cho 8 bài trong khi thực tế có 10. Nhét 16 tiêu chí thuộc 4 lĩnh vực vào một lời gọi làm LLM **tìm ra ít lỗi hơn**. Đây là **bằng chứng đo được cho luận điểm chuyên biệt hoá** mà `architecture.md` mục 4.3 trước đây chỉ trích dẫn nghiên cứu ngoài.
+
+**Cái giá:** hệ 4 agent tốn **+63% chi phí** ($0,0567 so với $0,0348/bài) và **5,6 so với 2,6** lượt gọi LLM/bài.
+
+⚠️ **Ba chỗ dễ trích sai:** (1) baseline là **2,6** lượt gọi/bài chứ không phải 1 — CP3 tra KB nên không gộp được; (2) độ trễ 26,9s so với 34,8s đo trên script chạy **tuần tự**, mà production fan-out 4 agent **song song** nên rất có thể hệ 4 agent **nhanh hơn** thật — chưa đo trên pipeline thật; (3) không có σ cho chính chênh lệch 0,104 vì chỉ chạy một lượt.
 
 ### 8.8. Chốt kiểm tra miễn phí trước lượt chạy production tiếp theo — ✅ ĐÃ XONG (2026-08-12)
 
@@ -812,7 +951,9 @@ Nếu sau này quay lại nền tảng, những thứ **chưa** làm và không 
 
 **1. Chỉnh ngưỡng cho phân bố đẹp.** Phép thử: *lý do phải phát biểu được mà **không** nhắc tới phân bố thu được.* CQ3 qua được phép thử này (số 30 là quy ước readability tiếng Anh vốn đếm **từ**, còn code đếm **tiếng** tiếng Việt); B9 thì không, và nó từng làm sập cả 3 lớp nhãn. Xem B13.
 
-**2. Một bộ so khớp gộp hai thứ khác nhau.** Đã xảy ra **ba lần**: B12 (so-sánh-nhất làm claim vs làm trạng ngữ), BV3 (xưng hô vs danh từ chỉ người), B14 (mọi số có `km` vs tầm hoạt động). **Không lần nào lộ ra trong unit test** — vì test dùng ví dụ do chính người viết code nghĩ ra. Chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+**2. Một bộ so khớp gộp hai thứ khác nhau.** Đã xảy ra **bốn lần**: B12 (so-sánh-nhất làm claim vs làm trạng ngữ), BV3 (xưng hô vs danh từ chỉ người), B14 (CP3: mọi số có `km` vs tầm hoạt động), **B15 (CP5: y hệt B14 nhưng ở tiêu chí khác — B14 chỉ sửa CP3)**. **Không lần nào lộ ra trong unit test** — vì test dùng ví dụ do chính người viết code nghĩ ra. Chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+
+**Hệ quả của lần thứ tư:** sửa một chỗ mắc bẫy này thì phải **đi rà mọi bộ so khớp cùng họ**, không chỉ chỗ đang đau. B14 sửa CP3 nhưng để nguyên CP5 dùng đúng regex thiếu ngữ cảnh đó, và nó sống thêm 5 ngày mà không ai thấy.
 
 **3. Con số chép tay trong tài liệu trôi lệch khỏi code.** Công thức `prompt_version` hỏng **hai lần**: bản 1 tham chiếu biến không còn tồn tại; bản 1-2 bỏ sót hai prompt của `fact_check` — đúng chỗ B14 được sửa. Nay nằm trong `eval_calibration.prompt_version()`. Quy tắc: **mọi con số trong tài liệu phải tính lại được từ một file trong `docs/evidence/`.**
 

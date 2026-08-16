@@ -1,0 +1,100 @@
+==========================================================================
+G-002   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (20 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 318,6km
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-006   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (10 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A1: Claim tuyệt đối? CHỈ tính khi khẳng định sản phẩm hơn hẳn/nhất. 'cách tốt nhất để...' KHÔNG phải A1
+     - "tốt nhất" -> ...i tuổi thọ pin. Để đảm bảo pin luôn trong trạng thái tốt nhất, kéo dài tuổi thọ và nâng cao hiệu suất hoạt động, ngư...
+     - "tuyệt đối" -> ...nhiệt độ pin trở về mức bình thường rồi mới sử dụng. Tuyệt đối không sạc pin ở những nơi dễ gây cháy nổ hoặc những mô...
+
+  A3: Đối chiếu các số này với src/kb/specs.json. Chỉ SAI SỐ mới là A3
+     - 1 phút, 101km, 110km, 120km, 150km, 160km, 194km, 198km, 200km, 203km, 205km, 3,5 KWh, 3,5kWh, 30km, 70km, 75km, 80km, 90km
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "ưu đãi" -> ...thế hệ mới ngay hôm nay để nhận được những chính sách ưu đãi, hậu mãi hấp dẫn từ VinFast. Cần hỗ trợ thêm thông t...
+
+  B1: Câu có km nhưng không thấy chuẩn đo (NEDC/WLTP/EPA/CLTC)
+     - Quãng đường đi được trong một lần sạc đầy (duy trì tốc độ 30km/h) .
+     - 80km .
+     - 70km .
+     - 75km .
+     - 90km .
+     - 198km .
+     - 90km .
+     - 120km .
+     (+12 chỗ nữa)
+
+  B2: Câu có thời gian sạc nhưng thiếu loại trụ hoặc dải %
+     - Với công nghệ mới, thời gian sạc đầy xe máy điện VinFast trung bình khoảng 10 tiếng.
+     - Như vậy, nếu so sánh về thời gian sạc thì pin Lithium có ưu thế hơn khi có thời gian sạc ngắn dưới 6 tiếng.
+     - Nên sạc khoảng 10 tiếng trong 3 lần sạc đầu tiên sau khi mua xe để làm già pin/ắc quy.
+     - Sau khi rút sạc ra khỏi xe, nếu muốn cắm lại sạc thì nên đợi thêm khoảng 1 phút.
+
+  B10: Số liệu % không thấy nguồn gần đó
+     - 8h: 80% dung lượng pin .
+     - 10h: 100% dung lượng pin .
+     - 3h: 90% SOC .
+     - 4,8h: 100% SOC .
+     - 3h: 90% SOC .
+     - 4,8h: 100% SOC .
+     - 8h: 80% dung lượng pin .
+     - 9h: 95% dung lượng pin .
+     (+9 chỗ nữa)
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+G-019   [QUÉT ĐẦY ĐỦ]
+==========================================================================
+  chưa có mã nào -> phải phân biệt publish / needs_revision.
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (22 câu > 30 tiếng)
+
+[CHỖ CẦN NGƯỜI XÁC NHẬN - script KHÔNG kết luận]
+
+  A4: Có nêu GIÁ TRỊ CỤ THỂ mà thiếu thời hạn/điều kiện không?
+     - "miễn phí" -> ...st. Tính năng cập nhật phần mềm từ xa qua phần mềm miễn phí FOTA và thu phí SOTA. >>> Tìm hiểu thêm: Xe điện có...
+
+[KHÔNG QUÉT ĐƯỢC - tự đọc]
+  A5 lạc đề >50%  - đọc title rồi lướt các H2: body có trả lời đúng không?
+  A6 mất an toàn  - chỉ xét bài hướng dẫn thao tác sạc/pin
+  B8 chính tả     - mã DUY NHẤT phải đọc thật. Ghi SỐ LỖI vào notes
+
+==========================================================================
+P-007a   [XONG]
+==========================================================================
+  nhãn = rejected (chèn mã A). KHÔNG cần đọc.
+
+[MÁY ĐÃ CHỐT - ĐỔI NHÃN]
+  B4 (ngoài 40-70)
+
+[NHÓM C - chép vào notes, KHÔNG đổi nhãn]
+  C4 (18 câu > 30 tiếng)
+

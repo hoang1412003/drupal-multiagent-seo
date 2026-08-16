@@ -34,12 +34,12 @@ Tài liệu này chốt: đo cái gì, bằng cách nào, tiêu chí đạt là 
 
 | Mã | Đo cái gì | Cần có trước | Tiêu chí đạt |
 |---|---|---|---|
-| **E1** | Độ ổn định điểm của agent qua nhiều lần chấm | Agent hiện có (đã xong) | σ điểm < 2 |
+| **E1** | Độ ổn định điểm của agent qua nhiều lần chấm | Agent hiện có (đã xong) | σ điểm < 2 — **đã đo 2026-08-16: σ `final_score` = 1,60, ĐẠT** |
 | **E2** | Retrieval lấy đúng đoạn không (recall@k) | KB đã dựng | recall@3 ≥ 0.9 (fact-check) — **đã đo: 1.00 (fact-check), 78,3% vs mốc 21,7% (brand)** |
-| **E3** | Multi-agent có hơn single-agent không | Gold set | (không có ngưỡng - là kết quả nghiên cứu) |
-| **E4** | Chi phí và độ trễ mỗi bài | Agent hiện có (đã xong) | (không có ngưỡng - là số liệu báo cáo) |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | Gold set + **E1 đạt** | Kappa cao nhất trong dải quét |
-| **E6** | Shadow-test trước khi vận hành | E5 | (xem mục 4.6 - phải viết lại cho khả thi) |
+| **E3** | Multi-agent có hơn single-agent không | Gold set | (không có ngưỡng) — **đã đo 2026-08-16: 4 agent thắng, Kappa CV 0,406 so với 0,302** |
+| **E4** | Chi phí và độ trễ mỗi bài | Agent hiện có (đã xong) | (không có ngưỡng) — **đã đo 2026-08-16 kèm E1: $0,0567/bài, 39,3s/lượt** |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | Gold set + **E1 đạt** | Kappa cao nhất trong dải quét — ⛔ **đã đo 2026-08-16 nhưng KHÔNG chốt được ngưỡng**, xem mục 4.5 |
+| **E6** | Shadow-test trước khi vận hành | E5 | k-fold theo mục 4.6.1 — **đã đo 2026-08-16: selection bias +0,000** |
 
 ---
 
@@ -88,7 +88,8 @@ Năm điểm chặn quan trọng:
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 | KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
 | E1 | ⚠️ **CHƯA đo trên bản này.** Preflight ngày 2026-08-12 đạt nhưng không gọi API/không tạo output; số 1,79 thuộc code trước B14/CP4 hiện hành |
-| E5 | ⚠️ **CHƯA đo trên bản này.** Kappa **0,713**, accuracy 0,879 thuộc bản 3 trước chốt CP4 (mục 4.5) |
+| E5 | ✅ **Đã đo 2026-08-16.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. ⛔ **Không chốt được ngưỡng** — xem [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md) và `technical-debt.md` mục 8.2 |
+| E6 | ✅ **Đã đo 2026-08-16, $0.** k-fold theo thiết kế đăng ký trước ở mục 4.6.1. Selection bias **+0,000** — dự đoán out-of-fold trùng khít in-sample trên cả 33 mẫu |
 
 > ### ⚠️ Bản khoá cũ có lỗ hổng — phát hiện khi sửa B14
 >
@@ -116,6 +117,24 @@ import eval_calibration as e; print(e.prompt_version())"      # phải ra 020738
 **Quy tắc trong thời gian khoá:** mọi thay đổi chạm vào đường chấm điểm — 4 agent, `scoring.py`, `graph.aggregator_node`, `compliance_rules.json`, `brand_rules.json`, `scoring.yaml` — đều **làm mất hiệu lực E1 và E5 đã chạy**, và phải đo lại. Sửa tài liệu, test, script gán nhãn thì không ảnh hưởng. Chốt CP4 vừa đổi đúng đường này, nên bản 4 chưa có E1/E5 hợp lệ.
 
 `04f10e1` là **snapshot của đường chấm**, không phải yêu cầu HEAD phải đứng mãi ở đúng commit đó. Commit chỉ sửa tài liệu được phép là descendant nếu trước lượt đo đã chứng minh không có diff ở agent/fact-check/graph/scoring/config/rule/retrieval/KB so với snapshot; evidence phải ghi cả HEAD thực tế và score-path snapshot. Cách phân biệt này tránh việc một commit tài liệu làm mất hiệu lực phép đo, nhưng không cho phép núp thay đổi hành vi trong commit mang nhãn `docs`.
+
+> #### Làm rõ nghĩa của "config" trong danh sách trên (thêm 2026-08-16 — làm rõ, **không đổi luật**)
+>
+> Danh sách liệt kê cụ thể ở đoạn trên ghi **`scoring.yaml`**, còn đoạn này ghi gọn là "config". Hai cách viết lệch nhau khi `multiagent/config/` có thêm file **không phục vụ việc chấm điểm** — đã xảy ra thật: P5 thêm `model_pricing.yaml` (đơn giá token cho dashboard chi phí).
+>
+> **Tiêu chí phân định — kiểm được bằng máy, không phải phán đoán:** một file trong `multiagent/config/` thuộc đường chấm **khi và chỉ khi có module thuộc đường chấm đọc nó**. Phải chạy phép kiểm này trước mỗi lượt đo và ghi kết quả vào evidence:
+>
+> ```bash
+> grep -rn "<ten_file>" multiagent/src multiagent/scripts --include=*.py | grep -v ".venv"
+> ```
+>
+> Nếu mọi nơi đọc đều nằm ngoài đường chấm (admin UI, observability, script vận hành) thì file đó **không** làm mất hiệu lực E1/E5. Nếu có **bất kỳ** nơi đọc nào nằm trong agent/fact-check/graph/scoring/retrieval/KB thì diff của nó **là** diff đường chấm, và phải đo lại.
+>
+> **Áp dụng lần đầu — `model_pricing.yaml`, kiểm ngày 2026-08-16:** chỉ có `review_platform/admin/queries.py` và `scripts/test_admin_dashboard.py` đọc nó; `config.py` hardcode đúng một đường dẫn tới `scoring.yaml` (dòng 19) chứ không quét thư mục, nên bộ nạp config của đường chấm không bao giờ chạm tới file này. Kết luận: **ngoài đường chấm**, không làm mất hiệu lực phép đo.
+>
+> **Không đổi luật và không kết quả đã đo nào bị đổi.** Đây là làm rõ một chỗ mà quy tắc chưa lường tới, đúng cách `annotation-guideline.md` đã xử lý ca A3 (mục "Ghi chú A3"). Tiêu chí "file nào được đường chấm đọc" vốn đã là *ý* của quy tắc gốc — chỗ này chỉ viết nó ra thành phép kiểm chạy được. Bản khoá vẫn là `04f10e1`, `prompt_version` vẫn `020738e209017213`.
+>
+> ⚠️ **Đây không phải cửa miễn trừ cho cả thư mục `config/`.** `scoring.yaml` được `config.py` đọc trực tiếp nên vĩnh viễn nằm trong đường chấm; sửa nó là mất hiệu lực E1/E5, không có ngoại lệ nào.
 
 **Hàng rào cho luồng productization song song:** thiết kế service độc lập/admin ngày 2026-08-12 chỉ được thay lớp API, auth, migration, site/profile, connector, admin UI và observability. Nếu việc triển khai làm đổi prompt, input chuẩn hóa của agent, retrieval, scoring, rule, Aggregator hoặc output report với cùng input thì đó **không còn là refactor lớp bao quanh**: phải dừng, ghi nhận thay đổi score-path và đo lại E1/E5. `site_id`, `profile_id` và `policy_version` chỉ là metadata cho tới khi profile mới được calibrate; chúng không được phép âm thầm chọn bộ ngưỡng/prompt khác cho profile `cam-nang-vn` hiện hành.
 
@@ -149,11 +168,21 @@ Rủi ro đã lường trước và đo được: rubric làm dao động **hi�
 
 **Tiêu chí:** σ < 2 điểm. Ngưỡng này không tùy tiện - `architecture.md` mục 8.2 dự kiến quét ngưỡng theo bước nhảy 2 điểm, nên dao động phải nhỏ hơn bước nhảy thì việc quét mới có nghĩa.
 
-#### Trạng thái bản 4 tại bàn giao 2026-08-12
+#### ✅ Kết quả bản 4 — chạy 2026-08-16, ĐẠT
 
-Preflight đã xác nhận legacy guard chặn file cũ trước đường trả phí, prompt version `020738e209017213`, model `claude-haiku-4-5-20251001`, 10 mẫu `G-001..G-010`, 50 lượt dự kiến và file đích mới `e1_sau_cp4_deadline_guard.json`. Tại thời điểm kiểm, file đích **chưa tồn tại** và không có API trả phí nào được gọi. Vì vậy trạng thái vẫn là **E1 bản 4 chưa chạy**.
+**σ `final_score` = 1,60 < 2.** Đo trên HEAD `08cebe3`, score-path snapshot `04f10e1` (diff rỗng), `prompt_version` `020738e209017213`, model `claude-haiku-4-5-20251001`, `calibrated: false`, mẫu `G-001..G-010` × 5 lượt = 50 lượt, chi phí thật **$3,07**.
 
-Lượt chạy được xếp vào ngày 2026-08-13, sau khi hoàn tất và khóa nhãn test–retest mù. Trước khi chạy vẫn phải có xác nhận riêng cho chi phí khoảng 3 USD. Lệnh và checklist vận hành là `technical-debt.md` mục 8.0–8.3; không sao chép file kết quả cũ sang tên mới và không xem output E1 trước khi người gán chốt nhãn lượt hai.
+| Agent | σ tb | Đạt < 2? |
+|---|---|---|
+| `content_quality` | 3,27 | ❌ |
+| `seo` | 0,22 | ✅ |
+| `brand` | 0,89 | ✅ |
+| `compliance` | 4,02 | ❌ |
+| **`final_score`** | **1,60** | ✅ |
+
+Tỉ lệ ra cùng `decision`: **92%**. Hai agent trượt ngưỡng riêng **không chặn E5** — tiêu chí áp cho `final_score`, đại lượng E5 quét ngưỡng lên. Báo cáo đầy đủ kèm so sánh với bản 2 và cảnh báo diễn giải: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md).
+
+Test–retest nhãn đã hoàn tất và khoá **trước** lượt chạy này (2026-08-15, Kappa 1,000 kèm ba giới hạn — `technical-debt.md` mục 8.3), nên ràng buộc "không xem output E1 trước khi người gán chốt nhãn lượt hai" đã được tuân thủ.
 
 **Biến thể quan trọng - so rubric với cách hiện tại:** ✅ **đã chạy 2026-08-04**, kết quả đầy đủ ở `docs/rubrics.md` mục 9.1 và `docs/evidence/e1_rubric_v2_report.txt`.
 
@@ -412,7 +441,11 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 
 **2. Ngưỡng `publish` không calibrate được.** Bộ tối ưu đẩy nó lên ≥92 chỉ vì gold set **không có mẫu `publish` nào** nên mọi dự đoán `publish` đều sai. Đó là hệ quả của lớp rỗng, không phải calibration thật (`technical-debt.md` mục 6).
 
-**3. CHƯA CÓ TRẦN để diễn giải 0,713.** `annotation-guideline.md` mục 8.2 bắt buộc báo cáo Kappa kèm **trần trên** — Kappa test-retest của chính người gán, chạy sớm nhất **13/08**. Không có trần thì 0,713 không nói được là tốt hay kém: nếu trần là 0,75 thì đây là kết quả rất tốt; nếu trần là 0,95 thì còn khoảng cách lớn.
+**3. ~~CHƯA CÓ TRẦN~~ — đã có trần từ 2026-08-15, nhưng nó không giúp được nhiều.** Test–retest cho Kappa **1,000** (`technical-debt.md` mục 8.3). Trần bằng 1,000 là **hướng an toàn** theo `annotation-guideline.md` mục 8.2, nhưng **mất chức năng chẩn đoán**: với trần 1,000 thì không bao giờ kích hoạt được cảnh báo "AI cao bất thường so với trần". Và bản thân trần đó đứng trên n=4 với 3/4 mẫu cùng một nhãn — phải trích kèm ba giới hạn ở mục 8.3.
+
+> **Cập nhật 2026-08-16 — bản 4 đã đo, và ba điều trên vẫn đúng, nhưng thứ tự quan trọng đã đổi.** Điểm 2 hoá ra không phải một chú thích bên lề mà là **phát hiện lớn nhất**: với `publish = 80` đang chạy thật, hệ thống đề xuất `publish` cho **9/33 bài (27%)** mà người gán nhãn nói là chưa đăng được, và Kappa tụt từ 0,713 xuống **0,406**. Toàn bộ khoảng cách giữa hai con số là ngưỡng `publish`. Xem [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
+>
+> Điểm 1 cũng cần chỉnh: điểm Compliance thấp nhất ở bản 4 là **25,0** chứ không phải 33,3, nên `veto = 30` **không** còn nằm dưới mọi điểm. Nhưng kết luận plateau vẫn đúng vì lý do khác — chỉ một mẫu (`P-005a` = 37,5) nằm giữa các giá trị fold chọn (34 và 40), và nó không đổi dự đoán nào.
 
 #### Chưa chốt ngưỡng vào `scoring.yaml`
 
@@ -440,6 +473,62 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 **Khuyến nghị A**, và nêu rõ trong báo cáo rằng đây là **held-out test**, không phải shadow-test đúng nghĩa - vì shadow-test thật đòi hỏi một quy trình vận hành thật để chạy song song.
 
 **Lưu ý về cỡ mẫu:** giữ lại 20% của 33 mẫu chỉ còn ~7 mẫu để calibrate ít đi. Với gold set nhỏ như vậy, cân nhắc **k-fold cross-validation** thay vì tách cứng - dùng hết 33 mẫu cho cả hai việc mà không rò rỉ. Đây là quyết định thống kê cần chốt trước khi bắt đầu E5.
+
+### 4.6.1. ✅ QUYẾT ĐỊNH ĐÃ CHỐT — k-fold, đăng ký trước ngày 2026-08-16
+
+**Chốt trước khi E5 chạy.** Commit của mục này phải là tổ tiên của commit chứa kết quả E5; nếu không, thiết kế mất tư cách "đăng ký trước" và Kappa CV chỉ còn là một con số chọn sau khi đã nhìn dữ liệu.
+
+**Chọn k-fold, không tách cứng.** Ba căn cứ, không căn cứ nào nhìn vào kết quả mong muốn:
+
+1. **Chi phí bằng nhau ($0 chênh lệch).** `eval_calibration.py` tách hai pha: PHA 1 chấm 33 bài một lần (~$2), PHA 2 quét ngưỡng là hàm thuần. k-fold thuần túy là cách phân tích khác trên **cùng một** output của PHA 1. Không có lý do ngân sách để chọn thiết kế yếu hơn.
+2. **Cỡ mẫu tập kiểm tra: 33 so với 7.** Đo độ nhạy trên chính phân bố của gold set (10 `rejected` / 23 `needs_revision`):
+
+   | Số dự đoán sai | Kappa nếu n=7 (tách cứng) | Kappa nếu n=33 (k-fold gộp) |
+   |---|---|---|
+   | 1 | 0,588 | 0,926 |
+   | 2 | 0,000 | 0,848 |
+   | 3 | −0,235 | 0,765 |
+
+   Tách cứng biến E6 thành phép đo nhị phân: sai một bài là sập. Test–retest ngày 2026-08-15 đã cho bằng chứng thực nghiệm về đúng bệnh này ở n=4.
+3. **Lớp `rejected` chủ yếu là mẫu nhân tạo.** `gold-real` chỉ có **3** `rejected` / 17 `needs_revision`; `gold-pert` có **7** / 6. Tách cứng 7 mẫu phân tầng cho ~2 `rejected`, xác suất cao cả hai đến từ nhóm chèn lỗi → E6 sẽ đo *"ngưỡng có bắt được lỗi tự chèn không"* thay vì *"ngưỡng có tổng quát hoá sang bài thật không"*.
+
+**Đánh đổi phải nêu trong báo cáo, không được giấu:** Kappa CV ước lượng chất lượng của **quy trình calibration**, không phải của đúng bộ ngưỡng đem dùng. Ngưỡng đem dùng vẫn refit trên cả 33 mẫu và **không** có tập sạch nào validate riêng nó.
+
+#### Thiết kế cố định (không đổi sau khi thấy dữ liệu)
+
+| Tham số | Giá trị |
+|---|---|
+| Số fold | **5** |
+| Đơn vị chia | **Nhóm theo `source_url`** — 33 mẫu chỉ đến từ **30 nguồn độc lập** |
+| Phân tầng | Theo `label` (10 `rejected` / 23 `needs_revision`) |
+| Seed gán fold | **`20260816`**, ghi vào file kết quả |
+| Chỉ số chính | Cohen's Kappa trên **toàn bộ 33 dự đoán out-of-fold** gộp lại |
+| Chỉ số phụ bắt buộc | Bộ ngưỡng mà **từng fold** chọn ra, in đủ 5 dòng |
+
+⚠️ **Ràng buộc nhóm là bắt buộc, không phải tuỳ chọn.** `P-001a`/`P-001b`, `P-004a`/`P-004b`, `P-007a`/`P-007b` mỗi cặp dùng chung một bài gốc. Hai biến thể cùng nguồn rơi vào train/test khác nhau là **rò rỉ gần-trùng-lặp** và làm Kappa CV lạc quan giả.
+
+#### Quy tắc phá hoà (tie-break) — phải cố định trước, đây là bậc tự do của người phân tích
+
+Với 441 tổ hợp hiệu dụng trên ~26 mẫu mỗi fold, **hoà điểm Kappa gần như chắc chắn xảy ra** (dự án đã biết `veto ≤ 33` là một plateau vì điểm Compliance thấp nhất là 33,3). Không cố định quy tắc trước là để ngỏ chỗ chọn con số thuận lợi sau.
+
+**Quy tắc:** trong các tổ hợp cùng đạt Kappa lớn nhất, chọn tổ hợp gần nhất (khoảng cách Euclid trên `(veto, nr)`) với **trung vị theo từng thành phần** của tập hoà. Còn hoà nữa thì lấy `veto` nhỏ hơn, rồi `nr` nhỏ hơn.
+
+Lý do phát biểu được **mà không nhắc tới phân bố thu được**: chọn giữa plateau là chọn điểm xa biên quyết định nhất, nên nhiễu chấm điểm ít có cơ hội lật nhãn. E1 vừa đo σ `final_score` = 1,60 trong khi bước quét là 2 — cùng cỡ, nên khoảng cách tới biên là đại lượng đáng tối đa hoá.
+
+#### `publish_min` không tham gia calibration
+
+Gold set có **0** mẫu `publish` nên `publish_min` **không xác định được** — đã ghi ở `technical-debt.md` mục 6 và 8.2. Không quét, không chốt: giữ nguyên giá trị minh hoạ **80** hiện có trong `scoring.yaml` và ghi rõ trong báo cáo là *chưa calibrate*. Cách xử lý ngưỡng này vẫn cần mentor quyết.
+
+Vì vậy số tổ hợp hiệu dụng là **441** (`veto` 21 × `nr` 21), không phải 7.056.
+
+#### Hai con số phải báo cáo cạnh nhau
+
+```
+Kappa in-sample  (quét trên cả 33, lấy max)  = 0.xx   <- LẠC QUAN, có selection bias
+Kappa CV         (33 dự đoán out-of-fold)    = 0.yy   <- ước lượng tổng quát hoá
+```
+
+Khoảng cách giữa hai số **chính là** mức selection bias của việc lấy max trên 441 tổ hợp. Báo cáo mỗi con số in-sample là giấu đúng thứ E6 sinh ra để đo.
 
 ---
 

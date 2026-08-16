@@ -108,7 +108,25 @@ Song với Sprint 3, phần Python được tổ chức thành **nền tảng Mu
 
 **Ma trận nghiệm thu 11/11 pass:** [`docs/evidence/platform-mvp-acceptance.md`](docs/evidence/platform-mvp-acceptance.md).
 
-⚠️ **Nền tảng xong KHÔNG có nghĩa là đã có kết quả chấm điểm.** Mọi run sinh ra trong P1→P5 đều là `is_fixture=true` do engine giả tạo. E1/E3/E5/E6 vẫn chưa chạy, và thứ tự bắt buộc vẫn là **test–retest nhãn → E1 → E5**.
+⚠️ **Nền tảng xong KHÔNG có nghĩa là đã có kết quả chấm điểm.** Mọi run sinh ra trong P1→P5 đều là `is_fixture=true` do engine giả tạo.
+
+### Trạng thái đo lường — cả sáu phép đo đã chạy xong (2026-08-16)
+
+| Phép đo | Kết quả | Evidence |
+|---|---|---|
+| Test–retest nhãn | Kappa **1,000** — đạt ngưỡng ≥0,80, **phải trích kèm ba giới hạn** | [`test_retest_2026-08-15.md`](docs/evidence/test_retest_2026-08-15.md) |
+| **E1** độ ổn định | σ `final_score` = **1,60** < 2 — **đạt** | [`e1_sau_cp4_deadline_guard_report.md`](docs/evidence/e1_sau_cp4_deadline_guard_report.md) |
+| **E3** multi vs single | **4 agent thắng**: Kappa CV 0,406 so với 0,302; baseline sai thêm 4 bài, không thắng bài nào | [`e3_baseline_single_report.md`](docs/evidence/e3_baseline_single_report.md) |
+| **E4** chi phí/độ trễ | $0,0567/bài, 39,3s/lượt — có provenance đầy đủ | (thu kèm E1) |
+| **E5** calibration | ⛔ **đo xong nhưng KHÔNG chốt được ngưỡng** | [`e5_e6_ban4_report.md`](docs/evidence/e5_e6_ban4_report.md) |
+| **E6** held-out | k-fold, selection bias **+0,000** | (cùng file E5) |
+| Functional-clean | `publish_rate` **10/10**, 0 bài chặn oan | [`functional_clean_ban4_report.md`](docs/evidence/functional_clean_ban4_report.md) |
+
+⛔ **Vì sao E5 không chốt được ngưỡng:** `publish_min = 80` làm hệ thống đề xuất `publish` cho **9/33 bài (27%)** mà người gán nhãn nói cần sửa — sai cả 9. Gold set có **0 mẫu `publish`** nên không calibrate được giá trị đúng. `meta.calibrated` vẫn `false`, `scoring.yaml` **không đổi một dòng**.
+
+Nguyên nhân sâu hơn (functional-clean chỉ ra): bộ phát hiện **chạy đúng** — `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có lỗi chính tả. Lệch là do **cách gộp điểm**: người gán nhãn dùng quy tắc dừng sớm (*một* khiếm khuyết là đủ loại khỏi `publish`), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm.
+
+**Việc còn lại không phải đo thêm mà là hai quyết định thiết kế cần mentor** — cùng một câu hỏi: *ai được quyền chặn xuất bản?* Chi tiết ở `docs/technical-debt.md` mục 8.2, 8.4 và 8.6.
 
 MVP vẫn chỉ có một site Drupal tại Việt Nam; schema đã có `site_id` và `review_profile` để không khóa đường mở rộng sau này.
 
