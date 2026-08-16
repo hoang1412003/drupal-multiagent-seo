@@ -374,8 +374,13 @@ class AiReportRenderer {
           . $this->esc($muc['excerpt']) . '</blockquote>';
       }
 
-      $out .= '<label class="vf-ai-the__xong">'
-        . '<input type="checkbox" class="vf-ai-xong"> Đã xử lý</label>';
+      // KHÔNG render checkbox "Đã xử lý" ở đây. Drupal lọc `#markup` qua
+      // Xss::filterAdmin(), mà danh sách thẻ của nó KHÔNG có <input> lẫn
+      // <label> - chúng bị nuốt im lặng (đã kiểm bằng drush php:eval).
+      // `data-*` thì sống sót, nên JS bám được vào thẻ để tự chèn checkbox.
+      //
+      // Việc này còn đúng hơn về progressive enhancement: checkbox không có
+      // JS thì bấm cũng chẳng làm gì, nên để JS tự tạo là đúng chỗ.
       $out .= '</div>';
     }
 

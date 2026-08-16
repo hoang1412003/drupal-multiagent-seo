@@ -263,6 +263,16 @@ kiem('the cua agent thuong KHONG co badge chan xuat ban',
 
 kiem('field khong co loi -> chuoi rong', $r->theLoiHtml($bao_day, 'summary') === '');
 
+// Drupal loc `#markup` qua Xss::filterAdmin(), ma danh sach the cua no
+// KHONG co <input> lan <label> - chung bi nuot IM LANG. `data-*` thi song
+// sot. Da kiem bang drush php:eval 2026-08-16.
+//
+// Nen checkbox "Da xu ly" phai do JS tu chen. Test nay khoa lai de lan sau
+// ai them <input> vao PHP thi vo ngay o day, thay vi ngoi do tai sao
+// checkbox khong hien tren trang.
+kiem('PHP KHONG render <input> (Drupal se nuot)',
+  !str_contains($the, '<input'), $the);
+
 // --- XSS tren markup MOI (bat buoc, prompt-injection.md M4) -------------
 // Bao cao chua trich dan nguyen van bai viet va van ban do LLM sinh. Markup
 // moi phai escape y het markup cu - them giao dien khong duoc mo lai lo hong
