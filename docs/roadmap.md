@@ -36,13 +36,19 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 ### Sprint 3
 
-- Calibration ngưỡng quyết định từ gold set, dùng F1/Recall và Cohen's Kappa (quy trình chi tiết tại architecture.md, mục 8.2).
+- [x] **Calibration ngưỡng quyết định từ gold set** (architecture.md mục 8.2) — chạy 2026-08-16. ⛔ **Đã đo nhưng KHÔNG chốt được ngưỡng**: `publish_min = 80` đề xuất `publish` cho 9/33 bài người nói cần sửa, và gold set có 0 mẫu `publish` để calibrate. `meta.calibrated` vẫn `false`. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
 
-- Chạy shadow-test toàn hệ thống trước khi trao quyền quyết định thật (quy trình chi tiết tại architecture.md, mục 8.3).
+- [x] **Shadow-test** (architecture.md mục 8.3) — đã viết lại thành **held-out test bằng k-fold** vì không có quy trình vận hành thật để chạy song song (evaluation-plan mục 4.6.1). Chạy 2026-08-16, selection bias +0,000.
 
-- Hoàn thiện UI, viết tài liệu vận hành.
+- [x] **Các phép đo còn lại:** E1 đạt (σ 1,60), E3 cho thấy kiến trúc 4 agent thắng (0,406 so với 0,302), E4 có provenance đầy đủ, test–retest nhãn Kappa 1,000, functional-clean `publish_rate` 10/10.
 
-- Demo bàn giao sản phẩm.
+- [ ] **Hai quyết định thiết kế cần mentor** — cùng một câu hỏi *ai được quyền chặn xuất bản?*: (1) có thêm cổng "bất kỳ tiêu chí mức 0 → trần `needs_revision`" để khớp quy tắc dừng sớm của người gán nhãn không; (2) một phán đoán thuần LLM có được phép một mình sinh `critical` không. Cả hai đổi `graph.aggregator_node`/agent nên **phải đo lại E1/E5/E6** sau khi sửa. Chi tiết: `technical-debt.md` mục 8.2, 8.4, 8.6.
+
+- [ ] **Hoàn thiện UI** — thiết kế mới cho khối báo cáo lỗi trong màn soạn bài đã có bundle handoff (`Trang hiển thị lỗi Agent/`), **chưa triển khai**. Hoãn có chủ đích tới khi xong chuỗi đo lường; nay đã xong.
+
+- [ ] Viết tài liệu vận hành.
+
+- [ ] Demo bàn giao sản phẩm.
 
 ## 3. Luồng song song: productization nền tảng Multi-Agent
 

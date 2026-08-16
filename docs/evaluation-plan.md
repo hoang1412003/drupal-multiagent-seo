@@ -34,12 +34,12 @@ Tài liệu này chốt: đo cái gì, bằng cách nào, tiêu chí đạt là 
 
 | Mã | Đo cái gì | Cần có trước | Tiêu chí đạt |
 |---|---|---|---|
-| **E1** | Độ ổn định điểm của agent qua nhiều lần chấm | Agent hiện có (đã xong) | σ điểm < 2 |
+| **E1** | Độ ổn định điểm của agent qua nhiều lần chấm | Agent hiện có (đã xong) | σ điểm < 2 — **đã đo 2026-08-16: σ `final_score` = 1,60, ĐẠT** |
 | **E2** | Retrieval lấy đúng đoạn không (recall@k) | KB đã dựng | recall@3 ≥ 0.9 (fact-check) — **đã đo: 1.00 (fact-check), 78,3% vs mốc 21,7% (brand)** |
-| **E3** | Multi-agent có hơn single-agent không | Gold set | (không có ngưỡng - là kết quả nghiên cứu) |
-| **E4** | Chi phí và độ trễ mỗi bài | Agent hiện có (đã xong) | (không có ngưỡng - là số liệu báo cáo) |
-| **E5** | Ngưỡng quyết định tối ưu (calibration) | Gold set + **E1 đạt** | Kappa cao nhất trong dải quét |
-| **E6** | Shadow-test trước khi vận hành | E5 | (xem mục 4.6 - phải viết lại cho khả thi) |
+| **E3** | Multi-agent có hơn single-agent không | Gold set | (không có ngưỡng) — **đã đo 2026-08-16: 4 agent thắng, Kappa CV 0,406 so với 0,302** |
+| **E4** | Chi phí và độ trễ mỗi bài | Agent hiện có (đã xong) | (không có ngưỡng) — **đã đo 2026-08-16 kèm E1: $0,0567/bài, 39,3s/lượt** |
+| **E5** | Ngưỡng quyết định tối ưu (calibration) | Gold set + **E1 đạt** | Kappa cao nhất trong dải quét — ⛔ **đã đo 2026-08-16 nhưng KHÔNG chốt được ngưỡng**, xem mục 4.5 |
+| **E6** | Shadow-test trước khi vận hành | E5 | k-fold theo mục 4.6.1 — **đã đo 2026-08-16: selection bias +0,000** |
 
 ---
 
