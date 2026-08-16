@@ -495,6 +495,42 @@ CP4 mắc lỗi **cùng họ**: gắn cờ *"khuyến mại thiếu thời hạn
 
 **Còn sót ở bản 3, đã xử lý trong bản 4 (2026-08-12):** **P-006a** vẫn là báo động giả của CP4 dù câu đó đã được nêu **làm ví dụ ngay trong prompt**. Đây là **giới hạn của sửa-bằng-prompt**. Bản 4 dùng regex chốt thời hạn trong evidence hoặc vùng lân cận có giới hạn; xem mục 8.4.
 
+⚠️ **Đính chính 2026-08-16:** chốt regex **có** chạy đúng trên câu đó, nhưng P-006a **vẫn `critical`** — nay từ vế *điều kiện áp dụng* do LLM chấm, không phải vế thời hạn. Chẩn đoán đầy đủ ở mục 8.4 và [`evidence/chan_doan_p006a_report.md`](evidence/chan_doan_p006a_report.md).
+
+### B15. CP5 khớp MỌI con số có "km" — ⚠️ MỚI PHÁT HIỆN 2026-08-16, **chưa sửa**
+
+**Lần thứ TƯ của đúng cái bẫy ở B14** — và B14 chỉ sửa cho **CP3**, không đụng CP5.
+
+`compliance_analysis.claim_tam_hoat_dong()` trả về mọi lần khớp của `_KM = <số> + "km"`, **không kiểm ngữ cảnh một chút nào**:
+
+```python
+_KM = re.compile(_SO + r"\s*(?:km|ki-?lô-?mét)\b", re.IGNORECASE)
+
+def claim_tam_hoat_dong(text_theo_field):
+    return _tim(_KM, text_theo_field)      # KHÔNG kiểm ngữ cảnh
+```
+
+So với `claim_thoi_gian_sac()` (CP6) ngay bên dưới, vốn **có** kiểm — chỉ nhận mốc thời gian khi có chữ `"sạc"` trong bán kính 120 ký tự. **CP6 biết ngữ cảnh, CP5 thì không.**
+
+**Đo được trên P-006a** (bài so sánh chi phí vận hành): CP5 nổ **12 cờ**, phần lớn sai —
+
+| Đoạn khớp | Thực chất |
+|---|---|
+| `13,4 kWh/100km` | mức tiêu thụ điện |
+| `7,8 lít/100km` | mức tiêu hao xăng |
+| `chi phí … trong 1km` | chi phí mỗi km |
+| `quãng đường di chuyển 80km` | ✅ đúng là quãng đường |
+
+**Ảnh hưởng:** CP5 mức 0 kéo Compliance của P-006a xuống **42,9**; nếu NA thì 50,0, nếu đạt mức 2 thì 57,1 — tức mất **7–14 điểm** Compliance, **2–4 điểm** `final_score`. Không quyết định nhãn của P-006a (cờ `critical` của CP4 mới quyết), nhưng bóp méo điểm trên **mọi** bài so sánh chi phí. Thêm nữa 12 cờ trùng lặp trên một bài là nhiễu nặng cho người soạn.
+
+**Chưa sửa vì nằm trong đường chấm điểm** — sửa bây giờ làm mất hiệu lực E1/E5/E6 vừa chạy.
+
+**Cách sửa khi được phép** (có tiền lệ ngay trong cùng file): thêm cổng ngữ cảnh giống CP6 — chỉ nhận số có `km` khi gần đó có từ chỉ tầm hoạt động (*"quãng đường"*, *"đi được"*, *"tầm hoạt động"*, *"sau một lần sạc"*), và loại trừ mẫu tỉ lệ (`/100km`, `đồng/km`, `lít/100km`, `kWh/100km`).
+
+**Xong khi:** test literal trên P-006a xác nhận `13,4 kWh/100km` và `chi phí trong 1km` **không** sinh cờ CP5, trong khi `quãng đường di chuyển 80km` vẫn sinh. Và phải đo lại E1/E5/E6 sau khi sửa.
+
+⚠️ **Mới quan sát trên MỘT bài.** Muốn biết CP5 bóp méo bao nhiêu bài phải chấm lại với `giu_chi_tiet=True`.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -627,7 +663,8 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **E5 + E6 đã chạy 2026-08-16 ($1,87) — nhưng ⛔ KHÔNG chốt được ngưỡng.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. Selection bias +0,000. Nguyên nhân: `publish_min=80` làm 27% bài bị đề xuất đăng sai, mà gold set không có mẫu `publish` nào để chọn giá trị đúng. Chi tiết bốn phát hiện: mục 8.2. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
 - ✅ **Functional-clean đã chạy 2026-08-16 ($0,24): `publish_rate` 10/10, 0 bài chặn oan, 22 issue.** Và nó **giải thích luôn kết quả E5**: `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có B8, tức **bộ phát hiện chạy đúng**. Lệch là do **cách gộp**: người dùng quy tắc dừng sớm (một mã B là đủ loại khỏi publish), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm `final_score`. Chi tiết: mục 8.6 và [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md).
 - 🔴 **CẦN MENTOR QUYẾT — không phải việc sửa ngay:** có thêm cổng *"bất kỳ tiêu chí mức 0 → trần `needs_revision`"* để khớp quy tắc người gán nhãn không? Đó là đổi `graph.aggregator_node`, tức **đường chấm điểm**, sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Ba lựa chọn kèm cái giá ở mục 8.6.
-- ➡️ **Việc kế tiếp (kỹ thuật):** chẩn đoán `critical` của P-006a (~$0,06, mục 8.4 chưa đóng hoàn toàn — nay `cham_mot_bai(giu_chi_tiet=True)` giữ được flag), rồi E3 (~$2, mục 8.7).
+- ✅ **Chẩn đoán P-006a xong 2026-08-16 ($0,044).** Chốt thời hạn của CP4 **chạy đúng**; cờ `critical` đến từ vế *điều kiện áp dụng* do LLM chấm. Mục 8.4 đã được chỉnh phát biểu. Cùng lúc phát hiện **B15: CP5 khớp mọi con số có `km` không kiểm ngữ cảnh** — lần thứ tư của bẫy B14, và B14 chỉ sửa CP3. Chưa sửa vì nằm trong đường chấm điểm.
+- ➡️ **Việc kế tiếp (kỹ thuật):** E3 baseline single-agent (~$2, mục 8.7) — phép đo cuối còn thiếu.
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
@@ -785,7 +822,17 @@ Regex nhận ngày cụ thể, khoảng ngày, tháng kết thúc, thời lượ
 
 **Hệ quả đo lường:** prompt version hiện hành là `020738e209017213`; E1 và E5 bản 3 đều hết hiệu lực, phải đo lại vào file mới.
 
-⚠️ **Cập nhật 2026-08-16 — mục này CHƯA đóng hoàn toàn.** E5 bản 4 cho thấy **G-008 đã sửa được** (`rejected` → `needs_revision`, đúng như thiết kế nhắm tới), nhưng **P-006a vẫn bị gắn `critical`**. File kết quả E5 chỉ lưu `co_critical` dạng boolean nên không truy được flag nào sinh ra nó. **Chưa kết luận CP4 hỏng** — cờ có thể đến từ CP1/CP2/CP3/CP9. Chẩn đoán cần chấm lại riêng P-006a với `cham_mot_bai(giu_chi_tiet=True)`, ~$0,06. Từ 2026-08-16 hàm đó đã giữ được flag nên lần sau không mất dữ liệu chẩn đoán nữa.
+⚠️ **Cập nhật 2026-08-16 — đã chẩn đoán xong ($0,044), và phát biểu của mục này cần chỉnh.** Báo cáo: [`evidence/chan_doan_p006a_report.md`](evidence/chan_doan_p006a_report.md).
+
+**Vế thời hạn do code kiểm CHẠY ĐÚNG.** Kiểm trực tiếp: `_CP4_MOC_THOI_HAN` khớp `"trước 6/4/2022"`, và `_cp4_co_thoi_han()` trả `True` với mọi biến thể evidence (kể cả khi evidence không chứa ngày — cửa sổ 240 ký tự bắt được). G-008 đã hết báo oan.
+
+**Nhưng P-006a vẫn `critical`, từ vế LLM.** Nhánh `muc in (0, 1)` của `_chot_cp4` kích hoạt vì LLM cho rằng *điều kiện áp dụng* chưa đủ chi tiết. Lý do do chính LLM viết: *"Chỉ nêu **thời hạn (trước 6/4/2022)** và sản phẩm (VF 8, VF 9) mà không rõ điều kiện cụ thể…"* — nó **tự xác nhận thời hạn có mặt**.
+
+**Phát biểu đúng của mục này phải là:** *"CP4 vế thời hạn đã tất định hoá và hết báo oan; vế điều kiện vẫn là phán đoán thuần LLM và vẫn có thể một mình sinh `critical`."* Kết quả người dùng nhìn thấy ở P-006a **không đổi** — cùng câu, vẫn bị chặn, chỉ khác lý do.
+
+**Vấn đề cấu trúc:** dự án đã khoá *"LLM không được tự chọn severity"* (bảng tra `scoring.severity_for`), nhưng chưa khoá *"LLM không được một mình đẩy bài sang trạng thái bị chặn"*. Và ở đây LLM **bất đồng với người gán nhãn** chứ không bịa: người gán P-006a `needs_revision` với `defect_codes = B10`, **không** ghi A4. Người coi *"đặt cọc VF 8/VF 9"* là điều kiện đủ rõ; LLM thì không.
+
+Việc này nên gộp với câu hỏi *"có thêm cổng bất-kỳ-tiêu-chí-mức-0 không"* ở mục 8.6 thành **một quyết định thiết kế cho mentor** — cả hai đều là câu hỏi *ai được quyền chặn xuất bản*.
 
 ### 8.5. Chẩn đoán G-008 — ✅ ĐÃ XONG, $0
 
@@ -887,7 +934,9 @@ Nếu sau này quay lại nền tảng, những thứ **chưa** làm và không 
 
 **1. Chỉnh ngưỡng cho phân bố đẹp.** Phép thử: *lý do phải phát biểu được mà **không** nhắc tới phân bố thu được.* CQ3 qua được phép thử này (số 30 là quy ước readability tiếng Anh vốn đếm **từ**, còn code đếm **tiếng** tiếng Việt); B9 thì không, và nó từng làm sập cả 3 lớp nhãn. Xem B13.
 
-**2. Một bộ so khớp gộp hai thứ khác nhau.** Đã xảy ra **ba lần**: B12 (so-sánh-nhất làm claim vs làm trạng ngữ), BV3 (xưng hô vs danh từ chỉ người), B14 (mọi số có `km` vs tầm hoạt động). **Không lần nào lộ ra trong unit test** — vì test dùng ví dụ do chính người viết code nghĩ ra. Chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+**2. Một bộ so khớp gộp hai thứ khác nhau.** Đã xảy ra **bốn lần**: B12 (so-sánh-nhất làm claim vs làm trạng ngữ), BV3 (xưng hô vs danh từ chỉ người), B14 (CP3: mọi số có `km` vs tầm hoạt động), **B15 (CP5: y hệt B14 nhưng ở tiêu chí khác — B14 chỉ sửa CP3)**. **Không lần nào lộ ra trong unit test** — vì test dùng ví dụ do chính người viết code nghĩ ra. Chỉ lộ khi chạy trên dữ liệu thật có nhãn độc lập.
+
+**Hệ quả của lần thứ tư:** sửa một chỗ mắc bẫy này thì phải **đi rà mọi bộ so khớp cùng họ**, không chỉ chỗ đang đau. B14 sửa CP3 nhưng để nguyên CP5 dùng đúng regex thiếu ngữ cảnh đó, và nó sống thêm 5 ngày mà không ai thấy.
 
 **3. Con số chép tay trong tài liệu trôi lệch khỏi code.** Công thức `prompt_version` hỏng **hai lần**: bản 1 tham chiếu biến không còn tồn tại; bản 1-2 bỏ sót hai prompt của `fact_check` — đúng chỗ B14 được sửa. Nay nằm trong `eval_calibration.prompt_version()`. Quy tắc: **mọi con số trong tài liệu phải tính lại được từ một file trong `docs/evidence/`.**
 
