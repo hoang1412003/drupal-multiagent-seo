@@ -329,6 +329,32 @@ class AiReportRenderer {
   }
 
   /**
+   * Khối tóm tắt cho cột phải - CHỈ những gì băng không có.
+   *
+   * Băng đã hiện đề xuất, điểm, giờ chấm và tổng số vấn đề. Lặp lại chúng ở
+   * cột phải là hai chỗ nói một điều trên cùng một màn hình (đã thấy trên
+   * ảnh chụp thật ngày 2026-08-16). Ở đây chỉ giữ phần **phân rã theo
+   * field**, thứ băng không có chỗ để hiện.
+   *
+   * KHÔNG xoá hẳn khối chứa nó: `vf_ai_trigger` gắn ô trạng thái và nút
+   * "Chấm lại" vào chính `$form['vf_ai_review']`.
+   *
+   * `overviewHtml()` giữ nguyên làm đường lùi, chưa xoá.
+   */
+  public function tomTatHtml(?array $report): string {
+    $fields = array_filter($report['fields'] ?? [], 'is_array');
+    if (!$fields) {
+      return '';
+    }
+    $out = '<div class="vf-ai-review"><p class="vf-ai-count">Phân bố theo trường:</p><ul>';
+    foreach ($fields as $khoa => $ds) {
+      $out .= '<li>' . $this->esc(self::FIELD_LABELS[$khoa] ?? $khoa)
+        . ' (' . count($ds) . ')</li>';
+    }
+    return $out . '</ul></div>';
+  }
+
+  /**
    * Thẻ lỗi rich của một field.
    *
    * Trả chuỗi rỗng nếu field không có vấn đề gì - gọi được cho mọi field mà

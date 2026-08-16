@@ -23,7 +23,12 @@
 
 .vf-ai-band {
   position: sticky;
-  top: 0;
+  /* PHẢI trừ chiều cao thanh admin toolbar, nếu không băng dính ở top:0
+     nhưng nằm SAU LƯNG toolbar và coi như biến mất - đúng lúc người dùng
+     cuộn xuống, tức đúng lúc cần nó nhất.
+     Drupal đặt --drupal-displace-offset-top qua displace.js; giá trị dự
+     phòng 0px cho trường hợp toolbar tắt hoặc người dùng không có quyền. */
+  top: var(--drupal-displace-offset-top, 0px);
   z-index: 20;
   display: flex;
   flex-wrap: wrap;
@@ -173,12 +178,18 @@
   margin-bottom: 6px;
 }
 
+/* Badge tên agent.
+   KHÔNG dùng font monospace: bundle handoff đặt mono cho MÃ TIÊU CHÍ ngắn
+   ("CP8"), nhưng phương án A chưa có mã đó nên chỗ này đang hiện TÊN AGENT
+   tiếng Việt. Mono làm "Chất Lượng" giãn chữ rời rạc, khó đọc.
+   Đổi lại mono khi nào backend trả `ma` (xem editor-ui-design.md mục 10.1). */
 .vf-ai-the__ma {
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 12px;
-  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
   font-size: 11.5px;
   font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
 }
 
 .vf-ai-the--block .vf-ai-the__ma { background: var(--vf-ai-chan-nen); color: var(--vf-ai-chan-chu); }

@@ -15,8 +15,32 @@
 
   var MUC = { block: 'Chặn xuất bản', fix: 'Cần sửa', tip: 'Gợi ý' };
 
-  // Khoảng cách chừa ra khi cuộn tới lỗi: băng sticky cao ~60px, cộng thở.
+  // Khoảng cách chừa ra khi cuộn tới lỗi: băng sticky + toolbar + chỗ thở.
   var CHUA_CHO_BANG = 160;
+
+  /**
+   * Đồng bộ chiều cao thanh admin toolbar vào biến CSS của băng.
+   *
+   * Không có bước này thì băng dính ở top:0 nhưng nằm SAU LƯNG toolbar và
+   * coi như biến mất khi cuộn - đúng lúc người dùng cần nó nhất.
+   *
+   * Drupal 10 mới tự đặt --drupal-displace-offset-top; bản cũ hơn thì không,
+   * nên vẫn phải tự đặt từ Drupal.displace. Cả hai đường đều bọc phòng thủ:
+   * không có displace thì rơi về 0 và băng vẫn dùng được, chỉ hơi khuất.
+   */
+  function dongBoOffset(doc) {
+    var tren = 0;
+    try {
+      if (Drupal.displace && typeof Drupal.displace.offsets === 'object') {
+        tren = Drupal.displace.offsets.top || 0;
+      }
+    }
+    catch (e) { /* không có toolbar: giữ 0 */ }
+    doc.documentElement.style.setProperty(
+      '--drupal-displace-offset-top', tren + 'px'
+    );
+    return tren;
+  }
 
   /**
    * GHI_CHU_KHOA: khoá PHẢI gồm content_hash, không chỉ nid.
@@ -171,7 +195,10 @@
     the.classList.add('vf-ai-the--dang-chon');
 
     var win = this.doc.defaultView;
-    var y = the.getBoundingClientRect().top + win.pageYOffset - CHUA_CHO_BANG;
+    // Trừ cả toolbar lẫn băng, nếu không lỗi được cuộn tới lại nằm ngay
+    // dưới hai thanh đó và người dùng không thấy gì.
+    var chua = CHUA_CHO_BANG + dongBoOffset(this.doc);
+    var y = the.getBoundingClientRect().top + win.pageYOffset - chua;
     win.scrollTo({ top: y, behavior: 'smooth' });
     this.veLai();
   };
@@ -272,6 +299,14 @@
         b.dungDieuKhien();
         b.ganCheckbox();
         b.veLai();
+
+        dongBoOffset(b.doc);
+        // Toolbar đổi chiều cao khi thu/mở hoặc khi đổi kích thước cửa sổ.
+        // Không nghe sự kiện này thì băng lệch chỗ ngay lần đầu người dùng
+        // thu thanh toolbar lại.
+        b.doc.defaultView.addEventListener(
+          'drupalViewportOffsetChange', function () { dongBoOffset(b.doc); }
+        );
       });
     }
   };

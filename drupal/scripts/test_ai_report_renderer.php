@@ -273,6 +273,22 @@ kiem('field khong co loi -> chuoi rong', $r->theLoiHtml($bao_day, 'summary') ===
 kiem('PHP KHONG render <input> (Drupal se nuot)',
   !str_contains($the, '<input'), $the);
 
+// --- tomTatHtml(): khoi cot phai, KHONG lap lai bang --------------------
+// Bang da hien de xuat/diem/gio cham/tong so van de. Khoi cot phai lap lai
+// y het la hai cho noi mot dieu tren cung mot man hinh - da thay tren anh
+// chup that. Khoi nay chi con giu thu bang KHONG co: phan ra theo field.
+//
+// KHONG xoa han duoc khoi nay: vf_ai_trigger gan o trang thai va nut
+// "Cham lai" vao chinh $form['vf_ai_review'].
+$tom = $r->tomTatHtml($bao_day);
+kiem('tom tat co phan ra theo field',
+  str_contains($tom, 'Tiêu đề') && str_contains($tom, 'Nội dung'), $tom);
+kiem('tom tat KHONG lap lai diem tong', !str_contains($tom, '76.5'), $tom);
+kiem('tom tat KHONG lap lai gio cham', !str_contains($tom, '2026'), $tom);
+kiem('tom tat tren bao cao NULL -> chuoi rong', $r->tomTatHtml(NULL) === '');
+kiem('tom tat khi khong co loi -> chuoi rong',
+  $r->tomTatHtml(['fields' => []]) === '');
+
 // --- XSS tren markup MOI (bat buoc, prompt-injection.md M4) -------------
 // Bao cao chua trich dan nguyen van bai viet va van ban do LLM sinh. Markup
 // moi phai escape y het markup cu - them giao dien khong duoc mo lai lo hong

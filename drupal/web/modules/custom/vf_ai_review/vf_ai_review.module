@@ -96,7 +96,12 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
     '#weight' => -10,
     'noi_dung' => [
       // Chuỗi này đã được AiReportRenderer escape toàn bộ phần động.
-      '#markup' => $renderer->overviewHtml($report, $stale, $loi_json),
+      //
+      // CHỈ phần băng không có (phân rã theo field). Băng ở đầu form đã hiện
+      // đề xuất/điểm/giờ chấm/tổng số vấn đề rồi; lặp lại ở đây là hai chỗ
+      // nói một điều trên cùng màn hình. `overviewHtml()` vẫn còn làm đường
+      // lùi nếu cần quay lại bản cũ.
+      '#markup' => $renderer->tomTatHtml($report),
     ],
   ];
 
