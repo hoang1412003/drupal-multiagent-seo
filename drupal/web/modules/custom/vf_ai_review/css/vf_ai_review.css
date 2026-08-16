@@ -235,10 +235,13 @@
 
 .vf-ai-o--block { border-color: var(--vf-ai-chan) !important; }
 .vf-ai-o--fix { border-color: var(--vf-ai-sua) !important; }
-.ck.ck-editor.vf-ai-o--block .ck.ck-editor__main > .ck-editor__editable,
-.ck-editor__main.vf-ai-o--block > .ck-editor__editable { border-color: var(--vf-ai-chan) !important; }
-.ck.ck-editor.vf-ai-o--fix .ck.ck-editor__main > .ck-editor__editable,
-.ck-editor__main.vf-ai-o--fix > .ck-editor__editable { border-color: var(--vf-ai-sua) !important; }
+
+/* CKEditor dựng nhiều lớp lồng nhau (toolbar + vùng soạn) và viền nhìn thấy
+   nằm ở lớp nào là chuyện nội bộ của nó, đổi được giữa các bản.
+   Dùng box-shadow vẽ một vòng quanh CẢ khung thay vì đoán xem phải đặt
+   border-color lên lớp nào - cách này không phụ thuộc cấu trúc bên trong. */
+.ck.ck-editor.vf-ai-o--block { box-shadow: 0 0 0 1px var(--vf-ai-chan); border-radius: 2px; }
+.ck.ck-editor.vf-ai-o--fix { box-shadow: 0 0 0 1px var(--vf-ai-sua); border-radius: 2px; }
 
 /* ── Dòng cảnh báo cạnh nút Save (JS chèn) ──────────────────────────── */
 

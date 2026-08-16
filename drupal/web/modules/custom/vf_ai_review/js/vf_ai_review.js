@@ -261,10 +261,39 @@
     if (!o) { return []; }
     // CKEditor giấu textarea gốc và vẽ khung riêng - phải tô đúng khung đó,
     // tô textarea ẩn thì không ai nhìn thấy gì.
+    //
+    // Khung này có thể CHƯA TỒN TẠI lúc behaviors chạy: CKEditor 5 khởi tạo
+    // bất đồng bộ sau khi trang tải. Đó là lý do lần đầu Body không có viền
+    // dù Title thì có (thấy trên ảnh chụp 2026-08-16). `theoDoiCkeditor()`
+    // gọi lại hàm này khi khung xuất hiện.
     var khung = o.parentNode
-      ? o.parentNode.querySelector('.ck-editor__main, .ck.ck-editor')
+      ? o.parentNode.querySelector('.ck.ck-editor')
       : null;
     return khung ? [o, khung] : [o];
+  };
+
+  /**
+   * Tô lại viền khi CKEditor dựng xong khung của nó.
+   *
+   * Một lần duy nhất rồi ngắt: không cần theo dõi mãi, và để observer sống
+   * suốt vòng đời trang là rò rỉ không có lý do.
+   */
+  Bang.prototype.theoDoiCkeditor = function () {
+    var self = this;
+    var win = this.doc.defaultView;
+    if (!win.MutationObserver) { return; }
+    if (this.doc.querySelector('.ck.ck-editor')) { return; }
+
+    var quan_sat = new win.MutationObserver(function () {
+      if (self.doc.querySelector('.ck.ck-editor')) {
+        quan_sat.disconnect();
+        self.vienField();
+      }
+    });
+    quan_sat.observe(this.doc.body, { childList: true, subtree: true });
+    // Lưới an toàn: CKEditor không bao giờ dựng (lỗi JS của nó, hoặc field
+    // dùng text format khác) thì cũng phải ngắt observer.
+    win.setTimeout(function () { quan_sat.disconnect(); }, 10000);
   };
 
   /** Viền ô nhập theo mức nghiêm trọng CAO NHẤT còn hiển thị của field đó. */
@@ -332,6 +361,7 @@
         b.ganCheckbox();
         b.veLai();
 
+        b.theoDoiCkeditor();
         dongBoOffset(b.doc);
         // Toolbar đổi chiều cao khi thu/mở hoặc khi đổi kích thước cửa sổ.
         // Không nghe sự kiện này thì băng lệch chỗ ngay lần đầu người dùng
