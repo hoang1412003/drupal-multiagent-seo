@@ -23,6 +23,17 @@ function kiem(string $ten, bool $dieu_kien, string $chi_tiet = ''): void {
   }
 }
 
+/**
+ * So gia tri THUC voi gia tri MONG, in ca hai khi lech.
+ *
+ * kiem() chi bao dat/truot; voi ham tra ve gia tri thi biet no tra ve CAI GI
+ * moi chan doan duoc, khong phai doc lai code de doan.
+ */
+function check(string $ten, $thuc, $mong): void {
+  kiem($ten, $thuc === $mong,
+    'mong ' . var_export($mong, TRUE) . ', thuc ' . var_export($thuc, TRUE));
+}
+
 $r = new AiReportRenderer();
 
 $bao_cao = [
@@ -134,5 +145,69 @@ kiem('fields co field la -> bo qua',
   $r->fieldNotesHtml(['fields' => ['khong_ton_tai' => [[]]]], 'title') === '');
 kiem('version khac 1 -> co canh bao',
   str_contains($r->overviewHtml(['version' => 2, 'decision' => 'publish'], FALSE), 'phiên bản khác'));
+
+// === THIET KE LAI 2026-08-16 (editor-ui-design.md muc 10) ================
+
+// --- trangThai(): suy trang thai bang sticky -----------------------------
+// Bay trang thai cua ban handoff, CONG state "JSON hong" von da co tu spec
+// muc 6.1 va dang bi test o tren khoa lai. Ban handoff khong biet toi state
+// do; gop no vao "chua cham" se lam loi du lieu bi hieu nham la binh thuong.
+//
+// `dang_cham` KHONG suy o PHP: no den tu vong poll cua vf_ai_trigger.
+
+$co_loi_bt = [
+  'decision' => 'needs_revision',
+  'fields' => ['title' => [['agent' => 'SEO', 'severity' => NULL]]],
+];
+
+kiem('chua cham', $r->trangThai(NULL, FALSE, FALSE) === 'chua_cham');
+kiem('JSON hong KHAC chua cham', $r->trangThai(NULL, FALSE, TRUE) === 'loi_json');
+kiem('co loi', $r->trangThai($co_loi_bt, FALSE, FALSE) === 'co_loi');
+kiem('dat khi khong field nao co loi',
+  $r->trangThai(['decision' => 'publish', 'fields' => []], FALSE, FALSE) === 'dat');
+kiem('thieu agent',
+  $r->trangThai(['fields' => [], 'missing_agents' => ['seo']], FALSE, FALSE) === 'thieu');
+kiem('veto', $r->trangThai(
+  ['fields' => [], 'veto_reason' => 'vi pham'], FALSE, FALSE) === 'veto');
+
+// stale THANG veto: noi dung da doi sau khi cham, nen ket qua cu noi ve mot
+// ban khac. Hien bang "BI TU CHOI" cho noi dung da sua roi la noi sai ve
+// ban dang soan - phai noi "ket qua cua ban cu, cham lai di".
+kiem('stale thang veto',
+  $r->trangThai(['fields' => [], 'veto_reason' => 'vi pham'], TRUE, FALSE) === 'stale');
+kiem('JSON hong thang tat ca', $r->trangThai($co_loi_bt, TRUE, TRUE) === 'loi_json');
+
+// --- mucHienThi(): severity 4 muc -> 3 muc -------------------------------
+// `block` CHI duoc den tu `critical`. Do la rang buoc, khong phai quy uoc:
+// critical dung bang thu kich hoat quyen phu quyet o graph.aggregator_node.
+// Anh xa null -> block se lam dong "Con N loi chan xuat ban" noi doi, vi he
+// thong that KHONG chan vi nhung loi do.
+check('critical -> block', AiReportRenderer::mucHienThi('critical'), 'block');
+check('medium -> fix', AiReportRenderer::mucHienThi('medium'), 'fix');
+check('low -> tip', AiReportRenderer::mucHienThi('low'), 'tip');
+check('NULL -> fix (3 agent ngoai Compliance)',
+  AiReportRenderer::mucHienThi(NULL), 'fix');
+check('gia tri la -> fix, khong vo', AiReportRenderer::mucHienThi('xyz'), 'fix');
+
+// --- demChan(): dem so loi CHAN XUAT BAN ---------------------------------
+$hon_hop = ['fields' => [
+  'title' => [
+    ['agent' => 'Compliance', 'severity' => 'critical'],
+    ['agent' => 'SEO', 'severity' => NULL],
+  ],
+  'body' => [
+    ['agent' => 'Compliance', 'severity' => 'medium'],
+    ['agent' => 'Compliance', 'severity' => 'critical'],
+    ['agent' => 'Brand Voice', 'severity' => NULL],
+  ],
+]];
+check('demChan dem dung so critical tren moi field',
+  $r->demChan($hon_hop), 2);
+check('demChan tren bao cao khong loi', $r->demChan(['fields' => []]), 0);
+check('demChan tren bao cao NULL', $r->demChan(NULL), 0);
+
+// --- demLoi(): tong so van de -------------------------------------------
+check('demLoi dem het moi field', $r->demLoi($hon_hop), 5);
+check('demLoi tren NULL', $r->demLoi(NULL), 0);
 
 exit($failed ? 1 : 0);

@@ -198,4 +198,89 @@ class AiReportRenderer {
     return $ts === FALSE ? $iso : date('d/m/Y H:i', $ts);
   }
 
+  // === THIẾT KẾ LẠI 2026-08-16 (editor-ui-design.md mục 10) ===============
+
+  /**
+   * Trạng thái của băng sticky.
+   *
+   * Bảy trạng thái của bản handoff, CỘNG `loi_json` vốn đã có từ spec mục
+   * 6.1: "chưa chấm" (field trống) khác hẳn "có dữ liệu nhưng đọc không
+   * được". Gộp chung sẽ khiến lỗi dữ liệu bị hiểu nhầm là bình thường.
+   *
+   * `dang_cham` KHÔNG suy ở đây - nó đến từ vòng poll của vf_ai_trigger.
+   *
+   * Thứ tự ưu tiên có chủ đích: `stale` THẮNG `veto`. Nội dung đã đổi sau
+   * khi chấm nghĩa là kết quả cũ nói về một bản khác; hiện băng "BỊ TỪ CHỐI"
+   * cho bản đang soạn là nói sai. Phải nói "kết quả của bản cũ, chấm lại đi".
+   */
+  public function trangThai(?array $report, bool $stale, bool $loiJson): string {
+    if ($loiJson) {
+      return 'loi_json';
+    }
+    if ($report === NULL) {
+      return 'chua_cham';
+    }
+    if ($stale) {
+      return 'stale';
+    }
+    if (!empty($report['veto_reason'])) {
+      return 'veto';
+    }
+    if (!empty($report['missing_agents'])) {
+      return 'thieu';
+    }
+    return $this->demLoi($report) === 0 ? 'dat' : 'co_loi';
+  }
+
+  /**
+   * severity trong báo cáo -> mức hiển thị.
+   *
+   * `block` CHỈ đến từ `critical`. Đây là ràng buộc, không phải quy ước:
+   * `critical` đúng bằng thứ kích hoạt quyền phủ quyết ở
+   * `graph.aggregator_node`. Ánh xạ NULL -> `block` sẽ làm dòng "Còn N lỗi
+   * chặn xuất bản" nói dối, vì hệ thống thật KHÔNG chặn vì những lỗi đó.
+   *
+   * NULL là trường hợp thường gặp chứ không phải ngoại lệ: ba agent ngoài
+   * Compliance cố ý không định nghĩa severity (`graph._issue_to_json`).
+   */
+  public static function mucHienThi(?string $severity): string {
+    return match ($severity) {
+      'critical' => 'block',
+      'low' => 'tip',
+      default => 'fix',
+    };
+  }
+
+  /**
+   * Đếm số vấn đề CHẶN XUẤT BẢN trên toàn báo cáo.
+   */
+  public function demChan(?array $report): int {
+    return $this->demTheo($report, fn($m) => ($m['severity'] ?? NULL) === 'critical');
+  }
+
+  /**
+   * Đếm tổng số vấn đề trên toàn báo cáo.
+   */
+  public function demLoi(?array $report): int {
+    return $this->demTheo($report, fn($m) => TRUE);
+  }
+
+  /**
+   * Duyệt mọi mục của mọi field, đếm những mục thoả điều kiện.
+   */
+  private function demTheo(?array $report, callable $hop_le): int {
+    $tong = 0;
+    foreach (($report['fields'] ?? []) as $ds) {
+      if (!is_array($ds)) {
+        continue;
+      }
+      foreach ($ds as $muc) {
+        if (is_array($muc) && $hop_le($muc)) {
+          $tong++;
+        }
+      }
+    }
+    return $tong;
+  }
+
 }
