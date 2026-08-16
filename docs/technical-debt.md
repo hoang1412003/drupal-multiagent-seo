@@ -622,9 +622,9 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **Code cần cho lượt đo đã xong:** CP4 và N1 đã merge; không còn việc sửa code nào phải chen vào trước E1.
 - ✅ **Preflight E1 bản 4 đã đạt ngày 2026-08-12:** legacy guard từ chối file cũ trước đường trả phí; model/prompt/sample/output target đúng; API key chỉ được xác nhận là có cấu hình, không ghi giá trị secret.
 - ✅ **Test–retest nhãn đã xong 2026-08-15:** đồng thuận 4/4, Kappa = 1,000, đạt ngưỡng ≥ 0,80. **Bắt buộc trích kèm ba giới hạn** ở mục 8.3 — con số 1,000 đứng một mình là nói sai về mức tin cậy của nhãn. Evidence: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md).
-- ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
-- ➡️ **Việc kế tiếp:** chạy E1 (mục 8.1) — cổng chặn duy nhất còn lại là **xác nhận chi phí riêng ~3 USD** của người dùng cho đúng lượt chạy đó. Test–retest đã khoá xong nên không còn ràng buộc "không được xem output E1 trước khi nhãn lượt hai được lưu".
-- ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
+- ✅ **E1 bản 4 đã chạy 2026-08-16 và ĐẠT:** σ `final_score` = **1,60** < 2 (bản 2 là 1,79), tỉ lệ cùng `decision` 92% (bản 2: 88%), chi phí thật **$3,07**. Dự đoán σ compliance giảm đã được xác nhận (4,68 → 4,02). Evidence: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md). Chi tiết và cảnh báo diễn giải ở mục 8.1.
+- ➡️ **Việc kế tiếp:** E5 (mục 8.2), ~$2, cần **xác nhận chi phí riêng**. **Trước khi bắt đầu E5 phải chốt một quyết định thống kê:** E6 dùng **k-fold** hay **tách cứng 20%** (`evaluation-plan.md` mục 4.6). Với 33 mẫu, tách cứng chỉ còn ~7 mẫu để calibrate — tài liệu khuyên cân nhắc k-fold. Chạy E5 trước khi quyết là tự khoá vào một lựa chọn chưa cân nhắc.
+- ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** cổng E1 đã mở nhưng mọi lượt API trả phí vẫn cần người dùng xác nhận riêng; `meta.calibrated` chỉ bật khi E5 hoàn tất và đạt.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
 
@@ -650,7 +650,29 @@ Chỉ chạy lệnh này sau khi người dùng xác nhận riêng chi phí dự
 
 **Nợ Minor không chặn CLI:** helper `ghi_ket_qua(data, path)` hiện gọi `os.makedirs(os.path.dirname(path))`; nếu code khác import trực tiếp helper rồi truyền đúng một filename tương đối như `"e1.json"`, `dirname` rỗng và lệnh tạo thư mục sẽ lỗi. CLI không dính vì luôn chuẩn hoá `--ket-qua` thành đường dẫn tuyệt đối. Khi sửa, chỉ gọi `os.makedirs()` nếu `dirname` khác rỗng và thêm test cho bare filename.
 
-### 8.1. Đo lại E1 — **chặn mọi việc còn lại**, ~$3
+### 8.1. Đo lại E1 — ✅ ĐÃ CHẠY 2026-08-16, **ĐẠT**, $3,07
+
+**σ `final_score` = 1,60 < 2 → ĐẠT. Cổng sang E5 mở.** Báo cáo đầy đủ: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md); số liệu thô: [`evidence/e1_sau_cp4_deadline_guard.json`](evidence/e1_sau_cp4_deadline_guard.json) (mang `_meta.prompt_version = 020738e209017213`).
+
+Truy vết: HEAD `08cebe3`, snapshot đường chấm `04f10e1` (đã xác minh là tổ tiên, diff rỗng với một ngoại lệ `model_pricing.yaml` đã kiểm chứng là ngoài đường chấm), model `claude-haiku-4-5-20251001`, `calibrated: false`, mẫu `G-001..G-010` × 5 lượt.
+
+| Đại lượng | σ tb | Đạt < 2? | Bản 2 → bản 4 |
+|---|---|---|---|
+| `content_quality` | 3,27 | ❌ | 4,38 → 3,27 |
+| `seo` | 0,22 | ✅ | 0,27 → 0,22 |
+| `brand` | 0,89 | ✅ | 1,44 → 0,89 |
+| `compliance` | 4,02 | ❌ | 4,68 → 4,02 |
+| **`final_score`** | **1,60** | ✅ **ĐẠT** | 1,79 → 1,60 |
+
+Tỉ lệ ra cùng `decision`: **92%** (bản 2: 88%).
+
+**Dự đoán về CP4 được xác nhận.** Mục này trước lượt đo đã ghi *"σ compliance nên giảm so với 4,68… không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra"* — thực tế giảm còn 4,02. Đây là bằng chứng độc lập cho chẩn đoán B14/CP4. ⚠️ Nhưng **cả bốn agent đều giảm**, kể cả `seo` vốn không bị CP4 chạm tới, nên không được quy toàn bộ mức giảm cho CP4; chỉ khẳng định được là **giảm, đúng chiều dự đoán**.
+
+**Hai agent vẫn trượt ngưỡng riêng** (`content_quality` 3,27 và `compliance` 4,02) — **không chặn E5**, vì tiêu chí áp cho `final_score`, đại lượng mà E5 quét ngưỡng lên. Đóng góp phương sai: compliance 67%, content_quality 31%, brand 2%, seo 0%.
+
+**Thu được kèm — E4 có provenance đầy đủ:** $0,0614/lượt, 42.331 input token, 3.815 output token, 5,6 lần gọi LLM, 39,3 giây/lượt (4 agent chạy **tuần tự** trong script; pipeline thật chạy song song nên nhanh hơn). Khác số E4 cũ mà mục 8.9 ghi là thiếu provenance.
+
+<details><summary>Lệnh và tiêu chí đã dùng (giữ lại để tái lập)</summary>
 
 ```powershell
 cd multiagent
@@ -658,28 +680,15 @@ $env:HF_HUB_OFFLINE = '1'
 .\.venv\Scripts\python.exe scripts\eval_stability.py --ket-qua e1_sau_cp4_deadline_guard.json  # đọc 8.0 TRƯỚC
 ```
 
-**Preflight đã chạy ngày 2026-08-12, không gọi API và không tạo output:**
+**Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent.
 
-| Kiểm tra | Kết quả |
-|---|---|
-| Legacy guard | `REJECTED_BEFORE_PAID_PATH` |
-| Commit được kiểm | `04f10e1` |
-| Prompt version | `020738e209017213` |
-| Model | `claude-haiku-4-5-20251001` |
-| Cấu hình calibration | `calibrated: false` |
-| Mẫu / số lượt dự kiến | `G-001..G-010` / `10 × 5 = 50` |
-| File đích | `e1_sau_cp4_deadline_guard.json` — **chưa tồn tại** |
-| Chi phí phát sinh trong preflight | **0 USD** |
+**Nếu σ ≥ 2:** dừng, **đừng chốt ngưỡng**. Bước nhảy quét của E5 là 2 điểm; σ lớn hơn bước nhảy thì ngưỡng chọn ra chỉ là nhiễu. Chẩn đoán theo mẫu B14: tìm **lỗi cụ thể**, đừng nhắm vào σ — tiền lệ B5 sửa mò cho kết quả 7,70 → 7,29.
 
-Kết luận preflight chỉ chứng minh lệnh **sẵn sàng chạy an toàn**; nó không phải kết quả E1 và không mở cổng E5. Trước lượt chạy ngày 2026-08-13 vẫn phải xác nhận riêng chi phí dự kiến khoảng 3 USD.
+Preflight ngày 2026-08-12 (không gọi API): legacy guard `REJECTED_BEFORE_PAID_PATH`, commit `04f10e1`, prompt version `020738e209017213`, `calibrated: false`, file đích chưa tồn tại, chi phí 0 USD.
 
-**Vì sao bắt buộc:** σ `final_score` = 1,79 đo trên code cũ. B14 rồi chốt CP4 đã đổi đúng agent có σ cao nhất bảng (compliance 4,68). Ghi `meta.calibrated: true` mà không biết điểm còn ổn định không là đúng thứ khối `meta` sinh ra để chặn.
+⚠️ **Lỗi môi trường đã gặp ở preflight lượt chạy thật:** `.env` có **BOM** ở đầu file nên `python-dotenv` đọc tên biến đầu tiên thành `﻿ANTHROPIC_API_KEY`; `os.environ.get("ANTHROPIC_API_KEY")` trả `None` và E1 sẽ chết ở lần gọi API đầu tiên, sau khi đã nạp BGE-M3. Kiểm bằng `load_dotenv()` rồi đọc biến, **không** bằng `grep` trên file. BOM quay lại được nếu sửa `.env` bằng Notepad hoặc `Out-File`.
 
-**Đạt khi:** σ `final_score` < 2 (`evaluation-plan.md` mục 4.1). Ngưỡng áp cho `final_score`, **không** cho từng agent — vì `final_score` mới là đại lượng E5 quét ngưỡng lên.
-
-**Nếu σ ≥ 2:** dừng, **đừng chốt ngưỡng**. Bước nhảy quét của E5 là 2 điểm; σ lớn hơn bước nhảy thì ngưỡng chọn ra chỉ là nhiễu. Chẩn đoán theo mẫu B14: tìm **lỗi cụ thể**, đừng nhắm vào σ. σ cao là *triệu chứng*, không phải thứ để sửa trực tiếp — tiền lệ B5 sửa mò cho kết quả 7,70 → 7,29.
-
-**Kỳ vọng:** σ compliance nên **giảm** so với 4,68 — CP3 bớt báo động giả thì bớt lật mức giữa các lượt. Giảm là bằng chứng thêm cho B14; không giảm là tín hiệu còn nguồn dao động khác chưa tìm ra.
+</details>
 
 ### 8.2. Đo lại E5 rồi mới chốt ngưỡng — sau 8.1
 

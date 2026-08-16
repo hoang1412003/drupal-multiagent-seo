@@ -167,11 +167,21 @@ Rủi ro đã lường trước và đo được: rubric làm dao động **hi�
 
 **Tiêu chí:** σ < 2 điểm. Ngưỡng này không tùy tiện - `architecture.md` mục 8.2 dự kiến quét ngưỡng theo bước nhảy 2 điểm, nên dao động phải nhỏ hơn bước nhảy thì việc quét mới có nghĩa.
 
-#### Trạng thái bản 4 tại bàn giao 2026-08-12
+#### ✅ Kết quả bản 4 — chạy 2026-08-16, ĐẠT
 
-Preflight đã xác nhận legacy guard chặn file cũ trước đường trả phí, prompt version `020738e209017213`, model `claude-haiku-4-5-20251001`, 10 mẫu `G-001..G-010`, 50 lượt dự kiến và file đích mới `e1_sau_cp4_deadline_guard.json`. Tại thời điểm kiểm, file đích **chưa tồn tại** và không có API trả phí nào được gọi. Vì vậy trạng thái vẫn là **E1 bản 4 chưa chạy**.
+**σ `final_score` = 1,60 < 2.** Đo trên HEAD `08cebe3`, score-path snapshot `04f10e1` (diff rỗng), `prompt_version` `020738e209017213`, model `claude-haiku-4-5-20251001`, `calibrated: false`, mẫu `G-001..G-010` × 5 lượt = 50 lượt, chi phí thật **$3,07**.
 
-Lượt chạy được xếp vào ngày 2026-08-13, sau khi hoàn tất và khóa nhãn test–retest mù. Trước khi chạy vẫn phải có xác nhận riêng cho chi phí khoảng 3 USD. Lệnh và checklist vận hành là `technical-debt.md` mục 8.0–8.3; không sao chép file kết quả cũ sang tên mới và không xem output E1 trước khi người gán chốt nhãn lượt hai.
+| Agent | σ tb | Đạt < 2? |
+|---|---|---|
+| `content_quality` | 3,27 | ❌ |
+| `seo` | 0,22 | ✅ |
+| `brand` | 0,89 | ✅ |
+| `compliance` | 4,02 | ❌ |
+| **`final_score`** | **1,60** | ✅ |
+
+Tỉ lệ ra cùng `decision`: **92%**. Hai agent trượt ngưỡng riêng **không chặn E5** — tiêu chí áp cho `final_score`, đại lượng E5 quét ngưỡng lên. Báo cáo đầy đủ kèm so sánh với bản 2 và cảnh báo diễn giải: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md).
+
+Test–retest nhãn đã hoàn tất và khoá **trước** lượt chạy này (2026-08-15, Kappa 1,000 kèm ba giới hạn — `technical-debt.md` mục 8.3), nên ràng buộc "không xem output E1 trước khi người gán chốt nhãn lượt hai" đã được tuân thủ.
 
 **Biến thể quan trọng - so rubric với cách hiện tại:** ✅ **đã chạy 2026-08-04**, kết quả đầy đủ ở `docs/rubrics.md` mục 9.1 và `docs/evidence/e1_rubric_v2_report.txt`.
 

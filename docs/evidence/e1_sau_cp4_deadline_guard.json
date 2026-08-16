@@ -1,0 +1,725 @@
+{
+  "G-001": [
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 83.3,
+        "compliance": 58.3
+      },
+      "final_score": 77.615,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 41625,
+      "output_tokens": 2806,
+      "giay": 87.2
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 83.3,
+        "compliance": 58.3
+      },
+      "final_score": 77.615,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 41643,
+      "output_tokens": 2919,
+      "giay": 33.3
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 83.3,
+        "compliance": 50.0
+      },
+      "final_score": 75.125,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 41625,
+      "output_tokens": 3000,
+      "giay": 32.7
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 83.3,
+        "compliance": 50.0
+      },
+      "final_score": 75.125,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 41625,
+      "output_tokens": 3115,
+      "giay": 33.8
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 83.3,
+        "compliance": 50.0
+      },
+      "final_score": 75.125,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 41628,
+      "output_tokens": 2576,
+      "giay": 30.7
+    }
+  ],
+  "G-002": [
+    {
+      "diem": {
+        "content_quality": 85.7,
+        "seo": 95.0,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 93.35,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 49255,
+      "output_tokens": 2157,
+      "giay": 24.8
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 95.0,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 91.575,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 49243,
+      "output_tokens": 1942,
+      "giay": 23.5
+    },
+    {
+      "diem": {
+        "content_quality": 85.7,
+        "seo": 95.0,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 93.35,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 49258,
+      "output_tokens": 2133,
+      "giay": 24.7
+    },
+    {
+      "diem": {
+        "content_quality": 85.7,
+        "seo": 95.0,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 93.35,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 49246,
+      "output_tokens": 1843,
+      "giay": 22.6
+    },
+    {
+      "diem": {
+        "content_quality": 85.7,
+        "seo": 95.0,
+        "brand": 91.7,
+        "compliance": 100.0
+      },
+      "final_score": 93.35,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 49246,
+      "output_tokens": 1770,
+      "giay": 21.6
+    }
+  ],
+  "G-003": [
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 78.66,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 51632,
+      "output_tokens": 2519,
+      "giay": 28.4
+    },
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 71.2,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 51617,
+      "output_tokens": 2986,
+      "giay": 33.3
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 78.66,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 51632,
+      "output_tokens": 2356,
+      "giay": 27.5
+    },
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 100.0,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 72.2,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 51617,
+      "output_tokens": 2839,
+      "giay": 30.7
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 78.66,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 51617,
+      "output_tokens": 2617,
+      "giay": 29.7
+    }
+  ],
+  "G-004": [
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 76.21000000000001,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 24433,
+      "output_tokens": 2377,
+      "giay": 27.1
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 79.31,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 24418,
+      "output_tokens": 2581,
+      "giay": 30.3
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 50.0
+      },
+      "final_score": 74.3,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 24430,
+      "output_tokens": 2392,
+      "giay": 27.7
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 66.7
+      },
+      "final_score": 77.76,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 24430,
+      "output_tokens": 2241,
+      "giay": 25.0
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 95.0,
+        "brand": 90.0,
+        "compliance": 66.7
+      },
+      "final_score": 80.26,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 24439,
+      "output_tokens": 2236,
+      "giay": 25.0
+    }
+  ],
+  "G-005": [
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 83.235,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 28967,
+      "output_tokens": 3454,
+      "giay": 35.0
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 81.685,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 28739,
+      "output_tokens": 3041,
+      "giay": 31.0
+    },
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 80.135,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 28733,
+      "output_tokens": 3440,
+      "giay": 32.8
+    },
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 66.7
+      },
+      "final_score": 80.135,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 28967,
+      "output_tokens": 3667,
+      "giay": 37.0
+    },
+    {
+      "diem": {
+        "content_quality": 68.8,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 58.3
+      },
+      "final_score": 77.615,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 28979,
+      "output_tokens": 3778,
+      "giay": 38.3
+    }
+  ],
+  "G-006": [
+    {
+      "diem": {
+        "content_quality": 87.5,
+        "seo": 95.0,
+        "brand": 90.0,
+        "compliance": 41.7
+      },
+      "final_score": 75.885,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 36906,
+      "output_tokens": 6880,
+      "giay": 51.7
+    },
+    {
+      "diem": {
+        "content_quality": 87.5,
+        "seo": 95.0,
+        "brand": 90.0,
+        "compliance": 41.7
+      },
+      "final_score": 75.885,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 36909,
+      "output_tokens": 6715,
+      "giay": 49.5
+    },
+    {
+      "diem": {
+        "content_quality": 93.8,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 41.7
+      },
+      "final_score": 74.96,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 36900,
+      "output_tokens": 6839,
+      "giay": 52.7
+    },
+    {
+      "diem": {
+        "content_quality": 93.8,
+        "seo": 95.0,
+        "brand": 90.0,
+        "compliance": 41.7
+      },
+      "final_score": 77.46,
+      "decision": "rejected",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 36903,
+      "output_tokens": 6695,
+      "giay": 49.7
+    },
+    {
+      "diem": {
+        "content_quality": 93.8,
+        "seo": 95.0,
+        "brand": 90.0,
+        "compliance": 50.0
+      },
+      "final_score": 79.95,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 36900,
+      "output_tokens": 6631,
+      "giay": 48.3
+    }
+  ],
+  "G-007": [
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 58.3
+      },
+      "final_score": 76.78999999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 61528,
+      "output_tokens": 6535,
+      "giay": 58.7
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 58.3
+      },
+      "final_score": 76.78999999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 61513,
+      "output_tokens": 6335,
+      "giay": 55.9
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 58.3
+      },
+      "final_score": 76.78999999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 61522,
+      "output_tokens": 6267,
+      "giay": 53.6
+    },
+    {
+      "diem": {
+        "content_quality": 83.3,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 58.3
+      },
+      "final_score": 77.315,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 61525,
+      "output_tokens": 5491,
+      "giay": 100.4
+    },
+    {
+      "diem": {
+        "content_quality": 81.2,
+        "seo": 95.0,
+        "brand": 80.0,
+        "compliance": 58.3
+      },
+      "final_score": 76.78999999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 61519,
+      "output_tokens": 6000,
+      "giay": 51.1
+    }
+  ],
+  "G-008": [
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 64.3
+      },
+      "final_score": 80.965,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 49765,
+      "output_tokens": 4901,
+      "giay": 48.1
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 64.3
+      },
+      "final_score": 80.965,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 49765,
+      "output_tokens": 5350,
+      "giay": 50.2
+    },
+    {
+      "diem": {
+        "content_quality": 62.5,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 71.4
+      },
+      "final_score": 79.97,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 49777,
+      "output_tokens": 4935,
+      "giay": 48.6
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 64.3
+      },
+      "final_score": 80.965,
+      "decision": "publish",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 48157,
+      "output_tokens": 5482,
+      "giay": 50.0
+    },
+    {
+      "diem": {
+        "content_quality": 75.0,
+        "seo": 100.0,
+        "brand": 91.7,
+        "compliance": 64.3
+      },
+      "final_score": 80.965,
+      "decision": "publish",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 49771,
+      "output_tokens": 6324,
+      "giay": 58.9
+    }
+  ],
+  "G-009": [
+    {
+      "diem": {
+        "content_quality": 56.2,
+        "seo": 90.0,
+        "brand": 83.3,
+        "compliance": 64.3
+      },
+      "final_score": 72.16499999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32319,
+      "output_tokens": 4043,
+      "giay": 42.0
+    },
+    {
+      "diem": {
+        "content_quality": 56.2,
+        "seo": 90.0,
+        "brand": 83.3,
+        "compliance": 64.3
+      },
+      "final_score": 72.16499999999999,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32325,
+      "output_tokens": 4004,
+      "giay": 41.5
+    },
+    {
+      "diem": {
+        "content_quality": 56.2,
+        "seo": 90.0,
+        "brand": 83.3,
+        "compliance": 71.4
+      },
+      "final_score": 74.295,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32325,
+      "output_tokens": 4176,
+      "giay": 42.3
+    },
+    {
+      "diem": {
+        "content_quality": 62.5,
+        "seo": 90.0,
+        "brand": 83.3,
+        "compliance": 71.4
+      },
+      "final_score": 75.87,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32322,
+      "output_tokens": 4097,
+      "giay": 40.6
+    },
+    {
+      "diem": {
+        "content_quality": 62.5,
+        "seo": 90.0,
+        "brand": 83.3,
+        "compliance": 64.3
+      },
+      "final_score": 73.74,
+      "decision": "needs_revision",
+      "so_lan_goi_llm": 6,
+      "input_tokens": 32340,
+      "output_tokens": 3851,
+      "giay": 40.8
+    }
+  ],
+  "G-010": [
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 100.0,
+        "brand": 70.0,
+        "compliance": 50.0
+      },
+      "final_score": 72.15,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47303,
+      "output_tokens": 2521,
+      "giay": 26.9
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 100.0,
+        "brand": 70.0,
+        "compliance": 40.0
+      },
+      "final_score": 69.15,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47303,
+      "output_tokens": 2591,
+      "giay": 29.6
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 100.0,
+        "brand": 70.0,
+        "compliance": 50.0
+      },
+      "final_score": 72.15,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47300,
+      "output_tokens": 2347,
+      "giay": 26.2
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 100.0,
+        "brand": 70.0,
+        "compliance": 50.0
+      },
+      "final_score": 72.15,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47297,
+      "output_tokens": 2378,
+      "giay": 26.1
+    },
+    {
+      "diem": {
+        "content_quality": 78.6,
+        "seo": 100.0,
+        "brand": 70.0,
+        "compliance": 50.0
+      },
+      "final_score": 72.15,
+      "decision": "rejected",
+      "so_lan_goi_llm": 5,
+      "input_tokens": 47288,
+      "output_tokens": 2563,
+      "giay": 27.8
+    }
+  ],
+  "_meta": {
+    "prompt_version": "020738e209017213"
+  }
+}
