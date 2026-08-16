@@ -198,4 +198,237 @@ class AiReportRenderer {
     return $ts === FALSE ? $iso : date('d/m/Y H:i', $ts);
   }
 
+  // === THIẾT KẾ LẠI 2026-08-16 (editor-ui-design.md mục 10) ===============
+
+  /**
+   * Trạng thái của băng sticky.
+   *
+   * Bảy trạng thái của bản handoff, CỘNG `loi_json` vốn đã có từ spec mục
+   * 6.1: "chưa chấm" (field trống) khác hẳn "có dữ liệu nhưng đọc không
+   * được". Gộp chung sẽ khiến lỗi dữ liệu bị hiểu nhầm là bình thường.
+   *
+   * `dang_cham` KHÔNG suy ở đây - nó đến từ vòng poll của vf_ai_trigger.
+   *
+   * Thứ tự ưu tiên có chủ đích: `stale` THẮNG `veto`. Nội dung đã đổi sau
+   * khi chấm nghĩa là kết quả cũ nói về một bản khác; hiện băng "BỊ TỪ CHỐI"
+   * cho bản đang soạn là nói sai. Phải nói "kết quả của bản cũ, chấm lại đi".
+   */
+  public function trangThai(?array $report, bool $stale, bool $loiJson): string {
+    if ($loiJson) {
+      return 'loi_json';
+    }
+    if ($report === NULL) {
+      return 'chua_cham';
+    }
+    if ($stale) {
+      return 'stale';
+    }
+    if (!empty($report['veto_reason'])) {
+      return 'veto';
+    }
+    if (!empty($report['missing_agents'])) {
+      return 'thieu';
+    }
+    return $this->demLoi($report) === 0 ? 'dat' : 'co_loi';
+  }
+
+  /**
+   * severity trong báo cáo -> mức hiển thị.
+   *
+   * `block` CHỈ đến từ `critical`. Đây là ràng buộc, không phải quy ước:
+   * `critical` đúng bằng thứ kích hoạt quyền phủ quyết ở
+   * `graph.aggregator_node`. Ánh xạ NULL -> `block` sẽ làm dòng "Còn N lỗi
+   * chặn xuất bản" nói dối, vì hệ thống thật KHÔNG chặn vì những lỗi đó.
+   *
+   * NULL là trường hợp thường gặp chứ không phải ngoại lệ: ba agent ngoài
+   * Compliance cố ý không định nghĩa severity (`graph._issue_to_json`).
+   */
+  public static function mucHienThi(?string $severity): string {
+    return match ($severity) {
+      'critical' => 'block',
+      'low' => 'tip',
+      default => 'fix',
+    };
+  }
+
+  /**
+   * Đếm số vấn đề CHẶN XUẤT BẢN trên toàn báo cáo.
+   */
+  public function demChan(?array $report): int {
+    return $this->demTheo($report, fn($m) => ($m['severity'] ?? NULL) === 'critical');
+  }
+
+  /**
+   * Đếm tổng số vấn đề trên toàn báo cáo.
+   */
+  public function demLoi(?array $report): int {
+    return $this->demTheo($report, fn($m) => TRUE);
+  }
+
+  /**
+   * Nhãn và màu của từng trạng thái băng.
+   *
+   * Bảy nhãn PHẢI khác nhau: trùng nhãn nghĩa là người duyệt không phân biệt
+   * được "chưa chấm" với "đã chấm và đạt" - hai tình huống đòi hành động
+   * ngược nhau.
+   */
+  private const NHAN_TRANG_THAI = [
+    'co_loi' => 'Cần sửa',
+    'chua_cham' => 'Chưa chấm',
+    'dat' => 'Đạt',
+    'veto' => 'Bị từ chối',
+    'stale' => 'Nội dung đã sửa sau chấm',
+    'thieu' => 'Chấm chưa đầy đủ',
+    'loi_json' => 'Không đọc được báo cáo',
+  ];
+
+  /**
+   * Băng trạng thái sticky ở đầu form.
+   *
+   * `data-vf-ai-band` là điểm móc DUY NHẤT của JS. Đổi tên ở đây mà quên sửa
+   * JS thì tương tác chết âm thầm - băng vẫn hiện, thẻ vẫn hiện, chỉ có
+   * Trước/Sau và bộ lọc là không làm gì. Có test khoá lại.
+   */
+  public function bangHtml(?array $report, string $trang_thai): string {
+    $nhan = self::NHAN_TRANG_THAI[$trang_thai] ?? $trang_thai;
+    $so_loi = $this->demLoi($report);
+    $so_field = count(array_filter($report['fields'] ?? [], 'is_array'));
+
+    $out = '<div class="vf-ai-band vf-ai-band--' . $this->esc($trang_thai) . '"'
+      . ' data-vf-ai-band="' . $this->esc($trang_thai) . '">';
+    $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="'
+      . $this->esc($nhan) . '">' . $this->esc($nhan) . '</span>';
+
+    if ($trang_thai === 'veto') {
+      $out .= '<span class="vf-ai-band__veto">VETO</span>';
+    }
+
+    if ($so_loi > 0) {
+      $out .= '<span class="vf-ai-band__dem"><strong>' . $so_loi
+        . ' vấn đề</strong> trên ' . $so_field . ' trường</span>';
+    }
+
+    // === NULL chứ KHÔNG empty(): điểm 0 là điểm hợp lệ, empty(0) trả TRUE
+    // nên nó sẽ bị giấu đi như thể chưa chấm được.
+    $diem = $report['final_score'] ?? NULL;
+    if ($diem !== NULL) {
+      $out .= '<span class="vf-ai-band__diem">Điểm <strong>'
+        . $this->esc($diem) . '</strong>/100</span>';
+    }
+
+    if (!empty($report['veto_reason'])) {
+      $out .= '<span class="vf-ai-band__ly-do">'
+        . $this->esc($report['veto_reason']) . '</span>';
+    }
+    if (!empty($report['scored_at'])) {
+      $out .= '<span class="vf-ai-band__gio">Chấm lúc '
+        . $this->esc($this->dinhDangGio($report['scored_at'])) . '</span>';
+    }
+
+    return $out . '</div>';
+  }
+
+  /**
+   * Khối tóm tắt cho cột phải - CHỈ những gì băng không có.
+   *
+   * Băng đã hiện đề xuất, điểm, giờ chấm và tổng số vấn đề. Lặp lại chúng ở
+   * cột phải là hai chỗ nói một điều trên cùng một màn hình (đã thấy trên
+   * ảnh chụp thật ngày 2026-08-16). Ở đây chỉ giữ phần **phân rã theo
+   * field**, thứ băng không có chỗ để hiện.
+   *
+   * KHÔNG xoá hẳn khối chứa nó: `vf_ai_trigger` gắn ô trạng thái và nút
+   * "Chấm lại" vào chính `$form['vf_ai_review']`.
+   *
+   * `overviewHtml()` giữ nguyên làm đường lùi, chưa xoá.
+   */
+  public function tomTatHtml(?array $report): string {
+    $fields = array_filter($report['fields'] ?? [], 'is_array');
+    if (!$fields) {
+      return '';
+    }
+    $out = '<div class="vf-ai-review"><p class="vf-ai-count">Phân bố theo trường:</p><ul>';
+    foreach ($fields as $khoa => $ds) {
+      $out .= '<li>' . $this->esc(self::FIELD_LABELS[$khoa] ?? $khoa)
+        . ' (' . count($ds) . ')</li>';
+    }
+    return $out . '</ul></div>';
+  }
+
+  /**
+   * Thẻ lỗi rich của một field.
+   *
+   * Trả chuỗi rỗng nếu field không có vấn đề gì - gọi được cho mọi field mà
+   * không cần người gọi tự kiểm trước.
+   */
+  public function theLoiHtml(?array $report, string $fieldKey): string {
+    $ds = $report['fields'][$fieldKey] ?? NULL;
+    if (!is_array($ds) || $ds === []) {
+      return '';
+    }
+
+    $ten = self::FIELD_LABELS[$fieldKey] ?? $fieldKey;
+    $out = '<div class="vf-ai-hop" data-vf-ai-hop="' . $this->esc($fieldKey) . '">';
+    $out .= '<div class="vf-ai-hop__dau">AI phát hiện <strong>' . count($ds)
+      . '</strong> vấn đề ở ' . $this->esc($ten) . '</div>';
+    $out .= '<div class="vf-ai-hop__the">';
+
+    foreach ($ds as $i => $muc) {
+      if (!is_array($muc)) {
+        continue;
+      }
+      $muc_hien = self::mucHienThi($muc['severity'] ?? NULL);
+      $out .= '<div class="vf-ai-the vf-ai-the--' . $muc_hien . '"'
+        . ' data-vf-ai-issue="' . $this->esc($fieldKey . '-' . $i) . '"'
+        . ' data-sev="' . $muc_hien . '"'
+        . ' data-field="' . $this->esc($fieldKey) . '">';
+
+      $out .= '<div class="vf-ai-the__dau">';
+      $out .= '<span class="vf-ai-the__ma">' . $this->esc($muc['agent'] ?? '') . '</span>';
+      if ($muc_hien === 'block') {
+        $out .= '<span class="vf-ai-the__chan">CHẶN XUẤT BẢN</span>';
+      }
+      $out .= '</div>';
+
+      if (!empty($muc['label'])) {
+        $out .= '<div class="vf-ai-the__tieu-de">' . $this->esc($muc['label']) . '</div>';
+      }
+      if (!empty($muc['message'])) {
+        $out .= '<div class="vf-ai-the__mo-ta">' . $this->esc($muc['message']) . '</div>';
+      }
+      if (!empty($muc['excerpt'])) {
+        $out .= '<blockquote class="vf-ai-the__trich">'
+          . $this->esc($muc['excerpt']) . '</blockquote>';
+      }
+
+      // KHÔNG render checkbox "Đã xử lý" ở đây. Drupal lọc `#markup` qua
+      // Xss::filterAdmin(), mà danh sách thẻ của nó KHÔNG có <input> lẫn
+      // <label> - chúng bị nuốt im lặng (đã kiểm bằng drush php:eval).
+      // `data-*` thì sống sót, nên JS bám được vào thẻ để tự chèn checkbox.
+      //
+      // Việc này còn đúng hơn về progressive enhancement: checkbox không có
+      // JS thì bấm cũng chẳng làm gì, nên để JS tự tạo là đúng chỗ.
+      $out .= '</div>';
+    }
+
+    return $out . '</div></div>';
+  }
+
+  /**
+   * Duyệt mọi mục của mọi field, đếm những mục thoả điều kiện.
+   */
+  private function demTheo(?array $report, callable $hop_le): int {
+    $tong = 0;
+    foreach (($report['fields'] ?? []) as $ds) {
+      if (!is_array($ds)) {
+        continue;
+      }
+      foreach ($ds as $muc) {
+        if (is_array($muc) && $hop_le($muc)) {
+          $tong++;
+        }
+      }
+    }
+    return $tong;
+  }
+
 }

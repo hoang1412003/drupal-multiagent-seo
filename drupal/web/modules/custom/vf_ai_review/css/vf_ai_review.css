@@ -1,14 +1,259 @@
 /* Báo cáo đánh giá AI trong form soạn bài.
-   Màu lấy theo bảng màu Claro (admin theme mặc định của Drupal 10) để không
-   lệch khỏi giao diện quản trị. */
+   Màu/khoảng cách lấy theo token Claro (admin theme mặc định của Drupal 10)
+   như bundle handoff quy định - xem docs/editor-ui-design.md mục 10. */
+
+:root {
+  --vf-ai-chan: #d72222;        /* block  - chặn xuất bản */
+  --vf-ai-chan-nen: #fdeaea;
+  --vf-ai-chan-chu: #a51b1b;
+  --vf-ai-sua: #b7791f;         /* fix    - cần sửa */
+  --vf-ai-sua-nen: #fdf3d6;
+  --vf-ai-sua-chu: #7a5410;
+  --vf-ai-goi-y: #8e929c;       /* tip    - gợi ý */
+  --vf-ai-goi-y-nen: #eceef2;
+  --vf-ai-goi-y-chu: #4a4b50;
+  --vf-ai-dat: #3f7a52;
+  --vf-ai-dat-nen: #e3f3e6;
+  --vf-ai-vien: #dedfe4;
+  --vf-ai-chu: #232429;
+  --vf-ai-chu-phu: #55565b;
+}
+
+/* ── Băng trạng thái sticky ─────────────────────────────────────────── */
+
+.vf-ai-band {
+  position: sticky;
+  /* PHẢI trừ chiều cao thanh admin toolbar, nếu không băng dính ở top:0
+     nhưng nằm SAU LƯNG toolbar và coi như biến mất - đúng lúc người dùng
+     cuộn xuống, tức đúng lúc cần nó nhất.
+     Drupal đặt --drupal-displace-offset-top qua displace.js; giá trị dự
+     phòng 0px cho trường hợp toolbar tắt hoặc người dùng không có quyền. */
+  top: var(--drupal-displace-offset-top, 0px);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 24px;
+  margin-bottom: 18px;
+  background: #fff;
+  border-bottom: 1px solid var(--vf-ai-vien);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+  font-size: 14px;
+  color: var(--vf-ai-chu);
+}
+
+.vf-ai-band__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 11px;
+  border-radius: 13px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.vf-ai-band__badge::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.vf-ai-band--co_loi .vf-ai-band__badge,
+.vf-ai-band--thieu .vf-ai-band__badge {
+  background: var(--vf-ai-chan-nen);
+  color: var(--vf-ai-chan-chu);
+}
+
+.vf-ai-band--veto .vf-ai-band__badge {
+  background: var(--vf-ai-chan);
+  color: #fff;
+}
+
+.vf-ai-band--dat .vf-ai-band__badge {
+  background: var(--vf-ai-dat-nen);
+  color: var(--vf-ai-dat);
+}
+
+.vf-ai-band--chua_cham .vf-ai-band__badge,
+.vf-ai-band--stale .vf-ai-band__badge,
+.vf-ai-band--dang_cham .vf-ai-band__badge {
+  background: var(--vf-ai-goi-y-nen);
+  color: var(--vf-ai-goi-y-chu);
+}
+
+.vf-ai-band--loi_json .vf-ai-band__badge {
+  background: var(--vf-ai-sua-nen);
+  color: var(--vf-ai-sua-chu);
+}
+
+.vf-ai-band__veto {
+  padding: 3px 9px;
+  border-radius: 3px;
+  background: var(--vf-ai-chan);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.vf-ai-band__dem strong { font-size: 15px; }
+.vf-ai-band__dem,
+.vf-ai-band__diem,
+.vf-ai-band__gio,
+.vf-ai-band__ly-do { color: var(--vf-ai-chu-phu); font-size: 13.5px; }
+.vf-ai-band__diem strong { color: var(--vf-ai-chu); font-size: 15px; }
+.vf-ai-band__ly-do { flex-basis: 100%; color: var(--vf-ai-chan-chu); }
+.vf-ai-band__gio { margin-left: auto; }
+
+/* Điều khiển do JS chèn: không có JS thì không có phần tử nào ở đây. */
+.vf-ai-band__dieu-khien { display: flex; align-items: center; gap: 8px; }
+
+.vf-ai-nut {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #919297;
+  border-radius: 2px;
+  background: #fff;
+  color: var(--vf-ai-chu);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.vf-ai-nut:hover { border-color: #0036b1; color: #0036b1; }
+.vf-ai-nut[disabled] { opacity: .45; cursor: default; }
+
+.vf-ai-chip {
+  padding: 4px 10px;
+  border: 1px solid var(--vf-ai-vien);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.vf-ai-chip[aria-pressed="true"] {
+  border-color: #003ecc;
+  background: #003ecc;
+  color: #fff;
+}
+
+/* ── Hộp báo cáo dưới từng field ────────────────────────────────────── */
+
+.vf-ai-hop {
+  margin: 8px 0 22px;
+  border: 1px solid var(--vf-ai-vien);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.vf-ai-hop__dau {
+  padding: 8px 12px;
+  background: #f8f9fc;
+  border-bottom: 1px solid var(--vf-ai-vien);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--vf-ai-chu-phu);
+}
+
+.vf-ai-the {
+  padding: 12px;
+  border-left: 3px solid var(--vf-ai-goi-y);
+  border-bottom: 1px solid #e6e7ed;
+  background: #fff;
+}
+
+.vf-ai-the:last-child { border-bottom: 0; }
+.vf-ai-the--block { border-left-color: var(--vf-ai-chan); background: #fffafa; }
+.vf-ai-the--fix { border-left-color: var(--vf-ai-sua); }
+.vf-ai-the--tip { border-left-color: var(--vf-ai-goi-y); }
+
+.vf-ai-the__dau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* Badge tên agent.
+   KHÔNG dùng font monospace: bundle handoff đặt mono cho MÃ TIÊU CHÍ ngắn
+   ("CP8"), nhưng phương án A chưa có mã đó nên chỗ này đang hiện TÊN AGENT
+   tiếng Việt. Mono làm "Chất Lượng" giãn chữ rời rạc, khó đọc.
+   Đổi lại mono khi nào backend trả `ma` (xem editor-ui-design.md mục 10.1). */
+.vf-ai-the__ma {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+
+.vf-ai-the--block .vf-ai-the__ma { background: var(--vf-ai-chan-nen); color: var(--vf-ai-chan-chu); }
+.vf-ai-the--fix .vf-ai-the__ma { background: var(--vf-ai-sua-nen); color: var(--vf-ai-sua-chu); }
+.vf-ai-the--tip .vf-ai-the__ma { background: var(--vf-ai-goi-y-nen); color: var(--vf-ai-goi-y-chu); }
+
+.vf-ai-the__chan {
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--vf-ai-chan);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.vf-ai-the__tieu-de { font-size: 14.5px; font-weight: 600; }
+.vf-ai-the__mo-ta { margin-top: 3px; font-size: 13.5px; color: var(--vf-ai-chu-phu); }
+
+.vf-ai-the__trich {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-left: 2px solid var(--vf-ai-vien);
+  background: #fafafb;
+  color: #666;
+  font-style: italic;
+  font-size: 13px;
+}
+
+/* Trạng thái do JS đặt */
+.vf-ai-the--xong { opacity: .5; border-left-color: var(--vf-ai-goi-y); }
+.vf-ai-the--dang-chon { outline: 2px solid #003ecc; outline-offset: -2px; }
+.vf-ai-the__xong { display: block; margin-top: 8px; font-size: 12.5px; cursor: pointer; }
+
+/* Trạng thái stale: kết quả nói về một bản nội dung khác, làm mờ để người
+   duyệt không đọc nó như thể đang mô tả bản đang soạn. */
+.vf-ai-band--stale ~ * .vf-ai-hop { opacity: .5; }
+
+/* ── Viền ô nhập theo mức nghiêm trọng cao nhất (JS đặt) ────────────────
+   Class đặt TRỰC TIẾP lên ô nhập, không lên phần tử bao.
+   Bản trước đặt lên tổ tiên rồi chọn con bằng `.vf-ai-field--fix input`,
+   và vì tổ tiên tìm bằng closest() nên nó trúng container chứa MỌI field:
+   Tags và Meta description bị tô viền dù không có lỗi nào. */
+
+.vf-ai-o--block { border-color: var(--vf-ai-chan) !important; }
+.vf-ai-o--fix { border-color: var(--vf-ai-sua) !important; }
+
+/* CKEditor dựng nhiều lớp lồng nhau (toolbar + vùng soạn) và viền nhìn thấy
+   nằm ở lớp nào là chuyện nội bộ của nó, đổi được giữa các bản.
+   Dùng box-shadow vẽ một vòng quanh CẢ khung thay vì đoán xem phải đặt
+   border-color lên lớp nào - cách này không phụ thuộc cấu trúc bên trong. */
+.ck.ck-editor.vf-ai-o--block { box-shadow: 0 0 0 1px var(--vf-ai-chan); border-radius: 2px; }
+.ck.ck-editor.vf-ai-o--fix { box-shadow: 0 0 0 1px var(--vf-ai-sua); border-radius: 2px; }
+
+/* ── Dòng cảnh báo cạnh nút Save (JS chèn) ──────────────────────────── */
+
+.vf-ai-chan-luu { margin: 0 0 8px; font-size: 13.5px; color: var(--vf-ai-chu-phu); }
+.vf-ai-chan-luu strong { color: var(--vf-ai-chan); }
+
+/* ── Khối cũ: giữ nguyên, vẫn dùng ở cột phải ───────────────────────── */
 
 .vf-ai-review { font-size: 0.9em; line-height: 1.5; }
 .vf-ai-review .vf-ai-meta { margin: 0 0 0.75em; }
 .vf-ai-review .vf-ai-meta dt { font-weight: 600; margin-top: 0.4em; }
 .vf-ai-review .vf-ai-meta dd { margin: 0 0 0.2em; }
-/* Danh sách đếm vấn đề theo trường. KHÔNG đặt màu chữ ở đây: màu xanh nhìn
-   thấy khi khối đang mở là trạng thái focus của Drupal, ép màu sẽ đè mất một
-   chỉ dấu hỗ trợ tiếp cận. */
 .vf-ai-review ul { margin: 0.3em 0 0; padding-left: 1.2em; }
 .vf-ai-empty { color: #545560; font-style: italic; }
 
@@ -24,20 +269,3 @@
   background: #f3f4f9; border-left: 4px solid #4d4d4d;
   padding: 0.6em 0.8em; margin-bottom: 0.75em;
 }
-
-/* Chú thích dưới từng field */
-.vf-ai-notes { margin: 0.4em 0 1em; }
-.vf-ai-note {
-  border-left: 3px solid #ccc; padding: 0.4em 0.7em;
-  margin-bottom: 0.4em; background: #fafafa; font-size: 0.9em;
-}
-.vf-ai-note .vf-ai-msg { margin-top: 0.25em; color: #454545; }
-.vf-ai-note blockquote {
-  margin: 0.35em 0 0; padding: 0.3em 0.6em;
-  border-left: 2px solid #ddd; color: #666; font-style: italic;
-}
-
-.vf-ai-sev-critical { border-left-color: #e34f4f; background: #fcf4f2; }
-.vf-ai-sev-medium   { border-left-color: #e5a83b; background: #fdf8ed; }
-.vf-ai-sev-low      { border-left-color: #73b355; background: #f3faef; }
-.vf-ai-sev-none     { border-left-color: #8e929c; }

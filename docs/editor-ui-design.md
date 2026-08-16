@@ -243,7 +243,99 @@ Không thay đổi: kiến trúc 8 node, cơ chế veto, công thức Aggregator
 
 ---
 
-## 10. Nguồn tham khảo
+## 10. Thiết kế lại khối báo cáo (2026-08-16)
+
+Mục 4 mô tả bản P1 đã chạy từ tháng 7. Mục này ghi bản **thiết kế lại** dựa trên bundle handoff `Trang hiển thị lỗi Agent/design_handoff_ai_review_panel/` (bản được chọn: `Phuong-an-1b.dc.html`). Nó **không thay thế** mục 4 — hai nguyên tắc gốc giữ nguyên: module **chỉ đọc**, và **escape mọi giá trị động**.
+
+⚠️ Đây **không** phải "P2" ở mục 3. P2 nghĩa là field formatter/widget riêng, vẫn không cần.
+
+### 10.1. Vì sao làm bây giờ, và vì sao chỉ làm được một phần
+
+Việc này bị hoãn có chủ đích tới khi xong chuỗi đo lường (xong 2026-08-16). Lý do: thiết kế đòi ba thứ backend chưa có, mà hai trong số đó phải sửa `agents/*.py` + `graph.py` — **đúng đường chấm điểm đang khoá**.
+
+**Phạm vi đã chốt: chỉ PHP/JS/CSS, không sửa một dòng Python nào.** Nhờ vậy diff đường chấm vẫn rỗng và E1/E5/E6 còn hiệu lực.
+
+**Ba thứ cắt khỏi bản handoff, kèm lý do:**
+
+| Cắt | Vì sao |
+|---|---|
+| Nút "Sửa thành…" (auto-fix) | `report_json` không có `autoFix`. Bịa dữ liệu để UI đẹp là sai. |
+| Link "Không đồng ý" | Đây là H11 (vòng phản hồi biên tập viên), **chưa triển khai**, cần backend ghi feedback có cấu trúc. |
+| Card "Điểm theo agent" · badge mã tiêu chí (`CP8`) · số revision | Cần `agents/*.py` hoặc `worker.py`. Badge tạm hiện **mã agent** (`CP`/`CQ`/`BV`/`SEO`). |
+
+Tầng PHP viết kiểu **"có dữ liệu thì hiện, không có thì ẩn"**, nên khi nào mở khoá được đường chấm thì chỉ cần bật dữ liệu lên, không phải viết lại giao diện.
+
+### 10.2. Bảy trạng thái — đều suy được từ dữ liệu đã có
+
+| Trạng thái | Suy từ |
+|---|---|
+| `chua_cham` | `report === NULL` |
+| `dang_cham` | `vf_ai_trigger` đã poll sẵn qua `data-vf-ai-status-url` (mục 9) |
+| `stale` | so `content_hash` — module **đã tính rồi** (biến `$stale`, mục 4.4) |
+| `veto` | `veto_reason` khác rỗng |
+| `thieu` | `missing_agents` không rỗng |
+| `dat` | `fields` rỗng |
+| `co_loi` | mặc định |
+
+### 10.3. Ánh xạ severity 4 mức → 3 mức hiển thị
+
+| `report_json` | Hiển thị | Ghi chú |
+|---|---|---|
+| `critical` | `block` (Chặn xuất bản) | |
+| `medium` | `fix` (Cần sửa) | |
+| `low` | `tip` (Gợi ý) | |
+| `null` | `fix` | Ba agent ngoài Compliance không định nghĩa severity (`graph._issue_to_json`) |
+
+**`block` chỉ đến từ `critical` — đây là ràng buộc, không phải quy ước.** `critical` đúng bằng thứ kích hoạt quyền phủ quyết ở `graph.aggregator_node`. Nếu ánh xạ `null` → `block` thì dòng *"Còn N lỗi chặn xuất bản"* sẽ nói dối: hệ thống thật không chặn vì những lỗi đó.
+
+Hệ quả: dòng cạnh nút Save đếm **động** theo số thẻ `block` **đang hiển thị** (sau lọc, sau đánh dấu đã xử lý), không phải đếm tĩnh — nếu không nó sai ngay khi người dùng đổi bộ lọc.
+
+### 10.4. "Đã xử lý" lưu ở `localStorage`, khoá gồm cả content hash
+
+Module **chỉ đọc**, không được ghi vào node — nên không lưu server được.
+
+Khoá: `vf-ai:<nid>:<content_hash>`.
+
+**Vì sao khoá phải có hash:** bài được chấm lại thì hash đổi → toàn bộ dấu cũ **tự hết hiệu lực**. Nếu chỉ khoá theo `nid`, dấu "đã xử lý" của lỗi cũ sẽ dính trên báo cáo mới và người duyệt tưởng đã xử lý rồi — đúng loại lỗi im lặng mà mục 4.4 đã phải xử lý một lần với mốc `changed`.
+
+### 10.5. Cấu trúc và kiểm thử
+
+| File | Việc |
+|---|---|
+| `src/AiReportRenderer.php` | Thêm suy trạng thái, ánh xạ severity, băng sticky, thẻ lỗi rich. **Giữ** `overviewHtml`/`fieldNotesHtml` cũ làm đường lùi |
+| `vf_ai_review.module` | Gắn băng vào đầu form; truyền `nid` + `content_hash` qua `drupalSettings` |
+| `js/vf_ai_review.js` | **Mới** — `Drupal.behaviors`, toàn bộ tương tác |
+| `css/vf_ai_review.css` | Viết lại theo token Claro của handoff |
+| `scripts/test_ai_report_renderer.php` | Mở rộng, **test viết trước** |
+
+Chạy test: `ddev exec php scripts/test_ai_report_renderer.php` (PHP thuần, không cần bootstrap Drupal).
+
+⚠️ **Không có test JS tự động trong dự án.** Phần tương tác phải kiểm tay trên Drupal thật; không được báo "đã verify" nếu chưa mở trình duyệt xem.
+
+**Progressive enhancement:** JS hỏng thì form vẫn dùng bình thường. Băng và thẻ lỗi do PHP render nên vẫn đọc được, chỉ mất tương tác.
+
+**Đường lùi:** `ddev drush pmu vf_ai_review` — mất hiển thị, **không mất dữ liệu** (đã kiểm chứng, mục 5).
+
+### 10.6. Bốn cái bẫy Drupal đã gặp khi dựng — đều IM LẶNG
+
+Cả bốn chỉ lộ ra khi nhìn ảnh chụp trình duyệt thật. Không cái nào bị test PHP bắt, và ba trong bốn cái tôi **chẩn đoán sai ở lần đầu**.
+
+**1. `#markup` nuốt `<input>` và `<label>`.** Drupal lọc `#markup` qua `Xss::filterAdmin()`, mà danh sách thẻ của nó không có hai thẻ này — chúng biến mất không báo gì. `data-*` thì sống sót. Kiểm bằng `ddev drush php:eval` với `Xss::filterAdmin()`.
+→ Checkbox "Đã xử lý" phải do JS chèn. Cũng đúng hơn về progressive enhancement: checkbox không có JS thì bấm cũng chẳng làm gì. Đã có test khoá lại việc PHP **không** được render `<input>`.
+
+**2. Băng sticky nằm sau lưng admin toolbar.** `top: 0` là đúng theo CSS nhưng sai theo thực tế: toolbar che mất. Dùng `var(--drupal-displace-offset-top)` và nghe `drupalViewportOffsetChange`.
+
+**3. Hộp lỗi chèn qua `#suffix` KHÔNG nằm trong wrapper của field.** Dùng `closest('.js-form-wrapper')` để đoán field cha thì nó leo lên container chứa **mọi** field, và viền lan sang cả Tags lẫn Meta description — hai field không có lỗi nào. Đây là lỗi **nói sai sự thật**, không phải lỗi thẩm mỹ.
+→ PHP truyền `VF_AI_REVIEW_FIELD_MAP` sang JS; JS nhắm đúng ô bằng thuộc tính `name`.
+
+**4. `querySelector('[name^="body["]')` trả về textarea SUMMARY, không phải body.** Thứ tự DOM thật là `body[0][summary]` → `body[0][value]` → `body[0][format]`, nên tiền tố khớp cái đầu tiên. Khung CKEditor vì vậy không bao giờ được tô viền.
+→ Nhắm `[name="X[0][value]"]` trước, dự phòng `[name^="X["]` cho `url_alias` (`path[0][alias]`). Khung CKEditor lấy bằng `sourceElement.nextElementSibling`, đúng quan hệ mà `core/modules/ckeditor5/js/ckeditor5.js:637` dùng.
+
+**Bài học chung:** với ba bẫy sau, chẩn đoán đầu tiên đều **hợp lý nhưng sai**. Chỉ khi đi đọc source của core và dump thứ tự DOM thật mới ra đúng nguyên nhân. Không nhìn được DOM thì phải lấy bằng chứng, đừng suy luận tiếp.
+
+---
+
+## 11. Nguồn tham khảo
 
 - `hook_form_alter()` để can thiệp form Drupal, thêm/ẩn/đổi phần tử: [drupal.org - Altering forms](https://www.drupal.org/docs/develop/drupal-apis/form-api/introduction-to-form-api)
 - Đặt phần tử vào cột `advanced` (sidebar) của form soạn node, và thảo luận về việc thay thế `hook_form_node_form_alter()` bằng field layout: [drupal.org issue #3344498](https://www.drupal.org/project/drupal/issues/3344498)

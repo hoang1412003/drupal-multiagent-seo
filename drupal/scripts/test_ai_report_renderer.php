@@ -23,6 +23,17 @@ function kiem(string $ten, bool $dieu_kien, string $chi_tiet = ''): void {
   }
 }
 
+/**
+ * So gia tri THUC voi gia tri MONG, in ca hai khi lech.
+ *
+ * kiem() chi bao dat/truot; voi ham tra ve gia tri thi biet no tra ve CAI GI
+ * moi chan doan duoc, khong phai doc lai code de doan.
+ */
+function check(string $ten, $thuc, $mong): void {
+  kiem($ten, $thuc === $mong,
+    'mong ' . var_export($mong, TRUE) . ', thuc ' . var_export($thuc, TRUE));
+}
+
 $r = new AiReportRenderer();
 
 $bao_cao = [
@@ -134,5 +145,188 @@ kiem('fields co field la -> bo qua',
   $r->fieldNotesHtml(['fields' => ['khong_ton_tai' => [[]]]], 'title') === '');
 kiem('version khac 1 -> co canh bao',
   str_contains($r->overviewHtml(['version' => 2, 'decision' => 'publish'], FALSE), 'phiên bản khác'));
+
+// === THIET KE LAI 2026-08-16 (editor-ui-design.md muc 10) ================
+
+// --- trangThai(): suy trang thai bang sticky -----------------------------
+// Bay trang thai cua ban handoff, CONG state "JSON hong" von da co tu spec
+// muc 6.1 va dang bi test o tren khoa lai. Ban handoff khong biet toi state
+// do; gop no vao "chua cham" se lam loi du lieu bi hieu nham la binh thuong.
+//
+// `dang_cham` KHONG suy o PHP: no den tu vong poll cua vf_ai_trigger.
+
+$co_loi_bt = [
+  'decision' => 'needs_revision',
+  'fields' => ['title' => [['agent' => 'SEO', 'severity' => NULL]]],
+];
+
+kiem('chua cham', $r->trangThai(NULL, FALSE, FALSE) === 'chua_cham');
+kiem('JSON hong KHAC chua cham', $r->trangThai(NULL, FALSE, TRUE) === 'loi_json');
+kiem('co loi', $r->trangThai($co_loi_bt, FALSE, FALSE) === 'co_loi');
+kiem('dat khi khong field nao co loi',
+  $r->trangThai(['decision' => 'publish', 'fields' => []], FALSE, FALSE) === 'dat');
+kiem('thieu agent',
+  $r->trangThai(['fields' => [], 'missing_agents' => ['seo']], FALSE, FALSE) === 'thieu');
+kiem('veto', $r->trangThai(
+  ['fields' => [], 'veto_reason' => 'vi pham'], FALSE, FALSE) === 'veto');
+
+// stale THANG veto: noi dung da doi sau khi cham, nen ket qua cu noi ve mot
+// ban khac. Hien bang "BI TU CHOI" cho noi dung da sua roi la noi sai ve
+// ban dang soan - phai noi "ket qua cua ban cu, cham lai di".
+kiem('stale thang veto',
+  $r->trangThai(['fields' => [], 'veto_reason' => 'vi pham'], TRUE, FALSE) === 'stale');
+kiem('JSON hong thang tat ca', $r->trangThai($co_loi_bt, TRUE, TRUE) === 'loi_json');
+
+// --- mucHienThi(): severity 4 muc -> 3 muc -------------------------------
+// `block` CHI duoc den tu `critical`. Do la rang buoc, khong phai quy uoc:
+// critical dung bang thu kich hoat quyen phu quyet o graph.aggregator_node.
+// Anh xa null -> block se lam dong "Con N loi chan xuat ban" noi doi, vi he
+// thong that KHONG chan vi nhung loi do.
+check('critical -> block', AiReportRenderer::mucHienThi('critical'), 'block');
+check('medium -> fix', AiReportRenderer::mucHienThi('medium'), 'fix');
+check('low -> tip', AiReportRenderer::mucHienThi('low'), 'tip');
+check('NULL -> fix (3 agent ngoai Compliance)',
+  AiReportRenderer::mucHienThi(NULL), 'fix');
+check('gia tri la -> fix, khong vo', AiReportRenderer::mucHienThi('xyz'), 'fix');
+
+// --- demChan(): dem so loi CHAN XUAT BAN ---------------------------------
+$hon_hop = ['fields' => [
+  'title' => [
+    ['agent' => 'Compliance', 'severity' => 'critical'],
+    ['agent' => 'SEO', 'severity' => NULL],
+  ],
+  'body' => [
+    ['agent' => 'Compliance', 'severity' => 'medium'],
+    ['agent' => 'Compliance', 'severity' => 'critical'],
+    ['agent' => 'Brand Voice', 'severity' => NULL],
+  ],
+]];
+check('demChan dem dung so critical tren moi field',
+  $r->demChan($hon_hop), 2);
+check('demChan tren bao cao khong loi', $r->demChan(['fields' => []]), 0);
+check('demChan tren bao cao NULL', $r->demChan(NULL), 0);
+
+// --- demLoi(): tong so van de -------------------------------------------
+check('demLoi dem het moi field', $r->demLoi($hon_hop), 5);
+check('demLoi tren NULL', $r->demLoi(NULL), 0);
+
+// --- bangHtml(): bang sticky --------------------------------------------
+$bao_day = [
+  'decision' => 'needs_revision',
+  'final_score' => 76.5,
+  'scored_at' => '2026-08-16T09:45:17+00:00',
+  'fields' => [
+    'title' => [['agent' => 'Compliance', 'label' => 'CP1 abc',
+                 'severity' => 'critical', 'message' => 'sua di']],
+    'body' => [['agent' => 'SEO', 'label' => 'Do dai', 'severity' => NULL,
+                'message' => 'rut ngan']],
+  ],
+];
+
+$bang = $r->bangHtml($bao_day, 'co_loi');
+kiem('bang co data-vf-ai-band de JS bam vao',
+  str_contains($bang, 'data-vf-ai-band="co_loi"'), $bang);
+kiem('bang dem dung so van de va so truong',
+  str_contains($bang, '2 vấn đề') && str_contains($bang, '2 trường'), $bang);
+kiem('bang co diem tong', str_contains($bang, '76.5'));
+
+// Moi trang thai phai co nhan RIENG. Trung nhan nghia la nguoi duyet khong
+// phan biet duoc "chua cham" voi "da cham va dat".
+$nhan = [];
+foreach (['co_loi', 'chua_cham', 'dat', 'veto', 'stale', 'thieu', 'loi_json'] as $t) {
+  preg_match('/data-vf-ai-nhan="([^"]*)"/', $r->bangHtml($bao_day, $t), $m);
+  $nhan[$t] = $m[1] ?? '';
+}
+kiem('bay trang thai co bay nhan khac nhau',
+  count(array_unique($nhan)) === 7, json_encode($nhan, JSON_UNESCAPED_UNICODE));
+kiem('trang thai veto co badge VETO',
+  str_contains($r->bangHtml($bao_day, 'veto'), 'VETO'));
+
+// --- theLoiHtml(): the loi rich, kem data-* cho JS ----------------------
+// JS bam vao data-vf-ai-issue / data-sev / data-field. Doi ten o PHP ma
+// quen sua JS thi tuong tac chet AM THAM: bang van hien, the van hien, chi
+// co nut Truoc/Sau va bo loc la khong lam gi ca. Khoa lai o day.
+$the = $r->theLoiHtml($bao_day, 'title');
+kiem('the co data-vf-ai-issue', str_contains($the, 'data-vf-ai-issue'));
+kiem('the co data-sev="block" cho critical',
+  str_contains($the, 'data-sev="block"'), $the);
+kiem('the co data-field="title"', str_contains($the, 'data-field="title"'));
+kiem('the co badge CHAN XUAT BAN cho block',
+  str_contains($the, 'CHẶN XUẤT BẢN'));
+
+$the_seo = $r->theLoiHtml($bao_day, 'body');
+kiem('severity NULL -> data-sev="fix", KHONG phai block',
+  str_contains($the_seo, 'data-sev="fix"') && !str_contains($the_seo, 'data-sev="block"'),
+  $the_seo);
+kiem('the cua agent thuong KHONG co badge chan xuat ban',
+  !str_contains($the_seo, 'CHẶN XUẤT BẢN'));
+
+kiem('field khong co loi -> chuoi rong', $r->theLoiHtml($bao_day, 'summary') === '');
+
+// Drupal loc `#markup` qua Xss::filterAdmin(), ma danh sach the cua no
+// KHONG co <input> lan <label> - chung bi nuot IM LANG. `data-*` thi song
+// sot. Da kiem bang drush php:eval 2026-08-16.
+//
+// Nen checkbox "Da xu ly" phai do JS tu chen. Test nay khoa lai de lan sau
+// ai them <input> vao PHP thi vo ngay o day, thay vi ngoi do tai sao
+// checkbox khong hien tren trang.
+kiem('PHP KHONG render <input> (Drupal se nuot)',
+  !str_contains($the, '<input'), $the);
+
+// --- tomTatHtml(): khoi cot phai, KHONG lap lai bang --------------------
+// Bang da hien de xuat/diem/gio cham/tong so van de. Khoi cot phai lap lai
+// y het la hai cho noi mot dieu tren cung mot man hinh - da thay tren anh
+// chup that. Khoi nay chi con giu thu bang KHONG co: phan ra theo field.
+//
+// KHONG xoa han duoc khoi nay: vf_ai_trigger gan o trang thai va nut
+// "Cham lai" vao chinh $form['vf_ai_review'].
+$tom = $r->tomTatHtml($bao_day);
+kiem('tom tat co phan ra theo field',
+  str_contains($tom, 'Tiêu đề') && str_contains($tom, 'Nội dung'), $tom);
+kiem('tom tat KHONG lap lai diem tong', !str_contains($tom, '76.5'), $tom);
+kiem('tom tat KHONG lap lai gio cham', !str_contains($tom, '2026'), $tom);
+kiem('tom tat tren bao cao NULL -> chuoi rong', $r->tomTatHtml(NULL) === '');
+kiem('tom tat khi khong co loi -> chuoi rong',
+  $r->tomTatHtml(['fields' => []]) === '');
+
+// --- XSS tren markup MOI (bat buoc, prompt-injection.md M4) -------------
+// Bao cao chua trich dan nguyen van bai viet va van ban do LLM sinh. Markup
+// moi phai escape y het markup cu - them giao dien khong duoc mo lai lo hong
+// da vá.
+$xss_moi = [
+  'decision' => '<script>alert(1)</script>',
+  'final_score' => 50,
+  'fields' => ['title' => [[
+    'agent' => '<img src=x onerror=alert(1)>',
+    'label' => '"><script>alert(2)</script>',
+    'message' => '<b>dam</b>',
+    'excerpt' => '"><svg onload=alert(3)>',
+    'severity' => 'critical',
+  ]]],
+];
+$h_bang = $r->bangHtml($xss_moi, 'co_loi');
+$h_the = $r->theLoiHtml($xss_moi, 'title');
+kiem('XSS bang: khong con <script>', !str_contains($h_bang, '<script>'), $h_bang);
+kiem('XSS the: khong con <script>', !str_contains($h_the, '<script>'), $h_the);
+kiem('XSS the: khong con <img', !str_contains($h_the, '<img'), $h_the);
+kiem('XSS the: khong con <svg', !str_contains($h_the, '<svg'), $h_the);
+kiem('XSS the: noi dung van hien duoi dang chu',
+  str_contains($h_the, '&lt;script&gt;'), $h_the);
+
+// Payload DI VAO THUOC TINH, khong phai vao text node. Day moi la cho dang
+// lo cua markup moi: ban cu chi do gia tri vao text, ban nay do `fieldKey`
+// vao data-field/data-vf-ai-hop. Ma khoa field den tu `report_json.fields`,
+// tuc tu output cua agent - khong duoc coi la dang tin.
+$xss_attr = ['fields' => ['x" onmouseover="alert(1)' => [
+  ['agent' => 'SEO', 'label' => 'abc', 'severity' => NULL],
+]]];
+$h_attr = $r->theLoiHtml($xss_attr, 'x" onmouseover="alert(1)');
+kiem('XSS thuoc tinh: dau nhay kep bi escape, khong thoat ra duoc',
+  !str_contains($h_attr, '" onmouseover='), $h_attr);
+kiem('XSS thuoc tinh: van render duoc, khong vo', $h_attr !== '');
+
+$h_band_attr = $r->bangHtml($bao_day, 'x" onmouseover="alert(1)');
+kiem('XSS thuoc tinh tren bang: dau nhay kep bi escape',
+  !str_contains($h_band_attr, '" onmouseover='), $h_band_attr);
 
 exit($failed ? 1 : 0);

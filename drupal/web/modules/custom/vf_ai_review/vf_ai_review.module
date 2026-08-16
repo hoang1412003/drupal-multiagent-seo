@@ -96,15 +96,30 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
     '#weight' => -10,
     'noi_dung' => [
       // Chuỗi này đã được AiReportRenderer escape toàn bộ phần động.
-      '#markup' => $renderer->overviewHtml($report, $stale, $loi_json),
+      //
+      // CHỈ phần băng không có (phân rã theo field). Băng ở đầu form đã hiện
+      // đề xuất/điểm/giờ chấm/tổng số vấn đề rồi; lặp lại ở đây là hai chỗ
+      // nói một điều trên cùng màn hình. `overviewHtml()` vẫn còn làm đường
+      // lùi nếu cần quay lại bản cũ.
+      '#markup' => $renderer->tomTatHtml($report),
     ],
+  ];
+
+  // Băng trạng thái sticky ở ĐẦU form (editor-ui-design.md mục 10).
+  // '#weight' rất âm để nó nằm trên mọi field; nó phải luôn nhìn thấy được
+  // khi cuộn, nếu không thì nút Trước/Sau và dòng đếm lỗi chặn xuất bản
+  // trôi mất khỏi màn hình đúng lúc người dùng đang cần.
+  $trang_thai = $renderer->trangThai($report, $stale, $loi_json);
+  $form['vf_ai_band'] = [
+    '#markup' => $renderer->bangHtml($report, $trang_thai),
+    '#weight' => -999,
   ];
 
   // Gom chú thích theo widget đích TRƯỚC, vì body và summary cùng trỏ về
   // widget 'body' - gắn thẳng thì cái sau đè mất cái trước.
   $theo_widget = [];
   foreach (VF_AI_REVIEW_FIELD_MAP as $khoa_bao_cao => $ten_form) {
-    $html = $renderer->fieldNotesHtml($report, $khoa_bao_cao);
+    $html = $renderer->theLoiHtml($report, $khoa_bao_cao);
     if ($html !== '') {
       $theo_widget[$ten_form] = ($theo_widget[$ten_form] ?? '') . $html;
     }
@@ -116,6 +131,24 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
     }
   }
 
+  // Khoá localStorage cho dấu "đã xử lý" (mục 10.4). PHẢI gồm content_hash:
+  // bài được chấm lại thì hash đổi -> dấu cũ tự hết hiệu lực. Chỉ khoá theo
+  // nid thì dấu của lỗi CŨ dính trên báo cáo MỚI và người duyệt tưởng đã
+  // xử lý rồi - đúng loại lỗi im lặng mà mục 4.4 đã phải xử lý một lần.
+  $form['#attached']['drupalSettings']['vfAiReview'] = [
+    'nid' => (string) ($node->id() ?? 'moi'),
+    'hash' => (string) ($report['content_hash'] ?? ''),
+    'trangThai' => $trang_thai,
+    // Khoá field trong báo cáo -> tên phần tử form, để JS tô viền ĐÚNG ô
+    // nhập của field đó.
+    //
+    // Vì sao phải truyền map thay vì để JS tự đoán bằng closest(): hộp lỗi
+    // được chèn qua '#suffix' nên nó KHÔNG nằm trong wrapper của field.
+    // closest('.js-form-wrapper') leo lên tận container chứa MỌI field, và
+    // viền lan sang cả Tags lẫn Meta description - hai field không có lỗi
+    // nào. Đã thấy trên ảnh chụp thật 2026-08-16.
+    'fieldMap' => VF_AI_REVIEW_FIELD_MAP,
+  ];
   $form['#attached']['library'][] = 'vf_ai_review/report';
 }
 
