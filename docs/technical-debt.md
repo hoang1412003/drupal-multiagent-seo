@@ -552,7 +552,7 @@ So với `claim_thoi_gian_sac()` (CP6) ngay bên dưới, vốn **có** kiểm �
 |---|---|---|
 | **E1** | Độ ổn định điểm qua nhiều lần chấm | ✅ **đạt, đo lại 2026-08-11** sau khi cả 4 agent dùng rubric + thêm VF e34 vào KB: σ `final_score` = **1,79** < 2. ⚠️ Nhưng tỉ lệ giữ nguyên quyết định tụt **100% → 88%**, và σ riêng của `content_quality` (4,38) với `compliance` (4,68) chưa đạt. Chẩn đoán ban đầu — *"8/10 bài có điểm Compliance sát ngưỡng veto 50, ngưỡng đặt sai chỗ chứ agent không hỏng"* — **E5 chứng minh là SAI một nửa**: ngưỡng đúng là đặt sai chỗ, nhưng agent **cũng** hỏng thật (B14, CP3 báo động giả 8/9). ⚠️ **Số 1,79 nay đã hết hiệu lực** — code chấm điểm đổi sau khi sửa B14, phải đo lại. Chi tiết: `evaluation-plan.md` mục 4.1 |
 | **E2** | Retrieval lấy đúng đoạn (recall@k) | ✅ fact-check 1.00; brand 78,3% vs mốc 21,7% |
-| **E3** | Multi-agent có hơn single-agent không | ❌ chưa — cần gold set |
+| **E3** | Multi-agent có hơn single-agent không | ✅ **đã chạy 2026-08-16, 4 agent THẮNG**: Kappa CV 0,406 so với 0,302; baseline sai thêm 4 bài và không thắng bài nào. Cái giá: +63% chi phí. Chi tiết mục 8.7 |
 | **E4** | Chi phí và độ trễ mỗi bài | ✅ **đo rồi** (2026-08-04) — TB **$0,057**/bài (~37,9k token vào), dải theo bài **$0,033–0,089** |
 | **E5** | Ngưỡng quyết định tối ưu (calibration) | ⚠️ **đã chạy 2 lần trên bản 3 (2026-08-11), nay hết hiệu lực với bản 4.** Lần 1 Kappa 0,264 → phát hiện B14; lần 2 Kappa **0,713**, accuracy 0,879, sai 4/33 → để lại P-006a/G-008 và dẫn tới chốt CP4. Bản 4 chưa chạy E5; `meta.calibrated` vẫn `false`. Chi tiết: `evaluation-plan.md` mục 4.5 và mục 8.4 dưới đây |
 | **E6** | Held-out test | ❌ chưa — sau E5 |
@@ -664,7 +664,8 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **Functional-clean đã chạy 2026-08-16 ($0,24): `publish_rate` 10/10, 0 bài chặn oan, 22 issue.** Và nó **giải thích luôn kết quả E5**: `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có B8, tức **bộ phát hiện chạy đúng**. Lệch là do **cách gộp**: người dùng quy tắc dừng sớm (một mã B là đủ loại khỏi publish), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm `final_score`. Chi tiết: mục 8.6 và [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md).
 - 🔴 **CẦN MENTOR QUYẾT — không phải việc sửa ngay:** có thêm cổng *"bất kỳ tiêu chí mức 0 → trần `needs_revision`"* để khớp quy tắc người gán nhãn không? Đó là đổi `graph.aggregator_node`, tức **đường chấm điểm**, sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Ba lựa chọn kèm cái giá ở mục 8.6.
 - ✅ **Chẩn đoán P-006a xong 2026-08-16 ($0,044).** Chốt thời hạn của CP4 **chạy đúng**; cờ `critical` đến từ vế *điều kiện áp dụng* do LLM chấm. Mục 8.4 đã được chỉnh phát biểu. Cùng lúc phát hiện **B15: CP5 khớp mọi con số có `km` không kiểm ngữ cảnh** — lần thứ tư của bẫy B14, và B14 chỉ sửa CP3. Chưa sửa vì nằm trong đường chấm điểm.
-- ➡️ **Việc kế tiếp (kỹ thuật):** E3 baseline single-agent (~$2, mục 8.7) — phép đo cuối còn thiếu.
+- ✅ **E3 đã chạy 2026-08-16 ($1,15): kiến trúc 4 agent THẮNG.** Kappa CV **0,406** so với **0,302** của baseline gộp một lượt gọi; tập bài sai của baseline là **tập cha** của tập bài sai hệ 4 agent (sai thêm 4 bài, không thắng bài nào). Cái giá: +63% chi phí. Chi tiết mục 8.7, evidence [`evidence/e3_baseline_single_report.md`](evidence/e3_baseline_single_report.md).
+- 🏁 **CẢ SÁU PHÉP ĐO ĐÃ CHẠY XONG.** E1 ✅ đạt · E2 ✅ · E3 ✅ · E4 ✅ (thu kèm E1, có provenance) · E5 ✅ đo xong nhưng ⛔ không chốt được ngưỡng · E6 ✅. Việc còn lại **không còn là đo** mà là **hai quyết định thiết kế cần mentor** (xem hai gạch đầu dòng 🔴 ở trên) và các nợ kỹ thuật B15/CP5.
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
@@ -874,9 +875,25 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 
 ⚠️ **Đúng thao tác "sửa bài cho sạch" mà mục 6 đã BÁC BỎ với gold set.** Hợp lệ ở đây **chỉ vì** bộ chức năng có mục đích khác: nó kiểm *cơ chế*, không đo *mức đồng thuận*, không tham gia calibration, không tính Kappa. **Tuyệt đối không** thêm bài này vào `labels.csv`.
 
-### 8.7. E3 và E6 — sau 8.1 và 8.3
+### 8.7. E3 và E6 — ✅ CẢ HAI ĐÃ CHẠY 2026-08-16
 
-`evaluation-plan.md` mục 4.3 và 4.6. E3 so multi-agent với single-agent; E6 held-out test. Cả hai cần ngưỡng đã chốt và trần Kappa.
+**E6** đã chạy cùng E5 bằng k-fold theo thiết kế đăng ký trước — xem mục 8.2.
+
+**E3 — kiến trúc 4 agent THẮNG, $1,15.** Báo cáo: [`evidence/e3_baseline_single_report.md`](evidence/e3_baseline_single_report.md). Code: `scripts/eval_baseline_single.py` (16 test, viết trước).
+
+| Chế độ ngưỡng | 4 agent | baseline 1 gọi |
+|---|---|---|
+| Ngưỡng đang chạy | **0,369** | 0,270 |
+| Ngưỡng tốt nhất của chính mỗi hệ | **0,406** | 0,302 |
+| k-fold CV | **0,406** | 0,302 |
+
+**Kết quả mạnh hơn con số:** tập bài sai của baseline là **tập cha** của tập bài sai hệ 4 agent — baseline sai thêm **4 bài** (`G-007`, `P-007b`, `P-009a`, `P-010a`, ba trong đó là mẫu perturbation có lỗi chèn có chủ đích) và **không thắng ở bài nào**.
+
+**Cơ chế đọc được:** baseline chấm rộng tay hơn ở đúng hai agent do LLM chi phối (CQ +2,1; Compliance +2,7) và gần như không đổi ở hai agent chủ yếu do máy đo (SEO −0,3; Brand −0,2); nó gắn `critical` cho 8 bài trong khi thực tế có 10. Nhét 16 tiêu chí thuộc 4 lĩnh vực vào một lời gọi làm LLM **tìm ra ít lỗi hơn**. Đây là **bằng chứng đo được cho luận điểm chuyên biệt hoá** mà `architecture.md` mục 4.3 trước đây chỉ trích dẫn nghiên cứu ngoài.
+
+**Cái giá:** hệ 4 agent tốn **+63% chi phí** ($0,0567 so với $0,0348/bài) và **5,6 so với 2,6** lượt gọi LLM/bài.
+
+⚠️ **Ba chỗ dễ trích sai:** (1) baseline là **2,6** lượt gọi/bài chứ không phải 1 — CP3 tra KB nên không gộp được; (2) độ trễ 26,9s so với 34,8s đo trên script chạy **tuần tự**, mà production fan-out 4 agent **song song** nên rất có thể hệ 4 agent **nhanh hơn** thật — chưa đo trên pipeline thật; (3) không có σ cho chính chênh lệch 0,104 vì chỉ chạy một lượt.
 
 ### 8.8. Chốt kiểm tra miễn phí trước lượt chạy production tiếp theo — ✅ ĐÃ XONG (2026-08-12)
 
