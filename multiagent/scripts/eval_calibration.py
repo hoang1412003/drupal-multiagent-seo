@@ -78,27 +78,41 @@ def doc_bai(sid: str) -> dict:
     }
 
 
-def cham_mot_bai(fields: dict) -> dict:
+def cham_mot_bai(fields: dict, *, giu_chi_tiet: bool = False) -> dict:
     """4 agent -> diem + co flag critical khong.
 
     Luu ca `co_critical` vi quyet dinh phu thuoc no doc lap voi diem - khong
     luu thi pha 2 khong tai lap duoc quyen phu quyet.
+
+    `giu_chi_tiet=True` luu them ket qua day du cua tung agent (issues/flags).
+    Mac dinh TAT de khong doi hinh dang file ket qua E5 da co.
+
+    Vi sao co tuy chon nay: ban chi luu `co_critical` dang boolean da tra gia
+    that - khi P-006a bi gan critical o E5 ban 4, KHONG truy duoc flag nao
+    sinh ra no ma khong cham lai bai do. Bo functional-clean con phai DEM
+    issue de tinh `false_positive_issues` nen bat buoc phai giu.
     """
     ai_core.USAGE_LOG.clear()
-    diem, co_critical = {}, False
-    for ten, ham in (("content_quality", content_quality.run), ("seo", seo.run),
-                     ("brand", brand_voice.run), ("compliance", compliance.run)):
+    diem, co_critical, chi_tiet = {}, False, {}
+    for ten, lay_ham in (("content_quality", lambda: content_quality.run),
+                         ("seo", lambda: seo.run),
+                         ("brand", lambda: brand_voice.run),
+                         ("compliance", lambda: compliance.run)):
         try:
-            r = ham(fields)
+            r = lay_ham()(fields)
         except Exception as e:
             print(f"      !! {ten}: {type(e).__name__}: {str(e)[:60]}")
             r = None
         diem[ten] = r["score"] if r else None
+        chi_tiet[ten] = r
         if ten == "compliance" and r:
             co_critical = any(f.get("severity") == "critical"
                               for f in r.get("flags", []))
-    return {"diem": diem, "co_critical": co_critical,
-            "usage": list(ai_core.USAGE_LOG)}
+    ra = {"diem": diem, "co_critical": co_critical,
+          "usage": list(ai_core.USAGE_LOG)}
+    if giu_chi_tiet:
+        ra["chi_tiet"] = chi_tiet
+    return ra
 
 
 def nap_ket_qua(path: str) -> dict:

@@ -28,6 +28,7 @@
     "test_evaluation_datasets.py",
     "test_extract_gold_sample.py",
     "test_fact_check.py",
+    "test_functional_clean.py",
     "test_graph_truyen_khoa.py",
     "test_image_alt.py",
     "test_kb_build.py",

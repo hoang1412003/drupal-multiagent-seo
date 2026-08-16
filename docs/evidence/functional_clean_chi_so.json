@@ -1,0 +1,33 @@
+{
+ "so_bai": 10,
+ "publish_rate": 1.0,
+ "false_positive_articles": 0,
+ "false_positive_issues": 22,
+ "phan_bo": {
+  "publish": 10
+ },
+ "du_doan": {
+  "C-001": "publish",
+  "C-002": "publish",
+  "C-003": "publish",
+  "C-004": "publish",
+  "C-005": "publish",
+  "C-006": "publish",
+  "C-007": "publish",
+  "C-008": "publish",
+  "C-009": "publish",
+  "C-010": "publish"
+ },
+ "loi_theo_bai": {
+  "C-001": 2,
+  "C-002": 3,
+  "C-003": 1,
+  "C-004": 3,
+  "C-005": 3,
+  "C-006": 3,
+  "C-007": 2,
+  "C-008": 1,
+  "C-009": 2,
+  "C-010": 2
+ }
+}

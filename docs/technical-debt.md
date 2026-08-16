@@ -625,7 +625,9 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **E1 bản 4 đã chạy 2026-08-16 và ĐẠT:** σ `final_score` = **1,60** < 2 (bản 2 là 1,79), tỉ lệ cùng `decision` 92% (bản 2: 88%), chi phí thật **$3,07**. Dự đoán σ compliance giảm đã được xác nhận (4,68 → 4,02). Evidence: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md). Chi tiết và cảnh báo diễn giải ở mục 8.1.
 - ✅ **Thiết kế E6 đã chốt và đăng ký trước (2026-08-16): k-fold**, không tách cứng — 5 fold, chia theo nhóm `source_url` (33 mẫu chỉ từ 30 nguồn), phân tầng theo nhãn, seed `20260816`, kèm quy tắc phá hoà cố định trước. Đầy đủ căn cứ và thiết kế: [`evaluation-plan.md` mục 4.6.1](evaluation-plan.md). Commit của quyết định này **phải là tổ tiên** của commit chứa kết quả E5.
 - ✅ **E5 + E6 đã chạy 2026-08-16 ($1,87) — nhưng ⛔ KHÔNG chốt được ngưỡng.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. Selection bias +0,000. Nguyên nhân: `publish_min=80` làm 27% bài bị đề xuất đăng sai, mà gold set không có mẫu `publish` nào để chọn giá trị đúng. Chi tiết bốn phát hiện: mục 8.2. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
-- ➡️ **Việc kế tiếp:** chạy **functional-clean 10 mẫu** (~$0,6, mục 8.6) — bộ **duy nhất** có mẫu kỳ vọng `publish`, và là thứ duy nhất trả lời được câu hỏi mà gold set không trả lời nổi. Rồi chẩn đoán `critical` của P-006a (~$0,06, mục 8.4 chưa đóng hoàn toàn), rồi E3 (~$2, mục 8.7).
+- ✅ **Functional-clean đã chạy 2026-08-16 ($0,24): `publish_rate` 10/10, 0 bài chặn oan, 22 issue.** Và nó **giải thích luôn kết quả E5**: `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có B8, tức **bộ phát hiện chạy đúng**. Lệch là do **cách gộp**: người dùng quy tắc dừng sớm (một mã B là đủ loại khỏi publish), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm `final_score`. Chi tiết: mục 8.6 và [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md).
+- 🔴 **CẦN MENTOR QUYẾT — không phải việc sửa ngay:** có thêm cổng *"bất kỳ tiêu chí mức 0 → trần `needs_revision`"* để khớp quy tắc người gán nhãn không? Đó là đổi `graph.aggregator_node`, tức **đường chấm điểm**, sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Ba lựa chọn kèm cái giá ở mục 8.6.
+- ➡️ **Việc kế tiếp (kỹ thuật):** chẩn đoán `critical` của P-006a (~$0,06, mục 8.4 chưa đóng hoàn toàn — nay `cham_mot_bai(giu_chi_tiet=True)` giữ được flag), rồi E3 (~$2, mục 8.7).
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
@@ -783,6 +785,8 @@ Regex nhận ngày cụ thể, khoảng ngày, tháng kết thúc, thời lượ
 
 **Hệ quả đo lường:** prompt version hiện hành là `020738e209017213`; E1 và E5 bản 3 đều hết hiệu lực, phải đo lại vào file mới.
 
+⚠️ **Cập nhật 2026-08-16 — mục này CHƯA đóng hoàn toàn.** E5 bản 4 cho thấy **G-008 đã sửa được** (`rejected` → `needs_revision`, đúng như thiết kế nhắm tới), nhưng **P-006a vẫn bị gắn `critical`**. File kết quả E5 chỉ lưu `co_critical` dạng boolean nên không truy được flag nào sinh ra nó. **Chưa kết luận CP4 hỏng** — cờ có thể đến từ CP1/CP2/CP3/CP9. Chẩn đoán cần chấm lại riêng P-006a với `cham_mot_bai(giu_chi_tiet=True)`, ~$0,06. Từ 2026-08-16 hàm đó đã giữ được flag nên lần sau không mất dữ liệu chẩn đoán nữa.
+
 ### 8.5. Chẩn đoán G-008 — ✅ ĐÃ XONG, $0
 
 File E5 cũ chứng minh G-008 có `co_critical: true`; bước chẩn đoán focused được ghi trong spec CP4 xác định cờ đó đến từ CP4 báo thiếu thời hạn. Nội dung thật có cả khoảng ngày lân cận và thời lượng “trong vòng 3 tháng kể từ thời điểm kích hoạt HĐTP”, nên đây cùng nguyên nhân với P-006a, không phải một lỗi độc lập.
@@ -799,7 +803,25 @@ Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa
 
 Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
 
-**Trạng thái: đã dựng 10 mẫu, chưa chạy pipeline.** Manifest nằm tại `docs/functional-tests/clean_labels.csv`; cần chạy pipeline rồi báo cáo riêng `publish_rate`, `false_positive_articles` và `false_positive_issues` để chứng minh hệ thống có đường ra `publish` mà không làm sai phép calibration.
+**Trạng thái: ✅ ĐÃ CHẠY 2026-08-16, $0,24.** Báo cáo đầy đủ: [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md). Runner: `scripts/eval_functional_clean.py` (14 test, viết trước).
+
+| Chỉ số | Giá trị |
+|---|---|
+| `publish_rate` | **1,000 (10/10)** |
+| `false_positive_articles` | **0** |
+| `false_positive_issues` | **22** |
+
+**Đã trả lời được "phản biện mạnh nhất" ở mục 6:** hệ thống **không** báo lỗi giả ở mức quyết định trên bài sạch. Đường ra `publish` hoạt động, ngưỡng 80 không chặn oan.
+
+22 issue tập trung ở SEO (17), trong đó **9 là SEO7 — tiêu chí người gán nhãn không hề đánh giá** (không mã A/B nào ánh xạ tới độ dài bài). Không phải báo động giả lung tung mà là chiều đo con người không xét.
+
+🔑 **Phát hiện quyết định — giải thích luôn kết quả E5:** `content_quality` = **100,0** trên bộ sạch, nhưng 78,6–85,7 trên các bài gold có mã B8. **Bộ phát hiện chạy đúng.** Vấn đề của E5 không phải hệ thống mù, mà là **hai cách gộp khác nhau về bản chất**: người gán nhãn dùng quy tắc dừng sớm (*một* mã B là đủ loại khỏi `publish`), hệ thống dùng *trung bình có trọng số*. Một tiêu chí trượt trong 7-8 tiêu chí chỉ làm `final_score` giảm ~3,6 điểm. Ví dụ G-002: người tìm 6 lỗi chính tả, hệ thống **có** trừ điểm (CQ 85,7) nhưng `final_score` vẫn 93,3 — để rơi xuống dưới 80 thì CQ phải tụt tới 32,3, tức gần như mọi tiêu chí đều trượt.
+
+Đó chính là lý do quét ngưỡng đẩy `publish` lên 96: đó là cách duy nhất để một trung bình có trọng số bắt chước được quy tắc "một khiếm khuyết là đủ".
+
+⛔ **Không tự sửa cách gộp.** Thêm cổng "bất kỳ tiêu chí mức 0 → trần `needs_revision`" là đổi `graph.aggregator_node`, tức **đường chấm điểm** — sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Đây là **quyết định thiết kế cần mentor**; ba lựa chọn kèm cái giá đã liệt kê trong file evidence.
+
+⚠️ **Giới hạn:** n=10 nên `publish_rate` 1,000 không loại trừ được tỉ lệ chặn oan thật cỡ 10-20%. Và mẫu là bài **đã được chính người gán nhãn sửa**, nên nó kiểm *cơ chế*, không chứng minh hệ thống xử lý đúng bài sạch **tự nhiên** — dự án chưa có bài nào như vậy (0/20 bài thật đạt `publish`).
 
 **Chốt chặn đã có test:** extractor từ chối ghi đè bản corrected trừ khi truyền `--force` và route HTML functional về đúng thư mục functional-clean; E5 lấy đầu vào từ manifest `docs/goldset/labels.csv`, chỉ nhận allowlist split `gold-real` và `gold-pert`, nên functional-clean không thể lọt vào phép tính dù có tệp lạ ở gần dữ liệu gold.
 
