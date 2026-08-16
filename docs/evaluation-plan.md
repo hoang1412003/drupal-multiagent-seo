@@ -469,6 +469,62 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 
 **Lưu ý về cỡ mẫu:** giữ lại 20% của 33 mẫu chỉ còn ~7 mẫu để calibrate ít đi. Với gold set nhỏ như vậy, cân nhắc **k-fold cross-validation** thay vì tách cứng - dùng hết 33 mẫu cho cả hai việc mà không rò rỉ. Đây là quyết định thống kê cần chốt trước khi bắt đầu E5.
 
+### 4.6.1. ✅ QUYẾT ĐỊNH ĐÃ CHỐT — k-fold, đăng ký trước ngày 2026-08-16
+
+**Chốt trước khi E5 chạy.** Commit của mục này phải là tổ tiên của commit chứa kết quả E5; nếu không, thiết kế mất tư cách "đăng ký trước" và Kappa CV chỉ còn là một con số chọn sau khi đã nhìn dữ liệu.
+
+**Chọn k-fold, không tách cứng.** Ba căn cứ, không căn cứ nào nhìn vào kết quả mong muốn:
+
+1. **Chi phí bằng nhau ($0 chênh lệch).** `eval_calibration.py` tách hai pha: PHA 1 chấm 33 bài một lần (~$2), PHA 2 quét ngưỡng là hàm thuần. k-fold thuần túy là cách phân tích khác trên **cùng một** output của PHA 1. Không có lý do ngân sách để chọn thiết kế yếu hơn.
+2. **Cỡ mẫu tập kiểm tra: 33 so với 7.** Đo độ nhạy trên chính phân bố của gold set (10 `rejected` / 23 `needs_revision`):
+
+   | Số dự đoán sai | Kappa nếu n=7 (tách cứng) | Kappa nếu n=33 (k-fold gộp) |
+   |---|---|---|
+   | 1 | 0,588 | 0,926 |
+   | 2 | 0,000 | 0,848 |
+   | 3 | −0,235 | 0,765 |
+
+   Tách cứng biến E6 thành phép đo nhị phân: sai một bài là sập. Test–retest ngày 2026-08-15 đã cho bằng chứng thực nghiệm về đúng bệnh này ở n=4.
+3. **Lớp `rejected` chủ yếu là mẫu nhân tạo.** `gold-real` chỉ có **3** `rejected` / 17 `needs_revision`; `gold-pert` có **7** / 6. Tách cứng 7 mẫu phân tầng cho ~2 `rejected`, xác suất cao cả hai đến từ nhóm chèn lỗi → E6 sẽ đo *"ngưỡng có bắt được lỗi tự chèn không"* thay vì *"ngưỡng có tổng quát hoá sang bài thật không"*.
+
+**Đánh đổi phải nêu trong báo cáo, không được giấu:** Kappa CV ước lượng chất lượng của **quy trình calibration**, không phải của đúng bộ ngưỡng đem dùng. Ngưỡng đem dùng vẫn refit trên cả 33 mẫu và **không** có tập sạch nào validate riêng nó.
+
+#### Thiết kế cố định (không đổi sau khi thấy dữ liệu)
+
+| Tham số | Giá trị |
+|---|---|
+| Số fold | **5** |
+| Đơn vị chia | **Nhóm theo `source_url`** — 33 mẫu chỉ đến từ **30 nguồn độc lập** |
+| Phân tầng | Theo `label` (10 `rejected` / 23 `needs_revision`) |
+| Seed gán fold | **`20260816`**, ghi vào file kết quả |
+| Chỉ số chính | Cohen's Kappa trên **toàn bộ 33 dự đoán out-of-fold** gộp lại |
+| Chỉ số phụ bắt buộc | Bộ ngưỡng mà **từng fold** chọn ra, in đủ 5 dòng |
+
+⚠️ **Ràng buộc nhóm là bắt buộc, không phải tuỳ chọn.** `P-001a`/`P-001b`, `P-004a`/`P-004b`, `P-007a`/`P-007b` mỗi cặp dùng chung một bài gốc. Hai biến thể cùng nguồn rơi vào train/test khác nhau là **rò rỉ gần-trùng-lặp** và làm Kappa CV lạc quan giả.
+
+#### Quy tắc phá hoà (tie-break) — phải cố định trước, đây là bậc tự do của người phân tích
+
+Với 441 tổ hợp hiệu dụng trên ~26 mẫu mỗi fold, **hoà điểm Kappa gần như chắc chắn xảy ra** (dự án đã biết `veto ≤ 33` là một plateau vì điểm Compliance thấp nhất là 33,3). Không cố định quy tắc trước là để ngỏ chỗ chọn con số thuận lợi sau.
+
+**Quy tắc:** trong các tổ hợp cùng đạt Kappa lớn nhất, chọn tổ hợp gần nhất (khoảng cách Euclid trên `(veto, nr)`) với **trung vị theo từng thành phần** của tập hoà. Còn hoà nữa thì lấy `veto` nhỏ hơn, rồi `nr` nhỏ hơn.
+
+Lý do phát biểu được **mà không nhắc tới phân bố thu được**: chọn giữa plateau là chọn điểm xa biên quyết định nhất, nên nhiễu chấm điểm ít có cơ hội lật nhãn. E1 vừa đo σ `final_score` = 1,60 trong khi bước quét là 2 — cùng cỡ, nên khoảng cách tới biên là đại lượng đáng tối đa hoá.
+
+#### `publish_min` không tham gia calibration
+
+Gold set có **0** mẫu `publish` nên `publish_min` **không xác định được** — đã ghi ở `technical-debt.md` mục 6 và 8.2. Không quét, không chốt: giữ nguyên giá trị minh hoạ **80** hiện có trong `scoring.yaml` và ghi rõ trong báo cáo là *chưa calibrate*. Cách xử lý ngưỡng này vẫn cần mentor quyết.
+
+Vì vậy số tổ hợp hiệu dụng là **441** (`veto` 21 × `nr` 21), không phải 7.056.
+
+#### Hai con số phải báo cáo cạnh nhau
+
+```
+Kappa in-sample  (quét trên cả 33, lấy max)  = 0.xx   <- LẠC QUAN, có selection bias
+Kappa CV         (33 dự đoán out-of-fold)    = 0.yy   <- ước lượng tổng quát hoá
+```
+
+Khoảng cách giữa hai số **chính là** mức selection bias của việc lấy max trên 441 tổ hợp. Báo cáo mỗi con số in-sample là giấu đúng thứ E6 sinh ra để đo.
+
 ---
 
 ## 5. Cái gì cố ý KHÔNG đo
