@@ -117,6 +117,24 @@ import eval_calibration as e; print(e.prompt_version())"      # phải ra 020738
 
 `04f10e1` là **snapshot của đường chấm**, không phải yêu cầu HEAD phải đứng mãi ở đúng commit đó. Commit chỉ sửa tài liệu được phép là descendant nếu trước lượt đo đã chứng minh không có diff ở agent/fact-check/graph/scoring/config/rule/retrieval/KB so với snapshot; evidence phải ghi cả HEAD thực tế và score-path snapshot. Cách phân biệt này tránh việc một commit tài liệu làm mất hiệu lực phép đo, nhưng không cho phép núp thay đổi hành vi trong commit mang nhãn `docs`.
 
+> #### Làm rõ nghĩa của "config" trong danh sách trên (thêm 2026-08-16 — làm rõ, **không đổi luật**)
+>
+> Danh sách liệt kê cụ thể ở đoạn trên ghi **`scoring.yaml`**, còn đoạn này ghi gọn là "config". Hai cách viết lệch nhau khi `multiagent/config/` có thêm file **không phục vụ việc chấm điểm** — đã xảy ra thật: P5 thêm `model_pricing.yaml` (đơn giá token cho dashboard chi phí).
+>
+> **Tiêu chí phân định — kiểm được bằng máy, không phải phán đoán:** một file trong `multiagent/config/` thuộc đường chấm **khi và chỉ khi có module thuộc đường chấm đọc nó**. Phải chạy phép kiểm này trước mỗi lượt đo và ghi kết quả vào evidence:
+>
+> ```bash
+> grep -rn "<ten_file>" multiagent/src multiagent/scripts --include=*.py | grep -v ".venv"
+> ```
+>
+> Nếu mọi nơi đọc đều nằm ngoài đường chấm (admin UI, observability, script vận hành) thì file đó **không** làm mất hiệu lực E1/E5. Nếu có **bất kỳ** nơi đọc nào nằm trong agent/fact-check/graph/scoring/retrieval/KB thì diff của nó **là** diff đường chấm, và phải đo lại.
+>
+> **Áp dụng lần đầu — `model_pricing.yaml`, kiểm ngày 2026-08-16:** chỉ có `review_platform/admin/queries.py` và `scripts/test_admin_dashboard.py` đọc nó; `config.py` hardcode đúng một đường dẫn tới `scoring.yaml` (dòng 19) chứ không quét thư mục, nên bộ nạp config của đường chấm không bao giờ chạm tới file này. Kết luận: **ngoài đường chấm**, không làm mất hiệu lực phép đo.
+>
+> **Không đổi luật và không kết quả đã đo nào bị đổi.** Đây là làm rõ một chỗ mà quy tắc chưa lường tới, đúng cách `annotation-guideline.md` đã xử lý ca A3 (mục "Ghi chú A3"). Tiêu chí "file nào được đường chấm đọc" vốn đã là *ý* của quy tắc gốc — chỗ này chỉ viết nó ra thành phép kiểm chạy được. Bản khoá vẫn là `04f10e1`, `prompt_version` vẫn `020738e209017213`.
+>
+> ⚠️ **Đây không phải cửa miễn trừ cho cả thư mục `config/`.** `scoring.yaml` được `config.py` đọc trực tiếp nên vĩnh viễn nằm trong đường chấm; sửa nó là mất hiệu lực E1/E5, không có ngoại lệ nào.
+
 **Hàng rào cho luồng productization song song:** thiết kế service độc lập/admin ngày 2026-08-12 chỉ được thay lớp API, auth, migration, site/profile, connector, admin UI và observability. Nếu việc triển khai làm đổi prompt, input chuẩn hóa của agent, retrieval, scoring, rule, Aggregator hoặc output report với cùng input thì đó **không còn là refactor lớp bao quanh**: phải dừng, ghi nhận thay đổi score-path và đo lại E1/E5. `site_id`, `profile_id` và `policy_version` chỉ là metadata cho tới khi profile mới được calibrate; chúng không được phép âm thầm chọn bộ ngưỡng/prompt khác cho profile `cam-nang-vn` hiện hành.
 
 **Vì sao có bản 2:** bản 1 khoá lúc mới 2/4 agent dùng rubric, kèm lập luận rằng σ của `content_quality` (0,38) và `seo` (0,19) đủ nhỏ nên không cần chuyển. Lập luận đó **đúng về độ ổn định nhưng thiếu một vế**: σ thấp chứng minh điểm *tái lập được*, không chứng minh điểm *có định nghĩa*. LLM trả 78 đều đặn qua 5 lượt vẫn không ai biết 78 khác 74 ở chỗ nào, mà calibrate một ngưỡng trên đại lượng không định nghĩa thì ngưỡng cũng không định nghĩa được — đó chính là luận điểm gốc của `rubrics.md` mục 1. Nên đã chuyển nốt: **4/4 agent dùng rubric, nợ A1 đóng.**
