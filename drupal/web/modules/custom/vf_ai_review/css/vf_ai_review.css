@@ -227,15 +227,18 @@
    duyệt không đọc nó như thể đang mô tả bản đang soạn. */
 .vf-ai-band--stale ~ * .vf-ai-hop { opacity: .5; }
 
-/* ── Viền field theo mức nghiêm trọng cao nhất (JS đặt) ─────────────── */
+/* ── Viền ô nhập theo mức nghiêm trọng cao nhất (JS đặt) ────────────────
+   Class đặt TRỰC TIẾP lên ô nhập, không lên phần tử bao.
+   Bản trước đặt lên tổ tiên rồi chọn con bằng `.vf-ai-field--fix input`,
+   và vì tổ tiên tìm bằng closest() nên nó trúng container chứa MỌI field:
+   Tags và Meta description bị tô viền dù không có lỗi nào. */
 
-.vf-ai-field--block input,
-.vf-ai-field--block textarea,
-.vf-ai-field--block .ck-editor__main { border-color: var(--vf-ai-chan) !important; }
-
-.vf-ai-field--fix input,
-.vf-ai-field--fix textarea,
-.vf-ai-field--fix .ck-editor__main { border-color: var(--vf-ai-sua) !important; }
+.vf-ai-o--block { border-color: var(--vf-ai-chan) !important; }
+.vf-ai-o--fix { border-color: var(--vf-ai-sua) !important; }
+.ck.ck-editor.vf-ai-o--block .ck.ck-editor__main > .ck-editor__editable,
+.ck-editor__main.vf-ai-o--block > .ck-editor__editable { border-color: var(--vf-ai-chan) !important; }
+.ck.ck-editor.vf-ai-o--fix .ck.ck-editor__main > .ck-editor__editable,
+.ck-editor__main.vf-ai-o--fix > .ck-editor__editable { border-color: var(--vf-ai-sua) !important; }
 
 /* ── Dòng cảnh báo cạnh nút Save (JS chèn) ──────────────────────────── */
 

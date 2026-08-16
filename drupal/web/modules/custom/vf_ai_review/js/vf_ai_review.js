@@ -243,9 +243,37 @@
     this.canhBaoLuu(ds);
   };
 
-  /** Viền field theo mức nghiêm trọng CAO NHẤT còn hiển thị trong field đó. */
+  /**
+   * Ô nhập THẬT của một field trong báo cáo.
+   *
+   * Nhắm bằng thuộc tính `name` do Drupal sinh (`title[0][value]`,
+   * `field_meta_description[0][value]`...), lấy từ map PHP truyền sang.
+   *
+   * KHÔNG dùng closest() để đoán tổ tiên: hộp lỗi được chèn qua '#suffix'
+   * nên nó không nằm trong wrapper của field, closest() leo lên tận
+   * container chứa MỌI field và viền lan sang những field không có lỗi -
+   * tức UI nói sai sự thật. Đã thấy trên ảnh chụp thật 2026-08-16.
+   */
+  Bang.prototype.oNhap = function (field) {
+    var ten = (this.cfg.fieldMap || {})[field];
+    if (!ten) { return []; }
+    var o = this.doc.querySelector('[name^="' + ten + '["]');
+    if (!o) { return []; }
+    // CKEditor giấu textarea gốc và vẽ khung riêng - phải tô đúng khung đó,
+    // tô textarea ẩn thì không ai nhìn thấy gì.
+    var khung = o.parentNode
+      ? o.parentNode.querySelector('.ck-editor__main, .ck.ck-editor')
+      : null;
+    return khung ? [o, khung] : [o];
+  };
+
+  /** Viền ô nhập theo mức nghiêm trọng CAO NHẤT còn hiển thị của field đó. */
   Bang.prototype.vienField = function () {
     var self = this;
+
+    // Gom theo field trước: `summary` và `body` cùng trỏ về một ô nhập, nên
+    // phải lấy mức cao nhất của CẢ HAI rồi mới tô, không tô đè lần lượt.
+    var mucCua = {};
     this.doc.querySelectorAll('[data-vf-ai-hop]').forEach(function (hop) {
       var field = hop.getAttribute('data-vf-ai-hop');
       var con = Array.prototype.filter.call(
@@ -255,13 +283,17 @@
       var muc = con.some(function (t) { return t.getAttribute('data-sev') === 'block'; })
         ? 'block'
         : (con.length ? 'fix' : '');
+      var ten = (self.cfg.fieldMap || {})[field];
+      if (!ten) { return; }
+      if (muc === 'block' || !mucCua[ten]) { mucCua[ten] = muc; }
+    });
 
-      var boc = hop.closest('.js-form-wrapper, .field--type-text-with-summary')
-        || hop.parentNode;
-      if (!boc || !boc.classList) { return; }
-      boc.classList.remove('vf-ai-field--block', 'vf-ai-field--fix');
-      if (muc) { boc.classList.add('vf-ai-field--' + muc); }
-      self.doc.body.setAttribute('data-vf-ai-field-' + field, muc || 'sach');
+    Object.keys(self.cfg.fieldMap || {}).forEach(function (field) {
+      var ten = self.cfg.fieldMap[field];
+      self.oNhap(field).forEach(function (o) {
+        o.classList.remove('vf-ai-o--block', 'vf-ai-o--fix');
+        if (mucCua[ten]) { o.classList.add('vf-ai-o--' + mucCua[ten]); }
+      });
     });
   };
 

@@ -139,6 +139,15 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
     'nid' => (string) ($node->id() ?? 'moi'),
     'hash' => (string) ($report['content_hash'] ?? ''),
     'trangThai' => $trang_thai,
+    // Khoá field trong báo cáo -> tên phần tử form, để JS tô viền ĐÚNG ô
+    // nhập của field đó.
+    //
+    // Vì sao phải truyền map thay vì để JS tự đoán bằng closest(): hộp lỗi
+    // được chèn qua '#suffix' nên nó KHÔNG nằm trong wrapper của field.
+    // closest('.js-form-wrapper') leo lên tận container chứa MỌI field, và
+    // viền lan sang cả Tags lẫn Meta description - hai field không có lỗi
+    // nào. Đã thấy trên ảnh chụp thật 2026-08-16.
+    'fieldMap' => VF_AI_REVIEW_FIELD_MAP,
   ];
   $form['#attached']['library'][] = 'vf_ai_review/report';
 }
