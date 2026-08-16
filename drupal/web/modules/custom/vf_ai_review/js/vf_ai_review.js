@@ -257,7 +257,20 @@
   Bang.prototype.oNhap = function (field) {
     var ten = (this.cfg.fieldMap || {})[field];
     if (!ten) { return []; }
-    var o = this.doc.querySelector('[name^="' + ten + '["]');
+
+    // PHẢI nhắm đúng `[0][value]` trước.
+    //
+    // Field Body có BA phần tử cùng tiền tố: body[0][summary],
+    // body[0][value], body[0][format] - và `summary` đứng TRƯỚC trong DOM
+    // (đã kiểm trên form thật). Nên `[name^="body["]` trả về textarea
+    // summary, thứ nằm trong vùng "Edit summary" đang thu gọn và KHÔNG phải
+    // nguồn của CKEditor. Đó là lý do khung Body không bao giờ được tô viền
+    // dù Title thì được (ảnh chụp 2026-08-16).
+    //
+    // Dự phòng `[name^=...]` cho field không có `[0][value]`, ví dụ
+    // url_alias là `path[0][alias]`.
+    var o = this.doc.querySelector('[name="' + ten + '[0][value]"]')
+      || this.doc.querySelector('[name^="' + ten + '["]');
     if (!o) { return []; }
     // CKEditor giấu textarea gốc và vẽ khung riêng - phải tô đúng khung đó,
     // tô textarea ẩn thì không ai nhìn thấy gì.
@@ -266,9 +279,14 @@
     // bất đồng bộ sau khi trang tải. Đó là lý do lần đầu Body không có viền
     // dù Title thì có (thấy trên ảnh chụp 2026-08-16). `theoDoiCkeditor()`
     // gọi lại hàm này khi khung xuất hiện.
-    var khung = o.parentNode
-      ? o.parentNode.querySelector('.ck.ck-editor')
-      : null;
+    // `core/modules/ckeditor5/js/ckeditor5.js:637` cho biết khung CKEditor
+    // chính là `sourceElement.nextElementSibling`. Dùng đúng quan hệ đó thay
+    // vì querySelector trong parentNode: chắc chắn hơn và không thể trúng
+    // khung của một editor khác trên cùng form.
+    var ke = o.nextElementSibling;
+    var khung = (ke && ke.classList && ke.classList.contains('ck-editor'))
+      ? ke
+      : (o.parentNode ? o.parentNode.querySelector('.ck.ck-editor') : null);
     return khung ? [o, khung] : [o];
   };
 
