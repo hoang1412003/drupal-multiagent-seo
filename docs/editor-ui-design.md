@@ -316,6 +316,23 @@ Chạy test: `ddev exec php scripts/test_ai_report_renderer.php` (PHP thuần, k
 
 **Đường lùi:** `ddev drush pmu vf_ai_review` — mất hiển thị, **không mất dữ liệu** (đã kiểm chứng, mục 5).
 
+### 10.6. Bốn cái bẫy Drupal đã gặp khi dựng — đều IM LẶNG
+
+Cả bốn chỉ lộ ra khi nhìn ảnh chụp trình duyệt thật. Không cái nào bị test PHP bắt, và ba trong bốn cái tôi **chẩn đoán sai ở lần đầu**.
+
+**1. `#markup` nuốt `<input>` và `<label>`.** Drupal lọc `#markup` qua `Xss::filterAdmin()`, mà danh sách thẻ của nó không có hai thẻ này — chúng biến mất không báo gì. `data-*` thì sống sót. Kiểm bằng `ddev drush php:eval` với `Xss::filterAdmin()`.
+→ Checkbox "Đã xử lý" phải do JS chèn. Cũng đúng hơn về progressive enhancement: checkbox không có JS thì bấm cũng chẳng làm gì. Đã có test khoá lại việc PHP **không** được render `<input>`.
+
+**2. Băng sticky nằm sau lưng admin toolbar.** `top: 0` là đúng theo CSS nhưng sai theo thực tế: toolbar che mất. Dùng `var(--drupal-displace-offset-top)` và nghe `drupalViewportOffsetChange`.
+
+**3. Hộp lỗi chèn qua `#suffix` KHÔNG nằm trong wrapper của field.** Dùng `closest('.js-form-wrapper')` để đoán field cha thì nó leo lên container chứa **mọi** field, và viền lan sang cả Tags lẫn Meta description — hai field không có lỗi nào. Đây là lỗi **nói sai sự thật**, không phải lỗi thẩm mỹ.
+→ PHP truyền `VF_AI_REVIEW_FIELD_MAP` sang JS; JS nhắm đúng ô bằng thuộc tính `name`.
+
+**4. `querySelector('[name^="body["]')` trả về textarea SUMMARY, không phải body.** Thứ tự DOM thật là `body[0][summary]` → `body[0][value]` → `body[0][format]`, nên tiền tố khớp cái đầu tiên. Khung CKEditor vì vậy không bao giờ được tô viền.
+→ Nhắm `[name="X[0][value]"]` trước, dự phòng `[name^="X["]` cho `url_alias` (`path[0][alias]`). Khung CKEditor lấy bằng `sourceElement.nextElementSibling`, đúng quan hệ mà `core/modules/ckeditor5/js/ckeditor5.js:637` dùng.
+
+**Bài học chung:** với ba bẫy sau, chẩn đoán đầu tiên đều **hợp lý nhưng sai**. Chỉ khi đi đọc source của core và dump thứ tự DOM thật mới ra đúng nguyên nhân. Không nhìn được DOM thì phải lấy bằng chứng, đừng suy luận tiếp.
+
 ---
 
 ## 11. Nguồn tham khảo
