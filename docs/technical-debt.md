@@ -948,6 +948,19 @@ Nếu sau này quay lại nền tảng, những thứ **chưa** làm và không 
 
 **Riêng với P4, những gì đã được kiểm bằng hệ thống thật (không phải chỉ unit test):** Drupal lưu bài → job qua `/api/v1` mang đúng revision và hash v2 → worker fetch exact revision → callback tạo **đúng một** revision AI mới, `moderation_state` không đổi; gửi lại cùng `run_id` trả `already_applied` và **không** tạo revision thứ hai; job của revision cũ nhận `content_superseded` và **không** ghi đè; diễn tập rollback về `/jobs` legacy đi hết đường worker với hash v1 + `rel:working-copy`. Chi tiết và giới hạn: [`evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
 
+### 8.10. Demo deploy lên AWS EC2 + HuggingFace Space — ✅ ĐÃ XONG (2026-08-17)
+
+Lần đầu tiên dự án chạy ngoài máy dev/ddev, thuần tuý để demo, **không phải**
+một lượt production pilot có ý nghĩa đo lường và **không** đụng gì tới các
+quyết định ở mục 8.1–8.9. Chi tiết đầy đủ, kiến trúc, và các bẫy hạ tầng gặp
+phải (đáng chú ý nhất: `vf_ai_trigger.settings.service_url` copy nguyên giá
+trị `host.docker.internal` từ database local, và hai hệ xác thực tách biệt
+giữa worker polling và `/api/v1/jobs` khiến phải chạy thêm
+`site_credential.py import-env` mà quyết định (3) ở mục 8.9 không nhắc tới) ở
+[`deployment-aws-demo.md`](deployment-aws-demo.md). Máy chủ có thể đã bị
+dừng/xoá sau demo — coi tài liệu đó là ghi chú vận hành, không phải cam kết
+uptime.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
