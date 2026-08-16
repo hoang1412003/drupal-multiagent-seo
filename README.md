@@ -47,7 +47,10 @@ drupal-multiagent-seo/
 │   ├── scripts/                  # tạo field + test lớp render (PHP thuần)
 │   └── web/modules/custom/
 │       ├── vf_ai_review/         # CHỈ ĐỌC: hiển thị báo cáo AI trong giao diện soạn bài,
-│       │                          # không tính điểm, không gọi API, không sửa dữ liệu node
+│       │                          # không tính điểm, không gọi API, không sửa dữ liệu node.
+│       │                          # src/AiReportRenderer.php dựng HTML (vào mảng, ra chuỗi
+│       │                          # đã escape - test được bằng PHP thuần); js/vf_ai_review.js
+│       │                          # lo tương tác (lọc, Trước/Sau, đánh dấu đã xử lý)
 │       └── vf_ai_trigger/        # module thứ hai, tách riêng vì nói chuyện với service:
 │                                  # bắt sự kiện Needs Review, gọi service HTTP, route
 │                                  # "chấm lại" - đây là module duy nhất phía Drupal được
@@ -258,6 +261,8 @@ Tài khoản này độc lập với tài khoản Drupal; người viết bài k
 - [x] Thu thập & gán nhãn gold set — hoàn tất **33/33** mẫu calibration (`docs/goldset/labels.csv`)
 - [x] Tự động hóa — Content Moderation "Needs Review" bật thật, **hai đường song song**: event-driven là đường chính (Drupal → module `vf_ai_trigger` → service HTTP → hàng đợi Postgres, ~2 giây tới lúc job chạy) và vòng đối soát định kỳ 300 giây là lưới an toàn (bắt các job event bị lọt, ví dụ service tắt tạm thời). Chạy thật end-to-end, 8/8 tiêu chí đạt: `docs/architecture.md` mục 9, bằng chứng `docs/evidence/tu_dong_hoa_e2e.txt`
 - [x] UI báo cáo trong editor — module `vf_ai_review`: khối tổng quan ở cột phải + **chú thích lỗi ngay dưới từng field** (phần đáp ứng đúng chữ đề bài). Python ghi thêm `field_ai_report_json` (báo cáo có cấu trúc), module chỉ đọc và render. Escape chống XSS theo `docs/prompt-injection.md` M4. Phát hiện nội dung sửa sau khi chấm bằng **hash nội dung**, không phải mốc `changed`
+
+> 🔄 **UI đang được thiết kế lại** trên nhánh `feat/ui-bao-cao-loi-ai` (chưa merge): băng trạng thái sticky 8 trạng thái, thẻ lỗi rich, lọc theo mức, Trước/Sau, đánh dấu đã xử lý. Chỉ PHP/JS/CSS, **không đụng Python**. Thiết kế và bốn cái bẫy Drupal đã gặp: [`docs/editor-ui-design.md` mục 10](docs/editor-ui-design.md).
 
 Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
 
