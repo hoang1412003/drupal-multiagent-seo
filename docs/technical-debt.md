@@ -621,8 +621,9 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 
 - ✅ **Code cần cho lượt đo đã xong:** CP4 và N1 đã merge; không còn việc sửa code nào phải chen vào trước E1.
 - ✅ **Preflight E1 bản 4 đã đạt ngày 2026-08-12:** legacy guard từ chối file cũ trước đường trả phí; model/prompt/sample/output target đúng; API key chỉ được xác nhận là có cấu hình, không ghi giá trị secret.
-- ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD sang **2026-08-13** để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
-- ➡️ **Việc kế tiếp ngày 2026-08-13:** hoàn tất test–retest mù trước; sau khi khóa nhãn lượt hai mới xin xác nhận chi phí riêng và chạy E1. Không được xem/tiết lộ nhãn cũ hoặc output E1 cho người gán trước khi nhãn lượt hai được lưu.
+- ✅ **Test–retest nhãn đã xong 2026-08-15:** đồng thuận 4/4, Kappa = 1,000, đạt ngưỡng ≥ 0,80. **Bắt buộc trích kèm ba giới hạn** ở mục 8.3 — con số 1,000 đứng một mình là nói sai về mức tin cậy của nhãn. Evidence: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md).
+- ⏸️ **E1 bản 4 chưa chạy:** người dùng chủ động hoãn lượt trả phí khoảng 3 USD để làm cùng phiên test–retest. Không có API trả phí nào được gọi trong preflight và chưa có file `e1_sau_cp4_deadline_guard.json`.
+- ➡️ **Việc kế tiếp:** chạy E1 (mục 8.1) — cổng chặn duy nhất còn lại là **xác nhận chi phí riêng ~3 USD** của người dùng cho đúng lượt chạy đó. Test–retest đã khoá xong nên không còn ràng buộc "không được xem output E1 trước khi nhãn lượt hai được lưu".
 - ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** E5 chỉ được chạy sau khi E1 bản 4 đạt; mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
@@ -703,20 +704,30 @@ meta:
 
 Sau E5 bản 4, chỉ chốt ngưỡng mới nếu điều kiện đo đạt; `prompt_version` phải là hash do code tính tại lần đo. Việc xử lý ngưỡng `publish` vẫn cần mentor quyết vì calibration gold set không có lớp publish.
 
-### 8.3. Test-retest nhãn — từ **2026-08-13**, $0
+### 8.3. Test-retest nhãn — ✅ ĐÃ CHẠY 2026-08-15, $0
 
-Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**.
+**Kết quả: đồng thuận 4/4, Kappa = 1,000 — đạt ngưỡng ≥ 0,80.** Evidence đầy đủ kèm ba giới hạn bắt buộc nêu kèm: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md). Nhãn lượt hai khoá tại commit `cc872d6` **trước** khi mở `labels.csv`.
 
-**Thứ tự bắt buộc trong phiên 2026-08-13 (để AI/model không vô tình làm hỏng phép đo):**
+⚠️ **Không trích con số 1,000 mà bỏ ba giới hạn đi.** Tóm tắt: (1) cả 3 mẫu `gold-real` cùng là `needs_revision` ở hai lượt nên `pe = 1` và Kappa **không xác định** trên tập đó — phần cần phán đoán thật không phân biệt được người gán với máy luôn trả một nhãn; (2) toàn bộ phương sai nhãn đến từ đúng mẫu `P-007a`, vốn thuộc `gold-pert` nên đồng thuận **do cấu tạo**; (3) với n = 4, chỉ một mẫu lệch là Kappa rơi xuống 0,50 (hoặc 0,00 nếu mẫu lệch là `P-007a`) — phép đo thực chất nhị phân, không có vùng trung gian.
 
-1. Chọn ngẫu nhiên 4 `sample_id`, chỉ đưa bài gốc và guideline cho người gán; không hiển thị `label`, `defect_codes`, `notes` cũ, báo cáo AI hoặc output E1.
-2. Lưu nhãn lượt hai vào **file evidence mới**, không ghi đè `docs/goldset/labels.csv`. Tệp đề xuất: `docs/evidence/test_retest_2026-08-13.csv`, tối thiểu có `sample_id,retest_label,annotator,date,notes` và ghi cách chọn mẫu/seed để tái lập.
+**Hệ quả khi dùng làm trần cho E5:** trần = 1,000 là **hướng an toàn** (guideline mục 8.2: trần cao hơn thật khiến AI trông kém hơn, không thổi phồng), nhưng nó **mất chức năng chẩn đoán** — với trần 1,000 thì không bao giờ kích hoạt được cảnh báo "AI cao bất thường so với trần". Câu phải viết trong báo cáo Sprint 3 đã soạn sẵn trong file evidence, dùng nguyên văn.
+
+**Đã cân nhắc và bác bỏ việc bốc thêm mẫu:** mở rộng cỡ mẫu *sau khi* đã thấy kết quả là optional stopping, cùng lỗi đã bác ở ca "thu thêm corpus để đẩy p qua ngưỡng" (mục 6). Muốn ước lượng ổn định hơn thì chạy một lượt **riêng, khai báo cỡ mẫu trước**, báo cáo cạnh kết quả này chứ không thay thế.
+
+<details><summary>Giao thức đã dùng (giữ lại để tái lập)</summary>
+
+Giao thức: `annotation-guideline.md` mục 8.1. Gán lại **3-4 bài** trong điều kiện **mù** (không nhìn nhãn cũ), tính Kappa với lần gán đầu. Yêu cầu **≥ 0,80**. Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ — lượt hai chạy 2026-08-15, cách 5 ngày.
+
+1. Chọn ngẫu nhiên 4 `sample_id`, chỉ đưa bài gốc và guideline cho người gán; không hiển thị `label`, `defect_codes`, `notes` cũ, báo cáo AI hoặc output E1. Đã bốc từ pool **cả 33 mẫu**, seed `20260815`, chỉ bốc một lần → G-002, G-006, G-019, P-007a.
+2. Lưu nhãn lượt hai vào **file evidence mới**, không ghi đè `docs/goldset/labels.csv`: [`evidence/test_retest_2026-08-15.csv`](evidence/test_retest_2026-08-15.csv), kèm cách chọn mẫu/seed để tái lập.
 3. Chỉ sau khi file lượt hai đã khóa mới mở nhãn lượt một để tính Cohen's Kappa và ghi kết quả/evidence.
 4. Sau test–retest mới chuyển sang E1; xin người dùng xác nhận riêng chi phí trước khi gọi API. Hai phép đo độc lập: một phép bị chặn không được làm mất bằng chứng của phép còn lại.
 
-**Vì sao chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Trần 0,75 thì 0,713 là rất tốt; trần 0,95 thì còn khoảng cách lớn. **Chưa có trần thì 0,713 không nói lên điều gì** — đừng đưa vào báo cáo mentor.
+⚠️ **Cạm bẫy công cụ đã gặp:** `scripts/quet_ung_vien.py` đọc `labels.csv` và **in thẳng nhãn suy ra** cho mẫu `gold-pert` (`quet_ung_vien.py:171-174`). Đây là lý do mẫu pert đồng thuận do cấu tạo. `label_helper.py` thì sạch — không đọc `labels.csv`. Lần sau nếu muốn test–retest đo đúng độ nhất quán của người gán thì bốc riêng từ 20 mẫu `gold-real`.
 
-Phải đợi ≥3 ngày kể từ khi gán xong (2026-08-10) để quên nhãn cũ.
+</details>
+
+**Vì sao mục này từng chặn việc báo cáo:** đây là **trần trên** để diễn giải Kappa 0,713 — mục 8.2 của guideline bắt buộc báo cáo Kappa kèm trần. Nay đã có trần, nhưng vì trần bằng 1,000 nên nó chỉ nói được "0,713 còn cách trần khá xa", không nói được nhiều hơn.
 
 ### 8.4. Chốt chặn tất định cho CP4 — ✅ ĐÃ SỬA (2026-08-12)
 
