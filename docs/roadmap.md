@@ -44,7 +44,7 @@ Chạy được luồng end-to-end trên Drupal: một node ở trạng thái "N
 
 - [ ] **Hai quyết định thiết kế cần mentor** — cùng một câu hỏi *ai được quyền chặn xuất bản?*: (1) có thêm cổng "bất kỳ tiêu chí mức 0 → trần `needs_revision`" để khớp quy tắc dừng sớm của người gán nhãn không; (2) một phán đoán thuần LLM có được phép một mình sinh `critical` không. Cả hai đổi `graph.aggregator_node`/agent nên **phải đo lại E1/E5/E6** sau khi sửa. Chi tiết: `technical-debt.md` mục 8.2, 8.4, 8.6.
 
-- [~] **Hoàn thiện UI** — thiết kế mới cho khối báo cáo lỗi đang làm trên nhánh **`feat/ui-bao-cao-loi-ai`** (chưa merge). Phạm vi: chỉ PHP/JS/CSS, **không sửa một dòng Python nào** nên đường chấm điểm còn nguyên. Phần **hiển thị đã xong và đã kiểm bằng ảnh chụp trình duyệt thật**; phần **tương tác chưa ai kiểm** (dự án không có hạ tầng test JS). Thiết kế + bốn cái bẫy Drupal đã gặp: [`editor-ui-design.md` mục 10](editor-ui-design.md).
+- [x] **Hoàn thiện UI** — khối báo cáo lỗi đã thiết kế lại xong và merge (PR #50, 2026-08-16). Phạm vi: chỉ PHP/JS/CSS, **không sửa một dòng Python nào** nên đường chấm điểm còn nguyên. Hiển thị kiểm bằng ảnh chụp trình duyệt thật qua 4 vòng sửa; ba tương tác (Trước/Sau, chip lọc, localStorage) đã kiểm tay và chạy đúng. Ba thứ còn thiếu (badge mã tiêu chí, card điểm theo agent, số revision) chờ mở khoá đường chấm điểm. Thiết kế + bốn cái bẫy Drupal: [`editor-ui-design.md` mục 10](editor-ui-design.md).
 
 - [ ] Viết tài liệu vận hành.
 

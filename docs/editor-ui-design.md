@@ -312,6 +312,8 @@ Chạy test: `ddev exec php scripts/test_ai_report_renderer.php` (PHP thuần, k
 
 ⚠️ **Không có test JS tự động trong dự án.** Phần tương tác phải kiểm tay trên Drupal thật; không được báo "đã verify" nếu chưa mở trình duyệt xem.
 
+**Đã kiểm tay 2026-08-16** trên `node/21/edit`: nút Trước/Sau cuộn đúng tới từng lỗi, chip lọc ẩn/hiện thẻ và cập nhật lại ô đếm, dấu "đã xử lý" còn nguyên sau khi Save và mở lại. **Nhưng một lần kiểm tay không phải một bộ test:** không có gì chặn regression, nên mỗi lần sửa `js/vf_ai_review.js` đều phải kiểm lại bằng mắt.
+
 **Progressive enhancement:** JS hỏng thì form vẫn dùng bình thường. Băng và thẻ lỗi do PHP render nên vẫn đọc được, chỉ mất tương tác.
 
 **Đường lùi:** `ddev drush pmu vf_ai_review` — mất hiển thị, **không mất dữ liệu** (đã kiểm chứng, mục 5).
