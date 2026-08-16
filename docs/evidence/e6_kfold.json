@@ -1,0 +1,120 @@
+{
+ "so_fold": 5,
+ "seed": 20260816,
+ "kappa_in_sample": 0.40629685157421286,
+ "kappa_cv": 0.40629685157421286,
+ "selection_bias": 0.0,
+ "accuracy_cv": 0.6363636363636364,
+ "nguong_in_sample": {
+  "veto": 34,
+  "nr": 50,
+  "publish": 80
+ },
+ "nguong_tung_fold": [
+  {
+   "veto": 34,
+   "nr": 50,
+   "publish": 80
+  },
+  {
+   "veto": 34,
+   "nr": 50,
+   "publish": 80
+  },
+  {
+   "veto": 34,
+   "nr": 50,
+   "publish": 80
+  },
+  {
+   "veto": 34,
+   "nr": 50,
+   "publish": 80
+  },
+  {
+   "veto": 40,
+   "nr": 50,
+   "publish": 80
+  }
+ ],
+ "fold": {
+  "0": [
+   "G-001",
+   "G-018",
+   "G-019",
+   "P-007a",
+   "P-007b",
+   "P-008a",
+   "P-009a"
+  ],
+  "1": [
+   "G-007",
+   "G-013",
+   "G-015",
+   "G-016",
+   "P-001a",
+   "P-001b",
+   "P-005a"
+  ],
+  "2": [
+   "G-003",
+   "G-004",
+   "G-005",
+   "G-010",
+   "G-017",
+   "P-004a",
+   "P-004b"
+  ],
+  "3": [
+   "G-002",
+   "G-008",
+   "G-011",
+   "G-012",
+   "G-014",
+   "P-010a"
+  ],
+  "4": [
+   "G-006",
+   "G-009",
+   "G-020",
+   "P-002a",
+   "P-003a",
+   "P-006a"
+  ]
+ },
+ "du_doan_oof": {
+  "P-007a": "rejected",
+  "P-007b": "needs_revision",
+  "G-019": "publish",
+  "P-009a": "needs_revision",
+  "G-018": "publish",
+  "P-008a": "rejected",
+  "G-001": "needs_revision",
+  "P-001a": "rejected",
+  "P-001b": "publish",
+  "G-015": "rejected",
+  "G-016": "needs_revision",
+  "P-005a": "rejected",
+  "G-007": "needs_revision",
+  "G-013": "needs_revision",
+  "P-004a": "needs_revision",
+  "P-004b": "rejected",
+  "G-005": "publish",
+  "G-003": "needs_revision",
+  "G-010": "rejected",
+  "G-004": "needs_revision",
+  "G-017": "needs_revision",
+  "G-002": "publish",
+  "G-012": "publish",
+  "G-011": "needs_revision",
+  "G-014": "publish",
+  "P-010a": "rejected",
+  "G-008": "publish",
+  "P-006a": "rejected",
+  "G-020": "publish",
+  "P-003a": "needs_revision",
+  "G-006": "needs_revision",
+  "G-009": "needs_revision",
+  "P-002a": "rejected"
+ }
+}

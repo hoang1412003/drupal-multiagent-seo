@@ -105,19 +105,25 @@ def chon_nguong(bang: list[dict]) -> dict:
     cao_nhat = max(r["kappa"] for r in bang)
     hoa = [r for r in bang if r["kappa"] == cao_nhat]
 
-    tv_veto = statistics.median(r["nguong"]["veto"] for r in hoa)
-    tv_nr = statistics.median(r["nguong"]["nr"] for r in hoa)
+    # Tinh tren CA BA chieu: khi `publish` cung duoc quet (phan tich phu) ma
+    # bo no ra khoi phep pha hoa thi gia tri chon duoc phu thuoc thu tu duyet
+    # cua `quet()` - lai dung mot bac tu do khong ai kiem soat. Khi `publish`
+    # bi co dinh thi trung vi cua no bang chinh no, dong gop khoang cach 0,
+    # nen nhanh dang ky truoc khong doi hanh vi.
+    tv = {k: statistics.median(r["nguong"][k] for r in hoa)
+          for k in ("veto", "nr", "publish")}
 
     def khoang_cach(r: dict) -> float:
-        g = r["nguong"]
-        return (g["veto"] - tv_veto) ** 2 + (g["nr"] - tv_nr) ** 2
+        return sum((r["nguong"][k] - tv[k]) ** 2 for k in tv)
 
     return min(hoa, key=lambda r: (khoang_cach(r), r["nguong"]["veto"],
-                                   r["nguong"]["nr"]))["nguong"]
+                                   r["nguong"]["nr"],
+                                   r["nguong"]["publish"]))["nguong"]
 
 
 def chay_cv(ket_qua: dict, nhan_that: dict, mau: list[dict], w: dict,
-            so_fold: int = 5, seed: int = 20260816) -> dict:
+            so_fold: int = 5, seed: int = 20260816,
+            publish: int | None = PUBLISH_CO_DINH) -> dict:
     """k-fold CV: moi fold hoc nguong tren cac fold KHAC, du doan fold cua no.
 
     Tra ve du doan out-of-fold cho TUNG mau, nguong ma tung fold chon, va
@@ -128,9 +134,15 @@ def chay_cv(ket_qua: dict, nhan_that: dict, mau: list[dict], w: dict,
     Kappa CV se bang Kappa in-sample va E6 mat sach y nghia - ma nhin tu ben
     ngoai khong co dau hieu gi.
 
-    `publish` khong tham gia calibration (gold set co 0 mau `publish`), nen
-    bang quet duoc loc ve dung PUBLISH_CO_DINH thay vi de no thanh mot bac tu
-    do thu ba - xem evaluation-plan.md muc 4.6.1.
+    `publish` MAC DINH co dinh o PUBLISH_CO_DINH - do la ban DA DANG KY TRUOC
+    (evaluation-plan.md muc 4.6.1): gold set co 0 mau `publish` nen nguong do
+    khong xac dinh duoc, khong duoc de no thanh bac tu do thu ba.
+
+    `publish=None` quet ca nguong do. Day la PHAN TICH PHU, khong thay the ban
+    dang ky truoc: no ton tai de giai thich duoc vi sao quet tu do cho Kappa
+    cao hon - nguong bi day len TREN diem cao nhat quan sat duoc, tuc `publish`
+    khong bao gio kich hoat nua. Do la vo hieu hoa mot duong ra, khong phai
+    calibrate no (technical-debt.md muc 8.2).
     """
     from eval_calibration import cohen_kappa, quet, quyet_dinh
 
@@ -142,8 +154,9 @@ def chay_cv(ket_qua: dict, nhan_that: dict, mau: list[dict], w: dict,
     for f in folds:
         giu = set(f)
         train = {s: v for s, v in ket_qua.items() if s not in giu}
-        bang = [r for r in quet(train, nhan_that, w)
-                if r["nguong"]["publish"] == PUBLISH_CO_DINH]
+        bang = quet(train, nhan_that, w)
+        if publish is not None:
+            bang = [r for r in bang if r["nguong"]["publish"] == publish]
         ng = chon_nguong(bang)
         nguong_tung_fold.append(ng)
         for s in f:
@@ -178,8 +191,9 @@ def doc_mau(labels_path: str | None = None) -> list[dict]:
             for r in _gold_rows(labels_path or LABELS)]
 
 
-def in_bao_cao(kq_e5: dict, mau: list[dict], w: dict,
-               so_fold: int = 5, seed: int = 20260816) -> dict:
+def in_bao_cao(kq_e5: dict, mau: list[dict], w: dict, so_fold: int = 5,
+               seed: int = 20260816,
+               publish: int | None = PUBLISH_CO_DINH) -> dict:
     """In hai con so canh nhau va bo nguong cua tung fold.
 
     Bao cao mot minh con so in-sample la giau dung thu E6 sinh ra de do:
@@ -192,14 +206,16 @@ def in_bao_cao(kq_e5: dict, mau: list[dict], w: dict,
     ids = sorted(s for s in kq_e5 if s in nhan)
     that = [nhan[s] for s in ids]
 
-    bang = [r for r in quet(kq_e5, nhan, w)
-            if r["nguong"]["publish"] == PUBLISH_CO_DINH]
+    bang = quet(kq_e5, nhan, w)
+    if publish is not None:
+        bang = [r for r in bang if r["nguong"]["publish"] == publish]
     ng_in = chon_nguong(bang)
     dd_in = [quyet_dinh(kq_e5[s]["diem"], kq_e5[s]["co_critical"], w, ng_in)
              for s in ids]
     kappa_in = cohen_kappa(that, dd_in)
 
-    cv = chay_cv(kq_e5, nhan, mau, w, so_fold=so_fold, seed=seed)
+    cv = chay_cv(kq_e5, nhan, mau, w, so_fold=so_fold, seed=seed,
+                 publish=publish)
     folds = chia_fold(mau, so_fold=so_fold, seed=seed)
 
     print("=" * 78)
@@ -269,12 +285,17 @@ if __name__ == "__main__":
     ap.add_argument("--ket-qua", required=True,
                     help="file ket qua PHA 1 cua E5 (trong docs/evidence/)")
     ap.add_argument("--ra", default="e6_kfold.json")
+    ap.add_argument("--quet-ca-publish", action="store_true",
+                    help="PHAN TICH PHU: quet ca publish_min. Khong thay the "
+                         "ban dang ky truoc (evaluation-plan.md muc 4.6.1).")
     a = ap.parse_args()
 
     path = (a.ket_qua if os.path.isabs(a.ket_qua)
             else os.path.join(REPO, "docs", "evidence", a.ket_qua))
 
-    tom_tat = in_bao_cao(nap_ket_qua(path), doc_mau(), config.load()["weights"])
+    tom_tat = in_bao_cao(nap_ket_qua(path), doc_mau(),
+                         config.load()["weights"],
+                         publish=None if a.quet_ca_publish else PUBLISH_CO_DINH)
 
     ra = os.path.join(REPO, "docs", "evidence", a.ra)
     with open(ra, "w", encoding="utf-8") as f:

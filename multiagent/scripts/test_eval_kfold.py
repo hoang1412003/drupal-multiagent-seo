@@ -232,4 +232,38 @@ check("doc_mau() khop chinh xac gold_ids() cua E5",
 kiem("moi mau co du source_url va label",
      all(m.get("source_url") and m.get("label") for m in mau_that))
 
+
+# --- publish=None: quet ca nguong publish (phan tich PHU) ----------------
+# Ban dang ky truoc CO DINH publish=80. Nhung de giai thich duoc vi sao E5
+# bao Kappa 0,713 con ban dang ky truoc bao thap hon, phai tinh lai duoc
+# nhanh "quet ca publish" - va no phai TAI LAP DUOC, khong phai script tam.
+#
+# Dat mau co final_score cao de nguong publish thuc su co tac dung: neu de
+# publish=80 thi chung bi doan `publish` (sai, vi khong mau nao nhan publish),
+# con quet tu do thi nguong bi day len tren max nen `publish` khong bao gio
+# kich hoat.
+
+def kq_diem_cao(mau):
+    ra = {}
+    for m in mau:
+        xau = m["label"] == "rejected"
+        ra[m["sample_id"]] = {
+            "diem": {"content_quality": 95, "seo": 95, "brand": 95,
+                     "compliance": 45 if xau else 90},
+            "co_critical": False,
+        }
+    return ra
+
+
+kq_cao = kq_diem_cao(mau_cv)
+co_dinh = chay_cv(kq_cao, nhan, mau_cv, W, so_fold=5, seed=20260816)
+tu_do = chay_cv(kq_cao, nhan, mau_cv, W, so_fold=5, seed=20260816, publish=None)
+
+kiem("publish=None quet ca nguong publish (khong bi ep ve 80)",
+     any(g["publish"] != PUBLISH_CO_DINH for g in tu_do["nguong_tung_fold"]),
+     f"nguong thu duoc {tu_do['nguong_tung_fold']}")
+kiem("quet tu do cho Kappa cao hon khi publish=80 doan sai",
+     tu_do["kappa_cv"] > co_dinh["kappa_cv"],
+     f"co dinh {co_dinh['kappa_cv']:.3f} vs tu do {tu_do['kappa_cv']:.3f}")
+
 sys.exit(1 if _hong else 0)

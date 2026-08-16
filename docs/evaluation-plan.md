@@ -88,7 +88,8 @@ Năm điểm chặn quan trọng:
 | Gold set | `labels.csv` 33/33, phân bố **10** `rejected` / **23** `needs_revision` / **0** `publish` (sau đợt rà lại 2026-08-10, xem `technical-debt.md` A3) |
 | KB fact-check | **5 mục** (thêm VF e34 ngày 2026-08-10, nguồn độc lập với gold set). E2 recall@3 = 1,00 sau khi thêm |
 | E1 | ⚠️ **CHƯA đo trên bản này.** Preflight ngày 2026-08-12 đạt nhưng không gọi API/không tạo output; số 1,79 thuộc code trước B14/CP4 hiện hành |
-| E5 | ⚠️ **CHƯA đo trên bản này.** Kappa **0,713**, accuracy 0,879 thuộc bản 3 trước chốt CP4 (mục 4.5) |
+| E5 | ✅ **Đã đo 2026-08-16.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. ⛔ **Không chốt được ngưỡng** — xem [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md) và `technical-debt.md` mục 8.2 |
+| E6 | ✅ **Đã đo 2026-08-16, $0.** k-fold theo thiết kế đăng ký trước ở mục 4.6.1. Selection bias **+0,000** — dự đoán out-of-fold trùng khít in-sample trên cả 33 mẫu |
 
 > ### ⚠️ Bản khoá cũ có lỗ hổng — phát hiện khi sửa B14
 >
@@ -440,7 +441,11 @@ Kết quả trên 12 bài chẩn đoán: **báo động giả 9 → 1**, và b�
 
 **2. Ngưỡng `publish` không calibrate được.** Bộ tối ưu đẩy nó lên ≥92 chỉ vì gold set **không có mẫu `publish` nào** nên mọi dự đoán `publish` đều sai. Đó là hệ quả của lớp rỗng, không phải calibration thật (`technical-debt.md` mục 6).
 
-**3. CHƯA CÓ TRẦN để diễn giải 0,713.** `annotation-guideline.md` mục 8.2 bắt buộc báo cáo Kappa kèm **trần trên** — Kappa test-retest của chính người gán, chạy sớm nhất **13/08**. Không có trần thì 0,713 không nói được là tốt hay kém: nếu trần là 0,75 thì đây là kết quả rất tốt; nếu trần là 0,95 thì còn khoảng cách lớn.
+**3. ~~CHƯA CÓ TRẦN~~ — đã có trần từ 2026-08-15, nhưng nó không giúp được nhiều.** Test–retest cho Kappa **1,000** (`technical-debt.md` mục 8.3). Trần bằng 1,000 là **hướng an toàn** theo `annotation-guideline.md` mục 8.2, nhưng **mất chức năng chẩn đoán**: với trần 1,000 thì không bao giờ kích hoạt được cảnh báo "AI cao bất thường so với trần". Và bản thân trần đó đứng trên n=4 với 3/4 mẫu cùng một nhãn — phải trích kèm ba giới hạn ở mục 8.3.
+
+> **Cập nhật 2026-08-16 — bản 4 đã đo, và ba điều trên vẫn đúng, nhưng thứ tự quan trọng đã đổi.** Điểm 2 hoá ra không phải một chú thích bên lề mà là **phát hiện lớn nhất**: với `publish = 80` đang chạy thật, hệ thống đề xuất `publish` cho **9/33 bài (27%)** mà người gán nhãn nói là chưa đăng được, và Kappa tụt từ 0,713 xuống **0,406**. Toàn bộ khoảng cách giữa hai con số là ngưỡng `publish`. Xem [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
+>
+> Điểm 1 cũng cần chỉnh: điểm Compliance thấp nhất ở bản 4 là **25,0** chứ không phải 33,3, nên `veto = 30` **không** còn nằm dưới mọi điểm. Nhưng kết luận plateau vẫn đúng vì lý do khác — chỉ một mẫu (`P-005a` = 37,5) nằm giữa các giá trị fold chọn (34 và 40), và nó không đổi dự đoán nào.
 
 #### Chưa chốt ngưỡng vào `scoring.yaml`
 

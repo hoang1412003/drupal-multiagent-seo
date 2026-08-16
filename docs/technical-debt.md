@@ -624,8 +624,9 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **Test–retest nhãn đã xong 2026-08-15:** đồng thuận 4/4, Kappa = 1,000, đạt ngưỡng ≥ 0,80. **Bắt buộc trích kèm ba giới hạn** ở mục 8.3 — con số 1,000 đứng một mình là nói sai về mức tin cậy của nhãn. Evidence: [`evidence/test_retest_2026-08-15.md`](evidence/test_retest_2026-08-15.md).
 - ✅ **E1 bản 4 đã chạy 2026-08-16 và ĐẠT:** σ `final_score` = **1,60** < 2 (bản 2 là 1,79), tỉ lệ cùng `decision` 92% (bản 2: 88%), chi phí thật **$3,07**. Dự đoán σ compliance giảm đã được xác nhận (4,68 → 4,02). Evidence: [`evidence/e1_sau_cp4_deadline_guard_report.md`](evidence/e1_sau_cp4_deadline_guard_report.md). Chi tiết và cảnh báo diễn giải ở mục 8.1.
 - ✅ **Thiết kế E6 đã chốt và đăng ký trước (2026-08-16): k-fold**, không tách cứng — 5 fold, chia theo nhóm `source_url` (33 mẫu chỉ từ 30 nguồn), phân tầng theo nhãn, seed `20260816`, kèm quy tắc phá hoà cố định trước. Đầy đủ căn cứ và thiết kế: [`evaluation-plan.md` mục 4.6.1](evaluation-plan.md). Commit của quyết định này **phải là tổ tiên** của commit chứa kết quả E5.
-- ➡️ **Việc kế tiếp:** E5 (mục 8.2), ~$2, cần **xác nhận chi phí riêng**. PHA 1 chấm 33 bài (~$2), PHA 2 quét ngưỡng $0 — k-fold chỉ là cách phân tích khác trên cùng output PHA 1 nên **không tốn thêm đồng nào**. Phải báo cáo **hai** con số cạnh nhau: Kappa in-sample (lạc quan) và Kappa CV (tổng quát hoá).
-- ⛔ **Không tự chạy E5/E3/E6 và không bật `meta.calibrated`:** cổng E1 đã mở nhưng mọi lượt API trả phí vẫn cần người dùng xác nhận riêng; `meta.calibrated` chỉ bật khi E5 hoàn tất và đạt.
+- ✅ **E5 + E6 đã chạy 2026-08-16 ($1,87) — nhưng ⛔ KHÔNG chốt được ngưỡng.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. Selection bias +0,000. Nguyên nhân: `publish_min=80` làm 27% bài bị đề xuất đăng sai, mà gold set không có mẫu `publish` nào để chọn giá trị đúng. Chi tiết bốn phát hiện: mục 8.2. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
+- ➡️ **Việc kế tiếp:** chạy **functional-clean 10 mẫu** (~$0,6, mục 8.6) — bộ **duy nhất** có mẫu kỳ vọng `publish`, và là thứ duy nhất trả lời được câu hỏi mà gold set không trả lời nổi. Rồi chẩn đoán `critical` của P-006a (~$0,06, mục 8.4 chưa đóng hoàn toàn), rồi E3 (~$2, mục 8.7).
+- ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
 
@@ -691,7 +692,34 @@ Preflight ngày 2026-08-12 (không gọi API): legacy guard `REJECTED_BEFORE_PAI
 
 </details>
 
-### 8.2. Đo lại E5 rồi mới chốt ngưỡng — sau 8.1
+### 8.2. E5 + E6 — ✅ ĐÃ CHẠY 2026-08-16, $1,87 — ⛔ NHƯNG KHÔNG CHỐT ĐƯỢC NGƯỠNG
+
+**Đã đo xong. Kết luận: không chốt bộ ngưỡng nào vào `scoring.yaml`, không bật `meta.calibrated`.** Báo cáo đầy đủ: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
+
+| Phép đo | Kappa | Accuracy |
+|---|---|---|
+| Ngưỡng đang chạy (`veto=50, nr=50, publish=80`) | 0,369 | 0,606 |
+| E6 **bản chính** (đăng ký trước, `publish` cố định 80) — CV | **0,406** | 0,636 |
+| E6 **phân tích phụ** (quét cả `publish`) — CV | **0,713** | 0,879 |
+
+Selection bias = **+0,000** ở cả hai: dự đoán out-of-fold trùng khít in-sample trên cả 33 mẫu.
+
+**Vì sao không chốt được — bốn phát hiện:**
+
+1. **`publish_min` là toàn bộ khoảng cách 0,406 → 0,713.** Với `publish=80`, hệ thống đề xuất `publish` cho **9/33 bài (27%)**, **sai cả 9** (8 `needs_revision`, 1 `rejected`). `final_score` cao nhất là 93,3, nên quét tự do chọn `publish=96` — tức **vô hiệu hoá đường ra `publish`**, không phải calibrate nó. Đúng cảnh báo vốn đã ghi ở mục này.
+2. **`needs_revision_min = 50` được xác nhận** — cả 5 fold ở cả hai phân tích đều chọn 50, đúng giá trị đang chạy. Đây là ngưỡng duy nhất có bằng chứng.
+3. **`compliance_veto_below` gần như không xác định được.** Fold chọn 34 (×4) và 40 (×1), nhưng chỉ **một** mẫu (`P-005a` = 37,5) nằm trong `[34,40)` và nó ở fold đã chọn 34 → chênh lệch **không đổi dự đoán nào**. Đổi veto 50→34 chỉ được +0,037 Kappa, trong khi publish 80→96 được +0,307.
+4. **Selection bias bằng 0 nghĩa là không overfit, nhưng cũng nghĩa là quét 441 tổ hợp hầu như không chọn ra thông tin gì** — ngưỡng nằm trên plateau rộng. Ngưỡng ổn định vì dữ liệu không đủ sức phân biệt, không phải vì đã hội tụ.
+
+**⚠️ Kappa 0,713 / accuracy 0,879 trùng khít số bản 3 — nhưng KHÔNG phải vì không có gì đổi.** 13/33 mẫu đổi điểm Compliance, và **2 dự đoán lật**: `G-008` `rejected`→`needs_revision` (**sửa đúng**, đúng ca false-critical mà chốt CP4 nhắm tới — mục 8.5) và `G-015` `needs_revision`→`rejected` (**hỏng đi**). Cùng số lỗi nên chỉ số tổng hợp không đổi, thành phần thì khác. Không được kết luận "CP4 vô tác dụng" từ hai con số bằng nhau.
+
+**Bốn lỗi còn lại chia đúng hai nhóm đối xứng:** `G-011` và `G-020` **bỏ sót A1** (claim tuyệt đối) → đoán nhẹ hơn nhãn người; `G-015` và `P-006a` bị gắn **`critical` sai** → đoán nặng hơn. Đây là hai lỗi hệ thống cụ thể, không phải nhiễu.
+
+**Câu hỏi mở — mục 8.4 chưa đóng hoàn toàn:** mục đó ghi chốt CP4 xử lý **cả P-006a lẫn G-008**. G-008 đã sửa được, **P-006a thì chưa**. File E5 chỉ lưu `co_critical` dạng boolean, không lưu flag sinh ra nó, nên không truy được nguyên nhân từ dữ liệu đã có. **Chưa kết luận CP4 hỏng** — cờ có thể đến từ CP1/CP2/CP3/CP9. Chẩn đoán cần chấm lại riêng P-006a với output flag đầy đủ, ~$0,06.
+
+**Việc nên làm tiếp:** chạy bộ **functional-clean 10 mẫu** (~$0,6, mục 8.6) — đó là bộ **duy nhất** có mẫu kỳ vọng `publish`, và là thứ duy nhất trả lời được câu gold set không trả lời nổi: ngưỡng `publish` có khả thi không. Rồi chẩn đoán P-006a, rồi xem lại recall của CP1.
+
+<details><summary>Bối cảnh trước lượt đo (giữ lại)</summary>
 
 Không được chốt kết quả E5 bản 3 vào `multiagent/config/scoring.yaml`: CP4 đã đổi cả prompt lẫn đường sinh cờ `critical`, đúng đại lượng quyết định nhãn. Chạy E5 vào **file mới** sau khi E1 đạt và có xác nhận riêng cho chi phí; guard phải từ chối file cũ trước API.
 
@@ -713,6 +741,10 @@ meta:
 - `publish ≥ 92` **không phải calibration thật** — nó chỉ phản ánh lớp `publish` rỗng (mục 6). Ghi 92 vào config là mã hoá một hiện vật của gold set thành tham số hệ thống.
 
 Sau E5 bản 4, chỉ chốt ngưỡng mới nếu điều kiện đo đạt; `prompt_version` phải là hash do code tính tại lần đo. Việc xử lý ngưỡng `publish` vẫn cần mentor quyết vì calibration gold set không có lớp publish.
+
+</details>
+
+**Ngưỡng `publish` vẫn cần mentor quyết** — nay có thêm số liệu để quyết: giữ **80** thì 27% bài bị đề xuất đăng sai; đẩy lên **96** thì nhánh `publish` không bao giờ chạy (trên trần `final_score` = 93,3). Gold set không thể chọn hộ vì nó không có mẫu `publish` nào.
 
 ### 8.3. Test-retest nhãn — ✅ ĐÃ CHẠY 2026-08-15, $0
 
