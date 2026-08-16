@@ -266,6 +266,123 @@ class AiReportRenderer {
   }
 
   /**
+   * Nhãn và màu của từng trạng thái băng.
+   *
+   * Bảy nhãn PHẢI khác nhau: trùng nhãn nghĩa là người duyệt không phân biệt
+   * được "chưa chấm" với "đã chấm và đạt" - hai tình huống đòi hành động
+   * ngược nhau.
+   */
+  private const NHAN_TRANG_THAI = [
+    'co_loi' => 'Cần sửa',
+    'chua_cham' => 'Chưa chấm',
+    'dat' => 'Đạt',
+    'veto' => 'Bị từ chối',
+    'stale' => 'Nội dung đã sửa sau chấm',
+    'thieu' => 'Chấm chưa đầy đủ',
+    'loi_json' => 'Không đọc được báo cáo',
+  ];
+
+  /**
+   * Băng trạng thái sticky ở đầu form.
+   *
+   * `data-vf-ai-band` là điểm móc DUY NHẤT của JS. Đổi tên ở đây mà quên sửa
+   * JS thì tương tác chết âm thầm - băng vẫn hiện, thẻ vẫn hiện, chỉ có
+   * Trước/Sau và bộ lọc là không làm gì. Có test khoá lại.
+   */
+  public function bangHtml(?array $report, string $trang_thai): string {
+    $nhan = self::NHAN_TRANG_THAI[$trang_thai] ?? $trang_thai;
+    $so_loi = $this->demLoi($report);
+    $so_field = count(array_filter($report['fields'] ?? [], 'is_array'));
+
+    $out = '<div class="vf-ai-band vf-ai-band--' . $this->esc($trang_thai) . '"'
+      . ' data-vf-ai-band="' . $this->esc($trang_thai) . '">';
+    $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="'
+      . $this->esc($nhan) . '">' . $this->esc($nhan) . '</span>';
+
+    if ($trang_thai === 'veto') {
+      $out .= '<span class="vf-ai-band__veto">VETO</span>';
+    }
+
+    if ($so_loi > 0) {
+      $out .= '<span class="vf-ai-band__dem"><strong>' . $so_loi
+        . ' vấn đề</strong> trên ' . $so_field . ' trường</span>';
+    }
+
+    // === NULL chứ KHÔNG empty(): điểm 0 là điểm hợp lệ, empty(0) trả TRUE
+    // nên nó sẽ bị giấu đi như thể chưa chấm được.
+    $diem = $report['final_score'] ?? NULL;
+    if ($diem !== NULL) {
+      $out .= '<span class="vf-ai-band__diem">Điểm <strong>'
+        . $this->esc($diem) . '</strong>/100</span>';
+    }
+
+    if (!empty($report['veto_reason'])) {
+      $out .= '<span class="vf-ai-band__ly-do">'
+        . $this->esc($report['veto_reason']) . '</span>';
+    }
+    if (!empty($report['scored_at'])) {
+      $out .= '<span class="vf-ai-band__gio">Chấm lúc '
+        . $this->esc($this->dinhDangGio($report['scored_at'])) . '</span>';
+    }
+
+    return $out . '</div>';
+  }
+
+  /**
+   * Thẻ lỗi rich của một field.
+   *
+   * Trả chuỗi rỗng nếu field không có vấn đề gì - gọi được cho mọi field mà
+   * không cần người gọi tự kiểm trước.
+   */
+  public function theLoiHtml(?array $report, string $fieldKey): string {
+    $ds = $report['fields'][$fieldKey] ?? NULL;
+    if (!is_array($ds) || $ds === []) {
+      return '';
+    }
+
+    $ten = self::FIELD_LABELS[$fieldKey] ?? $fieldKey;
+    $out = '<div class="vf-ai-hop" data-vf-ai-hop="' . $this->esc($fieldKey) . '">';
+    $out .= '<div class="vf-ai-hop__dau">AI phát hiện <strong>' . count($ds)
+      . '</strong> vấn đề ở ' . $this->esc($ten) . '</div>';
+    $out .= '<div class="vf-ai-hop__the">';
+
+    foreach ($ds as $i => $muc) {
+      if (!is_array($muc)) {
+        continue;
+      }
+      $muc_hien = self::mucHienThi($muc['severity'] ?? NULL);
+      $out .= '<div class="vf-ai-the vf-ai-the--' . $muc_hien . '"'
+        . ' data-vf-ai-issue="' . $this->esc($fieldKey . '-' . $i) . '"'
+        . ' data-sev="' . $muc_hien . '"'
+        . ' data-field="' . $this->esc($fieldKey) . '">';
+
+      $out .= '<div class="vf-ai-the__dau">';
+      $out .= '<span class="vf-ai-the__ma">' . $this->esc($muc['agent'] ?? '') . '</span>';
+      if ($muc_hien === 'block') {
+        $out .= '<span class="vf-ai-the__chan">CHẶN XUẤT BẢN</span>';
+      }
+      $out .= '</div>';
+
+      if (!empty($muc['label'])) {
+        $out .= '<div class="vf-ai-the__tieu-de">' . $this->esc($muc['label']) . '</div>';
+      }
+      if (!empty($muc['message'])) {
+        $out .= '<div class="vf-ai-the__mo-ta">' . $this->esc($muc['message']) . '</div>';
+      }
+      if (!empty($muc['excerpt'])) {
+        $out .= '<blockquote class="vf-ai-the__trich">'
+          . $this->esc($muc['excerpt']) . '</blockquote>';
+      }
+
+      $out .= '<label class="vf-ai-the__xong">'
+        . '<input type="checkbox" class="vf-ai-xong"> Đã xử lý</label>';
+      $out .= '</div>';
+    }
+
+    return $out . '</div></div>';
+  }
+
+  /**
    * Duyệt mọi mục của mọi field, đếm những mục thoả điều kiện.
    */
   private function demTheo(?array $report, callable $hop_le): int {

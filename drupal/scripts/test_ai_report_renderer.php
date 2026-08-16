@@ -210,4 +210,97 @@ check('demChan tren bao cao NULL', $r->demChan(NULL), 0);
 check('demLoi dem het moi field', $r->demLoi($hon_hop), 5);
 check('demLoi tren NULL', $r->demLoi(NULL), 0);
 
+// --- bangHtml(): bang sticky --------------------------------------------
+$bao_day = [
+  'decision' => 'needs_revision',
+  'final_score' => 76.5,
+  'scored_at' => '2026-08-16T09:45:17+00:00',
+  'fields' => [
+    'title' => [['agent' => 'Compliance', 'label' => 'CP1 abc',
+                 'severity' => 'critical', 'message' => 'sua di']],
+    'body' => [['agent' => 'SEO', 'label' => 'Do dai', 'severity' => NULL,
+                'message' => 'rut ngan']],
+  ],
+];
+
+$bang = $r->bangHtml($bao_day, 'co_loi');
+kiem('bang co data-vf-ai-band de JS bam vao',
+  str_contains($bang, 'data-vf-ai-band="co_loi"'), $bang);
+kiem('bang dem dung so van de va so truong',
+  str_contains($bang, '2 vấn đề') && str_contains($bang, '2 trường'), $bang);
+kiem('bang co diem tong', str_contains($bang, '76.5'));
+
+// Moi trang thai phai co nhan RIENG. Trung nhan nghia la nguoi duyet khong
+// phan biet duoc "chua cham" voi "da cham va dat".
+$nhan = [];
+foreach (['co_loi', 'chua_cham', 'dat', 'veto', 'stale', 'thieu', 'loi_json'] as $t) {
+  preg_match('/data-vf-ai-nhan="([^"]*)"/', $r->bangHtml($bao_day, $t), $m);
+  $nhan[$t] = $m[1] ?? '';
+}
+kiem('bay trang thai co bay nhan khac nhau',
+  count(array_unique($nhan)) === 7, json_encode($nhan, JSON_UNESCAPED_UNICODE));
+kiem('trang thai veto co badge VETO',
+  str_contains($r->bangHtml($bao_day, 'veto'), 'VETO'));
+
+// --- theLoiHtml(): the loi rich, kem data-* cho JS ----------------------
+// JS bam vao data-vf-ai-issue / data-sev / data-field. Doi ten o PHP ma
+// quen sua JS thi tuong tac chet AM THAM: bang van hien, the van hien, chi
+// co nut Truoc/Sau va bo loc la khong lam gi ca. Khoa lai o day.
+$the = $r->theLoiHtml($bao_day, 'title');
+kiem('the co data-vf-ai-issue', str_contains($the, 'data-vf-ai-issue'));
+kiem('the co data-sev="block" cho critical',
+  str_contains($the, 'data-sev="block"'), $the);
+kiem('the co data-field="title"', str_contains($the, 'data-field="title"'));
+kiem('the co badge CHAN XUAT BAN cho block',
+  str_contains($the, 'CHẶN XUẤT BẢN'));
+
+$the_seo = $r->theLoiHtml($bao_day, 'body');
+kiem('severity NULL -> data-sev="fix", KHONG phai block',
+  str_contains($the_seo, 'data-sev="fix"') && !str_contains($the_seo, 'data-sev="block"'),
+  $the_seo);
+kiem('the cua agent thuong KHONG co badge chan xuat ban',
+  !str_contains($the_seo, 'CHẶN XUẤT BẢN'));
+
+kiem('field khong co loi -> chuoi rong', $r->theLoiHtml($bao_day, 'summary') === '');
+
+// --- XSS tren markup MOI (bat buoc, prompt-injection.md M4) -------------
+// Bao cao chua trich dan nguyen van bai viet va van ban do LLM sinh. Markup
+// moi phai escape y het markup cu - them giao dien khong duoc mo lai lo hong
+// da vá.
+$xss_moi = [
+  'decision' => '<script>alert(1)</script>',
+  'final_score' => 50,
+  'fields' => ['title' => [[
+    'agent' => '<img src=x onerror=alert(1)>',
+    'label' => '"><script>alert(2)</script>',
+    'message' => '<b>dam</b>',
+    'excerpt' => '"><svg onload=alert(3)>',
+    'severity' => 'critical',
+  ]]],
+];
+$h_bang = $r->bangHtml($xss_moi, 'co_loi');
+$h_the = $r->theLoiHtml($xss_moi, 'title');
+kiem('XSS bang: khong con <script>', !str_contains($h_bang, '<script>'), $h_bang);
+kiem('XSS the: khong con <script>', !str_contains($h_the, '<script>'), $h_the);
+kiem('XSS the: khong con <img', !str_contains($h_the, '<img'), $h_the);
+kiem('XSS the: khong con <svg', !str_contains($h_the, '<svg'), $h_the);
+kiem('XSS the: noi dung van hien duoi dang chu',
+  str_contains($h_the, '&lt;script&gt;'), $h_the);
+
+// Payload DI VAO THUOC TINH, khong phai vao text node. Day moi la cho dang
+// lo cua markup moi: ban cu chi do gia tri vao text, ban nay do `fieldKey`
+// vao data-field/data-vf-ai-hop. Ma khoa field den tu `report_json.fields`,
+// tuc tu output cua agent - khong duoc coi la dang tin.
+$xss_attr = ['fields' => ['x" onmouseover="alert(1)' => [
+  ['agent' => 'SEO', 'label' => 'abc', 'severity' => NULL],
+]]];
+$h_attr = $r->theLoiHtml($xss_attr, 'x" onmouseover="alert(1)');
+kiem('XSS thuoc tinh: dau nhay kep bi escape, khong thoat ra duoc',
+  !str_contains($h_attr, '" onmouseover='), $h_attr);
+kiem('XSS thuoc tinh: van render duoc, khong vo', $h_attr !== '');
+
+$h_band_attr = $r->bangHtml($bao_day, 'x" onmouseover="alert(1)');
+kiem('XSS thuoc tinh tren bang: dau nhay kep bi escape',
+  !str_contains($h_band_attr, '" onmouseover='), $h_band_attr);
+
 exit($failed ? 1 : 0);
