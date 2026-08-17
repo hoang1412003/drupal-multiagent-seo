@@ -14,7 +14,9 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import text_utils
+import compliance_analysis as ca
 from agents import compliance
+from decision_policy import POLICY_V1, POLICY_V2, PolicyContractError
 from scoring import score_from_criteria, severity_for
 from text_utils import strip_html
 
@@ -189,6 +191,101 @@ def test_cp5_theo_ba_muc():
 def test_cp5_na_khi_bai_khong_co_claim_km():
     assert _muc(_chay(BODY_KHONG_SO), "CP5") is None
     print("[PASS] CP5 khong co claim km -> NA (may ket luan, khong doi giua cac lan)")
+
+
+def test_cp5_v2_loai_ti_le_nhung_giu_quang_duong():
+    text = {
+        "body": (
+            "Xe tiêu thụ 13,4 kWh/100km, chi phí 1.000 đồng/km. "
+            "Quãng đường di chuyển 80km sau một lần sạc."
+        )
+    }
+    assert ca.claim_tam_hoat_dong(text, contextual=True) == [
+        {"field": "body", "text": "80km"}
+    ]
+    print("[PASS] CP5 v2 loai rate/cost, giu 80km tam hoat dong")
+
+
+def test_cp5_v2_positive_va_negative_literal():
+    positive = (
+        ("Xe đi được 285 km trong điều kiện tiêu chuẩn.", "285 km"),
+        ("Tầm hoạt động đạt 420 km theo công bố.", "420 km"),
+        ("Sau một lần sạc, xe đi được 300 km.", "300 km"),
+    )
+    for body, expected in positive:
+        assert ca.claim_tam_hoat_dong(
+            {"body": body}, contextual=True
+        ) == [{"field": "body", "text": expected}], body
+
+    negative = (
+        "Mức tiêu thụ 7,8 lít/100km.",
+        "Mức tiêu thụ được trình bày dưới dạng 13,4/100km.",
+        "Chi phí trong 1km phụ thuộc biểu giá điện.",
+        "Chi phí 100 đồng/km chỉ là ví dụ.",
+    )
+    for body in negative:
+        assert ca.claim_tam_hoat_dong({"body": body}, contextual=True) == [], body
+    print("[PASS] CP5 v2 positive range va negative rate/cost literal")
+
+
+def test_cp5_legacy_co_y_giu_hanh_vi_cu():
+    body = (
+        "Xe tiêu thụ 13,4 kWh/100km, chi phí 1.000 đồng/km. "
+        "Quãng đường di chuyển 80km sau một lần sạc."
+    )
+    assert ca.claim_tam_hoat_dong({"body": body}) == [
+        {"field": "body", "text": "100km"},
+        {"field": "body", "text": "80km"},
+    ]
+    implicit_v1 = _chay(body)
+    explicit_v1 = _chay(body, policy_version=POLICY_V1)
+    assert explicit_v1 == implicit_v1
+    assert implicit_v1["score"] == 33.3
+    assert next(
+        item for item in implicit_v1["criteria"] if item["id"] == "CP5"
+    )["occurrences"] == [
+        {"field": "body", "text": "100km"},
+        {"field": "body", "text": "80km"},
+    ]
+    print("[PASS] CP5 legacy/default giu score va occurrences cu")
+
+
+def test_cp5_run_route_exact_policy_v2():
+    body = (
+        "Xe tiêu thụ 13,4 kWh/100km, chi phí 1.000 đồng/km. "
+        "Quãng đường di chuyển 80km sau một lần sạc."
+    )
+    result = _chay(body, policy_version=POLICY_V2)
+    cp5 = next(item for item in result["criteria"] if item["id"] == "CP5")
+    assert cp5["level"] == 0
+    assert cp5["occurrences"] == [{"field": "body", "text": "80km"}]
+    print("[PASS] compliance.run route exact v2 vao contextual CP5")
+
+
+def test_cp5_unknown_policy_fail_truoc_callback():
+    calls = {"llm": 0, "cp3": 0}
+
+    def llm(*args, **kwargs):
+        calls["llm"] += 1
+        raise AssertionError("LLM callback khong duoc goi")
+
+    def cp3(*args, **kwargs):
+        calls["cp3"] += 1
+        raise AssertionError("CP3 callback khong duoc goi")
+
+    try:
+        compliance.run(
+            {"title": "", "body": "Xe đi được 80 km.", "meta_description": ""},
+            danh_gia_llm=llm,
+            danh_gia_cp3=cp3,
+            policy_version="cam-nang-vn-v2-beta",
+        )
+    except PolicyContractError:
+        pass
+    else:
+        raise AssertionError("unknown policy_version phai bi tu choi")
+    assert calls == {"llm": 0, "cp3": 0}
+    print("[PASS] unknown policy fail truoc LLM/CP3 callback")
 
 
 def test_cp6_theo_ba_muc():
@@ -652,6 +749,11 @@ if __name__ == "__main__":
         test_cp1_sach_thi_muc_2,
         test_cp5_theo_ba_muc,
         test_cp5_na_khi_bai_khong_co_claim_km,
+        test_cp5_v2_loai_ti_le_nhung_giu_quang_duong,
+        test_cp5_v2_positive_va_negative_literal,
+        test_cp5_legacy_co_y_giu_hanh_vi_cu,
+        test_cp5_run_route_exact_policy_v2,
+        test_cp5_unknown_policy_fail_truoc_callback,
         test_cp6_theo_ba_muc,
         test_cp6_moc_thoi_gian_xa_chu_sac_thi_khong_tinh,
         test_cp8_may_chot_ap_dung_hay_na,

@@ -26,6 +26,7 @@ import re
 import compliance_analysis as ca
 from ai_core import call_agent
 from agents import fact_check
+from decision_policy import POLICY_V1, POLICY_V2, require_policy_version
 from prompt_builder import boc_noi_dung, boc_phan_an, chu_trong_doan_an
 from scoring import score_from_criteria, severity_for
 from text_utils import strip_html, trich_dan_co_that
@@ -213,13 +214,13 @@ def _cp1_claim_tuyet_doi(text_theo_field: dict) -> dict:
 # ------------------------------------------------------- CP5, CP6: máy
 
 
-def _cp5_tam_hoat_dong(text_theo_field: dict) -> dict:
+def _cp5_tam_hoat_dong(text_theo_field: dict, *, contextual: bool = False) -> dict:
     """Claim quãng đường có nêu điều kiện đo không (mã lỗi B1).
 
     Không có claim km nào -> NA. Đây là NA đúng nghĩa "bài không bàn tới",
     và giờ do máy kết luận nên nó không đổi giữa các lần chấm.
     """
-    claims = ca.claim_tam_hoat_dong(text_theo_field)
+    claims = ca.claim_tam_hoat_dong(text_theo_field, contextual=contextual)
     if not claims:
         return _tieu_chi("CP5", None)
     if ca.co_chuan_do(text_theo_field):
@@ -606,7 +607,8 @@ def _cp9_chi_dan_an(doan_an) -> list:
 
 
 def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
-        danh_gia_llm=_danh_gia_llm, danh_gia_cp3=None) -> dict | None:
+        danh_gia_llm=_danh_gia_llm, danh_gia_cp3=None,
+        policy_version: str = POLICY_V1) -> dict | None:
     """Chấm Compliance. Trả None khi không tiêu chí nào áp dụng được.
 
     None nghĩa là CHƯA CHẤM ĐƯỢC, khác hẳn 0 điểm: Aggregator gặp
@@ -617,6 +619,10 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
     `danh_gia_cp3` giải ở thời điểm gọi, không ở default, để test thay được
     cả module fact_check.
     """
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
     if danh_gia_cp3 is None:
         danh_gia_cp3 = fact_check.danh_gia
     text_theo_field = {f: strip_html(fields.get(f) or "") for f in _FIELDS}
@@ -644,7 +650,10 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         llm["CP2"],
         _cp3_so_lieu(fields, content_type, langcode, danh_gia_cp3),
         _chot_cp4(llm["CP4"], text_theo_field),
-        _cp5_tam_hoat_dong(text_theo_field),
+        _cp5_tam_hoat_dong(
+            text_theo_field,
+            contextual=(policy_version == POLICY_V2),
+        ),
         _cp6_thoi_gian_sac(text_theo_field),
         llm["CP7"],
         _chot_cp8(llm["CP8"], text_theo_field, llm_hong),
