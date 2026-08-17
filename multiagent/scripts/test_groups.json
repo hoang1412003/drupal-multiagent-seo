@@ -17,6 +17,7 @@
     "test_config.py",
     "test_cp9_chi_dan_an.py",
     "test_cq_rubric.py",
+    "test_decision_policy.py",
     "test_drupal_client_worker.py",
     "test_drupal_connector.py",
     "test_e2_evidence_export.py",
