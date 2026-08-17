@@ -26,6 +26,8 @@
     "test_eval_baseline_single.py",
     "test_eval_calibration_dataset.py",
     "test_eval_kfold.py",
+    "test_eval_policy_v2.py",
+    "test_eval_policy_v2_metrics.py",
     "test_eval_stability_resume.py",
     "test_evaluation_datasets.py",
     "test_extract_gold_sample.py",
