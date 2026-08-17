@@ -315,11 +315,11 @@ Nợ còn mở sau MVP: một site/một thị trường, local auth chưa SSO, 
 
 ## 6. Aggregator / Scoring (module tất định, không gọi LLM)
 
-Node cuối cùng nhận đủ 4 kết quả, tổng hợp thành một điểm số tổng và một quyết định duy nhất.
+Node cuối cùng nhận đủ 4 kết quả, tổng hợp thành một điểm số tổng và một quyết định duy nhất. Từ 2026-08-17, đường này được khóa bằng `policy_version`: `cam-nang-vn-v1` giữ nguyên hành vi lịch sử đã dùng cho E1/E5/E6; `cam-nang-vn-v2` là candidate policy theo mã lỗi A/B. **v2 chưa active/cutover và chưa có kết quả calibration** — có code không đồng nghĩa đã được chọn làm policy production.
 
-**Aggregator là module tính toán tất định (deterministic), không gọi LLM** - khác với 4 agent chuyên biệt. Điểm tổng và quyết định được tính bằng công thức trọng số + so ngưỡng cố định (mục 6.1-6.2), nên chạy nhiều lần trên cùng đầu vào luôn ra cùng kết quả. Đây là điều kiện bắt buộc để calibrate ngưỡng từ gold set ở Sprint 3 (mục 8.2): nếu để LLM tự "cảm nhận" rồi phán điểm tổng thì kết quả không tái lập được, không thể tính F1/Kappa ổn định hay chọn ngưỡng tối ưu. Tên gọi "Aggregator/Scoring" theo sơ đồ mentor được giữ nguyên, nhưng về bản chất kỹ thuật nó là một hàm thuần, không phải một LLM agent.
+**Aggregator là module tính toán tất định (deterministic), không gọi LLM** - khác với 4 agent chuyên biệt. Ở v1, điểm tổng và quyết định được tính bằng công thức trọng số + so ngưỡng cố định (mục 6.1-6.2). Ở v2 candidate, điểm vẫn được tính để chẩn đoán nhưng quyết định chỉ dựa trên finding A/B và độ đầy đủ assessment (mục 6.2a). Cả hai route đều tất định sau khi đã có output bốn agent. Tên gọi "Aggregator/Scoring" theo sơ đồ mentor được giữ nguyên, nhưng về bản chất kỹ thuật nó là một hàm thuần, không phải một LLM agent.
 
-### 6.1. Công thức tính điểm tổng (trung bình có trọng số)
+### 6.1. Công thức tính điểm tổng v1 (trung bình có trọng số)
 
 Các agent không có mức độ quan trọng như nhau - Compliance (rủi ro pháp lý) được đề xuất trọng số cao nhất, SEO thấp nhất vì chỉ ảnh hưởng thứ hạng tìm kiếm chứ không gây hậu quả nghiêm trọng:
 
@@ -378,7 +378,7 @@ Trọng số suy ra: **Compliance 0.42, Content 0.23, Brand 0.23, SEO 0.12**, v�
 - NIST AI RMF + EU DSA áp dụng trong bối cảnh kiểm duyệt nội dung (tài liệu tổng hợp): prudentpartners.in/content-moderation-services-trust-and-safety-guide/
 - Google Search Quality Rater Guidelines - YMYL đòi hỏi "tiêu chuẩn tin cậy/an toàn nghiêm ngặt nhất": guidelines.raterhub.com/searchqualityevaluatorguidelines.pdf (giải thích dễ đọc: searchengineland.com/guide/ymyl)
 
-### 6.2. Quy tắc ra quyết định
+### 6.2. Quy tắc ra quyết định v1 (lịch sử)
 
 ```
 if compliance.score < 50 hoặc có flag "severity: critical":
@@ -405,6 +405,37 @@ Tuy nhiên, giống như trọng số ở mục 6.1, **không có nguồn nào c
 
 - Youden's Index, phương pháp thống kê chuẩn để chọn ngưỡng phân loại tối ưu từ ROC curve: sciencedirect.com/topics/medicine-and-dentistry/youden-index
 - Mô hình three-tier moderation (auto-approve/human-review/auto-reject) và ngưỡng mặc định phổ biến 0.7-0.8: mux.com/articles/ai-content-moderation-ugc-video-pipeline-mux-robots
+
+### 6.2a. Candidate policy v2: quyết định theo mã lỗi và coverage
+
+`cam-nang-vn-v2` không dùng `publish_min`, `needs_revision_min` hoặc điểm
+Compliance để quyết định. Aggregator tái dùng điểm v1 chỉ làm số chẩn đoán,
+rồi gọi decision engine thuần theo đúng thứ tự ưu tiên:
+
+```
+nếu có finding nhóm A:       rejected
+ngược lại, nếu có nhóm B:    needs_revision
+ngược lại, nếu thiếu check:  needs_revision
+ngược lại:                   publish
+```
+
+Finding chỉ có hiệu lực khi đi từ mapping criterion/policy đã khai báo và có
+bằng chứng khớp nội dung. Mỗi agent đồng thời trả `unavailable_checks`; decision
+engine tổng hợp thành `coverage`. Vì vậy provider lỗi hoặc thiếu một check cần
+LLM không thể vô tình biến thành “không có lỗi” rồi tự publish. Các check máy
+đã quyết định vẫn được tính là đã đánh giá, không bị ghi unavailable chỉ vì
+LLM khác bị lỗi.
+
+Worker truyền exact `policy_version` của job và một `assessment_as_of` UTC duy
+nhất cho cả run. Orchestrator xác thực version trước fan-out; version lạ dừng
+trước khi gọi bốn agent. Báo cáo v2 bổ sung `decision_basis`,
+`effective_findings`, `advisory_findings`, `coverage` và
+`incomplete_assessment`, đồng thời giữ các field report v1 để consumer cũ vẫn
+đọc được.
+
+Đây mới là **candidate flow** để chạy phép calibration/evaluation versioned
+riêng. Chưa có cutover production và không được dùng code hiện diện như bằng
+chứng rằng v2 đã đạt metric hoặc thay thế kết quả v1.
 
 ### 6.3. Output cuối cùng
 

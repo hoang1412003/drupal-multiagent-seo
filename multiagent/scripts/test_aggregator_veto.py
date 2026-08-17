@@ -11,7 +11,8 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from graph import aggregator_node
+from decision_policy import POLICY_V1
+from graph import aggregate_score_v1, aggregator_node
 
 CRITICAL_FLAG = {
     "severity": "critical",
@@ -61,17 +62,20 @@ CASES = [
 if __name__ == "__main__":
     failed = False
     for label, state, expected_decision, expect_veto_reason in CASES:
-        result = aggregator_node(state)
+        legacy_result = aggregate_score_v1(state)
+        result = aggregator_node({**state, "policy_version": POLICY_V1})
         report = result["report"]
         decision_ok = report["decision"] == expected_decision
         veto_ok = ("veto_reason" in report) == expect_veto_reason
-        status = "PASS" if (decision_ok and veto_ok) else "FAIL"
+        snapshot_ok = result == legacy_result
+        status = "PASS" if (decision_ok and veto_ok and snapshot_ok) else "FAIL"
         if status == "FAIL":
             failed = True
         print(
             f"[{status}] {label}\n"
             f"    decision={report['decision']} (ky vong {expected_decision}), "
             f"veto_reason={'co' if 'veto_reason' in report else 'khong'} "
-            f"(ky vong {'co' if expect_veto_reason else 'khong'})"
+            f"(ky vong {'co' if expect_veto_reason else 'khong'}), "
+            f"v1_snapshot={'khop' if snapshot_ok else 'lech'}"
         )
     sys.exit(1 if failed else 0)

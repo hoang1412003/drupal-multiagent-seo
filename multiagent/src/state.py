@@ -1,8 +1,13 @@
-from typing import Literal, Optional, TypedDict
+from typing import Literal, NotRequired, Optional, TypedDict
 
 
 class ContentReviewState(TypedDict):
     node_id: str
+    # Version duong quyet dinh va ngay danh gia di xuyen graph. NotRequired
+    # giu tuong thich voi script legacy: thieu policy_version duoc normalize
+    # thanh v1 tai orchestrator, con v2 bat buoc co assessment_as_of.
+    policy_version: NotRequired[str]
+    assessment_as_of: NotRequired[str]
     # Khóa tra config trọng số/ngưỡng (docs/config-spec.md mục 4). Không
     # hard-code "vi" ở đâu trong logic agent - đây là một trong ba điểm giữ
     # sẵn để mở rộng ngôn ngữ/loại nội dung mà không đập đi làm lại

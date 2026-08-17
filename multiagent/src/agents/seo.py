@@ -288,17 +288,22 @@ def run(fields: dict, *, danh_gia_llm=_danh_gia_llm,
     can_hoi = tuple(m for m in _MA_LLM if m not in da_chot)
 
     tu_llm, main_keyword = {}, ""
+    unavailable_checks = []
     if can_hoi:
         try:
             kq = danh_gia_llm(fields, can_hoi)
             tu_llm = kq["criteria"]
             main_keyword = kq.get("main_keyword", "")
+            # Callback hop le nhung bo sot ma duoc hoi van la assessment
+            # khong day du; khong duoc ngam coi NA la da danh gia.
+            unavailable_checks = [m for m in can_hoi if m not in tu_llm]
         except Exception:
             # LLM lỗi -> các mã nó phụ trách thành NA (bị loại khỏi cả tử số
             # lẫn mẫu số), KHÔNG phải 0. Bốn tiêu chí máy chấm vẫn ra điểm -
             # đúng kiểu suy giảm có kiểm soát mà Brand Voice đã chứng minh khi
             # API hết hạn mức (technical-debt.md mục 5).
             tu_llm = {}
+            unavailable_checks = list(can_hoi)
 
     def lay(ma):
         """Tiêu chí LLM chấm. Máy đã chốt -> dùng của máy. LLM lỗi/thiếu -> NA."""
@@ -327,4 +332,5 @@ def run(fields: dict, *, danh_gia_llm=_danh_gia_llm,
         "main_keyword": main_keyword,
         "issues": _issues_from_criteria(criteria),
         "criteria": criteria,
+        "unavailable_checks": unavailable_checks,
     }

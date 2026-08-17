@@ -376,6 +376,10 @@ def chay_mot_job(
         # gioi nay, roi worker PATCH lan hai sau audit.
         invoke = build_graph(include_write_back=False).invoke
 
+    # Mot moc UTC duy nhat cho toan bo assessment. Khong de tung node tu doc
+    # dong ho vi run qua nua dem co the danh gia title nam cu theo hai ngay.
+    assessment_as_of = datetime.now(timezone.utc).date().isoformat()
+
     ai_core.USAGE_LOG.clear()
     da_ghi_usage = False
     bat_dau = time.monotonic()
@@ -394,6 +398,8 @@ def chay_mot_job(
                     "node_id": node_id,
                     "content_type": job["content_type"],
                     "langcode": job["langcode"],
+                    "policy_version": job["policy_version"],
+                    "assessment_as_of": assessment_as_of,
                 })
         except Exception as e:
             return q.fail(conn, job["id"], f"internal: {e.__class__.__name__}: {e}")

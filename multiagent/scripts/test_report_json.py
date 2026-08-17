@@ -61,6 +61,7 @@ def test_field_none_coi_nhu_rong():
 
 
 from graph import _build_report_json
+from decision_policy import POLICY_V1, POLICY_V2
 
 STATE_MAU = {
     "node_id": "n1",
@@ -92,11 +93,54 @@ STATE_MAU = {
 def test_cau_truc_co_ban():
     j = _build_report_json(STATE_MAU)
     assert j["version"] == 1
+    assert j["policy_version"] == POLICY_V1
     assert j["decision"] == "needs_revision"
     assert j["final_score"] == 76.5
     assert len(j["content_hash"]) == 64
     assert j["scored_at"], "phai co moc thoi gian"
     print("[PASS] cau truc co ban day du")
+
+
+def test_report_v2_co_basis_findings_coverage_va_giu_field_cu():
+    finding = {
+        "defect_code": "B8", "field": "body", "evidence": "cau loi",
+    }
+    coverage = {
+        "required_checks": ["A1", "B8"],
+        "assessed_checks": ["A1", "B8"],
+        "not_applicable_checks": [],
+        "unavailable_checks": [],
+        "complete": True,
+    }
+    state = {
+        **STATE_MAU,
+        "policy_version": POLICY_V2,
+        "report": {
+            **STATE_MAU["report"],
+            "policy_version": POLICY_V2,
+            "decision_basis": {
+                "highest_group": "B",
+                "blocking_codes": ["B8"],
+                "reason": "defect",
+            },
+            "effective_findings": [finding],
+            "advisory_findings": [{"source_check": "SEO1"}],
+            "coverage": coverage,
+            "incomplete_assessment": False,
+        },
+    }
+    j = _build_report_json(state)
+    assert j["policy_version"] == POLICY_V2
+    assert j["decision_basis"]["blocking_codes"] == ["B8"]
+    assert j["effective_findings"] == [finding]
+    assert j["advisory_findings"] == [{"source_check": "SEO1"}]
+    assert j["coverage"] == coverage
+    assert j["incomplete_assessment"] is False
+    assert j["version"] == 1
+    assert j["decision"] == "needs_revision"
+    assert j["final_score"] == 76.5
+    assert "fields" in j and "missing_agents" in j
+    print("[PASS] report v2 co policy basis/findings/coverage va giu field cu")
 
 
 def test_issue_gom_dung_field():
@@ -273,6 +317,7 @@ if __name__ == "__main__":
         test_field_thieu_coi_nhu_rong,
         test_field_none_coi_nhu_rong,
         test_cau_truc_co_ban,
+        test_report_v2_co_basis_findings_coverage_va_giu_field_cu,
         test_issue_gom_dung_field,
         test_severity_chi_tu_compliance,
         test_compliance_message_la_none,

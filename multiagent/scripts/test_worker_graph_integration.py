@@ -12,6 +12,7 @@ thay bang ham nem loi - bat ky lan goi HTTP nao cung lam test do ngay.
 import os
 import sys
 from contextlib import nullcontext
+from datetime import datetime as RealDatetime, timezone
 from uuid import UUID, uuid4
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -119,7 +120,7 @@ def test_worker_voi_graph_mac_dinh_chi_patch_mot_lan():
     assert ket["content_hash_version"] == 2
 
 
-def _chay_va_kiem() -> dict:
+def _chay_va_kiem(*, policy_version="cam-nang-vn-v1", invoke=None) -> dict:
     fields = {
         "title": "Huong dan sac xe dien",
         "body": "<p>Noi dung mau day du de chay graph.</p>",
@@ -138,7 +139,7 @@ def _chay_va_kiem() -> dict:
         "content_hash_version": 2,
         "site_id": UUID("00000000-0000-4000-8000-000000000001"),
         "profile_id": UUID("00000000-0000-4000-8000-000000000002"),
-        "policy_version": "cam-nang-vn-v1",
+        "policy_version": policy_version,
         "content_type": "cam_nang",
         "langcode": "vi",
         "correlation_id": uuid4(),
@@ -167,7 +168,7 @@ def _chay_va_kiem() -> dict:
         # Giu NGUYEN fetch_content that de di xuyen qua duong delegation moi.
         (graph, "fetch_content", drupal_client.fetch_content),
         (drupal_client, "_request_with_retry", _khong_duoc_goi_http),
-        (graph.content_quality, "run", lambda article: _ket_qua(80.0)),
+        (graph.content_quality, "run", lambda article, **keys: _ket_qua(80.0)),
         (graph.seo, "run", lambda article: _ket_qua(80.0)),
         (graph.brand_voice, "run", lambda article, **keys: _ket_qua(80.0)),
         (graph.compliance, "run", lambda article, **keys: _ket_qua(80.0)),
@@ -187,7 +188,9 @@ def _chay_va_kiem() -> dict:
     for obj, name, replacement in replacements:
         setattr(obj, name, replacement)
     try:
-        result = worker.chay_mot_job(_FakeConn(), job, connector=connector)
+        result = worker.chay_mot_job(
+            _FakeConn(), job, connector=connector, invoke=invoke
+        )
     finally:
         for obj, name, original in reversed(originals):
             setattr(obj, name, original)
@@ -209,11 +212,51 @@ def _chay_va_kiem() -> dict:
     }
 
 
+def test_worker_truyen_exact_policy_va_chup_ngay_utc_mot_lan():
+    seen = []
+    now_calls = []
+
+    class FixedDatetime:
+        @classmethod
+        def now(cls, tz):
+            now_calls.append(tz)
+            return RealDatetime(2026, 8, 17, 23, 59, tzinfo=timezone.utc)
+
+    def invoke(state):
+        seen.append(dict(state))
+        return {
+            **state,
+            "decision": "publish",
+            "final_score": 12.0,
+            "report": {
+                "node_id": state["node_id"],
+                "decision": "publish",
+                "final_score": 12.0,
+                "missing_agents": [],
+                "details": {},
+            },
+        }
+
+    old_datetime = worker.datetime
+    worker.datetime = FixedDatetime
+    try:
+        _chay_va_kiem(policy_version="cam-nang-vn-v2", invoke=invoke)
+    finally:
+        worker.datetime = old_datetime
+
+    assert len(seen) == 1
+    assert seen[0]["policy_version"] == "cam-nang-vn-v2"
+    assert seen[0]["assessment_as_of"] == "2026-08-17"
+    assert now_calls == [timezone.utc], now_calls
+    print("[PASS] worker truyen exact v2 + assessment UTC chup dung mot lan")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
         test_worker_voi_graph_mac_dinh_chi_patch_mot_lan,
         test_instrumentation_usage_khong_doi_output_cham_diem,
+        test_worker_truyen_exact_policy_va_chup_ngay_utc_mot_lan,
     ):
         try:
             fn()

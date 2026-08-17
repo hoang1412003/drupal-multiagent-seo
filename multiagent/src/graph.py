@@ -15,6 +15,12 @@ from langgraph.graph import END, START, StateGraph
 import ai_core
 import config
 from agents import brand_voice, compliance, content_quality, seo
+from decision_policy import (
+    POLICY_V1,
+    POLICY_V2,
+    evaluate as evaluate_decision_policy,
+    require_policy_version,
+)
 from drupal_client import fetch_content, write_back
 from state import ContentReviewState
 from text_utils import content_hash
@@ -58,6 +64,13 @@ def _config_cua(state: ContentReviewState) -> dict:
     return khoi
 
 
+def _policy_cua(state: ContentReviewState) -> str:
+    """Normalize script legacy ve v1, tu choi moi version khong biet."""
+    return require_policy_version(
+        state.get("policy_version"), allow_legacy_default=True
+    )
+
+
 def fetch_node(state: ContentReviewState) -> dict:
     content = fetch_content(state["node_id"])
     return {
@@ -67,14 +80,17 @@ def fetch_node(state: ContentReviewState) -> dict:
 
 
 def orchestrator_node(state: ContentReviewState) -> dict:
-    # Hiện chỉ chuyển tiếp (pass-through); để dành cho logic kiểm tra trước
-    # khi phát cho agent sau này (VD: bỏ qua hết nếu body rỗng/quá ngắn).
-    return {}
+    # Validate TRUOC fan-out: version la/sai khong duoc cham chung mot phan,
+    # cung khong duoc tieu bat ky provider call nao roi moi that bai.
+    return {"policy_version": _policy_cua(state)}
 
 
 def content_quality_node(state: ContentReviewState) -> dict:
+    policy_version = _policy_cua(state)
     try:
-        result = content_quality.run(state["fields"])
+        result = content_quality.run(
+            state["fields"], policy_version=policy_version
+        )
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"content_quality_result": result}
@@ -99,16 +115,22 @@ def brand_node(state: ContentReviewState) -> dict:
 
 
 def compliance_node(state: ContentReviewState) -> dict:
+    policy_version = _policy_cua(state)
     try:
         # Truyền khoá xuống: CP3 truy vấn KB fact-check theo (content_type,
         # langcode), không được để nó lọc bằng hằng số (nợ B6).
-        result = compliance.run(state["fields"], **_khoa_cua(state))
+        result = compliance.run(
+            state["fields"],
+            policy_version=policy_version,
+            **_khoa_cua(state),
+        )
     except Exception:
         result = None  # agent lỗi -> để Aggregator xử lý theo fail-safe (mục 6.4)
     return {"compliance_result": result}
 
 
-def aggregator_node(state: ContentReviewState) -> dict:
+def aggregate_score_v1(state: ContentReviewState) -> dict:
+    """Aggregator diem/nguong legacy, giu nguyen cho evidence E1/E5/E6 v1."""
     results = {
         "content_quality": state.get("content_quality_result"),
         "seo": state.get("seo_result"),
@@ -178,6 +200,49 @@ def aggregator_node(state: ContentReviewState) -> dict:
     if note:
         report["note"] = note
     return {"final_score": final_score, "decision": decision, "report": report}
+
+
+def aggregator_node(state: ContentReviewState) -> dict:
+    """Route exact policy; diem v1 chi la diagnostic trong policy v2."""
+    policy_version = _policy_cua(state)
+    if policy_version == POLICY_V1:
+        return aggregate_score_v1(state)
+
+    if policy_version != POLICY_V2:  # pragma: no cover - _policy_cua da chan
+        raise AssertionError(f"unreachable policy version: {policy_version}")
+
+    legacy = aggregate_score_v1(state)
+    results = {
+        "content_quality": state.get("content_quality_result"),
+        "seo": state.get("seo_result"),
+        "brand": state.get("brand_result"),
+        "compliance": state.get("compliance_result"),
+    }
+    evaluated = evaluate_decision_policy(
+        state.get("fields") or {},
+        results,
+        assessment_as_of=state.get("assessment_as_of"),
+        final_score=legacy["final_score"],
+    )
+    report = {
+        "node_id": state["node_id"],
+        "final_score": evaluated["final_score"],
+        "decision": evaluated["decision"],
+        "missing_agents": evaluated["missing_agents"],
+        "details": results,
+        "policy_version": evaluated["policy_version"],
+        "decision_basis": evaluated["decision_basis"],
+        "effective_findings": evaluated["effective_findings"],
+        "advisory_findings": evaluated["advisory_findings"],
+        "coverage": evaluated["coverage"],
+        "incomplete_assessment": evaluated["incomplete_assessment"],
+        "drift": evaluated["drift"],
+    }
+    return {
+        "final_score": evaluated["final_score"],
+        "decision": evaluated["decision"],
+        "report": report,
+    }
 
 
 # content_quality/seo dùng "issues", compliance dùng "flags" - đều là list dict
@@ -266,6 +331,7 @@ def _build_report_json(state: ContentReviewState) -> dict:
 
     return {
         "version": 1,
+        "policy_version": _policy_cua(state),
         "scored_at": datetime.now(timezone.utc).isoformat(),
         "content_hash": content_hash(state.get("fields") or {}),
         # Lấy decision/final_score từ STATE chứ không từ report, vì đó đúng
@@ -277,6 +343,11 @@ def _build_report_json(state: ContentReviewState) -> dict:
         "note": report.get("note"),
         "veto_reason": report.get("veto_reason"),
         "missing_agents": report.get("missing_agents", []),
+        "decision_basis": report.get("decision_basis"),
+        "effective_findings": report.get("effective_findings", []),
+        "advisory_findings": report.get("advisory_findings", []),
+        "coverage": report.get("coverage"),
+        "incomplete_assessment": report.get("incomplete_assessment"),
         "fields": theo_field,
     }
 
