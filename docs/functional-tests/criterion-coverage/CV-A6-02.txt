@@ -1,0 +1,27 @@
+title: Những hạng mục cần quan tâm khi bảo dưỡng ô tô điện
+url_alias: /vn_vi/nhung-hang-muc-can-quan-tam-khi-bao-duong-o-to-dien
+meta_description: Tìm hiểu những hạng mục cần kiểm tra định kỳ khi bảo dưỡng ô tô điện, từ pin, hệ thống phanh và lốp đến bộ lọc, cần gạt mưa cùng phần mềm trên xe.
+summary: Bảo dưỡng ô tô điện cần được thực hiện theo lịch và quy trình dành cho từng mẫu xe. Pin điện áp cao, phanh, lốp, hệ thống làm mát và các bộ phận hao mòn đều cần được kiểm tra đúng cách.
+---
+<p>Ô tô điện có cấu tạo và nguồn năng lượng khác xe dùng động cơ đốt trong, vì vậy danh mục bảo dưỡng cũng có những điểm riêng. Chủ xe cần tham khảo tài liệu hướng dẫn và lịch bảo dưỡng áp dụng cho đúng mẫu xe.</p>
+<p>Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn.</p>
+<img alt="Kỹ thuật viên kiểm tra ô tô điện tại xưởng dịch vụ"/>
+<h2>1. Pin điện áp cao và hệ thống làm mát</h2>
+<p>Trong quá trình bảo dưỡng, kỹ thuật viên kiểm tra cảnh báo, tình trạng đầu nối và dữ liệu chẩn đoán của hệ thống pin. Hệ thống làm mát cũng cần được đánh giá theo quy trình của nhà sản xuất.</p>
+<p>Nếu xe báo lỗi pin, giảm công suất bất thường hoặc có dấu hiệu quá nhiệt, chủ xe nên dừng ở vị trí an toàn và liên hệ hỗ trợ. Không tự bổ sung dung dịch hay mở bộ phận điện áp cao khi chưa có hướng dẫn dành cho người dùng.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/pin-va-tram-sac">Thông tin pin và trạm sạc ô tô điện</a></p>
+<img alt="Khu vực pin điện áp cao trên ô tô điện"/>
+<h2>2. Hệ thống phanh</h2>
+<p>Ô tô điện có thể sử dụng phanh tái sinh để hỗ trợ giảm tốc và thu hồi năng lượng. Tuy nhiên, xe vẫn cần hệ thống phanh ma sát để đáp ứng các tình huống và điều kiện vận hành khác nhau.</p>
+<p>Má phanh, đĩa phanh, dầu phanh và các cảm biến cần được kiểm tra theo lịch bảo dưỡng. Khi bàn đạp phanh có cảm giác khác thường, xe phát tiếng lạ hoặc xuất hiện cảnh báo, chủ xe nên đưa xe đến cơ sở dịch vụ.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/dich-vu-bao-duong">Thông tin bảo dưỡng định kỳ</a></p>
+<h2>3. Lốp, hệ thống treo và lái</h2>
+<p>Chủ xe cần duy trì áp suất lốp theo thông tin của nhà sản xuất và quan sát độ mòn trên toàn bộ bề mặt lốp. Tải trọng, thói quen tăng tốc, điều kiện đường và góc đặt bánh xe đều có thể ảnh hưởng đến tốc độ mòn.</p>
+<p>Khi xe rung, lệch hướng hoặc lốp mòn không đều, kỹ thuật viên cần kiểm tra lốp, cân bằng bánh xe, hệ thống treo và hệ thống lái. Việc đảo lốp hoặc thay lốp phải tuân theo hướng dẫn của mẫu xe.</p>
+<img alt="Kỹ thuật viên đo áp suất và kiểm tra độ mòn lốp ô tô điện"/>
+<h2>4. Các bộ phận hao mòn và phần mềm</h2>
+<p>Lọc gió điều hòa, cần gạt mưa, nước rửa kính, đèn và ắc quy phụ trợ vẫn cần được kiểm tra định kỳ. Thời điểm thay thế phụ thuộc vào tình trạng thực tế, môi trường sử dụng và lịch bảo dưỡng.</p>
+<p>Phần mềm điều khiển cũng có thể nhận bản cập nhật phục vụ vận hành hoặc khắc phục lỗi. Chủ xe nên đọc nội dung thông báo, duy trì điều kiện cập nhật theo hướng dẫn và không ngắt quá trình khi hệ thống đang cài đặt.</p>
+<p>&gt;&gt;&gt; Tham khảo: <a href="https://vinfastauto.com/vn_vi/tai-lieu-tham-khao">Tài liệu hướng dẫn sử dụng ô tô</a></p>
+<img alt="Màn hình ô tô điện hiển thị thông báo cập nhật phần mềm"/>
+<p>Bảo dưỡng đúng lịch và xử lý sớm các cảnh báo giúp chủ xe theo dõi tình trạng phương tiện. Khi không chắc về một thao tác, người dùng nên tham khảo tài liệu hoặc liên hệ cơ sở dịch vụ.</p>

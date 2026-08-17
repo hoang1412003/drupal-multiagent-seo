@@ -1,0 +1,40 @@
+title: Hướng dẫn cách sạc pin xe máy điện VinFast tại trạm sạc
+url_alias: /vn_vi/cach-sac-pin-xe-may-dien-vinfast
+meta_description: Hướng dẫn sạc pin xe máy điện VinFast tại trạm: chọn cổng khả dụng, kết nối bộ sạc, bắt đầu và kết thúc phiên sạc, kiểm tra thông tin trên ứng dụng.
+summary: Chủ xe cần tắt máy, kết nối đúng bộ sạc, chọn cổng tương ứng trên ứng dụng và theo dõi trạng thái tại trụ. Giao diện có thể thay đổi nên cần làm theo chỉ dẫn hiển thị.
+---
+<p>Sạc xe máy điện VinFast tại trạm công cộng cần được thực hiện theo đúng thứ tự để hệ thống nhận diện cổng, bắt đầu phiên sạc và ghi nhận thông tin. Hướng dẫn dưới đây được biên tập từ <a href="https://vinfastauto.com/vn_vi/cach-sac-pin-xe-may-dien-vinfast">quy trình sạc tại trạm do VinFast công bố</a>, truy cập ngày 17/08/2026.</p>
+<h2>1. Chuẩn bị trước khi sạc tại trạm</h2>
+<ul>
+<li>Kiểm tra trạm và cổng sạc đang khả dụng theo chỉ thị tại trụ hoặc trên ứng dụng.</li>
+<li>Đỗ xe đúng vị trí, tắt máy và chuẩn bị bộ sạc tương thích với xe.</li>
+<li>Chuẩn bị tài khoản VinFast E-Scooter; theo quy trình VinFast công bố ở trên, người dùng cần đăng nhập và quét mã QR để bắt đầu phiên sạc.</li>
+<li>Không sử dụng đầu nối, dây dẫn hoặc bộ sạc có dấu hiệu hư hỏng.</li>
+</ul>
+<p>Giao diện ứng dụng và cách hiển thị trạng thái có thể được cập nhật. Nếu nội dung trên ứng dụng khác bài viết, người dùng cần ưu tiên hướng dẫn tại trụ, trên ứng dụng và trong sách hướng dẫn của đúng mẫu xe.</p>
+<h2>2. Sáu bước sạc pin xe máy điện VinFast tại trạm</h2>
+<ol>
+<li><strong>Chọn cổng khả dụng:</strong> di chuyển xe vào vị trí trống và xác nhận cổng sạc sẵn sàng theo đèn chỉ thị hoặc thông tin trên ứng dụng.</li>
+<li><strong>Kết nối bộ sạc:</strong> tắt máy, lấy bộ sạc của xe, kết nối bộ sạc với xe rồi cắm vào ổ tương ứng trên trụ theo hướng dẫn.</li>
+<li><strong>Bắt đầu phiên sạc:</strong> đăng nhập ứng dụng VinFast E-Scooter, mở mục Dịch vụ, quét mã QR trên trụ sạc, chọn đúng cổng đã cắm và xác nhận bắt đầu.</li>
+<li><strong>Theo dõi quá trình:</strong> kiểm tra trạng thái trên ứng dụng và tại trụ. Nếu muốn kết thúc sớm, dùng chức năng dừng sạc theo hướng dẫn hiển thị.</li>
+<li><strong>Kết thúc và thu dây:</strong> xác nhận phiên sạc đã dừng trước khi rút bộ sạc, sau đó cất thiết bị đúng vị trí và đưa xe ra khỏi chỗ sạc.</li>
+<li><strong>Kiểm tra phiên sạc:</strong> xem lại thời gian, điện năng và chi phí được hệ thống ghi nhận; liên hệ hỗ trợ nếu thông tin có sai lệch.</li>
+</ol>
+<p>Người dùng cần chọn đúng cổng trên ứng dụng với ổ cắm thực tế. Nếu trạng thái không thay đổi hoặc hệ thống báo lỗi, không nên lặp lại thao tác liên tục; hãy dừng, kiểm tra chỉ dẫn và liên hệ kênh hỗ trợ tại trạm.</p>
+<h2>3. Tạo tài khoản và quản lý phiên sạc</h2>
+<p>Để thực hiện phiên sạc theo quy trình VinFast công bố, người dùng cần tài khoản đã đăng nhập trên ứng dụng VinFast E-Scooter. Các trường thông tin và bước xác thực có thể thay đổi theo phiên bản ứng dụng. Người dùng nên nhập thông tin theo chỉ dẫn trên màn hình, bảo vệ mã xác thực và không chia sẻ mật khẩu.</p>
+<p>Sau khi đăng nhập, ứng dụng có thể hỗ trợ tìm trạm, chọn cổng, theo dõi phiên sạc và kiểm tra hóa đơn. Khi thêm phương thức thanh toán, người dùng cần đọc nội dung xác nhận và chỉ thực hiện trên ứng dụng hoặc kênh chính thức.</p>
+<h2>4. Thanh toán chi phí sạc</h2>
+<p>Chi phí được hệ thống tính theo phiên sạc và chính sách đang áp dụng. Bài viết không cố định một mức giá vì biểu phí có thể thay đổi. Trước khi xác nhận, người dùng cần kiểm tra cổng sạc, thời gian, điện năng và số tiền hiển thị trên ứng dụng.</p>
+<p>Nếu có hóa đơn chờ thanh toán, người dùng thực hiện theo luồng trong mục thanh toán, kiểm tra thông tin rồi xác nhận bằng phương thức đã đăng ký. Khi giao dịch hoàn tất, cần kiểm tra trạng thái hóa đơn và lưu chứng từ khi cần đối soát.</p>
+<h2>5. Lưu ý an toàn khi sạc tại trạm</h2>
+<ul>
+<li>Chỉ dùng bộ sạc tương thích và thực hiện đúng trình tự trong sách hướng dẫn của mẫu xe.</li>
+<li>Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích.</li>
+<li>Không chạm vào đầu nối khi tay ướt hoặc khi thiết bị có dấu hiệu hư hỏng.</li>
+<li>Nếu xuất hiện cảnh báo, mùi lạ, nhiệt bất thường hoặc kết nối chập chờn, dừng phiên sạc và liên hệ hỗ trợ.</li>
+<li>Sau khi kết thúc, thu gọn thiết bị và di chuyển xe để nhường vị trí cho người dùng khác.</li>
+</ul>
+<p>Người dùng có thể tra sách hướng dẫn theo mẫu xe tại <a href="https://vinfastauto.com/vn_vi/tai-lieu-xe-may-dien">trang tài liệu xe máy điện VinFast</a>. Các chính sách thuê pin hoặc chương trình bán hàng không cần thiết cho quy trình sạc tại trạm và nên được kiểm tra riêng trên kênh chính thức tại thời điểm sử dụng.</p>
+<p>Nắm đúng sáu bước giúp người dùng kết nối đúng cổng, quản lý phiên sạc và đối chiếu thông tin sau giao dịch. Khi có khác biệt giữa bài viết và giao diện thực tế, hướng dẫn tại trạm, ứng dụng và sách hướng dẫn của xe là nguồn cần ưu tiên.</p>
