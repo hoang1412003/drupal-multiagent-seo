@@ -18,13 +18,25 @@ SCHEMA = [
     "parent_sha256", "content_sha256", "notes",
 ]
 
-EXPECTED_CORRECTED_IDS = {f"GC-{index:03d}" for index in range(1, 21)}
-EXPECTED_COVERAGE_IDS = {
-    "CV-A3-01", "CV-A5-01", "CV-A5-02", "CV-A6-01", "CV-A6-02",
-    "CV-A7-01", "CV-A7-02", "CV-B6-01", "CV-B7-01",
-    "CV-B9-01", "CV-B9-02",
+EXPECTED_CORRECTED_PARENTS = {
+    f"GC-{index:03d}": f"G-{index:03d}" for index in range(1, 21)
 }
-EXPECTED_GOLD_PARENTS = {f"G-{index:03d}" for index in range(1, 21)}
+EXPECTED_COVERAGE_ROWS = {
+    "CV-A3-01": ("A3", "GC-006", "rejected"),
+    "CV-A5-01": ("A5", "GC-003", "rejected"),
+    "CV-A5-02": ("A5", "GC-018", "rejected"),
+    "CV-A6-01": ("A6", "GC-010", "rejected"),
+    "CV-A6-02": ("A6", "C-008", "rejected"),
+    "CV-A7-01": ("A7", "C-005", "rejected"),
+    "CV-A7-02": ("A7", "GC-019", "rejected"),
+    "CV-B6-01": ("B6", "C-001", "needs_revision"),
+    "CV-B7-01": ("B7", "GC-018", "needs_revision"),
+    "CV-B9-01": ("B9", "GC-011", "needs_revision"),
+    "CV-B9-02": ("B9", "GC-016", "needs_revision"),
+}
+EXPECTED_CORRECTED_IDS = set(EXPECTED_CORRECTED_PARENTS)
+EXPECTED_COVERAGE_IDS = set(EXPECTED_COVERAGE_ROWS)
+EXPECTED_GOLD_PARENTS = set(EXPECTED_CORRECTED_PARENTS.values())
 VALID_TARGET = re.compile(r"^(?:A[1-7]|B(?:[1-9]|1[01]))$")
 VALID_SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -313,6 +325,39 @@ def _require_exact_ids(name: str, actual: set[str], expected: set[str]) -> None:
         raise DatasetValidationError(f"{name} inventory mismatch: {', '.join(details)}")
 
 
+def _validate_canonical_rows(
+    corrected: Sequence[FunctionalSample],
+    coverage: Sequence[FunctionalSample],
+) -> None:
+    for sample in corrected:
+        expected_parent = EXPECTED_CORRECTED_PARENTS[sample.sample_id]
+        if sample.parent_sample_id != expected_parent:
+            raise DatasetValidationError(
+                f"canonical parent_sample_id mismatch for {sample.sample_id!r}: "
+                f"expected {expected_parent!r}, got {sample.parent_sample_id!r}"
+            )
+
+    for sample in coverage:
+        expected_target, expected_parent, expected_label = EXPECTED_COVERAGE_ROWS[
+            sample.sample_id
+        ]
+        if sample.target_code != expected_target:
+            raise DatasetValidationError(
+                f"canonical target_code mismatch for {sample.sample_id!r}: "
+                f"expected {expected_target!r}, got {sample.target_code!r}"
+            )
+        if sample.parent_sample_id != expected_parent:
+            raise DatasetValidationError(
+                f"canonical parent_sample_id mismatch for {sample.sample_id!r}: "
+                f"expected {expected_parent!r}, got {sample.parent_sample_id!r}"
+            )
+        if sample.expected_label != expected_label:
+            raise DatasetValidationError(
+                f"canonical expected_label mismatch for {sample.sample_id!r}: "
+                f"expected {expected_label!r}, got {sample.expected_label!r}"
+            )
+
+
 def validate_inventory(repo_root: Path) -> DatasetInventory:
     repo_root = Path(repo_root).resolve()
     functional_root = repo_root / "docs" / "functional-tests"
@@ -351,6 +396,7 @@ def validate_inventory(repo_root: Path) -> DatasetInventory:
         {sample.parent_sample_id for sample in corrected},
         EXPECTED_GOLD_PARENTS,
     )
+    _validate_canonical_rows(corrected, coverage)
 
     for sample in corrected:
         _validate_parent(sample, gold)

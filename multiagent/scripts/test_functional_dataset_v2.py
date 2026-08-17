@@ -25,6 +25,8 @@ tempfile.tempdir = str(SCRIPT_DIR)
 
 from functional_dataset_v2 import (  # noqa: E402
     DatasetValidationError,
+    _Parent,
+    _reject_cross_dataset_overlap,
     load_manifest,
     sha256_file,
     validate_inventory,
@@ -380,6 +382,68 @@ def test_parent_hien_huu_phai_khop_sha256_va_source_url() -> None:
         _expect_error("parent source mismatch", lambda: validate_inventory(root), "source_url")
 
 
+# Mutation caught: keeping only the A/B severity rule would accept A5 under CV-A3-01.
+def test_coverage_target_phai_khop_canonical_id() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        _make_repo(root)
+        manifest = root / "docs" / "functional-tests" / "criterion-coverage-labels.csv"
+        headers, rows = _read_csv(manifest)
+        row = next(item for item in rows if item["sample_id"] == "CV-A3-01")
+        row.update({"target_code": "A5", "injected_codes": "A5"})
+        _write_csv(manifest, rows, headers)
+        _expect_error(
+            "canonical coverage target",
+            lambda: validate_inventory(root),
+            "canonical target_code",
+        )
+
+
+# Mutation caught: validating only the set of 20 G parents permits pair swaps.
+def test_corrected_parent_phai_khop_canonical_id() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        _make_repo(root)
+        manifest = root / "docs" / "functional-tests" / "gold-corrected-labels.csv"
+        headers, rows = _read_csv(manifest)
+        gold_dir = root / "docs" / "goldset" / "raw"
+        by_id = {row["sample_id"]: row for row in rows}
+        for corrected_id, parent_id in (("GC-001", "G-002"), ("GC-002", "G-001")):
+            by_id[corrected_id].update({
+                "parent_sample_id": parent_id,
+                "source_url": f"/source/{parent_id}",
+                "parent_sha256": _digest((gold_dir / f"{parent_id}.txt").read_bytes()),
+            })
+        _write_csv(manifest, rows, headers)
+        _expect_error(
+            "canonical corrected parent",
+            lambda: validate_inventory(root),
+            "canonical parent_sample_id",
+        )
+
+
+# Mutation caught: accepting any clean GC/C parent permits a different clean control.
+def test_coverage_parent_phai_khop_canonical_id() -> None:
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        _make_repo(root)
+        manifest = root / "docs" / "functional-tests" / "criterion-coverage-labels.csv"
+        headers, rows = _read_csv(manifest)
+        row = next(item for item in rows if item["sample_id"] == "CV-A3-01")
+        parent_path = root / "docs" / "functional-tests" / "clean" / "C-002.txt"
+        row.update({
+            "parent_sample_id": "C-002",
+            "source_url": "/source/C-002",
+            "parent_sha256": _digest(parent_path.read_bytes()),
+        })
+        _write_csv(manifest, rows, headers)
+        _expect_error(
+            "canonical coverage parent",
+            lambda: validate_inventory(root),
+            "canonical parent_sample_id",
+        )
+
+
 # Mutation caught: accepting partial or expanded inventories passes a subcase.
 def test_inventory_khoa_exact_20_gc_va_11_cv() -> None:
     with tempfile.TemporaryDirectory() as temp:
@@ -410,8 +474,8 @@ def test_inventory_khoa_exact_20_gc_va_11_cv() -> None:
         _expect_error("extra inventory ID", lambda: validate_inventory(root), "extra")
 
 
-# Mutations caught: omitting cross-dataset ID/path separation accepts a subcase.
-def test_id_va_path_giua_bon_lop_khong_duoc_giao_nhau() -> None:
+# Mutation caught: omitting cross-dataset ID separation accepts the collision.
+def test_id_giua_bon_lop_khong_duoc_giao_nhau() -> None:
     with tempfile.TemporaryDirectory() as temp:
         root = Path(temp)
         _make_repo(root)
@@ -424,20 +488,23 @@ def test_id_va_path_giua_bon_lop_khong_duoc_giao_nhau() -> None:
         _write_csv(manifest, rows, headers)
         _expect_error("cross-dataset ID", lambda: validate_inventory(root), "overlap")
 
+
+# Mutation caught: removing the resolved-path branch from the overlap validator
+# accepts two different IDs that resolve to the same file inside an allowed root.
+def test_content_path_overlap_di_toi_overlap_validator() -> None:
     with tempfile.TemporaryDirectory() as temp:
-        root = Path(temp)
-        _make_repo(root)
-        manifest = root / "docs" / "functional-tests" / "criterion-coverage-labels.csv"
-        headers, rows = _read_csv(manifest)
-        rows[0].update({
-            "sample_id": "../../goldset/raw/G-001",
-            "content_sha256": _digest(b"gold G-001"),
-        })
-        _write_csv(manifest, rows, headers)
+        allowed_root = Path(temp).resolve()
+        shared_path = (allowed_root / "shared.txt").resolve()
+        shared_path.write_text("same resolved path", encoding="utf-8")
+        shared_path.relative_to(allowed_root)
+        datasets = {
+            "corrected": {"GC-001": _Parent("/source/G-001", shared_path)},
+            "coverage": {"CV-A3-01": _Parent("/source/G-006", shared_path)},
+        }
         _expect_error(
             "cross-dataset path",
-            lambda: validate_inventory(root),
-            "path",
+            lambda: _reject_cross_dataset_overlap(datasets),
+            "content path overlap",
         )
 
 
@@ -493,8 +560,12 @@ if __name__ == "__main__":
         test_coverage_phai_co_dung_mot_target_trung_injected_code,
         test_target_a_rejected_va_target_b_needs_revision,
         test_parent_hien_huu_phai_khop_sha256_va_source_url,
+        test_coverage_target_phai_khop_canonical_id,
+        test_corrected_parent_phai_khop_canonical_id,
+        test_coverage_parent_phai_khop_canonical_id,
         test_inventory_khoa_exact_20_gc_va_11_cv,
-        test_id_va_path_giua_bon_lop_khong_duoc_giao_nhau,
+        test_id_giua_bon_lop_khong_duoc_giao_nhau,
+        test_content_path_overlap_di_toi_overlap_validator,
         test_sha256_va_cli_validate_manifest_chi_doc,
     )
     for test in tests:
