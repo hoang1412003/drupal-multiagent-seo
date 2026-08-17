@@ -419,3 +419,136 @@ Rà thủ công A1–A7/B1–B11:
 - Scanner cuối không sinh candidate A/B cho bất kỳ file GC-011..GC-015 nào.
 - C4 ở GC-011/012/013/015 là advisory về câu dài, không đổi nhãn publish.
 - Quyết định publish vẫn dựa trên helper cộng lượt đọc manual đầy đủ; scanner không phải bộ kết luận.
+
+# Nhật ký hiệu đính gold-corrected v1.4 — GC-016 đến GC-020
+
+- Ngày biên tập và kiểm nguồn: **17/08/2026**.
+- Annotator: `AI-A1`; provenance: `AI-annotated-partially-exposed`.
+- Generator model: `not-exposed-by-runtime`; runtime của phiên làm trực tiếp không cung cấp model ID chính xác.
+- Guideline: `v1.4`.
+- Parent G-016..G-020 giữ nguyên. Batch này hoàn tất exact set GC-001..GC-020.
+- Đây là corrected data tổng hợp cho phép calibration riêng; không phải nhãn độc lập và không thay bằng chứng đồng thuận trên bài thật.
+- Audit toàn taxonomy bổ sung B5 ở cả năm parent; G-018 bổ sung A4 và B8 ngoài candidate khởi đầu.
+
+## Nguồn chính thức đã kiểm
+
+Nguồn chủ đề:
+
+- `https://vinfastauto.com/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang`
+- `https://vinfastauto.com/vn_vi/tong-quan-tram-sac-vinfast`
+- `https://vinfastauto.com/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter`
+- `https://vinfastauto.com/vn_vi/ung-dung-vinfast-cho-o-to-dien`
+- `https://vinfastauto.com/vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast`
+
+Nguồn FAQ/tài liệu hiện hành:
+
+- `https://vinfastauto.com/vn_vi/thong-tin-bao-hanh`
+- `https://vinfastauto.com/vn_vi/cau-hoi-thuong-gap/cau-hoi-xe-o-to/he-thong-tram-sac`
+- `https://vinfastauto.com/vn_vi/cau-hoi-thuong-gap/cau-hoi-xe-may-dien/san-pham/ung-dung-vinfast`
+- `https://vinfastauto.com/vn_vi/cau-hoi-thuong-gap/cau-hoi-xe-o-to/san-pham/ung-dung-vinfast`
+- `https://vinfastauto.com/vn_vi/node/9081`
+
+Nguồn được truy cập ngày **17/08/2026**. Vì giao diện, tính năng và trạng thái trạm có thể thay đổi, corrected chỉ giữ nhóm chức năng được nguồn chính thức xác nhận và yêu cầu ưu tiên dữ liệu hiển thị cho đúng xe/tài khoản tại thời điểm dùng.
+
+## GC-016 ← G-016
+
+- **Nguồn chủ đề:** `/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang`.
+- **Field:** giữ title/alias; meta 151 ký tự; body 788 tiếng, 5 H2, giữ phép so sánh hạng mục và chi phí bảo dưỡng.
+- **Mã đã xử lý:** B5;B8;B10.
+
+Trước → sau:
+
+- B5: parent trộn “khách hàng” và “quý khách hàng” → corrected dùng nhất quán “người dùng”.
+- B8: sửa cụm lặp “thấp hơn ít nhất ít hơn”, “thường xe khuyến cáo” cùng các câu vụng bằng cách viết lại.
+- B10: bỏ các tỷ lệ chi phí, tuổi thọ, số bộ phận và ước tính tiền/quãng đường không có nguồn gần claim; corrected dùng hóa đơn và cùng phạm vi.
+- Claim cứu hộ trong parent nằm trong đoạn quyền lợi bảo hành, không phải khuyến mại có giá trị cụ thể theo A4; nội dung vẫn được bỏ vì dễ lỗi thời nhưng không bịa thêm mã.
+- GC-016 còn trên 500 tiếng và có H2, đủ làm parent canonical cho coverage B9 nếu cần.
+
+## GC-017 ← G-017
+
+- **Nguồn chủ đề:** `/vn_vi/tong-quan-tram-sac-vinfast`.
+- **Field:** title 74 → 48 ký tự; meta 186 → 152; giữ alias; body giữ tổng quan, kênh tra cứu, lập hành trình và an toàn.
+- **Mã đã xử lý:** B1;B3;B4;B5;B8.
+
+Trước → sau:
+
+- B1: bỏ claim phạm vi 285 km thiếu chu trình đo/caveat.
+- B3/B4: rút title và meta vào ranh giới v1.4; sửa meta sai ngữ pháp “với hơn hệ thống”.
+- B5: parent trộn “người dùng”, “khách hàng”, “người sử dụng”, “chủ xe” và “người tiêu dùng” → corrected dùng nhất quán “người dùng”.
+- B8: bảng trụ sạc sai số cột và các câu lỗi được thay bằng hướng dẫn tra nguồn hiện hành.
+- Bảng công suất/thời gian cũ bị bỏ để tránh dùng chéo model/thiết bị; không ghi thêm B10 vì các thông số parent nằm trên trang công bố chính thức, không phải số liệu khảo sát thiếu nguồn theo nhãn đã xét.
+
+## GC-018 ← G-018
+
+- **Nguồn chủ đề:** `/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter`.
+- **Field:** giữ title/alias; meta 118 → 144 ký tự; body 605 tiếng, 4 H2, giữ chuẩn bị/tìm trạm/kiểm tra/sạc.
+- **Mã đã xử lý:** A4;B3;B5;B8.
+
+Trước → sau:
+
+- A4: parent nêu trải nghiệm và chi phí sạc “hoàn toàn miễn phí” nhưng thiếu thời hạn/điều kiện → bỏ claim; corrected yêu cầu đọc biểu phí đang hiển thị.
+- B3: meta 118 → 144 ký tự.
+- B5: parent trộn “người dùng”, “khách hàng”, “bạn” và “các bạn” → corrected dùng nhất quán “người dùng”.
+- B8: sửa “hết xe hết pin”, ký tự lạ trong alt và các câu lỗi bằng nội dung mới.
+- Quy trình giao diện được caveat theo phiên bản; hướng dẫn sạc yêu cầu thiết bị tương thích, dừng khi bất thường và ưu tiên chỉ dẫn tại trạm/app.
+- GC-018 không còn candidate/hidden prose, đủ làm clean parent của coverage A5/B7.
+
+## GC-019 ← G-019
+
+- **Nguồn chủ đề:** `/vn_vi/ung-dung-vinfast-cho-o-to-dien`.
+- **Field:** giữ title/alias; meta 143; body giữ tài khoản, trạng thái pin/sạc, bản đồ, quyền người lái, đồng bộ và an toàn.
+- **Mã đã xử lý:** B5;B8.
+
+Trước → sau:
+
+- B5: parent trộn “người dùng”, “khách hàng”, “quý khách hàng” và “chủ xe” → corrected dùng nhất quán “người dùng”; vai trò trong ứng dụng được gọi theo “người lái/quyền truy cập” khi cần.
+- B8: sửa “điều khiển ô tô từ bằng thiết bị”, “được được”, dấu câu/viết hoa sai và dấu chấm lặp bằng cách viết lại.
+- Cụm FOTA/SOTA và claim phí cũ bị bỏ; corrected yêu cầu xác nhận gói dịch vụ theo điều khoản hiện hành nhưng không tạo A4/B11 mới.
+- GC-019 không có hidden prose/candidate, đủ làm clean parent của coverage A7.
+
+## GC-020 ← G-020
+
+- **Nguồn chủ đề:** `/vn_vi/quan-ly-xe-o-to-dien-qua-ung-dung-vinfast`.
+- **Field:** giữ title/alias; meta 146; body giữ quy trình thiết lập, trạng thái, quyền, lệnh từ xa, pin/sạc và xử lý đồng bộ.
+- **Mã đã xử lý:** A1;B5.
+
+Trước → sau:
+
+- A1: bỏ claim mẫu VinFast “được săn đón nhất thị trường xe xanh”; không thay bằng xếp hạng hoặc tuyệt đối khác.
+- B5: parent trộn “người dùng”, “khách hàng”, “quý khách”, “người sử dụng” và “chủ xe” → corrected dùng nhất quán “người dùng”.
+- Các giá trị mức sạc và thông báo theo giao diện cũ bị bỏ để tránh dùng sai phiên bản; scanner parent đánh dấu B2/B10 nhưng đây là giá trị giao diện trên chính nguồn VinFast, không phải claim thời gian sạc thiếu trụ hoặc khảo sát không nguồn nên không ghi thêm mã.
+
+## Kết quả helper và rà toàn bộ A/B
+
+Lượt helper cuối cho exact five files:
+
+| ID | Title | Meta | Alias | Body words | H2/H3 | Kết luận máy | C advisory |
+|---|---:|---:|---:|---:|---:|---|---|
+| GC-016 | 48 | 151 | 55 | 788 | 5/0 | không có A/B máy kết luận | C4=3 |
+| GC-017 | 48 | 152 | 33 | 721 | 4/3 | không có A/B máy kết luận | không có |
+| GC-018 | 54 | 144 | 61 | 605 | 4/0 | không có A/B máy kết luận | không có |
+| GC-019 | 64 | 143 | 37 | 772 | 6/0 | không có A/B máy kết luận | không có |
+| GC-020 | 51 | 146 | 48 | 791 | 6/0 | không có A/B máy kết luận | C4=4 |
+
+Rà thủ công A1–A7/B1–B11:
+
+- A1/A2: không còn xếp hạng, claim hơn nhất có phạm vi hoặc so trực tiếp đối thủ.
+- A3/A4: không giữ thông số, giá trị khuyến mại hoặc biểu phí cụ thể; ngày chỉ là ngày truy cập nguồn.
+- A5: H2/body bám title ở cả năm; GC-018/019 được đọc riêng để bảo đảm làm clean parent.
+- A6: GC-017/018 yêu cầu thiết bị tương thích, dừng khi bất thường và không thao tác màn hình khi lái; GC-019/020 yêu cầu xác nhận đúng xe/lệnh và ưu tiên cảnh báo trực tiếp.
+- A7: không có văn xuôi ẩn/comment/thuộc tính ẩn; GC-019 sạch để làm parent coverage A7.
+- B1/B2: không corrected nào giữ claim phạm vi hoặc thời gian sạc định lượng.
+- B3/B4: meta 143–152; title 48–64, không all-caps/năm cũ.
+- B5: dùng nhất quán “người dùng”; tên VinFast E-Scooter và ứng dụng VinFast đúng ngữ cảnh.
+- B6: không có ảnh nên không áp dụng.
+- B7: alias canonical, dưới 75 ký tự và chứa chủ đề.
+- B8: đã đọc toàn văn exact five; không còn lỗi quan sát được.
+- B9: mọi bài trên 500 tiếng đều có H2; GC-016 có 5 H2.
+- B10: không còn claim định lượng cần nguồn.
+- B11: không còn claim cụ thể về pin/bảo hành pin/thuê pin; link FAQ và bảo hành chỉ là chỉ dẫn tra cứu.
+
+## Disposition từng candidate của `quet_ung_vien.py`
+
+- Scanner cuối không sinh candidate A/B cho GC-016..GC-020.
+- C4 ở GC-016/020 là advisory, không đổi nhãn publish.
+- Publish được chốt từ helper cộng lượt đọc manual; scanner không tự quyết mã.
