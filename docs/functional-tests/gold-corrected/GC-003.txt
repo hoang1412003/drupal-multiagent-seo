@@ -1,122 +1,121 @@
 title: Hướng dẫn cách khởi động xe máy điện VinFast chi tiết
 url_alias: /vn_vi/cach-khoi-dong-xe-may-dien-vinfast
-meta_description: Cách khởi động xe máy điện VinFast cho người mới đầy đủ 3 bước, cập nhật thêm một số lưu ý và cách xử lý các lỗi thường gặp khi khởi động xe máy điện
-summary: Tìm hiểu cách khởi động xe máy điện VinFast với quy trình 3 bước chi tiết, cùng một số lưu ý quan trọng, tránh gặp phải những lỗi không đáng có giúp vận hành xe điện VinFast trơn tru và an toàn.
+meta_description: Cách khởi động xe máy điện VinFast cho người mới đầy đủ 3 bước, cập nhật thêm một số lưu ý và cách xử lý các lỗi thường gặp khi khởi động xe máy điện.
+summary: Tìm hiểu cách khởi động xe máy điện VinFast theo quy trình 3 bước, cùng một số lưu ý quan trọng để tránh lỗi và vận hành xe trơn tru, an toàn.
 ---
 <p><a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-vinfast.html"><strong>Các mẫu xe điện</strong></a> thế hệ mới của VinFast được cải tiến với hệ thống điều khiển đặc biệt nhằm đảm bảo an toàn và tính bảo mật. Chính vì thế, <a href="https://vinfastauto.com/vn_vi/cach-khoi-dong-xe-may-dien-vinfast"><strong>cách khởi động xe điện VinFast</strong></a> cần được thực hiện theo đúng trình tự để xe có thể vận hành an toàn và hiệu quả.</p>
 <img alt="Hướng dẫn khởi động xe máy điện"/>
 <em>Xe máy điện VinFast trang bị nhiều công nghệ hiện đại, dễ sử dụng </em>
 <h2><strong>1. Hướng dẫn cách khởi động xe máy điện VinFast</strong></h2>
-<p>Quá trình <strong>khởi động xe máy điện</strong> cần thực hiện theo đúng trình tự 3 bước nhằm giúp chủ xe đảm bảo an toàn, đồng thời tránh ảnh hưởng đến động cơ, giúp xe được bền bỉ theo thời gian.</p>
+<p>Quá trình <strong>khởi động xe máy điện</strong> cần được thực hiện theo đúng trình tự 3 bước để góp phần bảo đảm an toàn và duy trì độ bền của xe.</p>
 <img alt="Cách khởi động xe máy điện VinFast"/>
 <em>3 bước cơ bản khi khởi động và vận hành xe máy điện VinFast</em>
 <h3><strong>1.1. Bước 1 - Kiểm tra trước khi vận hành</strong></h3>
-<p>Việc đảm bảo chất lượng của các bộ phận trước khi vận hành ở xe máy điện không chỉ giúp người lái có thể an tâm khi sử dụng mà còn góp phần nâng cao tuổi thọ của xe. Các bộ phận cần kiểm tra gồm có:</p>
-<ul> <li><strong>Kiểm tra hệ thống đèn chiếu sáng</strong>: Bật nguồn xe, sau đó vận hành các công tắc xem cụm đèn pha trước sau, đèn xi nhan, cụm đồng hồ có hoạt động bình thường hay không.</li> <li><strong>Kiểm tra phanh xe</strong>: Kiểm tra hoạt động của phanh trước và phanh sau bằng cách bóp chặt phanh sau đó đẩy xe tiến, lùi để kiểm tra độ bám của phanh.</li> <li><strong>Kiểm tra tay ga điện</strong>: Tắt khóa điện và khóa cổ về vị trí OFF sau đó thử vặn và thả tay ga. Nếu bộ phận này vẫn có thể vận hành mượt mà và tự trả về vị trí ban đầu, chủ xe có thể an tâm khởi hành.</li> <li><strong>Kiểm tra lốp xe</strong>: Căn cứ vào vết hằn trên hoa lốp xe khi tiếp xúc với mặt đường, hoặc sử dụng các thiết bị đo áp suất để kiểm tra.</li> <li><strong>Kiểm tra dung lượng pin</strong>: Để chắc chắn rằng pin sẽ đủ trong suốt quá trình di chuyển.</li> </ul>
+<p>Kiểm tra các bộ phận của xe máy điện trước khi vận hành giúp người lái chủ động phát hiện bất thường và góp phần duy trì tuổi thọ xe. Các bộ phận cần kiểm tra gồm:</p>
+<ul> <li><strong>Kiểm tra hệ thống đèn chiếu sáng</strong>: Bật nguồn xe, sau đó vận hành các công tắc để kiểm tra cụm đèn pha phía trước và phía sau, đèn xi nhan cùng cụm đồng hồ.</li> <li><strong>Kiểm tra phanh xe</strong>: Bóp chặt phanh, sau đó đẩy xe tiến và lùi để kiểm tra độ bám của phanh trước và phanh sau.</li> <li><strong>Kiểm tra tay ga điện</strong>: Tắt khóa điện và khóa cổ về vị trí OFF, sau đó thử vặn và thả tay ga. Nếu tay ga vận hành mượt mà và tự trả về vị trí ban đầu, chủ xe có thể khởi hành.</li> <li><strong>Kiểm tra lốp xe</strong>: Quan sát độ mòn của hoa lốp và sử dụng thiết bị đo để kiểm tra áp suất.</li> <li><strong>Kiểm tra dung lượng pin</strong>: Bảo đảm pin đủ cho hành trình dự kiến.</li> </ul>
 <img alt="Cách khởi động xe máy điện"/>
 <em>Trước khi vận hành, người dùng cần phải kiểm tra dung lượng pin trên màn hình hiển thị HMI</em>
 <h3><strong>1.2. Bước 2 - Khóa/mở hệ thống điện</strong></h3>
 <p><strong>Cách mở khóa xe</strong></p>
-<p>Sau khi kiểm tra các hệ thống quan trọng một cách cẩn thận và kỹ lưỡng, người dùng hãy thực hiện việc mở khóa hệ thống điện để khởi động xe theo trình tự như sau:</p>
-<ul> <li>Bật nút mở (I) trên chìa khóa RF để tắt chế độ chống trộm</li> <li>Mở nắp bảo vệ (A) bằng chuôi chìa khóa, xoay chốt (G) theo chiều kim đồng hồ.</li> <li>Cắm chìa khoá vào khoá cổ và vặn nút khóa về phía ON (F), khi nghe thấy âm thanh mở khóa, pin Lithium-ion sẽ được bật lên.</li> <li>Sau khi mở khóa xe, cụm đồng hồ sẽ được bật sáng báo hiệu xe đã sẵn sàng. Lúc này, xe điện đang vào chế độ Parking.</li> </ul>
+<p>Sau khi kiểm tra các hệ thống quan trọng, người dùng mở khóa hệ thống điện để khởi động xe theo trình tự sau:</p>
+<ul> <li>Bật nút mở (I) trên chìa khóa RF để tắt chế độ chống trộm.</li> <li>Mở nắp bảo vệ (A) bằng chuôi chìa khóa, rồi xoay chốt (G) theo chiều kim đồng hồ.</li> <li>Cắm chìa khóa vào khóa cổ và vặn nút khóa về phía ON (F). Khi nghe thấy âm thanh mở khóa, pin Lithium-ion đã được bật.</li> <li>Sau khi mở khóa xe, cụm đồng hồ bật sáng để báo hiệu xe đã sẵn sàng. Lúc này, xe ở chế độ Parking.</li> </ul>
 <img alt="Cách khởi động xe điện"/>
 <em>Người dùng cần phải nắm rõ trình tự khởi động xe, giúp xe vận hành an toàn và ổn định</em>
 <p><strong>Cách mở khóa yên xe máy điện:</strong></p>
-<p>Đầu tiên, từ vị trí OFF, chủ xe hãy xoay chìa khóa cổ hoặc chìa khóa điện đến vị trí SEAT OPEN, như vậy là người dùng có thể dễ dàng mở khóa được phần yên xe. </p>
+<p>Từ vị trí OFF, chủ xe xoay chìa khóa cổ hoặc chìa khóa điện đến vị trí SEAT OPEN để mở yên xe. </p>
 <img alt="Cách khởi động xe máy điện VinFast bằng khóa chính"/>
 <em>Khóa điện chính của xe được đặt ở vị trí bên phải cổ xe</em>
 <p><strong>Chu trình khóa xe</strong></p>
 <ul> <li>Tắt xe:</li> </ul>
-<p>Khi xe đang trong chế độ di chuyển, từ vị trí ON, người dùng hãy vặn chìa khóa đến vị trí OFF để tắt xe. Khi người dùng nghe thấy tiếng “tách” vang lên, cũng là lúc pin được tắt. </p>
+<p>Khi xe đang ở chế độ di chuyển, người dùng vặn chìa khóa từ vị trí ON về OFF để tắt xe. Tiếng “tách” phát ra sau thao tác này báo hiệu pin đã tắt. </p>
 <ul> <li>Khóa điện/khóa cổ xe</li> </ul>
-<p>Bước 1: Xoay hành trình tay lái về phía bên trái</p>
-<p>Bước 2: Từ vị trí OFF (E), ấn và xoay chìa khóa theo chiều ngược chiều kim đồng hồ đến khi hết hành trình ở vị trí (C)</p>
+<p>Bước 1: Xoay tay lái hết hành trình về bên trái.</p>
+<p>Bước 2: Từ vị trí OFF (E), ấn và xoay chìa khóa ngược chiều kim đồng hồ đến khi hết hành trình ở vị trí (C).</p>
 <p>Bước 3: Rút chìa khóa ra khỏi ổ khóa (A).</p>
 <p>Bước 4: Nhấn nút đóng nắp khóa an toàn (B) để đậy nắp khóa an toàn lại.</p>
 <ul> <li>Khóa chống trộm (đối với Klara S (2022) và Feliz S)</li> </ul>
-<p>Bước 1: Sau khi khóa cổ xe, nhấn nút KHÓA (H) trên khóa RF</p>
-<p>Bước 2: Xe thông báo khóa thành công bằng hiệu lệnh âm thanh khóa xe. Lúc này, chế độ chống trộm được kích hoạt</p>
-<p>Đối với 2 mẫu xe điện <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-vento-s.html">VinFast Vento S</a> và <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-theon-s.html">VinFast Theon S</a> được trang bị Smartkey giúp nâng cao khả năng chống trộm của xe. Hệ thống này sẽ được mã hóa và điều khiển bởi bộ điều khiển trung tâm ECU xe máy điện, do vậy cách khởi động của VinFast Vento S và VinFast Theon S có sự khác biệt so với các mẫu xe khác, như:</p>
+<p>Bước 1: Sau khi khóa cổ xe, nhấn nút KHÓA (H) trên khóa RF.</p>
+<p>Bước 2: Xe phát tín hiệu âm thanh xác nhận khóa thành công; lúc này, chế độ chống trộm được kích hoạt.</p>
+<p>Hai mẫu xe máy điện <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-vento-s.html">VinFast Vento S</a> và <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-theon-s.html">VinFast Theon S</a> được trang bị Smartkey để hỗ trợ chống trộm. Hệ thống được mã hóa và điều khiển bởi bộ điều khiển trung tâm ECU, do đó cách khởi động của Vento S và Theon S có một số điểm khác biệt:</p>
 <p><strong>Bật xe</strong></p>
-<p>Bước 1: Bật chế độ tầm gần của Smartkey</p>
-<p>Bước 2: Đặt Smartkey trong vòng bán kính 1 mét với đầu xe</p>
-<p>Bước 3: Nhấn nút khởi động xe 1 lần để bật xe lên, khi xe đã được khởi động, pin được bật lên sẽ vang lên tiếng “tách”</p>
-<p>Bước 4: Xe bật lên, cụm đồng hồ đa chức năng bật sáng, đồng thời khóa cổ sẽ tự động mở</p>
+<p>Bước 1: Bật chế độ tầm gần của Smartkey.</p>
+<p>Bước 2: Đặt Smartkey trong bán kính 1 mét tính từ đầu xe.</p>
+<p>Bước 3: Nhấn nút khởi động một lần để bật xe. Tiếng “tách” phát ra báo hiệu pin đã bật.</p>
+<p>Bước 4: Cụm đồng hồ đa chức năng bật sáng, đồng thời khóa cổ tự động mở.</p>
 <p><strong>Mở khóa cổ</strong></p>
-<p>Đầu tiên, xe đang ở trong chế độ Tắt hoặc Parking, người dùng có thể mở khóa cổ theo trình tự như sau:</p>
-<ul> <li>Đặt Smartkey trong bán kính 1 mét với đầu xe</li> <li>Nhấn giữ nút đa chức năng trên cụm tay lái bên phải khoảng 1,5 giây</li> <li>Khóa cổ tự động mở ra. Nếu không mở được, xe sẽ phát ra hiệu lệnh bằng âm thanh đồng thời nháy đèn xi-nhan 2 lần và hiện mã lỗi để cảnh báo </li> <li>Kiểm tra lại cổ lái xe đã mở khóa thành công chưa</li> </ul>
+<p>Khi xe đang ở chế độ tắt hoặc Parking, người dùng có thể mở khóa cổ theo trình tự sau:</p>
+<ul> <li>Đặt Smartkey trong bán kính 1 mét tính từ đầu xe.</li> <li>Nhấn giữ nút đa chức năng trên cụm tay lái bên phải khoảng 1,5 giây.</li> <li>Khóa cổ tự động mở. Nếu khóa không mở, xe phát tín hiệu âm thanh, nháy đèn xi-nhan hai lần và hiển thị mã lỗi.</li> <li>Kiểm tra lại để xác nhận cổ lái đã được mở khóa.</li> </ul>
 <p><strong>Mở khóa yên xe</strong></p>
 <ul> <li>Mở bằng nút trên cụm tay lái bên phải</li> </ul>
-<p>Bước 1: Đặt Smartkey trong bán kính 1 mét với đầu xe</p>
-<p>Bước 2: Nhấn 1 lần nút đa chức năng trên cụm tay lái bên phải</p>
-<p>Bước 3: Khi yên xe đã được mở khóa, xe sẽ phản hồi lại bằng âm thanh và nháy đèn xi-nhan 2 lần </p>
+<p>Bước 1: Đặt Smartkey trong bán kính 1 mét tính từ đầu xe.</p>
+<p>Bước 2: Nhấn một lần nút đa chức năng trên cụm tay lái bên phải.</p>
+<p>Bước 3: Khi yên xe được mở khóa, xe phát tín hiệu âm thanh và nháy đèn xi-nhan hai lần. </p>
 <ul> <li>Mở bằng Smartkey</li> </ul>
-<p>Smartkey có chức năng mở khóa phương tiện từ xa mà không cần cắm chìa vào ổ. Do vậy bất kỳ ai sở hữu Smartkey đều có thể thực hiện mở khóa yên điện trên 2 phiên bản xe máy điện VinFast Vento S và VinFast Theon S. Đầu tiên, phương tiện đang ở chế độ tắt hoặc Parking, người dùng hãy nhấn đúp nút tìm xe (biểu tượng âm lượng). Yên xe sẽ được mở và báo hiệu tới người dùng bằng cách nháy đèn xi nhan 2 lần.</p>
+<p>Smartkey có chức năng mở khóa phương tiện từ xa mà không cần cắm chìa vào ổ. Khi phương tiện ở chế độ tắt hoặc Parking, người dùng nhấn đúp nút tìm xe (biểu tượng âm lượng) để mở yên trên Vento S và Theon S. Xe báo hiệu bằng cách nháy đèn xi-nhan hai lần.</p>
 <p><strong>Khóa cổ lái</strong></p>
-<p>Bước 1: Xe đang trong chế độ tắt</p>
-<p>Bước 2: Đặt Smartkey trong bán kính 1 mét với đầu xe</p>
-<p>Bước 3: Quay cổ lái sang trái đến hết hành trình</p>
-<p>Bước 4: Nhấn giữ nút đa chức năng trên cụm tay lái bên phải khoảng 1,5 giây</p>
-<p>Bước 5: Khóa cổ tự động chốt vào. Xe sẽ phản hồi bằng cách phát ra âm thanh. Nếu kêu 1 lần, khóa cổ đã thành công, kêu 2 lần tức là khóa cổ bị kẹt và không phát ra âm thanh nghĩa là cổ xe vẫn chưa được khóa</p>
-<p>Bước 6: Kiểm tra lại xem xe đã được khóa cổ chắc chắn hay chưa</p>
+<p>Bước 1: Đưa xe về chế độ tắt.</p>
+<p>Bước 2: Đặt Smartkey trong bán kính 1 mét tính từ đầu xe.</p>
+<p>Bước 3: Quay cổ lái sang trái đến hết hành trình.</p>
+<p>Bước 4: Nhấn giữ nút đa chức năng trên cụm tay lái bên phải khoảng 1,5 giây.</p>
+<p>Bước 5: Khóa cổ tự động chốt. Xe phát một tiếng nếu khóa thành công, hai tiếng nếu khóa bị kẹt; nếu không có âm thanh, cổ xe vẫn chưa được khóa.</p>
+<p>Bước 6: Kiểm tra lại để bảo đảm cổ xe đã được khóa chắc chắn.</p>
 <img alt="Cách khởi động xe máy điện VinFast Vento S"/>
 <em>Smart Key sử dụng sóng vô tuyến tần số thấp (LF) để xác thực xe và tần số cực cao (UHF) hỗ trợ điều khiển phương tiện</em>
 <h3><strong>1.3. Bước 3 - Vận hành xe điện VinFast</strong></h3>
 <p>Đầu tiên, người dùng cần khởi động xe theo trình tự sau:</p>
 <p><strong>Mở khóa xe</strong></p>
-<ul> <li>Gạt chân chống cạnh</li> <li>Thoát chế độ Parking</li> <li>Từ từ vặn tay ga điện để tăng tốc xe</li> </ul>
-<p>Đối với 2 phiên bản xe máy điện VinFast Vento S và VinFast Theon S sử dụng chìa khóa thông minh, cách khởi động xe khác ở một số bước: </p>
-<p>Bước 1: Bật điện xe</p>
-<p>Bước 2: Gạt chân chống lên</p>
-<p>Bước 3: Đặt Smartkey trong bán kính 1 mét so với đầu xe</p>
-<p>Bước 4: Bóp phanh và nhấn giữ nút khởi động xe khoảng 1 giây</p>
-<p>Bước 5: Từ từ vặn tay ga điện để tăng tốc</p>
+<ul> <li>Gạt chân chống cạnh lên.</li> <li>Thoát chế độ Parking.</li> <li>Từ từ vặn tay ga điện để tăng tốc xe.</li> </ul>
+<p>Đối với hai mẫu xe máy điện VinFast Vento S và VinFast Theon S sử dụng chìa khóa thông minh, cách khởi động có một số bước khác: </p>
+<p>Bước 1: Bật điện xe.</p>
+<p>Bước 2: Gạt chân chống cạnh lên.</p>
+<p>Bước 3: Đặt Smartkey trong bán kính 1 mét tính từ đầu xe.</p>
+<p>Bước 4: Bóp phanh và nhấn giữ nút khởi động xe khoảng 1 giây.</p>
+<p>Bước 5: Từ từ vặn tay ga điện để tăng tốc.</p>
 <p><strong>Phanh xe</strong></p>
-<p>Tương tự với các mẫu xe ga, trên cụm tay lái trái và phải của xe máy điện là tay phanh, giúp xe kiểm soát và giảm tốc độ hiệu quả. Tay phanh bên phải có tác dụng điều khiển phanh bánh trước, còn tay phanh bên trái sẽ ghìm tốc độ của bánh sau.</p>
-<p>Người dùng cần lưu ý khi bóp phanh, nên thả tay ga điện về vị trí ban đầu và phanh thật nhẹ nhàng để xe có thể chuyển động một cách an toàn. </p>
+<p>Cũng như trên xe tay ga, cụm tay lái bên trái và bên phải của xe máy điện có tay phanh để kiểm soát tốc độ. Tay phanh bên phải điều khiển phanh bánh trước, còn tay phanh bên trái điều khiển phanh bánh sau.</p>
+<p>Khi bóp phanh, người dùng nên thả tay ga điện về vị trí ban đầu và phanh nhẹ nhàng để giảm tốc an toàn. </p>
 <p><strong>Dừng xe</strong></p>
-<p>Sau khi xe dừng hẳn, đưa xe vào chế độ Parking để vô hiệu hóa tay ga. Điểm đặc biệt của xe máy điện VinFast là khi xe không chuyển động trong vòng 2 phút, xe sẽ tự động vào chế độ Parking. </p>
-<p>Cách dừng xe của VinFast Vento S và VinFast Theon S cũng tương đối đơn giản. Người dùng chỉ cần nhấn nút khởi động xe 1 lần để đưa xe vào chế độ Parking.</p>
-<p>Sau 2 phút xe không chuyển động và không nháy xi-nhan, xe sẽ tự động vào chế độ Parking như những phiên bản xe máy điện thế hệ mới khác của VinFast.</p>
+<p>Sau khi xe dừng hẳn, người dùng đưa xe vào chế độ Parking để vô hiệu hóa tay ga. </p>
+<p>Với VinFast Vento S và VinFast Theon S, người dùng nhấn nút khởi động một lần để đưa xe vào chế độ Parking.</p>
+<p>Nếu xe không chuyển động và không bật xi-nhan trong 2 phút, hệ thống sẽ tự động chuyển sang chế độ Parking.</p>
 <img alt="Hướng dẫn khởi động xe máy điện VinFast Feliz S"/>
 <em>Hướng dẫn sử dụng xe máy điện VinFast Feliz S để vận hành phương tiện hiệu quả</em>
 <h2><strong>2. Một số lưu ý khi khởi động xe máy điện VinFast</strong></h2>
-<p>Trong quá trình khởi động xe, người dùng nên có một số lưu ý như sau để đảm bảo an toàn:</p>
-<ul> <li>Sau khi khởi động thành công, xe máy điện vẫn còn đang trong chế độ Parking. Nếu chủ xe bấm giữ nút P, xe sẽ không thể thoát khỏi chế độ này được, dẫn đến người dùng không thể vặn được ga.</li> <li>Để đảm bảo an toàn khi lái xe, người dùng cần phải gạt chân chống xe và thả tay ga hoàn toàn trước khi bắt đầu di chuyển.</li> <li>Nên kích hoạt chế độ Eco khi đi đường bằng và chế độ Sport trên đoạn đường dốc để tăng gia tốc.</li> </ul>
+<p>Khi khởi động xe, người dùng cần lưu ý những điểm sau để bảo đảm an toàn:</p>
+<ul> <li>Sau khi khởi động, xe máy điện vẫn ở chế độ Parking. Người dùng cần thao tác nút P theo hướng dẫn của đúng mẫu xe để thoát chế độ này trước khi vặn ga.</li> <li>Để bảo đảm an toàn, người dùng cần gạt chân chống cạnh lên và thả tay ga hoàn toàn trước khi bắt đầu di chuyển.</li> <li>Người dùng có thể chọn chế độ Eco khi đi đường bằng và chế độ Sport trên đoạn đường dốc theo hướng dẫn của mẫu xe.</li> </ul>
 <img alt="Cách mở xe máy điện"/>
 <em>Người dùng cần tắt chế độ Parking trước khi vặn ga xe máy điện VinFast</em>
 <h2><strong>3. Các lỗi thường gặp khi khởi động xe máy điện</strong></h2>
 <h3><strong>3.1. Lỗi không khởi động được xe</strong></h3>
 <p>Hiện tượng không khởi động được là lỗi khá phổ biến ở xe máy điện. Khi khởi động xe mà không thấy phản hồi, người dùng có thể thực hiện các bước sau:</p>
-<ul> <li>Tắt khóa điện</li> <li>Tắt rồi bật lại công tắc pin trong khoang chứa đồ dưới yên xe</li> <li>Khởi động lại</li> </ul>
+<ul> <li>Tắt khóa điện.</li> <li>Nếu xe có công tắc pin trong khoang chứa đồ dưới yên, tắt rồi bật lại công tắc theo sách hướng dẫn của đúng mẫu xe.</li> <li>Khởi động lại xe.</li> </ul>
 <p>Lưu ý: Nếu thực hiện không thành công, chủ xe nên liên hệ với các trung tâm sửa chữa kỹ thuật để được hỗ trợ.</p>
 <h3><strong>3.2. Lỗi xe vặn ga không chạy</strong></h3>
-<p>Có nhiều nguyên nhân dẫn tới vặn ga nhưng xe vẫn không chạy. Một số nguyên nhân phổ biến thường gặp như: ắc quy/pin yếu hoặc bị hỏng, lỗi chân chống cạnh, xe vẫn đang ở chế độ P,...</p>
-<p>Khi xe gặp phải lỗi này, chủ xe cần kiểm tra chỉ thị chế độ Parking và chỉ thị phanh trên HMI. Đồng thời kiểm tra xe đã rút sạc ra khỏi xe chưa để khắc phục sự cố.</p>
+<p>Có nhiều nguyên nhân khiến xe không chạy khi người dùng vặn ga, chẳng hạn ắc quy hoặc pin yếu, pin bị hỏng, chân chống cạnh chưa được gạt lên hay xe vẫn ở chế độ P.</p>
+<p>Khi gặp lỗi này, chủ xe cần kiểm tra chỉ thị chế độ Parking và chỉ thị phanh trên HMI, đồng thời xác nhận đầu sạc đã được rút khỏi xe.</p>
 <img alt="Cách khởi động xe điện VinFast"/>
 <em>Xe vặn ga không chạy có thể do người dùng chưa tắt chế độ Parking trên xe</em>
 <h3><strong>3.3. Lỗi xe liên tục báo chống trộm</strong></h3>
-<p>Các mẫu xe máy điện thông minh của VinFast được tích hợp tính năng chống trộm, giúp người dùng bảo vệ tài sản tốt hơn. Theo đó, phương tiện sẽ phát đi tín hiệu cảnh báo như phát ra âm thanh cảnh báo khi xe có dấu hiệu bị dịch chuyển khỏi vị trí trong một khoảng nhất định, hay ổ khóa bị mở khóa trái phép.</p>
+<p>Các mẫu xe máy điện thông minh của VinFast được tích hợp tính năng chống trộm. Phương tiện có thể phát âm thanh cảnh báo khi bị dịch chuyển khỏi vị trí hoặc khi ổ khóa bị mở trái phép.</p>
 <p>Tuy nhiên, nếu xe ở trạng thái bình thường không có dấu hiệu bị xê dịch hay mở ổ khóa trái phép nhưng liên tục báo chống trộm thì đây là lỗi hệ thống. Điều này có thể gây ảnh hưởng tới nhiều người xung quanh nên cần có hướng khắc phục sớm.</p>
-<ul> <li>Đối với <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-klara-s-2022.html">Klara S (2022)</a> và <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-feliz-s.html">Feliz S</a>, cách tốt nhất để khắc phục sự cố này là dùng khóa điều khiển RF tạm dừng hoặc tắt cảnh báo chống trộm.</li> <li>Đối với Vento S và Theon S: Khách hàng đặt Smartkey lại gần đầu xe 1m sau đó dùng Smartkey tạm dừng hoặc tắt cảnh báo chống trộm.</li> </ul>
-<p>Tuy nhiên đây chỉ là cách khắc phục tạm thời, cách tốt nhất là chủ xe nên để các chuyên gia kỹ thuật kiểm tra và sửa chữa.</p>
+<ul> <li>Đối với <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-klara-s-2022.html">Klara S (2022)</a> và <a href="https://shop.vinfastauto.com/vn_vi/xe-may-dien-feliz-s.html">Feliz S</a>, người dùng có thể dùng khóa điều khiển RF để tạm dừng hoặc tắt cảnh báo chống trộm.</li> <li>Đối với Vento S và Theon S, người dùng đặt Smartkey trong phạm vi 1 mét tính từ đầu xe, sau đó dùng khóa để tạm dừng hoặc tắt cảnh báo.</li> </ul>
+<p>Đây chỉ là cách xử lý tạm thời. Chủ xe nên đưa phương tiện đến cơ sở dịch vụ để được kỹ thuật viên kiểm tra và sửa chữa.</p>
 <h3><strong>3.4. Lỗi màn hình hiển thị HMI</strong></h3>
-<p>Khi hệ thống tự chẩn đoán phát hiện lỗi, biểu tượng cảnh báo lỗi sẽ hiển thị trên HMI hình cờ lê. Lúc này, người dùng cần phải xác định lỗi và nhận hướng dẫn qua ứng dụng VinFast E-Scooter trên điện thoại.</p>
-<p>Tuy nhiên, có những lỗi không thể tự khắc phục được, người sử dụng nên mang xe đến hệ thống showroom và <a href="https://vinfastauto.com/vn_vi/dai-ly-uy-quyen-xe-may-dien"><strong>đại lý ủy quyền VinFast</strong></a> để được hỗ trợ xử lý kịp thời và chính xác.</p>
+<p>Khi hệ thống tự chẩn đoán phát hiện lỗi, biểu tượng hình cờ lê sẽ hiển thị trên HMI. Lúc này, người dùng cần xác định mã lỗi và xem hướng dẫn qua ứng dụng VinFast E-Scooter trên điện thoại.</p>
+<p>Với những lỗi không thể tự khắc phục, người dùng nên mang xe đến showroom hoặc <a href="https://vinfastauto.com/vn_vi/dai-ly-uy-quyen-xe-may-dien"><strong>đại lý ủy quyền VinFast</strong></a> để được kiểm tra và xử lý.</p>
 <img alt="Hướng dẫn cách khởi động xe máy điện"/>
 <em>Hệ thống tự chẩn đoán phát hiện lỗi sẽ hiển thị trên HMI hình cờ lê (đối với xe Feliz S và Klara S (2022))</em>
 <h2><strong>4. Một số lưu ý khi vận hành xe máy điện VinFast đảm bảo an toàn</strong></h2>
-<p>Sau khi đã nắm được cách khởi động xe máy điện VinFast, người dùng cần lưu ý tới kỹ năng vận hành giúp đảm bảo an toàn và tuổi thọ của phương tiện. </p>
-<p>Theo đó, khi di chuyển trên đường thẳng, người lái cần chú ý quan sát diễn biến giao thông ở phía trước và hai bên. Để có thể kịp xử lý các tình huống phát sinh trên đường, người điều khiển cần luôn giữ hai tay ở ghi đông và gần phanh xe. Cùng với đó, chân đặt ngay ngắn, thoải mái ở sàn để chân. Trong quá trình di chuyển, tay phải của người lái có thể điều chỉnh ga nhanh chậm theo tốc độ mà mình mong muốn.</p>
-<p>Nếu muốn quay đầu hoặc chuyển hướng xe, người điều khiển cần quan sát đồng thời cả phía trước, phía sau và 2 bên. Tiếp đó, người lái tiến hành giảm tốc độ đồng thời bật tín hiệu xi nhan để xin đường. Lưu ý, người lái chỉ thực hiện qua đường, quay đầu hoặc rẽ trái/phải tại nơi được quy định để đảm bảo an toàn.</p>
+<p>Sau khi nắm được cách khởi động xe máy điện VinFast, người dùng cần chú ý kỹ năng vận hành để góp phần bảo đảm an toàn và duy trì tuổi thọ phương tiện. </p>
+<p>Khi di chuyển trên đường thẳng, người lái cần quan sát giao thông ở phía trước và hai bên. Để kịp xử lý tình huống phát sinh, người điều khiển cần giữ hai tay trên ghi đông, sẵn sàng sử dụng phanh và đặt chân ngay ngắn trên sàn để chân. Tay phải điều khiển tay ga để điều chỉnh tốc độ phù hợp.</p>
+<p>Nếu muốn quay đầu hoặc chuyển hướng, người điều khiển cần quan sát phía trước, phía sau và hai bên. Sau đó, người lái giảm tốc độ và bật tín hiệu xi-nhan để xin đường. Người lái chỉ qua đường, quay đầu hoặc rẽ tại nơi được phép để bảo đảm an toàn.</p>
 <p>Ngoài ra, khi điều khiển xe máy điện, người lái cần giữ tỉnh táo, tuân thủ quy định pháp luật về trật tự, an toàn giao thông. Người lái và người ngồi sau phải đội mũ bảo hiểm; số người chở trên xe phải đúng giới hạn pháp luật cho phép.</p>
-<p>Nắm rõ <strong>cách khởi động xe máy điện VinFast</strong> giúp xe hạn chế được những lỗi không đáng có, đồng thời các bộ phận cũng bền bỉ hơn theo thời gian. Sử dụng xe đúng cách và lưu ý khi vận hành giúp xe hoạt động ổn định và đảm bảo an toàn khi di chuyển, tránh các trường hợp xảy ra lỗi hoặc dừng máy giữa đường. </p>
-<p>Xe máy điện VinFast được trang bị các tính năng hỗ trợ vận hành trong nhiều điều kiện sử dụng. Khả năng chống nước và giới hạn vận hành khác nhau theo từng mẫu xe; người dùng cần đọc đúng sách hướng dẫn của mẫu xe đang sử dụng và không đi qua vùng ngập vượt quá giới hạn do nhà sản xuất công bố. </p>
+<p>Nắm rõ <strong>cách khởi động xe máy điện VinFast</strong> giúp người dùng hạn chế lỗi thao tác. Sử dụng và bảo dưỡng xe đúng hướng dẫn góp phần duy trì khả năng vận hành ổn định và an toàn. </p>
 <p><a href="https://shop.vinfastauto.com/vn_vi/dat-mua-xe-may-dien-vinfast"><strong>Đặt mua xe máy điện VinFast thế hệ mới</strong></a> ngay hôm nay để có cơ hội sở hữu mẫu phương tiện phù hợp nhu cầu và nhận các ưu đãi hiện hành từ VinFast.</p>
-<p>Quý khách hàng có nhu cầu tìm hiểu và đặt mua các mẫu xe máy điện của VinFast có thể liên hệ với chúng tôi:</p>
+<p>Người dùng có nhu cầu tìm hiểu và đặt mua các mẫu xe máy điện VinFast có thể liên hệ:</p>
 <ul> <li>Tổng đài tư vấn: 1900 23 23 89.</li> <li>Email chăm sóc khách hàng: <a href="/cdn-cgi/l/email-protection">[email protected]</a></li> </ul>
 <p>&gt;&gt;&gt;Tìm hiểu thêm:</p>
 <ul> <li><a href="https://vinfastauto.com/vn_vi/nguyen-nhan-va-cach-xu-ly-xe-dien-vinfast-khong-khoi-dong-duoc">Nguyên nhân và cách xử lý xe điện VinFast không khởi động được</a></li> <li>Nguyên nhân <a href="https://vinfastauto.com/vn_vi/xe-may-bat-chia-khoa-khong-len-dien"><strong>xe máy mở khóa không lên điện</strong></a> và cách khắc phục</li> <li>Cách mở khóa xe khi bị <a href="https://vinfastauto.com/vn_vi/mat-chia-khoa-xe-may-dien"><strong>mất chìa khóa xe máy điện</strong></a></li> </ul>
-<p><em>* Thông tin trong bài mang tính chất tham khảo </em></p>
+<p><em>* Thông tin trong bài mang tính chất tham khảo.</em></p>
 <p><em><strong>&gt;&gt;&gt; Hè rộn ràng, ngàn ưu đãi cùng VinFast</strong></em></p>
 <ul> <li>Từ 25/06 – 31/08/2024 <a href="https://vinfastauto.com/vn_vi/chuong-trinh-tra-gop-lai-suat-0-mua-xe-may-dien-vinfast-bat-mode-xanh-hung-khoi">Chương trình trả góp lãi suất 0% khi mua xe máy điện VinFast</a></li> <li><a href="https://vinfastauto.com/vn_vi/vinfast-trien-khai-chuong-trinh-uu-dai-mua-he-hap-dan-cho-xe-may-dien">Chương trình ưu đãi mùa hè hấp dẫn cho xe máy điện VinFast</a> tới hết 31/08/2024</li> </ul>
