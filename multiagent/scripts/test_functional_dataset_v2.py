@@ -14,6 +14,7 @@ import hashlib
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 
@@ -454,7 +455,12 @@ def test_inventory_khoa_exact_20_gc_va_11_cv() -> None:
             raise AssertionError(f"wrong GC inventory: {inventory.corrected_ids!r}")
         if inventory.coverage_ids != EXPECTED_CV_IDS:
             raise AssertionError(f"wrong CV inventory: {inventory.coverage_ids!r}")
+        coverage_labels = Counter(sample.expected_label for sample in inventory.coverage)
+        expected_labels = Counter({"rejected": 7, "needs_revision": 4})
+        if coverage_labels != expected_labels:
+            raise AssertionError(f"wrong coverage label distribution: {coverage_labels!r}")
         print("[PASS] exact 20 GC + 11 CV inventory")
+        print("[PASS] coverage labels: 7 rejected + 4 needs_revision")
 
         manifest = root / "docs" / "functional-tests" / "gold-corrected-labels.csv"
         headers, rows = _read_csv(manifest)

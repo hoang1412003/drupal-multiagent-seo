@@ -179,3 +179,86 @@ Disposition full taxonomy:
 | CV-A6-02 | `f15313889d18ce34da504980fbf4a4d71244d74b6b1949183cb36cf9e67845c6` | `b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927` |
 | CV-A7-01 | `70c7b87f112923d10f43feda98ad9fdf283b980fd652c0b63d3b4c5499febd60` | `7a694324e07751a7c6eb83a2e715aaee4a7392ecd74fad60591c2a80ff0fac27` |
 | CV-A7-02 | `83d5df1b8f8001d0561f1bbb4628bbcabd6b436e2f1954e5d2b8b2e59cc80ec6` | `7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b` |
+
+## CV-B6-01 ← C-001
+
+- **Target duy nhất:** B6.
+- **Expected label:** `needs_revision`.
+- **Source URL chủ đề:** `/vn_vi/he-thong-phanh-tren-xe-o-to-dien`.
+- **Thay đổi:** chỉ làm rỗng alt của ảnh đầu tiên; hai ảnh còn lại và mọi field/body khác giữ nguyên.
+
+```diff
+-<img alt="Ô tô điện VinFast được trang bị chức năng phanh tái sinh"/>
++<img alt=""/>
+```
+
+`git diff --no-index --ignore-cr-at-eol --unified=0` xác nhận đúng một dòng khác parent. Helper kết luận B6 vì 1/3 ảnh thiếu alt text. Title/meta/alias/H2 và phần hướng dẫn an toàn kế thừa nguyên C-001 sạch, nên không phát sinh mã khác.
+
+## CV-B7-01 ← GC-018
+
+- **Target duy nhất:** B7.
+- **Expected label:** `needs_revision`.
+- **Source URL chủ đề:** `/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter`.
+- **Độ dài alias parent:** 61 ký tự.
+- **Độ dài alias fixture:** 77 ký tự, đếm toàn chuỗi được lưu; không dấu và vẫn chứa đầy đủ từ khóa tìm trạm sạc/VinFast E-Scooter/xe máy điện.
+
+```diff
+-url_alias: /vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter
++url_alias: /vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter-cho-xe-may-dien
+```
+
+Đây là khác biệt duy nhất. Helper kết luận B7 vì 77 > 75; title/meta/body không đổi nên không tạo B3/B4/B8 hoặc mã A.
+
+## CV-B9-01 ← GC-011
+
+- **Target duy nhất:** B9.
+- **Expected label:** `needs_revision`.
+- **Source URL chủ đề:** `/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast`.
+- **Phép biến đổi:** thay đúng 5 thẻ H2 bằng đoạn `p/strong` chứa nguyên văn tiêu đề; không xóa hoặc viết lại nội dung.
+- **Kết quả máy đo:** 1175 tiếng, H2=0, H3=4. Theo guideline, H3 không thay thế H2 cho B9.
+
+Mẫu vẫn trả lời đúng title và toàn bộ câu/claim giữ nguyên parent publish. Helper kết luận B9; C4=10 chỉ advisory.
+
+## CV-B9-02 ← GC-016
+
+- **Target duy nhất:** B9.
+- **Expected label:** `needs_revision`.
+- **Source URL chủ đề:** `/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang`.
+- **Phép biến đổi:** thay đúng 5 thẻ H2 bằng đoạn `p/strong` chứa nguyên văn tiêu đề; không xóa hoặc viết lại nội dung.
+- **Kết quả máy đo:** 793 tiếng, H2=0, H3=0.
+
+Mẫu vẫn trả lời đúng title và toàn bộ câu/claim giữ nguyên parent publish. Helper kết luận B9; C4=3 chỉ advisory.
+
+## Helper, scanner và manual review Task 9
+
+| ID | Title | Meta | Alias | Body tiếng | H2/H3 | Ảnh thiếu alt | Helper target | Scanner |
+|---|---:|---:|---:|---:|---:|---:|---|---|
+| CV-B6-01 | 47 | 140 | 39 | 515 | 3/0 | 1/3 | B6 | B6; không candidate |
+| CV-B7-01 | 54 | 144 | 77 | 605 | 4/0 | 0 | B7 | B7; không candidate |
+| CV-B9-01 | 51 | 144 | 58 | 1175 | 0/4 | 0 | B9 | B9; C4=10; không candidate |
+| CV-B9-02 | 48 | 151 | 55 | 793 | 0/0 | 0 | B9 | B9; C4=3; không candidate |
+
+Disposition full taxonomy:
+
+- B6/B7/B9 được máy kết luận đúng từng target như bảng; các fixture còn lại trong batch không mang target chéo.
+- Không A1–A7: không thay claim, số liệu, khuyến mại, chủ đề, hướng dẫn an toàn hoặc thêm văn xuôi ẩn.
+- Không B1/B2/B10/B11: không thay claim tầm hoạt động/sạc, số liệu hoặc chính sách.
+- Không B3/B4/B5/B8: meta/title/thuật ngữ/xưng hô/ngữ pháp giữ nguyên parent sạch; alias B7 dài nhưng vẫn đúng chính tả và chủ đề.
+- B6: chỉ một alt rỗng; hai alt còn lại mô tả đúng ảnh. B7: chỉ CV-B7-01 dài trên 75. B9: chỉ hai mẫu B9 trên 500 tiếng và không có H2.
+- C4 ở hai mẫu B9 chỉ là advisory, không đổi nhãn.
+
+## Hashes khóa Task 9
+
+| ID | Parent SHA-256 | Content SHA-256 |
+|---|---|---|
+| CV-B6-01 | `cf7bde58ce2458abcb102c75b90436a5b2054e4bfe190b8dac5e2d1ce3ac78e7` | `103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80` |
+| CV-B7-01 | `1ba51808dc0e247367339f403d2c149ad26f84dd990bf3032b031ef4fae086d9` | `88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04` |
+| CV-B9-01 | `f1fcf866f94bfd493a0f5f74bb564a9e3aeb1a7308ee297a5ca15a8d2e1dbde6` | `08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e` |
+| CV-B9-02 | `0b0286a295fe0dbdfc89a4db41e16a6ca5748e031b4d21938069a17e7196adac` | `dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55` |
+
+## Inventory khóa sau Task 9
+
+- Corrected: đúng 20 IDs `GC-001`…`GC-020`, expected `publish`.
+- Criterion coverage: đúng 11 canonical IDs.
+- Coverage label distribution: 7 `rejected` (A3/A5/A6/A7) + 4 `needs_revision` (B6/B7/B9).
+- Coverage tiếp tục tách khỏi 63 mẫu chính và không thay đổi gold E5 v1 hoặc `scoring.yaml`.
