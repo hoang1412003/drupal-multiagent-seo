@@ -101,4 +101,3 @@ Pha Evaluation phụ thuộc:
 - [ ] **Step 2:** Cập nhật mục 8 bằng `apply_patch`, tách rõ v1 lịch sử, v2 measured status và synthetic limitation.
 - [ ] **Step 3:** Chạy `git diff --check`, integrity validator và full offline suite lần cuối.
 - [ ] **Step 4:** Commit handoff riêng; không gộp file ngoài scope.
-
