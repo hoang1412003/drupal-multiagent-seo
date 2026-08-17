@@ -1,0 +1,36 @@
+title: Các loại pin xe máy điện VinFast: Đặc điểm, giá và cách dùng
+url_alias: /vn_vi/cac-loai-pin-xe-may-dien-vinfast-dac-diem-gia-cach-su-dung
+meta_description: Tìm hiểu các loại pin từng được dùng trên xe máy điện VinFast, cách tra giá hiện hành, thời gian sạc và nguyên tắc sử dụng đúng theo từng mẫu xe.
+summary: Xe máy điện VinFast ở các giai đoạn khác nhau sử dụng ắc quy chì, pin lithium-ion hoặc pin LFP. Người dùng cần xác định đúng mẫu xe trước khi tra thông số, giá và hướng dẫn sạc.
+---
+<p>Loại pin ảnh hưởng đến cách sạc, bảo quản và thông số vận hành của xe máy điện. Tuy nhiên, không thể áp một hướng dẫn chung cho mọi mẫu xe VinFast. Người dùng cần đối chiếu tên mẫu xe, phiên bản và tài liệu đi kèm trước khi lựa chọn bộ sạc hoặc thực hiện thao tác với pin.</p>
+<h2>1. Các loại pin từng được dùng trên xe máy điện VinFast</h2>
+<p>Trong các thế hệ sản phẩm khác nhau, VinFast đã công bố xe sử dụng ắc quy chì, pin lithium-ion và pin LFP. Danh mục mẫu xe thay đổi theo thời gian, vì vậy cách chắc chắn nhất để nhận biết loại pin là xem thông số hoặc sách hướng dẫn của đúng xe.</p>
+<h3>1.1. Ắc quy chì</h3>
+<p>Ắc quy chì từng được trang bị trên một số mẫu xe máy điện VinFast. Loại ắc quy, bộ sạc và quy trình kiểm tra phải theo tài liệu của đúng mẫu xe; người dùng không nên lấy thời gian sạc của xe này để áp cho xe khác.</p>
+<h3>1.2. Pin lithium-ion</h3>
+<p>VinFast từng công bố một số mẫu xe dùng pin lithium-ion có thể tháo rời. Số lượng pin, dung lượng và thời gian sạc khác nhau theo mẫu xe. Khi cần thay thế hoặc kiểm tra, người dùng nên sử dụng linh kiện phù hợp và liên hệ cơ sở dịch vụ được VinFast ủy quyền.</p>
+<h3>1.3. Pin LFP</h3>
+<p>Pin LFP được VinFast sử dụng trên nhiều mẫu xe máy điện. Ví dụ, trang <a href="https://vinfastauto.com/vn_vi/thong-so-ky-thuat-evo200">thông số Evo200</a> và <a href="https://vinfastauto.com/vn_vi/thong-so-ky-thuat-vento-s">thông số Vento S</a> đều ghi loại pin, dung lượng, bộ sạc và thời gian sạc riêng cho từng xe. Người dùng cần đọc các thông số này theo cùng một hàng của đúng mẫu xe.</p>
+<h2>2. Cách đọc thông số phạm vi và thời gian sạc</h2>
+<p>Một thông tin về quãng đường chỉ có ý nghĩa khi đi cùng điều kiện thử; thời gian sạc phải nêu bộ sạc và dải dung lượng pin. Chẳng hạn, VinFast công bố Evo200 với các mốc riêng cho bộ sạc 400 W và 1.000 W, đồng thời tách dải 0–100% khỏi 20–100%. Trang thông số cũng ghi phạm vi trong điều kiện vận tốc và tải trọng xác định. Quãng đường thực tế có thể thay đổi theo tải trọng, tốc độ, địa hình, nhiệt độ, tình trạng pin và cách vận hành.</p>
+<p>Vì vậy, khi so sánh pin giữa các mẫu xe, người dùng cần kiểm tra:</p>
+<ul>
+<li>tên mẫu xe và phiên bản;</li>
+<li>loại, dung lượng và số lượng pin;</li>
+<li>công suất bộ sạc;</li>
+<li>dải dung lượng dùng để đo thời gian sạc;</li>
+<li>điều kiện dùng để công bố phạm vi di chuyển.</li>
+</ul>
+<h2>3. Giá pin và chính sách áp dụng</h2>
+<p>Giá xe, giá pin, phương án sở hữu pin và chương trình bán hàng có thể thay đổi theo mẫu xe và thời điểm. Bản hiệu đính này không lặp lại bảng giá thuê pin cũ trong bài nguồn. Người dùng nên xem <a href="https://vinfastauto.com/vn_vi/hop-dong-va-chinh-sach">trang hợp đồng và chính sách VinFast</a>, trang sản phẩm hoặc hợp đồng mua bán tại thời điểm giao dịch để biết mức giá và điều kiện đang áp dụng.</p>
+<p>Tương tự, điều kiện bảo hành phụ thuộc loại xe, loại pin, ngày xuất hóa đơn và mục đích sử dụng. Trang <a href="https://vinfastauto.com/vn_vi/thong-tin-bao-hanh">thông tin bảo hành VinFast</a> dẫn tới sổ bảo hành tương ứng. Chỉ nhắc chung đến trang tra cứu như trên không phải là một cam kết rằng mọi mẫu xe có cùng thời hạn hay phạm vi bảo hành.</p>
+<h2>4. Cách sử dụng pin đúng theo từng mẫu xe</h2>
+<ul>
+<li>Chỉ dùng bộ sạc và đầu nối tương thích được chỉ định cho xe.</li>
+<li>Không tự tháo, sửa hoặc đấu nối thêm thiết bị vào hệ thống pin.</li>
+<li>Theo dõi cảnh báo trên xe và thực hiện đúng trình tự cắm, ngắt sạc trong sách hướng dẫn.</li>
+<li>Nếu pin, đầu nối hoặc bộ sạc có dấu hiệu bất thường, dừng sử dụng và liên hệ cơ sở dịch vụ được ủy quyền.</li>
+</ul>
+<p>Người dùng có thể tìm sách hướng dẫn của đúng mẫu xe tại <a href="https://vinfastauto.com/vn_vi/tai-lieu-xe-may-dien">trang tài liệu xe máy điện VinFast</a>. Đây là nguồn phù hợp hơn một bảng tổng hợp cũ khi cần quyết định cách sạc, bảo quản hoặc xử lý lỗi.</p>
+<p>Tóm lại, ắc quy chì, pin lithium-ion và pin LFP có đặc điểm và yêu cầu sử dụng khác nhau. Muốn so sánh chính xác, người dùng phải đặt thông số, giá và chính sách trong đúng phạm vi mẫu xe và thời điểm công bố.</p>
