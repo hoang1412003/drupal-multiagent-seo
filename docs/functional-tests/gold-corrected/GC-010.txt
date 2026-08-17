@@ -8,7 +8,7 @@ summary: Chủ xe cần tắt máy, kết nối đúng bộ sạc, chọn cổng
 <ul>
 <li>Kiểm tra trạm và cổng sạc đang khả dụng theo chỉ thị tại trụ hoặc trên ứng dụng.</li>
 <li>Đỗ xe đúng vị trí, tắt máy và chuẩn bị bộ sạc tương thích với xe.</li>
-<li>Đăng nhập ứng dụng VinFast E-Scooter nếu trạm yêu cầu xác thực phiên sạc.</li>
+<li>Chuẩn bị tài khoản VinFast E-Scooter; theo quy trình VinFast công bố ở trên, người dùng cần đăng nhập và quét mã QR để bắt đầu phiên sạc.</li>
 <li>Không sử dụng đầu nối, dây dẫn hoặc bộ sạc có dấu hiệu hư hỏng.</li>
 </ul>
 <p>Giao diện ứng dụng và cách hiển thị trạng thái có thể được cập nhật. Nếu nội dung trên ứng dụng khác bài viết, người dùng cần ưu tiên hướng dẫn tại trụ, trên ứng dụng và trong sách hướng dẫn của đúng mẫu xe.</p>
@@ -16,14 +16,14 @@ summary: Chủ xe cần tắt máy, kết nối đúng bộ sạc, chọn cổng
 <ol>
 <li><strong>Chọn cổng khả dụng:</strong> di chuyển xe vào vị trí trống và xác nhận cổng sạc sẵn sàng theo đèn chỉ thị hoặc thông tin trên ứng dụng.</li>
 <li><strong>Kết nối bộ sạc:</strong> tắt máy, lấy bộ sạc của xe, kết nối bộ sạc với xe rồi cắm vào ổ tương ứng trên trụ theo hướng dẫn.</li>
-<li><strong>Bắt đầu phiên sạc:</strong> mở mục dịch vụ trên ứng dụng, quét mã QR nếu được yêu cầu, chọn đúng cổng đã cắm và xác nhận bắt đầu.</li>
+<li><strong>Bắt đầu phiên sạc:</strong> đăng nhập ứng dụng VinFast E-Scooter, mở mục Dịch vụ, quét mã QR trên trụ sạc, chọn đúng cổng đã cắm và xác nhận bắt đầu.</li>
 <li><strong>Theo dõi quá trình:</strong> kiểm tra trạng thái trên ứng dụng và tại trụ. Nếu muốn kết thúc sớm, dùng chức năng dừng sạc theo hướng dẫn hiển thị.</li>
 <li><strong>Kết thúc và thu dây:</strong> xác nhận phiên sạc đã dừng trước khi rút bộ sạc, sau đó cất thiết bị đúng vị trí và đưa xe ra khỏi chỗ sạc.</li>
 <li><strong>Kiểm tra phiên sạc:</strong> xem lại thời gian, điện năng và chi phí được hệ thống ghi nhận; liên hệ hỗ trợ nếu thông tin có sai lệch.</li>
 </ol>
 <p>Người dùng cần chọn đúng cổng trên ứng dụng với ổ cắm thực tế. Nếu trạng thái không thay đổi hoặc hệ thống báo lỗi, không nên lặp lại thao tác liên tục; hãy dừng, kiểm tra chỉ dẫn và liên hệ kênh hỗ trợ tại trạm.</p>
 <h2>3. Tạo tài khoản và quản lý phiên sạc</h2>
-<p>Để sử dụng chức năng tại trạm, người dùng có thể cần tài khoản đã xác thực trên ứng dụng VinFast E-Scooter. Các trường thông tin và bước xác thực phụ thuộc phiên bản ứng dụng. Người dùng nên nhập thông tin theo chỉ dẫn trên màn hình, bảo vệ mã xác thực và không chia sẻ mật khẩu.</p>
+<p>Để thực hiện phiên sạc theo quy trình VinFast công bố, người dùng cần tài khoản đã đăng nhập trên ứng dụng VinFast E-Scooter. Các trường thông tin và bước xác thực có thể thay đổi theo phiên bản ứng dụng. Người dùng nên nhập thông tin theo chỉ dẫn trên màn hình, bảo vệ mã xác thực và không chia sẻ mật khẩu.</p>
 <p>Sau khi đăng nhập, ứng dụng có thể hỗ trợ tìm trạm, chọn cổng, theo dõi phiên sạc và kiểm tra hóa đơn. Khi thêm phương thức thanh toán, người dùng cần đọc nội dung xác nhận và chỉ thực hiện trên ứng dụng hoặc kênh chính thức.</p>
 <h2>4. Thanh toán chi phí sạc</h2>
 <p>Chi phí được hệ thống tính theo phiên sạc và chính sách đang áp dụng. Bài viết không cố định một mức giá vì biểu phí có thể thay đổi. Trước khi xác nhận, người dùng cần kiểm tra cổng sạc, thời gian, điện năng và số tiền hiển thị trên ứng dụng.</p>

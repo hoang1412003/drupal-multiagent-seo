@@ -155,7 +155,7 @@ Scanner chỉ đánh dấu candidate, không tự quyết mã. Các disposition 
 **Guideline:** v1.4
 **Provenance:** AI-corrected, đã tiếp xúc một phần với nhãn/candidate cũ; không phải nhãn publish tự nhiên độc lập.
 
-Năm bản này giữ đúng parent `G-006..G-010`, đủ năm field evaluator đọc (`title`, `url_alias`, `meta_description`, `summary`, `body`) và giữ nguyên chủ đề/ý định tìm kiếm. Parent trong `docs/goldset/raw/` và năm row/hash GC-001..GC-005 không bị sửa. `removed_codes` chỉ ghi defect thực tế đã sửa trong parent; không có mã thực tế bổ sung ngoài danh sách Task 4.
+Năm bản này giữ đúng parent `G-006..G-010`, đủ năm field evaluator đọc (`title`, `url_alias`, `meta_description`, `summary`, `body`) và giữ nguyên chủ đề/ý định tìm kiếm. Parent trong `docs/goldset/raw/` và năm row/hash GC-001..GC-005 không bị sửa. Review round 1 xác nhận B5 là defect thực tế bổ sung trên cả năm parent; `removed_codes` đã được cập nhật tương ứng, còn các chỉnh sửa phòng ngừa vẫn không được khai là defect.
 
 ## Nguồn chính thức đã kiểm
 
@@ -178,12 +178,13 @@ Các claim sạc/phạm vi định lượng chỉ được giữ ở GC-006 và 
 
 - **Nguồn chủ đề:** `/vn_vi/thoi-gian-sac-day-xe-may-dien-vinfast-bao-lau`
 - **Field:** `title` và `url_alias` giữ nguyên; `meta_description` 140 ký tự; `summary` trả lời rằng thời gian phụ thuộc mẫu xe/bộ sạc/SOC; `body` giữ ý định tra thời gian sạc, rút bảng nhiều mẫu xuống một ví dụ Evo200 có thể kiểm nguồn đầy đủ.
-- **Mã đã xử lý:** B1;B2;B10.
+- **Mã đã xử lý:** B1;B2;B5;B10.
 
 Trước → sau:
 
 - B1: bảng parent gắn nhiều phạm vi với “duy trì tốc độ 30 km/h” nhưng thiếu chuẩn/điều kiện/caveat theo từng mẫu → chỉ giữ Evo200 203 km ở 30 km/h, một người 65 kg, nêu đây không phải cam kết mọi hành trình và liệt kê yếu tố làm phạm vi thực tế thay đổi.
 - B2: các mốc sạc parent thiếu loại bộ sạc → bảng corrected nêu Evo200 với bộ sạc 400 W hoặc 1.000 W và tách rõ 0–100% khỏi 20–100%.
+- B5: parent trộn “người dùng”, “khách hàng” và “người sử dụng” → corrected dùng nhất quán “người dùng”.
 - B10: bảng tổng hợp cũ chứa nhiều dung lượng, thời gian và phạm vi không có nguồn gần claim → bỏ toàn bộ số không xác minh; bốn mốc sạc và một mốc phạm vi còn lại đều khớp trang thông số Evo200 chính thức.
 - Không dùng mốc “sạc đầy khoảng 6 giờ” của Vento S vì nguồn hiện tại không nêu SOC bắt đầu; việc không đưa claim thiếu ngữ cảnh này là lựa chọn an toàn, không phải một mã defect bổ sung.
 
@@ -191,11 +192,12 @@ Trước → sau:
 
 - **Nguồn chủ đề:** `/vn_vi/cac-loai-pin-xe-may-dien-vinfast-dac-diem-gia-cach-su-dung`
 - **Field:** `title` 60 ký tự, `url_alias` giữ nguyên; `meta_description` 145 ký tự; `summary` giữ ba nhóm pin; `body` giữ đủ ba ý đặc điểm, giá/chính sách và cách dùng nhưng chuyển nội dung biến động sang nguồn hiện hành.
-- **Mã đã xử lý:** B1;B2;B8;B10;B11.
+- **Mã đã xử lý:** B1;B2;B5;B8;B10;B11.
 
 Trước → sau:
 
 - B1/B2: bảng Feliz/Klara A2 nêu phạm vi và thời gian nhưng thiếu bộ sạc, điều kiện thử và caveat → bỏ bảng; phần đọc thông số chỉ dùng Evo200 làm ví dụ, yêu cầu đủ điều kiện thử, công suất bộ sạc và dải SOC, kèm caveat phạm vi thực tế.
+- B5: parent trộn “người dùng”, “khách hàng” và “Quý khách hàng” → corrected dùng nhất quán “người dùng”.
 - B8: sửa lỗi “khống quá 1mm” bằng cách bỏ checklist nhận pin cũ cùng các câu vụng/lẫn ngôi; toàn bài dùng nhất quán “người dùng”, “mẫu xe”, “pin”.
 - B10: bỏ các số không có nguồn như hơn 2.000 chu kỳ, 70%, mức hao hụt theo ngày/tháng, kích thước vết xước, hotline và bảng thông số/giá cũ. Không thay bằng số suy đoán.
 - B11: bảng giá thuê pin parent có đối tượng/giá nhưng không nêu thời hạn hiệu lực → bỏ claim cụ thể; corrected chỉ hướng người dùng tới cổng chính sách, trang sản phẩm hoặc hợp đồng tại thời điểm giao dịch. Đoạn bảo hành cũng nói rõ điều kiện thay đổi theo mẫu xe, loại pin, ngày hóa đơn và mục đích sử dụng, không hứa một thời hạn chung.
@@ -204,11 +206,12 @@ Trước → sau:
 
 - **Nguồn chủ đề:** `/vn_vi/khi-nao-nen-sac-pin-xe-dien`
 - **Field:** `title` và `url_alias` giữ nguyên; `meta_description` 147 ký tự; `summary` trả lời trực tiếp thời điểm nên sạc; `body` giữ bốn phần về thời điểm, hình thức, lưu ý và lập kế hoạch sạc.
-- **Mã đã xử lý:** B8;B10.
+- **Mã đã xử lý:** B5;B8;B10.
 
 Trước → sau:
 
 - B8: “viêc”/“thông suất” và các câu rườm rà được viết lại; lượt QA đầu còn meta 139 ký tự, sau đó được mở rộng lên 147 trước khi đưa vào manifest. Đây không phải B3 của parent và không được ghi vào `removed_codes`.
+- B5: parent trộn “người dùng” với “khách hàng” và viết sai tên `VF e 34` → corrected dùng nhất quán “người dùng” và không giữ dạng tên sai.
 - B10: bỏ quy tắc phổ quát “10 giờ cho 3 lần sạc đầu”, bảng cấp sạc/số công suất và các mốc kỹ thuật không có nguồn gần claim; thay bằng hướng dẫn dựa trên cảnh báo xe, hành trình và tài liệu đúng mẫu, không đưa ngưỡng số mới.
 - Phần chính sách thuê pin chi tiết trong parent có đối tượng và thời hạn (CP7=2) nên không phải B11; phần này bị bỏ vì không cần để trả lời “khi nào nên sạc”, không được khai là defect. Corrected chỉ dẫn cổng chính sách hiện hành mà không nêu giá trị cụ thể.
 
@@ -216,26 +219,29 @@ Trước → sau:
 
 - **Nguồn chủ đề:** `/vn_vi/tim-hieu-cac-loai-pin-o-to-dien`
 - **Field:** `title` 31 → 49 ký tự; `url_alias` giữ nguyên; `meta_description` 147 ký tự; `summary` và `body` giữ taxonomy pin, cách đọc thông số, sạc/tuổi thọ và chính sách theo mẫu xe.
-- **Mã đã xử lý:** B1;B2;B4;B8;B10;B11.
+- **Mã đã xử lý:** B1;B2;B4;B5;B8;B10;B11.
 
 Trước → sau:
 
 - B4: title “Các loại pin ô tô điện” dài 31 ký tự → “Tìm hiểu các loại pin ô tô điện phổ biến hiện nay” dài 49 ký tự, vẫn đúng chủ đề và không gắn năm cũ.
-- B8: “nên nên” cùng câu lặp/vụng được viết lại; “đúng model” ở lượt biên tập đầu được sửa thành “đúng mẫu xe” trước khi chốt hash.
+- B5: parent trộn “người dùng”, “khách hàng” và “Quý khách hàng”; review round 1 còn tìm thấy một “khách hàng” trong corrected → đổi thành “người dùng” và đọc lại toàn bài để thống nhất xưng hô.
+- B8: “nên nên” cùng câu lặp/vụng được viết lại; “đúng model” được đổi thành “đúng mẫu xe”; các cụm “có nhiều hóa học”, “một số hóa học lithium-ion” và “thời gian của một mẫu xe hoặc một dải pin” được sửa thành “nhiều loại hóa học pin”, “một số loại pin lithium-ion” và “thời gian sạc ... trong một dải dung lượng pin”.
 - B1/B2: bảng mẫu xe cũ chứa phạm vi VF 5 Plus thiếu chuẩn đo và mốc VF e34 18 phút thiếu dải SOC → bỏ bảng; phần thay thế giải thích mỗi claim phải có chuẩn/điều kiện và thiết bị/dải SOC, không lặp số.
-- B10: bỏ các số mẫu xe, công suất, thời gian sạc và phạm vi không được xác minh thành một bộ đồng nhất; phần hóa học pin chỉ giữ mô tả định tính và dẫn bài tổng quan chính thức.
+- B10: bỏ các số mẫu xe, công suất, thời gian sạc và phạm vi không được xác minh thành một bộ đồng nhất; phần hóa học pin chỉ giữ mô tả định tính và dẫn bài tổng quan chính thức. Đoạn nêu yếu tố ảnh hưởng tốc độ sạc và cơ chế giảm công suất nay gắn trực tiếp nguồn VinFast về sạc nhanh/siêu nhanh ngay tại claim.
 - B11: claim thay pin dưới 70% và bảo hành tới 10 năm không nêu thời hạn hiệu lực/phạm vi đầy đủ → bỏ. Corrected hướng đến sổ bảo hành và hợp đồng hiện hành, đồng thời nói rõ không có thời hạn chung cho mọi xe.
 
 ## GC-010 ← G-010
 
 - **Nguồn chủ đề:** `/vn_vi/cach-sac-pin-xe-may-dien-vinfast`
 - **Field:** `title` và `url_alias` giữ nguyên; `meta_description` 148 ký tự; `summary` cùng `body` thống nhất quy trình sáu bước, giữ ý định sạc tại trạm/tài khoản/thanh toán/an toàn.
-- **Mã đã xử lý:** A1;B8.
+- **Mã đã xử lý:** A1;B5;B8.
 
 Trước → sau:
 
 - A1: bỏ anchor “hệ thống trạm sạc hiện đại nhất Việt Nam”; không thay bằng claim hơn đối thủ hoặc tuyệt đối khác.
+- B5: parent trộn “Khách hàng” và “Người dùng” → corrected dùng nhất quán “người dùng”; “chủ xe” chỉ vai trò ở summary, không đổi tên cùng thực thể trong body.
 - B8: sửa “thêm thêm”; loại mâu thuẫn summary nói 6 bước nhưng body nói 10 bước; corrected dùng duy nhất sáu bước theo nguồn chính thức và diễn đạt thống nhất “ứng dụng VinFast E-Scooter”.
+- Source fidelity round 1: thay hai cụm tùy chọn “nếu trạm yêu cầu” bằng yêu cầu đăng nhập và quét mã QR theo quy trình VinFast công bố; đoạn lân cận vẫn caveat giao diện/bước xác thực có thể thay đổi và ưu tiên chỉ dẫn tại trạm/ứng dụng/manual. Đây là sửa chất lượng nguồn, reviewer không xác định mã A/B mới nên không bịa thêm code.
 - Chi tiết giao diện được caveat là có thể cập nhật; người dùng phải ưu tiên chỉ dẫn tại trụ, ứng dụng và sách hướng dẫn đúng mẫu xe.
 - Chính sách thuê pin parent có đối tượng/thời hạn (CP7=2), không phải B11. Nội dung này được bỏ vì không cần cho quy trình sạc; corrected không nêu giá/đối tượng/thời hạn chính sách mới.
 
@@ -248,8 +254,8 @@ Lượt helper cuối cho exact five files:
 | GC-006 | 46 | 140 | 52 | 536 | 3/0 | không có A/B máy kết luận | không có |
 | GC-007 | 60 | 145 | 65 | 768 | 4/3 | không có A/B máy kết luận | C4=3 |
 | GC-008 | 48 | 147 | 34 | 700 | 4/3 | không có A/B máy kết luận | không có |
-| GC-009 | 49 | 147 | 38 | 846 | 6/3 | không có A/B máy kết luận | C4=4 |
-| GC-010 | 55 | 148 | 39 | 832 | 5/0 | không có A/B máy kết luận | C4=4 |
+| GC-009 | 49 | 147 | 38 | 870 | 6/3 | không có A/B máy kết luận | C4=5 |
+| GC-010 | 55 | 148 | 39 | 853 | 5/0 | không có A/B máy kết luận | C4=4 |
 
 Rà thủ công A1–A7/B1–B11:
 
@@ -262,7 +268,7 @@ Rà thủ công A1–A7/B1–B11:
 - B1: GC-006 có phạm vi Evo200 kèm tốc độ, tải trọng, phạm vi mẫu xe và caveat thực tế; GC-007 chỉ nhắc định tính rằng trang nguồn có điều kiện xác định. Các bài khác không nêu phạm vi định lượng.
 - B2: GC-006 ghi đủ bộ sạc và SOC đầu–cuối; GC-007 mô tả đúng cách đọc mà không nêu mốc thời gian; các bài khác không có claim thời gian sạc định lượng.
 - B3/B4: meta 140–148; title 46–60, không all-caps và không gắn năm cũ.
-- B5: tên Evo200/Vento S/VinFast E-Scooter nhất quán; xưng hô “người dùng”/“chủ xe” theo vai trò, không đổi tên cùng thực thể.
+- B5: B5 thực tế ở cả năm parent đã được ghi vào `removed_codes`; corrected dùng nhất quán “người dùng”, còn “chủ xe” chỉ vai trò phù hợp ở summary. Tên Evo200/Vento S/VinFast E-Scooter nhất quán và không còn `VF e 34`.
 - B6: năm bài không có ảnh nên B6 không áp dụng.
 - B7: alias không dấu, dưới 75 ký tự và chứa từ khóa chính tương ứng title.
 - B8: đã đọc toàn văn năm candidate sau sửa; không còn lỗi trong nhãn/evidence hoặc lỗi cùng họ tìm thấy.
