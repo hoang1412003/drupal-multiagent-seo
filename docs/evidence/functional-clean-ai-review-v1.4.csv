@@ -1,0 +1,11 @@
+sample_id,expected_label,annotator,generator_model,guideline_version,reviewed_at,content_sha256,notes
+C-001,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,cf7bde58ce2458abcb102c75b90436a5b2054e4bfe190b8dac5e2d1ce3ac78e7,AI-annotated-partially-exposed; no A/B after helper scanner and full manual review
+C-002,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,79431f0dbc393b6e9630366f88b7c50a29d7b11ec705bb0620e340e04e473b50,AI-annotated-partially-exposed; range is caveated and no fixed unsupported value remains
+C-003,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,5f6263129e74aaf1a2c06eded3d7b1866fd84ad0ce1f17d9395be09eec5598c0,AI-annotated-partially-exposed; model-specific controls are caveated and safety guidance remains
+C-004,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,b4b4fb704e63d3a34e8dded685c6f3d428cde1baa396b05ae103813a5f9a28bc,AI-annotated-partially-exposed; alias is 73 characters and no A/B remains
+C-005,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,70c7b87f112923d10f43feda98ad9fdf283b980fd652c0b63d3b4c5499febd60,AI-annotated-partially-exposed; application workflow is caveated and no hidden prose exists
+C-006,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,9d2876ce4c25e790b453651fbaa7817904c69f38370b3cccc4e75a997ef4956f,AI-annotated-partially-exposed; B11 is NA because policy mention is generic and points to current terms
+C-007,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,196bbf6d1c3e0772030c77fd4c91200f5831d31fee6c534c46f0ddb87dfe2ca4,AI-annotated-partially-exposed; no fixed charger power claim and safety steps remain
+C-008,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,f15313889d18ce34da504980fbf4a4d71244d74b6b1949183cb36cf9e67845c6,AI-annotated-partially-exposed; high-voltage work is reserved for trained technicians
+C-009,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,47550c50c426d237bbd9c2c65ff207078ae245d29a194703eac2cb55ca523d86,AI-annotated-partially-exposed; no unsupported tire threshold or maintenance interval remains
+C-010,publish,AI-A1,not-exposed-by-runtime,v1.4,2026-08-17,1e10eb7a9694a480ba548e20bb5fc2c72b81b7c2015245989e5fd492ef109107,AI-annotated-partially-exposed; warning meanings are caveated by model and display instructions
