@@ -1,9 +1,9 @@
 # Evidence gán lại gold set bởi AI theo guideline v1.4
 
-**Ngày khóa lượt gán:** 2026-08-17  
-**Nhánh/worktree:** `ai/v14-relabel` / `.worktrees/ai-v14-relabel`  
-**Commit nền:** `b0fa1c862a03250a629525623885e054d2548d65`  
-**Annotator:** `AI-A1`  
+**Ngày khóa lượt gán:** 2026-08-17\
+**Nhánh/worktree:** `ai/v14-relabel` / `.worktrees/ai-v14-relabel`\
+**Commit nền:** `b0fa1c862a03250a629525623885e054d2548d65`\
+**Annotator:** `AI-A1`\
 **Đầu ra:** `docs/goldset/labels-ai-v1.4.csv`
 
 ## 1. Kết luận sử dụng dữ liệu
