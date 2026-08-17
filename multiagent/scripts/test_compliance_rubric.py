@@ -10,13 +10,14 @@ Chay: .venv\\Scripts\\python.exe scripts\\test_compliance_rubric.py
 """
 import os
 import sys
+from copy import deepcopy
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import text_utils
 import compliance_analysis as ca
 from agents import compliance
-from decision_policy import POLICY_V1, POLICY_V2, PolicyContractError
+from decision_policy import POLICY_V1, POLICY_V2, PolicyContractError, evaluate
 from scoring import score_from_criteria, severity_for
 from text_utils import strip_html
 
@@ -26,11 +27,13 @@ BODY = "VF 8 chạy được 420 km mỗi lần sạc theo chuẩn NEDC."
 
 # Bai khong co con so nao: CP5, CP6, CP8 deu NA do MAY ket luan.
 BODY_KHONG_SO = "Hướng dẫn sạc pin an toàn cho xe điện đúng cách."
+SAFETY_RULES = compliance.load_safety_rules()
+SAFE_CABLE_REF = "VF-SAFE-CHARGING-CABLE-001"
 
 
 def _llm(muc_theo_ma: dict, evidence: str = BODY):
     """Gia lap LLM: tra mot muc co san cho moi ma."""
-    def fn(fields, text_theo_field):
+    def fn(fields, text_theo_field, **kwargs):
         result = {}
         for ma, muc in muc_theo_ma.items():
             muc_sau = compliance._hop_thuc_hoa(ma, muc, evidence, text_theo_field)
@@ -470,7 +473,7 @@ def test_diem_va_flag_khong_con_mau_thuan():
 # --------------------------------------------------------- suy giam co kiem soat
 
 
-def _boom(fields, text_theo_field):
+def _boom(fields, text_theo_field, **kwargs):
     raise RuntimeError("het han muc API")
 
 
@@ -505,7 +508,7 @@ def test_llm_loi_nhung_co_vi_pham_cung_thi_van_tra_ket_qua():
 def test_khong_tieu_chi_nao_ap_dung_thi_tra_none():
     """Tra None = CHUA CHAM DUOC, khac han 0 diem. Aggregator gap None thi
     khong bao gio tu dong publish."""
-    def chi_na(fields, text_theo_field):
+    def chi_na(fields, text_theo_field, **kwargs):
         return {ma: compliance._tieu_chi(ma, None) for ma in compliance._MA_LLM}
 
     result = compliance.run(
@@ -735,6 +738,310 @@ def test_cp4_duong_llm_that_giu_evidence_de_chot_thoi_han():
     print("[PASS] duong LLM that giu evidence CP4 muc 2 de chot thoi han")
 
 
+# ------------------------------------------------ A6 / CP7 policy v2
+
+def _a6_check(status, *, evidence="", reference_id="", reason="Đã đánh giá A6."):
+    return {
+        "id": "A6",
+        "status": status,
+        "field": "body",
+        "evidence": evidence,
+        "reason": reason,
+        "reference_id": reference_id,
+    }
+
+
+def _llm_v2(muc_theo_ma, check, *, evidence=BODY_KHONG_SO):
+    legacy = _llm(muc_theo_ma, evidence=evidence)
+
+    def fn(fields, text_theo_field, **kwargs):
+        return {
+            "criteria": legacy(fields, text_theo_field, **kwargs),
+            "policy_checks": [check],
+        }
+    return fn
+
+
+def _run_v2(body, llm, *, title="Hướng dẫn an toàn"):
+    fields = {"title": title, "body": body, "meta_description": ""}
+    result = compliance.run(
+        fields,
+        danh_gia_llm=llm,
+        danh_gia_cp3=_cp3_na,
+        policy_version=POLICY_V2,
+        safety_rules=SAFETY_RULES,
+    )
+    return fields, result
+
+
+def _decision_from_compliance(fields, result):
+    decision_fields = {
+        **fields,
+        "summary": "Tóm tắt nội dung.",
+        "url_alias": "/huong-dan-an-toan",
+        "image_alt": "Ảnh minh họa an toàn",
+    }
+    return evaluate(
+        decision_fields,
+        {"compliance": result},
+        assessment_as_of="2026-08-17",
+    )
+
+
+def test_a6_v2_present_giu_reference_allowlist_va_rejected():
+    evidence = "Có thể kéo căng hoặc dẫm lên cáp sạc khi dây bị vướng."
+    check = _a6_check(
+        "present",
+        evidence=evidence,
+        reference_id=SAFE_CABLE_REF,
+        reason="Hướng dẫn trái quy tắc an toàn cáp sạc đã khóa.",
+    )
+    fields, result = _run_v2(
+        evidence,
+        _llm_v2({ma: None for ma in compliance._MA_LLM}, check, evidence=evidence),
+    )
+    assert result["policy_checks"][0]["status"] == "present"
+    assert result["policy_checks"][0]["reference_id"] == SAFE_CABLE_REF
+    assert "A6" not in result["unavailable_checks"]
+    decision = _decision_from_compliance(fields, result)
+    assert decision["decision"] == "rejected"
+    assert "A6" in decision["decision_basis"]["blocking_codes"]
+    print("[PASS] A6 hop le giu allowlisted reference -> rejected")
+
+
+def test_a6_v2_reference_la_thanh_unavailable_khong_rejected():
+    evidence = "Có thể kéo căng cáp sạc khi dây bị vướng."
+    check = _a6_check(
+        "present",
+        evidence=evidence,
+        reference_id="VF-UNKNOWN-001",
+        reason="Tham chiếu này không có trong safety source.",
+    )
+    fields, result = _run_v2(
+        evidence,
+        _llm_v2({ma: None for ma in compliance._MA_LLM}, check, evidence=evidence),
+    )
+    assert result["policy_checks"][0]["status"] == "unavailable"
+    assert "A6" in result["unavailable_checks"]
+    decision = _decision_from_compliance(fields, result)
+    assert decision["decision"] == "needs_revision"
+    assert "A6" not in {
+        finding["defect_code"] for finding in decision["effective_findings"]
+    }
+    print("[PASS] A6 reference la -> unavailable, khong rejected")
+
+
+def test_a6_v2_evidence_bia_thanh_unavailable():
+    body = "Luôn kiểm tra cáp sạc trước khi sử dụng."
+    check = _a6_check(
+        "present",
+        evidence="Câu nguy hiểm này không hề có trong body.",
+        reference_id=SAFE_CABLE_REF,
+        reason="Hướng dẫn trái quy tắc an toàn cáp sạc đã khóa.",
+    )
+    _, result = _run_v2(
+        body,
+        _llm_v2({ma: None for ma in compliance._MA_LLM}, check, evidence=body),
+    )
+    assert result["policy_checks"][0]["status"] == "unavailable"
+    assert "A6" in result["unavailable_checks"]
+    print("[PASS] A6 evidence bia -> unavailable")
+
+
+def test_a6_v2_absent_va_not_applicable_deu_assessed():
+    cases = (
+        (
+            "Luôn kiểm tra cáp và không dẫm lên cáp sạc.",
+            _a6_check("absent", reason="Hướng dẫn kỹ thuật phù hợp nguồn."),
+        ),
+        (
+            "Bài giới thiệu màu sắc ngoại thất của xe.",
+            _a6_check("not_applicable", reason="Không có hướng dẫn kỹ thuật."),
+        ),
+    )
+    for body, check in cases:
+        _, result = _run_v2(
+            body,
+            _llm_v2({ma: None for ma in compliance._MA_LLM}, check, evidence=body),
+        )
+        assert result["policy_checks"][0]["status"] == check["status"]
+        assert "A6" not in result["unavailable_checks"]
+    print("[PASS] A6 absent/not_applicable deu la assessment hoan tat")
+
+
+def test_v2_llm_hong_ghi_ro_moi_check_llm_unavailable():
+    _, result = _run_v2(
+        BODY_KHONG_SO,
+        _boom,
+        title="VF 3 tốt nhất phân khúc",
+    )
+    assert result is not None, "CP1 hard finding phai giu result"
+    assert set(result["unavailable_checks"]) == {
+        "CP2", "CP4", "CP7", "CP8", "A6"
+    }
+    assert result["policy_checks"][0]["status"] == "unavailable"
+    print("[PASS] LLM hong -> A6 va 4 criterion LLM deu unavailable")
+
+
+def test_v2_llm_output_malformed_cung_thanh_unavailable():
+    def malformed(fields, text_theo_field, **kwargs):
+        return []
+
+    _, result = _run_v2(
+        BODY_KHONG_SO,
+        malformed,
+        title="VF 3 tốt nhất phân khúc",
+    )
+    assert result is not None
+    assert set(result["unavailable_checks"]) == {
+        "CP2", "CP4", "CP7", "CP8", "A6"
+    }
+    print("[PASS] output LLM malformed -> unavailable, khong crash")
+
+
+def test_cp7_v2_du_bon_muc_va_0_1_map_b11():
+    body = "Gói thuê pin 1.000.000 đồng mỗi tháng áp dụng trong 12 tháng."
+    for level in (None, 0, 1, 2):
+        check = _a6_check("not_applicable", reason="Không có hướng dẫn kỹ thuật.")
+        fields, result = _run_v2(
+            body,
+            _llm_v2(
+                {"CP2": 2, "CP4": None, "CP7": level, "CP8": 2},
+                check,
+                evidence=body,
+            ),
+        )
+        assert _muc(result, "CP7") == level
+        decision = _decision_from_compliance(fields, result)
+        codes = {f["defect_code"] for f in decision["effective_findings"]}
+        assert ("B11" in codes) == (level in (0, 1)), (level, codes)
+    print("[PASS] CP7 v2 NA/0/1/2; chi 0/1 map B11")
+
+
+def _raw_llm_cp7(body):
+    return {
+        "criteria": [
+            {"id": "CP2", "muc": "2", "field": "body", "evidence": "", "reason": ""},
+            {"id": "CP4", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+            {"id": "CP7", "muc": "1", "field": "body", "evidence": body,
+             "reason": "Thiếu một thành phần."},
+            {"id": "CP8", "muc": "2", "field": "body", "evidence": body, "reason": ""},
+        ]
+    }
+
+
+def test_cp7_v1_giu_prompt_schema_score_va_severity_cu():
+    body = "Gói thuê pin 1.000.000 đồng mỗi tháng áp dụng trong 12 tháng."
+    calls = []
+
+    def fake_call_agent(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+        return _raw_llm_cp7(body)
+
+    old = compliance.call_agent
+    compliance.call_agent = fake_call_agent
+    try:
+        implicit = compliance.run(
+            {"title": "Hướng dẫn thuê pin", "body": body, "meta_description": ""},
+            danh_gia_cp3=_cp3_na,
+        )
+        explicit = compliance.run(
+            {"title": "Hướng dẫn thuê pin", "body": body, "meta_description": ""},
+            danh_gia_cp3=_cp3_na,
+            policy_version=POLICY_V1,
+        )
+    finally:
+        compliance.call_agent = old
+
+    assert implicit == explicit
+    assert implicit["score"] == 87.5
+    assert [(c["id"], c["level"]) for c in implicit["criteria"]] == [
+        ("CP1", 2), ("CP2", 2), ("CP3", None), ("CP4", None),
+        ("CP5", None), ("CP6", None), ("CP7", 1), ("CP8", 2),
+    ]
+    cp7_flags = [f for f in implicit["flags"] if f["rule"].endswith("(CP7)")]
+    assert len(cp7_flags) == 1 and cp7_flags[0]["severity"] == "low"
+    assert len(calls) == 2
+    for call in calls:
+        prompt, _, schema = call["args"]
+        assert "POLICY CHECK A6" not in prompt
+        assert "policy_checks" not in schema["properties"]
+    print("[PASS] CP7 v1 giu prompt/schema/score/severity cu")
+
+
+def test_v2_compliance_chi_goi_llm_mot_lan_va_schema_co_a6():
+    calls = []
+    raw = {
+        "criteria": [
+            {"id": "CP2", "muc": "2", "field": "body", "evidence": "", "reason": ""},
+            {"id": "CP4", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+            {"id": "CP7", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+            {"id": "CP8", "muc": "NA", "field": "body", "evidence": "", "reason": ""},
+        ],
+        "policy_checks": [_a6_check(
+            "not_applicable",
+            reason="Không có hướng dẫn kỹ thuật.",
+        )],
+    }
+
+    def fake_call_agent(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+        return raw
+
+    old = compliance.call_agent
+    compliance.call_agent = fake_call_agent
+    try:
+        result = compliance.run(
+            {
+                "title": "Giới thiệu màu xe",
+                "body": "Bài chỉ giới thiệu màu ngoại thất.",
+                "meta_description": "",
+            },
+            danh_gia_cp3=_cp3_na,
+            policy_version=POLICY_V2,
+            safety_rules=SAFETY_RULES,
+        )
+    finally:
+        compliance.call_agent = old
+
+    assert len(calls) == 1
+    prompt, _, schema = calls[0]["args"]
+    assert "POLICY CHECK A6" in prompt
+    assert SAFE_CABLE_REF in prompt
+    assert "policy_checks" in schema["properties"]
+    assert result["policy_checks"][0]["status"] == "not_applicable"
+    print("[PASS] Compliance v2 dung mot LLM call, prompt/schema co A6")
+
+
+def test_v2_safety_source_sai_fail_truoc_llm_va_cp3():
+    calls = {"llm": 0, "cp3": 0}
+    invalid = deepcopy(SAFETY_RULES)
+    invalid["version"] = 2
+
+    def llm(*args, **kwargs):
+        calls["llm"] += 1
+        raise AssertionError("LLM khong duoc goi")
+
+    def cp3(*args, **kwargs):
+        calls["cp3"] += 1
+        raise AssertionError("CP3 khong duoc goi")
+
+    try:
+        compliance.run(
+            {"title": "Hướng dẫn", "body": "Nội dung", "meta_description": ""},
+            danh_gia_llm=llm,
+            danh_gia_cp3=cp3,
+            policy_version=POLICY_V2,
+            safety_rules=invalid,
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("safety source sai version phai bi tu choi")
+    assert calls == {"llm": 0, "cp3": 0}
+    print("[PASS] safety source sai fail truoc LLM/CP3 callback")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -786,6 +1093,16 @@ if __name__ == "__main__":
         test_cp4_g008_co_thoi_han_khong_bi_veto_oan,
         test_cp4_p006a_co_thoi_han_khong_bi_veto_oan,
         test_cp4_duong_llm_that_giu_evidence_de_chot_thoi_han,
+        test_a6_v2_present_giu_reference_allowlist_va_rejected,
+        test_a6_v2_reference_la_thanh_unavailable_khong_rejected,
+        test_a6_v2_evidence_bia_thanh_unavailable,
+        test_a6_v2_absent_va_not_applicable_deu_assessed,
+        test_v2_llm_hong_ghi_ro_moi_check_llm_unavailable,
+        test_v2_llm_output_malformed_cung_thanh_unavailable,
+        test_cp7_v2_du_bon_muc_va_0_1_map_b11,
+        test_cp7_v1_giu_prompt_schema_score_va_severity_cu,
+        test_v2_compliance_chi_goi_llm_mot_lan_va_schema_co_a6,
+        test_v2_safety_source_sai_fail_truoc_llm_va_cp3,
     ):
         try:
             fn()

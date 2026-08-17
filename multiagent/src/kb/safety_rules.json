@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "reference_id": "VF-SAFE-CHARGING-CABLE-001",
+      "source_url": "https://vinfastauto.com/vn_vi/bo-sac-di-dong-tai-nha-co-an-toan-khong",
+      "accessed_at": "2026-08-17",
+      "content_type": "cam_nang",
+      "langcode": "vi",
+      "rule": "Không kéo căng, gập, thắt, kéo hoặc dẫm lên cáp sạc."
+    },
+    {
+      "reference_id": "VF-SAFE-HIGH-VOLTAGE-001",
+      "source_url": "https://vinfastauto.com/vn_vi/dich-vu-pin-oto-dien",
+      "accessed_at": "2026-08-17",
+      "content_type": "cam_nang",
+      "langcode": "vi",
+      "rule": "Người dùng không tự tháo, sửa hoặc thay bộ phận, cáp hay đầu nối điện áp cao."
+    }
+  ]
+}

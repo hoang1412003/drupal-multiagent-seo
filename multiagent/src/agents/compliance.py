@@ -19,6 +19,7 @@ cùng bài, cùng model, cùng code, lúc ra 0 flag/95 điểm, lúc ra 2-3 flag
 low/85 điểm. Compliance là agent duy nhất có quyền phủ quyết, nên đúng chỗ
 đó lại là chỗ bất định nhất.
 """
+from datetime import date
 import json
 import os
 import re
@@ -32,8 +33,90 @@ from scoring import score_from_criteria, severity_for
 from text_utils import strip_html, trich_dan_co_that
 
 _RULES_PATH = os.path.join(os.path.dirname(__file__), "compliance_rules.json")
+_SAFETY_RULES_PATH = os.path.normpath(os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "kb",
+    "safety_rules.json",
+))
+
+_SAFETY_TOP_LEVEL = {"version", "rules"}
+_SAFETY_RULE_FIELDS = {
+    "reference_id",
+    "source_url",
+    "accessed_at",
+    "content_type",
+    "langcode",
+    "rule",
+}
+_SAFETY_REFERENCE_ID = re.compile(r"[A-Z0-9]+(?:-[A-Z0-9]+)+\Z")
+_SAFETY_ACCESSED_AT = re.compile(r"\d{4}-\d{2}-\d{2}\Z")
 
 _rules_cache = None
+
+
+def _validate_safety_rules(data) -> dict:
+    """Validate release-locked safety rules without silently repairing drift."""
+    if not isinstance(data, dict) or set(data) != _SAFETY_TOP_LEVEL:
+        raise ValueError("safety rules must contain exactly version and rules")
+    if isinstance(data["version"], bool) or data["version"] != 1:
+        raise ValueError(f"unsupported safety rules version: {data['version']!r}")
+    if not isinstance(data["rules"], list) or not data["rules"]:
+        raise ValueError("safety rules must be a non-empty list")
+
+    seen = set()
+    for index, rule in enumerate(data["rules"]):
+        if not isinstance(rule, dict):
+            raise ValueError(f"safety rule {index} must be an object")
+        missing = _SAFETY_RULE_FIELDS - set(rule)
+        extra = set(rule) - _SAFETY_RULE_FIELDS
+        if missing:
+            raise ValueError(f"safety rule {index} missing: {sorted(missing)}")
+        if extra:
+            raise ValueError(f"safety rule {index} has unknown fields: {sorted(extra)}")
+
+        reference_id = rule["reference_id"]
+        if not isinstance(reference_id, str) or not _SAFETY_REFERENCE_ID.fullmatch(
+            reference_id
+        ):
+            raise ValueError(f"safety rule {index} has invalid reference_id")
+        if reference_id in seen:
+            raise ValueError(f"duplicate reference_id: {reference_id}")
+        seen.add(reference_id)
+
+        source_url = rule["source_url"]
+        if not isinstance(source_url, str) or not source_url.startswith(
+            "https://vinfastauto.com/"
+        ):
+            raise ValueError(
+                f"safety rule {reference_id} source_url must use official HTTPS"
+            )
+
+        accessed_at = rule["accessed_at"]
+        if not isinstance(accessed_at, str) or not _SAFETY_ACCESSED_AT.fullmatch(
+            accessed_at
+        ):
+            raise ValueError(f"safety rule {reference_id} has invalid accessed_at")
+        try:
+            date.fromisoformat(accessed_at)
+        except ValueError as error:
+            raise ValueError(
+                f"safety rule {reference_id} has invalid accessed_at"
+            ) from error
+
+        for field in ("content_type", "langcode", "rule"):
+            value = rule[field]
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    f"safety rule {reference_id} has invalid {field}"
+                )
+    return data
+
+
+def load_safety_rules(path: str | None = None) -> dict:
+    """Load and validate the versioned VinFast safety source."""
+    with open(path or _SAFETY_RULES_PATH, encoding="utf-8") as handle:
+        return _validate_safety_rules(json.load(handle))
 
 # Các field Compliance đọc (docs/rubrics.md mục 6)
 _FIELDS = ("title", "body", "meta_description")
@@ -412,6 +495,167 @@ _LLM_SCHEMA = {
     "additionalProperties": False,
 }
 
+_CP7_V2_PROMPT = (
+    "BỔ SUNG POLICY V2 CHO CP7:\n"
+    "Với CP7, dùng định nghĩa này thay cho đoạn CP7 phía trên. Trước hết xác "
+    "định bài có claim chính sách pin, bảo hành pin hoặc thuê pin CỤ THỂ hay "
+    "không; lời khuyên sử dụng pin chung chung không phải claim chính sách.\n"
+    "  NA = không có claim chính sách cụ thể\n"
+    "  0 = claim thiếu từ hai thành phần thiết yếu trở lên\n"
+    "  1 = claim thiếu đúng một thành phần thiết yếu\n"
+    "  2 = đủ đối tượng/điều kiện, thời hạn và mức phí nếu có thu phí\n"
+    "Mức 0/1 phải kèm evidence nguyên văn; mức 2 cũng phải chứng minh bài có "
+    "claim cụ thể."
+)
+
+
+def _a6_prompt(safety_rules: dict) -> str:
+    lines = [
+        "BỔ SUNG POLICY CHECK A6 (trường `policy_checks`):",
+        "Trả đúng một check id A6 với status present, absent, "
+        "not_applicable hoặc unavailable.",
+        "- present: bài có thao tác nguy hiểm, bỏ cảnh báo bắt buộc hoặc "
+        "hướng dẫn trái một quy tắc dưới đây; phải có evidence nguyên văn "
+        "trong body và reference_id đúng quy tắc. Reason phải mô tả nguy cơ "
+        "cụ thể và hướng sửa an toàn, không lặp lại thao tác nguy hiểm như "
+        "một lời khuyên thật.",
+        "- absent: bài có hướng dẫn kỹ thuật và không phát hiện vi phạm sau "
+        "khi đối chiếu các quy tắc.",
+        "- not_applicable: bài không có hướng dẫn kỹ thuật.",
+        "- unavailable: không đủ căn cứ; không được suy thành absent.",
+        "NGUỒN AN TOÀN ĐÃ KHÓA:",
+    ]
+    for rule in safety_rules["rules"]:
+        lines.append(
+            f"- {rule['reference_id']}: {rule['rule']} "
+            f"(nguồn {rule['source_url']}, truy cập {rule['accessed_at']})"
+        )
+    return "\n".join(lines)
+
+
+def _llm_prompt(policy_version: str, safety_rules: dict | None) -> str:
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
+    if policy_version == POLICY_V1:
+        return _LLM_PROMPT
+    if safety_rules is None:
+        raise ValueError("policy v2 requires validated safety_rules")
+    return (
+        _LLM_PROMPT
+        + "\n\n"
+        + _CP7_V2_PROMPT
+        + "\n\n"
+        + _a6_prompt(safety_rules)
+    )
+
+
+def _a6_check_schema(reference_ids: list[str]) -> dict:
+    return {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string", "enum": ["A6"]},
+            "status": {
+                "type": "string",
+                "enum": ["present", "absent", "not_applicable", "unavailable"],
+            },
+            "field": {"type": "string", "enum": ["body"]},
+            "evidence": {"type": "string"},
+            "reason": {"type": "string"},
+            "reference_id": {"type": "string", "enum": ["", *reference_ids]},
+        },
+        "required": [
+            "id", "status", "field", "evidence", "reason", "reference_id"
+        ],
+        "additionalProperties": False,
+    }
+
+
+def _llm_schema(policy_version: str, safety_rules: dict | None) -> dict:
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
+    if policy_version == POLICY_V1:
+        return _LLM_SCHEMA
+    if safety_rules is None:
+        raise ValueError("policy v2 requires validated safety_rules")
+    reference_ids = [rule["reference_id"] for rule in safety_rules["rules"]]
+    return {
+        "type": "object",
+        "properties": {
+            **_LLM_SCHEMA["properties"],
+            "policy_checks": {
+                "type": "array",
+                "items": _a6_check_schema(reference_ids),
+                "minItems": 1,
+                "maxItems": 1,
+            },
+        },
+        "required": [*_LLM_SCHEMA["required"], "policy_checks"],
+        "additionalProperties": False,
+    }
+
+
+def _a6_unavailable(reason: str) -> tuple[list[dict], list[str]]:
+    return ([{
+        "id": "A6",
+        "status": "unavailable",
+        "field": "body",
+        "evidence": "",
+        "reason": reason,
+        "reference_id": None,
+    }], ["A6"])
+
+
+def _chuan_hoa_a6(
+    raw_checks,
+    text_theo_field: dict,
+    safety_rules: dict,
+) -> tuple[list[dict], list[str]]:
+    """Fail-safe raw A6 against exact body evidence and safety allowlist."""
+    if not isinstance(raw_checks, list) or len(raw_checks) != 1:
+        return _a6_unavailable("Output thiếu đúng một policy check A6.")
+    raw = raw_checks[0]
+    if not isinstance(raw, dict) or raw.get("id") != "A6":
+        return _a6_unavailable("Output policy check A6 sai cấu trúc hoặc ID.")
+
+    status = raw.get("status")
+    if status not in {"present", "absent", "not_applicable", "unavailable"}:
+        return _a6_unavailable("Trạng thái policy check A6 không hợp lệ.")
+    if raw.get("field") != "body":
+        return _a6_unavailable("Policy check A6 phải trỏ tới field body.")
+    evidence = raw.get("evidence")
+    reason = raw.get("reason")
+    reference_id = raw.get("reference_id")
+    if not isinstance(evidence, str) or not isinstance(reference_id, str):
+        return _a6_unavailable("Policy check A6 thiếu evidence/reference_id.")
+    if not isinstance(reason, str) or not reason.strip():
+        return _a6_unavailable("Policy check A6 thiếu căn cứ kết luận.")
+    if status == "unavailable":
+        return _a6_unavailable(reason)
+
+    allowed = {rule["reference_id"] for rule in safety_rules["rules"]}
+    if reference_id and reference_id not in allowed:
+        return _a6_unavailable("A6 dùng reference_id ngoài safety allowlist.")
+    if status == "present":
+        if not reference_id:
+            return _a6_unavailable("A6 present thiếu safety reference_id.")
+        if not trich_dan_co_that(evidence, {"body": text_theo_field["body"]}):
+            return _a6_unavailable("Evidence A6 không khớp nguyên văn body.")
+    else:
+        evidence = ""
+
+    return ([{
+        "id": "A6",
+        "status": status,
+        "field": "body",
+        "evidence": evidence,
+        "reason": reason,
+        "reference_id": reference_id or None,
+    }], [])
+
 
 def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
     """Áp quy tắc bằng chứng lên mức LLM vừa chấm.
@@ -450,8 +694,17 @@ def _hop_thuc_hoa(ma: str, muc, evidence: str, text_theo_field: dict):
     return muc if trich_dan_co_that(evidence, text_theo_field) else None
 
 
-def _danh_gia_llm(fields: dict, text_theo_field: dict) -> dict:
-    """Gọi LLM một lần, trả dict mã -> tiêu chí đã hợp thức hoá.
+def _danh_gia_llm(
+    fields: dict,
+    text_theo_field: dict,
+    *,
+    policy_version: str = POLICY_V1,
+    safety_rules: dict | None = None,
+) -> dict:
+    """Gọi LLM một lần và hợp thức hóa criteria/evidence.
+
+    V1 trả mapping criterion lịch sử. V2 bọc mapping đó cùng raw A6 để lớp
+    adapter chung kiểm evidence/reference trước khi công bố policy check.
 
     M1 + M3 qua `prompt_builder.boc_noi_dung`. Compliance là chỗ đáng làm
     nhất trong 4 agent: nó là agent duy nhất có quyền phủ quyết, nên một câu
@@ -461,7 +714,11 @@ def _danh_gia_llm(fields: dict, text_theo_field: dict) -> dict:
     `text_theo_field` dựng từ body GỐC (docs/prompt-injection.md mục 5 M3).
     """
     noi_dung, _ = boc_noi_dung(fields, _FIELDS)
-    kq = call_agent(_LLM_PROMPT, noi_dung, _LLM_SCHEMA)
+    kq = call_agent(
+        _llm_prompt(policy_version, safety_rules),
+        noi_dung,
+        _llm_schema(policy_version, safety_rules),
+    )
 
     theo_ma = {}
     for c in kq["criteria"]:
@@ -474,22 +731,85 @@ def _danh_gia_llm(fields: dict, text_theo_field: dict) -> dict:
         occ = ([{"field": c["field"], "text": c["evidence"]}]
                if can_evidence else [])
         theo_ma[ma] = _tieu_chi(ma, muc, occ, c["reason"] if muc in (0, 1) else "")
+    if policy_version == POLICY_V2:
+        return {
+            "criteria": theo_ma,
+            "policy_checks": kq.get("policy_checks", []),
+        }
     return theo_ma
 
 
-def _cac_tieu_chi_llm(fields: dict, text_theo_field: dict, danh_gia_llm) -> tuple:
-    """Trả (dict mã -> tiêu chí, llm_hong).
+def _cac_tieu_chi_llm(
+    fields: dict,
+    text_theo_field: dict,
+    danh_gia_llm,
+    *,
+    policy_version: str,
+    safety_rules: dict | None,
+) -> tuple:
+    """Trả (criteria, policy_checks, unavailable_checks, llm_hong).
 
-    Lỗi LLM -> cả 6 tiêu chí thành NA, KHÔNG phải 0. Nhưng người gọi phải
+    Lỗi LLM -> cả bốn tiêu chí LLM thành NA, KHÔNG phải 0. Nhưng người gọi phải
     biết đó là NA vì HẠ TẦNG HỎNG chứ không phải vì "bài không bàn tới chủ
     đề" - hai thứ này cùng ký hiệu NA nhưng ý nghĩa ngược nhau, xem run().
     """
     try:
-        theo_ma = danh_gia_llm(fields, text_theo_field)
+        if policy_version == POLICY_V2:
+            raw = danh_gia_llm(
+                fields,
+                text_theo_field,
+                policy_version=policy_version,
+                safety_rules=safety_rules,
+            )
+        else:
+            # Giữ adapter callback v1 ba tham số như trước release v2. Chỉ
+            # callback v2 cần nhận context policy/safety mới.
+            raw = danh_gia_llm(fields, text_theo_field)
     except Exception:
-        return {ma: _tieu_chi(ma, None) for ma in _MA_LLM}, True
+        policy_checks, unavailable = (
+            _a6_unavailable("Không gọi được bộ đánh giá A6.")
+            if policy_version == POLICY_V2
+            else ([], [])
+        )
+        llm_unavailable = list(_MA_LLM) if policy_version == POLICY_V2 else []
+        return (
+            {ma: _tieu_chi(ma, None) for ma in _MA_LLM},
+            policy_checks,
+            llm_unavailable + unavailable,
+            True,
+        )
+
+    if not isinstance(raw, dict):
+        raise TypeError("Compliance LLM adapter must return a mapping")
+    if policy_version == POLICY_V2 and isinstance(raw.get("criteria"), dict):
+        theo_ma = raw["criteria"]
+        raw_policy_checks = raw.get("policy_checks")
+    else:
+        # Adapter v1 lịch sử trả thẳng mapping criterion; v2 vẫn nhận để các
+        # characterization callback cũ không che mất kết quả máy, nhưng A6
+        # thiếu sẽ được đánh dấu unavailable.
+        theo_ma = raw
+        raw_policy_checks = None
+
+    if not isinstance(theo_ma, dict):
+        raise TypeError("Compliance normalized criteria must be a mapping")
+    missing = [ma for ma in _MA_LLM if ma not in theo_ma]
+    if policy_version == POLICY_V2:
+        policy_checks, a6_unavailable = _chuan_hoa_a6(
+            raw_policy_checks,
+            text_theo_field,
+            safety_rules,
+        )
+        unavailable = missing + a6_unavailable
+    else:
+        policy_checks, unavailable = [], []
     # Mã LLM không trả về cũng coi là NA - không suy đoán hộ.
-    return {ma: theo_ma.get(ma) or _tieu_chi(ma, None) for ma in _MA_LLM}, False
+    return (
+        {ma: theo_ma.get(ma) or _tieu_chi(ma, None) for ma in _MA_LLM},
+        policy_checks,
+        unavailable,
+        False,
+    )
 
 
 def _chot_cp8(tu_llm: dict, text_theo_field: dict, llm_hong: bool) -> dict:
@@ -575,7 +895,7 @@ def _flags_from_criteria(criteria: list[dict]) -> list[dict]:
 _CP9_RULE = "Chỉ dẫn ẩn nhắm vào hệ thống đánh giá tự động (CP9)"
 
 
-def _cp9_chi_dan_an(doan_an) -> list:
+def _cp9_chi_dan_an(doan_an, *, canonical: bool = False) -> list:
     """CP9 (M2) - sinh flag `critical`, KHÔNG tham gia công thức tính điểm.
 
     Cố ý đứng ngoài `criteria`. Thang 0/1/2 dùng để đo MỨC ĐỘ - "sai nhiều
@@ -592,8 +912,9 @@ def _cp9_chi_dan_an(doan_an) -> list:
     cách đo chính xác hơn. Không đáng đổi.
     """
     dang_ngo = ca.doan_an_dang_ngo(doan_an)
-    return [
-        {
+    flags = []
+    for chu in dang_ngo:
+        flag = {
             "field": "body",
             "severity": "critical",
             "rule": _CP9_RULE,
@@ -602,13 +923,43 @@ def _cp9_chi_dan_an(doan_an) -> list:
                           "giá tự động vẫn đọc được. Xoá khỏi nội dung, và "
                           "kiểm tra lại nguồn gốc bài viết.",
         }
-        for chu in dang_ngo
+        if canonical:
+            flag["criterion_id"] = "CP9"
+            flag["defect_code"] = "A7"
+            flag["evidence"] = chu[:200]
+        flags.append(flag)
+    return flags
+
+
+def _safety_rules_for_run(
+    policy_version: str,
+    safety_rules: dict | None,
+    *,
+    content_type: str,
+    langcode: str,
+) -> dict | None:
+    if policy_version == POLICY_V1:
+        return None
+    validated = (
+        load_safety_rules()
+        if safety_rules is None
+        else _validate_safety_rules(safety_rules)
+    )
+    relevant = [
+        rule for rule in validated["rules"]
+        if rule["content_type"] == content_type and rule["langcode"] == langcode
     ]
+    if not relevant:
+        raise ValueError(
+            f"no safety rules for profile {content_type}:{langcode}"
+        )
+    return {"version": validated["version"], "rules": relevant}
 
 
 def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         danh_gia_llm=_danh_gia_llm, danh_gia_cp3=None,
-        policy_version: str = POLICY_V1) -> dict | None:
+        policy_version: str = POLICY_V1,
+        safety_rules: dict | None = None) -> dict | None:
     """Chấm Compliance. Trả None khi không tiêu chí nào áp dụng được.
 
     None nghĩa là CHƯA CHẤM ĐƯỢC, khác hẳn 0 điểm: Aggregator gặp
@@ -622,6 +973,12 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
     policy_version = require_policy_version(
         policy_version,
         allow_legacy_default=False,
+    )
+    safety_rules = _safety_rules_for_run(
+        policy_version,
+        safety_rules,
+        content_type=content_type,
+        langcode=langcode,
     )
     if danh_gia_cp3 is None:
         danh_gia_cp3 = fact_check.danh_gia
@@ -644,7 +1001,27 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         # nội dung nào để kiểm duyệt.
         return None
 
-    llm, llm_hong = _cac_tieu_chi_llm(fields, text_theo_field, danh_gia_llm)
+    try:
+        llm, policy_checks, unavailable_checks, llm_hong = _cac_tieu_chi_llm(
+            fields,
+            text_theo_field,
+            danh_gia_llm,
+            policy_version=policy_version,
+            safety_rules=safety_rules,
+        )
+    except Exception:
+        # Structured output có thể sai hình dạng dù provider call đã trả về.
+        # Đối xử giống lỗi provider: không crash mất hard finding và tuyệt
+        # đối không suy output malformed thành các mức đạt.
+        llm = {ma: _tieu_chi(ma, None) for ma in _MA_LLM}
+        llm_hong = True
+        if policy_version == POLICY_V2:
+            policy_checks, a6_unavailable = _a6_unavailable(
+                "Output bộ đánh giá A6/Compliance sai cấu trúc."
+            )
+            unavailable_checks = list(_MA_LLM) + a6_unavailable
+        else:
+            policy_checks, unavailable_checks = [], []
     criteria = [
         _cp1_claim_tuyet_doi(text_theo_field),
         llm["CP2"],
@@ -659,7 +1036,15 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         _chot_cp8(llm["CP8"], text_theo_field, llm_hong),
     ]
 
-    if llm_hong and not any(c["level"] == 0 for c in criteria):
+    cp9_flags = _cp9_chi_dan_an(
+        doan_an,
+        canonical=(policy_version == POLICY_V2),
+    )
+    if (
+        llm_hong
+        and not any(c["level"] == 0 for c in criteria)
+        and not cp9_flags
+    ):
         # 6/8 tiêu chí không đo được vì hạ tầng, và phần đo được không tìm
         # thấy vi phạm nào. "Không tìm thấy" ở đây KHÔNG có nghĩa là tuân thủ:
         # thứ duy nhất còn chạy là danh sách từ cấm. Trả điểm lúc này là báo
@@ -678,6 +1063,8 @@ def run(fields: dict, *, content_type: str = "cam_nang", langcode: str = "vi",
         return None
     return {
         "score": score,
-        "flags": _flags_from_criteria(criteria) + _cp9_chi_dan_an(doan_an),
+        "flags": _flags_from_criteria(criteria) + cp9_flags,
         "criteria": criteria,
+        "policy_checks": policy_checks,
+        "unavailable_checks": unavailable_checks,
     }

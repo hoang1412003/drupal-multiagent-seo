@@ -186,6 +186,33 @@ hiện diện sang nhóm A (`rejected`); A5 unavailable chỉ làm assessment ch
 | **CP7** | Chính sách pin/thuê pin nêu đủ điều kiện, phí, thời hạn | LLM | Thiếu ≥2 yếu tố | Thiếu 1 yếu tố | Đủ | medium | - |
 | **CP8** | Số liệu định lượng có nguồn | máy chốt áp dụng + LLM chấm nguồn | Có số liệu không nguồn | Một phần | Đủ nguồn | low | B10 |
 
+### Bổ sung policy v2 — A6, A7 và CP7/B11
+
+Với `cam-nang-vn-v2`, Compliance đánh giá thêm policy-only check `A6` trong
+**chính lượt gọi LLM CP2/CP4/CP7/CP8 hiện có**. A6 có trạng thái
+`present | absent | not_applicable | unavailable`, không vào CP1–CP8 và
+không làm đổi điểm. `present` phải có evidence nguyên văn trong `body`, mô
+tả nguy cơ/hướng sửa an toàn và `reference_id` thuộc allowlist trong
+`src/kb/safety_rules.json`; thiếu evidence hoặc reference hợp lệ phải thành
+`unavailable`, không được tự đẩy bài lên `rejected`.
+
+Safety source có version/schema cố định, chỉ chứa nguồn VinFast chính thức,
+URL HTTPS và ngày truy cập. File này phải được băm trong release tuple của
+mọi run v2; thay nội dung nguồn làm thay đổi release và evidence cũ không còn
+đại diện cho prompt mới.
+
+Detector văn xuôi ẩn CP9 vẫn tất định và vẫn giữ severity/veto legacy ở v1.
+Riêng output v2 bổ sung exact `criterion_id="CP9"`, `defect_code="A7"` và
+evidence để decision engine ánh xạ canonical, không suy đoán từ chuỗi hiển
+thị của `rule`.
+
+CP7 v2 chỉ áp dụng khi có claim chính sách pin/bảo hành/thuê pin cụ thể:
+không có claim → `NA`; thiếu ít nhất hai thành phần thiết yếu → mức 0; thiếu
+đúng một → mức 1; đủ đối tượng/điều kiện, thời hạn và mức phí nếu có thu phí
+→ mức 2. Mức 0/1 ánh xạ B11 (`needs_revision`), không phải nhóm A. Cột mã
+lỗi `-` của bảng phía trên mô tả rubric/evidence v1 lịch sử; không được hồi
+tố gọi CP7 v1 là B11.
+
 ### 6.1. Vì sao bỏ việc LLM tự cho điểm và tự chọn severity
 
 Compliance là agent **rủi ro cao nhất** và cũng là agent duy nhất có quyền phủ quyết. Đúng chỗ đó lại đang có hai phán đoán tự do của LLM:
