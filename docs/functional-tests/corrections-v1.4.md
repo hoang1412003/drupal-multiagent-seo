@@ -285,3 +285,137 @@ Rà thủ công A1–A7/B1–B11:
 - **GC-010:** scanner không sinh candidate A/B; review tay vẫn thực hiện đủ taxonomy.
 
 Scanner chỉ đánh dấu candidate, không tự quyết mã. Các disposition trên là quyết định manual theo guideline v1.4; C4 chỉ là advisory về khẳng định chung và không được ghi thành defect A/B.
+
+# Nhật ký hiệu đính gold-corrected v1.4 — GC-011 đến GC-015
+
+- Ngày biên tập và kiểm nguồn: **17/08/2026**.
+- Annotator: `AI-A1`; provenance: `AI-annotated-partially-exposed`.
+- Generator model: `not-exposed-by-runtime`; runtime của phiên làm trực tiếp không cung cấp model ID chính xác nên không suy đoán.
+- Guideline: `v1.4`.
+- Năm parent `G-011..G-015` giữ nguyên; corrected chỉ được tạo trong `docs/functional-tests/gold-corrected/`.
+- Đây là dữ liệu corrected tổng hợp để kiểm tiêu chí publish, không phải nhãn mù độc lập và không chứng minh đồng thuận AI-người hoặc người-người.
+- Danh sách mã trong plan là điểm bắt đầu. Lượt audit đầy đủ bổ sung A4 ở G-011, B1 ở G-015 và B5 ở cả năm parent.
+
+## Nguồn chính thức đã kiểm
+
+Nguồn chủ đề:
+
+- `https://vinfastauto.com/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast`
+- `https://vinfastauto.com/vn_vi/chi-phi-su-dung-xe-dien`
+- `https://vinfastauto.com/vn_vi/nuoi-o-to-dien-vinfast-vf-e34-co-re-hon-xe-xang`
+- `https://vinfastauto.com/vn_vi/chi-phi-nuoi-xe-vf-e34-hang-thang-tiet-kiem-bao-nhieu`
+- `https://vinfastauto.com/vn_vi/co-nen-mua-o-to-thoi-diem-nay`
+
+Nguồn hiện hành dùng để thay cách dẫn chính sách/tài liệu:
+
+- `https://vinfastauto.com/vn_vi/thong-tin-bao-hanh`
+- `https://vinfastauto.com/vn_vi/hop-dong-va-chinh-sach`
+- `https://vinfastauto.com/vn_vi/tai-lieu-xe-may-dien`
+
+Mọi nguồn trên được truy cập ngày **17/08/2026**. Bản corrected không sao chép giá, tỷ lệ, ngưỡng pin hoặc quyền lợi cũ từ parent; nội dung biến động được chuyển thành quy trình tra hợp đồng, hóa đơn và cổng chính thức tại thời điểm sử dụng.
+
+## GC-011 ← G-011
+
+- **Nguồn chủ đề:** `/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast`.
+- **Field:** giữ title và alias; meta 144 ký tự; summary trả lời nguyên tắc dự trù; body giữ chủ đề chi phí, nhóm hạng mục, lịch, địa điểm và hồ sơ bảo dưỡng.
+- **Mã đã xử lý:** A1;A4;B3;B5;B8.
+
+Trước → sau:
+
+- A1: parent quảng bá quyền lợi “có một không hai” và “không có ở bất kì loại xe điện hãng khác” → bỏ toàn bộ claim hơn các hãng khác.
+- A4: parent nêu miễn bảo dưỡng bảy lần đầu cho một số mẫu nhưng không có thời hạn hiệu lực → bỏ giá trị khuyến mại; corrected yêu cầu kiểm tra quyền lợi theo hồ sơ hiện hành.
+- B3: meta 187 ký tự → 144 ký tự.
+- B5: parent trộn “người dùng”, “khách hàng” và “bạn” → corrected dùng nhất quán “người dùng”.
+- B8: sửa “chỉnh chu” cùng các câu lặp/vụng bằng cách viết lại; không giữ nguyên bảng lịch dài và câu kêu gọi lỗi thời.
+- GC-011 có 1.170 tiếng và 5 H2, đáp ứng điều kiện làm parent cho fixture B9 ở Task 8.
+
+## GC-012 ← G-012
+
+- **Nguồn chủ đề:** `/vn_vi/chi-phi-su-dung-xe-dien`.
+- **Field:** giữ title và alias; meta 144 ký tự; summary/body chuyển từ tổng tiền cứng sang phương pháp lập ngân sách theo kỳ.
+- **Mã đã xử lý:** B5;B8;B10;B11.
+
+Trước → sau:
+
+- B5: parent trộn “người dùng”, “khách hàng” và “chủ xe” khi nói cùng người sở hữu → corrected dùng nhất quán “người dùng”.
+- B8: bảng chi phí có phép tính và dòng tổng không nhất quán cùng nhiều câu dài/vụng → bỏ bảng cũ, viết lại theo nhóm chi phí và chứng từ.
+- B10: bỏ giá điện, mức tiêu thụ, tỷ lệ bảo dưỡng, thu nhập và ước tính chi phí không có nguồn kiểm được gần claim; không suy số thay thế.
+- B11: bỏ claim đổi pin dưới ngưỡng cụ thể và gói thuê pin cũ không đủ thành phần hiệu lực hiện hành; corrected chỉ dẫn cổng hợp đồng/chính sách mà không nêu quyền lợi cụ thể.
+
+## GC-013 ← G-013
+
+- **Nguồn chủ đề:** `/vn_vi/nuoi-o-to-dien-vinfast-vf-e34-co-re-hon-xe-xang`.
+- **Field:** giữ title và alias; meta 149 ký tự; body giữ phép so sánh VF e34 với xe xăng nhưng khóa cùng kỳ, cùng quãng đường và cùng phạm vi.
+- **Mã đã xử lý:** B1;B5;B8;B10;B11.
+
+Trước → sau:
+
+- B1: parent nêu phạm vi 318,6 km sau một lần sạc nhưng chỉ nói “pin tiêu chuẩn”, không có chu trình đo và caveat thực tế → bỏ claim định lượng.
+- B5: parent trộn “người dùng”, “khách hàng” và “chủ xe” → corrected dùng nhất quán “người dùng”.
+- B8: sửa cấu trúc “Với cách khách hàng” và các lỗi câu/dấu bằng cách viết lại toàn bộ phương pháp so sánh.
+- B10: bỏ mức tiêu thụ, đơn giá, tổng chi phí và ước tính bảo dưỡng không được chứng minh thành một bộ đồng nhất; corrected yêu cầu hóa đơn/chứng từ.
+- B11: bỏ quyền lợi pin và giá thuê pin cũ thiếu thành phần hiệu lực hiện hành; corrected dẫn cổng chính sách mà không nêu claim cụ thể.
+
+## GC-014 ← G-014
+
+- **Nguồn chủ đề:** `/vn_vi/chi-phi-nuoi-xe-vf-e34-hang-thang-tiet-kiem-bao-nhieu`.
+- **Field:** giữ title và alias; meta 145 ký tự; body giữ các nhóm sạc, định kỳ, hợp đồng và bảng ngân sách hàng tháng.
+- **Mã đã xử lý:** B3;B5;B8;B11.
+
+Trước → sau:
+
+- B3: meta 172 ký tự → 145 ký tự.
+- B5: parent trộn “người dùng”, “khách hàng”, “Quý khách hàng” và “chủ xe” → corrected dùng nhất quán “người dùng”.
+- B8: sửa “các chi tiết cần cần bảo dưỡng”, “tiết kiện” cùng các câu lặp/vụng bằng bản hướng dẫn mới.
+- B11: bỏ claim thay pin dưới ngưỡng cụ thể và giá thuê pin theo năm bán cũ; corrected yêu cầu đối chiếu hợp đồng, cổng chính sách và tài liệu bảo hành của đúng xe.
+- Các số giá/chi phí cũ khác được bỏ để tránh tái sử dụng dữ liệu biến động; không ghi thêm B10 vì parent có nguồn/điều kiện cho các claim định lượng thuộc phạm vi nhãn đã xét.
+
+## GC-015 ← G-015
+
+- **Nguồn chủ đề:** `/vn_vi/co-nen-mua-o-to-thoi-diem-nay`.
+- **Field:** giữ title và alias; meta 140 ký tự; body giữ câu hỏi thời điểm mua, so xe điện/xe xăng, khả năng sạc, chính sách và checklist quyết định.
+- **Mã đã xử lý:** B1;B5;B8;B10;B11.
+
+Trước → sau:
+
+- B1: parent nêu 285 km theo NEDC nhưng không có caveat phạm vi thực tế → bỏ claim; corrected chỉ hướng dẫn tra đúng mẫu/điều kiện và nêu các yếu tố làm kết quả thay đổi.
+- B5: parent trộn “người tiêu dùng”, “khách hàng” và “chủ xe” → corrected dùng nhất quán “người dùng”.
+- B8: sửa “được hưởngg”, “bằng cáchliên hệ” cùng các câu lỗi bằng cách viết lại nội dung.
+- B10: bỏ giá nhiên liệu, tuổi thọ pin, tỷ lệ bảo dưỡng và các phép tính chi phí không có nguồn gần claim; không thay bằng con số phỏng đoán.
+- B11: bỏ claim đổi pin theo ngưỡng và gói thuê pin cũ thiếu thành phần hiện hành; corrected chỉ dẫn nguồn hợp đồng/chính sách và bảo hành.
+- Cụm “dẫn đầu xu hướng mới” ở parent không gán A1: guideline v1.4 yêu cầu vừa có phạm vi so sánh rõ vừa nói về sản phẩm VinFast; câu này không nêu phạm vi thị trường/phân khúc. Claim đã được bỏ khi viết lại nhưng không bịa thêm mã.
+
+## Kết quả helper và rà toàn bộ A/B
+
+Lượt helper cuối cho exact five files:
+
+| ID | Title | Meta | Alias | Body words | H2/H3 | Kết luận máy | C advisory |
+|---|---:|---:|---:|---:|---:|---|---|
+| GC-011 | 51 | 144 | 58 | 1.170 | 5/4 | không có A/B máy kết luận | C4=10 |
+| GC-012 | 45 | 144 | 30 | 882 | 4/3 | không có A/B máy kết luận | C4=5 |
+| GC-013 | 46 | 149 | 54 | 839 | 5/0 | không có A/B máy kết luận | C4=5 |
+| GC-014 | 47 | 145 | 60 | 750 | 5/2 | không có A/B máy kết luận | không có |
+| GC-015 | 58 | 140 | 36 | 794 | 5/0 | không có A/B máy kết luận | C4=5 |
+
+Rà thủ công A1–A7/B1–B11:
+
+- A1/A2: không corrected nào còn claim so sánh nhất trong phạm vi thị trường/phân khúc hoặc so trực tiếp với đối thủ.
+- A3/A4: không giữ giá, thông số sản phẩm hoặc giá trị khuyến mại cụ thể cần đối chiếu; ngày 17/08/2026 chỉ là ngày truy cập nguồn.
+- A5: H2 và body của từng bài trả lời đúng câu hỏi title; không bài nào lạc chủ đề trên 50%.
+- A6: GC-011 yêu cầu dừng sử dụng khi có dấu hiệu điện/phanh bất thường, không tự mở pin/bộ sạc và ưu tiên tài liệu đúng mẫu; các bài còn lại không hướng dẫn thao tác kỹ thuật có rủi ro.
+- A7: không có văn xuôi ẩn, comment hoặc thuộc tính ẩn trong năm file.
+- B1/B2: corrected không nêu phạm vi hoặc thời gian sạc định lượng; hướng dẫn GC-015 chỉ yêu cầu tra đúng mẫu và caveat điều kiện thực tế.
+- B3/B4: meta 140–149; title 45–58, không all-caps và không gắn năm cũ.
+- B5: chỉ dùng “người dùng” cho cùng đối tượng; tên VF e34 và VinFast nhất quán.
+- B6: năm bài không có ảnh nên không áp dụng.
+- B7: alias giữ canonical parent, dưới 75 ký tự và chứa chủ đề tương ứng.
+- B8: đã đọc toàn văn sau lượt sửa meta; không còn lỗi chính tả/ngữ pháp quan sát được.
+- B9: mọi bài trên 500 tiếng đều có ít nhất một H2; riêng GC-011 có 5 H2.
+- B10: không còn claim định lượng cần nguồn; công thức chỉ mô tả cách dùng hóa đơn/chứng từ, không tạo số liệu mới.
+- B11: link chính sách/bảo hành chỉ là chỉ dẫn tra cứu, không nêu claim chính sách cụ thể nên CP7 không áp dụng theo guideline v1.4.
+
+## Disposition từng candidate của `quet_ung_vien.py`
+
+- Scanner cuối không sinh candidate A/B cho bất kỳ file GC-011..GC-015 nào.
+- C4 ở GC-011/012/013/015 là advisory về câu dài, không đổi nhãn publish.
+- Quyết định publish vẫn dựa trên helper cộng lượt đọc manual đầy đủ; scanner không phải bộ kết luận.
