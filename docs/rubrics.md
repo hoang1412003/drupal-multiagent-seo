@@ -102,6 +102,22 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 
 **Cố ý không có tiêu chí "readability".** Flesch-Kincaid đếm âm tiết theo quy tắc tiếng Anh, không áp dụng được cho tiếng Việt (`architecture.md` mục 5.5). CQ3/CQ4 là phần *đo được* của khái niệm đó; phần còn lại bỏ, không thay bằng cảm nhận của LLM.
 
+### Bổ sung policy v2 — CQ-A5
+
+Với `cam-nang-vn-v2`, Content Quality đánh giá thêm check policy-only `A5`
+trong **chính lượt gọi LLM CQ hiện có**. Check này có trạng thái
+`present | absent | unavailable`, không nằm trong CQ1–CQ8, không đi vào
+`score_from_criteria()` và không sinh `issues` theo điểm.
+
+`present` chỉ hợp lệ khi đồng thời có đủ hai vế: body không trả lời câu hỏi
+hoặc intent ở title, và việc sửa đúng chủ đề đòi viết lại trên 50% nội dung.
+Một đoạn phụ lạc đề, lặp ý hoặc bài ngắn nhưng vẫn trả lời title không phải
+A5. Kết luận `present` phải kèm trích dẫn nguyên văn trong `body`; bằng chứng
+không khớp, output thiếu/sai schema hoặc lỗi provider đều thành
+`unavailable`, không được suy thành `absent`. Decision policy v2 ánh xạ A5
+hiện diện sang nhóm A (`rejected`); A5 unavailable chỉ làm assessment chưa
+đủ và chặn `publish` ở `needs_revision`.
+
 ---
 
 ## 4. SEO Agent
