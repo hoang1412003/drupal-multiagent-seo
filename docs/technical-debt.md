@@ -775,9 +775,35 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   bài còn lại (`G-011`, `G-020`) là **lỗ hổng cũ từ v1** (bỏ sót A1, đã
   ghi ở mục 8.2), không liên quan tới quyết định hôm nay. ⚠️ Nhãn đối
   chiếu vẫn là AI tự gán (`independent_label_reliability = not_demonstrated`)
-  — Kappa này có tư cách **tạm**, chưa kiểm chứng độc lập. Việc kế tiếp:
-  Corrected v2 (~$1,7) → Coverage v2 (~$0,6). `scoring.yaml.meta.calibrated`
-  không đổi.
+  — Kappa này có tư cách **tạm**, chưa kiểm chứng độc lập.
+- ⛔ **Cập nhật 2026-08-19 (tối) — Corrected v2 ĐÃ CHẠY, KHÔNG ĐẠT; tìm ra
+  bug prompt A6 thật; ĐÃ SỬA prompt, CHƯA đo lại theo yêu cầu người dùng.**
+  Corrected v2: `corrected_publish = 12/30`, `paired_recovery = 7/20` (cả
+  hai cần đủ số, không đạt). Chi phí thật $1,00 (tính tay, không qua
+  `eval_corrected_coverage.py` vì thiếu điều kiện dưới đây).
+  **Chẩn đoán: `A6` chặn 10/18 bài không đạt publish — và đây là bug prompt
+  thật, không phải LLM lưỡng lự như E1.** Đọc 3 case cụ thể (`C-007`,
+  `C-008`, `GC-011`): evidence trích ra **chính là câu cảnh báo ĐÃ CÓ**
+  trong bài (VD *"Không nên tự tháo vỏ pin..."*), không phải đoạn thiếu
+  cảnh báo — prompt cũ viết *"present: bài **có thao tác nguy hiểm**, bỏ
+  cảnh báo HOẶC..."* mơ hồ, khiến LLM hiểu "bài nhắc chủ đề nguy hiểm"
+  cũng đủ gắn cờ, dù bài đang cảnh báo đúng.
+  **Đã sửa prompt** (commit `fcb5717`) — tách rõ "present" CHỈ khi hướng
+  dẫn thiếu cảnh báo thật, "absent" bao gồm rõ trường hợp đã có cảnh báo.
+  Full offline suite: 83/83, 0 hỏng, 0 skip (test dùng LLM giả lập, không
+  chạm prompt text thật). Manifest freeze lại, `verified: true`.
+  ⛔ **CHƯA đo lại** theo yêu cầu người dùng (chỉ sửa, dừng ở đây) — nhưng
+  đúng luật đã khoá (`evaluation-plan.md` mục 3a): đổi prompt = mất hiệu
+  lực mọi phép đo cũ. `paid_runs.e1`/`paid_runs.gold` trong manifest **vẫn
+  ghi `"measured"`** nhưng `runtime_release_sha256` đã lệch `release_sha256`
+  mới nhất — **không tự động đánh dấu hết hiệu lực**, phải nhớ bằng tài
+  liệu này: **E1 v2 (2026-08-19, `decision_consistency=1,00`) và Gold v2
+  (2026-08-19, `Kappa=0,6765`) đều đã HẾT HIỆU LỰC chính thức từ commit
+  `fcb5717`**, dù phân tích riêng cho thấy khả năng cao con số không đổi
+  (không bài nào trong 2 lượt đó dựa riêng vào A6 để ra quyết định — xem
+  chi tiết trong hội thoại bàn giao). Corrected v2 (đã biết không đạt) và
+  Coverage v2 (chưa chạy) cũng cần đo lại/đo mới sau khi có xác nhận chạy
+  tiếp. `scoring.yaml.meta.calibrated` không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
