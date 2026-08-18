@@ -690,6 +690,26 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - Corrected 30 và coverage 11 là synthetic functional evidence. Chúng đo
   recovery/isolation, không thay cho đồng thuận AI–người trên bài thật;
   `independent_label_reliability=not_demonstrated` bất kể gate kỹ thuật.
+- ✅ **Cập nhật 2026-08-18 (chiều) — ĐÃ MERGE VÀO `main`, không còn ở nhánh
+  riêng.** PR #52 merge tại `c828a50`; dòng "chưa merge vào main" ở các mục
+  trên đã lỗi thời, giữ lại nguyên văn để đúng thứ tự thời gian, không xoá.
+  Sau merge, `main` chạm thêm 5 commit sửa lỗi phát hiện khi kiểm lại:
+  (1) `.gitattributes` khoá `eol=lf` cho toàn bộ path pin content-hash —
+  repo trước đó không có, khiến `core.autocrlf` (cấu hình dùng chung, từng
+  bị đổi giữa chừng bởi tiến trình khác) làm sai lệch hash đã đóng băng;
+  sửa kèm hai chỗ hardcode hash cũ trong `test_evaluation_datasets.py`/
+  `test_goldset_ai_v14.py`/CSV review v1.4; (2) rà tay 41 mẫu corrected+
+  coverage trước lượt đo trả phí, phát hiện và sửa hai mẫu hỏng: `GC-003`
+  (đoạn khuyến mại có ngày nhưng thiếu điều kiện áp dụng — đúng mẫu hình
+  gây oan ở P-006a) và `CV-A3-01` (claim gốc dùng model "Evo200" không có
+  trong `specs.json`, và chỉ số sạc nhanh duy nhất trong KB lại chính là ví
+  dụ `metric="khac"` bị chặn tất định trong `_EXTRACT_PROMPT` — đổi hẳn
+  sang claim `tam_hoat_dong` VF 9 có thật trong KB). Manifest đã freeze lại
+  ba lần theo từng sửa, HEAD hiện tại `64e1865`, `data_head` =
+  `release_source_commit` = `53c2476`, `corrected` = 30 mẫu, `coverage` =
+  11 mẫu, cả bốn `paid_runs.*.status = "preflighted"`. Full offline suite
+  **83/83, 0 hỏng, 0 skip**. **Vẫn chưa gọi Anthropic API lần nào** —
+  4 lượt đo trả phí (mục ngay trên) vẫn là việc kế tiếp duy nhất.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
