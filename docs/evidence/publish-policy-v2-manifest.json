@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "policy_version": "cam-nang-vn-v2",
+  "data_head": "8635a45c9aee1369f6f7b17b0918a580db7390da",
+  "release_source_commit": null,
+  "independent_label_reliability": "not_demonstrated",
+  "artifacts": {},
+  "paid_runs": {
+    "e1": {
+      "status": "pending"
+    },
+    "gold": {
+      "status": "pending"
+    },
+    "corrected": {
+      "status": "pending"
+    },
+    "coverage": {
+      "status": "pending"
+    },
+    "smoke": {
+      "status": "pending"
+    }
+  },
+  "approval": {
+    "measured_complete": false,
+    "level_b": "pending",
+    "approved_for_limited_pilot": false
+  }
+}

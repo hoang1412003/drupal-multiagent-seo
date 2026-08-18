@@ -46,6 +46,7 @@
     "test_platform_logging.py",
     "test_platform_usage.py",
     "test_policy_routing.py",
+    "test_policy_release.py",
     "test_prompt_builder.py",
     "test_report_json.py",
     "test_retry.py",

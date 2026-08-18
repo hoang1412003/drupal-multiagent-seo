@@ -7,6 +7,7 @@ offline va duoc danh dau ``is_fixture=true`` trong raw.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
@@ -239,6 +240,46 @@ def _git(repo_root: Path, *args: str) -> str:
         raise EvaluationContractError(f"khong doc duoc git {' '.join(args)}") from error
 
 
+def _resolve_data_head(repo_root: Path, pinned: str | None) -> str:
+    if pinned is None:
+        return _validate_git_commit(
+            "data_head",
+            _git(
+                repo_root,
+                "log",
+                "-1",
+                "--format=%H",
+                "--",
+                "docs/goldset",
+                "docs/functional-tests",
+            ),
+        )
+    pinned = _validate_git_commit("data_head", pinned)
+    _git(repo_root, "cat-file", "-e", f"{pinned}^{{commit}}")
+    ancestor = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", pinned, "HEAD"],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    if ancestor.returncode != 0:
+        raise EvaluationContractError("pinned data_head khong la ancestor cua HEAD")
+    snapshot = subprocess.run(
+        [
+            "git", "diff", "--quiet", pinned, "--",
+            "docs/goldset", "docs/functional-tests",
+        ],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    if snapshot.returncode == 1:
+        raise EvaluationContractError("data snapshot drift tu pinned data_head")
+    if snapshot.returncode != 0:
+        raise EvaluationContractError("khong verify duoc pinned data snapshot")
+    return pinned
+
+
 def _bundle_hash(repo_root: Path, relative_paths: tuple[str, ...]) -> str:
     artifacts = {
         relative: _sha256_file(repo_root / relative)
@@ -282,6 +323,8 @@ def build_runtime_contract(
     samples: list[EvaluationSample],
     assessment_as_of: str,
     output_path: Path,
+    *,
+    data_head: str | None = None,
 ) -> dict:
     """Khoa moi dimension co the lam hai run khong con so sanh duoc."""
     repo_root = Path(repo_root).resolve()
@@ -343,15 +386,7 @@ def build_runtime_contract(
         raise EvaluationContractError("weights cam_nang:vi khong hop le")
 
     git_head = _git(repo_root, "rev-parse", "HEAD")
-    data_head = _git(
-        repo_root,
-        "log",
-        "-1",
-        "--format=%H",
-        "--",
-        "docs/goldset",
-        "docs/functional-tests",
-    )
+    data_head = _resolve_data_head(repo_root, data_head)
     _validate_git_commit("git_head", git_head)
     _validate_git_commit("data_head", data_head)
 
@@ -788,6 +823,7 @@ def run_samples(
     *,
     repeats: int = 1,
     agent_runner: Callable[..., dict] | None = None,
+    paid_authorization: dict | None = None,
 ) -> dict:
     """Chay/resume theo prefix, ghi atomic sau tung sample/repeat."""
     if isinstance(repeats, bool) or not isinstance(repeats, int) or repeats < 1:
@@ -797,6 +833,29 @@ def run_samples(
     ids = _validate_samples(samples)
     if ids != runtime_contract["ordered_sample_ids"]:
         raise EvaluationContractError("samples khong khop ordered sample IDs")
+    if agent_runner is None:
+        if (
+            not isinstance(paid_authorization, dict)
+            or paid_authorization.get("authorized") is not True
+            or paid_authorization.get("is_fixture") is not False
+            or paid_authorization.get("dataset_kind") != runtime_contract["dataset_kind"]
+            or paid_authorization.get("runtime_release_sha256")
+            != runtime_contract["release_sha256"]
+        ):
+            raise EvaluationContractError(
+                "default provider path bat buoc co paid authorization dung runtime release"
+            )
+        token_hash = paid_authorization.get("confirmation_token_hash")
+        if (
+            not isinstance(token_hash, str)
+            or len(token_hash) != 64
+            or any(char not in "0123456789abcdef" for char in token_hash)
+        ):
+            raise EvaluationContractError("paid authorization token hash khong hop le")
+        if os.environ.get("VF_ALLOW_PAID_EVAL") != "1":
+            raise EvaluationContractError(
+                "VF_ALLOW_PAID_EVAL phai bang 1 truoc default paid runner"
+            )
     is_fixture = agent_runner is not None
 
     if output_path.exists():
@@ -825,3 +884,86 @@ def run_samples(
     if len(raw["results"]) != len(expected):
         raise EvaluationContractError("sample/repeat inventory thieu ket qua")
     return raw
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Evaluate publish policy v2")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--preflight", action="store_true")
+    mode.add_argument("--run", action="store_true")
+    parser.add_argument("--dataset", choices=("e1", "gold"), required=True)
+    parser.add_argument("--manifest", required=True)
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--assessment-as-of", required=True)
+    parser.add_argument("--confirmation-token")
+    parser.add_argument(
+        "--repo-root", default=str(Path(__file__).resolve().parents[2])
+    )
+    return parser
+
+
+def cli(argv: list[str] | None = None) -> int:
+    """Preflight $0 hoac authorized paid run; khong co nhanh --force."""
+    args = build_parser().parse_args(argv)
+    repo_root = Path(args.repo_root).resolve()
+    output_path = Path(args.output).resolve()
+
+    # Verify frozen manifest TRUOC build_runtime_contract lazy-import ai_core.
+    from policy_release import (
+        authorize_paid_run,
+        build_preflight,
+        verify,
+    )
+
+    manifest = verify(Path(args.manifest), repo_root)
+    manifest.pop("verified", None)
+    samples = load_dataset(args.dataset, repo_root)
+    runtime_contract = build_runtime_contract(
+        repo_root,
+        args.dataset,
+        samples,
+        args.assessment_as_of,
+        output_path,
+        data_head=manifest["data_head"],
+    )
+    repeats = 5 if args.dataset == "e1" else 1
+    if args.preflight:
+        result = build_preflight(
+            manifest,
+            runtime_contract,
+            repeats=repeats,
+            repo_root=repo_root,
+        )
+    else:
+        if not args.confirmation_token:
+            raise EvaluationContractError(
+                "--run bat buoc co --confirmation-token"
+            )
+        authorization = authorize_paid_run(
+            manifest,
+            args.dataset,
+            output_path,
+            args.assessment_as_of,
+            args.confirmation_token,
+            runtime_contract=runtime_contract,
+        )
+        raw = run_samples(
+            samples,
+            output_path,
+            runtime_contract,
+            repeats=repeats,
+            paid_authorization=authorization,
+        )
+        result = {
+            "dataset_kind": args.dataset,
+            "result_count": len(raw["results"]),
+            "output_path": str(output_path),
+            "release_sha256": manifest["release_sha256"],
+            "is_fixture": raw["_meta"]["is_fixture"],
+        }
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(cli())
