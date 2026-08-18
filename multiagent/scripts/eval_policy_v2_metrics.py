@@ -4,10 +4,15 @@ File nay chi doc object JSON; khong import evaluator, model, agent hay provider.
 """
 from __future__ import annotations
 
+import argparse
 from collections import Counter
 from decimal import Decimal, InvalidOperation
+import json
 import math
+import os
+from pathlib import Path
 import statistics
+import tempfile
 from typing import Any
 
 
@@ -251,3 +256,62 @@ def gold_metrics(raw: dict) -> dict:
         "label_provenance": meta.get("label_provenance"),
         "provenance_limitation": "independent_label_reliability_not_demonstrated",
     }
+
+
+_DATASET_METRICS = {
+    "e1": stability_metrics,
+    "gold": gold_metrics,
+}
+
+
+def _write_atomic(path: Path, report: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            temp_name = handle.name
+            json.dump(report, handle, ensure_ascii=False, indent=2, allow_nan=False)
+            handle.write("\n")
+        os.replace(temp_name, path)
+    finally:
+        if temp_name and os.path.exists(temp_name):
+            os.unlink(temp_name)
+
+
+def main(argv: list[str]) -> int:
+    """CLI report-only: doc raw JSON, tinh metric, ghi report JSON atomic."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dataset", choices=sorted(_DATASET_METRICS), required=True)
+    parser.add_argument("--raw", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args(argv)
+
+    try:
+        raw = json.loads(args.raw.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"[FAIL] khong doc/parse duoc --raw: {error}")
+        return 1
+
+    metric_fn = _DATASET_METRICS[args.dataset]
+    try:
+        report = metric_fn(raw)
+    except EvaluationContractError as error:
+        print(f"[FAIL] {error}")
+        return 1
+
+    _write_atomic(args.output, report)
+    print(f"[OK] {args.dataset}: report ghi tai {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main(sys.argv[1:]))

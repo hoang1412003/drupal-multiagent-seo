@@ -25,6 +25,7 @@
     "test_embeddings.py",
     "test_eval_baseline_single.py",
     "test_eval_calibration_dataset.py",
+    "test_eval_corrected_coverage.py",
     "test_eval_kfold.py",
     "test_eval_policy_v2.py",
     "test_eval_policy_v2_metrics.py",

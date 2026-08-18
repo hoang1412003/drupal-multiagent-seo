@@ -1,6 +1,8 @@
 """Metric tests report-only cho raw policy v2; khong import agent/provider."""
+import json
 from pathlib import Path
 import sys
+import tempfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -8,6 +10,7 @@ import eval_policy_v2_metrics  # noqa: E402
 from eval_policy_v2_metrics import (  # noqa: E402
     EvaluationContractError,
     gold_metrics,
+    main,
     stability_metrics,
 )
 
@@ -131,6 +134,48 @@ def test_denominator_zero_tra_none_status_na():
     print("[PASS] denominator zero -> None va gate NA")
 
 
+def test_cli_dataset_gold_ghi_report_json_atomic():
+    raw = gold_raw([
+        ("publish", "publish"),
+        ("needs_revision", "needs_revision"),
+    ])
+    with tempfile.TemporaryDirectory() as tmp:
+        raw_path = Path(tmp) / "gold_raw.json"
+        output_path = Path(tmp) / "gold_report.json"
+        raw_path.write_text(json.dumps(raw), encoding="utf-8")
+        exit_code = main(["--dataset", "gold", "--raw", str(raw_path), "--output", str(output_path)])
+        assert exit_code == 0
+        report = json.loads(output_path.read_text(encoding="utf-8"))
+        assert report["dataset_kind"] == "gold"
+        assert report["kappa"] is not None
+    print("[PASS] CLI --dataset gold ghi report JSON atomic")
+
+
+def test_cli_dataset_e1_ghi_report_json_atomic():
+    raw = e1_raw({"G-001": [("publish", 80.0)] * 5})
+    with tempfile.TemporaryDirectory() as tmp:
+        raw_path = Path(tmp) / "e1_raw.json"
+        output_path = Path(tmp) / "e1_report.json"
+        raw_path.write_text(json.dumps(raw), encoding="utf-8")
+        exit_code = main(["--dataset", "e1", "--raw", str(raw_path), "--output", str(output_path)])
+        assert exit_code == 0
+        report = json.loads(output_path.read_text(encoding="utf-8"))
+        assert report["dataset_kind"] == "e1"
+        assert report["decision_consistency"] == 1.0
+    print("[PASS] CLI --dataset e1 ghi report JSON atomic")
+
+
+def test_cli_raw_contract_loi_tra_exit_code_khac_khong_khong_crash():
+    with tempfile.TemporaryDirectory() as tmp:
+        raw_path = Path(tmp) / "bad_raw.json"
+        output_path = Path(tmp) / "bad_report.json"
+        raw_path.write_text(json.dumps({"_meta": {}, "results": []}), encoding="utf-8")
+        exit_code = main(["--dataset", "gold", "--raw", str(raw_path), "--output", str(output_path)])
+        assert exit_code == 1
+        assert not output_path.exists()
+    print("[PASS] CLI raw contract loi tra exit code 1, khong ghi output, khong crash")
+
+
 def test_report_only_khong_import_ai_core_agents():
     source = Path(eval_policy_v2_metrics.__file__).read_text(encoding="utf-8")
     assert "ai_core" not in source
@@ -148,6 +193,9 @@ if __name__ == "__main__":
         test_inventory_duplicate_fatal,
         test_gold_confusion_kappa_recall_va_false_publish,
         test_denominator_zero_tra_none_status_na,
+        test_cli_dataset_gold_ghi_report_json_atomic,
+        test_cli_dataset_e1_ghi_report_json_atomic,
+        test_cli_raw_contract_loi_tra_exit_code_khac_khong_khong_crash,
         test_report_only_khong_import_ai_core_agents,
     ):
         try:
