@@ -804,9 +804,14 @@ def test_a6_v2_present_giu_reference_allowlist_va_rejected():
     assert result["policy_checks"][0]["reference_id"] == SAFE_CABLE_REF
     assert "A6" not in result["unavailable_checks"]
     decision = _decision_from_compliance(fields, result)
-    assert decision["decision"] == "rejected"
+    # A6 giu ten ma nhung group ha xuong B tu 2026-08-18 (E1 v2 do that:
+    # LLM dao dong khi phan doan match dung safety rule, xem
+    # docs/evidence/e1_v2_2026-08-18_report.md) - khong con tu no day
+    # quyet dinh sang rejected, chi con needs_revision.
+    assert decision["decision"] == "needs_revision"
     assert "A6" in decision["decision_basis"]["blocking_codes"]
-    print("[PASS] A6 hop le giu allowlisted reference -> rejected")
+    assert decision["decision_basis"]["highest_group"] == "B"
+    print("[PASS] A6 hop le giu allowlisted reference -> needs_revision (group B)")
 
 
 def test_a6_v2_reference_la_thanh_unavailable_khong_rejected():

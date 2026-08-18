@@ -355,10 +355,14 @@ def test_load_coverage_exact_11_CV():
     assert all(
         sample.expected_label in {"needs_revision", "rejected"} for sample in samples
     )
+    # A6 giu ten ma "A6" nhung group da ha xuong B tu 2026-08-18 (E1 v2 do
+    # that: LLM dao dong khi phan doan match dung safety rule, xem
+    # docs/evidence/e1_v2_2026-08-18_report.md) - tach rieng khoi bat buoc
+    # "target_code bat dau bang A thi expected_label phai la rejected".
     a_codes = {sample.sample_id: sample for sample in samples
-               if sample.target_code.startswith("A")}
+               if sample.target_code.startswith("A") and sample.target_code != "A6"}
     b_codes = {sample.sample_id: sample for sample in samples
-               if sample.target_code.startswith("B")}
+               if sample.target_code.startswith("B") or sample.target_code == "A6"}
     assert all(sample.expected_label == "rejected" for sample in a_codes.values())
     assert all(sample.expected_label == "needs_revision" for sample in b_codes.values())
     e1_gold_corrected_ids = set(E1_IDS) | set(GOLD_IDS) | set(CORRECTED_IDS)

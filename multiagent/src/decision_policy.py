@@ -292,9 +292,15 @@ def _criterion_finding(
 
 
 def _policy_finding(code: str, agent: str, check: dict) -> dict:
+    # A6 giu nguyen TEN ma (an toan reference/prompt/test/spec khong doi),
+    # nhung quyen chan ha xuong nhom B: E1 v2 do that 2026-08-18 cho thay
+    # phan doan "day co phai nguy co khop dung safety rule" con dao dong
+    # giua cac lan goi LLM (bao cao evidence/e1_v2_2026-08-18_report.md).
+    # A5 khong doi - khong co bang chung dao dong tuong tu.
+    group = "B" if code == "A6" else "A"
     return {
         "defect_code": code,
-        "group": "A",
+        "group": group,
         "source_agent": agent,
         "source_check": code,
         "level": None,
@@ -661,8 +667,13 @@ def evaluate(
         for code in DEFECT_ORDER
         if any(finding["defect_code"] == code for finding in effective_findings)
     ]
-    has_a = any(code.startswith("A") for code in blocking_codes)
-    has_b = any(code.startswith("B") for code in blocking_codes)
+    # Doc quyen chan tu "group" THAT cua tung finding, khong doan qua tien
+    # to ten ma - A6 la vi du co chu y: ten ma van la "A6" (khong doi de
+    # giu tuong thich safety_rules/prompt/test) nhung group da ha xuong
+    # "B" (xem _policy_finding), nen A6 khong con tu no day quyet dinh
+    # sang rejected duoc nua.
+    has_a = any(finding["group"] == "A" for finding in effective_findings)
+    has_b = any(finding["group"] == "B" for finding in effective_findings)
     if has_a:
         decision = "rejected"
         highest_group = "A"

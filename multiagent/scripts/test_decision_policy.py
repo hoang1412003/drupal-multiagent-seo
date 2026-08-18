@@ -170,18 +170,6 @@ def test_moi_ma_a_doc_lap_deu_rejected() -> None:
         "A5",
     )
 
-    results = base_results()
-    set_policy_check(
-        results,
-        "A6",
-        reference_id="VF-SAFE-CHARGING-CABLE-001",
-    )
-    assert_single_block(
-        evaluate(clean_fields(), results, assessment_as_of="2026-08-17"),
-        "rejected",
-        "A6",
-    )
-
     fields = clean_fields()
     fields["body"] += "<!-- văn xuôi ẩn -->"
     results = base_results()
@@ -227,6 +215,22 @@ def test_moi_ma_b_doc_lap_deu_needs_revision() -> None:
         fields.update(changed_fields)
         actual = evaluate(fields, base_results(), assessment_as_of="2026-08-17")
         assert_single_block(actual, "needs_revision", code)
+
+    # A6 giu ten ma "A6" (an toan reference/prompt/test khong doi) nhung
+    # quyen chan da ha xuong nhom B - E1 v2 do that 2026-08-18 cho thay
+    # phan doan "co khop dung safety rule" con dao dong giua cac lan goi
+    # LLM (evidence/e1_v2_2026-08-18_report.md). Khong con tu no day
+    # quyet dinh sang rejected duoc nua, dung mang tinh than "nghi van
+    # nghiem trong chi tu LLM cung dung o needs_revision" da chot tu dau.
+    results = base_results()
+    set_policy_check(
+        results,
+        "A6",
+        reference_id="VF-SAFE-CHARGING-CABLE-001",
+    )
+    actual = evaluate(clean_fields(), results, assessment_as_of="2026-08-17")
+    assert_single_block(actual, "needs_revision", "A6")
+    assert actual["decision_basis"]["highest_group"] == "B"
 
 
 def test_nhieu_b_khong_tu_nang_thanh_rejected() -> None:
