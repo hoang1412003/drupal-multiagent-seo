@@ -651,6 +651,43 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
 
+**Trạng thái hiện hành — policy v2 candidate:**
+
+- Sáu phép đo v1 đã chạy xong ngày 2026-08-16; E1 đạt, E3 cho thấy 4 agent
+  thắng baseline, E5 đã đo nhưng không chốt được ngưỡng publish. Toàn bộ số
+  v1 ở mục 8.1–8.7 là evidence lịch sử, không phải kết quả policy v2.
+- Quyết định thiết kế *ai có quyền chặn xuất bản* đã được chốt cho candidate
+  `cam-nang-vn-v2`: A → B → assessment incomplete → publish; điểm tổng chỉ
+  diagnostic. V1 vẫn giữ nguyên để tương thích và đối chiếu lịch sử.
+- Policy core/evaluator/release guard Tasks 1–7 đã commit tới `d54d6f9`.
+  Focused post-commit release-guard test pass; meta-manifest phủ đúng 82 file.
+  Lượt pure 53/53 đã chạy trước vòng hardening guard cuối nên không được dùng
+  làm chứng nhận cho commit này. **Full `all-offline` fresh vẫn pending** ở
+  checkpoint Task 9, nên chưa được gọi core offline-ready trong bàn giao này.
+- Data snapshot được pin tại checkpoint `8635a45`; cây `docs/goldset` và
+  `docs/functional-tests` hiện diff rỗng so với checkpoint. `data_head` là
+  checkpoint đã verify snapshot, không phải commit cuối trực tiếp chạm file
+  data (`8e5ca60`).
+- Manifest `evidence/publish-policy-v2-manifest.json` vẫn là skeleton
+  **unfrozen**: `release_source_commit=null`, năm paid gate đều `pending`.
+  Chưa có preflight thật, chưa có paid output v2, policy v2 chưa active/cutover
+  và `scoring.yaml.meta.calibrated` vẫn `false`.
+- Việc tiếp theo duy nhất sau commit reconcile docs này: chạy checkpoint
+  offline Task 9, rồi thực thi child Evaluation Plan theo thứ tự runner/metrics → freeze một
+  release chung → preflight `$0` bốn dataset → USER GATE E1 → gold → corrected
+  → coverage → aggregate → conditional smoke. Mỗi paid gate cần xác nhận chi
+  phí riêng; không tự gọi API.
+- Corrected 30 và coverage 11 là synthetic functional evidence. Chúng đo
+  recovery/isolation, không thay cho đồng thuận AI–người trên bài thật;
+  `independent_label_reliability=not_demonstrated` bất kể gate kỹ thuật.
+
+Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
+Plan thực thi hiện hành:
+[`superpowers/plans/2026-08-17-corrected-publish-criterion-coverage-evaluation.md`](superpowers/plans/2026-08-17-corrected-publish-criterion-coverage-evaluation.md).
+
+**Snapshot và trạng thái bên dưới là luồng v1 lịch sử; giữ lại để giải thích
+bằng chứng, không dùng làm lệnh chạy policy v2.**
+
 **Snapshot đường chấm dùng cho lần đo kế tiếp:** `main` tại lúc preflight là merge commit `04f10e1` (đã gồm chốt CP4 tất định và fix N1 double write-back), prompt version `020738e209017213`. Productization P2 code checkpoint `c35dc75` đã chạy full suite offline/integration **48/48 test script xanh**, 0 skip/fail, qua re-review không còn Critical/Important, và diff score-path so với `04f10e1` rỗng; evidence P1 ở `docs/evidence/platform-foundation-verification.txt`, P2 ở `docs/evidence/platform-admin-auth-verification.txt`. Trước lượt đo vẫn phải ghi HEAD thực tế và xác minh lại vì nhánh có thể được integrate thêm. E1 và E5 cũ đều **hết hiệu lực**; Kappa 0,713/accuracy 0,879 chỉ là số lịch sử của bản 3. Gold calibration có 33 mẫu; functional-clean có 10 mẫu tách riêng.
 
 **Trạng thái ngắn cho AI/model tiếp nhận:**
@@ -662,16 +699,28 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - ✅ **Thiết kế E6 đã chốt và đăng ký trước (2026-08-16): k-fold**, không tách cứng — 5 fold, chia theo nhóm `source_url` (33 mẫu chỉ từ 30 nguồn), phân tầng theo nhãn, seed `20260816`, kèm quy tắc phá hoà cố định trước. Đầy đủ căn cứ và thiết kế: [`evaluation-plan.md` mục 4.6.1](evaluation-plan.md). Commit của quyết định này **phải là tổ tiên** của commit chứa kết quả E5.
 - ✅ **E5 + E6 đã chạy 2026-08-16 ($1,87) — nhưng ⛔ KHÔNG chốt được ngưỡng.** Kappa CV **0,406** với cấu hình đang chạy (`publish=80`), **0,713** nếu vô hiệu hoá nhánh `publish`. Selection bias +0,000. Nguyên nhân: `publish_min=80` làm 27% bài bị đề xuất đăng sai, mà gold set không có mẫu `publish` nào để chọn giá trị đúng. Chi tiết bốn phát hiện: mục 8.2. Evidence: [`evidence/e5_e6_ban4_report.md`](evidence/e5_e6_ban4_report.md).
 - ✅ **Functional-clean đã chạy 2026-08-16 ($0,24): `publish_rate` 10/10, 0 bài chặn oan, 22 issue.** Và nó **giải thích luôn kết quả E5**: `content_quality` = 100,0 trên bài sạch nhưng 78–86 trên bài có B8, tức **bộ phát hiện chạy đúng**. Lệch là do **cách gộp**: người dùng quy tắc dừng sớm (một mã B là đủ loại khỏi publish), hệ thống dùng trung bình có trọng số nên một tiêu chí trượt chỉ mất ~3,6 điểm `final_score`. Chi tiết: mục 8.6 và [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md).
-- 🔴 **CẦN MENTOR QUYẾT — không phải việc sửa ngay:** có thêm cổng *"bất kỳ tiêu chí mức 0 → trần `needs_revision`"* để khớp quy tắc người gán nhãn không? Đó là đổi `graph.aggregator_node`, tức **đường chấm điểm**, sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Ba lựa chọn kèm cái giá ở mục 8.6.
-- ✅ **Chẩn đoán P-006a xong 2026-08-16 ($0,044).** Chốt thời hạn của CP4 **chạy đúng**; cờ `critical` đến từ vế *điều kiện áp dụng* do LLM chấm. Mục 8.4 đã được chỉnh phát biểu. Cùng lúc phát hiện **B15: CP5 khớp mọi con số có `km` không kiểm ngữ cảnh** — lần thứ tư của bẫy B14, và B14 chỉ sửa CP3. Chưa sửa vì nằm trong đường chấm điểm.
+- ✅ **Quyết định aggregator đã được chốt cho policy v2 candidate:** bất kỳ
+  finding A/B blocking được policy engine xét trước score; assessment thiếu
+  thì fail-safe. Đây là đường versioned mới, chưa active và chưa measured;
+  v1 lịch sử không bị viết lại.
+- ✅ **Chẩn đoán P-006a xong 2026-08-16 ($0,044).** Chốt thời hạn của CP4
+  **chạy đúng**; cờ `critical` đến từ vế *điều kiện áp dụng* do LLM chấm. B15
+  (CP5 khớp mọi số có `km`) đã được sửa/test cho **policy v2** ở commit
+  `e587c1b`; nhánh v1 giữ nguyên để bảo toàn evidence lịch sử.
 - ✅ **E3 đã chạy 2026-08-16 ($1,15): kiến trúc 4 agent THẮNG.** Kappa CV **0,406** so với **0,302** của baseline gộp một lượt gọi; tập bài sai của baseline là **tập cha** của tập bài sai hệ 4 agent (sai thêm 4 bài, không thắng bài nào). Cái giá: +63% chi phí. Chi tiết mục 8.7, evidence [`evidence/e3_baseline_single_report.md`](evidence/e3_baseline_single_report.md).
-- 🏁 **CẢ SÁU PHÉP ĐO ĐÃ CHẠY XONG.** E1 ✅ đạt · E2 ✅ · E3 ✅ · E4 ✅ (thu kèm E1, có provenance) · E5 ✅ đo xong nhưng ⛔ không chốt được ngưỡng · E6 ✅. Việc còn lại **không còn là đo** mà là **hai quyết định thiết kế cần mentor** (xem hai gạch đầu dòng 🔴 ở trên) và các nợ kỹ thuật B15/CP5.
+- 🏁 **CẢ SÁU PHÉP ĐO v1 ĐÃ CHẠY XONG.** E1 ✅ đạt · E2 ✅ · E3 ✅ · E4
+  ✅ (thu kèm E1, có provenance) · E5 ✅ đo xong nhưng ⛔ không chốt được
+  ngưỡng · E6 ✅. Policy v2 là release đo mới, không kế thừa status measured
+  của sáu phép v1.
 - ✅ **UI báo cáo lỗi đã thiết kế lại xong và merge (PR #50, 2026-08-16).** Phạm vi cố ý hẹp: **chỉ PHP/JS/CSS trong `drupal/web/modules/custom/vf_ai_review/`, không sửa một dòng Python nào** — đã xác minh diff đường chấm điểm vẫn rỗng nên E1/E5/E6 còn hiệu lực. Hiển thị kiểm bằng ảnh chụp trình duyệt thật qua **4 vòng sửa** (5 lỗi tìm ra, không lỗi nào bị test bắt); ba tương tác (Trước/Sau, chip lọc, localStorage) đã kiểm tay và chạy đúng. Thiết kế, ba thứ cố ý cắt, và **bốn cái bẫy Drupal đã gặp**: [`editor-ui-design.md` mục 10](editor-ui-design.md). Test: `cd drupal && ddev exec php scripts/test_ai_report_renderer.php` (75 PASS).
 - ⚠️ **Nợ còn mở của UI: không có hạ tầng test JS.** Phần tương tác chỉ được bảo vệ bằng một lần kiểm tay, không có gì chặn regression. Sửa `js/vf_ai_review.js` là phải kiểm lại bằng mắt trên `http://drupal.ddev.site/node/21/edit`. Đây là giới hạn đã biết, không phải bỏ sót.
 - ➡️ **Ba việc còn thiếu của UI, chỉ làm được sau khi mở khoá đường chấm điểm:** badge mã tiêu chí (`CP8` thay vì `CP`), card điểm theo agent, số revision lúc chấm. Hai cái đầu cần sửa `agents/*.py`/`graph.py`, cái thứ ba cần `worker.py`. Nếu quyết sửa cổng aggregator (hai câu hỏi 🔴 ở trên) thì **gộp luôn ba thứ này vào cùng đợt** — đằng nào cũng phải đo lại E1/E5/E6, thêm chúng là miễn phí.
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
-- 🧪 **Chạy toàn bộ test bằng một lệnh:** `python scripts/run_test_group.py all-offline` → 72 file, 0 hỏng, 0 skip. Nợ H1 (test runner thống nhất) đã đóng.
+- 🧪 **Runner thống nhất:** `python scripts/run_test_group.py all-offline`.
+  Mốc 72 file/0 hỏng/0 skip là checkpoint lịch sử; manifest hiện phủ 82 file.
+  Task 7 mới chỉ có pure 53/53 pass, full all-offline fresh phải lấy từ Task 9,
+  không chép số lịch sử sang evidence v2.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 

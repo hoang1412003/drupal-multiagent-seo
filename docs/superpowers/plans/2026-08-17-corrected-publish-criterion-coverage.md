@@ -4,7 +4,7 @@
 
 **Goal:** Xây 20 bản `GC` expected-publish và 11 bản `CV` một lỗi, khóa provenance/checksum, rồi đo policy v2 trên bộ chính 63 và coverage riêng 11 mà không sửa gold/evidence v1.
 
-**Architecture:** Chương trình được chia thành hai pha có checkpoint độc lập. Pha Data tạo và xác minh dữ liệu hoàn toàn offline; Pha Evaluation chỉ dùng runner/paid guard chung của `cam-nang-vn-v2`, preregister metric trước output và tách hai lượt trả phí corrected/coverage. Các mẫu synthetic không đi vào Kappa gold và không được dùng để fit `publish_min`.
+**Architecture:** Chương trình được chia thành hai pha có checkpoint độc lập. Pha Data tạo và xác minh dữ liệu hoàn toàn offline; Pha Evaluation chỉ dùng runner/paid guard chung của `cam-nang-vn-v2`, preregister metric trước output và bổ sung hai lượt trả phí corrected/coverage sau E1/gold. Các mẫu synthetic không đi vào Kappa gold và không được dùng để fit `publish_min`.
 
 **Tech Stack:** Python 3.12, CSV/JSON, SHA-256, các script kiểm thử standalone hiện hành, PowerShell, Git, pipeline policy v2.
 
@@ -28,14 +28,22 @@
 
 ## Plan Map
 
+0. [`2026-08-17-publish-blocking-decision-policy.md`](2026-08-17-publish-blocking-decision-policy.md) — prerequisite policy v2 core/evaluator/release guard; hoàn tất checkpoint offline trước khi mở rộng dataset.
 1. [`2026-08-17-corrected-publish-criterion-coverage-data.md`](2026-08-17-corrected-publish-criterion-coverage-data.md) — khóa nhãn candidate, validator, 20 GC, 11 CV và integrity evidence; không API.
-2. [`2026-08-17-corrected-publish-criterion-coverage-evaluation.md`](2026-08-17-corrected-publish-criterion-coverage-evaluation.md) — metric/runner/preflight, hai paid run mới và báo cáo Mức A/B/C.
+2. [`2026-08-17-corrected-publish-criterion-coverage-evaluation.md`](2026-08-17-corrected-publish-criterion-coverage-evaluation.md) — mở rộng metrics/runner, freeze một release chung, preflight bốn dataset, rồi chạy từng USER GATE theo thứ tự.
 
 Pha Evaluation phụ thuộc:
 
 - Pha Data đã commit đủ 20 + 11 và integrity test xanh;
 - Core policy `cam-nang-vn-v2` cùng `eval_policy_v2.py`/paid guard đã qua checkpoint offline;
 - exact guideline/rubric/prompt/policy/KB/embedding provenance đã khóa.
+
+**Thứ tự duy nhất của Pha Evaluation:** mở rộng metrics/runner → commit mọi
+protected input → freeze release + manifest-only commit → full offline →
+preflight `$0` cho `e1|gold|corrected|coverage` → USER GATE E1 → gold →
+corrected → coverage → aggregate/approve Mức A/B → conditional smoke Mức C.
+Không có paid output nào được tạo trước freeze; nếu upstream gate trượt,
+downstream dừng hoặc chỉ chạy diagnostic sau protocol amendment commit.
 
 ## Checkpoints
 
@@ -60,13 +68,18 @@ Pha Evaluation phụ thuộc:
 
 - [ ] Pure metrics/fake runner tests xanh; report-only không import/call paid model.
 - [ ] Protocol/manifest commit trước output và chứa đúng gate 30/30, 20/20, 11/11 cùng các gate gold/stability.
-- [ ] Preflight sinh token/cost riêng cho corrected và coverage; usage vẫn 0.
+- [ ] Preflight sinh bốn token/cost riêng cho E1, gold, corrected và coverage;
+  usage vẫn 0, chưa có model result.
 
 ### Checkpoint E — evidence
 
-- [ ] Kết quả Mức A luôn được báo pass/fail trung thực sau khi đủ run được phép.
-- [ ] Mức B chỉ `passed` khi tất cả gate preregistered đạt; nếu trượt, giữ release/evidence bất biến và không cutover.
-- [ ] Mức C ghi `not_demonstrated`, không suy từ synthetic hoặc 33/33 AI khớp nhãn cũ.
+- [ ] Mức A chỉ chứng nhận core offline/provenance `$0`, không suy chất lượng
+  thật và không đợi paid run.
+- [ ] Mức B chỉ `passed` khi đủ bốn run và tất cả gate preregistered đạt; nếu
+  trượt, giữ release/evidence bất biến và không cutover.
+- [ ] Mức C chỉ sau conditional smoke + authority riêng;
+  `independent_label_reliability` vẫn `not_demonstrated`, không suy từ
+  synthetic hoặc 33/33 AI khớp nhãn cũ.
 
 ### Task 1: Execute Offline Data Plan
 
@@ -84,10 +97,13 @@ Pha Evaluation phụ thuộc:
 
 **Interfaces:** Consumes immutable Data commit; produces raw/report/manifest provenance for Mức A/B/C.
 
-- [ ] **Step 1:** Xác minh prerequisites và preregister protocol từ clean committed tree.
-- [ ] **Step 2:** Chạy từng USER GATE chi phí riêng; không gộp confirmation token.
+- [ ] **Step 1:** Xác minh prerequisites, hoàn tất runner/metrics rồi freeze đúng
+  một release chung từ clean committed tree.
+- [ ] **Step 2:** Preflight `$0` đủ bốn dataset, sau đó chạy từng USER GATE
+  E1 → gold → corrected → coverage; không gộp confirmation token.
 - [ ] **Step 3:** Commit cả evidence âm nếu metric trượt; không chỉnh sample/release tại chỗ.
-- [ ] **Step 4:** Chỉ đề xuất cutover khi Mức B đạt; Mức C vẫn phải ghi đúng giới hạn.
+- [ ] **Step 4:** Chỉ mở USER GATE smoke khi Mức B đạt và smoke contract đã
+  được freeze; Mức C/độ tin cậy nhãn vẫn phải ghi đúng giới hạn.
 
 ### Task 3: Final Handoff
 
