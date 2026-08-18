@@ -1,3 +1,10 @@
+# Mac dinh an toan cho CA REPO: chuan hoa moi file text ve LF khi checkout,
+# bat ke core.autocrlf dang la gi (gia tri nay dung chung toan repo va da
+# tung tu doi giua phien lam viec - xem ghi chu duoi). Khong dung LF se lam
+# git tao diff toan file (moi dong bi coi la doi) moi khi Edit tool ghi lai
+# mot file dang CRLF - da gap that voi docs/technical-debt.md 2026-08-18.
+* text=auto eol=lf
+
 # Toan bo path duoi day nam trong protected_paths()/_DATA_GLOBS cua
 # multiagent/scripts/policy_release.py - noi dung duoc pin SHA256 vao
 # docs/evidence/publish-policy-v2-manifest.json luc freeze. Khoa eol=lf
