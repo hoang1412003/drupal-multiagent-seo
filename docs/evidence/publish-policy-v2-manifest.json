@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
-  "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
-  "release_source_commit": "e8213012e68ba7450bb2f03d6c08739e639cfe8c",
+  "data_head": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
+  "release_source_commit": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -19,7 +19,7 @@
     "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
     "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
     "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-    "docs/functional-tests/criterion-coverage-labels.csv": "ad659446d8bb0d0eb4622a7c501122348603edef39c5681db0b59120802dba67",
+    "docs/functional-tests/criterion-coverage-labels.csv": "efb14df3c80d1b7b12f07b55d2a5447be5c6221a276dfabad86cc6d81b4a8591",
     "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
     "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
     "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
@@ -105,7 +105,7 @@
     "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
     "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
     "multiagent/src/ai_core.py": "27e6f41bdfa7e9d62f14acd3724b2f9e5c5573fdaa023da41bd56062f8293ed0",
-    "multiagent/src/decision_policy.py": "a61173dac56efeaf2d730851121ef72554e038885bb52fe67252cf50ce617703",
+    "multiagent/src/decision_policy.py": "52b87720f9c88519a412cbb789b4edd335a8055aa641a0abc07c7edec38896a7",
     "multiagent/src/embeddings.py": "9be33c9ec1c4a2b89a96de0b579b75112094dc5809947e8abbc1a616b7ad6771",
     "multiagent/src/graph.py": "b823eefddd22ba9260ba4699be84e15a53abbacd8b6b02a8307a105ceca07a30",
     "multiagent/src/kb/safety_rules.json": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
@@ -169,7 +169,7 @@
     "approved_for_limited_pilot": false
   },
   "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
-  "policy_hash": "a61173dac56efeaf2d730851121ef72554e038885bb52fe67252cf50ce617703",
+  "policy_hash": "52b87720f9c88519a412cbb789b4edd335a8055aa641a0abc07c7edec38896a7",
   "protocol_hash": "51c08bdbec366b83cbdcfcbcc187d74acc6a36d6c97d4e55d04db772314ba299",
   "model": "claude-haiku-4-5-20251001",
   "datasets": {
@@ -370,11 +370,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-18T12:40:14.365544+00:00",
+  "frozen_at": "2026-08-18T15:24:10.246223+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
-    "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
-    "release_source_commit": "e8213012e68ba7450bb2f03d6c08739e639cfe8c",
+    "data_head": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
+    "release_source_commit": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -392,7 +392,7 @@
       "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
       "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
       "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-      "docs/functional-tests/criterion-coverage-labels.csv": "ad659446d8bb0d0eb4622a7c501122348603edef39c5681db0b59120802dba67",
+      "docs/functional-tests/criterion-coverage-labels.csv": "efb14df3c80d1b7b12f07b55d2a5447be5c6221a276dfabad86cc6d81b4a8591",
       "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
       "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
       "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
@@ -478,7 +478,7 @@
       "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
       "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
       "multiagent/src/ai_core.py": "27e6f41bdfa7e9d62f14acd3724b2f9e5c5573fdaa023da41bd56062f8293ed0",
-      "multiagent/src/decision_policy.py": "a61173dac56efeaf2d730851121ef72554e038885bb52fe67252cf50ce617703",
+      "multiagent/src/decision_policy.py": "52b87720f9c88519a412cbb789b4edd335a8055aa641a0abc07c7edec38896a7",
       "multiagent/src/embeddings.py": "9be33c9ec1c4a2b89a96de0b579b75112094dc5809947e8abbc1a616b7ad6771",
       "multiagent/src/graph.py": "b823eefddd22ba9260ba4699be84e15a53abbacd8b6b02a8307a105ceca07a30",
       "multiagent/src/kb/safety_rules.json": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
@@ -686,5 +686,5 @@
       }
     }
   },
-  "release_sha256": "a637aec90a88677eefaed8b7b620e874a4c073fba6c763cd8739d91ec5b9e1b3"
+  "release_sha256": "cafe28a25060175dd49e645f0cac9af229cc658e90fab7e864ad0ea1a8a39d50"
 }

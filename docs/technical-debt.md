@@ -721,11 +721,28 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `P-006a` cũ)** — hai finding nhóm A duy nhất còn thuần LLM judgment.
   6/10 bài hoàn toàn ổn định; đối chiếu code với spec mục 8.2 xác nhận
   `_chuan_hoa_a6` **thực thi đúng thiết kế đã duyệt** (không phải bug nới
-  lỏng) — bản thân phán đoán LLM dao động thật. **Chưa quyết định hướng xử
-  lý** (chấp nhận đo tiếp Gold có ghi rủi ro, hay thêm ràng buộc tất định
-  cho A6 — thay đổi thiết kế cần quyết riêng). **Chưa chạy Gold/Corrected/
-  Coverage v2** — đúng quy tắc "E1 chặn Gold". `scoring.yaml.meta.calibrated`
-  không đổi.
+  lỏng) — bản thân phán đoán LLM dao động thật.
+- ✅ **Cập nhật 2026-08-18 (tối, muộn hơn) — ĐÃ CHỐT quyết định A6, commit
+  `eb5898e`.** Cân nhắc 3 hướng (thêm keyword matching tất định / hạ A6
+  xuống nhóm B / đo thêm để tích luỹ bằng chứng), **chọn hạ A6 xuống nhóm
+  B**: tránh lặp lại đúng bẫy "một bộ so khớp gộp hai thứ khác nhau" đã
+  gặp 4 lần (B12/BV3/B14/B15) nếu tự đặt từ khoá dựa trên vài ví dụ vừa
+  thấy; đúng tinh thần thiết kế gốc đã chốt từ đầu (*"nghi vấn nghiêm
+  trọng chỉ từ LLM cũng dừng ở needs_revision"*). Kỹ thuật: `has_a`/`has_b`
+  trong `decision_policy.py` đổi từ đọc **tiền tố tên mã** sang đọc
+  **trường `group` thật** của từng finding — phát hiện tiền tố tên mã
+  không điều khiển quyết định như tưởng. A6 **giữ nguyên tên mã** (không
+  đổi `safety_rules.json`/prompt/spec/test tham chiếu "A6"), chỉ đổi
+  `group` trong `_policy_finding()`. A5 không đổi — không có bằng chứng
+  dao động tương tự. Cập nhật kèm: `test_decision_policy.py`,
+  `test_compliance_rubric.py`, `test_eval_policy_v2.py`,
+  `criterion-coverage-labels.csv` (`CV-A6-01`/`CV-A6-02` đổi
+  `expected_label` từ `rejected` sang `needs_revision` — không đổi thì
+  cổng coverage vĩnh viễn không pass được dù A6 phát hiện đúng). Full
+  offline suite: **83/83, 0 hỏng, 0 skip**. Manifest freeze lại,
+  `verified: true`. **Vẫn chưa chạy lại E1** để xác nhận sửa có thật sự
+  giảm dao động hay không — đây là việc kế tiếp, tốn thêm tiền thật.
+  `scoring.yaml.meta.calibrated` không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
