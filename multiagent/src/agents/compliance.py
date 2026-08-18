@@ -590,7 +590,13 @@ def _llm_schema(policy_version: str, safety_rules: dict | None) -> dict:
                 "type": "array",
                 "items": _a6_check_schema(reference_ids),
                 "minItems": 1,
-                "maxItems": 1,
+                # "maxItems" bi Anthropic structured output API tu choi (400:
+                # "For 'array' type, property 'maxItems' is not supported") -
+                # phat hien khi chay that lan dau 2026-08-18, khien MOI lan
+                # goi LLM cua compliance loi 400, lam ca 4 tieu chi LLM (CP2/
+                # CP4/CP7/CP8) va A6 thanh unavailable cho toan bo mau. Bo
+                # rang buoc so luong (da co _chuan_hoa_a6 dong 618 tu kiem
+                # dung 1 phan tu, khong can schema ep) - khong sua logic.
             },
         },
         "required": [*_LLM_SCHEMA["required"], "policy_checks"],
