@@ -12,9 +12,9 @@
   "pricing_version": 1,
   "pricing_effective_at": "2025-10-15",
   "pricing_source": "https://www.anthropic.com/claude/haiku",
-  "confirmation_token": "07c37d56aa8deb9da169abb574b5d7d72a0af8a61d7702fc1c42260c5ce751db",
-  "release_sha256": "7aa03443786a39ffab485a361a316e3531bd68ed2a93fb0da8aefdf40d1b6acc",
-  "runtime_release_sha256": "01816700dae4500d93c9aad65c3a2312fec19241a963eb127b783bfa2c987582",
+  "confirmation_token": "c8060cdf6c90c441188a715d513be8efd7decf9d4489accc72e6903727242e50",
+  "release_sha256": "891c7c246d501900e5e9d1ac74de973a3ad0c0aa48c0178aa9d1ae3d66979e95",
+  "runtime_release_sha256": "14e05e90bac5ac889bec9051cc5d704fcd8e68f191eb41a860ec810310bc4778",
   "assessment_as_of": "2026-08-18",
-  "output_path": "D:\\drupal-multiagent-seo\\.worktrees\\ai-v14-relabel\\docs\\evidence\\e1-v2-20260818.json"
+  "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-2026-08-18.json"
 }

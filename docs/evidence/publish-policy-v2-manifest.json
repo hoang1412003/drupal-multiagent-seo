@@ -118,38 +118,38 @@
     "e1": {
       "status": "preflighted",
       "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\.worktrees\\ai-v14-relabel\\docs\\evidence\\e1-v2-preflight-20260818.json",
-        "sha256": "965f6d8e76632c77f73ec5be574b71f8fa55df10c2148b7d3f0e14233d989df8"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-preflight-20260818b.json",
+        "sha256": "e896f67333e92e2b337c8fb67975cb5e0dc09748e7281c62501138fd09c7b199"
       },
-      "runtime_release_sha256": "01816700dae4500d93c9aad65c3a2312fec19241a963eb127b783bfa2c987582",
-      "confirmation_token_hash": "f0d8877e54ffc5f3f5d3b2e4a74a58f4113e708c1a5f9c7d99fac8955ff31add"
+      "runtime_release_sha256": "14e05e90bac5ac889bec9051cc5d704fcd8e68f191eb41a860ec810310bc4778",
+      "confirmation_token_hash": "81e32fbea7d4e73493f76e91f501605b074425cb48e640e81f99e0bff411e862"
     },
     "gold": {
       "status": "preflighted",
       "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\.worktrees\\ai-v14-relabel\\docs\\evidence\\gold-v2-preflight-20260818.json",
-        "sha256": "a93a048268a11997a767c475b39af9a89fda40c30115fbaf535ab9bf48a27c44"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-preflight-20260818b.json",
+        "sha256": "b5696fa55ae931d11a60e9f092d7e9a788ed5c133c8c16706762429cd936dbe3"
       },
-      "runtime_release_sha256": "429c2117f91daac694d39f1882951eb1cdcfb08cbf6674ba53c42c765bc4b3b6",
-      "confirmation_token_hash": "c5f6428bf206b1d975cc0c236bf3a37e8a38c5b03484616291c5214d37676288"
+      "runtime_release_sha256": "f840606c04bcfb48f607a0d87cf89bd3f299a9e71be59d9ac86691badc78d8e8",
+      "confirmation_token_hash": "53d306084a9de783d95e7e7da691af70e88650fd6a51f7d9cb7e65c3566d222a"
     },
     "corrected": {
       "status": "preflighted",
       "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\.worktrees\\ai-v14-relabel\\docs\\evidence\\corrected-v2-preflight-20260818.json",
-        "sha256": "982bade59267c6c68a4fa50e5acd558630d688e8fdc6dadbd39383989e9d4bcf"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-preflight-20260818b.json",
+        "sha256": "a918a7ad7ac509162ead3cc319a227c7f9cc07677164001dd19f8009b9987ef9"
       },
-      "runtime_release_sha256": "9c307bf5959ab58aa8ee51fe829ecc96c0d47b77272d74c86607353ca83022e6",
-      "confirmation_token_hash": "826126974309c701a26f44af33fad627f7ea0611fe48bb2961464858183e9a92"
+      "runtime_release_sha256": "9fa2612bcb62b49f47c82be445eb2a0611291d6d6a5103801a6ee9ab6512fad7",
+      "confirmation_token_hash": "40988d52a6b2f000ff674bcb44cb45be946128f6066d419843c187d591deb089"
     },
     "coverage": {
       "status": "preflighted",
       "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\.worktrees\\ai-v14-relabel\\docs\\evidence\\coverage-v2-preflight-20260818.json",
-        "sha256": "9f217dcce4a159494d1e931eef87dc6d6334d6c8caf6d3ae3cb3dc70b098b209"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-preflight-20260818b.json",
+        "sha256": "18ab3205f7b1adadc5358808f1a38b60625705fb41b180248f5aecc3d541781f"
       },
-      "runtime_release_sha256": "b6e380ca9ca2447ead369474eaba279f9e7fcde4d628bd6cc6947b220bb9f79b",
-      "confirmation_token_hash": "26a38dcf409534a0a9988c28d708e5c4deb4729ef949301200b8ec4eaf0228b3"
+      "runtime_release_sha256": "b2d52bf5dd6e5b02de060b1d846216f8b2c899162480ff395bfacde5aa509771",
+      "confirmation_token_hash": "3526295d90eaac8aa6e0bc5b5d78969102d583b6ee24956146aadd953f697064"
     },
     "smoke": {
       "status": "pending"
