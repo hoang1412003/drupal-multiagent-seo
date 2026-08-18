@@ -84,6 +84,14 @@ def _fixture_repo(temp: Path) -> tuple[Path, Path]:
     )
     skeleton = json.loads(manifest.read_text(encoding="utf-8"))
     skeleton["data_head"] = data_head
+    # Fixture phai doc lap voi trang thai paid_runs that cua repo song - copy
+    # nguyen manifest that lam khuon mau se ke thua ca "preflighted"/token
+    # that ngay khi ai do chay record-preflight that, lam test lech (bao
+    # "raw runtime release lech preflight" du day la fixture ca lap).
+    skeleton["paid_runs"] = {
+        name: {"status": "pending"}
+        for name in skeleton["paid_runs"]
+    }
     _write_json(manifest, skeleton)
     _git(repo, "add", str(MANIFEST_REL).replace("\\", "/"))
     _git(repo, "commit", "-m", "set fixture data head")
