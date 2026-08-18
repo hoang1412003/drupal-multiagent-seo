@@ -45,10 +45,14 @@ _STATIC_PROTECTED = (
     "docs/goldset/labels.csv",
     "docs/goldset/sources.md",
     "docs/rubrics.md",
+    "docs/functional-tests/clean_labels.csv",
     "docs/functional-tests/gold-corrected-labels.csv",
     "docs/functional-tests/criterion-coverage-labels.csv",
+    "docs/evidence/functional-clean-ai-review-v1.4.csv",
     "multiagent/config/model_pricing.yaml",
     "multiagent/config/scoring.yaml",
+    "multiagent/scripts/eval_corrected_coverage.py",
+    "multiagent/scripts/eval_functional_clean.py",
     "multiagent/scripts/eval_policy_v2.py",
     "multiagent/scripts/eval_policy_v2_metrics.py",
     "multiagent/scripts/functional_dataset_v2.py",
@@ -243,10 +247,14 @@ def _csv_ids(path: Path, expected_count: int) -> list[str]:
     return ids
 
 
+_CLEAN_IDS = tuple(f"C-{index:03d}" for index in range(1, 11))
+
+
 def _dataset_registry(repo_root: Path, artifacts: dict) -> dict:
     e1_ids = list(_GOLD_IDS[:10])
     gold_ids = list(_GOLD_IDS)
-    corrected_ids = _csv_ids(
+    clean_ids = list(_CLEAN_IDS)
+    gold_corrected_ids = _csv_ids(
         repo_root / "docs/functional-tests/gold-corrected-labels.csv", 20
     )
     coverage_ids = _csv_ids(
@@ -262,12 +270,23 @@ def _dataset_registry(repo_root: Path, artifacts: dict) -> dict:
             hashes[sample_id] = artifacts[relative]
         return {"ordered_ids": ids, "content_hashes_sha256": hashes}
 
+    def corrected_entry(clean_ids: list[str], gc_ids: list[str]) -> dict:
+        # "corrected" = 10 C (functional-tests/clean) + 20 GC
+        # (functional-tests/gold-corrected), theo dung thu tu eval_policy_v2.
+        clean = entry(clean_ids, "docs/functional-tests/clean")
+        gold_corrected = entry(gc_ids, "docs/functional-tests/gold-corrected")
+        return {
+            "ordered_ids": clean["ordered_ids"] + gold_corrected["ordered_ids"],
+            "content_hashes_sha256": {
+                **clean["content_hashes_sha256"],
+                **gold_corrected["content_hashes_sha256"],
+            },
+        }
+
     return {
         "e1": entry(e1_ids, "docs/goldset/raw"),
         "gold": entry(gold_ids, "docs/goldset/raw"),
-        "corrected": entry(
-            corrected_ids, "docs/functional-tests/gold-corrected"
-        ),
+        "corrected": corrected_entry(clean_ids, gold_corrected_ids),
         "coverage": entry(
             coverage_ids, "docs/functional-tests/criterion-coverage"
         ),
@@ -531,8 +550,8 @@ def build_preflight(
     _validate_frozen_in_memory(manifest)
     dataset_kind = runtime_contract.get("dataset_kind")
     ids = runtime_contract.get("ordered_sample_ids")
-    if dataset_kind not in ("e1", "gold"):
-        raise ReleaseContractError("core preflight chi ho tro e1|gold")
+    if dataset_kind not in MEASURED_DATASETS:
+        raise ReleaseContractError("preflight chi ho tro e1|gold|corrected|coverage")
     if ids != manifest["datasets"][dataset_kind]["ordered_ids"]:
         raise ReleaseContractError("runtime ordered IDs khong khop manifest")
     if runtime_contract.get("policy_version") != manifest["policy_version"]:
@@ -734,7 +753,7 @@ def record_result(
     manifest.pop("verified", None)
     if dataset_kind not in MEASURED_DATASETS:
         raise ReleaseContractError(f"dataset khong co measured result: {dataset_kind}")
-    if dataset_kind in {"e1", "gold"} and raw_path is None:
+    if raw_path is None:
         raise ReleaseContractError(f"{dataset_kind} bat buoc co raw_path")
     raw_reference = _reference(raw_path) if raw_path is not None else None
     report_reference = _reference(report_path)
@@ -787,11 +806,16 @@ def approve(manifest_path: Path, repo_root: Path) -> dict:
 
     e1_raw = _verified_json(manifest["paid_runs"]["e1"].get("raw"))
     gold_raw = _verified_json(manifest["paid_runs"]["gold"].get("raw"))
+    corrected_raw = _verified_json(manifest["paid_runs"]["corrected"].get("raw"))
+    coverage_raw = _verified_json(manifest["paid_runs"]["coverage"].get("raw"))
     corrected = _verified_json(manifest["paid_runs"]["corrected"].get("report"))
     coverage = _verified_json(manifest["paid_runs"]["coverage"].get("report"))
     e1 = stability_metrics(e1_raw)
     gold = gold_metrics(gold_raw)
 
+    # Ten field khop dung output that cua eval_corrected_coverage.main_metrics()
+    # (corrected_30/paired_20) va coverage_metrics() (passed/failed) - khong
+    # phai schema doan truoc khi Task 1 cua Evaluation Plan viet.
     gates = {
         "e1_decision_consistency": e1["decision_consistency"] >= 0.90,
         "gold_kappa": gold["kappa"] is not None and gold["kappa"] >= 0.60,
@@ -807,24 +831,15 @@ def approve(manifest_path: Path, repo_root: Path) -> dict:
             gold["false_publish_count"] == 0
             and gold["false_publish_denominator"] == 33
         ),
-        "corrected_publish": (
-            corrected.get("corrected_publish_count") == 30
-            and corrected.get("corrected_total") == 30
-        ),
-        "paired_recovery": (
-            corrected.get("paired_recovery_count") == 20
-            and corrected.get("paired_recovery_total") == 20
-        ),
-        "coverage_target_decision_parent": (
-            coverage.get("target_decision_parent_pass_count") == 11
-            and coverage.get("coverage_total") == 11
-        ),
-        "coverage_failure": coverage.get("failure_count") == 0,
+        "corrected_publish": corrected.get("corrected_30", {}).get("publish_count") == 30,
+        "paired_recovery": corrected.get("paired_20", {}).get("recovered_count") == 20,
+        "coverage_target_decision_parent": coverage.get("passed") == 11,
+        "coverage_failure": coverage.get("failed") == 0,
         "drift": (
-            corrected.get("drift_count") == 0
-            and coverage.get("drift_count") == 0
-            and _drift_count(e1_raw) == 0
+            _drift_count(e1_raw) == 0
             and _drift_count(gold_raw) == 0
+            and _drift_count(corrected_raw) == 0
+            and _drift_count(coverage_raw) == 0
         ),
     }
     level_b = "pass" if all(gates.values()) else "fail"

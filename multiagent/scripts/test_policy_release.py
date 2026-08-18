@@ -127,6 +127,11 @@ def test_artifact_drift_prompt_safety_scoring_dataset_deu_fail():
         "multiagent/src/kb/safety_rules.json",
         "multiagent/config/scoring.yaml",
         "docs/goldset/raw/G-001.txt",
+        "docs/functional-tests/clean/C-001.txt",
+        "docs/functional-tests/gold-corrected/GC-001.txt",
+        "docs/functional-tests/criterion-coverage/CV-A3-01.txt",
+        "docs/functional-tests/clean_labels.csv",
+        "docs/evidence/functional-clean-ai-review-v1.4.csv",
     )
     with tempfile.TemporaryDirectory(prefix="release-drift-") as raw_temp:
         repo, manifest_path, _ = _frozen(Path(raw_temp))
@@ -155,6 +160,51 @@ def test_freeze_chan_dirty_protected_va_giu_manifest_nguyen_byte():
             "dirty protected",
         )
         assert manifest_path.read_bytes() == before
+
+
+def test_corrected_29_30_va_coverage_10_11_chan_freeze():
+    with tempfile.TemporaryDirectory(prefix="release-count-") as raw_temp:
+        repo, manifest_path = _fixture_repo(Path(raw_temp))
+        gc_labels = repo / "docs/functional-tests/gold-corrected-labels.csv"
+        lines = gc_labels.read_text(encoding="utf-8").splitlines(keepends=True)
+        gc_labels.write_text("".join(lines[:-1]), encoding="utf-8")
+        gc_file = repo / "docs/functional-tests/gold-corrected/GC-020.txt"
+        gc_file.unlink()
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-m", "drop one GC row (simulate 29/30 corrected)")
+        _expect_error(
+            "corrected 29/30 chan freeze",
+            lambda: freeze(manifest_path, repo),
+            "gold-corrected",
+        )
+
+    with tempfile.TemporaryDirectory(prefix="release-count2-") as raw_temp:
+        repo, manifest_path = _fixture_repo(Path(raw_temp))
+        cv_labels = repo / "docs/functional-tests/criterion-coverage-labels.csv"
+        lines = cv_labels.read_text(encoding="utf-8").splitlines(keepends=True)
+        cv_labels.write_text("".join(lines[:-1]), encoding="utf-8")
+        cv_file = repo / "docs/functional-tests/criterion-coverage/CV-B9-02.txt"
+        cv_file.unlink()
+        _git(repo, "add", "-A")
+        _git(repo, "commit", "-m", "drop one CV row (simulate 10/11 coverage)")
+        _expect_error(
+            "coverage 10/11 chan freeze",
+            lambda: freeze(manifest_path, repo),
+            "criterion-coverage",
+        )
+
+
+def test_independent_label_reliability_passed_bi_chan():
+    with tempfile.TemporaryDirectory(prefix="release-label-") as raw_temp:
+        repo, manifest_path, frozen = _frozen(Path(raw_temp))
+        broken = deepcopy(frozen)
+        broken["independent_label_reliability"] = "passed"
+        _write_json(manifest_path, broken)
+        _expect_error(
+            "independent_label_reliability=passed bi tu choi",
+            lambda: verify(manifest_path, repo),
+            "not_demonstrated",
+        )
 
 
 def test_protocol_commit_phai_la_ancestor_release_source():
@@ -559,7 +609,7 @@ def test_approve_recompute_gate_nhung_khong_bia_label_doc_lap():
             "e1",
             e1_samples,
             "2026-08-17",
-            evidence / "e1.json",
+            evidence / "e1-raw.json",
             data_head=manifest["data_head"],
         )
         gold_contract = build_runtime_contract(
@@ -567,7 +617,7 @@ def test_approve_recompute_gate_nhung_khong_bia_label_doc_lap():
             "gold",
             gold_samples,
             "2026-08-17",
-            evidence / "gold.json",
+            evidence / "gold-raw.json",
             data_head=manifest["data_head"],
         )
         e1_ids = manifest["datasets"]["e1"]["ordered_ids"]
@@ -605,29 +655,64 @@ def test_approve_recompute_gate_nhung_khong_bia_label_doc_lap():
                 for sample, expected in gold_pairs
             ],
         }
+        corrected_ids = manifest["datasets"]["corrected"]["ordered_ids"]
+        corrected_contract = build_runtime_contract(
+            repo, "corrected", load_dataset("corrected", repo),
+            "2026-08-17", evidence / "corrected-raw.json",
+            data_head=manifest["data_head"],
+        )
+        corrected_raw = {
+            "_meta": _real_meta(corrected_contract, 1),
+            "results": [
+                _metric_row(
+                    sample_id, 1, "publish", "publish",
+                    corrected_contract["release_tuple"],
+                )
+                for sample_id in corrected_ids
+            ],
+        }
+        coverage_ids = manifest["datasets"]["coverage"]["ordered_ids"]
+        coverage_contract = build_runtime_contract(
+            repo, "coverage", load_dataset("coverage", repo),
+            "2026-08-17", evidence / "coverage-raw.json",
+            data_head=manifest["data_head"],
+        )
+        coverage_raw = {
+            "_meta": _real_meta(coverage_contract, 1),
+            "results": [
+                _metric_row(
+                    sample_id, 1, "rejected", "rejected",
+                    coverage_contract["release_tuple"],
+                )
+                for sample_id in coverage_ids
+            ],
+        }
+
         paths = {}
-        for name, value in (
-            ("e1", e1_raw),
-            ("gold", gold_raw),
-            ("corrected", {"corrected_publish_count": 30,
-                           "corrected_total": 30,
-                           "paired_recovery_count": 20,
-                           "paired_recovery_total": 20,
-                           "drift_count": 0}),
-            ("coverage", {"target_decision_parent_pass_count": 11,
-                          "coverage_total": 11,
-                          "failure_count": 0,
-                          "drift_count": 0}),
+        for name, raw_value, report_value in (
+            ("e1", e1_raw, e1_raw),
+            ("gold", gold_raw, gold_raw),
+            ("corrected", corrected_raw, {
+                "main_63": {}, "gold_33": {},
+                "corrected_30": {"publish_count": 30, "publish_rate": 1.0,
+                                  "false_block_count": 0},
+                "paired_20": {"recovered_count": 20, "recovery_rate": 1.0},
+            }),
+            ("coverage", coverage_raw, {
+                "passed": 11, "failed": 0, "by_code": {},
+            }),
         ):
-            path = evidence / f"{name}.json"
-            _write_json(path, value)
-            paths[name] = path
+            raw_path = evidence / f"{name}-raw.json"
+            report_path = evidence / f"{name}-report.json"
+            _write_json(raw_path, raw_value)
+            _write_json(report_path, report_value)
+            paths[name] = report_path
             record_result(
                 manifest_path,
                 repo,
                 name,
-                raw_path=path if name in {"e1", "gold"} else None,
-                report_path=path,
+                raw_path=raw_path,
+                report_path=report_path,
             )
         approved = approve(manifest_path, repo)
         assert approved["approval"]["measured_complete"] is True
@@ -644,6 +729,8 @@ if __name__ == "__main__":
         test_manifest_incomplete_neu_thieu_data_policy_protocol_hash,
         test_artifact_drift_prompt_safety_scoring_dataset_deu_fail,
         test_freeze_chan_dirty_protected_va_giu_manifest_nguyen_byte,
+        test_corrected_29_30_va_coverage_10_11_chan_freeze,
+        test_independent_label_reliability_passed_bi_chan,
         test_protocol_commit_phai_la_ancestor_release_source,
         test_token_replay_va_bound_field_drift,
         test_unknown_policy_va_paid_env_off_chan_truoc_output,
