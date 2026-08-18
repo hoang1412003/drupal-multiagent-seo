@@ -1,0 +1,72 @@
+{
+  "dataset_kind": "e1",
+  "sample_count": 10,
+  "repeat_count": 50,
+  "decision_consistency": 1.0,
+  "final_score_sigma": 1.6375816747816718,
+  "final_score_sigma_max": 4.591242478893924,
+  "samples": {
+    "G-001": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.3336510038237137
+    },
+    "G-002": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 0.7938041320124215
+    },
+    "G-003": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 4.591242478893924
+    },
+    "G-004": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 2.3834596703112085
+    },
+    "G-005": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 2.1119197427932703
+    },
+    "G-006": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.4329890090297288
+    },
+    "G-007": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 0.704361412912435
+    },
+    "G-008": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.8833733034106666
+    },
+    "G-009": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.1410159946293505
+    },
+    "G-010": {
+      "mode_decision": "rejected",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 0.0
+    }
+  },
+  "usage": {
+    "events": 278,
+    "input_tokens": 2195215,
+    "output_tokens": 203441,
+    "estimated_usd": "3.212420",
+    "mean_latency_ms": 43223.73718
+  },
+  "gate_status": {
+    "decision_consistency": "PASS",
+    "final_score_sigma": "PASS"
+  },
+  "label_provenance": "AI-annotated-partially-exposed"
+}

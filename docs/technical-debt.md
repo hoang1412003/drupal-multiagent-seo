@@ -754,6 +754,18 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   **Vẫn chưa chạy lại E1** để xác nhận cả hai lần hạ (A6 + A4) có thật sự
   đủ giảm dao động xuống dưới ngưỡng hay không — đây là việc kế tiếp, tốn
   thêm tiền thật. `scoring.yaml.meta.calibrated` không đổi.
+- 🏁 **Cập nhật 2026-08-19 — E1 v2 ĐO LẠI, ĐẠT.** `decision_consistency =
+  1,00` ≥ 0,90 (trước khi hạ A6/A4: 0,86). **10/10 bài hoàn toàn ổn định**
+  — đúng 4 bài từng dao động (`G-003/006/007/008`) giờ `mode_agreement =
+  1,00`. Chi phí thật $3,21 (một lượt sạch, không ghép nối như lần đầu).
+  σ `final_score` = 1,64 < 2, vẫn đạt. Chẩn đoán đầy đủ:
+  [`evidence/e1_v2_2026-08-19_report.md`](evidence/e1_v2_2026-08-19_report.md).
+  **Giới hạn phải nêu kèm:** n=10 nhỏ, không loại trừ tiêu chí khác dao
+  động nhưng chưa xuất hiện trong đúng 10 bài này; cả 10 bài đều rơi vào
+  `needs_revision`/`rejected`, chưa kiểm được dao động dạng
+  `needs_revision` ↔ `publish`. **Cổng sang Gold v2 đã mở** — bước tiếp
+  theo theo đúng thứ tự (E1 chặn Gold). `scoring.yaml.meta.calibrated`
+  không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
