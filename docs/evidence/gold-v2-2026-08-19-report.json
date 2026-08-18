@@ -1,0 +1,49 @@
+{
+  "dataset_kind": "gold",
+  "sample_count": 33,
+  "label_order": [
+    "publish",
+    "needs_revision",
+    "rejected"
+  ],
+  "confusion": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      23,
+      0
+    ],
+    [
+      0,
+      4,
+      6
+    ]
+  ],
+  "kappa": 0.6764705882352942,
+  "recall": {
+    "publish": null,
+    "needs_revision": 1.0,
+    "rejected": 0.6
+  },
+  "false_publish_count": 0,
+  "false_publish_denominator": 33,
+  "usage": {
+    "events": 185,
+    "input_tokens": 1376543,
+    "output_tokens": 119702,
+    "estimated_usd": "1.975053",
+    "mean_latency_ms": 39907.059272727274
+  },
+  "gate_status": {
+    "kappa": "PASS",
+    "rejected_recall": "FAIL",
+    "needs_revision_recall": "PASS",
+    "false_publish": "PASS"
+  },
+  "label_provenance": "AI-annotated-partially-exposed",
+  "provenance_limitation": "independent_label_reliability_not_demonstrated"
+}

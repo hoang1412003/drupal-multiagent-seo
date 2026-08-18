@@ -133,13 +133,21 @@
       "confirmation_token_hash": "0b6e0667b18932b17b99c0d05c1d3d9e315428731e047e184e0cbb0b3866722a"
     },
     "gold": {
-      "status": "preflighted",
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-preflight-20260818b.json",
-        "sha256": "b5696fa55ae931d11a60e9f092d7e9a788ed5c133c8c16706762429cd936dbe3"
+      "status": "measured",
+      "raw": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19.json",
+        "sha256": "2ea9685a60a9676fecb406ac500ec6761a5837cffca9f76632130d5281ce8a36"
       },
-      "runtime_release_sha256": "f840606c04bcfb48f607a0d87cf89bd3f299a9e71be59d9ac86691badc78d8e8",
-      "confirmation_token_hash": "53d306084a9de783d95e7e7da691af70e88650fd6a51f7d9cb7e65c3566d222a"
+      "report": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19-report.json",
+        "sha256": "37eadf8131e061608bc569c6916f3a132e260d3adb17d85857206c5aaf888159"
+      },
+      "preflight": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-preflight-2026-08-19.json",
+        "sha256": "a229d5e67660b78f4ca134cf43937b8b71b37fdb66cd39239bd2e300e95dcc1b"
+      },
+      "runtime_release_sha256": "0be3cbb5893d4a432b1c0e3e0f17af31751fb08c0672ea42224e2cb7d08b0d94",
+      "confirmation_token_hash": "db6e5b06e3806b355c2f39242519f2d65a47fb9ca6293a4522f5c7ea790755bc"
     },
     "corrected": {
       "status": "preflighted",

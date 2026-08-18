@@ -766,6 +766,18 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `needs_revision` ↔ `publish`. **Cổng sang Gold v2 đã mở** — bước tiếp
   theo theo đúng thứ tự (E1 chặn Gold). `scoring.yaml.meta.calibrated`
   không đổi.
+- 🏁 **Cập nhật 2026-08-19 — Gold v2 ĐÃ CHẠY, ĐẠT.** `Kappa = 0,6765` ≥ 0,60,
+  `false_publish = 0/33` — đúng vấn đề gốc E5 v1 (`publish_min=80` sai
+  9/33) đã giải quyết bằng thiết kế. Chi phí thật $1,975. Chẩn đoán đầy
+  đủ: [`evidence/gold_v2_2026-08-19_report.md`](evidence/gold_v2_2026-08-19_report.md).
+  **`rejected_recall` chỉ 0,60 (4/10 bài) — nhưng chỉ 2/4 là cái giá thật
+  của quyết định hạ A6/A4** (`P-004b`, `P-010a`, đều có finding `A4`); 2
+  bài còn lại (`G-011`, `G-020`) là **lỗ hổng cũ từ v1** (bỏ sót A1, đã
+  ghi ở mục 8.2), không liên quan tới quyết định hôm nay. ⚠️ Nhãn đối
+  chiếu vẫn là AI tự gán (`independent_label_reliability = not_demonstrated`)
+  — Kappa này có tư cách **tạm**, chưa kiểm chứng độc lập. Việc kế tiếp:
+  Corrected v2 (~$1,7) → Coverage v2 (~$0,6). `scoring.yaml.meta.calibrated`
+  không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
