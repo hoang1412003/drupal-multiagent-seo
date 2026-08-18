@@ -275,9 +275,16 @@ def _criterion_finding(
 ) -> dict:
     evidence = occurrence.get("text", "")
     suggestion = criterion.get("suggestion") or criterion.get("reason") or ""
+    # A4 giu nguyen TEN ma (CP4/scoring/prompt/test khong doi), nhung quyen
+    # chan ha xuong nhom B cung ly do va cung dot voi A6 (xem
+    # docs/evidence/e1_v2_2026-08-18_report.md): CP4 gop chung "thoi han"
+    # (da tat dinh hoa) va "dieu kien ap dung" (thuan LLM, cung ho P-006a)
+    # vao MOT muc level duy nhat, decision_policy khong tach duoc phan nao
+    # gay muc 0 - nen khong the giu rieng phan tat dinh o nhom A duoc.
+    group = "B" if defect_code == "A4" else defect_code[0]
     return {
         "defect_code": defect_code,
-        "group": defect_code[0],
+        "group": group,
         "source_agent": agent,
         "source_check": criterion_id,
         "level": criterion["level"],

@@ -154,7 +154,6 @@ def test_moi_ma_a_doc_lap_deu_rejected() -> None:
         ("A1", "CP1"),
         ("A2", "CP2"),
         ("A3", "CP3"),
-        ("A4", "CP4"),
     ):
         results = base_results()
         replace_level(results, "compliance", criterion_id, 0)
@@ -190,6 +189,12 @@ def test_moi_ma_a_doc_lap_deu_rejected() -> None:
 
 def test_moi_ma_b_doc_lap_deu_needs_revision() -> None:
     for code, agent, criterion_id in (
+        # A4 giu ten ma "A4" (CP4/scoring/prompt/test khong doi) nhung
+        # quyen chan da ha xuong nhom B - cung ly do/dot voi A6 (xem
+        # docs/evidence/e1_v2_2026-08-18_report.md): CP4 gop chung vao
+        # mot muc level "thoi han" (da tat dinh) va "dieu kien ap dung"
+        # (thuan LLM, cung ho P-006a cu) nen khong tach rieng duoc.
+        ("A4", "compliance", "CP4"),
         ("B1", "compliance", "CP5"),
         ("B2", "compliance", "CP6"),
         ("B5", "brand", "BV1"),
