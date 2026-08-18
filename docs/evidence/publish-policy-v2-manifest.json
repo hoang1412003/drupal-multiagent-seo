@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
   "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
-  "release_source_commit": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
+  "release_source_commit": "e54b1870650f89465e2ff59d2669a7d948619151",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -100,7 +100,7 @@
     "multiagent/scripts/policy_release.py": "d8369dc28e75c160dcf8461c5a154fcc9bf3acf4736537691d229696e17113dc",
     "multiagent/src/agents/brand_rules.json": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
     "multiagent/src/agents/brand_voice.py": "b9736c918ea65d4e1d2a54fc3223b9660fa18806bf20daceb9432df8ef964be5",
-    "multiagent/src/agents/compliance.py": "eb304a4ad87b268c34eb16c666006ea4b268b1e6408914c28bedd43b8fec0d4a",
+    "multiagent/src/agents/compliance.py": "b8bc1085fa8070646e55d6ccf856728b0abac576584f032b8987573a6cbd0ddb",
     "multiagent/src/agents/content_quality.py": "a80faf4b6f9d58b6eadd9fc24e803276e65d9234f057bc2cceac01afc844039d",
     "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
     "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
@@ -362,11 +362,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-18T10:07:58.059174+00:00",
+  "frozen_at": "2026-08-18T12:28:40.442158+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
     "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
-    "release_source_commit": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
+    "release_source_commit": "e54b1870650f89465e2ff59d2669a7d948619151",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -465,7 +465,7 @@
       "multiagent/scripts/policy_release.py": "d8369dc28e75c160dcf8461c5a154fcc9bf3acf4736537691d229696e17113dc",
       "multiagent/src/agents/brand_rules.json": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
       "multiagent/src/agents/brand_voice.py": "b9736c918ea65d4e1d2a54fc3223b9660fa18806bf20daceb9432df8ef964be5",
-      "multiagent/src/agents/compliance.py": "eb304a4ad87b268c34eb16c666006ea4b268b1e6408914c28bedd43b8fec0d4a",
+      "multiagent/src/agents/compliance.py": "b8bc1085fa8070646e55d6ccf856728b0abac576584f032b8987573a6cbd0ddb",
       "multiagent/src/agents/content_quality.py": "a80faf4b6f9d58b6eadd9fc24e803276e65d9234f057bc2cceac01afc844039d",
       "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
       "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
@@ -678,5 +678,5 @@
       }
     }
   },
-  "release_sha256": "891c7c246d501900e5e9d1ac74de973a3ad0c0aa48c0178aa9d1ae3d66979e95"
+  "release_sha256": "bc9f41fd6afb91b70c0f98c6b97c950f2df3b2567383e6ba5c423171205688f5"
 }
