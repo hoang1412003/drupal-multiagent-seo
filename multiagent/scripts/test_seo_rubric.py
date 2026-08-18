@@ -149,6 +149,33 @@ def test_llm_hong_van_cham_duoc_phan_may():
     check("LLM hong -> SEO7 (may) van cham", _muc(kq, "SEO7"), 2)
 
 
+def test_llm_hong_ghi_unavailable_cho_ma_can_llm():
+    """Coverage v2 phai biet ro ma nao chua danh gia duoc."""
+    def llm_no(fields, can_hoi):
+        raise RuntimeError("API down")
+
+    kq = _chay({
+        "url_alias": "/vn_vi/huong-dan-sac-xe-dien",
+        "image_alt": "Anh 1 trong bai: xe dien dang sac tai nha",
+    }, llm_no)
+    unavailable = set(kq["unavailable_checks"])
+    check("LLM hong -> SEO5 unavailable", "SEO5" in unavailable, True)
+    check("LLM hong -> SEO9 unavailable", "SEO9" in unavailable, True)
+
+
+def test_ma_may_da_chot_khong_bi_ghi_unavailable():
+    """SEO5/SEO9 do may ket luan van la assessment hop le khi LLM hong."""
+    def llm_no(fields, can_hoi):
+        raise RuntimeError("API down")
+
+    kq = _chay({"url_alias": "", "image_alt": ""}, llm_no)
+    unavailable = set(kq["unavailable_checks"])
+    check("URL trong do may chot -> SEO5 khong unavailable",
+          "SEO5" in unavailable, False)
+    check("Bai khong anh do may chot NA -> SEO9 khong unavailable",
+          "SEO9" in unavailable, False)
+
+
 def test_llm_khong_duoc_ha_muc_0_cho_ma_may_da_chot():
     """LLM tra muc 0 cho SEO5/SEO8/SEO9 -> keo ve 1.
 
@@ -197,6 +224,8 @@ if __name__ == "__main__":
     test_seo9_anh()
     test_seo10_internal_link()
     test_llm_hong_van_cham_duoc_phan_may()
+    test_llm_hong_ghi_unavailable_cho_ma_can_llm()
+    test_ma_may_da_chot_khong_bi_ghi_unavailable()
     test_llm_khong_duoc_ha_muc_0_cho_ma_may_da_chot()
     test_bai_rong_tra_none()
     sys.exit(1 if _hong else 0)

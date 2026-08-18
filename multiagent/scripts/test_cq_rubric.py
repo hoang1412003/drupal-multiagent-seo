@@ -13,6 +13,11 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 import config  # noqa: E402
 from agents import content_quality as cq  # noqa: E402
+from decision_policy import (  # noqa: E402
+    POLICY_V1,
+    POLICY_V2,
+    PolicyContractError,
+)
 
 NG = config.load()["scoring"]
 _hong = False
@@ -28,14 +33,14 @@ def check(ten, thuc, mong):
         print(f"         mong {mong!r}, thuc {thuc!r}")
 
 
-def _llm_rong(fields, ttf, hoi_cq8):
+def _llm_rong(fields, ttf, hoi_cq8, **kwargs):
     return {"loi": [], "criteria": {}}
 
 
-def _chay(fields, llm=_llm_rong):
+def _chay(fields, llm=_llm_rong, **kwargs):
     day_du = {"title": "Tieu de mau", "body": "<p>Noi dung.</p>", "summary": ""}
     day_du.update(fields)
-    return cq.run(day_du, danh_gia_llm=llm)
+    return cq.run(day_du, danh_gia_llm=llm, **kwargs)
 
 
 def _muc(kq, ma):
@@ -108,7 +113,7 @@ def test_cq8_summary():
 
     da_hoi = []
 
-    def llm(fields, ttf, hoi_cq8):
+    def llm(fields, ttf, hoi_cq8, **kwargs):
         da_hoi.append(hoi_cq8)
         return {"loi": [], "criteria": {}}
 
@@ -124,7 +129,7 @@ def test_cq8_summary():
 def test_cq12_may_dem_loi_chu_khong_phai_llm_cham_muc():
     """LLM liet ke loi, MAY dem va quy muc. Nguong nam o config."""
     def llm_n_loi(n):
-        def f(fields, ttf, hoi_cq8):
+        def f(fields, ttf, hoi_cq8, **kwargs):
             return {"loi": [{"ma": "CQ1", "field": "body",
                              "evidence": "Noi dung.", "suggestion": "sua"}
                             for _ in range(n)],
@@ -140,7 +145,7 @@ def test_cq12_loai_trich_dan_bia():
     """Loi co `evidence` khong nam nguyen van trong bai -> KHONG dem.
 
     Khong co buoc nay thi LLM bia ba loi la day mot bai sach xuong muc 0."""
-    def llm_bia(fields, ttf, hoi_cq8):
+    def llm_bia(fields, ttf, hoi_cq8, **kwargs):
         # `_danh_gia_llm` that moi loc trich dan; stub nay mo phong dung no
         from text_utils import trich_dan_co_that
         tho = [{"ma": "CQ1", "field": "body", "evidence": ev, "suggestion": "x"}
@@ -161,7 +166,7 @@ def test_llm_hong_cac_ma_llm_thanh_na_khong_phai_2():
 
     Muc 2 se la 'khong tim thay loi chinh ta nao' trong khi thuc ra chua ai
     di tim - dung loai diem mien phi rubrics.md muc 2.2 canh bao."""
-    def llm_no(fields, ttf, hoi_cq8):
+    def llm_no(fields, ttf, hoi_cq8, **kwargs):
         raise RuntimeError("API down")
 
     kq = _chay({"body": "<p>" + _cau(5) * 3 + "</p>"}, llm_no)
@@ -177,6 +182,195 @@ def test_bai_rong_tra_none():
                  danh_gia_llm=_llm_rong), None)
 
 
+# ---------------------------------------------------------- A5 policy v2
+
+def _raw_cq_v2(check):
+    return {"loi": [], "criteria": [], "policy_checks": [check]}
+
+
+_DEFAULT_POLICY = object()
+
+
+def _goi_voi_raw(fields, raw_or_error, *, policy_version=POLICY_V2):
+    calls = []
+
+    def fake_call_agent(*args, **kwargs):
+        calls.append({"args": args, "kwargs": kwargs})
+        if isinstance(raw_or_error, Exception):
+            raise raw_or_error
+        return raw_or_error
+
+    cu = cq.call_agent
+    cq.call_agent = fake_call_agent
+    try:
+        day_du = {
+            "title": "Cách sạc ô tô điện an toàn tại nhà",
+            "body": "<p>Nội dung mẫu.</p>",
+            "summary": "",
+        }
+        day_du.update(fields)
+        policy_kwargs = (
+            {} if policy_version is _DEFAULT_POLICY
+            else {"policy_version": policy_version}
+        )
+        result = cq.run(day_du, **policy_kwargs)
+    finally:
+        cq.call_agent = cu
+    return result, calls
+
+
+def test_a5_v2_present_can_bang_chung_that_va_khong_vao_diem():
+    evidence = "Bài này chỉ trình bày cách chọn màu sơn cho phòng khách."
+    raw = _raw_cq_v2({
+        "id": "A5",
+        "status": "present",
+        "field": "body",
+        "evidence": evidence,
+        "reason": "Body không trả lời title và cần viết lại trên 50%.",
+    })
+    result, _ = _goi_voi_raw({"body": f"<p>{evidence}</p>"}, raw)
+    assert result["policy_checks"] == [{
+        "id": "A5",
+        "status": "present",
+        "field": "body",
+        "evidence": evidence,
+        "reason": "Body không trả lời title và cần viết lại trên 50%.",
+        "reference_id": None,
+    }]
+    assert "A5" not in {item["id"] for item in result["criteria"]}
+    assert result["unavailable_checks"] == []
+    print("[PASS] A5 present co evidence that, policy-only khong vao diem")
+
+
+def test_a5_v2_absent_cho_doan_phu_lac_de_va_bai_ngan_dung_chu_de():
+    absent = {
+        "id": "A5",
+        "status": "absent",
+        "field": "body",
+        "evidence": "",
+        "reason": "Body vẫn trả lời đúng intent của title.",
+    }
+    cases = (
+        {
+            "body": (
+                "<p>Cắm bộ sạc đúng hướng dẫn và kiểm tra ổ điện.</p>"
+                "<p>Một câu phụ nói về màu xe không làm lệch toàn bài.</p>"
+            )
+        },
+        {"body": "<p>Kiểm tra ổ điện rồi cắm bộ sạc đúng hướng dẫn.</p>"},
+    )
+    for fields in cases:
+        result, _ = _goi_voi_raw(fields, _raw_cq_v2(absent))
+        assert result["policy_checks"][0]["status"] == "absent"
+        assert result["unavailable_checks"] == []
+    print("[PASS] A5 absent cho doan phu lac de va bai ngan dung chu de")
+
+
+def test_a5_v2_evidence_bia_thanh_unavailable():
+    raw = _raw_cq_v2({
+        "id": "A5",
+        "status": "present",
+        "field": "body",
+        "evidence": "Câu này hoàn toàn không có trong body.",
+        "reason": "Body không trả lời title và cần viết lại trên 50%.",
+    })
+    result, _ = _goi_voi_raw({"body": "<p>Hướng dẫn sạc đúng chủ đề.</p>"}, raw)
+    assert result["unavailable_checks"] == ["A5"]
+    assert result["policy_checks"][0]["status"] == "unavailable"
+    print("[PASS] A5 present co evidence bia -> unavailable")
+
+
+def test_a5_v2_thieu_hoac_malformed_check_thanh_unavailable():
+    malformed = (
+        {"loi": [], "criteria": []},
+        _raw_cq_v2({
+            "id": "A5",
+            "status": "absent",
+            "evidence": "",
+            "reason": "Thiếu field bắt buộc.",
+        }),
+    )
+    for raw in malformed:
+        result, _ = _goi_voi_raw({}, raw)
+        assert result["unavailable_checks"] == ["A5"]
+        assert result["policy_checks"][0]["status"] == "unavailable"
+    print("[PASS] A5 thieu hoac malformed check -> unavailable")
+
+
+def test_a5_v2_llm_hong_van_giu_cq_may_va_a5_unavailable():
+    result, calls = _goi_voi_raw(
+        {"body": "<p>Hướng dẫn sạc đúng chủ đề.</p>"},
+        RuntimeError("provider down"),
+    )
+    assert len(calls) == 1
+    assert result is not None
+    assert result["unavailable_checks"] == ["A5"]
+    assert result["policy_checks"][0]["status"] == "unavailable"
+    assert _muc(result, "CQ3") == 2
+    print("[PASS] LLM hong -> A5 unavailable, CQ may van tra ket qua")
+
+
+def test_a5_v2_dung_chung_dung_mot_call_cq():
+    raw = _raw_cq_v2({
+        "id": "A5",
+        "status": "absent",
+        "field": "body",
+        "evidence": "",
+        "reason": "Body trả lời đúng chủ đề trong title.",
+    })
+    result, calls = _goi_voi_raw({}, raw)
+    assert len(calls) == 1
+    prompt, _, schema = calls[0]["args"]
+    assert "A5" in prompt
+    assert "policy_checks" in schema["properties"]
+    assert result["policy_checks"][0]["id"] == "A5"
+    print("[PASS] A5 v2 dung chung dung mot provider call cua CQ")
+
+
+def test_a5_v1_giu_prompt_schema_score_va_criteria_cu():
+    raw = {"loi": [], "criteria": []}
+    implicit, calls_implicit = _goi_voi_raw(
+        {}, raw, policy_version=_DEFAULT_POLICY
+    )
+    explicit, calls_explicit = _goi_voi_raw({}, raw, policy_version=POLICY_V1)
+    assert implicit == explicit
+    assert implicit["score"] == 80.0
+    assert [(item["id"], item["level"]) for item in implicit["criteria"]] == [
+        ("CQ1", 2),
+        ("CQ2", 2),
+        ("CQ3", 2),
+        ("CQ4", 2),
+        ("CQ5", None),
+        ("CQ6", None),
+        ("CQ7", None),
+        ("CQ8", 0),
+    ]
+    for call in calls_implicit + calls_explicit:
+        prompt, _, schema = call["args"]
+        assert "A5" not in prompt
+        assert "policy_checks" not in schema["properties"]
+    assert implicit["policy_checks"] == []
+    assert implicit["unavailable_checks"] == []
+    print("[PASS] CQ v1 giu prompt/schema/score/criteria, policy checks rong")
+
+
+def test_a5_unknown_policy_fail_truoc_provider():
+    calls = []
+
+    def llm(*args, **kwargs):
+        calls.append(1)
+        raise AssertionError("callback khong duoc goi")
+
+    try:
+        _chay({}, llm, policy_version="cam-nang-vn-v2-beta")
+    except PolicyContractError:
+        pass
+    else:
+        raise AssertionError("unknown policy_version phai bi tu choi")
+    assert calls == []
+    print("[PASS] CQ unknown policy fail truoc provider callback")
+
+
 if __name__ == "__main__":
     test_cq3_cau_qua_dai()
     test_cq4_doan_qua_dai()
@@ -186,4 +380,12 @@ if __name__ == "__main__":
     test_cq12_loai_trich_dan_bia()
     test_llm_hong_cac_ma_llm_thanh_na_khong_phai_2()
     test_bai_rong_tra_none()
+    test_a5_v2_present_can_bang_chung_that_va_khong_vao_diem()
+    test_a5_v2_absent_cho_doan_phu_lac_de_va_bai_ngan_dung_chu_de()
+    test_a5_v2_evidence_bia_thanh_unavailable()
+    test_a5_v2_thieu_hoac_malformed_check_thanh_unavailable()
+    test_a5_v2_llm_hong_van_giu_cq_may_va_a5_unavailable()
+    test_a5_v2_dung_chung_dung_mot_call_cq()
+    test_a5_v1_giu_prompt_schema_score_va_criteria_cu()
+    test_a5_unknown_policy_fail_truoc_provider()
     sys.exit(1 if _hong else 0)

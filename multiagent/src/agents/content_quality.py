@@ -26,6 +26,7 @@ theo rubric đã chốt; ghi nhận ở docs/technical-debt.md để quyết sau
 import config
 import content_analysis as ca
 from ai_core import call_agent
+from decision_policy import POLICY_V1, POLICY_V2, require_policy_version
 from prompt_builder import boc_noi_dung
 from scoring import score_from_criteria
 from text_utils import trich_dan_co_that
@@ -136,6 +137,19 @@ _LLM_PROMPT = (
     "tiếng Việt ở `suggestion`."
 )
 
+_A5_PROMPT = (
+    "PHẦN 3 - POLICY CHECK A5 (trường `policy_checks`):\n\n"
+    "A5 chỉ `present` khi ĐỒNG THỜI đúng cả hai vế: (1) body không trả lời "
+    "được câu hỏi hoặc intent ở title; và (2) để trả lời đúng chủ đề phải "
+    "viết lại trên 50% nội dung. Một đoạn phụ lạc đề, lặp ý hoặc bài ngắn "
+    "nhưng vẫn trả lời title KHÔNG phải A5.\n"
+    "Trả đúng một check id A5. `status` là `present`, `absent` hoặc "
+    "`unavailable`. Khi `present`, field phải là `body` và evidence phải là "
+    "trích dẫn nguyên văn từ body cho thấy nội dung đang đi sai chủ đề. "
+    "Không đủ căn cứ đánh giá thì dùng `unavailable`, không suy thành "
+    "`absent`."
+)
+
 _LLM_SCHEMA = {
     "type": "object",
     "properties": {
@@ -173,15 +187,130 @@ _LLM_SCHEMA = {
     "additionalProperties": False,
 }
 
+_A5_CHECK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "id": {"type": "string", "enum": ["A5"]},
+        "status": {
+            "type": "string",
+            "enum": ["present", "absent", "unavailable"],
+        },
+        "field": {"type": "string", "enum": ["body"]},
+        "evidence": {"type": "string"},
+        "reason": {"type": "string"},
+    },
+    "required": ["id", "status", "field", "evidence", "reason"],
+    "additionalProperties": False,
+}
 
-def _danh_gia_llm(fields: dict, text_theo_field: dict, hoi_cq8: bool) -> dict:
+_LLM_SCHEMA_V2 = {
+    "type": "object",
+    "properties": {
+        **_LLM_SCHEMA["properties"],
+        "policy_checks": {
+            "type": "array",
+            "items": _A5_CHECK_SCHEMA,
+            "minItems": 1,
+            "maxItems": 1,
+        },
+    },
+    "required": [*_LLM_SCHEMA["required"], "policy_checks"],
+    "additionalProperties": False,
+}
+
+
+def llm_prompt(policy_version: str) -> str:
+    """Chọn prompt theo exact policy; v1 giữ nguyên chuỗi lịch sử."""
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
+    return (
+        _LLM_PROMPT
+        if policy_version == POLICY_V1
+        else _LLM_PROMPT + "\n\n" + _A5_PROMPT
+    )
+
+
+def _llm_schema(policy_version: str) -> dict:
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
+    return _LLM_SCHEMA if policy_version == POLICY_V1 else _LLM_SCHEMA_V2
+
+
+def _a5_unavailable(reason: str) -> tuple[list[dict], list[str]]:
+    return ([{
+        "id": "A5",
+        "status": "unavailable",
+        "field": "body",
+        "evidence": "",
+        "reason": reason,
+        "reference_id": None,
+    }], ["A5"])
+
+
+def _chuan_hoa_a5(raw_checks, text_theo_field: dict) -> tuple[list[dict], list[str]]:
+    """Fail-safe raw A5 thành contract ổn định cho decision engine."""
+    if not isinstance(raw_checks, list) or len(raw_checks) != 1:
+        return _a5_unavailable("Output thiếu đúng một policy check A5.")
+
+    raw = raw_checks[0]
+    if not isinstance(raw, dict) or raw.get("id") != "A5":
+        return _a5_unavailable("Output policy check A5 sai cấu trúc hoặc ID.")
+
+    status = raw.get("status")
+    reason = raw.get("reason")
+    if status not in {"present", "absent", "unavailable"}:
+        return _a5_unavailable("Trạng thái policy check A5 không hợp lệ.")
+    if not isinstance(reason, str) or not reason.strip():
+        return _a5_unavailable("Policy check A5 thiếu căn cứ kết luận.")
+    if raw.get("field") != "body" or not isinstance(raw.get("evidence"), str):
+        return _a5_unavailable("Policy check A5 thiếu field/evidence bắt buộc.")
+    if status == "unavailable":
+        return _a5_unavailable(reason)
+
+    if not text_theo_field.get("title", "").strip() or not text_theo_field.get(
+        "body", ""
+    ).strip():
+        return _a5_unavailable("Không đủ title và body để đánh giá A5.")
+
+    if status == "present":
+        evidence = raw.get("evidence")
+        if not trich_dan_co_that(evidence, {"body": text_theo_field["body"]}):
+            return _a5_unavailable("Evidence A5 không khớp nguyên văn body.")
+    else:
+        evidence = ""
+
+    return ([{
+        "id": "A5",
+        "status": status,
+        "field": "body",
+        "evidence": evidence,
+        "reason": reason,
+        "reference_id": None,
+    }], [])
+
+
+def _danh_gia_llm(
+    fields: dict,
+    text_theo_field: dict,
+    hoi_cq8: bool,
+    *,
+    policy_version: str = POLICY_V1,
+) -> dict:
     """Gọi LLM một lần. Trả {"loi": [...], "criteria": {ma -> tiêu chí}}.
 
     Lỗi nào trích dẫn không khớp nguyên văn thì LOẠI ngay ở đây - máy đếm số
     lỗi để quy mức, nên một trích dẫn bịa sẽ đẩy mức xuống oan.
     """
     noi_dung, _ = boc_noi_dung(fields, _FIELDS)
-    kq = call_agent(_LLM_PROMPT, noi_dung, _LLM_SCHEMA)
+    kq = call_agent(
+        llm_prompt(policy_version),
+        noi_dung,
+        _llm_schema(policy_version),
+    )
 
     loi = [
         d for d in kq["loi"]
@@ -206,7 +335,11 @@ def _danh_gia_llm(fields: dict, text_theo_field: dict, hoi_cq8: bool) -> dict:
                if muc in (0, 1) else [])
         theo_ma[ma] = _tieu_chi(ma, muc, occ,
                                 c["suggestion"] if muc in (0, 1) else "")
-    return {"loi": loi, "criteria": theo_ma}
+    return {
+        "loi": loi,
+        "criteria": theo_ma,
+        "policy_checks": kq.get("policy_checks", []),
+    }
 
 
 def _muc_tu_danh_sach_loi(ma: str, loi: list, ng: dict) -> dict:
@@ -241,8 +374,13 @@ def _issues_from_criteria(criteria: list) -> list:
 
 
 def run(fields: dict, *, danh_gia_llm=_danh_gia_llm,
-        content_type: str = "cam_nang", langcode: str = "vi") -> dict | None:
+        content_type: str = "cam_nang", langcode: str = "vi",
+        policy_version: str = POLICY_V1) -> dict | None:
     """Chấm Content Quality. Trả None khi không tiêu chí nào áp dụng được."""
+    policy_version = require_policy_version(
+        policy_version,
+        allow_legacy_default=False,
+    )
     from text_utils import strip_html
 
     ng = config.load(content_type, langcode)["scoring"]
@@ -254,13 +392,31 @@ def run(fields: dict, *, danh_gia_llm=_danh_gia_llm,
     summary_trong = not (fields.get("summary") or "").strip()
 
     try:
-        kq = danh_gia_llm(fields, text_theo_field, not summary_trong)
+        kq = danh_gia_llm(
+            fields,
+            text_theo_field,
+            not summary_trong,
+            policy_version=policy_version,
+        )
         loi, tu_llm, llm_hong = kq["loi"], kq["criteria"], False
+        if policy_version == POLICY_V2:
+            policy_checks, unavailable_checks = _chuan_hoa_a5(
+                kq.get("policy_checks"),
+                text_theo_field,
+            )
+        else:
+            policy_checks, unavailable_checks = [], []
     except Exception:
         # LLM lỗi -> CQ1/CQ2/CQ6/CQ7/CQ8 thành NA, KHÔNG phải mức 2.
         # Mức 2 sẽ là "không tìm thấy lỗi chính tả nào" trong khi thực ra chưa
         # ai đi tìm - đúng loại điểm miễn phí rubrics.md mục 2.2 cảnh báo.
         loi, tu_llm, llm_hong = [], {}, True
+        if policy_version == POLICY_V2:
+            policy_checks, unavailable_checks = _a5_unavailable(
+                "Không gọi được bộ đánh giá A5."
+            )
+        else:
+            policy_checks, unavailable_checks = [], []
 
     def cq12(ma):
         return (_tieu_chi(ma, None) if llm_hong
@@ -288,6 +444,8 @@ def run(fields: dict, *, danh_gia_llm=_danh_gia_llm,
         "score": score,
         "issues": _issues_from_criteria(criteria),
         "criteria": criteria,
+        "policy_checks": policy_checks,
+        "unavailable_checks": unavailable_checks,
         # Giữ trường cũ để graph.py và module PHP không phải đổi. Rubric không
         # có tiêu chí nào về "điểm mạnh" nên nó luôn rỗng - bỏ hẳn sẽ phải sửa
         # cả hai phía, không đáng cho một trường không ai đọc.

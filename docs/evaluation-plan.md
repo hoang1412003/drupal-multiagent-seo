@@ -1,11 +1,27 @@
 # Kế hoạch thí nghiệm và đo lường
 
-**Phiên bản:** v1 (2026-07-27)
-**Trạng thái (cập nhật 2026-08-14):** E2 và E4 còn hiệu lực. E1 và E5 đã từng chạy nhưng đều **hết hiệu lực với bản 4** sau chốt CP4 ngày 2026-08-12. Preflight E1 bản 4 đã đạt trên snapshot `04f10e1`/prompt `020738e209017213`, nhưng **không gọi API, không tạo output và không phải kết quả E1**.
+**Phiên bản:** v1 lịch sử (2026-07-27) + policy v2 addendum planned
+(2026-08-18)
 
-⚠️ **Tính đến 2026-08-14, test–retest và E1 bản 4 VẪN CHƯA CHẠY.** Lượt trả phí từng được xếp cho 2026-08-13 nhưng chưa diễn ra; đừng đọc mốc ngày cũ thành "đã làm xong". Thứ tự bắt buộc không đổi: **test–retest mù trước, rồi mới E1**, và không được xem output E1 trước khi người gán khoá nhãn lượt hai.
+**Nguồn trạng thái hiện hành:** `technical-debt.md` mục 8. Sáu phép đo v1 đã
+chạy xong ngày 2026-08-16; E1 đạt, E3 xác nhận kiến trúc 4 agent thắng, E5 đã
+đo nhưng không chốt được ngưỡng publish. Các số v1 bên dưới được giữ nguyên
+như evidence lịch sử, không phải kết quả của policy v2.
 
-E5 bản 3 đạt Kappa 0,713, accuracy 0,879, sai 4/33; đây là bằng chứng lịch sử đã giúp tìm B14/CP4, không phải kết quả của code hiện hành. Gold set 33/33. Còn E3/E6, E1/E5 bản 4 và test–retest nhãn.
+**Policy v2 chưa measured và chưa active.** Core/evaluator/release guard tới
+commit `d54d6f9` đã qua focused post-commit release-guard test; test manifest
+phủ 82 file. Một lượt pure 53/53 đã chạy trước vòng hardening guard cuối nên
+không được dùng làm chứng nhận cho HEAD này; full `all-offline` fresh
+checkpoint vẫn pending. Manifest
+`docs/evidence/publish-policy-v2-manifest.json` còn là skeleton unfrozen;
+`release_source_commit=null`, năm paid gate đều `pending`, chưa có preflight
+thật hoặc paid output v2. `scoring.yaml.meta.calibrated` không đổi.
+
+Thứ tự v2 duy nhất nằm ở mục 3b và child plan
+`superpowers/plans/2026-08-17-corrected-publish-criterion-coverage-evaluation.md`:
+hoàn tất runner/metrics → freeze release → preflight bốn dataset → E1 → gold
+→ corrected → coverage → aggregate → conditional smoke. Mỗi paid gate cần
+xác nhận chi phí riêng.
 
 **Luồng productization P1→P5 (hoàn tất 2026-08-14) KHÔNG ảnh hưởng hợp đồng đo lường này:** `prompt_version` vẫn `020738e209017213`, `git diff` score-path so với `04f10e1` vẫn rỗng, và không lần gọi Anthropic nào phát sinh. Mọi run sinh ra trong P1→P5 đều `is_fixture=true` do engine giả — **không phải kết quả chấm điểm** và không được đưa vào bất kỳ phép đo nào.
 
@@ -14,6 +30,10 @@ Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp pu
 Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa.
 
 Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
+
+Policy v2 planned suite: main 63 mẫu (gold 33 + corrected 30) và coverage 11
+mẫu tách riêng. Corrected/coverage là synthetic functional evidence, không
+đi vào Kappa gold và không chứng minh nhãn độc lập.
 
 ---
 
@@ -148,6 +168,44 @@ Rủi ro đã lường trước và đo được: rubric làm dao động **hi�
 - **Năm tiêu chí gần như không mang thông tin trên corpus này:** BV3 (0/33 đạt mức 2), BV1/BV5/BV7 và **SEO10** (33/33 luôn mức 2 — mọi bài đều có ≥3 internal link). Chẩn đoán ở `technical-debt.md` B13; không sửa vì chúng không gây quyết định sai, và với chúng **không tìm được lập luận nào không nhắc tới phân bố** — chỉnh ngưỡng lúc đó sẽ là đúng bẫy B9.
 
   *(Ngoại lệ đã sửa: CQ3 ban đầu cũng 33/33 mức 0, nhưng ở đó có lập luận độc lập — ngưỡng 30 là quy ước readability tiếng Anh đếm **từ**, áp nhầm lên số **tiếng**. Đổi sang 45 tiếng ≈ 30 từ, phát biểu được mà không cần nhắc tới phân bố. Sau khi sửa: 13/14/6.)*
+
+---
+
+## 3b. Policy v2 — release và thứ tự đo planned (2026-08-18)
+
+Mục 3a là khóa/evidence của pipeline v1 lịch sử. Policy candidate
+`cam-nang-vn-v2` đổi quyền quyết định sang thứ tự A → B → assessment
+incomplete → publish; `final_score` chỉ còn diagnostic. Vì đường chấm đã đổi,
+không được tái sử dụng raw E1/gold v1 làm kết quả v2.
+
+Protocol preregistered:
+[`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
+Manifest chung:
+[`evidence/publish-policy-v2-manifest.json`](evidence/publish-policy-v2-manifest.json).
+Ở thời điểm viết, manifest vẫn unfrozen và toàn bộ paid run `pending`; đây là
+kế hoạch, không phải evidence kết quả.
+
+Chuỗi thực thi duy nhất:
+
+1. Mở rộng metrics/report và shared evaluator cho đủ
+   `e1|gold|corrected|coverage`; test fake/offline.
+2. Commit toàn bộ protected source/data/protocol, rồi `freeze` đúng một release
+   chung; commit tiếp theo chỉ chứa manifest và phải verify ancestry/hash.
+3. Chạy full `all-offline` 0 fail/0 skip.
+4. Tạo và record bốn preflight `$0`; mỗi token khóa dataset, ordered IDs,
+   content/release hashes, assessment date và raw output path.
+5. USER GATE trả phí theo đúng thứ tự **E1 → gold → corrected → coverage**;
+   mỗi lượt cần xác nhận chi phí riêng và phải commit cả kết quả âm.
+6. `approve` recompute Mức A/B từ evidence đã hash; Mức C luôn
+   `not_demonstrated` trong protocol này.
+7. Chỉ xem xét smoke/limited pilot nếu Mức B pass **và** smoke contract đã
+   nằm trong frozen release; nếu manifest smoke còn rỗng thì phải tạo protocol
+   amendment/release version mới trước, không vá sau output.
+
+Nếu một upstream gate trượt, downstream dừng. Diagnostic chỉ được chạy sau
+protocol amendment commit và confirmation mới; không optional stopping, không
+sửa sample/prompt/policy trong cùng version. `scoring.yaml.meta.calibrated`
+vẫn `false`; policy v2 không fit `publish_min` từ C/GC/CV.
 
 ---
 
@@ -547,10 +605,21 @@ Nêu rõ những thứ không đo cũng quan trọng như nêu những thứ đo
 
 ## 6. Thứ tự khuyến nghị
 
-Trạng thái lịch sử của các bước đã hoàn thành nằm ở mục 4. Thứ tự **hiện hành từ bàn giao 2026-08-12** là:
+Các bước v1 trong mục 4 đã hoàn thành ngày 2026-08-16 và chỉ còn giá trị lịch
+sử theo đúng release v1. Thứ tự **hiện hành** là policy v2 ở mục 3b:
 
-1. **Ngày 2026-08-13: test–retest nhãn trước** — 4 bài ngẫu nhiên, gán mù, lưu riêng và khóa nhãn lượt hai; chỉ sau đó mới mở nhãn lượt một để tính Kappa. Giao thức đầy đủ: `annotation-guideline.md` mục 8.1; checklist chống lộ nhãn: `technical-debt.md` mục 8.3.
-2. **E1 bản 4 sau test–retest** — xin xác nhận riêng chi phí khoảng 3 USD, chạy vào file mới. Nếu σ `final_score` ≥ 2 thì dừng và chẩn đoán; không chạy E5.
-3. **E5 bản 4 khi E1 đạt** — xin xác nhận chi phí riêng, dùng đúng bộ commit/prompt/model đã khóa; chưa chốt ngưỡng `publish` nếu chưa có quyết định mentor về lớp publish rỗng.
-4. **Functional-clean** — chạy và báo cáo riêng `publish_rate`/false positive, tuyệt đối không gộp với Kappa/accuracy calibration.
-5. **E3 baseline**, rồi **E6 held-out** sau khi có ngưỡng hợp lệ và đã có trần Kappa test–retest.
+1. Hoàn tất metrics/shared runner và release guard cho bốn dataset, hoàn toàn
+   offline.
+2. Freeze một release chung sau commit protected source cuối; manifest-only
+   commit rồi verify.
+3. Full offline checkpoint, sau đó preflight `$0` cho E1, gold, corrected và
+   coverage.
+4. Xin xác nhận chi phí và chạy tuần tự E1 → gold → corrected → coverage;
+   upstream trượt thì downstream dừng hoặc cần amendment diagnostic.
+5. Aggregate/approve Mức A/B từ file evidence; không nâng độ tin cậy nhãn độc
+   lập và không bật `scoring.yaml.meta.calibrated`.
+6. Smoke/limited pilot chỉ là conditional USER GATE sau Mức B và exact smoke
+   contract; không có contract thì tạo release version mới trước.
+
+Chi tiết lệnh, artifact và stop condition nằm ở
+`superpowers/plans/2026-08-17-corrected-publish-criterion-coverage-evaluation.md`.

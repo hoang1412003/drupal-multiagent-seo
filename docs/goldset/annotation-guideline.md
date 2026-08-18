@@ -1,6 +1,6 @@
 # Hướng dẫn gán nhãn gold set
 
-**Phiên bản:** v1.3 (2026-08-10)
+**Phiên bản:** v1.4 (2026-08-17)
 **Phạm vi:** bài cẩm nang tiếng Việt về xe điện (P0 - xem `docs/superpowers/specs/2026-07-24-marketing-content-scope-design.md`)
 
 > **Nguồn thi hành các ngưỡng gán nhãn là `multiagent/config/scoring.yaml`** (khối `labelling`) - `label_helper.py` đọc thẳng từ đó. Tài liệu này giữ con số để đọc tại chỗ, nhưng khi lệch nhau thì file config đúng. Lưu ý ngưỡng gán nhãn **cố ý khác** ngưỡng chấm điểm ở `rubrics.md`; lý do ở `docs/config-spec.md` mục 2.
@@ -57,6 +57,7 @@ Nhãn gán cho **một node Drupal** (một bài, ở trạng thái chưa xuất
 | **A4** | Khuyến mại/ưu đãi nêu giá trị cụ thể nhưng **thiếu thời hạn hoặc điều kiện áp dụng** | Luật Thương mại |
 | **A5** | Nội dung lạc đề/sai lệch tới mức phải viết lại trên 50%: bài không trả lời được câu hỏi ở chính tiêu đề của nó | Đọc tiêu đề → kiểm tra body có trả lời không |
 | **A6** | Hướng dẫn kỹ thuật có nguy cơ gây mất an toàn (thao tác sạc/pin sai cách, bỏ cảnh báo an toàn bắt buộc) | Đối chiếu hướng dẫn sử dụng chính thức |
+| **A7** | `body` chứa **văn xuôi bị ẩn khỏi người đọc** nhưng vẫn nằm trong đầu vào evaluator | Chỉ tính nội dung ngôn ngữ tự nhiên có nghĩa; loại CSS, tracking code, URL và marker kỹ thuật theo ghi chú A7 ở mục 6 |
 
 ### 4.2. Nhóm B - lỗi sửa tại chỗ (dẫn tới `needs_revision`)
 
@@ -68,10 +69,11 @@ Nhãn gán cho **một node Drupal** (một bài, ở trạng thái chưa xuất
 | **B4** | `title` ngoài khoảng **40-70** ký tự, **hoặc** viết hoa toàn bộ, **hoặc** gắn năm đã cũ | VD thật trên site: *"LƯU Ý SỬ DỤNG ĐỐI VỚI PIN CELL LFP/GOTION"*, *"...đúng cách 2024"* |
 | **B5** | Sai thuật ngữ/tên model so với chuẩn brand, hoặc xưng hô không nhất quán trong cùng bài | "VF8" thay vì "VF 8"; "xe hơi điện" thay vì "ô tô điện"; lẫn lộn "bạn"/"quý khách" |
 | **B6** | Thiếu thuộc tính `alt` (hoặc `alt` rỗng) ở bất kỳ ảnh nào trong `body`, hoặc alt text không mô tả đúng ảnh | |
-| **B7** | `url_alias` còn dấu tiếng Việt, thiếu từ khóa chính, hoặc quá dài | |
+| **B7** | `url_alias` còn dấu tiếng Việt, thiếu từ khóa chính, hoặc dài **trên 75 ký tự** | Đếm toàn bộ chuỗi alias như được lưu trong mẫu |
 | **B8** | Lỗi chính tả hoặc ngữ pháp (từ 1 lỗi trở lên) | |
-| **B9** | Bài trên ~500 từ mà không có heading H2/H3 | Lỗi **cấu trúc**, không phải văn phong - xem C4/C5 ở mục 4.3 |
+| **B9** | Bài trên **500 tiếng** mà không có heading H2 | Đếm bằng `len(text.split())`; H3 không thay thế cấu trúc H2. Đây là lỗi **cấu trúc**, không phải văn phong - xem C4/C5 ở mục 4.3 |
 | **B10** | Số liệu định lượng không nêu nguồn | "90% người dùng hài lòng" không dẫn nguồn |
+| **B11** | Claim cụ thể về **chính sách pin, bảo hành pin hoặc thuê pin** thiếu đúng một hay nhiều thành phần thiết yếu đang áp dụng | Xem bảng CP7 v2 và ghi chú B11 ở mục 6; mức CP7 0 hoặc 1 đều là `needs_revision` |
 
 ### 4.3. Nhóm C - không bắt buộc sửa (vẫn `publish`)
 
@@ -133,6 +135,15 @@ Ranh giới: **sai số liệu → A; đúng nhưng thiếu điều kiện → B
 | Bài quá ngắn (dưới ~300 từ) | Không phải lỗi riêng. Xét bình thường theo bảng mã; ngắn thường kéo theo A5 (không trả lời được câu hỏi ở tiêu đề). **Không** kéo theo B9 - B9 chỉ áp dụng cho bài trên ~500 từ |
 | Bài có lỗi lặp cùng một loại nhiều lần | Ghi mã lỗi **một lần**, ghi số lần vào `notes` |
 | Bài thuộc mục "Công ty"/thông cáo báo chí | Loại khỏi gold set (spec mục 6.2), không gán nhãn |
+
+**Ghi chú A7 (thêm ở v1.4).** Chỉ gán A7 khi `body` chứa một đoạn văn xuôi có nghĩa mà người đọc không nhìn thấy trong giao diện nhưng evaluator vẫn nhận được làm đầu vào. Không gán A7 cho CSS, mã tracking, URL, thuộc tính kỹ thuật, comment/marker không mang nội dung tự nhiên, hoặc ví dụ/thảo luận bình thường đang hiển thị. Việc loại marker kỹ thuật tuân theo CP9; mục tiêu là chặn nội dung có thể tác động đến mô hình nhưng né người đọc, không phải phạt HTML hợp lệ.
+
+**Ghi chú B11 và CP7 v2 (thêm ở v1.4).** Trước hết xác định bài có một claim chính sách cụ thể hay không:
+
+- Chỉ nhắc chung về pin, đặt link, hoặc viết "xem chính sách hiện hành" mà không nêu nội dung chính sách cụ thể → **không áp dụng (NA)**, không gán B11.
+- Nếu có claim cụ thể, xét các thành phần **thực sự áp dụng** cho claim đó: đối tượng/điều kiện áp dụng, thời hạn hiệu lực, và mức phí khi chính sách có thu phí.
+- Thiếu từ hai thành phần thiết yếu trở lên → CP7 = 0; thiếu đúng một → CP7 = 1; đủ các thành phần áp dụng → CP7 = 2. CP7 = 0 hoặc 1 đều gán **B11**.
+- Thông tin trái công bố chính thức → **A3**, không hạ xuống B11. Ưu đãi có giá trị cụ thể nhưng thiếu thời hạn/điều kiện → **A4**. Số liệu định lượng không nguồn và không thuộc claim chính sách → xét **B10**.
 
 **Ghi chú A1 (thêm 2026-08-10).** Cụm so sánh nhất chỉ tính là A1 khi thoả **cả hai**:
 
@@ -228,7 +239,9 @@ Diễn giải: nếu trần là 0.65 thì AI đạt 0.60 là **rất tốt**, kh
 
 ## 9. Định dạng ghi nhãn
 
-File: `docs/goldset/labels.csv`
+File lịch sử v1.3: `docs/goldset/labels.csv`.
+
+Lượt gán lại v1.4 do AI thực hiện phải lưu riêng tại `docs/goldset/labels-ai-v1.4.csv`; **không ghi đè** nhãn v1.3. File và evidence phải ghi rõ provenance `AI-annotated`, việc model đã tiếp xúc một phần nhãn/quy tắc cũ, và không được trình bày như ground truth độc lập của con người.
 
 Gold set calibration: 33 mẫu (20 original + 13 perturbed), không có lớp publish.
 
@@ -245,10 +258,11 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 | `injected_codes` | Mã lỗi **cố ý chèn** (chỉ với bản perturbation) |
 | `defect_codes` | Mọi mã lỗi người gán tìm thấy, phân tách bằng `;` |
 | `label` | `publish` \| `needs_revision` \| `rejected` |
-| `annotator` | Ký hiệu người gán (`A1`, `A2`) |
+| `annotator` | Ký hiệu người gán (`A1`, `A2`) hoặc `AI-A1` cho lượt AI v1.4 |
 | `date` | Ngày gán |
-| `guideline_version` | `v1` |
+| `guideline_version` | Phiên bản đầy đủ, ví dụ `v1.4` |
 | `notes` | Ca khó, mã nhóm C, số lần lặp lỗi |
+| `provenance` | Nguồn/lịch sử tạo nhãn; candidate AI v1.4 phải là `AI-annotated-partially-exposed` |
 
 ---
 
@@ -275,6 +289,17 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 ## 11. Phiên bản
 
 Mọi thay đổi bảng mã lỗi (mục 4) hoặc quy tắc quy nhãn (mục 5) đều phải tăng version của tài liệu này. Nhãn gán theo version cũ **không trộn chung** với version mới trong cùng một phép tính Kappa - hoặc gán lại toàn bộ, hoặc báo cáo tách theo version.
+
+**v1.4 (2026-08-17)** - mở một contract mới để gán lại toàn bộ 33 mẫu, không sửa nhãn v1.3:
+
+| Thay đổi | Quyết định v1.4 | Lý do |
+|---|---|---|
+| Văn xuôi ẩn trong đầu vào evaluator | Thêm **A7** | Đây là nội dung có thể chi phối quyết định máy nhưng người đọc không kiểm chứng được; cần quyền chặn rõ ràng và tách khỏi marker kỹ thuật CP9 |
+| Claim chính sách pin/bảo hành/thuê pin không đủ thành phần | Thêm **B11**, chuẩn hoá CP7 theo NA/0/1/2 | CP7 trước đây chưa ánh xạ sang mã A/B nên có thể ảnh hưởng điểm nhưng không có ground-truth defect code tương ứng |
+| URL quá dài | Chốt B7 là **trên 75 ký tự** | Loại bỏ cách hiểu định tính "quá dài" giữa các lượt gán |
+| Cấu trúc heading | Chốt B9 là **trên 500 tiếng và không có H2** | Đồng nhất cách đếm với helper; H3 không thay thế cấp cấu trúc H2 |
+
+Nhãn v1.4 áp dụng lại từ đầu theo bảng A1-A7/B1-B11. Lượt AI chỉ là dữ liệu calibration tổng hợp có provenance, không thay thế bằng chứng đồng thuận AI-người hoặc người-người trên bài thật.
 
 **v1.1 (2026-07-27)** - nới hai ngưỡng đếm trong bảng mã lỗi:
 

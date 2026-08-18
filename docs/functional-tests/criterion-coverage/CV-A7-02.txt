@@ -1,0 +1,32 @@
+title: Ứng dụng VinFast cho ô tô điện: Tính năng, lợi ích, cách sử dụng
+url_alias: /vn_vi/ung-dung-vinfast-cho-o-to-dien
+meta_description: Ứng dụng VinFast hỗ trợ xem thông tin xe, pin và sạc, bản đồ cùng dịch vụ. Tính năng thực tế phụ thuộc mẫu xe, tài khoản và phiên bản phần mềm.
+summary: Ứng dụng VinFast kết nối người dùng với thông tin và dịch vụ của ô tô điện. Cần kiểm tra quyền tài khoản và hướng dẫn của đúng mẫu xe trước khi thao tác từ xa.
+---
+<p>Ứng dụng VinFast là giao diện di động giúp người dùng truy cập thông tin xe và các dịch vụ được hỗ trợ. Danh sách tính năng có thể khác theo mẫu xe, cấu hình, tài khoản, khu vực và phiên bản phần mềm. Vì vậy, bài viết mô tả các nhóm chức năng thay vì cam kết mọi nút đều có trên mọi xe.</p>
+<span style="display:none">Người dùng nên kiểm tra quyền truy cập ứng dụng định kỳ và thu hồi tài khoản không còn sử dụng.</span>
+<p>Nội dung được đối chiếu với <a href="https://vinfastauto.com/vn_vi/ung-dung-vinfast-cho-o-to-dien">bài giới thiệu ứng dụng VinFast</a>, <a href="https://vinfastauto.com/vn_vi/node/9081">FAQ “Ứng dụng VinFast là gì?”</a> và <a href="https://vinfastauto.com/vn_vi/cau-hoi-thuong-gap/cau-hoi-xe-o-to/san-pham/ung-dung-vinfast">FAQ ứng dụng cho ô tô điện</a> ngày 17/08/2026.</p>
+<h2>1. Quản lý tài khoản và phương tiện</h2>
+<p>Sau khi đăng nhập, người dùng có thể xem phương tiện được liên kết với tài khoản và chuyển giữa các xe nếu tính năng được hỗ trợ. Thông tin xe chỉ nên được chia sẻ qua luồng chính thức. Mật khẩu, mã xác thực và dữ liệu cá nhân cần được bảo vệ.</p>
+<p>Khi bán, cho mượn hoặc thay đổi người dùng chính, cần làm theo quy trình quản lý quyền của VinFast. Không nên chia sẻ toàn bộ tài khoản chỉ để cho người khác dùng một chức năng.</p>
+<h2>2. Theo dõi pin, sạc và trạng thái xe</h2>
+<p>Ứng dụng có thể hiển thị thông tin pin, trạng thái sạc và thông báo liên quan của xe được hỗ trợ. Dữ liệu trên ứng dụng giúp người dùng theo dõi, nhưng cảnh báo trên xe và hướng dẫn an toàn vẫn phải được ưu tiên khi có khác biệt.</p>
+<p>Trong khu vực pin và sạc, người dùng có thể xem các tiện ích hiện có cho tài khoản, chẳng hạn trạng thái phiên sạc hoặc điểm sạc gần xe. Tên mục và dữ liệu cụ thể có thể thay đổi theo phiên bản.</p>
+<h2>3. Bản đồ và dịch vụ</h2>
+<p>Bản đồ có thể hỗ trợ tìm trạm sạc, địa điểm dịch vụ hoặc lập tuyến. Trước khi đi, người dùng cần kiểm tra trạng thái điểm đến, khả năng tương thích và phương án dự phòng. Thông tin trên bản đồ là dữ liệu hỗ trợ, không thay thế quan sát và quyết định an toàn của người lái.</p>
+<p>Một số luồng dịch vụ có thể cho phép tra cứu thông tin hoặc đặt lịch. Nội dung xác nhận trên ứng dụng tại thời điểm thao tác là căn cứ trực tiếp; bài viết không cố định tên nút hoặc chính sách dịch vụ.</p>
+<h2>4. Quản lý người lái và quyền truy cập</h2>
+<p>Với xe và tài khoản được hỗ trợ, ứng dụng có thể cung cấp vai trò người lái hoặc quyền dùng xe. Người dùng cần hiểu quyền nào được chia sẻ, thời hạn của quyền và cách thu hồi. Chỉ cấp quyền cần thiết và kiểm tra lại sau khi xe được trả.</p>
+<p>Các chức năng điều khiển từ xa liên quan đến vị trí, khóa hoặc điều hòa phải được sử dụng đúng mục đích và đúng hướng dẫn. Trước khi gửi lệnh, cần xác nhận đúng xe và bảo đảm thao tác không gây ảnh hưởng tới người đang ở trong hoặc quanh xe.</p>
+<h2>5. Cập nhật và xử lý khi ứng dụng không đồng bộ</h2>
+<p>Khi dữ liệu không cập nhật, người dùng có thể kiểm tra kết nối mạng của điện thoại, trạng thái tài khoản, quyền ứng dụng và phiên bản phần mềm. Không nên lặp lệnh điều khiển nhiều lần khi chưa biết lệnh trước đã được xe nhận hay chưa.</p>
+<p>Nếu trạng thái trên xe khác ứng dụng, cần dựa vào thông tin trực tiếp trên xe, đặt xe ở trạng thái an toàn và liên hệ hỗ trợ khi cần. Tính năng cập nhật phần mềm hoặc gói dịch vụ phải được xác nhận trên ứng dụng và điều khoản hiện hành; bài viết không gán sẵn biểu phí.</p>
+<h2>6. Cách sử dụng ứng dụng an toàn</h2>
+<ul>
+<li>Cài ứng dụng từ kho chính thức và bật cơ chế bảo vệ tài khoản.</li>
+<li>Không thao tác phức tạp trên điện thoại khi đang lái xe.</li>
+<li>Đọc nội dung xác nhận trước khi gửi lệnh hoặc thanh toán.</li>
+<li>Kiểm tra quyền truy cập định kỳ và thu hồi tài khoản không còn sử dụng.</li>
+<li>Ưu tiên sách hướng dẫn và cảnh báo của đúng mẫu xe.</li>
+</ul>
+<p>Tóm lại, ứng dụng VinFast tập trung các nhóm thông tin, điều khiển và dịch vụ cho xe được hỗ trợ. Giá trị của ứng dụng đến từ việc dùng đúng tài khoản, đúng quyền và đúng hướng dẫn, không từ việc giả định mọi tính năng đều giống nhau trên mọi xe.</p>

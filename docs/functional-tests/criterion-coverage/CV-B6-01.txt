@@ -1,0 +1,24 @@
+title: Lưu ý khi sử dụng hệ thống phanh trên ô tô điện
+url_alias: /vn_vi/he-thong-phanh-tren-xe-o-to-dien
+meta_description: Tìm hiểu cách phối hợp phanh tái sinh và phanh ma sát trên ô tô điện, các tình huống cần đạp phanh và lưu ý giúp người lái vận hành an toàn.
+summary: Phanh tái sinh hỗ trợ giảm tốc và thu hồi một phần động năng, nhưng không thay thế hệ thống phanh ma sát. Người lái cần hiểu đặc tính của xe và luôn chủ động sử dụng bàn đạp phanh khi cần thiết.
+---
+<p>Hệ thống phanh trên ô tô điện gồm phanh ma sát và chức năng phanh tái sinh. Hai cơ chế phối hợp để giúp xe giảm tốc, dừng lại và thu hồi một phần năng lượng trong quá trình vận hành. Hiểu đúng vai trò của từng cơ chế giúp người lái chủ động hơn trong nhiều điều kiện giao thông.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/luu-y-khi-su-dung-xe-o-to-dien-an-toan-dung-cach">Lưu ý khi sử dụng ô tô điện an toàn</a></p>
+<img alt=""/>
+<p>Người lái nên đọc tài liệu hướng dẫn của mẫu xe đang sử dụng trước khi điều chỉnh mức phanh tái sinh.</p>
+<h2>Phanh tái sinh hoạt động như thế nào?</h2>
+<p>Khi người lái nhả chân ga hoặc đạp phanh, tùy thiết kế và cài đặt của xe, mô-tơ điện có thể tham gia giảm tốc. Một phần động năng khi đó được chuyển thành điện năng để nạp lại cho pin. Mức giảm tốc có thể thay đổi theo chế độ lái, mức pin, nhiệt độ pin và điều kiện vận hành.</p>
+<p>Phanh tái sinh chỉ hỗ trợ quá trình giảm tốc. Hệ thống phanh ma sát vẫn giữ vai trò thiết yếu và sẽ phối hợp khi lực giảm tốc tái sinh không đủ. Người lái phải sử dụng bàn đạp phanh để dừng xe đúng lúc, đặc biệt khi gặp chướng ngại vật hoặc tình huống bất ngờ.</p>
+<img alt="Phanh tái sinh hỗ trợ thu hồi năng lượng khi ô tô điện giảm tốc"/>
+<p>Phanh tái sinh hỗ trợ thu hồi năng lượng nhưng không thay thế thao tác phanh chủ động của người lái.</p>
+<p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cong-nghe-phanh-tai-tao-nang-luong-ung-dung-thong-minh-cho-xe-o-to-dien">Công nghệ phanh tái sinh trên ô tô điện</a></p>
+<h2>Cách làm quen với đặc tính giảm tốc của ô tô điện</h2>
+<p>Ở khu vực an toàn và có mật độ giao thông thấp, người lái có thể làm quen với phản ứng của xe khi nhả chân ga. Hãy giữ khoảng cách phù hợp, quan sát phía trước và chuyển chân sang bàn đạp phanh ngay khi cần giảm tốc nhanh hơn.</p>
+<p>Không nên mặc định xe sẽ tự dừng hoàn toàn sau khi nhả chân ga. Khả năng giảm tốc và giữ xe đứng yên khác nhau giữa từng mẫu xe, chế độ lái và trạng thái vận hành. Tài liệu hướng dẫn sử dụng là nguồn tham khảo chính xác cho chiếc xe cụ thể.</p>
+<img alt="Người lái phối hợp chân ga và bàn đạp phanh trên ô tô điện"/>
+<p>Việc giữ khoảng cách và quan sát giao thông vẫn là nguyên tắc quan trọng khi lái ô tô điện.</p>
+<h2>Những tình huống cần chủ động đạp phanh</h2>
+<ul> <li>Khi cần dừng xe khẩn cấp hoặc tránh va chạm.</li> <li>Khi xuống dốc dài và xe không giảm tốc như mong muốn.</li> <li>Khi mặt đường trơn, tầm nhìn hạn chế hoặc giao thông đông.</li> <li>Khi xe hiển thị cảnh báo liên quan đến hệ thống phanh.</li> </ul>
+<p>Nếu bàn đạp phanh có cảm giác bất thường, xe lệch hướng khi phanh hoặc đèn cảnh báo không tắt, người lái nên dừng xe tại vị trí an toàn và liên hệ cơ sở dịch vụ. Không tiếp tục vận hành khi hệ thống phanh có dấu hiệu mất an toàn.</p>
+<p>&gt;&gt;&gt; Xem thêm: <a href="https://vinfastauto.com/vn_vi/dich-vu-bao-duong">Thông tin bảo dưỡng định kỳ</a></p>

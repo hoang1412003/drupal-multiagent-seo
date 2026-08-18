@@ -102,6 +102,22 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 
 **Cố ý không có tiêu chí "readability".** Flesch-Kincaid đếm âm tiết theo quy tắc tiếng Anh, không áp dụng được cho tiếng Việt (`architecture.md` mục 5.5). CQ3/CQ4 là phần *đo được* của khái niệm đó; phần còn lại bỏ, không thay bằng cảm nhận của LLM.
 
+### Bổ sung policy v2 — CQ-A5
+
+Với `cam-nang-vn-v2`, Content Quality đánh giá thêm check policy-only `A5`
+trong **chính lượt gọi LLM CQ hiện có**. Check này có trạng thái
+`present | absent | unavailable`, không nằm trong CQ1–CQ8, không đi vào
+`score_from_criteria()` và không sinh `issues` theo điểm.
+
+`present` chỉ hợp lệ khi đồng thời có đủ hai vế: body không trả lời câu hỏi
+hoặc intent ở title, và việc sửa đúng chủ đề đòi viết lại trên 50% nội dung.
+Một đoạn phụ lạc đề, lặp ý hoặc bài ngắn nhưng vẫn trả lời title không phải
+A5. Kết luận `present` phải kèm trích dẫn nguyên văn trong `body`; bằng chứng
+không khớp, output thiếu/sai schema hoặc lỗi provider đều thành
+`unavailable`, không được suy thành `absent`. Decision policy v2 ánh xạ A5
+hiện diện sang nhóm A (`rejected`); A5 unavailable chỉ làm assessment chưa
+đủ và chặn `publish` ở `needs_revision`.
+
 ---
 
 ## 4. SEO Agent
@@ -169,6 +185,33 @@ Với mọi tiêu chí LLM chấm mức `0` hoặc `1`, output **bắt buộc** 
 | **CP6** | Claim thời gian sạc nêu loại trụ & dải % | máy | Thiếu cả hai | Nêu một trong hai | Nêu đủ | medium | B2 |
 | **CP7** | Chính sách pin/thuê pin nêu đủ điều kiện, phí, thời hạn | LLM | Thiếu ≥2 yếu tố | Thiếu 1 yếu tố | Đủ | medium | - |
 | **CP8** | Số liệu định lượng có nguồn | máy chốt áp dụng + LLM chấm nguồn | Có số liệu không nguồn | Một phần | Đủ nguồn | low | B10 |
+
+### Bổ sung policy v2 — A6, A7 và CP7/B11
+
+Với `cam-nang-vn-v2`, Compliance đánh giá thêm policy-only check `A6` trong
+**chính lượt gọi LLM CP2/CP4/CP7/CP8 hiện có**. A6 có trạng thái
+`present | absent | not_applicable | unavailable`, không vào CP1–CP8 và
+không làm đổi điểm. `present` phải có evidence nguyên văn trong `body`, mô
+tả nguy cơ/hướng sửa an toàn và `reference_id` thuộc allowlist trong
+`src/kb/safety_rules.json`; thiếu evidence hoặc reference hợp lệ phải thành
+`unavailable`, không được tự đẩy bài lên `rejected`.
+
+Safety source có version/schema cố định, chỉ chứa nguồn VinFast chính thức,
+URL HTTPS và ngày truy cập. File này phải được băm trong release tuple của
+mọi run v2; thay nội dung nguồn làm thay đổi release và evidence cũ không còn
+đại diện cho prompt mới.
+
+Detector văn xuôi ẩn CP9 vẫn tất định và vẫn giữ severity/veto legacy ở v1.
+Riêng output v2 bổ sung exact `criterion_id="CP9"`, `defect_code="A7"` và
+evidence để decision engine ánh xạ canonical, không suy đoán từ chuỗi hiển
+thị của `rule`.
+
+CP7 v2 chỉ áp dụng khi có claim chính sách pin/bảo hành/thuê pin cụ thể:
+không có claim → `NA`; thiếu ít nhất hai thành phần thiết yếu → mức 0; thiếu
+đúng một → mức 1; đủ đối tượng/điều kiện, thời hạn và mức phí nếu có thu phí
+→ mức 2. Mức 0/1 ánh xạ B11 (`needs_revision`), không phải nhóm A. Cột mã
+lỗi `-` của bảng phía trên mô tả rubric/evidence v1 lịch sử; không được hồi
+tố gọi CP7 v1 là B11.
 
 ### 6.1. Vì sao bỏ việc LLM tự cho điểm và tự chọn severity
 

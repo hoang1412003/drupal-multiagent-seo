@@ -1,0 +1,37 @@
+title: Những kiến thức cơ bản về sạc xe ô tô điện cần biết
+url_alias: /vn_vi/nhung-kien-thuc-co-ban-ve-sac-xe-o-to-dien-can-biet
+meta_description: Kiến thức cơ bản về sạc xe ô tô điện giúp chủ xe hiểu cách nạp pin, thời gian sạc và các lưu ý để sử dụng phương tiện, bảo vệ pin đúng hướng dẫn.
+summary: Đối với ô tô điện, pin là bộ phận lưu trữ năng lượng và ảnh hưởng trực tiếp đến khả năng vận hành. Nắm kiến thức cơ bản giúp người dùng sạc xe đúng cách và bảo vệ pin theo hướng dẫn của nhà sản xuất.
+---
+<p>Ô tô điện sử dụng năng lượng điện để hoạt động. Bộ phận chính của xe điện là pin và động cơ điện. Việc sạc pin đóng vai trò quan trọng vì ảnh hưởng trực tiếp đến khả năng di chuyển và góp phần duy trì độ bền của pin và phương tiện. Do đó, người lái cần trang bị những kiến thức cơ bản về sạc xe ô tô điện để xe vận hành ổn định trong suốt hành trình.</p>
+<img alt="Kiến thức cơ bản về sạc xe ô tô điện mới nhất"/>
+<p>Người dùng cần trang bị kiến thức cơ bản về sạc xe ô tô điện.</p>
+<h2>1. Những kiến thức cơ bản về sạc xe ô tô điện</h2>
+<p>Một trong những vấn đề người dùng nên quan tâm trước khi sở hữu ô tô điện là việc sạc pin. Dưới đây là một số kiến thức giúp người dùng sạc xe đúng cách, duy trì khả năng vận hành và chăm sóc pin theo hướng dẫn của nhà sản xuất. </p>
+<h3>1.1. Sạc xe ô tô điện là gì? Có mấy cách sạc?</h3>
+<p>Sạc xe ô tô điện là quá trình đưa năng lượng điện vào pin của xe ô tô điện. Để <a href="https://vinfastauto.com/vn_vi/cach-sac-pin-o-to-dien-VinFast">sạc pin cho xe ô tô điện</a>, chủ xe có thể tiến hành sạc tại nhà hoặc tại các trạm sạc công cộng. Cụ thể:</p>
+<ul> <li>Cách sạc pin tại nhà: Người dùng chỉ sử dụng bộ sạc tương thích với xe, nguồn điện đáp ứng yêu cầu kỹ thuật và thao tác theo sách hướng dẫn của đúng mẫu xe. Thời gian sạc phụ thuộc vào công suất bộ sạc, dung lượng pin và trạng thái pin khi bắt đầu sạc.</li> <li>Cách sạc pin tại trạm sạc công cộng: Một số hãng ô tô điện lắp đặt hệ thống trạm sạc công cộng để phục vụ người dùng. Tại trạm, người dùng có thể lựa chọn chế độ sạc thường hoặc sạc nhanh tùy theo nhu cầu và khả năng hỗ trợ của xe.</li> </ul>
+<img alt="Cách sạc xe ô tô điện hiệu quả tại các trạm sạc công cộng"/>
+<p>Khi sạc pin tại trạm công cộng, người dùng có thể lựa chọn chế độ sạc nhanh hoặc sạc thường.</p>
+<h3>1.2. Thời gian sạc ô tô điện </h3>
+<p>Thời gian sạc phụ thuộc vào mẫu xe, công suất trụ sạc và trạng thái pin khi bắt đầu sạc. </p>
+<p>Ví dụ, <a href="https://vinfastauto.com/vn_vi/node/6477">VinFast công bố</a> VF e34 có thể di chuyển khoảng 285 km sau một lần sạc đầy theo chuẩn NEDC. Quãng đường thực tế có thể thay đổi theo tải trọng, tốc độ, thời tiết và điều kiện vận hành.</p>
+<p>Với <a href="https://vinfastauto.com/vn_vi/node/6999">trụ sạc siêu nhanh DC 250 kW</a>, VinFast cho biết khoảng 18 phút sạc có thể bổ sung phạm vi di chuyển khoảng 180 km cho VF e34; đây không phải thời gian sạc đầy. Quãng đường thực tế có thể khác tùy điều kiện vận hành.</p>
+<h3>1.3. Các loại cổng sạc ô tô điện </h3>
+<p>Cổng sạc giúp kết nối xe với nguồn điện bên ngoài. Người dùng cần chọn đúng chuẩn đầu nối và công suất mà xe hỗ trợ. Theo <a href="https://vinfastauto.com/vn_vi/node/6999">hướng dẫn trạm sạc của VinFast</a>, thời gian tham khảo cho VF e34 thay đổi theo loại trụ:</p>
+<ul> <li>Trụ AC 11 kW: sạc từ 10% lên 70% pin trong khoảng 2 giờ 10 phút.</li> <li>Trụ DC 30 kW: sạc từ 10% lên 70% pin trong khoảng 1 giờ.</li> <li>Trụ DC 60 kW: sạc từ 10% lên 70% pin trong khoảng 30 phút.</li> <li>Trụ siêu nhanh DC 250 kW: khoảng 18 phút sạc có thể bổ sung phạm vi di chuyển khoảng 180 km cho VF e34 trong điều kiện tham khảo; kết quả thực tế có thể khác.</li> </ul>
+<img alt="Thời gian sạc ô tô điện tùy thuộc theo các loại cổng sạc sử dụng"/>
+<p>Tùy nhu cầu sử dụng, người dùng nên chọn cổng sạc tương thích với xe.</p>
+<h2>2. Những lưu ý khi sạc xe ô tô điện VinFast</h2>
+<p>Để chăm sóc pin, chủ xe cần nắm rõ <a href="https://vinfastauto.com/vn_vi/huong-dan-sac-o-to-dien-vinfast-tai-tram">cách sạc pin tại trạm sạc VinFast</a>, cách sạc tại nhà và các yếu tố ảnh hưởng đến dung lượng pin theo thời gian.</p>
+<h3>2.1. Sạc pin xe ô tô điện: Nên chọn sạc nhanh hay sạc thường?</h3>
+<p>Người dùng nên tuân thủ giới hạn sạc trong sách hướng dẫn của đúng mẫu xe. <a href="https://vinfastauto.com/vn_vi/tuoi-tho-pin-o-to-dien-va-nhung-dieu-can-luu-y-de-keo-dai-tuoi-tho-pin">Hướng dẫn của VinFast</a> khuyên tránh để pin cạn kiệt; khi không sử dụng xe trong thời gian dài, nên giữ dung lượng pin dưới 80%. Khi cần đi xa, người dùng có thể sạc đầy theo hướng dẫn của xe nhưng không nên duy trì trạng thái đầy trong thời gian dài. <br/> <br/> <a href="https://vinfastauto.com/vn_vi/sac-nhanh-va-sac-sieu-nhanh-cua-o-to-dien">Sạc nhanh và sạc siêu nhanh</a> giúp rút ngắn thời gian chờ, nhưng tần suất sử dụng và nhiệt độ pin có thể ảnh hưởng đến tốc độ suy giảm dung lượng. Người dùng nên chọn chế độ sạc phù hợp với hành trình và khuyến cáo của nhà sản xuất.</p>
+<h3>2.2. Tuổi thọ pin xe ô tô điện phụ thuộc vào yếu tố nào?</h3>
+<p>Dung lượng pin giảm dần theo thời gian, nhưng tốc độ suy giảm không giống nhau giữa mọi xe. Theo <a href="https://vinfastauto.com/vn_vi/tuoi-tho-pin-o-to-dien-va-nhung-dieu-can-luu-y-de-keo-dai-tuoi-tho-pin">hướng dẫn của VinFast</a>, tuổi thọ pin chịu ảnh hưởng bởi cách sử dụng, bảo quản, bảo dưỡng và điều kiện môi trường. Người dùng cần lưu ý:</p>
+<ul> <li>Hạn chế để xe thường xuyên trong môi trường có nhiệt độ cao và tránh để pin cạn kiệt.</li> <li>Không sử dụng bộ sạc không tương thích; dừng sạc và kiểm tra khi phát hiện dấu hiệu bất thường.</li> <li>Tuân thủ lịch kiểm tra, bảo dưỡng và hướng dẫn sạc của đúng mẫu xe.</li> </ul>
+<p>&gt;&gt;&gt; Tìm hiểu thêm:</p>
+<ul> <li><a href="https://vinfastauto.com/vn_vi/cuu-ho-pin-o-to-dien-vinfast">Chi tiết quy trình cứu hộ pin ô tô điện VinFast mới nhất</a></li> <li><a href="https://vinfastauto.com/vn_vi/cach-sac-pin-o-to-dien-VinFast">Gợi ý 7 cách sạc pin ô tô điện VinFast an toàn và kéo dài tuổi thọ pin</a></li> <li><a href="https://vinfastauto.com/vn_vi/lam-gi-khi-o-to-dien-het-pin-giua-duong">Pin ô tô điện VinFast hết giữa đường - Chủ xe cần làm gì?</a></li> <li><a href="https://vinfastauto.com/vn_vi/gia-pin-o-to-dien-quyet-dinh-chi-phi-mua-xe-nhu-the-nao">Giá pin ô tô điện quyết định chi phí mua xe như thế nào?</a></li> </ul>
+<p>Người dùng có thể tham khảo thông tin và <a href="https://shop.vinfastauto.com/vn_vi/vinfast-cars-deposit.html">đặt cọc xe điện VinFast VF e34</a> trên website VinFast.</p>
+<p>Để có thêm thông tin hoặc cần hỗ trợ tư vấn về các sản phẩm của <a href="https://vinfastauto.com/vn_vi">VinFast</a>, vui lòng liên hệ với chúng tôi:</p>
+<ul> <li>Tổng đài tư vấn: <strong>1900 23 23 89</strong>.</li> <li>Email chăm sóc khách hàng: <a href="mailto:support.vn@vinfastauto.com">[email protected]</a></li> </ul>
+<p>*<em>Thông tin trong bài mang tính chất tham khảo.</em></p>

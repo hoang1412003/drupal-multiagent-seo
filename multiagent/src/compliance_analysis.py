@@ -26,6 +26,28 @@ _SO = r"\d+(?:[.,]\d+)?"
 # --- CP5: claim tầm hoạt động / quãng đường ------------------------------
 _KM = re.compile(_SO + r"\s*(?:km|ki-?lô-?mét)\b", re.IGNORECASE)
 
+# Policy v1 cố ý giữ matcher rộng ở trên để bảo toàn evidence E1/E5/E6. Từ
+# policy v2, CP5 chỉ coi một số km là claim tầm hoạt động khi ngữ cảnh gần đó
+# thật sự nói về quãng đường xe đi được. Nhánh này đồng thời loại các mẫu tỷ
+# lệ như kWh/100 km và chi phí/km -- nguyên nhân của nợ B15.
+_CUA_SO_TAM_HOAT_DONG = 120
+_TAM_HOAT_DONG = re.compile(
+    r"quãng đường|đi được|di chuyển được|tầm hoạt động|sau một lần sạc",
+    re.IGNORECASE,
+)
+_TY_LE_KM = re.compile(
+    r"/\s*100\s*km\b|"
+    r"(?:kwh|lít)\s*/\s*100\s*km\b|"
+    r"đồng\s*/\s*km\b|"
+    + _SO + r"\s*km\s*/\s*kwh\b",
+    re.IGNORECASE,
+)
+_CHI_PHI_TIEU_HAO = re.compile(
+    r"chi phí|tiêu thụ|tiêu hao|đồng|kwh|lít",
+    re.IGNORECASE,
+)
+_RANH_GIOI_MENH_DE = ".,;:!?\n"
+
 # Chuẩn đo tầm hoạt động được công nhận quốc tế. Corpus 33 bài: chỉ 4 bài nêu
 # - đúng thứ mã lỗi B1 muốn bắt.
 _CHUAN_DO = re.compile(r"\b(?:NEDC|WLTP|EPA|CLTC)\b", re.IGNORECASE)
@@ -71,8 +93,58 @@ def _tim(pattern, text_theo_field: dict) -> list:
     return ra
 
 
-def claim_tam_hoat_dong(text_theo_field: dict) -> list:
-    return _tim(_KM, text_theo_field)
+def _menh_de_chua(text: str, start: int, end: int) -> str:
+    """Lấy mệnh đề chứa match để phân biệt claim với chi phí/tiêu hao."""
+    trai = max(text.rfind(ch, 0, start) for ch in _RANH_GIOI_MENH_DE) + 1
+    cac_phai = [text.find(ch, end) for ch in _RANH_GIOI_MENH_DE]
+    cac_phai = [pos for pos in cac_phai if pos >= 0]
+    phai = min(cac_phai) if cac_phai else len(text)
+    return text[trai:phai]
+
+
+def _nam_trong_ty_le_km(text: str, start: int, end: int) -> bool:
+    """True khi chính match km nằm trong một biểu thức tỷ lệ."""
+    return any(
+        ty_le.start() <= start and end <= ty_le.end()
+        for ty_le in _TY_LE_KM.finditer(text)
+    )
+
+
+def claim_tam_hoat_dong(
+    text_theo_field: dict,
+    *,
+    contextual: bool = False,
+) -> list:
+    """Tìm claim tầm hoạt động; mặc định giữ nguyên matcher legacy v1.
+
+    ``contextual=True`` là hành vi policy v2: loại số km thuộc tỷ lệ
+    chi phí/tiêu hao và chỉ giữ số có tín hiệu tầm hoạt động trong cửa sổ
+    gần. Việc tách cờ thay vì thay matcher mặc định bảo toàn toàn bộ số đo v1.
+    """
+    if not contextual:
+        return _tim(_KM, text_theo_field)
+
+    ra = []
+    for field, value in text_theo_field.items():
+        text = value or ""
+        for match in _KM.finditer(text):
+            if _nam_trong_ty_le_km(text, match.start(), match.end()):
+                continue
+
+            menh_de = _menh_de_chua(text, match.start(), match.end())
+            if (
+                _CHI_PHI_TIEU_HAO.search(menh_de)
+                and not _TAM_HOAT_DONG.search(menh_de)
+            ):
+                continue
+
+            quanh = text[
+                max(0, match.start() - _CUA_SO_TAM_HOAT_DONG):
+                match.end() + _CUA_SO_TAM_HOAT_DONG
+            ]
+            if _TAM_HOAT_DONG.search(quanh):
+                ra.append({"field": field, "text": match.group(0)})
+    return ra
 
 
 def claim_thoi_gian_sac(text_theo_field: dict) -> list:
