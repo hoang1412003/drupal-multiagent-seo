@@ -671,15 +671,22 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `docs/functional-tests` hiện diff rỗng so với checkpoint. `data_head` là
   checkpoint đã verify snapshot, không phải commit cuối trực tiếp chạm file
   data (`8e5ca60`).
-- Manifest `evidence/publish-policy-v2-manifest.json` vẫn là skeleton
-  **unfrozen**: `release_source_commit=null`, năm paid gate đều `pending`.
-  Chưa có preflight thật, chưa có paid output v2, policy v2 chưa active/cutover
-  và `scoring.yaml.meta.calibrated` vẫn `false`.
-- Việc tiếp theo duy nhất: thực thi child Evaluation Plan bắt đầu từ Task 1,
-  theo thứ tự runner/metrics → freeze một release chung → preflight `$0` bốn
-  dataset → USER GATE E1 → gold → corrected → coverage → aggregate →
-  conditional smoke. Mỗi paid gate cần xác nhận chi phí riêng; không tự gọi
-  API.
+- ⚠️ **Cập nhật 2026-08-18 (commit `41ea280`, sau checkpoint Task 9 ở trên):**
+  manifest **đã freeze + verify** (`release_source_commit=7c2c4a3`,
+  `verified: true`), **không còn** `unfrozen`/`release_source_commit=null`
+  như mô tả cũ ở trên. Đã có preflight `$0` cho đủ **4** dataset đo
+  (e1=10×5, gold=33×1, corrected=**30**×1 — không còn 20, đã gộp thêm 10
+  mẫu `clean` C-001..C-010, coverage=11×1), `usage_events=0` cả 4,
+  `paid_runs.*.status = "preflighted"`. Sửa thêm một lỗi cô lập test
+  (`_fixture_repo()` copy nguyên `paid_runs` từ manifest thật, làm fixture
+  không còn độc lập sau khi manifest thật đổi trạng thái) — không đụng logic
+  sản xuất. Full offline suite sau các commit này: **83/83, 0 hỏng, 0 skip**.
+  **Vẫn chưa gọi Anthropic API lần nào, `scoring.yaml.meta.calibrated` vẫn
+  `false`.**
+- Việc tiếp theo duy nhất: 4 lượt đo trả phí thật (Task 5-8 của Evaluation
+  Plan) — E1 v2 → gold v2 → corrected-publish 30 → criterion coverage 11,
+  mỗi lượt là **USER GATE riêng**, không tự gọi API. Ước chi phí thực tế
+  ~$7-15 (trần preflight ~$32, xem cách tính ở PR).
 - Corrected 30 và coverage 11 là synthetic functional evidence. Chúng đo
   recovery/isolation, không thay cho đồng thuận AI–người trên bài thật;
   `independent_label_reliability=not_demonstrated` bất kể gate kỹ thuật.
@@ -923,6 +930,20 @@ Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ li
 Đó chính là lý do quét ngưỡng đẩy `publish` lên 96: đó là cách duy nhất để một trung bình có trọng số bắt chước được quy tắc "một khiếm khuyết là đủ".
 
 ⛔ **Không tự sửa cách gộp.** Thêm cổng "bất kỳ tiêu chí mức 0 → trần `needs_revision`" là đổi `graph.aggregator_node`, tức **đường chấm điểm** — sẽ làm mất hiệu lực E1/E5/E6 vừa chạy. Đây là **quyết định thiết kế cần mentor**; ba lựa chọn kèm cái giá đã liệt kê trong file evidence.
+
+**Cập nhật 2026-08-17 — chủ dự án đã chọn hướng thiết kế, CHƯA triển khai:** không tiếp tục tạo dữ liệu tổng hợp chỉ để ép ra một `publish_min`; hướng được chọn là **blocking rule + score**. Finding A đủ assurance mới được đề xuất `rejected`; finding B chặn ở `needs_revision`; nghi vấn nghiêm trọng chỉ từ LLM cũng dừng ở `needs_revision`; nhóm C/advisory không chặn; `final_score` vẫn giữ để mô tả/xếp hạng nhưng không được bù mất finding bắt buộc sửa. Không dùng luật thô “mọi level 0 đều chặn” vì một số criterion không ánh xạ A/B hoặc đang có nợ semantics. Design chi tiết và bảng quyền từng criterion: [`superpowers/specs/2026-08-17-publish-blocking-decision-policy-design.md`](superpowers/specs/2026-08-17-publish-blocking-decision-policy-design.md).
+
+Đây chỉ là **planned state**: chưa sửa Python/config/database, `cam-nang-vn-v1` vẫn là policy đang chạy và E1/E5/E6 ngày 2026-08-16 vẫn còn hiệu lực cho v1. Khi triển khai phải tạo release `cam-nang-vn-v2`, truyền exact `policy_version` từ job vào graph, giữ lịch sử v1 bất biến và đo lại/thiết kế lại E1/E5/E6 theo spec; không được đổi `scoring.yaml` hoặc bật `meta.calibrated` chỉ dựa trên quyết định này.
+
+**Audit coverage 2026-08-17 — cũng mới là thiết kế:** chủ dự án đồng ý bổ sung **B11** cho claim chính sách pin/bảo hành/thuê pin thiếu thông tin thiết yếu và thiết kế lại CP7; không được ánh xạ thẳng level CP7 cũ vì C-006 sạch đang mang mức 1 theo semantics quá rộng. Rà đủ 34 check còn phát hiện: CP9 chưa có mã người gán tương ứng (candidate A7); A5/A6 và vế “năm đã cũ” của B4 chưa có check trực tiếp; SEO4/BV4 đang ghi mã quá rộng; B7/B9 có câu chữ guideline chưa khớp config/code; BV3/B13 và CP5/B15 chưa đủ tin cậy để trao quyền chặn. Spec đã phân biệt các khoảng trống đó với nhóm SEO/style cố ý chỉ advisory — không tạo thêm mã B chỉ vì rubric có level 0.
+
+Gói candidate vì vậy phải version đồng bộ: annotation guideline v1.4, rubric v2, prompt hash mới và `cam-nang-vn-v2`. Thêm A7/B11 hoặc đổi ranh giới B7/B9 buộc rà/gán lại đủ 33 mẫu và chạy test–retest mới; output functional-clean cũ không replay được cho CP7 v2. Chưa có dòng nào trong guideline/labels/code hiện hành được đổi ở bước audit này.
+
+**Implementation plan đã lập, vẫn chưa thực thi:** plan tổng ở [`superpowers/plans/2026-08-17-publish-blocking-decision-policy.md`](superpowers/plans/2026-08-17-publish-blocking-decision-policy.md), tách thành Core offline và Evaluation/Cutover. Plan khóa bốn check `CQ9/SEO11/CP9/CP10`, provenance CP3, sửa B15/CP5, exact prompt/policy v1-v2, gán mù v1.4 + test–retest và bốn cổng xác nhận chi phí riêng. Việc có plan không phải bằng chứng code, nhãn, phép đo hay profile v2 đã tồn tại.
+
+**Cập nhật 2026-08-18 — plan trên ĐÃ có code thật, nằm ở nhánh riêng `ai/v14-relabel` (git worktree `.worktrees/ai-v14-relabel`), CHƯA merge vào `main`.** 33 commit tính tới `41ea280`. Task 1-4 của Core plan đã xong và offline-verified: `decision_policy.py` (hàm thuần, đúng thuật toán mục 5 của spec), B15/CP5 đã sửa theo version (không đổi hành vi legacy v1), thêm check A5/A6/CP7-v2/A7, `graph.aggregator_node` route theo `policy_version` từ state (mặc định v1 nếu thiếu — **không** có traffic nào tự chuyển sang v2). Full offline suite trên nhánh: **83/83, 0 hỏng, 0 skip**. Manifest release đã freeze + verify (`docs/evidence/publish-policy-v2-manifest.json`, `release_source_commit` = `7c2c4a3`), và đã có preflight $0 cho cả 4 dataset đo (e1=10, gold=33, corrected=30, coverage=11) — `paid_runs.*.status = "preflighted"`, **chưa gọi Anthropic API lần nào**.
+
+**Còn thiếu trước khi coi là kết quả:** (1) bốn lượt đo trả phí thật (E1 v2 → gold v2 → corrected-publish 30 → criterion coverage 11), mỗi lượt là USER GATE riêng, ước ~$7-15; (2) **test–retest thật bằng người** cho nhãn `labels-ai-v1.4.csv` — nhãn hiện tại có `provenance = AI-annotated-partially-exposed`, `independent_label_reliability = "not_demonstrated"`, sớm nhất chạy được **2026-08-20**; (3) tổng hợp A/B/C và verify cuối (Task 9-11 của Evaluation plan); (4) quyết định merge/cutover sang `main`. `scoring.yaml.meta.calibrated` trên `main` không đổi.
 
 ⚠️ **Giới hạn:** n=10 nên `publish_rate` 1,000 không loại trừ được tỉ lệ chặn oan thật cỡ 10-20%. Và mẫu là bài **đã được chính người gán nhãn sửa**, nên nó kiểm *cơ chế*, không chứng minh hệ thống xử lý đúng bài sạch **tự nhiên** — dự án chưa có bài nào như vậy (0/20 bài thật đạt `publish`).
 
