@@ -211,7 +211,12 @@ _LLM_SCHEMA_V2 = {
             "type": "array",
             "items": _A5_CHECK_SCHEMA,
             "minItems": 1,
-            "maxItems": 1,
+            # "maxItems" bi Anthropic structured output API tu choi (400:
+            # "For 'array' type, property 'maxItems' is not supported") -
+            # cung mot bay nhu compliance.py (xem e54b187), phat hien khi
+            # ra soat lai sau lan chay E1 v2 that dau tien 2026-08-18. Bo
+            # rang buoc so luong (_chuan_hoa_a5 dong 256 da tu kiem dung 1
+            # phan tu, khong can schema ep) - khong sua logic.
         },
     },
     "required": [*_LLM_SCHEMA["required"], "policy_checks"],
