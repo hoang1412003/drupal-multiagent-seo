@@ -1,0 +1,46 @@
+# Toan bo path duoi day nam trong protected_paths()/_DATA_GLOBS cua
+# multiagent/scripts/policy_release.py - noi dung duoc pin SHA256 vao
+# docs/evidence/publish-policy-v2-manifest.json luc freeze. Khoa eol=lf
+# tuong minh, KHONG phu thuoc core.autocrlf (gia tri nay dung chung ca
+# repo va co the bi doi boi tien trinh khac dang chay - da gap that
+# 2026-08-18, core.autocrlf tu doi tu true sang false giua phien lam
+# viec). Da freeze lai manifest sau khi renormalize toan bo ve LF.
+
+docs/evaluation-plan.md text eol=lf
+docs/evidence/corrected-publish-coverage-v1-protocol.md text eol=lf
+docs/evidence/functional-clean-ai-review-v1.4.csv text eol=lf
+docs/functional-tests/clean_labels.csv text eol=lf
+docs/functional-tests/criterion-coverage-labels.csv text eol=lf
+docs/functional-tests/gold-corrected-labels.csv text eol=lf
+docs/goldset/annotation-guideline.md text eol=lf
+docs/goldset/labels-ai-v1.4.csv text eol=lf
+docs/goldset/labels.csv text eol=lf
+docs/goldset/sources.md text eol=lf
+docs/rubrics.md text eol=lf
+multiagent/config/model_pricing.yaml text eol=lf
+multiagent/config/scoring.yaml text eol=lf
+multiagent/scripts/eval_corrected_coverage.py text eol=lf
+multiagent/scripts/eval_functional_clean.py text eol=lf
+multiagent/scripts/eval_policy_v2.py text eol=lf
+multiagent/scripts/eval_policy_v2_metrics.py text eol=lf
+multiagent/scripts/functional_dataset_v2.py text eol=lf
+multiagent/scripts/policy_release.py text eol=lf
+multiagent/src/agents/brand_rules.json text eol=lf
+multiagent/src/agents/brand_voice.py text eol=lf
+multiagent/src/agents/compliance.py text eol=lf
+multiagent/src/agents/content_quality.py text eol=lf
+multiagent/src/agents/fact_check.py text eol=lf
+multiagent/src/agents/seo.py text eol=lf
+multiagent/src/ai_core.py text eol=lf
+multiagent/src/decision_policy.py text eol=lf
+multiagent/src/embeddings.py text eol=lf
+multiagent/src/graph.py text eol=lf
+multiagent/src/kb/safety_rules.json text eol=lf
+multiagent/src/kb/specs.json text eol=lf
+multiagent/src/retrieval.py text eol=lf
+multiagent/src/scoring.py text eol=lf
+multiagent/src/state.py text eol=lf
+docs/goldset/raw/*.txt text eol=lf
+docs/functional-tests/clean/*.txt text eol=lf
+docs/functional-tests/gold-corrected/*.txt text eol=lf
+docs/functional-tests/criterion-coverage/*.txt text eol=lf

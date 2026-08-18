@@ -47,7 +47,7 @@ def main() -> int:
           {r["provenance"] for r in rows}, {"AI-annotated-partially-exposed"})
     check("guideline v1.4", {r["guideline_version"] for r in rows}, {"v1.4"})
     check("gold v1 unchanged", sha256(GOLD_V1.read_bytes()).hexdigest(),
-          "ac74ee3e3f11103f8afb0223685aa3e4004dae7e8eaf3b9cd6f716bb58dfcb17")
+          "07e444e445b74c317ea5de5b26bcf340186b871cc74615ea42cd7269af992ce6")
     return 1 if _hong else 0
 
 
