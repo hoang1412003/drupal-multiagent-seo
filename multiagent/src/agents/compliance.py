@@ -514,13 +514,18 @@ def _a6_prompt(safety_rules: dict) -> str:
         "BỔ SUNG POLICY CHECK A6 (trường `policy_checks`):",
         "Trả đúng một check id A6 với status present, absent, "
         "not_applicable hoặc unavailable.",
-        "- present: bài có thao tác nguy hiểm, bỏ cảnh báo bắt buộc hoặc "
-        "hướng dẫn trái một quy tắc dưới đây; phải có evidence nguyên văn "
-        "trong body và reference_id đúng quy tắc. Reason phải mô tả nguy cơ "
-        "cụ thể và hướng sửa an toàn, không lặp lại thao tác nguy hiểm như "
-        "một lời khuyên thật.",
-        "- absent: bài có hướng dẫn kỹ thuật và không phát hiện vi phạm sau "
-        "khi đối chiếu các quy tắc.",
+        "- present CHỈ khi bài HƯỚNG DẪN/MÔ TẢ CÁC BƯỚC làm một thao tác kỹ "
+        "thuật khớp đúng một quy tắc dưới đây MÀ KHÔNG kèm cảnh báo/lưu ý an "
+        "toàn tương ứng ở gần đó. Evidence PHẢI là đoạn HƯỚNG DẪN THIẾU CẢNH "
+        "BÁO đó (câu mô tả cách làm), KHÔNG PHẢI câu cảnh báo. Reason phải mô "
+        "tả nguy cơ cụ thể và hướng sửa an toàn, không lặp lại thao tác nguy "
+        "hiểm như một lời khuyên thật.",
+        "- absent khi bài ĐÃ CÓ cảnh báo/khuyến cáo đúng nguy cơ đó (dù ngắn, "
+        "dạng 'không nên...', 'tránh...', 'chỉ nên...', 'không tự...') — "
+        "TUYỆT ĐỐI không trả present chỉ vì bài NHẮC TỚI chủ đề nguy hiểm; "
+        "phải có bằng chứng THIẾU cảnh báo thật, không suy diễn từ việc bài "
+        "có nói tới hành động đó. Cũng trả absent khi có hướng dẫn kỹ thuật "
+        "và không phát hiện vi phạm sau khi đối chiếu các quy tắc.",
         "- not_applicable: bài không có hướng dẫn kỹ thuật.",
         "- unavailable: không đủ căn cứ; không được suy thành absent.",
         "NGUỒN AN TOÀN ĐÃ KHÓA:",
