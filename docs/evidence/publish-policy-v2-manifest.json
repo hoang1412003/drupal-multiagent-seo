@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
-  "data_head": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
-  "release_source_commit": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
+  "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
+  "release_source_commit": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -19,8 +19,8 @@
     "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
     "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
     "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-    "docs/functional-tests/criterion-coverage-labels.csv": "2d81d36d8d73058736540b743676f125bc406170cab689e3ff4909f8f0f25586",
-    "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "02baa2fe48cceebe763af667019ff1925a054978d86d1b0a90d90dc07c419f4e",
+    "docs/functional-tests/criterion-coverage-labels.csv": "ad659446d8bb0d0eb4622a7c501122348603edef39c5681db0b59120802dba67",
+    "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
     "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
     "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
     "docs/functional-tests/criterion-coverage/CV-A6-01.txt": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
@@ -344,7 +344,7 @@
         "CV-B9-02"
       ],
       "content_hashes_sha256": {
-        "CV-A3-01": "02baa2fe48cceebe763af667019ff1925a054978d86d1b0a90d90dc07c419f4e",
+        "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
         "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
         "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
         "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
@@ -362,11 +362,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-18T09:34:56.241488+00:00",
+  "frozen_at": "2026-08-18T10:07:58.059174+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
-    "data_head": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
-    "release_source_commit": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
+    "data_head": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
+    "release_source_commit": "53c2476e9070f69c69c02cc80e2f1698aa4020a1",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -384,8 +384,8 @@
       "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
       "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
       "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-      "docs/functional-tests/criterion-coverage-labels.csv": "2d81d36d8d73058736540b743676f125bc406170cab689e3ff4909f8f0f25586",
-      "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "02baa2fe48cceebe763af667019ff1925a054978d86d1b0a90d90dc07c419f4e",
+      "docs/functional-tests/criterion-coverage-labels.csv": "ad659446d8bb0d0eb4622a7c501122348603edef39c5681db0b59120802dba67",
+      "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
       "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
       "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
       "docs/functional-tests/criterion-coverage/CV-A6-01.txt": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
@@ -659,7 +659,7 @@
           "CV-B9-02"
         ],
         "content_hashes_sha256": {
-          "CV-A3-01": "02baa2fe48cceebe763af667019ff1925a054978d86d1b0a90d90dc07c419f4e",
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
           "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
           "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
           "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
@@ -678,5 +678,5 @@
       }
     }
   },
-  "release_sha256": "e19b980f8f67e2cc3397eff0219b1e324786b101d065a205bc003f1dd98b006b"
+  "release_sha256": "891c7c246d501900e5e9d1ac74de973a3ad0c0aa48c0178aa9d1ae3d66979e95"
 }
