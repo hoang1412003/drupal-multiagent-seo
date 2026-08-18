@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
-  "data_head": "8635a45c9aee1369f6f7b17b0918a580db7390da",
-  "release_source_commit": "16095b7559510ae7ee7b1c7114e81a0dea0e11e8",
+  "data_head": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
+  "release_source_commit": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -31,10 +31,10 @@
     "docs/functional-tests/criterion-coverage/CV-B7-01.txt": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
     "docs/functional-tests/criterion-coverage/CV-B9-01.txt": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
     "docs/functional-tests/criterion-coverage/CV-B9-02.txt": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55",
-    "docs/functional-tests/gold-corrected-labels.csv": "004685cf34dbc6b1465d751a4fda74328537b426f40b4bc823904d93082341ca",
+    "docs/functional-tests/gold-corrected-labels.csv": "b37dabf66896e3d9b799f9b7bf2179c91017f3cdbc122278f289abbb78f2d135",
     "docs/functional-tests/gold-corrected/GC-001.txt": "514b7b3872e99f5f25732310be9369cd14e2a837540fe7aa0df49fb17a8b26d5",
     "docs/functional-tests/gold-corrected/GC-002.txt": "647de2dd9f599a82657b03a97a92cbcd945f0c426d5087964bdbd911c2b1d427",
-    "docs/functional-tests/gold-corrected/GC-003.txt": "871c36ce97a010d87feb76f2f23ab328b00286748462149f42e9eeda9fe9efd8",
+    "docs/functional-tests/gold-corrected/GC-003.txt": "10a284a7cede5410195551c38fb9cc11c4c63fa56e292fd4d498b99095909d38",
     "docs/functional-tests/gold-corrected/GC-004.txt": "be175f566d303f24bb7153f11f8b3b2e0a2b216fdc2ac9567d66721419098fcf",
     "docs/functional-tests/gold-corrected/GC-005.txt": "0863ca5a4ffbef7c01dc0974641b802c777867e993dda28987bdd6b1e02d21ed",
     "docs/functional-tests/gold-corrected/GC-006.txt": "60599dea5732e1c9ed80e222093c651f3326c9b980f2c1d735a4109e00a778ed",
@@ -309,7 +309,7 @@
         "C-010": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
         "GC-001": "514b7b3872e99f5f25732310be9369cd14e2a837540fe7aa0df49fb17a8b26d5",
         "GC-002": "647de2dd9f599a82657b03a97a92cbcd945f0c426d5087964bdbd911c2b1d427",
-        "GC-003": "871c36ce97a010d87feb76f2f23ab328b00286748462149f42e9eeda9fe9efd8",
+        "GC-003": "10a284a7cede5410195551c38fb9cc11c4c63fa56e292fd4d498b99095909d38",
         "GC-004": "be175f566d303f24bb7153f11f8b3b2e0a2b216fdc2ac9567d66721419098fcf",
         "GC-005": "0863ca5a4ffbef7c01dc0974641b802c777867e993dda28987bdd6b1e02d21ed",
         "GC-006": "60599dea5732e1c9ed80e222093c651f3326c9b980f2c1d735a4109e00a778ed",
@@ -362,11 +362,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-18T08:09:03.806421+00:00",
+  "frozen_at": "2026-08-18T09:34:56.241488+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
-    "data_head": "8635a45c9aee1369f6f7b17b0918a580db7390da",
-    "release_source_commit": "16095b7559510ae7ee7b1c7114e81a0dea0e11e8",
+    "data_head": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
+    "release_source_commit": "d7b31670fabd27a15696a9984a4c1ab8a527aa5e",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -396,10 +396,10 @@
       "docs/functional-tests/criterion-coverage/CV-B7-01.txt": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
       "docs/functional-tests/criterion-coverage/CV-B9-01.txt": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
       "docs/functional-tests/criterion-coverage/CV-B9-02.txt": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55",
-      "docs/functional-tests/gold-corrected-labels.csv": "004685cf34dbc6b1465d751a4fda74328537b426f40b4bc823904d93082341ca",
+      "docs/functional-tests/gold-corrected-labels.csv": "b37dabf66896e3d9b799f9b7bf2179c91017f3cdbc122278f289abbb78f2d135",
       "docs/functional-tests/gold-corrected/GC-001.txt": "514b7b3872e99f5f25732310be9369cd14e2a837540fe7aa0df49fb17a8b26d5",
       "docs/functional-tests/gold-corrected/GC-002.txt": "647de2dd9f599a82657b03a97a92cbcd945f0c426d5087964bdbd911c2b1d427",
-      "docs/functional-tests/gold-corrected/GC-003.txt": "871c36ce97a010d87feb76f2f23ab328b00286748462149f42e9eeda9fe9efd8",
+      "docs/functional-tests/gold-corrected/GC-003.txt": "10a284a7cede5410195551c38fb9cc11c4c63fa56e292fd4d498b99095909d38",
       "docs/functional-tests/gold-corrected/GC-004.txt": "be175f566d303f24bb7153f11f8b3b2e0a2b216fdc2ac9567d66721419098fcf",
       "docs/functional-tests/gold-corrected/GC-005.txt": "0863ca5a4ffbef7c01dc0974641b802c777867e993dda28987bdd6b1e02d21ed",
       "docs/functional-tests/gold-corrected/GC-006.txt": "60599dea5732e1c9ed80e222093c651f3326c9b980f2c1d735a4109e00a778ed",
@@ -624,7 +624,7 @@
           "C-010": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
           "GC-001": "514b7b3872e99f5f25732310be9369cd14e2a837540fe7aa0df49fb17a8b26d5",
           "GC-002": "647de2dd9f599a82657b03a97a92cbcd945f0c426d5087964bdbd911c2b1d427",
-          "GC-003": "871c36ce97a010d87feb76f2f23ab328b00286748462149f42e9eeda9fe9efd8",
+          "GC-003": "10a284a7cede5410195551c38fb9cc11c4c63fa56e292fd4d498b99095909d38",
           "GC-004": "be175f566d303f24bb7153f11f8b3b2e0a2b216fdc2ac9567d66721419098fcf",
           "GC-005": "0863ca5a4ffbef7c01dc0974641b802c777867e993dda28987bdd6b1e02d21ed",
           "GC-006": "60599dea5732e1c9ed80e222093c651f3326c9b980f2c1d735a4109e00a778ed",
@@ -678,5 +678,5 @@
       }
     }
   },
-  "release_sha256": "2ab9488b09aad30822b0d5dc2c8978a640cc61a486f83031268bcefab40b6c35"
+  "release_sha256": "e19b980f8f67e2cc3397eff0219b1e324786b101d065a205bc003f1dd98b006b"
 }
