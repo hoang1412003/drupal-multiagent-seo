@@ -740,9 +740,20 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `expected_label` từ `rejected` sang `needs_revision` — không đổi thì
   cổng coverage vĩnh viễn không pass được dù A6 phát hiện đúng). Full
   offline suite: **83/83, 0 hỏng, 0 skip**. Manifest freeze lại,
-  `verified: true`. **Vẫn chưa chạy lại E1** để xác nhận sửa có thật sự
-  giảm dao động hay không — đây là việc kế tiếp, tốn thêm tiền thật.
-  `scoring.yaml.meta.calibrated` không đổi.
+  `verified: true`.
+- ✅ **Cập nhật 2026-08-18 (khuya) — HẠ THÊM `A4` xuống nhóm B, commit
+  `8b4036f`.** Chẩn đoán E1 cho thấy `A4` cũng gây dao động **độc lập**
+  với A6 — rõ nhất ở `G-008` (3/5 lần). Hạ A4 cùng cách/cùng lý do với A6
+  (`_criterion_finding()` thay vì `_policy_finding()` vì A4 là criterion
+  thường, không phải policy check). **Không tách riêng được phần "thời
+  hạn" (đã tất định hoá từ B14) khỏi phần "điều kiện áp dụng" (thuần
+  LLM)** — CP4 gộp cả hai vào một mức `level` duy nhất, `decision_policy`
+  chỉ thấy `level=0`, không biết phần nào gây ra. Không có mẫu
+  `criterion-coverage` nào target A4 nên không cần sửa CSV. Full offline
+  suite: **83/83, 0 hỏng, 0 skip**. Manifest freeze lại, `verified: true`.
+  **Vẫn chưa chạy lại E1** để xác nhận cả hai lần hạ (A6 + A4) có thật sự
+  đủ giảm dao động xuống dưới ngưỡng hay không — đây là việc kế tiếp, tốn
+  thêm tiền thật. `scoring.yaml.meta.calibrated` không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
