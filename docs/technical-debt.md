@@ -710,6 +710,22 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   11 mẫu, cả bốn `paid_runs.*.status = "preflighted"`. Full offline suite
   **83/83, 0 hỏng, 0 skip**. **Vẫn chưa gọi Anthropic API lần nào** —
   4 lượt đo trả phí (mục ngay trên) vẫn là việc kế tiếp duy nhất.
+- ⛔ **Cập nhật 2026-08-18 (tối) — E1 v2 ĐÃ CHẠY THẬT, KHÔNG ĐẠT.**
+  `decision_consistency = 0,86` (cần ≥ 0,90), chi phí thật $3,967 (hai lượt
+  gọi — lượt 1 lộ ra 2 bug schema thật: `compliance.py`/`content_quality.py`
+  đặt `maxItems` trên mảng `policy_checks`, bị Anthropic API từ chối thẳng
+  `400`, làm 50/50 kết quả thiếu Compliance/A5; đã sửa ở commit `e54b187`,
+  `e821301`, không phải lỗi mẫu). Chẩn đoán đầy đủ:
+  [`evidence/e1_v2_2026-08-18_report.md`](evidence/e1_v2_2026-08-18_report.md).
+  **100% số lần lật quyết định gắn với `A6` (mới) hoặc `A4` (cùng họ
+  `P-006a` cũ)** — hai finding nhóm A duy nhất còn thuần LLM judgment.
+  6/10 bài hoàn toàn ổn định; đối chiếu code với spec mục 8.2 xác nhận
+  `_chuan_hoa_a6` **thực thi đúng thiết kế đã duyệt** (không phải bug nới
+  lỏng) — bản thân phán đoán LLM dao động thật. **Chưa quyết định hướng xử
+  lý** (chấp nhận đo tiếp Gold có ghi rủi ro, hay thêm ràng buộc tất định
+  cho A6 — thay đổi thiết kế cần quyết riêng). **Chưa chạy Gold/Corrected/
+  Coverage v2** — đúng quy tắc "E1 chặn Gold". `scoring.yaml.meta.calibrated`
+  không đổi.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:

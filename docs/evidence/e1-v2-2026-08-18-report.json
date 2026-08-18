@@ -1,0 +1,72 @@
+{
+  "dataset_kind": "e1",
+  "sample_count": 10,
+  "repeat_count": 50,
+  "decision_consistency": 0.86,
+  "final_score_sigma": 1.6046955782836259,
+  "final_score_sigma_max": 2.905551582746381,
+  "samples": {
+    "G-001": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.3504166023860937
+    },
+    "G-002": {
+      "mode_decision": "rejected",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.1069383451665191
+    },
+    "G-003": {
+      "mode_decision": "rejected",
+      "mode_agreement": 0.6,
+      "final_score_sigma": 2.905551582746381
+    },
+    "G-004": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 2.268166660543271
+    },
+    "G-005": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.9908810863534747
+    },
+    "G-006": {
+      "mode_decision": "rejected",
+      "mode_agreement": 0.8,
+      "final_score_sigma": 1.5330256031782394
+    },
+    "G-007": {
+      "mode_decision": "rejected",
+      "mode_agreement": 0.6,
+      "final_score_sigma": 1.4588762798811956
+    },
+    "G-008": {
+      "mode_decision": "rejected",
+      "mode_agreement": 0.6,
+      "final_score_sigma": 1.7070369064551565
+    },
+    "G-009": {
+      "mode_decision": "needs_revision",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 1.726062716125928
+    },
+    "G-010": {
+      "mode_decision": "rejected",
+      "mode_agreement": 1.0,
+      "final_score_sigma": 0.0
+    }
+  },
+  "usage": {
+    "events": 179,
+    "input_tokens": 1370330,
+    "output_tokens": 170330,
+    "estimated_usd": "2.221980",
+    "mean_latency_ms": 35210.6266
+  },
+  "gate_status": {
+    "decision_consistency": "FAIL",
+    "final_score_sigma": "PASS"
+  },
+  "label_provenance": "AI-annotated-partially-exposed"
+}
