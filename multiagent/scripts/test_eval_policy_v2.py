@@ -3,6 +3,7 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 
@@ -27,6 +28,13 @@ GOLD_IDS = [
     "P-001a", "P-001b", "P-002a", "P-003a", "P-004a", "P-004b",
     "P-005a", "P-006a", "P-007a", "P-007b", "P-008a", "P-009a",
     "P-010a",
+]
+CLEAN_IDS = [f"C-{index:03d}" for index in range(1, 11)]
+GOLD_CORRECTED_IDS = [f"GC-{index:03d}" for index in range(1, 21)]
+CORRECTED_IDS = CLEAN_IDS + GOLD_CORRECTED_IDS
+COVERAGE_IDS = [
+    "CV-A3-01", "CV-A5-01", "CV-A5-02", "CV-A6-01", "CV-A6-02",
+    "CV-A7-01", "CV-A7-02", "CV-B6-01", "CV-B7-01", "CV-B9-01", "CV-B9-02",
 ]
 
 
@@ -317,6 +325,139 @@ def test_score_nan_bi_chan_va_khong_tao_raw():
         assert not output.exists()
 
 
+def test_load_corrected_exact_10_C_20_GC_khong_lan():
+    samples = load_dataset("corrected", REPO_ROOT)
+    assert [sample.sample_id for sample in samples] == CORRECTED_IDS
+    assert len(samples) == 30
+    assert all(sample.expected_label == "publish" for sample in samples)
+    assert all(
+        sample.content_sha256 and len(sample.content_sha256) == 64
+        for sample in samples
+    )
+    clean = samples[:10]
+    corrected = samples[10:]
+    assert all(sample.parent_sample_id is None for sample in clean)
+    assert all(
+        sample.parent_sample_id and sample.parent_sample_id.startswith("G-")
+        for sample in corrected
+    )
+    e1_gold_ids = set(E1_IDS) | set(GOLD_IDS)
+    assert not (set(CORRECTED_IDS) & e1_gold_ids)
+    print("[PASS] --dataset corrected tra dung C-001..010 + GC-001..020, khong lan gold/e1")
+
+
+def test_load_coverage_exact_11_CV():
+    samples = load_dataset("coverage", REPO_ROOT)
+    assert [sample.sample_id for sample in samples] == COVERAGE_IDS
+    assert len(samples) == 11
+    assert all(sample.target_code for sample in samples)
+    assert all(sample.parent_sample_id for sample in samples)
+    assert all(
+        sample.expected_label in {"needs_revision", "rejected"} for sample in samples
+    )
+    a_codes = {sample.sample_id: sample for sample in samples
+               if sample.target_code.startswith("A")}
+    b_codes = {sample.sample_id: sample for sample in samples
+               if sample.target_code.startswith("B")}
+    assert all(sample.expected_label == "rejected" for sample in a_codes.values())
+    assert all(sample.expected_label == "needs_revision" for sample in b_codes.values())
+    e1_gold_corrected_ids = set(E1_IDS) | set(GOLD_IDS) | set(CORRECTED_IDS)
+    assert not (set(COVERAGE_IDS) & e1_gold_corrected_ids)
+    print("[PASS] --dataset coverage tra dung 11 CV, target_code/parent_sample_id day du")
+
+
+def _copy_relative(rel_path, dst_root):
+    src = REPO_ROOT / rel_path
+    dst = dst_root / rel_path
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    if src.is_dir():
+        shutil.copytree(src, dst)
+    else:
+        shutil.copy2(src, dst)
+
+
+def test_corrected_content_sha_mismatch_fatal():
+    tmp_root = Path(tempfile.mkdtemp(prefix="eval-v2-corrected-corrupt-"))
+    try:
+        for rel in (
+            "docs/functional-tests/clean_labels.csv",
+            "docs/functional-tests/clean",
+            "docs/functional-tests/gold-corrected-labels.csv",
+            "docs/functional-tests/gold-corrected",
+            "docs/evidence/functional-clean-ai-review-v1.4.csv",
+        ):
+            _copy_relative(rel, tmp_root)
+        target = tmp_root / "docs/functional-tests/gold-corrected/GC-005.txt"
+        target.write_text(target.read_text(encoding="utf-8") + "\nCORRUPTED", encoding="utf-8")
+        _expect_contract_error(
+            "corrected content SHA mismatch fatal",
+            lambda: load_dataset("corrected", tmp_root),
+            "content_sha256",
+        )
+    finally:
+        shutil.rmtree(tmp_root, ignore_errors=True)
+
+
+def test_dataset_manifest_hashes_dataset_aware():
+    corrected_samples = load_dataset("corrected", REPO_ROOT)
+    coverage_samples = load_dataset("coverage", REPO_ROOT)
+    with tempfile.TemporaryDirectory(prefix="eval-v2-manifest-") as temp:
+        corrected_output = Path(temp) / "corrected-raw.json"
+        coverage_output = Path(temp) / "coverage-raw.json"
+        corrected_contract = build_runtime_contract(
+            REPO_ROOT, "corrected", corrected_samples, "2026-08-17", corrected_output
+        )
+        coverage_contract = build_runtime_contract(
+            REPO_ROOT, "coverage", coverage_samples, "2026-08-17", coverage_output
+        )
+    corrected_manifests = set(
+        corrected_contract["release_tuple"]["dataset_manifest_hashes"]
+    )
+    coverage_manifests = set(
+        coverage_contract["release_tuple"]["dataset_manifest_hashes"]
+    )
+    assert corrected_manifests == {
+        "docs/functional-tests/clean_labels.csv",
+        "docs/evidence/functional-clean-ai-review-v1.4.csv",
+        "docs/functional-tests/gold-corrected-labels.csv",
+    }
+    assert coverage_manifests == {"docs/functional-tests/criterion-coverage-labels.csv"}
+    assert "docs/goldset/labels-ai-v1.4.csv" not in corrected_manifests
+    assert "docs/goldset/labels-ai-v1.4.csv" not in coverage_manifests
+    print("[PASS] dataset_manifest_hashes dung file rieng cho corrected/coverage")
+
+
+def test_token_corrected_khong_chay_duoc_tren_coverage_va_nguoc_lai():
+    corrected_samples = load_dataset("corrected", REPO_ROOT)
+    coverage_samples = load_dataset("coverage", REPO_ROOT)
+    with tempfile.TemporaryDirectory(prefix="eval-v2-token-") as temp:
+        output = Path(temp) / "raw.json"
+        corrected_contract = build_runtime_contract(
+            REPO_ROOT, "corrected", corrected_samples, "2026-08-17", output
+        )
+        _expect_contract_error(
+            "token corrected khong chay duoc tren coverage samples",
+            lambda: run_samples(
+                coverage_samples, output, corrected_contract, agent_runner=_fake_runner
+            ),
+        )
+        assert not output.exists()
+
+        coverage_output = Path(temp) / "coverage-raw.json"
+        coverage_contract = build_runtime_contract(
+            REPO_ROOT, "coverage", coverage_samples, "2026-08-17", coverage_output
+        )
+        _expect_contract_error(
+            "token coverage khong chay duoc tren corrected samples",
+            lambda: run_samples(
+                corrected_samples, coverage_output, coverage_contract,
+                agent_runner=_fake_runner,
+            ),
+        )
+        assert not coverage_output.exists()
+    print("[PASS] token corrected khong chay duoc tren coverage va nguoc lai")
+
+
 if __name__ == "__main__":
     failed = False
     for test in (
@@ -328,6 +469,11 @@ if __name__ == "__main__":
         test_resume_release_tuple_mismatch_fatal_va_khong_ghi_de,
         test_inventory_duplicate_hoac_hole_deu_fatal,
         test_score_nan_bi_chan_va_khong_tao_raw,
+        test_load_corrected_exact_10_C_20_GC_khong_lan,
+        test_load_coverage_exact_11_CV,
+        test_corrected_content_sha_mismatch_fatal,
+        test_dataset_manifest_hashes_dataset_aware,
+        test_token_corrected_khong_chay_duoc_tren_coverage_va_nguoc_lai,
     ):
         try:
             test()

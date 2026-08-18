@@ -43,7 +43,7 @@ from label_helper import parse_sample  # noqa: E402
 from review_platform.pricing import estimate_usage  # noqa: E402
 
 
-DATASET_KINDS = frozenset({"e1", "gold"})
+DATASET_KINDS = frozenset({"e1", "gold", "corrected", "coverage"})
 LABELS = frozenset({"publish", "needs_revision", "rejected"})
 GUIDELINE_VERSION = "v1.4"
 RUBRIC_VERSION = "v1"
@@ -56,6 +56,24 @@ GOLD_IDS = (
     "P-005a", "P-006a", "P-007a", "P-007b", "P-008a", "P-009a",
     "P-010a",
 )
+CLEAN_IDS = tuple(f"C-{index:03d}" for index in range(1, 11))
+GOLD_CORRECTED_IDS = tuple(f"GC-{index:03d}" for index in range(1, 21))
+CORRECTED_IDS = CLEAN_IDS + GOLD_CORRECTED_IDS
+COVERAGE_IDS = (
+    "CV-A3-01", "CV-A5-01", "CV-A5-02", "CV-A6-01", "CV-A6-02",
+    "CV-A7-01", "CV-A7-02", "CV-B6-01", "CV-B7-01", "CV-B9-01", "CV-B9-02",
+)
+
+_DATASET_MANIFEST_PATHS = {
+    "e1": ("docs/goldset/labels-ai-v1.4.csv", "docs/goldset/sources.md"),
+    "gold": ("docs/goldset/labels-ai-v1.4.csv", "docs/goldset/sources.md"),
+    "corrected": (
+        "docs/functional-tests/clean_labels.csv",
+        "docs/evidence/functional-clean-ai-review-v1.4.csv",
+        "docs/functional-tests/gold-corrected-labels.csv",
+    ),
+    "coverage": ("docs/functional-tests/criterion-coverage-labels.csv",),
+}
 
 RELEASE_FIELDS = (
     "dataset_kind",
@@ -96,6 +114,10 @@ class EvaluationSample:
     split: str
     source_url: str
     content_sha256: str
+    # Chi co gia tri cho dataset "corrected" (GC-*) va "coverage" (CV-*);
+    # None cho e1/gold va cho C-* (khong co parent).
+    parent_sample_id: str | None = None
+    target_code: str | None = None
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -201,31 +223,156 @@ def _labels_rows(repo_root: Path) -> list[dict]:
     return rows
 
 
+def _csv_rows(path: Path) -> list[dict]:
+    try:
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            return list(csv.DictReader(handle))
+    except OSError as error:
+        raise EvaluationContractError(f"khong doc duoc manifest: {path}") from error
+
+
+def _gold_corrected_rows(repo_root: Path) -> list[dict]:
+    """20 GC, moi cai la ban sua cua mot bai gold G-001..020, ky vong publish."""
+    path = repo_root / "docs" / "functional-tests" / "gold-corrected-labels.csv"
+    rows = _csv_rows(path)
+    if len(rows) != 20:
+        raise EvaluationContractError(
+            f"gold-corrected-labels phai co exact 20 row, nhan {len(rows)}"
+        )
+    ids = tuple(row.get("sample_id") for row in rows)
+    if ids != GOLD_CORRECTED_IDS:
+        raise EvaluationContractError("gold-corrected-labels sai canonical ordered IDs")
+    for row in rows:
+        sample_id = row["sample_id"]
+        if row.get("expected_label") != "publish":
+            raise EvaluationContractError(f"{sample_id} corrected phai expected_label publish")
+        if row.get("guideline_version") != GUIDELINE_VERSION:
+            raise EvaluationContractError(f"{sample_id} sai guideline_version")
+        if not row.get("parent_sample_id"):
+            raise EvaluationContractError(f"{sample_id} thieu parent_sample_id")
+        _validate_sha(f"{sample_id}.content_sha256 (manifest)", row.get("content_sha256"))
+    return rows
+
+
+def _clean_rows_corrected(repo_root: Path) -> list[dict]:
+    """10 C: doi chieu clean_labels.csv (v1.3, co source_url) voi
+    functional-clean-ai-review-v1.4.csv (v1.4, co content_sha256)."""
+    legacy_path = repo_root / "docs" / "functional-tests" / "clean_labels.csv"
+    review_path = repo_root / "docs" / "evidence" / "functional-clean-ai-review-v1.4.csv"
+    legacy_rows = {row.get("sample_id"): row for row in _csv_rows(legacy_path)}
+    review_rows = {row.get("sample_id"): row for row in _csv_rows(review_path)}
+    if set(legacy_rows) != set(CLEAN_IDS) or set(review_rows) != set(CLEAN_IDS):
+        raise EvaluationContractError(
+            "clean C-001..010 khong khop giua clean_labels.csv va functional-clean-ai-review-v1.4.csv"
+        )
+    merged = []
+    for sample_id in CLEAN_IDS:
+        legacy = legacy_rows[sample_id]
+        review = review_rows[sample_id]
+        if legacy.get("expected_label") != review.get("expected_label"):
+            raise EvaluationContractError(
+                f"{sample_id} expected_label lech giua clean_labels va functional-clean-ai-review-v1.4"
+            )
+        if review.get("guideline_version") != GUIDELINE_VERSION:
+            raise EvaluationContractError(f"{sample_id} sai guideline_version")
+        _validate_sha(f"{sample_id}.content_sha256 (manifest)", review.get("content_sha256"))
+        merged.append({
+            "sample_id": sample_id,
+            "source_url": legacy.get("source_url", ""),
+            "expected_label": review["expected_label"],
+            "content_sha256": review["content_sha256"],
+        })
+    return merged
+
+
+def _criterion_coverage_rows(repo_root: Path) -> list[dict]:
+    """11 CV, moi cai injected dung mot target_code tu mot parent corrected/clean."""
+    path = repo_root / "docs" / "functional-tests" / "criterion-coverage-labels.csv"
+    rows = _csv_rows(path)
+    if len(rows) != 11:
+        raise EvaluationContractError(
+            f"criterion-coverage-labels phai co exact 11 row, nhan {len(rows)}"
+        )
+    ids = tuple(row.get("sample_id") for row in rows)
+    if ids != COVERAGE_IDS:
+        raise EvaluationContractError("criterion-coverage-labels sai canonical ordered IDs")
+    for row in rows:
+        sample_id = row["sample_id"]
+        if row.get("expected_label") not in LABELS:
+            raise EvaluationContractError(f"{sample_id} co expected_label khong hop le")
+        if row.get("guideline_version") != GUIDELINE_VERSION:
+            raise EvaluationContractError(f"{sample_id} sai guideline_version")
+        if not row.get("target_code"):
+            raise EvaluationContractError(f"{sample_id} thieu target_code")
+        if not row.get("parent_sample_id"):
+            raise EvaluationContractError(f"{sample_id} thieu parent_sample_id")
+        _validate_sha(f"{sample_id}.content_sha256 (manifest)", row.get("content_sha256"))
+    return rows
+
+
 def load_dataset(kind: str, repo_root: Path) -> list[EvaluationSample]:
-    """Doc exact E1 hoac gold AI-v1.4 theo thu tu canonical."""
+    """Doc exact e1/gold/corrected/coverage theo thu tu canonical."""
     kind = _validate_dataset_kind(kind)
     repo_root = Path(repo_root).resolve()
-    rows = _labels_rows(repo_root)
-    selected = rows[:10] if kind == "e1" else rows
-    expected_ids = E1_IDS if kind == "e1" else GOLD_IDS
-    if tuple(row["sample_id"] for row in selected) != expected_ids:
-        raise EvaluationContractError(f"{kind} sai ordered sample IDs")
+
+    if kind in ("e1", "gold"):
+        rows = _labels_rows(repo_root)
+        selected = rows[:10] if kind == "e1" else rows
+        expected_ids = E1_IDS if kind == "e1" else GOLD_IDS
+        if tuple(row["sample_id"] for row in selected) != expected_ids:
+            raise EvaluationContractError(f"{kind} sai ordered sample IDs")
+        raw_dir = repo_root / "docs" / "goldset" / "raw"
+        samples = []
+        for row in selected:
+            sample_id = row["sample_id"]
+            path = raw_dir / f"{sample_id}.txt"
+            if not path.is_file():
+                raise EvaluationContractError(f"thieu sample content: {sample_id}")
+            samples.append(
+                EvaluationSample(
+                    sample_id=sample_id,
+                    fields=_fields_from_file(path),
+                    expected_label=row["label"],
+                    split="e1" if kind == "e1" else row["split"],
+                    source_url=row.get("source_url", ""),
+                    content_sha256=_sha256_file(path),
+                )
+            )
+        return samples
+
+    if kind == "corrected":
+        clean_dir = repo_root / "docs" / "functional-tests" / "clean"
+        gold_corrected_dir = repo_root / "docs" / "functional-tests" / "gold-corrected"
+        rows_with_dir = (
+            [(row, clean_dir) for row in _clean_rows_corrected(repo_root)]
+            + [(row, gold_corrected_dir) for row in _gold_corrected_rows(repo_root)]
+        )
+    else:  # coverage
+        coverage_dir = repo_root / "docs" / "functional-tests" / "criterion-coverage"
+        rows_with_dir = [(row, coverage_dir) for row in _criterion_coverage_rows(repo_root)]
 
     samples = []
-    raw_dir = repo_root / "docs" / "goldset" / "raw"
-    for row in selected:
+    for row, raw_dir in rows_with_dir:
         sample_id = row["sample_id"]
         path = raw_dir / f"{sample_id}.txt"
         if not path.is_file():
             raise EvaluationContractError(f"thieu sample content: {sample_id}")
+        actual_hash = _sha256_file(path)
+        manifest_hash = row.get("content_sha256")
+        if manifest_hash and actual_hash != manifest_hash:
+            raise EvaluationContractError(
+                f"{sample_id} content_sha256 lech manifest: file={actual_hash} manifest={manifest_hash}"
+            )
         samples.append(
             EvaluationSample(
                 sample_id=sample_id,
                 fields=_fields_from_file(path),
-                expected_label=row["label"],
-                split="e1" if kind == "e1" else row["split"],
+                expected_label=row["expected_label"],
+                split=kind,
                 source_url=row.get("source_url", ""),
-                content_sha256=_sha256_file(path),
+                content_sha256=actual_hash,
+                parent_sample_id=row.get("parent_sample_id") or None,
+                target_code=row.get("target_code") or None,
             )
         )
     return samples
@@ -340,8 +487,6 @@ def build_runtime_contract(
     brand_kb_path = repo_root / "multiagent" / "src" / "agents" / "brand_rules.json"
     guideline_path = repo_root / "docs" / "goldset" / "annotation-guideline.md"
     rubric_path = repo_root / "docs" / "rubrics.md"
-    labels_path = repo_root / "docs" / "goldset" / "labels-ai-v1.4.csv"
-    sources_path = repo_root / "docs" / "goldset" / "sources.md"
 
     # Doc/validate tat ca artifact truoc khi lazy-import ai_core.
     hashes = {
@@ -368,8 +513,8 @@ def build_runtime_contract(
         ("multiagent/src/embeddings.py", "multiagent/src/retrieval.py"),
     )
     dataset_manifest_hashes = {
-        "docs/goldset/labels-ai-v1.4.csv": _sha256_file(labels_path),
-        "docs/goldset/sources.md": _sha256_file(sources_path),
+        relative: _sha256_file(repo_root / relative)
+        for relative in _DATASET_MANIFEST_PATHS[dataset_kind]
     }
     try:
         scoring = yaml.safe_load(scoring_path.read_text(encoding="utf-8"))
@@ -679,6 +824,8 @@ def run_policy_sample(
         "split": sample.split,
         "source_url": sample.source_url,
         "content_sha256": sample.content_sha256,
+        "parent_sample_id": sample.parent_sample_id,
+        "target_code": sample.target_code,
         "decision": evaluated["decision"],
         "final_score": evaluated["final_score"],
         "decision_basis": evaluated["decision_basis"],
@@ -891,7 +1038,9 @@ def build_parser() -> argparse.ArgumentParser:
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--preflight", action="store_true")
     mode.add_argument("--run", action="store_true")
-    parser.add_argument("--dataset", choices=("e1", "gold"), required=True)
+    parser.add_argument(
+        "--dataset", choices=("e1", "gold", "corrected", "coverage"), required=True
+    )
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--assessment-as-of", required=True)

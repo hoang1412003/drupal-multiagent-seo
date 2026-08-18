@@ -906,7 +906,7 @@ Functional-clean: 10 mẫu corrected, expected publish, không tham gia E5/Kappa
 
 Evaluation suite: 43 mẫu, chỉ số phải báo cáo riêng theo lát dữ liệu.
 
-**Trạng thái: ✅ ĐÃ CHẠY 2026-08-16, $0,24.** Báo cáo đầy đủ: [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md). Runner: `scripts/eval_functional_clean.py` (14 test, viết trước).
+**Trạng thái: ✅ ĐÃ CHẠY 2026-08-16, $0,24.** Báo cáo đầy đủ: [`evidence/functional_clean_ban4_report.md`](evidence/functional_clean_ban4_report.md). Runner tại thời điểm đó: `scripts/eval_functional_clean.py` (14 test, viết trước). **Từ 2026-08-18, file này đã được viết lại thành wrapper mỏng gọi `eval_policy_v2.py`/`eval_corrected_coverage.py` cho policy v2** (xem "Trạng thái hiện hành — policy v2 candidate" đầu mục 8) — không còn tái tạo được báo cáo v1 phía trên; số liệu trên vẫn đứng nguyên vì đã đóng băng trong file evidence.
 
 | Chỉ số | Giá trị |
 |---|---|

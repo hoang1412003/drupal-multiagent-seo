@@ -1,129 +1,123 @@
-"""Test bo kiem thu chuc nang functional-clean (technical-debt.md muc 8.6).
+"""Test wrapper tuong thich eval_functional_clean.py -> policy v2.
 
+Wrapper nay khong con tu goi 4 agent (cham_mot_bai v1); moi lenh phai forward
+sang eval_policy_v2.cli() (preflight/run) hoac eval_corrected_coverage.main()
+(report), tai su dung nguyen manifest/guard/confirmation-token chung.
 Chay: .venv\\Scripts\\python.exe scripts\\test_functional_clean.py
 """
-import os
+from pathlib import Path
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import eval_calibration as ec  # noqa: E402
-from eval_functional_clean import doc_mau_sach, thong_ke  # noqa: E402
-
-_hong = False
+import eval_functional_clean  # noqa: E402
 
 
-def check(ten, thuc, mong):
-    global _hong
-    if thuc != mong:
-        _hong = True
-        print(f"[FAIL] {ten}: mong {mong!r}, thuc {thuc!r}")
-    else:
-        print(f"[PASS] {ten}")
+def test_run_forward_dung_dataset_corrected():
+    captured = {}
+
+    def fake_cli(argv):
+        captured["argv"] = argv
+        return 0
+
+    original = eval_functional_clean.eval_policy_v2.cli
+    eval_functional_clean.eval_policy_v2.cli = fake_cli
+    try:
+        exit_code = eval_functional_clean.main([
+            "--run",
+            "--manifest", "m.json",
+            "--output", "out.json",
+            "--assessment-as-of", "2026-08-18",
+            "--confirmation-token", "tok",
+        ])
+    finally:
+        eval_functional_clean.eval_policy_v2.cli = original
+
+    assert exit_code == 0
+    argv = captured["argv"]
+    assert "--dataset" in argv and argv[argv.index("--dataset") + 1] == "corrected"
+    assert "--run" in argv
+    assert "--preflight" not in argv
+    assert "--manifest" in argv and argv[argv.index("--manifest") + 1] == "m.json"
+    assert "--confirmation-token" in argv and argv[argv.index("--confirmation-token") + 1] == "tok"
+    print("[PASS] --run forward dung --dataset corrected sang eval_policy_v2.cli")
 
 
-def kiem(ten, dieu_kien, chi_tiet=""):
-    global _hong
-    if dieu_kien:
-        print(f"[PASS] {ten}")
-    else:
-        _hong = True
-        print(f"[FAIL] {ten}" + (f" - {chi_tiet}" if chi_tiet else ""))
+def test_preflight_forward_dung_dataset_corrected():
+    captured = {}
+
+    def fake_cli(argv):
+        captured["argv"] = argv
+        return 0
+
+    original = eval_functional_clean.eval_policy_v2.cli
+    eval_functional_clean.eval_policy_v2.cli = fake_cli
+    try:
+        exit_code = eval_functional_clean.main([
+            "--preflight",
+            "--manifest", "m.json",
+            "--output", "out.json",
+            "--assessment-as-of", "2026-08-18",
+        ])
+    finally:
+        eval_functional_clean.eval_policy_v2.cli = original
+
+    assert exit_code == 0
+    argv = captured["argv"]
+    assert "--dataset" in argv and argv[argv.index("--dataset") + 1] == "corrected"
+    assert "--preflight" in argv
+    assert "--run" not in argv
+    print("[PASS] --preflight forward dung --dataset corrected sang eval_policy_v2.cli")
 
 
-W = {"content_quality": 0.25, "seo": 0.20, "brand": 0.25, "compliance": 0.30}
-NG = {"veto": 50, "nr": 50, "publish": 80}
+def test_report_forward_dung_report_corrected():
+    captured = {}
+
+    def fake_main(argv):
+        captured["argv"] = argv
+        return 0
+
+    original = eval_functional_clean.eval_corrected_coverage.main
+    eval_functional_clean.eval_corrected_coverage.main = fake_main
+    try:
+        exit_code = eval_functional_clean.main([
+            "--report",
+            "--gold-raw", "g.json",
+            "--output", "c.json",
+            "--report-output", "r.json",
+        ])
+    finally:
+        eval_functional_clean.eval_corrected_coverage.main = original
+
+    assert exit_code == 0
+    assert captured["argv"] == [
+        "--report-corrected",
+        "--gold-raw", "g.json",
+        "--corrected-raw", "c.json",
+        "--output", "r.json",
+    ]
+    print("[PASS] --report forward dung --report-corrected sang eval_corrected_coverage.main")
 
 
-def bai(cq, seo_, brand, cp, critical=False, so_issue=0):
-    return {
-        "diem": {"content_quality": cq, "seo": seo_, "brand": brand,
-                 "compliance": cp},
-        "co_critical": critical,
-        "chi_tiet": {"content_quality": {"issues": [{}] * so_issue},
-                     "seo": {"issues": []}, "brand": {"issues": []},
-                     "compliance": {"flags": []}},
-    }
+def test_khong_tu_goi_bon_agent_v1():
+    source = Path(eval_functional_clean.__file__).read_text(encoding="utf-8")
+    assert "cham_mot_bai" not in source
+    assert "eval_calibration" not in source
+    assert "quyet_dinh" not in source
+    print("[PASS] wrapper khong con tu goi cham_mot_bai/quyet_dinh v1")
 
 
-# --- Ba chi so bat buoc cua muc 8.6 -------------------------------------
-# `publish_rate`, `false_positive_articles`, `false_positive_issues`.
-# MOI bai trong bo nay deu ky vong `publish`, nen bai nao KHONG ra publish
-# la mot bao dong gia o muc BAI, va moi issue tim duoc la mot bao dong gia
-# o muc ISSUE. Hai muc do khac nhau: mot bai co 5 issue nho van chi la MOT
-# bai bi bao sai, nhung 5 lan lam phien nguoi viet.
-
-kq = {
-    "C-001": bai(95, 95, 95, 95, so_issue=0),      # publish, sach
-    "C-002": bai(95, 95, 95, 95, so_issue=3),      # publish nhung co 3 issue
-    "C-003": bai(60, 60, 60, 60, so_issue=2),      # final 60 -> needs_revision
-    "C-004": bai(95, 95, 95, 95, critical=True),   # critical -> rejected
-}
-t = thong_ke(kq, NG, W)
-
-check("publish_rate = 2/4", round(t["publish_rate"], 3), 0.5)
-check("false_positive_articles = 2 bai khong ra publish",
-      t["false_positive_articles"], 2)
-check("false_positive_issues dem TAT CA issue tren moi bai",
-      t["false_positive_issues"], 5)
-check("dem theo tung quyet dinh", t["phan_bo"],
-      {"publish": 2, "needs_revision": 1, "rejected": 1})
-
-# Bo sach hoan toan -> khong bao dong gia nao.
-t0 = thong_ke({"C-001": bai(95, 95, 95, 95)}, NG, W)
-check("bo sach hoan toan -> publish_rate 1.0", t0["publish_rate"], 1.0)
-check("bo sach hoan toan -> 0 false positive article",
-      t0["false_positive_articles"], 0)
-check("bo sach hoan toan -> 0 false positive issue",
-      t0["false_positive_issues"], 0)
-
-
-# --- cham_mot_bai(giu_chi_tiet=True) phai GIU danh sach issue -----------
-# Vi sao can: ban mac dinh chi luu `co_critical` dang boolean, nen khi
-# P-006a bi gan critical o E5 thi KHONG truy duoc flag nao sinh ra no ma
-# khong cham lai (~$0,06). Bo functional-clean con phai DEM issue nen cang
-# khong the mat du lieu do.
-
-class _Gia:
-    def __init__(self, ket): self.ket = ket
-    def run(self, fields, **kw): return self.ket
-
-
-that_cq, that_seo = ec.content_quality, ec.seo
-that_brand, that_cp = ec.brand_voice, ec.compliance
-try:
-    ec.content_quality = _Gia({"score": 80, "issues": [{"type": "CQ1"}]})
-    ec.seo = _Gia({"score": 90, "issues": []})
-    ec.brand_voice = _Gia({"score": 85, "issues": []})
-    ec.compliance = _Gia({"score": 70, "flags": [
-        {"severity": "critical", "rule": "CP1 abc"}]})
-
-    mac_dinh = ec.cham_mot_bai({})
-    chi_tiet = ec.cham_mot_bai({}, giu_chi_tiet=True)
-finally:
-    ec.content_quality, ec.seo = that_cq, that_seo
-    ec.brand_voice, ec.compliance = that_brand, that_cp
-
-kiem("mac dinh KHONG giu chi tiet (E5 khong doi hanh vi)",
-     "chi_tiet" not in mac_dinh, str(sorted(mac_dinh)))
-kiem("giu_chi_tiet=True co danh sach issue",
-     chi_tiet["chi_tiet"]["content_quality"]["issues"] == [{"type": "CQ1"}])
-kiem("giu_chi_tiet=True giu duoc FLAG sinh ra co_critical",
-     chi_tiet["chi_tiet"]["compliance"]["flags"][0]["rule"] == "CP1 abc",
-     "day chinh la thu thieu khi chan doan P-006a")
-check("diem va co_critical khong doi giua hai che do",
-      (mac_dinh["diem"], mac_dinh["co_critical"]),
-      (chi_tiet["diem"], chi_tiet["co_critical"]))
-
-
-# --- doc_mau_sach() doc dung manifest -----------------------------------
-mau = doc_mau_sach()
-check("doc du 10 mau functional-clean", len(mau), 10)
-kiem("moi mau ky vong publish",
-     all(m["expected_label"] == "publish" for m in mau))
-kiem("khong mau nao trung id voi gold set",
-     not (set(m["sample_id"] for m in mau) & set(ec.gold_ids())),
-     "functional-clean KHONG duoc lot vao E5/Kappa")
-
-sys.exit(1 if _hong else 0)
+if __name__ == "__main__":
+    failed = False
+    for test in (
+        test_run_forward_dung_dataset_corrected,
+        test_preflight_forward_dung_dataset_corrected,
+        test_report_forward_dung_report_corrected,
+        test_khong_tu_goi_bon_agent_v1,
+    ):
+        try:
+            test()
+        except Exception as error:
+            failed = True
+            print(f"[FAIL] {test.__name__}: {type(error).__name__}: {error}")
+    sys.exit(1 if failed else 0)
