@@ -659,11 +659,14 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
 - Quyết định thiết kế *ai có quyền chặn xuất bản* đã được chốt cho candidate
   `cam-nang-vn-v2`: A → B → assessment incomplete → publish; điểm tổng chỉ
   diagnostic. V1 vẫn giữ nguyên để tương thích và đối chiếu lịch sử.
-- Policy core/evaluator/release guard Tasks 1–7 đã commit tới `d54d6f9`.
-  Focused post-commit release-guard test pass; meta-manifest phủ đúng 82 file.
-  Lượt pure 53/53 đã chạy trước vòng hardening guard cuối nên không được dùng
-  làm chứng nhận cho commit này. **Full `all-offline` fresh vẫn pending** ở
-  checkpoint Task 9, nên chưa được gọi core offline-ready trong bàn giao này.
+- Policy core/evaluator/release guard Tasks 1–8 đã commit tới `c60b5e4`.
+  **Checkpoint Task 9 đã chạy xong ngày 2026-08-18 ($0):** 7 script focused
+  fresh 0 fail/0 skip, full `all-offline` fresh **82 file, 0 hỏng, 0 skip**
+  (không phải số 72 lịch sử), protected paths (`docs/goldset/raw`,
+  `docs/functional-tests/*`, `scoring.yaml`) diff rỗng so với Data HEAD
+  `8635a45`, inventory 20 corrected + 11 coverage hợp lệ. **Core offline-ready
+  tại `c60b5e45bafec2890d7ae5dbbbe402ae5073741a`; chưa measured.** Evidence:
+  [`evidence/publish-policy-v2-core-offline-verification.md`](evidence/publish-policy-v2-core-offline-verification.md).
 - Data snapshot được pin tại checkpoint `8635a45`; cây `docs/goldset` và
   `docs/functional-tests` hiện diff rỗng so với checkpoint. `data_head` là
   checkpoint đã verify snapshot, không phải commit cuối trực tiếp chạm file
@@ -672,11 +675,11 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   **unfrozen**: `release_source_commit=null`, năm paid gate đều `pending`.
   Chưa có preflight thật, chưa có paid output v2, policy v2 chưa active/cutover
   và `scoring.yaml.meta.calibrated` vẫn `false`.
-- Việc tiếp theo duy nhất sau commit reconcile docs này: chạy checkpoint
-  offline Task 9, rồi thực thi child Evaluation Plan theo thứ tự runner/metrics → freeze một
-  release chung → preflight `$0` bốn dataset → USER GATE E1 → gold → corrected
-  → coverage → aggregate → conditional smoke. Mỗi paid gate cần xác nhận chi
-  phí riêng; không tự gọi API.
+- Việc tiếp theo duy nhất: thực thi child Evaluation Plan bắt đầu từ Task 1,
+  theo thứ tự runner/metrics → freeze một release chung → preflight `$0` bốn
+  dataset → USER GATE E1 → gold → corrected → coverage → aggregate →
+  conditional smoke. Mỗi paid gate cần xác nhận chi phí riêng; không tự gọi
+  API.
 - Corrected 30 và coverage 11 là synthetic functional evidence. Chúng đo
   recovery/isolation, không thay cho đồng thuận AI–người trên bài thật;
   `independent_label_reliability=not_demonstrated` bất kể gate kỹ thuật.
@@ -718,9 +721,9 @@ bằng chứng, không dùng làm lệnh chạy policy v2.**
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Runner thống nhất:** `python scripts/run_test_group.py all-offline`.
-  Mốc 72 file/0 hỏng/0 skip là checkpoint lịch sử; manifest hiện phủ 82 file.
-  Task 7 mới chỉ có pure 53/53 pass, full all-offline fresh phải lấy từ Task 9,
-  không chép số lịch sử sang evidence v2.
+  Mốc 72 file/0 hỏng/0 skip là checkpoint lịch sử; manifest hiện phủ **82
+  file, 0 hỏng, 0 skip** — chạy fresh ngày 2026-08-18 ở Task 9, xem
+  [`evidence/publish-policy-v2-core-offline-verification.md`](evidence/publish-policy-v2-core-offline-verification.md).
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
