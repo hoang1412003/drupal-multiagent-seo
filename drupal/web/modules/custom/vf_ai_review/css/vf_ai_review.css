@@ -6,7 +6,7 @@
   --vf-ai-chan: #d72222;        /* block  - chặn xuất bản */
   --vf-ai-chan-nen: #fdeaea;
   --vf-ai-chan-chu: #a51b1b;
-  --vf-ai-sua: #b7791f;         /* fix    - cần sửa */
+  --vf-ai-sua: #d97706;         /* fix    - cần sửa (vàng cam hổ phách tươi, rõ nét) */
   --vf-ai-sua-nen: #fdf3d6;
   --vf-ai-sua-chu: #7a5410;
   --vf-ai-goi-y: #8e929c;       /* tip    - gợi ý */
@@ -19,28 +19,85 @@
   --vf-ai-chu-phu: #55565b;
 }
 
-/* ── Băng trạng thái sticky ─────────────────────────────────────────── */
+/* ── Triệt tiêu khoảng cách giữa tab View/Edit và Băng Sticky ───────── */
+
+header.content-header,
+header.page-header {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+header.content-header .layout-container,
+header.page-header .layout-container {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.block-local-tasks-block,
+.tabs-wrapper,
+nav.tabs,
+.tabs,
+ul.tabs--primary {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* ── Băng trạng thái sticky tràn 100% full-width, dính sát đáy header ── */
 
 .vf-ai-band {
   position: sticky;
-  /* PHẢI trừ chiều cao thanh admin toolbar, nếu không băng dính ở top:0
-     nhưng nằm SAU LƯNG toolbar và coi như biến mất - đúng lúc người dùng
-     cuộn xuống, tức đúng lúc cần nó nhất.
-     Drupal đặt --drupal-displace-offset-top qua displace.js; giá trị dự
-     phòng 0px cho trường hợp toolbar tắt hoặc người dùng không có quyền. */
   top: var(--drupal-displace-offset-top, 0px);
-  z-index: 20;
+  z-index: 500;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 14px;
   padding: 12px 24px;
-  margin-bottom: 18px;
+  margin: 0 !important;
   background: #fff;
   border-bottom: 1px solid var(--vf-ai-vien);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
   font-size: 14px;
   color: var(--vf-ai-chu);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.vf-ai-band--veto {
+  background: #fdf5f5 !important;
+}
+
+.vf-ai-band--stale {
+  background: #fbfbfd !important;
+}
+
+/* Khoảng cách giữa băng sticky và nội dung form bên dưới */
+main > .layout-container,
+.page-content {
+  margin-top: 24px !important;
+  padding-top: 0 !important;
+}
+
+.vf-ai-band__trai {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.vf-ai-band__phai {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.vf-ai-band__ngan {
+  display: inline-block;
+  width: 1px;
+  height: 22px;
+  background: var(--vf-ai-vien);
 }
 
 .vf-ai-band__badge {
@@ -53,10 +110,9 @@
   font-weight: 700;
 }
 
-.vf-ai-band__badge::before {
-  content: "";
-  width: 8px;
-  height: 8px;
+.vf-ai-band__dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: currentColor;
 }
@@ -99,40 +155,92 @@
   letter-spacing: .04em;
 }
 
-.vf-ai-band__dem strong { font-size: 15px; }
+.vf-ai-band__dem strong {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vf-ai-chu);
+}
+.vf-ai-band__dem-truong {
+  color: var(--vf-ai-chu-phu);
+}
 .vf-ai-band__dem,
 .vf-ai-band__diem,
 .vf-ai-band__gio,
-.vf-ai-band__ly-do { color: var(--vf-ai-chu-phu); font-size: 13.5px; }
-.vf-ai-band__diem strong { color: var(--vf-ai-chu); font-size: 15px; }
-.vf-ai-band__ly-do { flex-basis: 100%; color: var(--vf-ai-chan-chu); }
-.vf-ai-band__gio { margin-left: auto; }
-
-/* Điều khiển do JS chèn: không có JS thì không có phần tử nào ở đây. */
-.vf-ai-band__dieu-khien { display: flex; align-items: center; gap: 8px; }
-
-.vf-ai-nut {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 10px;
-  border: 1px solid #919297;
-  border-radius: 2px;
-  background: #fff;
+.vf-ai-band__ly-do {
+  color: var(--vf-ai-chu-phu);
+  font-size: 13.5px;
+}
+.vf-ai-band__diem strong {
   color: var(--vf-ai-chu);
-  font-size: 13px;
-  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+}
+.vf-ai-band__ly-do {
+  flex-basis: 100%;
+  color: var(--vf-ai-chan-chu);
 }
 
-.vf-ai-nut:hover { border-color: #0036b1; color: #0036b1; }
-.vf-ai-nut[disabled] { opacity: .45; cursor: default; }
+/* Spinner và dot cho dang_cham */
+@keyframes vfspin {
+  to { transform: rotate(360deg); }
+}
+
+.vf-ai-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #c3c5cc;
+  border-top-color: #003ecc;
+  border-radius: 50%;
+  animation: vfspin .9s linear infinite;
+  vertical-align: middle;
+}
+
+.vf-ai-dot-done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #3f7a52;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.vf-ai-dot-cho {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #c3c5cc;
+  border-radius: 50%;
+}
+
+/* ── Chip bộ lọc trên băng ──────────────────────────────────────────── */
+
+.vf-ai-band__chips {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 
 .vf-ai-chip {
-  padding: 4px 10px;
+  padding: 5px 11px;
+  cursor: pointer;
   border: 1px solid var(--vf-ai-vien);
   border-radius: 12px;
   background: #fff;
+  color: #3d3e44;
   font-size: 12.5px;
-  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  line-height: 1.2;
+  transition: all .15s ease;
+}
+
+.vf-ai-chip:hover {
+  border-color: #919297;
 }
 
 .vf-ai-chip[aria-pressed="true"] {
@@ -141,131 +249,636 @@
   color: #fff;
 }
 
+.vf-ai-chip span {
+  margin-left: 2px;
+}
+
+/* ── Điều khiển bên phải băng ───────────────────────────────────────── */
+
+.vf-ai-band__pos {
+  min-width: 64px;
+  font-size: 13.5px;
+  color: var(--vf-ai-chu-phu);
+  text-align: center;
+}
+
+.vf-ai-nut-nav {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid #919297;
+  border-radius: 2px;
+  background: #fff;
+  color: #3d3e44;
+  font-size: 15px;
+  font-family: inherit;
+  line-height: 1;
+  padding: 0;
+  transition: all .15s ease;
+}
+
+.vf-ai-nut-nav:hover:not([disabled]) {
+  border-color: #0036b1;
+  color: #0036b1;
+}
+
+.vf-ai-nut-nav[disabled] {
+  opacity: .4;
+  cursor: default;
+}
+
+.vf-ai-nut-rescore {
+  padding: 9px 15px;
+  cursor: pointer;
+  color: var(--vf-ai-chu);
+  border: 1px solid #919297;
+  border-radius: 2px;
+  background: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  line-height: 1.2;
+  transition: all .15s ease;
+}
+
+.vf-ai-nut-rescore:hover {
+  border-color: #003ecc;
+  color: #003ecc;
+}
+
+.vf-ai-link-toggle {
+  font-size: 13px;
+  color: #003ecc;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.vf-ai-link-toggle:hover {
+  text-decoration: underline;
+  color: #0036b1;
+}
+
+/* ── Dải cảnh báo toàn cục trên đỉnh form (veto, stale, thieu) ───────── */
+
+.vf-ai-globalnote {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 11px 14px;
+  border: 1px solid var(--vf-ai-vien);
+  border-left: 3px solid var(--vf-ai-goi-y);
+  border-radius: 3px;
+  background: #fbfbfd;
+  font-size: 13.5px;
+  color: #3d3e44;
+}
+
+.vf-ai-globalnote--veto {
+  border-left-color: var(--vf-ai-chan) !important;
+  background: #fdf7f7 !important;
+  color: #8f1717 !important;
+}
+
+.vf-ai-globalnote--stale {
+  border-left-color: var(--vf-ai-sua) !important;
+}
+
+.vf-ai-globalnote--thieu {
+  border-left-color: var(--vf-ai-goi-y) !important;
+}
+
+/* ── Thông báo trường Đạt (trạng thái dat) ───────────────────────────── */
+
+.vf-ai-ok {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--vf-ai-dat);
+  font-weight: 600;
+}
+
+.vf-ai-ok-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--vf-ai-dat);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
 /* ── Hộp báo cáo dưới từng field ────────────────────────────────────── */
 
 .vf-ai-hop {
-  margin: 8px 0 22px;
+  margin: 8px 0 24px;
   border: 1px solid var(--vf-ai-vien);
   border-radius: 3px;
   overflow: hidden;
+  background: #fff;
 }
 
 .vf-ai-hop__dau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 12px;
   background: #f8f9fc;
-  border-bottom: 1px solid var(--vf-ai-vien);
+  border-bottom: 1px solid #e6e7ed;
   font-size: 12.5px;
   font-weight: 700;
   color: var(--vf-ai-chu-phu);
 }
 
+.vf-ai-hop__dau-chu-thich {
+  color: #8b8c92;
+  font-weight: 400;
+}
+
+.vf-ai-hop__thu-gon {
+  margin-left: auto;
+  font-size: 12.5px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #003ecc;
+  cursor: pointer;
+}
+
+.vf-ai-hop__thu-gon:hover {
+  text-decoration: underline;
+  color: #0036b1;
+}
+
 .vf-ai-the {
+  display: flex;
+  gap: 12px;
   padding: 12px;
   border-left: 3px solid var(--vf-ai-goi-y);
   border-bottom: 1px solid #e6e7ed;
   background: #fff;
+  transition: background .15s, opacity .15s;
 }
 
-.vf-ai-the:last-child { border-bottom: 0; }
-.vf-ai-the--block { border-left-color: var(--vf-ai-chan); background: #fffafa; }
-.vf-ai-the--fix { border-left-color: var(--vf-ai-sua); }
-.vf-ai-the--tip { border-left-color: var(--vf-ai-goi-y); }
+.vf-ai-the:last-child {
+  border-bottom: 0;
+}
 
-.vf-ai-the__dau {
+.vf-ai-the--block {
+  border-left-color: var(--vf-ai-chan);
+  background: #fffafa;
+}
+
+.vf-ai-the--fix {
+  border-left-color: var(--vf-ai-sua);
+  background: #fff;
+}
+
+.vf-ai-the--tip {
+  border-left-color: var(--vf-ai-goi-y);
+  background: #fff;
+}
+
+.vf-ai-the--stale {
+  opacity: .5 !important;
+}
+
+/* Badge mã tiêu chí bên trái thẻ */
+.vf-ai-the__ma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 7px;
+  height: 20px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.vf-ai-the__ma--block {
+  background: var(--vf-ai-chan-nen);
+  color: var(--vf-ai-chan-chu);
+}
+
+.vf-ai-the__ma--fix {
+  background: var(--vf-ai-sua-nen);
+  color: var(--vf-ai-sua-chu);
+}
+
+.vf-ai-the__ma--tip {
+  background: var(--vf-ai-goi-y-nen);
+  color: var(--vf-ai-goi-y-chu);
+}
+
+.vf-ai-the__noi-dung {
+  flex: 1;
+  min-width: 0;
+}
+
+.vf-ai-the__hang-tieu-de {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
 }
 
-/* Badge tên agent.
-   KHÔNG dùng font monospace: bundle handoff đặt mono cho MÃ TIÊU CHÍ ngắn
-   ("CP8"), nhưng phương án A chưa có mã đó nên chỗ này đang hiện TÊN AGENT
-   tiếng Việt. Mono làm "Chất Lượng" giãn chữ rời rạc, khó đọc.
-   Đổi lại mono khi nào backend trả `ma` (xem editor-ui-design.md mục 10.1). */
-.vf-ai-the__ma {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: .01em;
-  white-space: nowrap;
+.vf-ai-the__tieu-de {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--vf-ai-chu);
+  line-height: 1.35;
 }
 
-.vf-ai-the--block .vf-ai-the__ma { background: var(--vf-ai-chan-nen); color: var(--vf-ai-chan-chu); }
-.vf-ai-the--fix .vf-ai-the__ma { background: var(--vf-ai-sua-nen); color: var(--vf-ai-sua-chu); }
-.vf-ai-the--tip .vf-ai-the__ma { background: var(--vf-ai-goi-y-nen); color: var(--vf-ai-goi-y-chu); }
+.vf-ai-the__agent-ten {
+  font-weight: 400;
+  color: #6a6b70;
+  font-size: 13.5px;
+}
 
 .vf-ai-the__chan {
-  padding: 2px 8px;
+  padding: 1px 7px;
   border-radius: 3px;
   background: var(--vf-ai-chan);
   color: #fff;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
+  line-height: 1.4;
 }
 
-.vf-ai-the__tieu-de { font-size: 14.5px; font-weight: 600; }
-.vf-ai-the__mo-ta { margin-top: 3px; font-size: 13.5px; color: var(--vf-ai-chu-phu); }
+.vf-ai-the__mo-ta {
+  margin-top: 3px;
+  font-size: 13.5px;
+  color: var(--vf-ai-chu-phu);
+  line-height: 1.45;
+}
 
+.vf-ai-trich,
 .vf-ai-the__trich {
-  margin: 8px 0 0;
-  padding: 6px 10px;
+  margin: 7px 0 0;
+  padding: 6px 9px;
   border-left: 2px solid var(--vf-ai-vien);
   background: #fafafb;
-  color: #666;
+  color: #6a6b70;
   font-style: italic;
+  font-size: 13px;
+  line-height: 1.4;
+  quotes: none;
+}
+
+.vf-ai-trich::before,
+.vf-ai-the__trich::before,
+.vf-ai-trich::after,
+.vf-ai-the__trich::after,
+blockquote.vf-ai-the__trich::before,
+blockquote.vf-ai-the__trich::after {
+  content: none !important;
+  display: none !important;
+}
+
+.vf-ai-the__hanh-dong {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 9px;
   font-size: 13px;
 }
 
+.vf-ai-the__xong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #3d3e44;
+  font-size: 13px;
+  user-select: none;
+}
+
+.vf-ai-the__xong input[type="checkbox"] {
+  margin: 0;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  accent-color: #003ecc;
+}
+
+.vf-ai-nut-autofix {
+  padding: 5px 11px;
+  cursor: pointer;
+  border: 1px solid #003ecc;
+  border-radius: 2px;
+  background: #fff;
+  color: #003ecc;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  transition: all .15s ease;
+}
+
+.vf-ai-nut-autofix:hover:not([disabled]) {
+  background: #003ecc;
+  color: #fff;
+}
+
+.vf-ai-nut-autofix[disabled] {
+  color: #6a6b70;
+  border-color: #dedfe4;
+  background: #fafafa;
+  cursor: default;
+}
+
+.vf-ai-link-disagree {
+  color: #55565b;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.vf-ai-link-disagree:hover {
+  color: #232429;
+  text-decoration: underline;
+}
+
 /* Trạng thái do JS đặt */
-.vf-ai-the--xong { opacity: .5; border-left-color: var(--vf-ai-goi-y); }
-.vf-ai-the--dang-chon { outline: 2px solid #003ecc; outline-offset: -2px; }
-.vf-ai-the__xong { display: block; margin-top: 8px; font-size: 12.5px; cursor: pointer; }
+.vf-ai-the--xong {
+  opacity: .45;
+  border-left-color: var(--vf-ai-goi-y) !important;
+}
 
-/* Trạng thái stale: kết quả nói về một bản nội dung khác, làm mờ để người
-   duyệt không đọc nó như thể đang mô tả bản đang soạn. */
-.vf-ai-band--stale ~ * .vf-ai-hop { opacity: .5; }
+.vf-ai-the--dang-chon {
+  outline: 2px solid #003ecc;
+  outline-offset: -1px;
+}
 
-/* ── Viền ô nhập theo mức nghiêm trọng cao nhất (JS đặt) ────────────────
-   Class đặt TRỰC TIẾP lên ô nhập, không lên phần tử bao.
-   Bản trước đặt lên tổ tiên rồi chọn con bằng `.vf-ai-field--fix input`,
-   và vì tổ tiên tìm bằng closest() nên nó trúng container chứa MỌI field:
-   Tags và Meta description bị tô viền dù không có lỗi nào. */
+/* ── Card Điểm theo agent (Sidebar) ─────────────────────────────────── */
 
-.vf-ai-o--block { border-color: var(--vf-ai-chan) !important; }
-.vf-ai-o--fix { border-color: var(--vf-ai-sua) !important; }
+.vf-ai-agent-card {
+  margin-top: 0;
+  border: 1px solid var(--vf-ai-vien);
+  border-radius: 2px;
+  background: #fff;
+  overflow: hidden;
+}
 
-/* CKEditor dựng nhiều lớp lồng nhau (toolbar + vùng soạn) và viền nhìn thấy
-   nằm ở lớp nào là chuyện nội bộ của nó, đổi được giữa các bản.
-   Dùng box-shadow vẽ một vòng quanh CẢ khung thay vì đoán xem phải đặt
-   border-color lên lớp nào - cách này không phụ thuộc cấu trúc bên trong. */
-.ck.ck-editor.vf-ai-o--block { box-shadow: 0 0 0 1px var(--vf-ai-chan); border-radius: 2px; }
-.ck.ck-editor.vf-ai-o--fix { box-shadow: 0 0 0 1px var(--vf-ai-sua); border-radius: 2px; }
+.vf-ai-agent-card--stale {
+  opacity: .55 !important;
+}
 
-/* ── Dòng cảnh báo cạnh nút Save (JS chèn) ──────────────────────────── */
+.vf-ai-agent-card__head {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--vf-ai-vien);
+  background: #fbfbfd;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--vf-ai-chu);
+}
 
-.vf-ai-chan-luu { margin: 0 0 8px; font-size: 13.5px; color: var(--vf-ai-chu-phu); }
-.vf-ai-chan-luu strong { color: var(--vf-ai-chan); }
+.vf-ai-agent-card__body {
+  padding: 14px 18px;
+}
 
-/* ── Khối cũ: giữ nguyên, vẫn dùng ở cột phải ───────────────────────── */
+.vf-ai-agent-card__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13.5px;
+  color: var(--vf-ai-chu);
+}
 
-.vf-ai-review { font-size: 0.9em; line-height: 1.5; }
-.vf-ai-review .vf-ai-meta { margin: 0 0 0.75em; }
-.vf-ai-review .vf-ai-meta dt { font-weight: 600; margin-top: 0.4em; }
-.vf-ai-review .vf-ai-meta dd { margin: 0 0 0.2em; }
-.vf-ai-review ul { margin: 0.3em 0 0; padding-left: 1.2em; }
-.vf-ai-empty { color: #545560; font-style: italic; }
+.vf-ai-agent-card__name {
+  flex: 1;
+  color: var(--vf-ai-chu);
+}
+
+.vf-ai-agent-card__bar-bg {
+  width: 80px;
+  height: 5px;
+  border-radius: 3px;
+  background: #e8e9ee;
+  overflow: hidden;
+  display: block;
+}
+
+.vf-ai-agent-card__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width .3s ease;
+}
+
+.vf-ai-agent-card__bar-fill--seo {
+  background: #3f7a52 !important; /* Xanh lá */
+}
+
+.vf-ai-agent-card__bar-fill--cq {
+  background: #b7791f !important; /* Vàng nâu */
+}
+
+.vf-ai-agent-card__bar-fill--bv {
+  background: #c07010 !important; /* Cam hổ phách */
+}
+
+.vf-ai-agent-card__bar-fill--cp {
+  background: #d72222 !important; /* Đỏ */
+}
+
+.vf-ai-agent-card__bar-fill--dat {
+  background: #3f7a52 !important;
+}
+
+.vf-ai-agent-card__bar-fill--fix {
+  background: #b7791f !important;
+}
+
+.vf-ai-agent-card__bar-fill--block {
+  background: #d72222 !important;
+}
+
+.vf-ai-agent-card__val {
+  width: 42px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--vf-ai-chu);
+}
+
+.vf-ai-agent-card__footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e6e7ed;
+  font-size: 12.5px;
+  color: var(--vf-ai-chu-phu);
+}
+
+.vf-ai-agent-card__link {
+  color: #003ecc;
+  text-decoration: none;
+  font-size: 12.5px;
+}
+
+.vf-ai-agent-card__link:hover {
+  text-decoration: underline;
+}
+
+/* ── Ẩn nút Chấm lại thừa ở sidebar (đã có trên băng sticky) ────────── */
+
+.vf-ai-review-wrapper .button,
+.vf-ai-review-wrapper .vf-ai-cham-lai,
+[data-vf-ai-rescore-url].vf-ai-cham-lai {
+  display: none !important;
+}
+
+/* ── Khối cảnh báo trạng thái đẹp mắt ──────────────────────────────── */
+
+.vf-ai-trang-thai:not(:empty) {
+  margin: 0 0 16px 0;
+  padding: 10px 14px;
+  background: #fff8e5;
+  border: 1px solid #f2e1b8;
+  border-left: 4px solid #e5a83b;
+  border-radius: 3px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #7a5410;
+  font-weight: 500;
+}
+
+/* Hiệu ứng chớp sáng khi nhảy lỗi */
+@keyframes vfflash {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,62,204,0); }
+  30% { box-shadow: 0 0 0 4px rgba(0,62,204,.28); }
+}
+
+.vf-ai-flash {
+  animation: vfflash 1.1s ease-out 2 !important;
+}
+
+/* ── Viền ô nhập theo mức nghiêm trọng cao nhất (JS đặt) ──────────────── */
+
+.vf-ai-o--block {
+  border-color: var(--vf-ai-chan) !important;
+  box-shadow: 0 0 0 1px var(--vf-ai-chan) !important;
+}
+.vf-ai-o--fix {
+  border-color: var(--vf-ai-sua) !important;
+  box-shadow: 0 0 0 1px var(--vf-ai-sua) !important;
+}
+.vf-ai-o--dat {
+  border-color: var(--vf-ai-dat) !important;
+  box-shadow: 0 0 0 1px var(--vf-ai-dat) !important;
+}
+
+.ck.ck-editor.vf-ai-o--block,
+.ck.ck-editor.vf-ai-o--block .ck-toolbar,
+.ck.ck-editor.vf-ai-o--block .ck-editor__main > .ck-editor__editable {
+  border-color: var(--vf-ai-chan) !important;
+}
+.ck.ck-editor.vf-ai-o--block {
+  box-shadow: 0 0 0 1px var(--vf-ai-chan) !important;
+  border-radius: 2px;
+}
+
+.ck.ck-editor.vf-ai-o--fix,
+.ck.ck-editor.vf-ai-o--fix .ck-toolbar,
+.ck.ck-editor.vf-ai-o--fix .ck-editor__main > .ck-editor__editable {
+  border-color: var(--vf-ai-sua) !important;
+}
+.ck.ck-editor.vf-ai-o--fix {
+  box-shadow: 0 0 0 1px var(--vf-ai-sua) !important;
+  border-radius: 2px;
+}
+
+.ck.ck-editor.vf-ai-o--dat,
+.ck.ck-editor.vf-ai-o--dat .ck-toolbar,
+.ck.ck-editor.vf-ai-o--dat .ck-editor__main > .ck-editor__editable {
+  border-color: var(--vf-ai-dat) !important;
+}
+.ck.ck-editor.vf-ai-o--dat {
+  box-shadow: 0 0 0 1px var(--vf-ai-dat) !important;
+  border-radius: 2px;
+}
+
+/* ── Dòng cảnh báo cạnh nút Save / Delete (JS chèn) ──────────────────── */
+
+.form-actions,
+#edit-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+.vf-ai-chan-luu {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  margin: 0 0 0 16px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--vf-ai-chu-phu);
+  vertical-align: middle;
+}
+.vf-ai-chan-luu strong {
+  color: var(--vf-ai-chan);
+  font-weight: 700;
+}
+.vf-ai-chan-luu--ok {
+  color: var(--vf-ai-dat);
+}
+
+/* ── Khối fallback cũ ──────────────────────────────────────────────── */
+
+.vf-ai-review {
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.vf-ai-review .vf-ai-meta {
+  margin: 0 0 0.75em;
+}
+.vf-ai-review .vf-ai-meta dt {
+  font-weight: 600;
+  margin-top: 0.4em;
+}
+.vf-ai-review .vf-ai-meta dd {
+  margin: 0 0 0.2em;
+}
+.vf-ai-review ul {
+  margin: 0.3em 0 0;
+  padding-left: 1.2em;
+}
+.vf-ai-empty {
+  color: #545560;
+  font-style: italic;
+}
 
 .vf-ai-veto {
-  background: #fcf4f2; border-left: 4px solid #e34f4f;
-  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+  background: #fcf4f2;
+  border-left: 4px solid #e34f4f;
+  padding: 0.6em 0.8em;
+  margin-bottom: 0.75em;
 }
 .vf-ai-stale {
-  background: #fdf8ed; border-left: 4px solid #e5a83b;
-  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+  background: #fdf8ed;
+  border-left: 4px solid #e5a83b;
+  padding: 0.6em 0.8em;
+  margin-bottom: 0.75em;
 }
 .vf-ai-warn {
-  background: #f3f4f9; border-left: 4px solid #4d4d4d;
-  padding: 0.6em 0.8em; margin-bottom: 0.75em;
+  background: #f3f4f9;
+  border-left: 4px solid #4d4d4d;
+  padding: 0.6em 0.8em;
+  margin-bottom: 0.75em;
 }

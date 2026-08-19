@@ -1,0 +1,240 @@
+/* VinFast Custom Styling */
+:root {
+  --vf-primary: #00237a;
+  --vf-primary-hover: #001f68;
+  --vf-blue-glow: rgba(0, 85, 255, 0.15);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9f9f9;
+  color: #1a1c1c;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(230, 231, 232, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(47, 49, 49, 0.75);
+  border-color: rgba(116, 118, 133, 0.3);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #00237a;
+  color: #ffffff;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px 0 rgba(0, 35, 122, 0.15);
+}
+
+.btn-primary:hover {
+  background-color: #001f68;
+  box-shadow: 0 6px 20px rgba(0, 35, 122, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #00237a;
+  border: 1px solid #c4c5d6;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(230, 231, 232, 0.3);
+  border-color: #00237a;
+}
+
+/* Image Animations & Hover */
+.card-hover-image {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-container:hover .card-hover-image {
+  transform: scale(1.05);
+}
+
+.img-hover-zoom {
+  overflow: hidden;
+}
+
+.img-hover-zoom img {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.img-hover-zoom:hover img {
+  transform: scale(1.05);
+}
+
+/* Typography for Article Content */
+.article-content {
+  font-family: 'Inter', sans-serif;
+  color: #444653;
+  line-height: 1.75;
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+.article-content h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 2rem;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #00237a;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.article-content h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.5rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #00237a;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.article-content ul, .article-content ol {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.article-content ul {
+  list-style-type: disc;
+}
+
+.article-content ol {
+  list-style-type: decimal;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+
+.article-content a {
+  color: #0035ad;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.article-content a:hover {
+  color: #0055ff;
+}
+
+.article-content blockquote {
+  margin: 2.5rem 0;
+  padding: 1.75rem 2rem;
+  border-left: 4px solid #00237a;
+  background: rgba(243, 243, 243, 0.7);
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Header and Body spacing */
+body {
+  padding-top: 5rem !important; /* 80px */
+}
+
+/* Drupal Admin Toolbar spacing when logged in */
+body.toolbar-fixed {
+  padding-top: calc(5rem + 39px) !important; /* 80px + 39px */
+}
+
+body.toolbar-fixed.toolbar-horizontal.toolbar-tray-open {
+  padding-top: calc(5rem + 79px) !important; /* 80px + 79px */
+}
+
+body.toolbar-fixed nav.fixed,
+body.toolbar-fixed header.fixed {
+  top: 39px !important;
+}
+
+body.toolbar-fixed.toolbar-horizontal.toolbar-tray-open nav.fixed,
+body.toolbar-fixed.toolbar-horizontal.toolbar-tray-open header.fixed {
+  top: 79px !important;
+}
+
+
+/* Drupal User Login Form Customization */
+.vf-drupal-login-form .form-item label {
+  display: none;
+}
+.vf-drupal-login-form .description {
+  font-size: 0.75rem;
+  color: #747685;
+  margin-top: 0.25rem;
+}
+.vf-drupal-login-form h2.visually-hidden {
+  display: none !important;
+}
+
+/* Contextual Tabs (View, Edit, Delete, Revisions) */
+/* Contextual Action Tabs (View, Edit, Delete, Revisions) */
+.vf-local-tasks a,
+.vf-local-tasks-secondary a {
+  color: inherit !important;
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+}
+.vf-local-tasks .bg-primary a,
+.vf-local-tasks .is-active a {
+  color: #ffffff !important;
+}
+
+
+
+/* Drupal Messages styling */
+[data-drupal-messages] {
+  margin-bottom: 1.5rem;
+}
+[data-drupal-messages] .messages--error {
+  background-color: #ffdad6;
+  color: #93000a;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid #ba1a1a;
+}
+[data-drupal-messages] .messages--status {
+  background-color: #e1e2e6;
+  color: #00237a;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.input-field {
+  border: 1px solid #c4c5d6;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.input-field:focus {
+  outline: none;
+  border-color: #00237a;
+  box-shadow: 0 0 0 2px rgba(0, 35, 122, 0.1);
+}
+
+
+
+

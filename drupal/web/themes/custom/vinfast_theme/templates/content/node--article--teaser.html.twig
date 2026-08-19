@@ -1,0 +1,44 @@
+{#
+/**
+ * @file
+ * Theme override to display an Article node teaser card.
+ */
+#}
+<article
+  data-vf-blog-card
+  data-category="{{ vf_tags[0]|default('Tin tức') }}"
+  {{ attributes.addClass('card-container', 'flex', 'flex-col', 'bg-surface-container-lowest', 'border', 'border-outline-variant/40', 'rounded-2xl', 'overflow-hidden', 'hover:shadow-xl', 'transition-all', 'duration-300', 'transform', 'hover:-translate-y-1') }}
+>
+  <div class="relative h-64 overflow-hidden bg-surface-container">
+    <a href="{{ url }}" class="block w-full h-full">
+      <img
+        alt="{{ label }}"
+        class="w-full h-full object-cover card-hover-image"
+        src="{{ vf_hero_image }}"
+        loading="lazy"
+      />
+    </a>
+    <div class="absolute top-4 left-4">
+      <span class="bg-surface-white/95 backdrop-blur-md text-primary font-label-sm text-label-sm font-semibold uppercase px-3 py-1 rounded-md shadow-sm border border-outline-variant/30">
+        {{ vf_tags[0]|default('Tin tức') }}
+      </span>
+    </div>
+  </div>
+
+  <div class="p-6 flex-1 flex flex-col">
+    <h3 data-vf-card-title class="font-headline-lg text-xl md:text-2xl font-bold text-on-surface mb-3 line-clamp-2 hover:text-primary transition-colors">
+      <a href="{{ url }}">
+        {{ label }}
+      </a>
+    </h3>
+    <div data-vf-card-summary class="font-body-md text-on-surface-variant mb-6 line-clamp-3 flex-1 text-sm md:text-base leading-relaxed">
+      {{ content.body }}
+    </div>
+    <div class="flex items-center justify-between mt-auto pt-4 border-t border-outline-variant/30">
+      <span class="font-label-sm text-label-sm text-secondary font-medium">{{ vf_formatted_date }}</span>
+      <a class="text-primary hover:text-primary-container p-1 rounded-full hover:bg-surface-container transition-colors" href="{{ url }}" aria-label="Xem bài viết">
+        <span class="material-symbols-outlined align-middle" style="font-variation-settings: 'FILL' 0;">arrow_outward</span>
+      </a>
+    </div>
+  </div>
+</article>

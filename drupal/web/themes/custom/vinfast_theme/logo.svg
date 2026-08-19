@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Background Gradient: VinFast Deep Electric Blue -->
+    <linearGradient id="vf-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0035AD" />
+      <stop offset="100%" stop-color="#001F66" />
+    </linearGradient>
+
+    <!-- Chrome Metallic Gradients -->
+    <linearGradient id="vf-chrome-left" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="35%" stop-color="#E2E6EC" />
+      <stop offset="75%" stop-color="#A2AAB8" />
+      <stop offset="100%" stop-color="#707988" />
+    </linearGradient>
+
+    <linearGradient id="vf-chrome-right" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="35%" stop-color="#D9DFE8" />
+      <stop offset="75%" stop-color="#919AAB" />
+      <stop offset="100%" stop-color="#5E6777" />
+    </linearGradient>
+
+    <linearGradient id="vf-chrome-inner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="60%" stop-color="#CBD2DC" />
+      <stop offset="100%" stop-color="#8892A2" />
+    </linearGradient>
+
+    <!-- Subtle Glow Shadow -->
+    <filter id="vf-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- Rounded App Icon Background -->
+  <rect width="64" height="64" rx="14" fill="url(#vf-bg)" />
+  <rect width="62" height="62" x="1" y="1" rx="13" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="1" />
+
+  <!-- VinFast V Wing Logo -->
+  <g filter="url(#vf-shadow)">
+    <!-- Outer Wing: Left & Right Sweep -->
+    <!-- Left Outer Wing -->
+    <path d="M11 15 C17 26 25 41 32 50 C29 42 22 28 17 20 C14.5 16 12.5 15 11 15 Z" fill="url(#vf-chrome-left)" />
+    <!-- Right Outer Wing -->
+    <path d="M53 15 C47 26 39 41 32 50 C35 42 42 28 47 20 C49.5 16 51.5 15 53 15 Z" fill="url(#vf-chrome-right)" />
+    <!-- Outer Bottom Center Bridge -->
+    <path d="M32 50 L30 46.5 C31.3 48 32.7 48 34 46.5 Z" fill="#707988" />
+
+    <!-- Inner Wing (Secondary V) -->
+    <!-- Left Inner Wing -->
+    <path d="M19 22 C23 30 28 39 32 43.5 C30.5 38 26.5 28 23.5 22.5 C21.5 19 20 19.5 19 22 Z" fill="url(#vf-chrome-inner)" />
+    <!-- Right Inner Wing -->
+    <path d="M45 22 C41 30 36 39 32 43.5 C33.5 38 37.5 28 40.5 22.5 C42.5 19 44 19.5 45 22 Z" fill="url(#vf-chrome-inner)" />
+  </g>
+</svg>

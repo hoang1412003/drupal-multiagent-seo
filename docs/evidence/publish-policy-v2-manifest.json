@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
-  "data_head": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
-  "release_source_commit": "fcb57178736fb55ed9776d806ce48e8eecd2e39b",
+  "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+  "release_source_commit": "7cdcd6107919ff45daf1cc7c614e98aa17a6f20b",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -19,13 +19,13 @@
     "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
     "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
     "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-    "docs/functional-tests/criterion-coverage-labels.csv": "efb14df3c80d1b7b12f07b55d2a5447be5c6221a276dfabad86cc6d81b4a8591",
+    "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18",
     "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
     "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
     "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
     "docs/functional-tests/criterion-coverage/CV-A6-01.txt": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
     "docs/functional-tests/criterion-coverage/CV-A6-02.txt": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
-    "docs/functional-tests/criterion-coverage/CV-A7-01.txt": "7a694324e07751a7c6eb83a2e715aaee4a7392ecd74fad60591c2a80ff0fac27",
+    "docs/functional-tests/criterion-coverage/CV-A7-01.txt": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
     "docs/functional-tests/criterion-coverage/CV-A7-02.txt": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
     "docs/functional-tests/criterion-coverage/CV-B6-01.txt": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
     "docs/functional-tests/criterion-coverage/CV-B7-01.txt": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
@@ -101,7 +101,7 @@
     "multiagent/src/agents/brand_rules.json": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
     "multiagent/src/agents/brand_voice.py": "b9736c918ea65d4e1d2a54fc3223b9660fa18806bf20daceb9432df8ef964be5",
     "multiagent/src/agents/compliance.py": "a29e7086d22e6fd1697155454393a63b151bd76634ecbf22198fb142046259ef",
-    "multiagent/src/agents/content_quality.py": "54706766363b5bab95a5309e24a0d68db0cb4aa424c60a41438f22365f105b67",
+    "multiagent/src/agents/content_quality.py": "1cd4d4418f5484bdfe40ad0a5ab3cd7d4bb851a58cd4fd35c6d0c27abde06ba0",
     "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
     "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
     "multiagent/src/ai_core.py": "27e6f41bdfa7e9d62f14acd3724b2f9e5c5573fdaa023da41bd56062f8293ed0",
@@ -118,36 +118,24 @@
     "e1": {
       "status": "measured",
       "raw": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-2026-08-19.json",
-        "sha256": "1d5540e6b3d80acc828b327a59855c2221c3b640ee58096225f5821361ba4a59"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-2026-08-19c.json",
+        "sha256": "876e5b95d6e25d368361d1ddbcc70bc87e174d523d646ecd4358d6502909d4c6"
       },
       "report": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-2026-08-19-report.json",
-        "sha256": "0e00b78fe0cec9fcd2905e72c58ebe526f8e7515994b22c331c25bf5eb7940a2"
-      },
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-preflight-2026-08-19.json",
-        "sha256": "289b12e02f14bac822ee84662440785c1bb448e05a87c71128371c7cce96d647"
-      },
-      "runtime_release_sha256": "4d9c353c589a4585ed3db926773f1eab2b6885bccd99bf8899a4ec76835d11ec",
-      "confirmation_token_hash": "0b6e0667b18932b17b99c0d05c1d3d9e315428731e047e184e0cbb0b3866722a"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\e1-v2-2026-08-19c-report.json",
+        "sha256": "ad39a5e932f0b59a8e444553ec4b9caefe6f06d8cf0f26356290c74ebbdae8f4"
+      }
     },
     "gold": {
       "status": "measured",
       "raw": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19.json",
-        "sha256": "2ea9685a60a9676fecb406ac500ec6761a5837cffca9f76632130d5281ce8a36"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19c.json",
+        "sha256": "7944422725f5e53b689c11d779c1ff7edf77813a317331df539fec757a6f120b"
       },
       "report": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19-report.json",
-        "sha256": "37eadf8131e061608bc569c6916f3a132e260d3adb17d85857206c5aaf888159"
-      },
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-preflight-2026-08-19.json",
-        "sha256": "a229d5e67660b78f4ca134cf43937b8b71b37fdb66cd39239bd2e300e95dcc1b"
-      },
-      "runtime_release_sha256": "0be3cbb5893d4a432b1c0e3e0f17af31751fb08c0672ea42224e2cb7d08b0d94",
-      "confirmation_token_hash": "db6e5b06e3806b355c2f39242519f2d65a47fb9ca6293a4522f5c7ea790755bc"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19c-report.json",
+        "sha256": "4f6b465029cd7fff0ca0ab7eb86c361a385ac2a4ea856580757309277a7fa946"
+      }
     },
     "corrected": {
       "status": "preflighted",
@@ -365,7 +353,7 @@
         "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
         "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
         "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
-        "CV-A7-01": "7a694324e07751a7c6eb83a2e715aaee4a7392ecd74fad60591c2a80ff0fac27",
+        "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
         "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
         "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
         "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
@@ -378,11 +366,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-18T17:32:18.846303+00:00",
+  "frozen_at": "2026-08-19T07:28:53.818241+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
-    "data_head": "eb5898e61a6e28f0911d1dc7da57e8e4c9918952",
-    "release_source_commit": "fcb57178736fb55ed9776d806ce48e8eecd2e39b",
+    "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+    "release_source_commit": "7cdcd6107919ff45daf1cc7c614e98aa17a6f20b",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -400,13 +388,13 @@
       "docs/functional-tests/clean/C-009.txt": "9eec49b65a8509ceda71e531408e496ebaa7ea4bb91a536da6ce577ae966797f",
       "docs/functional-tests/clean/C-010.txt": "bff65dcffb4079ec12de267f627fca7c68fffda19aec124e7bcaee4ecbdb04ec",
       "docs/functional-tests/clean_labels.csv": "e5f8fc457b15286cef504b440ac6a96fbb1ca707c17ca1a169ddb6533e87deef",
-      "docs/functional-tests/criterion-coverage-labels.csv": "efb14df3c80d1b7b12f07b55d2a5447be5c6221a276dfabad86cc6d81b4a8591",
+      "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18",
       "docs/functional-tests/criterion-coverage/CV-A3-01.txt": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
       "docs/functional-tests/criterion-coverage/CV-A5-01.txt": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
       "docs/functional-tests/criterion-coverage/CV-A5-02.txt": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
       "docs/functional-tests/criterion-coverage/CV-A6-01.txt": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
       "docs/functional-tests/criterion-coverage/CV-A6-02.txt": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
-      "docs/functional-tests/criterion-coverage/CV-A7-01.txt": "7a694324e07751a7c6eb83a2e715aaee4a7392ecd74fad60591c2a80ff0fac27",
+      "docs/functional-tests/criterion-coverage/CV-A7-01.txt": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
       "docs/functional-tests/criterion-coverage/CV-A7-02.txt": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
       "docs/functional-tests/criterion-coverage/CV-B6-01.txt": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
       "docs/functional-tests/criterion-coverage/CV-B7-01.txt": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
@@ -482,7 +470,7 @@
       "multiagent/src/agents/brand_rules.json": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
       "multiagent/src/agents/brand_voice.py": "b9736c918ea65d4e1d2a54fc3223b9660fa18806bf20daceb9432df8ef964be5",
       "multiagent/src/agents/compliance.py": "a29e7086d22e6fd1697155454393a63b151bd76634ecbf22198fb142046259ef",
-      "multiagent/src/agents/content_quality.py": "54706766363b5bab95a5309e24a0d68db0cb4aa424c60a41438f22365f105b67",
+      "multiagent/src/agents/content_quality.py": "1cd4d4418f5484bdfe40ad0a5ab3cd7d4bb851a58cd4fd35c6d0c27abde06ba0",
       "multiagent/src/agents/fact_check.py": "7bc1b2c9c3bdfb73887da26543f223a6233065892d2f8f5c4a5c0356de1d7a3a",
       "multiagent/src/agents/seo.py": "4fb297c8b402b5ae1d1f7f373d72bbbd2c4748b7d28f939f0609884c12d84539",
       "multiagent/src/ai_core.py": "27e6f41bdfa7e9d62f14acd3724b2f9e5c5573fdaa023da41bd56062f8293ed0",
@@ -680,7 +668,7 @@
           "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
           "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
           "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
-          "CV-A7-01": "7a694324e07751a7c6eb83a2e715aaee4a7392ecd74fad60591c2a80ff0fac27",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
           "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
           "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
           "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
@@ -694,5 +682,5 @@
       }
     }
   },
-  "release_sha256": "8ca6f1afd25344941bb2b55944aa845c70e3d66c7dea333b9e78c30c5d0f840c"
+  "release_sha256": "b154057aee95429493c407e3b077c6ec8ad29a010e5129ed153c4d3b2b4f0f9a"
 }

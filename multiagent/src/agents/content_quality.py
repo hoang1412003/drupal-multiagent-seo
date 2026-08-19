@@ -145,9 +145,11 @@ _A5_PROMPT = (
     "nhưng vẫn trả lời title KHÔNG phải A5.\n"
     "Trả đúng một check id A5. `status` là `present`, `absent` hoặc "
     "`unavailable`. Khi `present`, field phải là `body` và evidence phải là "
-    "trích dẫn nguyên văn từ body cho thấy nội dung đang đi sai chủ đề. "
-    "Không đủ căn cứ đánh giá thì dùng `unavailable`, không suy thành "
-    "`absent`."
+    "NGUYÊN VĂN MỘT câu bất kỳ trong body minh hoạ rõ nhất việc lạc đề - "
+    "KHÔNG được mô tả hay tóm tắt cả đoạn (không viết kiểu 'toàn bộ đoạn từ "
+    "... đến ...'), chỉ trích đúng một câu có thật trong body. Giải thích vì "
+    "sao cả bài lạc đề thì để ở `reason`, không phải ở `evidence`. Không đủ "
+    "căn cứ đánh giá thì dùng `unavailable`, không suy thành `absent`."
 )
 
 _LLM_SCHEMA = {

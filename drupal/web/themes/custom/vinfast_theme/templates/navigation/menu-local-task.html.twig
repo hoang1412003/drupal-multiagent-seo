@@ -1,0 +1,17 @@
+{#
+/**
+ * @file
+ * Theme override for a single local task link.
+ */
+#}
+<li{{ attributes.addClass('inline-flex', 'items-center') }}>
+  {% if is_active %}
+    <span class="inline-flex items-center px-4 py-1.5 rounded-xl bg-primary text-white font-label-md text-xs font-semibold shadow-sm">
+      {{ link }}
+    </span>
+  {% else %}
+    <span class="inline-flex items-center px-4 py-1.5 rounded-xl text-on-surface hover:bg-surface-container-high hover:text-primary transition-all font-label-md text-xs font-medium">
+      {{ link }}
+    </span>
+  {% endif %}
+</li>

@@ -1,0 +1,22 @@
+name: 'VinFast Theme'
+type: theme
+description: 'Giao diện Blog VinFast V-Velocity Kinetic Modern & Glassmorphic cho Drupal 10.'
+core_version_requirement: ^10
+package: 'Custom'
+base theme: false
+
+libraries:
+  - vinfast_theme/fonts
+  - vinfast_theme/icons
+  - vinfast_theme/tailwind
+  - vinfast_theme/global-styling
+  - vinfast_theme/scripts
+
+regions:
+  header: 'Header / Top Nav'
+  primary_menu: 'Primary Menu'
+  highlighted: 'Highlighted'
+  hero: 'Hero Section'
+  content: 'Main Content'
+  sidebar: 'Sidebar'
+  footer: 'Footer'

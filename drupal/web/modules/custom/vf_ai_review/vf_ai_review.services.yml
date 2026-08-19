@@ -1,0 +1,5 @@
+services:
+  vf_ai_review.user_admin_theme_negotiator:
+    class: Drupal\vf_ai_review\Theme\UserAdminThemeNegotiator
+    tags:
+      - { name: theme_negotiator, priority: 50 }

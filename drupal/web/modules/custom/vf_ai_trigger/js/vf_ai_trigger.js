@@ -25,12 +25,46 @@
         // quả sẽ không mở ra sửa được.
         var da_thay_dang_chay = false;
 
+        function veDangChamTrenBand() {
+          var band = document.querySelector('[data-vf-ai-band]');
+          if (!band) return;
+          band.className = 'vf-ai-band vf-ai-band--dang_cham';
+          band.setAttribute('data-vf-ai-band', 'dang_cham');
+
+          var trai = band.querySelector('.vf-ai-band__trai');
+          if (trai) {
+            trai.innerHTML = '<span class="vf-ai-band__badge"><span class="vf-ai-spinner"></span>Đang chấm</span>'
+              + '<span style="display:flex; align-items:center; gap:12px; font-size:13.5px; color:#3d3e44;">'
+              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>SEO</span>'
+              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>Chất lượng</span>'
+              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-spinner"></span>Brand Voice</span>'
+              + '<span style="display:flex; align-items:center; gap:6px; color:#8b8c92;"><span class="vf-ai-dot-cho"></span>Tuân thủ</span>'
+              + '</span>'
+              + '<span style="flex:1; min-width:120px; max-width:220px; height:5px; border-radius:3px; background:#e8e9ee;"><span style="display:block; width:62%; height:5px; border-radius:3px; background:#003ecc;"></span></span>'
+              + '<span style="font-size:12.5px; color:#6a6b70;">còn ~40 giây · bạn vẫn có thể sửa bài</span>';
+          }
+          var phai = band.querySelector('[data-vf-ai-nav]');
+          if (phai) {
+            phai.innerHTML = '';
+          }
+          document.querySelectorAll('[data-vf-ai-hop]').forEach(function (h) {
+            h.style.display = 'none';
+          });
+          var luu = document.querySelector('.vf-ai-chan-luu');
+          if (luu) {
+            luu.innerHTML = '<span style="color:#55565b">Đang chờ kết quả chấm…</span>';
+            luu.className = 'vf-ai-chan-luu';
+          }
+        }
+
         function ve(trangThai) {
           if (trangThai === 'queued') {
             el.textContent = '⏳ Đã xếp hàng, đang chờ tới lượt…';
+            veDangChamTrenBand();
           }
           else if (trangThai === 'running') {
             el.textContent = '⏳ Đang chấm…';
+            veDangChamTrenBand();
           }
           else if (trangThai === 'failed') {
             el.textContent = '⛔ Chấm thất bại. Xem log của worker.';

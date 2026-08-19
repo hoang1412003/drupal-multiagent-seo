@@ -11,56 +11,43 @@
  * lý" nằm ở localStorage, khoá gồm cả content_hash - xem GHI_CHU_KHOA.
  */
 (function (Drupal, drupalSettings, once) {
-  'use strict';
+  "use strict";
 
-  var MUC = { block: 'Chặn xuất bản', fix: 'Cần sửa', tip: 'Gợi ý' };
+  var MUC = { block: "Chặn", fix: "Cần sửa", tip: "Gợi ý" };
 
   // Khoảng cách chừa ra khi cuộn tới lỗi: băng sticky + toolbar + chỗ thở.
   var CHUA_CHO_BANG = 160;
 
   /**
    * Đồng bộ chiều cao thanh admin toolbar vào biến CSS của băng.
-   *
-   * Không có bước này thì băng dính ở top:0 nhưng nằm SAU LƯNG toolbar và
-   * coi như biến mất khi cuộn - đúng lúc người dùng cần nó nhất.
-   *
-   * Drupal 10 mới tự đặt --drupal-displace-offset-top; bản cũ hơn thì không,
-   * nên vẫn phải tự đặt từ Drupal.displace. Cả hai đường đều bọc phòng thủ:
-   * không có displace thì rơi về 0 và băng vẫn dùng được, chỉ hơi khuất.
    */
   function dongBoOffset(doc) {
     var tren = 0;
     try {
-      if (Drupal.displace && typeof Drupal.displace.offsets === 'object') {
+      if (Drupal.displace && typeof Drupal.displace.offsets === "object") {
         tren = Drupal.displace.offsets.top || 0;
       }
+    } catch (e) {
+      /* không có toolbar: giữ 0 */
     }
-    catch (e) { /* không có toolbar: giữ 0 */ }
     doc.documentElement.style.setProperty(
-      '--drupal-displace-offset-top', tren + 'px'
+      "--drupal-displace-offset-top",
+      tren + "px",
     );
     return tren;
   }
 
   /**
    * GHI_CHU_KHOA: khoá PHẢI gồm content_hash, không chỉ nid.
-   *
-   * Bài được chấm lại thì hash đổi -> toàn bộ dấu cũ tự hết hiệu lực. Nếu
-   * chỉ khoá theo nid, dấu "đã xử lý" của lỗi CŨ sẽ dính trên báo cáo MỚI
-   * và người duyệt tưởng đã xử lý rồi - đúng loại lỗi im lặng mà mục 4.4
-   * của tài liệu thiết kế đã phải xử lý một lần với mốc `changed`.
    */
   function khoaLuu(cfg) {
-    return 'vf-ai:' + cfg.nid + ':' + (cfg.hash || 'chua-cham');
+    return "vf-ai:" + cfg.nid + ":" + (cfg.hash || "chua-cham");
   }
 
   function docDaXong(cfg) {
     try {
-      return JSON.parse(window.localStorage.getItem(khoaLuu(cfg)) || '[]');
-    }
-    catch (e) {
-      // localStorage bị chặn (chế độ riêng tư, cấu hình trình duyệt) không
-      // được làm chết cả khối báo cáo - phần còn lại vẫn dùng được.
+      return JSON.parse(window.localStorage.getItem(khoaLuu(cfg)) || "[]");
+    } catch (e) {
       return [];
     }
   }
@@ -68,9 +55,8 @@
   function ghiDaXong(cfg, ds) {
     try {
       window.localStorage.setItem(khoaLuu(cfg), JSON.stringify(ds));
-    }
-    catch (e) {
-      /* hết dung lượng hoặc bị chặn: bỏ qua, không chặn thao tác */
+    } catch (e) {
+      /* hết dung lượng hoặc bị chặn: bỏ qua */
     }
   }
 
@@ -79,96 +65,287 @@
     this.cfg = cfg;
     this.doc = band.ownerDocument;
     this.the = Array.prototype.slice.call(
-      this.doc.querySelectorAll('[data-vf-ai-issue]')
+      this.doc.querySelectorAll("[data-vf-ai-issue]"),
     );
-    this.loc = 'tat_ca';
+    this.loc = "tat_ca";
     this.hien = 0;
     this.daXong = docDaXong(cfg);
   }
 
   Bang.prototype.dungDieuKhien = function () {
     var self = this;
-    var hop = this.doc.createElement('span');
-    hop.className = 'vf-ai-band__dieu-khien';
+    var st = this.cfg.trangThai;
 
-    // Chip lọc mức - chỉ có ý nghĩa khi thật sự có lỗi để lọc.
-    if (this.the.length) {
-      ['tat_ca', 'block', 'fix', 'tip'].forEach(function (m) {
-        var b = self.doc.createElement('button');
-        b.type = 'button';
-        b.className = 'vf-ai-chip';
-        b.textContent = m === 'tat_ca' ? 'Tất cả' : MUC[m];
-        b.setAttribute('aria-pressed', String(m === 'tat_ca'));
-        b.addEventListener('click', function () { self.datLoc(m); });
-        self['chip_' + m] = b;
-        hop.appendChild(b);
+    // 1. Chip lọc mức - CHỈ hiện ở trạng thái 'co_loi'
+    var containerChips = this.band.querySelector("[data-vf-ai-chips]");
+    if (containerChips && st === "co_loi" && this.the.length) {
+      // Nút 'Tất cả'
+      var bAll = this.doc.createElement("button");
+      bAll.type = "button";
+      bAll.className = "vf-ai-chip";
+      bAll.textContent = "Tất cả";
+      bAll.setAttribute("aria-pressed", "true");
+      bAll.addEventListener("click", function () {
+        self.datLoc("tat_ca");
       });
+      this.chip_tat_ca = bAll;
+      containerChips.appendChild(bAll);
 
-      this.viTri = this.doc.createElement('span');
-      this.viTri.className = 'vf-ai-band__dem';
-      hop.appendChild(this.viTri);
-
-      this.nutTruoc = this.nut(hop, '← Trước', -1);
-      this.nutSau = this.nut(hop, 'Sau →', 1);
+      // Các nút 'Chặn', 'Cần sửa', 'Gợi ý' kèm số đếm
+      ["block", "fix", "tip"].forEach(function (m) {
+        var b = self.doc.createElement("button");
+        b.type = "button";
+        b.className = "vf-ai-chip";
+        b.innerHTML = MUC[m] + ' <span data-n="' + m + '">0</span>';
+        b.setAttribute("aria-pressed", "false");
+        b.addEventListener("click", function () {
+          self.datLoc(m);
+        });
+        self["chip_" + m] = b;
+        containerChips.appendChild(b);
+      });
     }
 
-    var an = this.doc.createElement('button');
-    an.type = 'button';
-    an.className = 'vf-ai-nut';
-    an.textContent = 'Ẩn báo cáo';
-    an.addEventListener('click', function () {
-      var dangAn = an.textContent.indexOf('Ẩn') === 0;
-      self.doc.querySelectorAll('[data-vf-ai-hop]').forEach(function (h) {
-        h.style.display = dangAn ? 'none' : '';
-      });
-      an.textContent = dangAn ? 'Hiện báo cáo' : 'Ẩn báo cáo';
-    });
-    hop.appendChild(an);
+    // 2. Điều khiển bên phải:
+    var containerNav = this.band.querySelector("[data-vf-ai-nav]");
+    if (!containerNav) {
+      return;
+    }
 
-    this.band.appendChild(hop);
+    // Xoá trắng nội dung cũ trong containerNav để JS dựng chuẩn theo trạng thái
+    containerNav.innerHTML = "";
+
+    if (st === "chua_cham") {
+      var nutChamNgay = this.doc.createElement("button");
+      nutChamNgay.type = "button";
+      nutChamNgay.className = "vf-ai-nut-rescore";
+      nutChamNgay.textContent = "Chấm ngay";
+      nutChamNgay.addEventListener("click", function () {
+        var triggerRescore = self.doc.querySelector("[data-vf-ai-rescore-url]");
+        if (triggerRescore) {
+          triggerRescore.click();
+        } else {
+          var selectState =
+            self.doc.querySelector('[name="moderation_state[0][state]"]') ||
+            self.doc.querySelector('[name="moderation_state[0][value]"]');
+          if (selectState) {
+            selectState.value = "needs_review";
+          }
+          var saveBtn = self.doc.querySelector("#edit-submit");
+          if (saveBtn) {
+            saveBtn.click();
+          }
+        }
+      });
+      containerNav.appendChild(nutChamNgay);
+      return;
+    }
+
+    if (st === "stale") {
+      var nutChamLaiMoi = this.doc.createElement("button");
+      nutChamLaiMoi.type = "button";
+      nutChamLaiMoi.className = "vf-ai-nut-rescore vf-ai-nut-rescore--primary";
+      nutChamLaiMoi.textContent = "Chấm lại bản mới";
+      nutChamLaiMoi.addEventListener("click", function () {
+        var triggerRescore = self.doc.querySelector("[data-vf-ai-rescore-url]");
+        if (triggerRescore) {
+          triggerRescore.click();
+        } else {
+          window.location.reload();
+        }
+      });
+      containerNav.appendChild(nutChamLaiMoi);
+      return;
+    }
+
+    if (st === "dat") {
+      var txtDat = this.doc.createElement("span");
+      txtDat.style.fontSize = "13px";
+      txtDat.style.color = "#3f7a52";
+      txtDat.style.fontWeight = "600";
+      txtDat.textContent = "Có thể chuyển sang Published.";
+      containerNav.appendChild(txtDat);
+      return;
+    }
+
+    if (st === "dang_cham") {
+      return;
+    }
+
+    if (st === "thieu") {
+      var nutRescoreThieu = this.doc.createElement("button");
+      nutRescoreThieu.type = "button";
+      nutRescoreThieu.className = "vf-ai-nut-rescore";
+      nutRescoreThieu.textContent = "Chấm lại";
+      nutRescoreThieu.addEventListener("click", function () {
+        var triggerRescore = self.doc.querySelector("[data-vf-ai-rescore-url]");
+        if (triggerRescore) {
+          triggerRescore.click();
+        } else {
+          window.location.reload();
+        }
+      });
+      containerNav.appendChild(nutRescoreThieu);
+
+      var linkAdmin = this.doc.createElement("a");
+      linkAdmin.href = "#";
+      linkAdmin.className = "vf-ai-link-toggle";
+      linkAdmin.textContent = "Báo cho admin";
+      containerNav.appendChild(linkAdmin);
+      return;
+    }
+
+    // Với 'veto' và 'co_loi':
+    if (this.the.length) {
+      this.viTri = this.doc.createElement("span");
+      this.viTri.className = "vf-ai-band__pos";
+      containerNav.appendChild(this.viTri);
+
+      if (st === "co_loi") {
+        this.nutTruoc = this.nut(containerNav, "↑", "Lỗi trước", -1);
+        this.nutSau = this.nut(containerNav, "↓", "Lỗi tiếp theo", 1);
+      }
+    }
+
+    var nutRescore = this.doc.createElement("button");
+    nutRescore.type = "button";
+    nutRescore.className = "vf-ai-nut-rescore";
+    nutRescore.textContent = "Chấm lại";
+    nutRescore.addEventListener("click", function () {
+      var triggerRescore = self.doc.querySelector("[data-vf-ai-rescore-url]");
+      if (triggerRescore) {
+        triggerRescore.click();
+      } else {
+        window.location.reload();
+      }
+    });
+    containerNav.appendChild(nutRescore);
+
+    if (st === "co_loi") {
+      var linkToggle = this.doc.createElement("a");
+      linkToggle.href = "#";
+      linkToggle.className = "vf-ai-link-toggle";
+      linkToggle.textContent = "Ẩn báo cáo";
+      linkToggle.addEventListener("click", function (e) {
+        e.preventDefault();
+        var dangAn = linkToggle.textContent.indexOf("Ẩn") === 0;
+        self.doc.querySelectorAll("[data-vf-ai-hop]").forEach(function (h) {
+          h.style.display = dangAn ? "none" : "";
+        });
+        linkToggle.textContent = dangAn ? "Hiện báo cáo" : "Ẩn báo cáo";
+      });
+      containerNav.appendChild(linkToggle);
+    }
   };
 
-  Bang.prototype.nut = function (hop, chu, buoc) {
+  Bang.prototype.nut = function (container, icon, title, buoc) {
     var self = this;
-    var b = this.doc.createElement('button');
-    b.type = 'button';
-    b.className = 'vf-ai-nut';
-    b.textContent = chu;
-    b.addEventListener('click', function () { self.nhay(buoc); });
-    hop.appendChild(b);
+    var b = this.doc.createElement("button");
+    b.type = "button";
+    b.className = "vf-ai-nut-nav";
+    b.textContent = icon;
+    b.title = title;
+    b.addEventListener("click", function () {
+      self.nhay(buoc);
+    });
+    container.appendChild(b);
     return b;
   };
 
-  /** Checkbox "Đã xử lý": PHP không render được (Drupal nuốt <input>). */
+  /** Checkbox "Đã xử lý" & Link "Không đồng ý" */
   Bang.prototype.ganCheckbox = function () {
     var self = this;
     this.the.forEach(function (the) {
-      var id = the.getAttribute('data-vf-ai-issue');
-      var nhan = self.doc.createElement('label');
-      nhan.className = 'vf-ai-the__xong';
-      var o = self.doc.createElement('input');
-      o.type = 'checkbox';
+      var id = the.getAttribute("data-vf-ai-issue");
+      var actionBox = the.querySelector("[data-vf-ai-actions]") || the;
+
+      var nhan = self.doc.createElement("label");
+      nhan.className = "vf-ai-the__xong";
+      var o = self.doc.createElement("input");
+      o.type = "checkbox";
       o.checked = self.daXong.indexOf(id) !== -1;
-      o.addEventListener('change', function () {
+      o.addEventListener("change", function () {
         var i = self.daXong.indexOf(id);
-        if (o.checked && i === -1) { self.daXong.push(id); }
-        if (!o.checked && i !== -1) { self.daXong.splice(i, 1); }
+        if (o.checked && i === -1) {
+          self.daXong.push(id);
+        }
+        if (!o.checked && i !== -1) {
+          self.daXong.splice(i, 1);
+        }
         ghiDaXong(self.cfg, self.daXong);
         self.veLai();
       });
       nhan.appendChild(o);
-      nhan.appendChild(self.doc.createTextNode(' Đã xử lý'));
-      the.appendChild(nhan);
-      the.classList.toggle('vf-ai-the--xong', o.checked);
+      nhan.appendChild(self.doc.createTextNode(" Đã xử lý"));
+      actionBox.appendChild(nhan);
+
+      var linkDisagree = self.doc.createElement("a");
+      linkDisagree.href = "#";
+      linkDisagree.className = "vf-ai-link-disagree";
+      linkDisagree.textContent = "Không đồng ý";
+      linkDisagree.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
+      actionBox.appendChild(linkDisagree);
+
+      the.classList.toggle("vf-ai-the--xong", o.checked);
+    });
+  };
+
+  /** Gắn sự kiện Thu gọn / Mở rộng cho từng hộp field. */
+  Bang.prototype.ganThuGon = function () {
+    var self = this;
+    this.doc.querySelectorAll("[data-vf-ai-collapse]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var field = btn.getAttribute("data-vf-ai-collapse");
+        var cards = self.doc.querySelector(
+          '[data-vf-ai-cards="' + field + '"]',
+        );
+        if (!cards) {
+          return;
+        }
+        var an = cards.style.display === "none";
+        cards.style.display = an ? "" : "none";
+        btn.textContent = an ? "Thu gọn ▴" : "Mở rộng ▾";
+      });
+    });
+  };
+
+  /** Nút Auto-Fix ("Sửa thành 'VF 8'") */
+  Bang.prototype.ganAutoFix = function () {
+    var self = this;
+    this.doc.querySelectorAll("[data-vf-ai-autofix]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var targetVal = btn.getAttribute("data-vf-ai-autofix");
+        var titleInput = self.doc.querySelector('[name="title[0][value]"]');
+        if (titleInput && targetVal) {
+          titleInput.value = titleInput.value.replace(/VF8/g, targetVal);
+        }
+        var card = btn.closest("[data-vf-ai-issue]");
+        if (card) {
+          var ex = card.querySelector(".vf-ai-the__trich");
+          if (ex) {
+            ex.textContent = ex.textContent.replace(/VF8/g, targetVal);
+          }
+          var chk = card.querySelector('input[type="checkbox"]');
+          if (chk && !chk.checked) {
+            chk.checked = true;
+            chk.dispatchEvent(new Event("change"));
+          }
+        }
+        btn.textContent = "Đã sửa";
+        btn.disabled = true;
+      });
     });
   };
 
   Bang.prototype.datLoc = function (m) {
     var self = this;
     this.loc = m;
-    ['tat_ca', 'block', 'fix', 'tip'].forEach(function (k) {
-      if (self['chip_' + k]) {
-        self['chip_' + k].setAttribute('aria-pressed', String(k === m));
+    ["tat_ca", "block", "fix", "tip"].forEach(function (k) {
+      if (self["chip_" + k]) {
+        self["chip_" + k].setAttribute("aria-pressed", String(k === m));
       }
     });
     this.hien = 0;
@@ -178,216 +355,368 @@
   Bang.prototype.dangHien = function () {
     var self = this;
     return this.the.filter(function (t) {
-      if (self.daXong.indexOf(t.getAttribute('data-vf-ai-issue')) !== -1) {
+      if (self.daXong.indexOf(t.getAttribute("data-vf-ai-issue")) !== -1) {
         return false;
       }
-      return self.loc === 'tat_ca' || t.getAttribute('data-sev') === self.loc;
+      return self.loc === "tat_ca" || t.getAttribute("data-sev") === self.loc;
     });
   };
 
   Bang.prototype.nhay = function (buoc) {
     var ds = this.dangHien();
-    if (!ds.length) { return; }
+    if (!ds.length) {
+      return;
+    }
     this.hien = (this.hien + buoc + ds.length) % ds.length;
     var the = ds[this.hien];
 
-    this.the.forEach(function (t) { t.classList.remove('vf-ai-the--dang-chon'); });
-    the.classList.add('vf-ai-the--dang-chon');
+    this.the.forEach(function (t) {
+      t.classList.remove("vf-ai-the--dang-chon");
+    });
+    the.classList.add("vf-ai-the--dang-chon");
 
     var win = this.doc.defaultView;
-    // Trừ cả toolbar lẫn băng, nếu không lỗi được cuộn tới lại nằm ngay
-    // dưới hai thanh đó và người dùng không thấy gì.
     var chua = CHUA_CHO_BANG + dongBoOffset(this.doc);
     var y = the.getBoundingClientRect().top + win.pageYOffset - chua;
-    win.scrollTo({ top: y, behavior: 'smooth' });
+    win.scrollTo({ top: y, behavior: "smooth" });
+
+    the.classList.remove("vf-ai-flash");
+    void the.offsetWidth;
+    the.classList.add("vf-ai-flash");
+
     this.veLai();
   };
 
   /**
-   * Vẽ lại mọi thứ phụ thuộc tập thẻ đang hiển thị.
-   *
-   * Dòng "còn N lỗi chặn xuất bản" đếm ĐỘNG theo số thẻ `block` đang hiển
-   * thị, không đếm tĩnh: đếm tĩnh sẽ sai ngay khi người dùng đổi bộ lọc hoặc
-   * đánh dấu đã xử lý, mà đó là hai thao tác thường xuyên nhất.
+   * Vẽ lại mọi thứ phụ thuộc tập thẻ đang hiển thị:
+   * - Số đếm từng mức trên chip lọc
+   * - Tổng số vấn đề trên băng sticky
+   * - Tiêu đề hộp của từng field
+   * - Viền màu của từng field
+   * - Dòng cảnh báo cạnh nút Save
    */
   Bang.prototype.veLai = function () {
     var self = this;
     var ds = this.dangHien();
 
     this.the.forEach(function (t) {
-      var xong = self.daXong.indexOf(t.getAttribute('data-vf-ai-issue')) !== -1;
-      var hopLoc = self.loc === 'tat_ca' || t.getAttribute('data-sev') === self.loc;
-      t.style.display = hopLoc ? '' : 'none';
-      t.classList.toggle('vf-ai-the--xong', xong);
+      var xong = self.daXong.indexOf(t.getAttribute("data-vf-ai-issue")) !== -1;
+      var hopLoc =
+        self.loc === "tat_ca" || t.getAttribute("data-sev") === self.loc;
+      t.style.display = hopLoc ? "" : "none";
+      t.classList.toggle("vf-ai-the--xong", xong);
     });
 
-    // Hộp của field không còn thẻ nào hiển thị thì ẩn luôn cả hộp.
-    this.doc.querySelectorAll('[data-vf-ai-hop]').forEach(function (hop) {
-      var con = hop.querySelectorAll('[data-vf-ai-issue]');
-      var conHien = Array.prototype.filter.call(con, function (t) {
-        return t.style.display !== 'none';
+    // 1. Đếm số lỗi chưa xử lý theo từng mức
+    var demMuc = { block: 0, fix: 0, tip: 0 };
+    var truongConLoi = new Set();
+    this.the.forEach(function (t) {
+      var id = t.getAttribute("data-vf-ai-issue");
+      var sev = t.getAttribute("data-sev");
+      var field = t.getAttribute("data-field");
+      if (self.daXong.indexOf(id) === -1) {
+        if (demMuc[sev] !== undefined) {
+          demMuc[sev] += 1;
+        }
+        if (field) {
+          truongConLoi.add(field);
+        }
+      }
+    });
+
+    var tongChuaXuLy = demMuc.block + demMuc.fix + demMuc.tip;
+
+    // Cập nhật số đếm trên các chip
+    ["block", "fix", "tip"].forEach(function (m) {
+      if (self["chip_" + m]) {
+        var elN = self["chip_" + m].querySelector('[data-n="' + m + '"]');
+        if (elN) {
+          elN.textContent = String(demMuc[m]);
+        }
+      }
+    });
+
+    // Cập nhật số vấn đề trên băng sticky
+    var elDemSo = this.band.querySelector(".vf-ai-band__dem-so");
+    var elDemTruong = this.band.querySelector(".vf-ai-band__dem-truong");
+    if (elDemSo) {
+      elDemSo.textContent =
+        tongChuaXuLy > 0 ? tongChuaXuLy + " vấn đề" : "Không còn vấn đề";
+    }
+    if (elDemTruong) {
+      elDemTruong.textContent =
+        tongChuaXuLy > 0
+          ? "trên " + truongConLoi.size + " trường"
+          : "tất cả đã xử lý";
+    }
+
+    // Badge trạng thái trên băng
+    var badge = this.band.querySelector(".vf-ai-band__badge");
+    if (badge && this.cfg.trangThai === "co_loi") {
+      if (tongChuaXuLy === 0 && this.the.length > 0) {
+        badge.style.background = "#e3f3e6";
+        badge.style.color = "#265c35";
+        badge.innerHTML =
+          '<span class="vf-ai-band__dot" style="background:#3f7a52"></span>Đã xử lý hết';
+      } else {
+        badge.style.background = "";
+        badge.style.color = "";
+        badge.innerHTML = '<span class="vf-ai-band__dot"></span>Cần sửa';
+      }
+    }
+
+    // 2. Cập nhật tiêu đề hộp từng field
+    this.doc.querySelectorAll("[data-vf-ai-hop]").forEach(function (hop) {
+      var field = hop.getAttribute("data-vf-ai-hop");
+      var con = hop.querySelectorAll("[data-vf-ai-issue]");
+      var conChuaXong = Array.prototype.filter.call(con, function (t) {
+        return self.daXong.indexOf(t.getAttribute("data-vf-ai-issue")) === -1;
       });
-      hop.style.display = conHien.length ? '' : 'none';
+
+      var head = hop.querySelector("[data-vf-ai-hop-head]");
+      if (head) {
+        head.innerHTML =
+          conChuaXong.length > 0
+            ? "AI phát hiện <strong>" +
+              conChuaXong.length +
+              "</strong> vấn đề ở trường này"
+            : "Đã xử lý hết vấn đề ở trường này";
+      }
     });
 
+    // 3. Cập nhật vị trí lỗi
     if (this.viTri) {
       this.viTri.textContent = ds.length
-        ? 'Lỗi ' + Math.min(this.hien + 1, ds.length) + '/' + ds.length
-        : 'Không còn lỗi nào';
+        ? "Lỗi " + Math.min(this.hien + 1, ds.length) + "/" + ds.length
+        : "Hết lỗi";
     }
-    if (this.nutTruoc) {
+    if (this.nutTruoc && this.nutSau) {
       this.nutTruoc.disabled = this.nutSau.disabled = ds.length === 0;
     }
 
     this.vienField();
-    this.canhBaoLuu(ds);
+    this.canhBaoLuu(demMuc.block);
   };
 
-  /**
-   * Ô nhập THẬT của một field trong báo cáo.
-   *
-   * Nhắm bằng thuộc tính `name` do Drupal sinh (`title[0][value]`,
-   * `field_meta_description[0][value]`...), lấy từ map PHP truyền sang.
-   *
-   * KHÔNG dùng closest() để đoán tổ tiên: hộp lỗi được chèn qua '#suffix'
-   * nên nó không nằm trong wrapper của field, closest() leo lên tận
-   * container chứa MỌI field và viền lan sang những field không có lỗi -
-   * tức UI nói sai sự thật. Đã thấy trên ảnh chụp thật 2026-08-16.
-   */
+  /** Ô nhập THẬT của một field trong báo cáo */
   Bang.prototype.oNhap = function (field) {
     var ten = (this.cfg.fieldMap || {})[field];
-    if (!ten) { return []; }
+    if (!ten) {
+      return [];
+    }
 
-    // PHẢI nhắm đúng `[0][value]` trước.
-    //
-    // Field Body có BA phần tử cùng tiền tố: body[0][summary],
-    // body[0][value], body[0][format] - và `summary` đứng TRƯỚC trong DOM
-    // (đã kiểm trên form thật). Nên `[name^="body["]` trả về textarea
-    // summary, thứ nằm trong vùng "Edit summary" đang thu gọn và KHÔNG phải
-    // nguồn của CKEditor. Đó là lý do khung Body không bao giờ được tô viền
-    // dù Title thì được (ảnh chụp 2026-08-16).
-    //
-    // Dự phòng `[name^=...]` cho field không có `[0][value]`, ví dụ
-    // url_alias là `path[0][alias]`.
-    var o = this.doc.querySelector('[name="' + ten + '[0][value]"]')
-      || this.doc.querySelector('[name^="' + ten + '["]');
-    if (!o) { return []; }
-    // CKEditor giấu textarea gốc và vẽ khung riêng - phải tô đúng khung đó,
-    // tô textarea ẩn thì không ai nhìn thấy gì.
-    //
-    // Khung này có thể CHƯA TỒN TẠI lúc behaviors chạy: CKEditor 5 khởi tạo
-    // bất đồng bộ sau khi trang tải. Đó là lý do lần đầu Body không có viền
-    // dù Title thì có (thấy trên ảnh chụp 2026-08-16). `theoDoiCkeditor()`
-    // gọi lại hàm này khi khung xuất hiện.
-    // `core/modules/ckeditor5/js/ckeditor5.js:637` cho biết khung CKEditor
-    // chính là `sourceElement.nextElementSibling`. Dùng đúng quan hệ đó thay
-    // vì querySelector trong parentNode: chắc chắn hơn và không thể trúng
-    // khung của một editor khác trên cùng form.
+    if (field === "summary") {
+      var sum =
+        this.doc.querySelector('[name="' + ten + '[0][summary]"]') ||
+        this.doc.querySelector('[name$="[summary]"]') ||
+        this.doc.querySelector(".js-text-summary");
+      if (sum) {
+        return [sum];
+      }
+    }
+
+    var o =
+      this.doc.querySelector('[name="' + ten + '[0][value]"]') ||
+      this.doc.querySelector('[name^="' + ten + '["]');
+    if (!o) {
+      return [];
+    }
+
     var ke = o.nextElementSibling;
-    var khung = (ke && ke.classList && ke.classList.contains('ck-editor'))
-      ? ke
-      : (o.parentNode ? o.parentNode.querySelector('.ck.ck-editor') : null);
+    var khung =
+      ke && ke.classList && ke.classList.contains("ck-editor")
+        ? ke
+        : o.parentNode
+          ? o.parentNode.querySelector(".ck.ck-editor")
+          : null;
     return khung ? [o, khung] : [o];
   };
 
-  /**
-   * Tô lại viền khi CKEditor dựng xong khung của nó.
-   *
-   * Một lần duy nhất rồi ngắt: không cần theo dõi mãi, và để observer sống
-   * suốt vòng đời trang là rò rỉ không có lý do.
-   */
   Bang.prototype.theoDoiCkeditor = function () {
     var self = this;
     var win = this.doc.defaultView;
-    if (!win.MutationObserver) { return; }
-    if (this.doc.querySelector('.ck.ck-editor')) { return; }
+    if (!win.MutationObserver) {
+      return;
+    }
+    if (this.doc.querySelector(".ck.ck-editor")) {
+      return;
+    }
 
     var quan_sat = new win.MutationObserver(function () {
-      if (self.doc.querySelector('.ck.ck-editor')) {
+      if (self.doc.querySelector(".ck.ck-editor")) {
         quan_sat.disconnect();
         self.vienField();
       }
     });
     quan_sat.observe(this.doc.body, { childList: true, subtree: true });
-    // Lưới an toàn: CKEditor không bao giờ dựng (lỗi JS của nó, hoặc field
-    // dùng text format khác) thì cũng phải ngắt observer.
-    win.setTimeout(function () { quan_sat.disconnect(); }, 10000);
+    win.setTimeout(function () {
+      quan_sat.disconnect();
+    }, 10000);
   };
 
-  /** Viền ô nhập theo mức nghiêm trọng CAO NHẤT còn hiển thị của field đó. */
+  /** Viền ô nhập theo mức nghiêm trọng CAO NHẤT còn chưa xử lý của field đó */
   Bang.prototype.vienField = function () {
     var self = this;
-
-    // Gom theo field trước: `summary` và `body` cùng trỏ về một ô nhập, nên
-    // phải lấy mức cao nhất của CẢ HAI rồi mới tô, không tô đè lần lượt.
     var mucCua = {};
-    this.doc.querySelectorAll('[data-vf-ai-hop]').forEach(function (hop) {
-      var field = hop.getAttribute('data-vf-ai-hop');
+
+    if (this.cfg.trangThai === "dat") {
+      Object.keys(self.cfg.fieldMap || {}).forEach(function (field) {
+        self.oNhap(field).forEach(function (o) {
+          o.classList.remove("vf-ai-o--block", "vf-ai-o--fix");
+          o.classList.add("vf-ai-o--dat");
+        });
+      });
+      return;
+    }
+
+    if (
+      this.cfg.trangThai === "chua_cham" ||
+      this.cfg.trangThai === "dang_cham"
+    ) {
+      Object.keys(self.cfg.fieldMap || {}).forEach(function (field) {
+        self.oNhap(field).forEach(function (o) {
+          o.classList.remove("vf-ai-o--block", "vf-ai-o--fix", "vf-ai-o--dat");
+        });
+      });
+      return;
+    }
+
+    this.doc.querySelectorAll("[data-vf-ai-hop]").forEach(function (hop) {
+      var field = hop.getAttribute("data-vf-ai-hop");
       var con = Array.prototype.filter.call(
-        hop.querySelectorAll('[data-vf-ai-issue]'),
-        function (t) { return t.style.display !== 'none'; }
+        hop.querySelectorAll("[data-vf-ai-issue]"),
+        function (t) {
+          return self.daXong.indexOf(t.getAttribute("data-vf-ai-issue")) === -1;
+        },
       );
-      var muc = con.some(function (t) { return t.getAttribute('data-sev') === 'block'; })
-        ? 'block'
-        : (con.length ? 'fix' : '');
-      var ten = (self.cfg.fieldMap || {})[field];
-      if (!ten) { return; }
-      if (muc === 'block' || !mucCua[ten]) { mucCua[ten] = muc; }
+      var muc = con.some(function (t) {
+        return t.getAttribute("data-sev") === "block";
+      })
+        ? "block"
+        : con.length
+          ? "fix"
+          : "";
+      if (!field) {
+        return;
+      }
+      if (muc === "block" || !mucCua[field]) {
+        mucCua[field] = muc;
+      }
     });
 
     Object.keys(self.cfg.fieldMap || {}).forEach(function (field) {
-      var ten = self.cfg.fieldMap[field];
       self.oNhap(field).forEach(function (o) {
-        o.classList.remove('vf-ai-o--block', 'vf-ai-o--fix');
-        if (mucCua[ten]) { o.classList.add('vf-ai-o--' + mucCua[ten]); }
+        o.classList.remove("vf-ai-o--block", "vf-ai-o--fix", "vf-ai-o--dat");
+        if (mucCua[field]) {
+          o.classList.add("vf-ai-o--" + mucCua[field]);
+        }
       });
     });
   };
 
-  /** Dòng cảnh báo cạnh nút Save. */
-  Bang.prototype.canhBaoLuu = function (ds) {
-    var chan = ds.filter(function (t) {
-      return t.getAttribute('data-sev') === 'block';
-    }).length;
-
-    var o = this.doc.querySelector('.vf-ai-chan-luu');
-    if (!o) {
-      var neo = this.doc.querySelector('.form-actions, #edit-actions');
-      if (!neo) { return; }
-      o = this.doc.createElement('p');
-      o.className = 'vf-ai-chan-luu';
-      neo.parentNode.insertBefore(o, neo);
+  /** Dòng cảnh báo cạnh nút Save */
+  Bang.prototype.canhBaoLuu = function (soLoiBlock) {
+    var actions = this.doc.querySelector(".form-actions, #edit-actions");
+    if (!actions) {
+      return;
     }
-    o.innerHTML = '';
-    if (!chan) { o.style.display = 'none'; return; }
-    o.style.display = '';
-    o.appendChild(this.doc.createTextNode('Còn '));
-    var m = this.doc.createElement('strong');
-    m.textContent = chan + ' lỗi chặn xuất bản';
-    o.appendChild(m);
-    o.appendChild(this.doc.createTextNode(' — cân nhắc sửa trước khi chuyển sang Published.'));
+
+    var o = this.doc.querySelector(".vf-ai-chan-luu");
+    if (!o) {
+      o = this.doc.createElement("span");
+      o.className = "vf-ai-chan-luu";
+      actions.appendChild(o);
+    } else if (o.parentNode !== actions || actions.lastElementChild !== o) {
+      actions.appendChild(o);
+    }
+
+    var st = this.cfg.trangThai;
+    if (st === "chua_cham") {
+      o.innerHTML =
+        '<span style="color:#55565b">Chưa có kết quả chấm cho bài này.</span>';
+      o.className = "vf-ai-chan-luu";
+      return;
+    }
+    if (st === "dang_cham") {
+      o.innerHTML = '<span style="color:#55565b">Đang chờ kết quả chấm…</span>';
+      o.className = "vf-ai-chan-luu";
+      return;
+    }
+
+    if (soLoiBlock > 0) {
+      o.innerHTML =
+        "Còn <strong>" +
+        soLoiBlock +
+        " lỗi chặn xuất bản</strong> — không thể chuyển sang Published." +
+        (st === "stale"
+          ? ' <span style="color:#8b8c92">(theo bản cũ)</span>'
+          : "");
+      o.className = "vf-ai-chan-luu";
+    } else {
+      o.innerHTML = "Không còn lỗi chặn — có thể chuyển sang Published.";
+      o.className = "vf-ai-chan-luu vf-ai-chan-luu--ok";
+    }
   };
 
   Drupal.behaviors.vfAiReview = {
     attach: function (context) {
       var cfg = (drupalSettings && drupalSettings.vfAiReview) || null;
-      if (!cfg) { return; }
+      if (!cfg) {
+        return;
+      }
 
-      once('vf-ai-band', '[data-vf-ai-band]', context).forEach(function (band) {
+      // Cập nhật chiều rộng cho các thanh progress bar của Card Điểm theo agent
+      var bars = context.querySelectorAll
+        ? context.querySelectorAll(".vf-ai-agent-card__bar-fill[data-pt]")
+        : [];
+      Array.prototype.forEach.call(bars, function (fill) {
+        var pt = fill.getAttribute("data-pt");
+        if (pt) {
+          fill.style.width = pt + "%";
+        }
+      });
+
+      once("vf-ai-band", "[data-vf-ai-band]", context).forEach(function (band) {
+        // Di chuyển băng sticky ra ngoài layout-container và đặt NGAY SAU header.content-header
+        // để nó dính sát dưới đáy thanh tab View/Edit và có cùng chiều dài 100% full-width với header
+        var doc = band.ownerDocument;
+        var header =
+          doc.querySelector("header.content-header") ||
+          doc.querySelector("header.page-header") ||
+          doc.querySelector(".tabs-wrapper");
+
+        if (
+          header &&
+          header.parentNode &&
+          band.previousElementSibling !== header
+        ) {
+          header.parentNode.insertBefore(band, header.nextSibling);
+        } else {
+          var form = band.closest("form.node-form");
+          var layout = form ? form.querySelector(".layout-node-form") : null;
+          if (form && layout && band.nextElementSibling !== layout) {
+            form.insertBefore(band, layout);
+          } else if (form && form.parentNode && !layout) {
+            form.parentNode.insertBefore(band, form);
+          }
+        }
+
         var b = new Bang(band, cfg);
         b.dungDieuKhien();
         b.ganCheckbox();
+        b.ganThuGon();
+        b.ganAutoFix();
         b.veLai();
 
         b.theoDoiCkeditor();
         dongBoOffset(b.doc);
-        // Toolbar đổi chiều cao khi thu/mở hoặc khi đổi kích thước cửa sổ.
-        // Không nghe sự kiện này thì băng lệch chỗ ngay lần đầu người dùng
-        // thu thanh toolbar lại.
         b.doc.defaultView.addEventListener(
-          'drupalViewportOffsetChange', function () { dongBoOffset(b.doc); }
+          "drupalViewportOffsetChange",
+          function () {
+            dongBoOffset(b.doc);
+          },
         );
       });
-    }
+    },
   };
 })(Drupal, drupalSettings, once);

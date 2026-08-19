@@ -1,0 +1,53 @@
+{#
+/**
+ * @file
+ * Theme override for the user login form.
+ */
+#}
+<form{{ attributes.addClass('space-y-5') }}>
+  <!-- Username / Email Field -->
+  <div>
+    <label class="block font-label-sm text-label-sm text-secondary mb-2 uppercase tracking-wider font-semibold" for="edit-name">
+      {{ element.name['#title']|default('Email hoặc Tên đăng nhập') }}
+    </label>
+    <div class="relative">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline select-none pointer-events-none">person</span>
+      {{ element.name }}
+    </div>
+  </div>
+
+  <!-- Password Field -->
+  <div>
+    <div class="flex justify-between items-center mb-2">
+      <label class="block font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold" for="edit-pass">
+        {{ element.pass['#title']|default('Mật khẩu') }}
+      </label>
+      <a class="font-label-sm text-label-sm text-primary hover:text-electric-blue transition-colors font-medium" href="/user/password">
+        Quên mật khẩu?
+      </a>
+    </div>
+    <div class="relative">
+      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline select-none pointer-events-none">lock</span>
+      {{ element.pass }}
+      <button data-vf-toggle-password class="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors focus:outline-none p-1" type="button" aria-label="Hiện/Ẩn mật khẩu">
+        <span class="material-symbols-outlined text-xl align-middle">visibility_off</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Remember Me Checkbox -->
+  <div class="flex items-center pt-1">
+    <input class="h-4 w-4 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-lowest cursor-pointer" id="vf-remember-me" name="remember_me" type="checkbox" />
+    <label class="ml-3 block font-body-md text-sm text-on-surface-variant cursor-pointer select-none" for="vf-remember-me">
+      Ghi nhớ đăng nhập
+    </label>
+  </div>
+
+  <!-- Hidden Fields & Submit Button -->
+  <div class="pt-2">
+    {{ element.form_build_id }}
+    {{ element.form_id }}
+    {{ element.form_token }}
+    {{ element.actions }}
+  </div>
+</form>

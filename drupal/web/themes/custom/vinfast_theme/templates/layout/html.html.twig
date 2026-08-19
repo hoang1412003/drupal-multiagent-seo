@@ -1,0 +1,24 @@
+{#
+/**
+ * @file
+ * Theme override for the basic html structure of a single Drupal page.
+ */
+#}
+<!DOCTYPE html>
+<html{{ html_attributes.addClass('light') }} lang="{{ html_attributes.lang|default('vi') }}">
+  <head>
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/{{ directory }}/favicon.svg?v=2">
+    <link rel="alternate icon" type="image/png" href="/favicon.png?v=2">
+    <link rel="shortcut icon" href="/favicon.ico?v=2">
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+  </head>
+  <body{{ attributes.addClass('bg-background', 'text-on-background', 'font-body-md', 'antialiased') }}>
+    {{ page_top }}
+    {{ page }}
+    {{ page_bottom }}
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>

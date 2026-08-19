@@ -88,38 +88,45 @@ function vf_ai_review_form_node_form_alter(array &$form, FormStateInterface $for
     $stale = ($hien_tai !== $report['content_hash']);
   }
 
-  $form['vf_ai_review'] = [
-    '#type' => 'details',
-    '#title' => 'Đánh giá AI',
-    '#group' => 'advanced',
-    '#open' => TRUE,
-    '#weight' => -10,
-    'noi_dung' => [
-      // Chuỗi này đã được AiReportRenderer escape toàn bộ phần động.
-      //
-      // CHỈ phần băng không có (phân rã theo field). Băng ở đầu form đã hiện
-      // đề xuất/điểm/giờ chấm/tổng số vấn đề rồi; lặp lại ở đây là hai chỗ
-      // nói một điều trên cùng màn hình. `overviewHtml()` vẫn còn làm đường
-      // lùi nếu cần quay lại bản cũ.
-      '#markup' => $renderer->tomTatHtml($report),
-    ],
-  ];
+  $trang_thai = $renderer->trangThai($report, $stale, $loi_json);
+
+  $card_html = $renderer->diemTheoAgentCardHtml($report, $trang_thai);
+  if ($card_html !== '') {
+    $form['vf_ai_review'] = [
+      '#type' => 'container',
+      '#group' => 'advanced',
+      '#weight' => -10,
+      '#attributes' => [
+        'class' => ['vf-ai-review-wrapper'],
+      ],
+      'noi_dung' => [
+        '#markup' => $card_html,
+      ],
+    ];
+  }
 
   // Băng trạng thái sticky ở ĐẦU form (editor-ui-design.md mục 10).
   // '#weight' rất âm để nó nằm trên mọi field; nó phải luôn nhìn thấy được
   // khi cuộn, nếu không thì nút Trước/Sau và dòng đếm lỗi chặn xuất bản
   // trôi mất khỏi màn hình đúng lúc người dùng đang cần.
-  $trang_thai = $renderer->trangThai($report, $stale, $loi_json);
   $form['vf_ai_band'] = [
     '#markup' => $renderer->bangHtml($report, $trang_thai),
     '#weight' => -999,
   ];
 
+  $global_note = $renderer->globalNoteHtml($trang_thai, $report);
+  if ($global_note !== '') {
+    $form['vf_ai_global_note'] = [
+      '#markup' => $global_note,
+      '#weight' => -998,
+    ];
+  }
+
   // Gom chú thích theo widget đích TRƯỚC, vì body và summary cùng trỏ về
   // widget 'body' - gắn thẳng thì cái sau đè mất cái trước.
   $theo_widget = [];
   foreach (VF_AI_REVIEW_FIELD_MAP as $khoa_bao_cao => $ten_form) {
-    $html = $renderer->theLoiHtml($report, $khoa_bao_cao);
+    $html = $renderer->theLoiHtml($report, $khoa_bao_cao, $trang_thai);
     if ($html !== '') {
       $theo_widget[$ten_form] = ($theo_widget[$ten_form] ?? '') . $html;
     }

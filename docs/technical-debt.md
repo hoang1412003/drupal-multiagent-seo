@@ -802,8 +802,113 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `fcb5717`**, dù phân tích riêng cho thấy khả năng cao con số không đổi
   (không bài nào trong 2 lượt đó dựa riêng vào A6 để ra quyết định — xem
   chi tiết trong hội thoại bàn giao). Corrected v2 (đã biết không đạt) và
-  Coverage v2 (chưa chạy) cũng cần đo lại/đo mới sau khi có xác nhận chạy
-  tiếp. `scoring.yaml.meta.calibrated` không đổi.
+  Coverage v2 cũng cần đo lại/đo mới sau khi có xác nhận chạy tiếp (xem mục
+  tiếp theo — Coverage v2 **đã chạy** ngay sau bản ghi này, không phải
+  "chưa chạy" như câu trên viết ban đầu). `scoring.yaml.meta.calibrated`
+  không đổi.
+- 🏁 **Cập nhật 2026-08-19 (khuya) — Coverage v2 ĐÃ CHẠY (chẩn đoán, $0,336,**
+  11/11 mẫu CV-*), chạy dưới prompt A6 đã sửa nhưng TRƯỚC prompt A5 sửa bên
+  dưới. Chỉ 4/11 mẫu cô lập sạch đúng mã mục tiêu; 5/11 dính nhiễu `B8` phụ
+  (nhiều khả năng do chất lượng fixture, không phải bug code — chưa điều
+  tra riêng); **3/11 mã mục tiêu không bắn** — đã đọc sâu cả ba:
+  - `CV-A5-02` (A5 không bắn, `coverage.unavailable_checks=['A5']`): LLM
+    chấm **đúng** (phát hiện lạc đề, body nói về quản lý ảnh trong khi
+    title hỏi về tìm trạm sạc), nhưng field `evidence` trả về là một câu
+    **mô tả/tóm tắt cả đoạn** ("Toàn bộ nội dung body từ đoạn... đến...")
+    thay vì trích nguyên văn — bị 2 lớp fail-safe exact-match
+    (`trich_dan_co_that`, `_evidence_is_exact`) đúng luật từ chối, rơi về
+    `unavailable`. **Bug prompt thật** (khác bản chất bug A6 hôm trước:
+    A6 là mơ hồ present/absent, A5 là sai định dạng evidence). **Đã sửa**
+    prompt A5 (commit `76dd295`) — bắt evidence phải là NGUYÊN VĂN MỘT câu
+    trong body, giải thích lý do lạc đề chuyển sang field `reason`. Manifest
+    freeze lại `release_sha256 = 365cec35...`. Full offline suite 83/83, 0
+    hỏng, 0 skip.
+  - `CV-A7-01` (A7 không bắn): **không phải bug code** — detector CP9
+    (`_THE_AN` trong `prompt_builder.py`) chỉ nhận diện văn bản ẩn qua CSS
+    inline cụ thể (`display:none`/`visibility:hidden`/`font-size:0`), có
+    ghi chú rõ trong code là giới hạn chủ đích. Fixture lại dùng thuộc tính
+    HTML5 `<p hidden>` — kỹ thuật nằm ngoài phạm vi detector được thiết kế
+    để bắt. **Lỗi ở fixture, không phải ở code** — **đã sửa** (commit
+    `f854ee6`): đổi `<p hidden>` sang `<p style="display:none">`, nội dung
+    câu chữ giữ nguyên. Xác minh lại bằng `boc_phan_an`/`doan_an_dang_ngo`
+    trực tiếp (thuần Python, $0, không gọi LLM) — đoạn ẩn giờ được trích
+    đúng. `content_sha256` của `CV-A7-01` trong
+    `criterion-coverage-labels.csv` đã cập nhật theo nội dung mới; `data_head`
+    manifest cập nhật sang `f854ee6`; freeze lại, `release_sha256 =
+    01ef77bb...`.
+  - `CV-B7-01` (SEO5 không bắn, `coverage.unavailable_checks=[]` — đã được
+    đánh giá đầy đủ): LLM chủ động chấm URL 77 ký tự là `level=2` (đạt).
+    SEO5 không có ngưỡng số tất định, hoàn toàn dựa phán đoán chủ quan của
+    LLM — **miss thật, đúng rủi ro đã biết trước khi thiết kế fixture**,
+    không phải bug hạ tầng.
+  ⛔ **CHƯA đo lại E1/Gold/Corrected/Coverage** theo đúng yêu cầu người
+  dùng (chỉ sửa, dừng ở đây). Cùng luật đã khoá ở trên: sửa prompt A5 =
+  thêm một lớp mất hiệu lực nữa cho E1 v2/Gold v2 (đã mất hiệu lực từ
+  `fcb5717`, nay cộng dồn với `76dd295`). Coverage v2 (2026-08-19 khuya,
+  file `evidence/coverage-v2-2026-08-19.json`) tự thân **không phải** kết
+  quả "measured" chính thức — được đóng khung ngay từ đầu là chạy chẩn
+  đoán để tìm lỗi, không phải cổng đo lường.
+- 🏁 **Cập nhật 2026-08-19 (khuya, đợt 2) — Review toàn tuyến trước khi đo
+  lại thật, $0.** Xác nhận lại từ đầu: full offline suite 83/83 (0 hỏng, 0
+  skip) chạy sạch ở HEAD hiện tại; `policy_release.py verify` báo
+  `verified: true`, không lệch file nào; `decision_policy.py` không còn chỗ
+  nào dùng `code.startswith("A"/"B")` cũ, chỉ còn `finding["group"]`; test
+  và CSV nhãn khớp quyết định hạ A6/A4; `prompt_version`/`policy_hash` hash
+  nguyên file nên tự bắt cả 2 lần sửa prompt (A6 + A5). Preflight lại cả 4
+  dataset (E1/Gold/Corrected/Coverage, $0) chạy sạch, đúng
+  `release_sha256` hiện hành. Nhân review này, phát hiện và **sửa luôn**
+  fixture `CV-A7-01` (mục ngay trên) — không phải lỗi mới, là nợ đã ghi
+  nhận từ đợt điều tra Coverage v2 nhưng chưa xử lý.
+  **Kết luận: không còn gì chặn, sẵn sàng đo lại.** Thứ tự bắt buộc: E1
+  trước (gate Gold); Corrected/Coverage đo độc lập, không phụ thuộc thứ tự.
+- 🏁 **Cập nhật 2026-08-19 (đêm) — E1 v2 đo lại thật (đợt 3, sau fix A5),
+  chi phí $3,25 — ĐẠT gate thật, cổng Gold mở.** `decision_consistency =
+  0,96` ≥ 0,90 ✅, `drift = 0/50` ✅ — đây là hai điều kiện gate thật của
+  E1 v2 (plan
+  `superpowers/plans/2026-08-17-publish-blocking-policy-v2-evaluation-cutover.md`
+  dòng 292: *"gate là consistency ≥0,90"*; hàm duyệt release chính thức
+  `policy_release.approve()` cũng chỉ kiểm `e1_decision_consistency` cho
+  E1, không có `final_score_sigma`). σ `final_score` = **2,06** ≥ 2 —
+  **vượt ngưỡng tham khảo, KHÔNG PHẢI gate chặn** (chỉ để so sánh xu
+  hướng, `final_score` không tham gia quyết định publish/needs_revision/
+  rejected). ⚠️ **Đính chính:** bản ghi đầu tiên ở đây viết nhầm "KHÔNG
+  ĐẠT... chưa đủ điều kiện mở cổng Gold" — sai, đã sửa sau khi người dùng
+  hỏi lại tại sao điểm không quyết định gì mà vẫn bị dùng để chặn. 9/10
+  bài quyết định ổn định tuyệt đối; riêng `G-008` lần đầu dao động
+  (`mode_agreement = 0,60`) — nguồn duy nhất kéo `decision_consistency`
+  xuống dưới 1,00, vẫn đạt xa ngưỡng. σ tăng lan toả ở 7/10 bài so với lượt
+  trước (1,64 → 2,06) — **chưa đủ căn cứ kết luận do sửa prompt A5 hay do
+  nhiễu lấy mẫu tự nhiên của LLM** (n quá nhỏ, 1 lượt mỗi bên). Chi tiết
+  đầy đủ:
+  [`evidence/e1_v2_2026-08-19c_report.md`](evidence/e1_v2_2026-08-19c_report.md).
+  Manifest đã ghi kết quả (`record-result`) và freeze lại
+  (`release_sha256 = 3f37a227...`), `verified: true`. **Bước tiếp theo:
+  Gold v2** (E1 đã đạt). Có thể điều tra `G-008` song song/sau, $0, không
+  bắt buộc trước Gold.
+- ⛔ **Cập nhật 2026-08-19 (đêm, tiếp) — Gold v2 đo lại thật (đợt 2, sau E1
+  đạt), chi phí $1,99 — Kappa/false_publish/needs_revision_recall ĐẠT,
+  `rejected_recall` KHÔNG ĐẠT.** `Kappa = 0,608` ≥ 0,60 ✅, `false_publish
+  = 0/33` ✅, `needs_revision_recall = 0,957` ✅, **`rejected_recall = 0,60`
+  < 0,80 ❌**. Khác với σ của E1, **`rejected_recall` LÀ một gate thật**
+  (plan `.../2026-08-17-publish-blocking-policy-v2-evaluation-cutover.md`
+  dòng 432-443 "Pass chỉ khi đồng thời"; `policy_release.approve()` có
+  `gold_rejected_recall` riêng) — không nhầm lẫn với vụ sigma. **Tái hiện
+  y hệt lượt đo trước** (cùng đúng 4 bài `P-004b`, `P-010a`, `G-011`,
+  `G-020`): 2/4 là cái giá đã biết trước của quyết định hạ A4 xuống nhóm B
+  (A4 bắn đúng, không tự đẩy `rejected` được nữa); 2/4 (`G-011`, `G-020`)
+  là lỗ hổng cũ từ v1 — thiếu `A1` (claim so sánh nhất/tuyệt đối hoá vô căn
+  cứ), không liên quan gì tới các sửa đổi trong phiên này. Cả 4 bài vẫn bị
+  chặn xuất bản (`needs_revision`, không phải `publish`) — chỉ sai mức độ
+  chặn, không phải để lọt bài nguy hiểm ra publish. ⚠️ **Đính chính:** báo
+  cáo Gold v2 lượt trước gọi kết quả tương tự là "ĐẠT" và chỉ nêu
+  `rejected_recall` như một giới hạn diễn giải — không chính xác theo đúng
+  "Pass chỉ khi đồng thời" của plan gốc; đã sửa cách đọc trong report mới.
+  Chi tiết đầy đủ:
+  [`evidence/gold_v2_2026-08-19c_report.md`](evidence/gold_v2_2026-08-19c_report.md).
+  Manifest đã ghi kết quả, freeze lại (`release_sha256 =
+  b154057aee95...`), `verified: true`. **CHƯA chạy Corrected/Coverage** —
+  cần người dùng quyết định: chấp nhận gap `A1` đã biết và tiếp tục, hay
+  điều tra/sửa CP1 trước.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:

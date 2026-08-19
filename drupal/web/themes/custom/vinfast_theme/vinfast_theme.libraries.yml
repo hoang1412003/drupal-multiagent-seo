@@ -1,0 +1,30 @@
+fonts:
+  header: true
+  css:
+    theme:
+      'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap': { type: external, minified: true }
+
+icons:
+  header: true
+  css:
+    theme:
+      'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap': { type: external, minified: true }
+
+tailwind:
+  header: true
+  js:
+    'https://cdn.tailwindcss.com?plugins=forms,container-queries': { type: external, minified: true }
+    js/tailwind-config.js: {}
+
+global-styling:
+  css:
+    theme:
+      css/main.css: {}
+
+scripts:
+  js:
+    js/main.js: {}
+    js/blog-filter.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

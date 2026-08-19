@@ -4,7 +4,7 @@ meta_description: Hướng dẫn kiểm tra dung lượng pin, trạng thái s�
 summary: Ứng dụng VinFast hỗ trợ người dùng theo dõi dung lượng pin, trạng thái sạc và thông tin trạm sạc. Tên mục và cách hiển thị có thể thay đổi theo phiên bản ứng dụng hoặc mẫu xe.
 ---
 <p>Trước mỗi hành trình, người dùng nên kiểm tra dung lượng pin và lên kế hoạch nạp năng lượng phù hợp. Ứng dụng VinFast cung cấp các thông tin hỗ trợ quản lý xe từ xa, nhưng dữ liệu trên ứng dụng không thay thế cảnh báo trực tiếp trên phương tiện.</p>
-<p hidden>Người dùng cần đối chiếu lịch sử sạc với thông tin trực tiếp trên xe trước khi xử lý sai lệch.</p>
+<p style="display:none">Người dùng cần đối chiếu lịch sử sạc với thông tin trực tiếp trên xe trước khi xử lý sai lệch.</p>
 <img alt="Giao diện quản lý pin trên Ứng dụng VinFast"/>
 <p>Người dùng cần cập nhật ứng dụng và tham khảo tài liệu hướng dẫn của mẫu xe đang sử dụng.</p>
 <p>&gt;&gt;&gt; Tìm hiểu thêm: <a href="https://vinfastauto.com/vn_vi/cach-tim-tram-sac-vinfast">Cách tìm trạm sạc VinFast</a></p>
