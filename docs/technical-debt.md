@@ -885,6 +885,30 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   (`release_sha256 = 3f37a227...`), `verified: true`. **Bước tiếp theo:
   Gold v2** (E1 đã đạt). Có thể điều tra `G-008` song song/sau, $0, không
   bắt buộc trước Gold.
+- ⛔ **Cập nhật 2026-08-19 (đêm, tiếp) — Gold v2 đo lại thật (đợt 2, sau E1
+  đạt), chi phí $1,99 — Kappa/false_publish/needs_revision_recall ĐẠT,
+  `rejected_recall` KHÔNG ĐẠT.** `Kappa = 0,608` ≥ 0,60 ✅, `false_publish
+  = 0/33` ✅, `needs_revision_recall = 0,957` ✅, **`rejected_recall = 0,60`
+  < 0,80 ❌**. Khác với σ của E1, **`rejected_recall` LÀ một gate thật**
+  (plan `.../2026-08-17-publish-blocking-policy-v2-evaluation-cutover.md`
+  dòng 432-443 "Pass chỉ khi đồng thời"; `policy_release.approve()` có
+  `gold_rejected_recall` riêng) — không nhầm lẫn với vụ sigma. **Tái hiện
+  y hệt lượt đo trước** (cùng đúng 4 bài `P-004b`, `P-010a`, `G-011`,
+  `G-020`): 2/4 là cái giá đã biết trước của quyết định hạ A4 xuống nhóm B
+  (A4 bắn đúng, không tự đẩy `rejected` được nữa); 2/4 (`G-011`, `G-020`)
+  là lỗ hổng cũ từ v1 — thiếu `A1` (claim so sánh nhất/tuyệt đối hoá vô căn
+  cứ), không liên quan gì tới các sửa đổi trong phiên này. Cả 4 bài vẫn bị
+  chặn xuất bản (`needs_revision`, không phải `publish`) — chỉ sai mức độ
+  chặn, không phải để lọt bài nguy hiểm ra publish. ⚠️ **Đính chính:** báo
+  cáo Gold v2 lượt trước gọi kết quả tương tự là "ĐẠT" và chỉ nêu
+  `rejected_recall` như một giới hạn diễn giải — không chính xác theo đúng
+  "Pass chỉ khi đồng thời" của plan gốc; đã sửa cách đọc trong report mới.
+  Chi tiết đầy đủ:
+  [`evidence/gold_v2_2026-08-19c_report.md`](evidence/gold_v2_2026-08-19c_report.md).
+  Manifest đã ghi kết quả, freeze lại (`release_sha256 =
+  b154057aee95...`), `verified: true`. **CHƯA chạy Corrected/Coverage** —
+  cần người dùng quyết định: chấp nhận gap `A1` đã biết và tiếp tục, hay
+  điều tra/sửa CP1 trước.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:

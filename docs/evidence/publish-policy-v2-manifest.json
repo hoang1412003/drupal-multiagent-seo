@@ -2,7 +2,7 @@
   "schema_version": 1,
   "policy_version": "cam-nang-vn-v2",
   "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
-  "release_source_commit": "dac3b9ebebb9d2e3bc2cf51dc19d2b1ce130e4e9",
+  "release_source_commit": "7cdcd6107919ff45daf1cc7c614e98aa17a6f20b",
   "independent_label_reliability": "not_demonstrated",
   "artifacts": {
     "docs/evaluation-plan.md": "d8dbbd2561c94d29e1be31e9f0de0aea4851e8c17ff6a6ce4e30c4e455e1800b",
@@ -129,19 +129,13 @@
     "gold": {
       "status": "measured",
       "raw": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19.json",
-        "sha256": "2ea9685a60a9676fecb406ac500ec6761a5837cffca9f76632130d5281ce8a36"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19c.json",
+        "sha256": "7944422725f5e53b689c11d779c1ff7edf77813a317331df539fec757a6f120b"
       },
       "report": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19-report.json",
-        "sha256": "37eadf8131e061608bc569c6916f3a132e260d3adb17d85857206c5aaf888159"
-      },
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-preflight-2026-08-19.json",
-        "sha256": "a229d5e67660b78f4ca134cf43937b8b71b37fdb66cd39239bd2e300e95dcc1b"
-      },
-      "runtime_release_sha256": "0be3cbb5893d4a432b1c0e3e0f17af31751fb08c0672ea42224e2cb7d08b0d94",
-      "confirmation_token_hash": "db6e5b06e3806b355c2f39242519f2d65a47fb9ca6293a4522f5c7ea790755bc"
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\gold-v2-2026-08-19c-report.json",
+        "sha256": "4f6b465029cd7fff0ca0ab7eb86c361a385ac2a4ea856580757309277a7fa946"
+      }
     },
     "corrected": {
       "status": "preflighted",
@@ -372,11 +366,11 @@
       "content_hashes_sha256": {}
     }
   },
-  "frozen_at": "2026-08-19T05:18:18.951707+00:00",
+  "frozen_at": "2026-08-19T07:28:53.818241+00:00",
   "release_tuple": {
     "policy_version": "cam-nang-vn-v2",
     "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
-    "release_source_commit": "dac3b9ebebb9d2e3bc2cf51dc19d2b1ce130e4e9",
+    "release_source_commit": "7cdcd6107919ff45daf1cc7c614e98aa17a6f20b",
     "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
     "model": "claude-haiku-4-5-20251001",
     "artifacts": {
@@ -688,5 +682,5 @@
       }
     }
   },
-  "release_sha256": "3f37a227abbd235968cf82caf7bb25e69bf90fc34a0560d5a93283a265b4afcc"
+  "release_sha256": "b154057aee95429493c407e3b077c6ec8ad29a010e5129ed153c4d3b2b4f0f9a"
 }
