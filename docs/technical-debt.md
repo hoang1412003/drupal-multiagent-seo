@@ -828,9 +828,14 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
     inline cụ thể (`display:none`/`visibility:hidden`/`font-size:0`), có
     ghi chú rõ trong code là giới hạn chủ đích. Fixture lại dùng thuộc tính
     HTML5 `<p hidden>` — kỹ thuật nằm ngoài phạm vi detector được thiết kế
-    để bắt. **Lỗi ở fixture, không phải ở code** — muốn CV-A7-01 test đúng
-    CP9 phải đổi sang `style="display:none"`. Chưa sửa fixture (chưa được
-    yêu cầu).
+    để bắt. **Lỗi ở fixture, không phải ở code** — **đã sửa** (commit
+    `f854ee6`): đổi `<p hidden>` sang `<p style="display:none">`, nội dung
+    câu chữ giữ nguyên. Xác minh lại bằng `boc_phan_an`/`doan_an_dang_ngo`
+    trực tiếp (thuần Python, $0, không gọi LLM) — đoạn ẩn giờ được trích
+    đúng. `content_sha256` của `CV-A7-01` trong
+    `criterion-coverage-labels.csv` đã cập nhật theo nội dung mới; `data_head`
+    manifest cập nhật sang `f854ee6`; freeze lại, `release_sha256 =
+    01ef77bb...`.
   - `CV-B7-01` (SEO5 không bắn, `coverage.unavailable_checks=[]` — đã được
     đánh giá đầy đủ): LLM chủ động chấm URL 77 ký tự là `level=2` (đạt).
     SEO5 không có ngưỡng số tất định, hoàn toàn dựa phán đoán chủ quan của
@@ -843,6 +848,19 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   file `evidence/coverage-v2-2026-08-19.json`) tự thân **không phải** kết
   quả "measured" chính thức — được đóng khung ngay từ đầu là chạy chẩn
   đoán để tìm lỗi, không phải cổng đo lường.
+- 🏁 **Cập nhật 2026-08-19 (khuya, đợt 2) — Review toàn tuyến trước khi đo
+  lại thật, $0.** Xác nhận lại từ đầu: full offline suite 83/83 (0 hỏng, 0
+  skip) chạy sạch ở HEAD hiện tại; `policy_release.py verify` báo
+  `verified: true`, không lệch file nào; `decision_policy.py` không còn chỗ
+  nào dùng `code.startswith("A"/"B")` cũ, chỉ còn `finding["group"]`; test
+  và CSV nhãn khớp quyết định hạ A6/A4; `prompt_version`/`policy_hash` hash
+  nguyên file nên tự bắt cả 2 lần sửa prompt (A6 + A5). Preflight lại cả 4
+  dataset (E1/Gold/Corrected/Coverage, $0) chạy sạch, đúng
+  `release_sha256` hiện hành. Nhân review này, phát hiện và **sửa luôn**
+  fixture `CV-A7-01` (mục ngay trên) — không phải lỗi mới, là nợ đã ghi
+  nhận từ đợt điều tra Coverage v2 nhưng chưa xử lý.
+  **Kết luận: không còn gì chặn, sẵn sàng đo lại.** Thứ tự bắt buộc: E1
+  trước (gate Gold); Corrected/Coverage đo độc lập, không phụ thuộc thứ tự.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
