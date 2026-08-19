@@ -56,7 +56,8 @@ Bốn nguyên tắc:
 2. Package mới `src/review_platform/admin_api/` chỉ làm ba việc: nhận request →
    gọi `queries` → trả JSON qua Pydantic model.
 3. Hai UI dùng chung cookie phiên `vf_admin_session`. Đăng nhập một lần dùng
-   được cả hai; thu hồi phiên có hiệu lực với cả hai.
+   được cả hai; thu hồi phiên có hiệu lực với cả hai. Điều này **đòi hỏi mở
+   rộng `path` của cookie** — xem 5.1.
 4. Admin cũ giữ nguyên đường dẫn `/admin` trong suốt giai đoạn 1. Muốn bỏ
    Console chỉ cần gỡ hai lệnh mount.
 
@@ -98,9 +99,16 @@ Tiền tố: `/api/console/v1`.
 | GET | `/dashboard` | `queries.dashboard` | viewer |
 | GET | `/jobs` | `queries.list_jobs` | viewer |
 | GET | `/jobs/{public_id}` | `queries.get_job` | viewer |
-| POST | `/jobs/{public_id}/retry` | `reviews` retry hiện có | operator |
+| POST | `/jobs/{public_id}/retry` | `reviews.retry_failed` | operator |
 | GET | `/reviews` | `queries.list_reviews` | viewer |
 | GET | `/reviews/{public_id}` | `queries.get_review` | viewer |
+
+**Retry giữ nguyên cổng xác nhận chi phí.** `admin/job_routes.py:216` chặn
+retry khi chưa xác nhận, vì retry chạy lại pipeline tức là **gọi API trả phí**.
+Console API giữ cổng này dưới dạng trường `confirm_cost: bool` trong thân JSON;
+thiếu xác nhận trả `400` mã `cost_not_confirmed`. Retry cũng tạo ra **job mới**
+(`RetryResult.new_job_public_id`) chứ không cập nhật job cũ, nên response trả
+chi tiết của job mới, và giao diện phải điều hướng sang job mới đó.
 
 ### 4.1 `/auth/me` — endpoint không có màn hình nào nhưng bắt buộc
 
@@ -132,6 +140,7 @@ không biết mình đã đăng nhập hay chưa. Nó gọi `/auth/me`:
 |---|---|---|
 | 401 | chưa đăng nhập / phiên đã bị thu hồi | chuyển về `/console/login` |
 | 403 | sai role | hiện "không đủ quyền", không chuyển trang |
+| 400 | thiếu xác nhận chi phí khi retry | mở lại hộp thoại xác nhận |
 | 404 | không tìm thấy | trang trống có thông báo |
 | 409 | xung đột trạng thái (retry job không `failed`) | banner lỗi tại chỗ |
 | 422 | tham số lọc sai | banner lỗi tại chỗ, giữ bộ lọc |
@@ -160,17 +169,64 @@ bỏ bước này là mở lại đường cho dữ liệu chưa làm sạch t�
 
 ## 5. Thay đổi trên code đang chạy
 
-Chỉ hai chỗ, cả hai đều là bổ sung chứ không đổi hành vi cũ:
+Bản đầu của mục này viết "chỉ hai chỗ, không đổi hành vi cũ". **Sai.** Khi lập
+kế hoạch triển khai, đọc lại code phát hiện hai vấn đề chặn (5.1 và 5.2) buộc
+phải sửa hành vi hiện có. Danh sách đúng gồm ba chỗ:
 
-1. **`admin/dependencies.py`** — `require_csrf` hiện chỉ đọc
-   `form.get("csrf_token")`. Thêm nhánh đọc header `X-CSRF-Token`, **giữ
-   nguyên** nhánh form để admin htmx không hỏng.
-2. **`src/api.py`** (nơi khởi tạo `app = FastAPI(...)`, dòng 44) — mount router
+1. **`admin/router.py`** — mở rộng `path` của cookie phiên (xem 5.1).
+2. **`admin/dependencies.py`** — `require_csrf` đọc thêm header `X-CSRF-Token`
+   (**giữ nguyên** nhánh form để admin htmx không hỏng), và bổ sung dependency
+   phiên riêng cho API (xem 5.2).
+3. **`src/api.py`** (nơi khởi tạo `app = FastAPI(...)`, dòng 44) — mount router
    `admin_api` và mount `StaticFiles` cho `/console`, kèm catch-all trả
    `index.html` để React Router không trả 404 khi người dùng bấm F5 trên đường
    dẫn con.
 
-Ngoài hai chỗ này, không file nào đang chạy bị sửa.
+### 5.1 Cookie phiên đang giới hạn ở `path="/admin"`
+
+`router.py:206` đặt cookie `vf_admin_session` với `path="/admin"`, và xóa nó ở
+`router.py:232` và `router.py:295` cũng với `path="/admin"`. Trình duyệt vì thế
+**không gửi cookie tới `/api/console/v1/...` và `/console`**. Giả định "hai UI
+dùng chung phiên" ở mục 3 không thể chạy nếu giữ nguyên.
+
+Cách xử lý: đưa `path` về `"/"` qua một hằng số dùng chung
+`SESSION_COOKIE_PATH` trong `dependencies.py`, sửa cả ba vị trí.
+
+Không được để hai đường dẫn cùng tồn tại. Nếu Console đặt cookie ở `"/"` còn
+admin cũ đặt ở `"/admin"`, trình duyệt sẽ giữ **hai cookie trùng tên**, và
+`request.cookies.get()` của Starlette chỉ trả về một cái không xác định — lỗi
+này rất khó truy.
+
+Xử lý cookie cũ còn sót của người đang đăng nhập lúc triển khai: route đăng
+nhập (cả cũ lẫn mới) gọi thêm `delete_cookie(SESSION_COOKIE, path="/admin")`
+trước khi đặt cookie mới ở `"/"`, và route đăng xuất xóa ở **cả hai** đường
+dẫn. Đây là code chuyển tiếp, gỡ được sau một chu kỳ hết hạn phiên (8 giờ).
+
+Đánh giá rủi ro của việc mở rộng: cookie sẽ được gửi tới mọi đường dẫn cùng
+origin, gồm `/api/v1/*` của connector. Endpoint đó xác thực bằng API key và bỏ
+qua cookie nên không đổi hành vi. Cookie vẫn `HttpOnly` + `SameSite=lax`, nên
+mở rộng path không mở thêm bề mặt tấn công đáng kể — đây cũng là cấu hình mặc
+định của phần lớn ứng dụng web.
+
+### 5.2 `current_session` trả redirect 303, API cần 401
+
+`dependencies.current_session` khi không có phiên sẽ raise `HTTPException(303,
+Location: /admin/login)`, và khi `must_change_password` thì redirect sang
+`/admin/change-password`. Đúng cho trang HTML, **sai cho API JSON**: fetch của
+trình duyệt sẽ tự đi theo redirect và SPA nhận về HTML trang đăng nhập với mã
+200 thay vì 401.
+
+Vì vậy `admin_api` **không dùng lại** `current_session`. Nó có dependency riêng
+`console_session` trong `admin_api/dependencies.py`, dùng chung
+`sessions.resolve/revoke/touch` nhưng:
+
+- không có phiên hợp lệ → `401` với thân `{"error": {"code": "unauthenticated"}}`;
+- `must_change_password = true` → mọi endpoint trả `403` với
+  `{"error": {"code": "must_change_password"}}`, **trừ** `/auth/me`,
+  `/auth/change-password` và `/auth/logout`.
+
+`/auth/me` phải đi qua được ở trạng thái này, vì đó là cách SPA biết cần hiện
+form đổi mật khẩu.
 
 ## 6. Bàn giao cho Antigravity
 
