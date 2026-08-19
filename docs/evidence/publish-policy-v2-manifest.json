@@ -138,31 +138,61 @@
       }
     },
     "corrected": {
-      "status": "preflighted",
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-preflight-20260818b.json",
-        "sha256": "a918a7ad7ac509162ead3cc319a227c7f9cc07677164001dd19f8009b9987ef9"
+      "status": "measured",
+      "raw": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-2026-08-19d.json",
+        "sha256": "05ec6c2072b5487ee60edbe05f047558c635897fefea4d6d7658f90eb96d66c3"
       },
-      "runtime_release_sha256": "9fa2612bcb62b49f47c82be445eb2a0611291d6d6a5103801a6ee9ab6512fad7",
-      "confirmation_token_hash": "40988d52a6b2f000ff674bcb44cb45be946128f6066d419843c187d591deb089"
+      "report": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-2026-08-19d-report.json",
+        "sha256": "f012d2160debf46d36102b8ab6ed9646db881cb1f0ebdf2163b723d03657c969"
+      },
+      "preflight": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-preflight-20260819d.json",
+        "sha256": "dafb3064d68cdf4a69a4e571f51282289ae879b62a99e7a7f2257249401c0284"
+      },
+      "runtime_release_sha256": "641d1d0ec14985deb25e983c2f665a31d253eb20fc64b19b2a0b7666d67a36b9",
+      "confirmation_token_hash": "22e72749fc80ca4f3fc04cb7d29de1b3081254015fef65613d2fb51eca60e622"
     },
     "coverage": {
-      "status": "preflighted",
-      "preflight": {
-        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-preflight-20260818b.json",
-        "sha256": "18ab3205f7b1adadc5358808f1a38b60625705fb41b180248f5aecc3d541781f"
+      "status": "measured",
+      "raw": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "sha256": "ca4e18742514c9963f8a37af82944afb6b02db2819c75987393cb2d1dd1cd6f4"
       },
-      "runtime_release_sha256": "b2d52bf5dd6e5b02de060b1d846216f8b2c899162480ff395bfacde5aa509771",
-      "confirmation_token_hash": "3526295d90eaac8aa6e0bc5b5d78969102d583b6ee24956146aadd953f697064"
+      "report": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d-report.json",
+        "sha256": "e5861a634d31df1a44dba3233a931edc825bebcdf7a4544510891d4ab3bd5f18"
+      },
+      "preflight": {
+        "path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-preflight-20260819.json",
+        "sha256": "a2231c67ba597df6a8a670f8341a3125d9f64d13fd892894bc16b7bbc6369a97"
+      },
+      "runtime_release_sha256": "ec0b66dce6b23001c125660744c6ea65789fb863cd0f2a7baf3382557724b1ad",
+      "confirmation_token_hash": "f294c3acbb4ad3c931a61846a8528f15b8b6e19af2aee640c620473ed5066b11"
     },
     "smoke": {
       "status": "pending"
     }
   },
   "approval": {
-    "measured_complete": false,
-    "level_b": "pending",
-    "approved_for_limited_pilot": false
+    "measured_complete": true,
+    "level_b": "fail",
+    "technical_gates": {
+      "e1_decision_consistency": true,
+      "gold_kappa": true,
+      "gold_rejected_recall": false,
+      "gold_needs_revision_recall": true,
+      "gold_false_publish": true,
+      "corrected_publish": false,
+      "paired_recovery": false,
+      "coverage_target_decision_parent": false,
+      "coverage_failure": false,
+      "drift": true
+    },
+    "independent_label_reliability": "not_demonstrated",
+    "approved_for_limited_pilot": false,
+    "recomputed_at": "2026-08-19T10:18:10.883647+00:00"
   },
   "protocol_commit": "d54d6f932b209e17c59eb924a53a990fe53a0a3e",
   "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
