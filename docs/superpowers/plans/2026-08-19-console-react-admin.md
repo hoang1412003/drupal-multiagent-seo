@@ -21,6 +21,7 @@
 - Test là **script Python thuần** theo mẫu `scripts/test_admin_audit_page.py`, **không phải pytest**. In `[PASS]` / `[FAIL]`, `[SKIP]` khi không có Postgres, `sys.exit(1)` khi có lỗi.
 - Mọi file `scripts/test_*.py` mới **bắt buộc** khai báo trong `scripts/test_groups.json` nhóm `postgres`, nếu không `run_test_group.py` báo `[LOI MANIFEST]` và chặn toàn bộ.
 - Lệnh xác minh chuẩn (chạy từ `multiagent/`): `.venv\Scripts\python.exe scripts\run_test_group.py all-offline` — phải báo `hong: 0` và `co [SKIP]: 0`.
+- **Tên hàm, tên biến, tên test: tiếng Anh.** Chú thích và thông báo lỗi: tiếng Việt không dấu, khớp với phần còn lại của repo. Đây cũng là quy ước sẵn có của package `admin/` (`_set_login_csrf`, `_client_ip`, `_filters`).
 - Commit tiếng Việt **không dấu**, **không** trailer `Co-Authored-By: Claude`.
 - Nhánh làm việc: `docs/thiet-ke-console-react-admin` (đã có spec + kế hoạch).
 
@@ -63,7 +64,7 @@ Tách theo màn hình chứ không theo tầng kỹ thuật: file nào thay đ�
 Tạo `scripts/test_admin_session_cookie_path.py`. Phần khung (kết nối DB, reset schema, `_make_client`, `_user`) sao chép nguyên từ `scripts/test_admin_audit_page.py` dòng 1-72, đổi `SCHEMA = "vf_test_admin_cookie_path"`. Phần test:
 
 ```python
-def test_login_dat_cookie_path_goc_va_xoa_cookie_cu(conn):
+def test_login_sets_cookie_at_root_path(conn):
     _reset_schema(conn)
     account = _user(conn, "cookie.path.admin", Role.ADMIN)
 
@@ -92,7 +93,7 @@ def test_login_dat_cookie_path_goc_va_xoa_cookie_cu(conn):
     print("[PASS] login dat cookie phien o path=/ va xoa cookie cu o /admin")
 
 
-def test_cookie_phien_duoc_gui_ngoai_admin(conn):
+def test_cookie_reaches_paths_outside_admin(conn):
     _reset_schema(conn)
     account = _user(conn, "cookie.path.viewer", Role.VIEWER)
 
@@ -104,7 +105,7 @@ def test_cookie_phien_duoc_gui_ngoai_admin(conn):
     print("[PASS] cookie phien co hieu luc ngoai duong dan /admin")
 
 
-def test_logout_xoa_cookie_o_ca_hai_path(conn):
+def test_logout_clears_cookie_on_both_paths(conn):
     _reset_schema(conn)
     account = _user(conn, "cookie.path.logout", Role.ADMIN)
 
@@ -118,12 +119,12 @@ def test_logout_xoa_cookie_o_ca_hai_path(conn):
     response = client.post("/admin/logout", data={"csrf_token": csrf_token})
     assert response.status_code == 303
 
-    duong_dan = {
+    paths = {
         h.split("Path=")[1].split(";")[0]
         for h in response.headers.get_list("set-cookie")
         if h.startswith("vf_admin_session=")
     }
-    assert duong_dan == {"/", "/admin"}, duong_dan
+    assert paths == {"/", "/admin"}, paths
     print("[PASS] logout xoa cookie phien o ca hai duong dan")
 ```
 
@@ -134,7 +135,7 @@ def test_logout_xoa_cookie_o_ca_hai_path(conn):
 ```
 .venv\Scripts\python.exe scripts\test_admin_session_cookie_path.py
 ```
-Kỳ vọng: `[FAIL] test_login_dat_cookie_path_goc_va_xoa_cookie_cu` — hiện chỉ có 1 header `vf_admin_session`, và `Path=/admin`.
+Kỳ vọng: `[FAIL] test_login_sets_cookie_at_root_path` — hiện chỉ có 1 header `vf_admin_session`, và `Path=/admin`.
 
 - [ ] **Step 3: Thêm hằng số đường dẫn**
 
@@ -230,7 +231,7 @@ def _make_client(conn):
 Test:
 
 ```python
-def test_khong_co_phien_tra_401_json_khong_redirect(conn):
+def test_no_session_returns_401_json_not_redirect(conn):
     _reset_schema(conn)
     client = _make_client(conn)
     response = client.get("/api/console/v1/auth/me")
@@ -242,7 +243,7 @@ def test_khong_co_phien_tra_401_json_khong_redirect(conn):
     print("[PASS] khong co phien tra 401 JSON, khong redirect 303")
 
 
-def test_must_change_password_chan_moi_endpoint_tru_auth(conn):
+def test_must_change_password_blocks_all_but_auth(conn):
     _reset_schema(conn)
     users.create_user(
         conn, "console.mcp", "Mat-khau-console-mcp-2026", Role.ADMIN,
@@ -265,7 +266,7 @@ def test_must_change_password_chan_moi_endpoint_tru_auth(conn):
     print("[PASS] must_change_password: /auth/me qua duoc, endpoint khac bi chan 403")
 
 
-def test_sai_role_tra_403_khong_phai_401(conn):
+def test_wrong_role_returns_403_not_401(conn):
     _reset_schema(conn)
     users.create_user(
         conn, "console.viewer", "Mat-khau-console-viewer-2026", Role.VIEWER,
@@ -471,7 +472,7 @@ def iso(value: datetime | None) -> str | None:
     return None if value is None else value.isoformat().replace("+00:00", "Z")
 
 
-def so(value: Decimal | None) -> float | None:
+def to_number(value: Decimal | None) -> float | None:
     return None if value is None else float(value)
 
 
@@ -621,7 +622,7 @@ async def require_csrf(
 ```
 .venv\Scripts\python.exe scripts\test_console_api_auth.py
 ```
-Kỳ vọng: `test_khong_co_phien_tra_401_json_khong_redirect` và `test_must_change_password_chan_moi_endpoint_tru_auth` in `[PASS]`. `test_sai_role_tra_403_khong_phai_401` vẫn `[FAIL]` cho tới task 6 (chưa có route retry).
+Kỳ vọng: `test_no_session_returns_401_json_not_redirect` và `test_must_change_password_blocks_all_but_auth` in `[PASS]`. `test_wrong_role_returns_403_not_401` vẫn `[FAIL]` cho tới task 6 (chưa có route retry).
 
 - [ ] **Step 6: Commit**
 
@@ -641,7 +642,7 @@ git commit -m "feat: bon endpoint /auth cho Console API va CSRF qua header"
 - Modify: `scripts/test_groups.json`
 
 **Interfaces:**
-- Consumes: `dependencies.require_console_role`, `models.iso`, `models.so`.
+- Consumes: `dependencies.require_console_role`, `models.iso`, `models.to_number`.
 - Produces: `models.DashboardResponse`, `models.CostEstimateModel` — task 7 dùng lại `CostEstimateModel`.
 
 - [ ] **Step 1: Viết test thất bại**
@@ -649,19 +650,19 @@ git commit -m "feat: bon endpoint /auth cho Console API va CSRF qua header"
 `scripts/test_console_api_dashboard.py`, khung như task 2. Trước khi so sánh, gọi thẳng `queries.dashboard(conn, ...)` để lấy giá trị mong đợi — test so API với hàm truy vấn, không hard-code số:
 
 ```python
-def test_dashboard_tra_du_truong_va_dung_kieu(conn):
+def test_dashboard_returns_all_fields_with_correct_types(conn):
     _reset_schema(conn)
-    _seed_jobs_va_reviews(conn)          # sao chep tu scripts/test_admin_dashboard*.py
-    client = _dang_nhap_viewer(conn)
+    _seed_jobs_and_reviews(conn)          # sao chep tu scripts/test_admin_dashboard*.py
+    client = _login_viewer(conn)
 
     response = client.get("/api/console/v1/dashboard?from=2026-08-01&to=2026-08-31")
     assert response.status_code == 200
     body = response.json()
 
-    mong_doi = queries.dashboard(conn, date(2026, 8, 1), date(2026, 8, 31))
-    assert body["total_reviews"] == mong_doi.total_reviews
-    assert body["queue_counts"] == mong_doi.queue_counts
-    assert body["decision_counts"] == mong_doi.decision_counts
+    expected = queries.dashboard(conn, date(2026, 8, 1), date(2026, 8, 31))
+    assert body["total_reviews"] == expected.total_reviews
+    assert body["queue_counts"] == expected.queue_counts
+    assert body["decision_counts"] == expected.decision_counts
     assert body["worker_status"] in ("running", "stale", "unavailable")
     # Decimal phai la so JSON, khong phai chuoi.
     assert body["duration_p95_ms"] is None or isinstance(body["duration_p95_ms"], (int, float))
@@ -672,9 +673,9 @@ def test_dashboard_tra_du_truong_va_dung_kieu(conn):
     print("[PASS] dashboard tra du truong, Decimal la so JSON")
 
 
-def test_dashboard_tu_choi_khoang_ngay_sai(conn):
+def test_dashboard_rejects_inverted_date_range(conn):
     _reset_schema(conn)
-    client = _dang_nhap_viewer(conn)
+    client = _login_viewer(conn)
     response = client.get("/api/console/v1/dashboard?from=2026-08-31&to=2026-08-01")
     assert response.status_code == 422
     assert response.json()["error"]["code"] == "invalid_filter"
@@ -697,7 +698,7 @@ class CostEstimateModel(BaseModel):
     unknown_models: list[str]
 
     @classmethod
-    def tu_dataclass(cls, value) -> "CostEstimateModel":
+    def from_dataclass(cls, value) -> "CostEstimateModel":
         return cls(
             input_tokens=value.input_tokens,
             output_tokens=value.output_tokens,
@@ -737,7 +738,7 @@ def dashboard(
     resolved=Depends(dependencies.require_console_role(Role.VIEWER)),
     conn=Depends(admin_dependencies.get_db),
 ):
-    date_from, date_to = _khoang_ngay(request)   # parse ?from=&to=, mac dinh 30 ngay
+    date_from, date_to = _date_range(request)   # parse ?from=&to=, mac dinh 30 ngay
     try:
         view = queries.dashboard(conn, date_from, date_to)
     except ValueError as exc:
@@ -748,11 +749,11 @@ def dashboard(
         queue_counts=view.queue_counts,
         total_reviews=view.total_reviews,
         decision_counts=view.decision_counts,
-        duration_p50_ms=models.so(view.duration_p50_ms),
-        duration_p95_ms=models.so(view.duration_p95_ms),
+        duration_p50_ms=models.to_number(view.duration_p50_ms),
+        duration_p95_ms=models.to_number(view.duration_p95_ms),
         cost_estimate=models.CostEstimateModel.tu_dataclass(view.cost_estimate),
         writeback_counts=view.writeback_counts,
-        writeback_success_rate=models.so(view.writeback_success_rate),
+        writeback_success_rate=models.to_number(view.writeback_success_rate),
         worker_status=view.worker_status,
         connector_status=view.connector_status,
         worker_running=view.worker_running,
@@ -761,7 +762,7 @@ def dashboard(
     )
 ```
 
-`_khoang_ngay` đọc `?from=`/`?to=` dạng `YYYY-MM-DD`, raise `errors.invalid_filter` khi sai định dạng hoặc `from > to`, mặc định 30 ngày gần nhất khi thiếu.
+`_date_range` đọc `?from=`/`?to=` dạng `YYYY-MM-DD`, raise `errors.invalid_filter` khi sai định dạng hoặc `from > to`, mặc định 30 ngày gần nhất khi thiếu.
 
 - [ ] **Step 5: Chạy test + đăng ký manifest + chạy cả nhóm** — kỳ vọng `[PASS]` cả hai, `all-offline` báo `hong: 0`, `co [SKIP]: 0`.
 
@@ -784,15 +785,15 @@ git commit -m "feat: endpoint dashboard cho Console API"
 
 **Interfaces:**
 - Consumes: `queries.JobFilters`, `queries.list_jobs`, `queries.get_job`.
-- Produces: `models.JobListItemModel`, `models.JobDetailModel`, `models.JobPage`, và **`models.trang(...)`** — helper phân trang dùng lại ở task 7.
+- Produces: `models.JobListItemModel`, `models.JobDetailModel`, `models.JobPage`, và **`models.page_payload(...)`** — helper phân trang dùng lại ở task 7.
 
 - [ ] **Step 1: Viết test thất bại**
 
 ```python
-def test_jobs_phan_trang_dung_hinh_dang(conn):
+def test_jobs_pagination_shape(conn):
     _reset_schema(conn)
     _seed_jobs(conn, so_luong=137)
-    client = _dang_nhap_viewer(conn)
+    client = _login_viewer(conn)
 
     response = client.get("/api/console/v1/jobs?page=1&page_size=50")
     assert response.status_code == 200
@@ -810,21 +811,21 @@ def test_jobs_phan_trang_dung_hinh_dang(conn):
     print("[PASS] jobs phan trang dung hinh dang chuan")
 
 
-def test_jobs_loc_sai_tra_422_dung_hinh_dang_loi(conn):
+def test_jobs_invalid_filter_returns_422_error_shape(conn):
     _reset_schema(conn)
-    client = _dang_nhap_viewer(conn)
-    for duong_dan in ("/api/console/v1/jobs?status=khong-ton-tai",
-                      "/api/console/v1/jobs?page=0",
-                      "/api/console/v1/jobs?from=2026-08-13"):
-        response = client.get(duong_dan)
-        assert response.status_code == 422, duong_dan
+    client = _login_viewer(conn)
+    for path in ("/api/console/v1/jobs?status=khong-ton-tai",
+                 "/api/console/v1/jobs?page=0",
+                 "/api/console/v1/jobs?from=2026-08-13"):
+        response = client.get(path)
+        assert response.status_code == 422, path
         assert set(response.json()["error"]) == {"code", "message", "field"}
     print("[PASS] jobs loc sai tra 422 dung hinh dang loi")
 
 
-def test_job_detail_khong_ton_tai_tra_404(conn):
+def test_job_detail_missing_returns_404(conn):
     _reset_schema(conn)
-    client = _dang_nhap_viewer(conn)
+    client = _login_viewer(conn)
     assert client.get("/api/console/v1/jobs/%s" % uuid4()).status_code == 404
     assert client.get("/api/console/v1/jobs/khong-phai-uuid").status_code == 404
     print("[PASS] job detail tra 404 cho id la va id sai dinh dang")
@@ -842,7 +843,7 @@ class PageResponse(BaseModel):
     total_pages: int
 
 
-def trang(view, items: list) -> dict:
+def page_payload(view, items: list) -> dict:
     """Trai PageView thanh dict chuan. Dung cho MOI endpoint danh sach."""
     return {
         "items": items,
@@ -881,11 +882,11 @@ def list_jobs(
     conn=Depends(admin_dependencies.get_db),
 ):
     try:
-        filters, page_number, page_size = _bo_loc(request)
+        filters, page_number, page_size = _job_filters(request)
         view = queries.list_jobs(conn, filters, page_number, page_size)
     except ValueError as exc:
         raise errors.invalid_filter(str(exc)) from exc
-    return models.trang(view, [_job_item(item) for item in view.items])
+    return models.page_payload(view, [_job_item(item) for item in view.items])
 
 
 @router.get("/jobs/{public_id}", response_model=models.JobDetailModel)
@@ -904,7 +905,7 @@ def get_job(
     return _job_detail(job)
 ```
 
-`_bo_loc` chuyển query params thành `queries.JobFilters` + `page`/`page_size`, tái dùng đúng quy tắc của `admin/job_routes.py:_filters` (bao gồm `page >= 1`, `page_size` trong khoảng cho phép, `from` và `to` phải đi cùng nhau).
+`_job_filters` chuyển query params thành `queries.JobFilters` + `page`/`page_size`, tái dùng đúng quy tắc của `admin/job_routes.py:_filters` (bao gồm `page >= 1`, `page_size` trong khoảng cho phép, `from` và `to` phải đi cùng nhau).
 
 - [ ] **Step 5: Chạy test + đăng ký manifest + chạy cả nhóm** — kỳ vọng 3 `[PASS]`, `all-offline` sạch.
 
@@ -934,45 +935,45 @@ git commit -m "feat: endpoint danh sach va chi tiet job cho Console API"
 - [ ] **Step 1: Viết test thất bại**
 
 ```python
-def test_retry_yeu_cau_operator_va_job_phai_failed(conn):
+def test_retry_requires_operator_and_failed_job(conn):
     _reset_schema(conn)
     job_failed = _seed_job(conn, status="failed")
     job_running = _seed_job(conn, status="running")
 
-    xac_nhan = {"confirm_cost": True, "reason": "test"}
+    confirmation = {"confirm_cost": True, "reason": "test"}
 
-    viewer = _dang_nhap(conn, "retry.viewer", Role.VIEWER)
+    viewer = _login_as(conn, "retry.viewer", Role.VIEWER)
     r = viewer.post(
         "/api/console/v1/jobs/%s/retry" % job_failed,
-        json=xac_nhan,
+        json=confirmation,
         headers={"X-CSRF-Token": _csrf(viewer, conn)},
     )
     assert r.status_code == 403 and r.json()["error"]["code"] == "forbidden"
 
-    operator = _dang_nhap(conn, "retry.operator", Role.OPERATOR)
+    operator = _login_as(conn, "retry.operator", Role.OPERATOR)
     ok = operator.post(
         "/api/console/v1/jobs/%s/retry" % job_failed,
-        json=xac_nhan,
+        json=confirmation,
         headers={"X-CSRF-Token": _csrf(operator, conn)},
     )
     assert ok.status_code == 200, ok.text
     # retry tao JOB MOI, khong tra lai job cu.
     assert ok.json()["public_id"] != str(job_failed)
 
-    xung_dot = operator.post(
+    conflict = operator.post(
         "/api/console/v1/jobs/%s/retry" % job_running,
-        json=xac_nhan,
+        json=confirmation,
         headers={"X-CSRF-Token": _csrf(operator, conn)},
     )
-    assert xung_dot.status_code == 409
-    assert xung_dot.json()["error"]["code"] == "conflict"
+    assert conflict.status_code == 409
+    assert conflict.json()["error"]["code"] == "conflict"
     print("[PASS] retry: viewer 403, operator 200 tao job moi, job dang chay 409")
 
 
-def test_retry_khong_xac_nhan_chi_phi_bi_chan(conn):
+def test_retry_without_cost_confirmation_is_blocked(conn):
     _reset_schema(conn)
     job_failed = _seed_job(conn, status="failed")
-    operator = _dang_nhap(conn, "retry.chiphi", Role.OPERATOR)
+    operator = _login_as(conn, "retry.chiphi", Role.OPERATOR)
     r = operator.post(
         "/api/console/v1/jobs/%s/retry" % job_failed,
         json={"confirm_cost": False, "reason": None},
@@ -983,10 +984,10 @@ def test_retry_khong_xac_nhan_chi_phi_bi_chan(conn):
     print("[PASS] retry khong xac nhan chi phi bi chan truoc khi goi API tra phi")
 
 
-def test_retry_thieu_csrf_header_bi_tu_choi(conn):
+def test_retry_without_csrf_header_is_rejected(conn):
     _reset_schema(conn)
     job_failed = _seed_job(conn, status="failed")
-    operator = _dang_nhap(conn, "retry.nocsrf", Role.OPERATOR)
+    operator = _login_as(conn, "retry.nocsrf", Role.OPERATOR)
     r = operator.post("/api/console/v1/jobs/%s/retry" % job_failed)
     assert r.status_code == 403 and r.json()["error"]["code"] == "csrf_invalid"
     print("[PASS] retry thieu header X-CSRF-Token bi tu choi")
@@ -1043,13 +1044,13 @@ def retry_job(
         raise errors.not_found("Job khong ton tai") from exc
     except (reviews.JobRetryConflict, reviews.JobRetryContextError) as exc:
         raise errors.ConsoleError(409, "conflict", str(exc)) from exc
-    job_moi = queries.get_job(conn, result.new_job_public_id)
-    return _job_detail(job_moi)
+    new_job = queries.get_job(conn, result.new_job_public_id)
+    return _job_detail(new_job)
 ```
 
 Thứ tự ba lần kiểm tra là cố ý và phải giữ đúng: **404 trước, rồi cổng chi phí, rồi mới retry**. Đảo lại thì một job không tồn tại vẫn trả 400 "chưa xác nhận chi phí", làm lộ ra rằng lỗi nằm ở chỗ khác và gây nhiễu khi truy sự cố.
 
-- [ ] **Step 4: Chạy test** — kỳ vọng 3 `[PASS]` mới (role, cổng chi phí, thiếu CSRF), và `test_sai_role_tra_403_khong_phai_401` trong `test_console_api_auth.py` giờ cũng `[PASS]`.
+- [ ] **Step 4: Chạy test** — kỳ vọng 3 `[PASS]` mới (role, cổng chi phí, thiếu CSRF), và `test_wrong_role_returns_403_not_401` trong `test_console_api_auth.py` giờ cũng `[PASS]`.
 
 - [ ] **Step 5: Commit**
 
@@ -1071,7 +1072,7 @@ git commit -m "feat: endpoint retry job cho Console API, yeu cau operator"
 - Modify: `scripts/test_groups.json`
 
 **Interfaces:**
-- Consumes: `queries.list_reviews`, `queries.get_review`, `models.trang`, `models.CostEstimateModel`.
+- Consumes: `queries.list_reviews`, `queries.get_review`, `models.page_payload`, `models.CostEstimateModel`.
 - Produces: không có gì cho task sau.
 
 - [ ] **Step 1: Viết test thất bại**
@@ -1079,15 +1080,15 @@ git commit -m "feat: endpoint retry job cho Console API, yeu cau operator"
 Test quan trọng nhất là test làm sạch dữ liệu — nó phải chứng minh API **không** trả ra dữ liệu thô:
 
 ```python
-def test_review_detail_van_lam_sach_du_lieu_agent(conn):
+def test_review_detail_still_sanitizes_agent_data(conn):
     _reset_schema(conn)
     # Gieo mot run_log co payload doc hai trong criteria/issues/evidence.
-    review_id = _seed_review_doc_hai(
+    review_id = _seed_malicious_review(
         conn,
         marker_script="<script>alert('XSS-MARKER')</script>",
         marker_password="RAW-PASSWORD-MARKER",
     )
-    client = _dang_nhap_viewer(conn)
+    client = _login_viewer(conn)
 
     response = client.get("/api/console/v1/reviews/%s" % review_id)
     assert response.status_code == 200
@@ -1096,19 +1097,19 @@ def test_review_detail_van_lam_sach_du_lieu_agent(conn):
     assert "RAW-PASSWORD-MARKER" not in raw
 
     # So sanh voi chinh queries.get_review: API khong duoc lam sach it hon.
-    mong_doi = queries.get_review(conn, review_id)
-    assert len(response.json()["agents"]) == len(mong_doi.agents)
+    expected = queries.get_review(conn, review_id)
+    assert len(response.json()["agents"]) == len(expected.agents)
     print("[PASS] review detail giu nguyen buoc lam sach cua queries")
 
 
-def test_reviews_final_score_la_so_khong_phai_chuoi(conn):
+def test_reviews_final_score_is_number_not_string(conn):
     _reset_schema(conn)
     _seed_reviews(conn, so_luong=3)
-    client = _dang_nhap_viewer(conn)
+    client = _login_viewer(conn)
     body = client.get("/api/console/v1/reviews").json()
-    diem = [i["final_score"] for i in body["items"] if i["final_score"] is not None]
-    assert diem, "can it nhat mot review co diem de kiem tra kieu"
-    assert all(isinstance(d, (int, float)) and not isinstance(d, bool) for d in diem)
+    scores = [i["final_score"] for i in body["items"] if i["final_score"] is not None]
+    assert scores, "can it nhat mot review co diem de kiem tra kieu"
+    assert all(isinstance(d, (int, float)) and not isinstance(d, bool) for d in scores)
     print("[PASS] final_score la so JSON, khong phai chuoi")
 ```
 
@@ -1176,10 +1177,10 @@ git commit -m "feat: endpoint danh sach va chi tiet review cho Console API"
 - [ ] **Step 1: Viết test thất bại**
 
 ```python
-def test_app_that_co_du_route_console(conn):
+def test_real_app_mounts_all_console_routes(conn):
     import api as app_module
-    duong_dan = {r.path for r in app_module.app.routes}
-    can_co = {
+    paths = {r.path for r in app_module.app.routes}
+    required = {
         "/api/console/v1/auth/login",
         "/api/console/v1/auth/me",
         "/api/console/v1/auth/logout",
@@ -1191,19 +1192,19 @@ def test_app_that_co_du_route_console(conn):
         "/api/console/v1/reviews",
         "/api/console/v1/reviews/{public_id}",
     }
-    thieu = can_co - duong_dan
-    assert not thieu, f"thieu route: {sorted(thieu)}"
+    missing = required - paths
+    assert not missing, f"thieu route: {sorted(missing)}"
     print("[PASS] app that mount du 10 route Console")
 
 
-def test_openapi_sinh_duoc_va_khong_co_route_admin_cu(conn):
+def test_openapi_excludes_legacy_admin_routes(conn):
     import api as app_module
     schema = app_module.app.openapi()
-    duong_dan = set(schema["paths"])
-    assert "/api/console/v1/auth/me" in duong_dan
+    paths = set(schema["paths"])
+    assert "/api/console/v1/auth/me" in paths
     # Trang Jinja2 dat include_in_schema=False hoac khong nam trong openapi:
     # hop dong giao cho Antigravity chi duoc chua API JSON.
-    assert not [p for p in duong_dan if p.startswith("/admin")], sorted(duong_dan)
+    assert not [p for p in paths if p.startswith("/admin")], sorted(paths)
     print("[PASS] openapi chi chua API JSON, khong lan route admin cu")
 ```
 
@@ -1251,16 +1252,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 import api as app_module
 
-DICH = Path(__file__).resolve().parents[1] / "console_ui" / "openapi.json"
+TARGET = Path(__file__).resolve().parents[1] / "console_ui" / "openapi.json"
 
 
 def main() -> int:
     schema = app_module.app.openapi()
     paths = {p: v for p, v in schema["paths"].items() if p.startswith("/api/console/")}
     schema["paths"] = paths
-    DICH.parent.mkdir(parents=True, exist_ok=True)
-    DICH.write_text(json.dumps(schema, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[OK] ghi {len(paths)} duong dan vao {DICH}")
+    TARGET.parent.mkdir(parents=True, exist_ok=True)
+    TARGET.write_text(json.dumps(schema, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[OK] ghi {len(paths)} duong dan vao {TARGET}")
     return 0
 
 
