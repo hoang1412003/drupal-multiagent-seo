@@ -215,3 +215,120 @@ class JobDetailModel(BaseModel):
             run_scored_at=iso(job.run_scored_at),
             saved_result_available=job.saved_result_available,
         )
+
+
+class ReviewListItemModel(BaseModel):
+    public_id: str
+    scored_at: str
+    site_id: str
+    site_slug: str
+    external_content_id: str
+    decision: str | None
+    final_score: float | None
+    profile_code: str
+    policy_version: str
+    model: str
+    is_fixture: bool
+
+    @classmethod
+    def from_view(cls, item) -> "ReviewListItemModel":
+        return cls(
+            public_id=str(item.public_id),
+            scored_at=iso(item.scored_at),
+            site_id=str(item.site_id),
+            site_slug=item.site_slug,
+            external_content_id=item.external_content_id,
+            decision=item.decision,
+            final_score=to_number(item.final_score),
+            profile_code=item.profile_code,
+            policy_version=item.policy_version,
+            model=item.model,
+            is_fixture=item.is_fixture,
+        )
+
+
+class ReviewPage(PageResponse):
+    items: list[ReviewListItemModel]
+
+
+class AgentResultModel(BaseModel):
+    name: str
+    # score la gia tri tu do da qua sanitize: co the la so, chuoi, hoac null.
+    score: float | int | str | bool | None
+    criteria: list[dict]
+    issues: list[dict]
+    evidence: list[dict]
+
+    @classmethod
+    def from_view(cls, agent) -> "AgentResultModel":
+        return cls(
+            name=agent.name,
+            score=agent.score,
+            criteria=list(agent.criteria),
+            issues=list(agent.issues),
+            evidence=list(agent.evidence),
+        )
+
+
+class ReviewDetailModel(BaseModel):
+    public_id: str
+    scored_at: str
+    duration_ms: int | None
+    decision: str | None
+    final_score: float | None
+    missing_agents: list[str]
+    veto_reason: str | None
+    note: str | None
+    agents: list[AgentResultModel]
+    config_meta: dict | list | str | int | float | bool | None
+    cost_estimate: CostEstimateModel
+    usage_available: bool
+    model: str
+    writeback_status: str
+    writeback_error: str | None
+    site_id: str
+    site_slug: str
+    site_name: str
+    profile_id: str
+    profile_code: str
+    policy_version: str
+    external_content_id: str
+    external_revision_id: str | None
+    content_type: str
+    langcode: str
+    correlation_id: str
+    is_fixture: bool
+    drupal_url: str | None
+
+    @classmethod
+    def from_view(cls, review) -> "ReviewDetailModel":
+        return cls(
+            public_id=str(review.public_id),
+            scored_at=iso(review.scored_at),
+            duration_ms=review.duration_ms,
+            decision=review.decision,
+            final_score=to_number(review.final_score),
+            missing_agents=list(review.missing_agents),
+            veto_reason=review.veto_reason,
+            note=review.note,
+            agents=[AgentResultModel.from_view(a) for a in review.agents],
+            config_meta=review.config_meta,
+            cost_estimate=CostEstimateModel.from_dataclass(review.cost_estimate),
+            usage_available=review.usage_available,
+            model=review.model,
+            writeback_status=review.writeback_status,
+            writeback_error=review.writeback_error,
+            site_id=str(review.site_id),
+            site_slug=review.site_slug,
+            site_name=review.site_name,
+            profile_id=str(review.profile_id),
+            profile_code=review.profile_code,
+            policy_version=review.policy_version,
+            external_content_id=review.external_content_id,
+            external_revision_id=review.external_revision_id,
+            content_type=review.content_type,
+            langcode=review.langcode,
+            correlation_id=str(review.correlation_id),
+            is_fixture=review.is_fixture,
+            drupal_url=review.drupal_url,
+        )

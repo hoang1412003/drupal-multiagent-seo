@@ -78,6 +78,7 @@
     "test_console_api_auth.py",
     "test_console_api_dashboard.py",
     "test_console_api_jobs.py",
+    "test_console_api_reviews.py",
     "test_admin_user_routes.py",
     "test_admin_users.py",
     "test_api.py",

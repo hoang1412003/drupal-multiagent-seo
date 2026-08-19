@@ -223,10 +223,18 @@ def _review_entries(value, *, limit: int = 50) -> tuple[dict, ...]:
     if value is None:
         return ()
     if isinstance(value, Mapping):
-        raw_items = [
-            {"criterion": key, "value": nested}
-            for key, nested in list(value.items())[:limit]
-        ]
+        # Lam sach cap khoa-gia tri TRUOC khi tai cau truc. Neu doi cho truoc,
+        # ten khoa (vi du "api-key") chuyen sang vi tri gia tri, bo loc theo ten
+        # khoa khong con khop va bi mat di thang ra UI. `criteria` thuong la
+        # dict nen day la nhanh hay gap nhat.
+        raw_items = []
+        for key, nested in list(value.items())[:limit]:
+            safe_pair = _review_value({key: nested})
+            if isinstance(safe_pair, Mapping) and safe_pair:
+                safe_nested = next(iter(safe_pair.values()))
+            else:
+                safe_nested = safe_pair
+            raw_items.append({"criterion": key, "value": safe_nested})
     elif isinstance(value, (list, tuple)):
         raw_items = list(value[:limit])
     else:
