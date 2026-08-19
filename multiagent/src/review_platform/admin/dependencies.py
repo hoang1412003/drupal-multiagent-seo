@@ -117,9 +117,11 @@ async def require_csrf(
     request: Request,
     resolved=Depends(current_session),
 ) -> None:
-    form = await request.form()
-    if not csrf.verify_session_csrf(
-        resolved.csrf_token,
-        form.get("csrf_token"),
-    ):
+    # Admin Jinja2 gui csrf_token trong form; Console API gui trong header.
+    # Giu ca hai nhanh: bo nhanh form se lam hong toan bo admin cu.
+    supplied = request.headers.get("X-CSRF-Token")
+    if supplied is None:
+        form = await request.form()
+        supplied = form.get("csrf_token")
+    if not csrf.verify_session_csrf(resolved.csrf_token, supplied):
         raise HTTPException(403, "CSRF token không hợp lệ")

@@ -196,6 +196,12 @@ git commit -m "fix: mo rong path cookie phien ve / de Console dung chung duoc ph
 
 ---
 
+### Task 2+3 (gộp khi thực thi): Hình dạng lỗi, dependency phiên, và bốn endpoint `/auth/*`
+
+> **Ghi chú thực thi (2026-08-19).** Task 2 và Task 3 đã được gộp làm một. Lý do: ranh giới ban đầu vẽ sai — deliverable của Task 2 không tự kiểm chứng được, vì test của nó cần route từ Task 3 và Task 5, mà một file `test_*.py` chưa xanh thì cũng không được đăng ký vào `test_groups.json` (manifest bắt buộc mọi file trên đĩa phải khai báo, nên để ngoài cũng vỡ). Cách xử lý: dùng **route thăm dò dựng ngay trong app test** (`/api/console/v1/probe`, `/probe-operator`) thay vì phụ thuộc `/jobs`, nhờ đó tầng auth tự kiểm chứng trọn vẹn mà không cần Task 5.
+>
+> **Bẫy đã gặp:** không được trả `Response(status_code=204, headers=dict(response.headers))` cho logout/change-password. `dict()` gộp nhiều header `set-cookie` thành một, nên chỉ một trong hai lệnh xóa cookie sống sót. Đúng cách là đặt cookie lên `response` đã tiêm vào rồi `return None`, để FastAPI gộp `raw_headers`. Test phải khẳng định **cả hai** đường dẫn bị xóa, nếu không lỗi này lọt.
+
 ### Task 2: Hình dạng lỗi + dependency phiên cho API
 
 **Files:**
