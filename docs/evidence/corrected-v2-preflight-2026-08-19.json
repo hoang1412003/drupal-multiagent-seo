@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "kind": "preflight_only_not_experiment_result",
+  "dataset_kind": "corrected",
+  "sample_count": 30,
+  "repeats": 1,
+  "usage_events": 0,
+  "estimated_max_calls": 240,
+  "estimated_max_input_tokens": 2880000,
+  "estimated_max_output_tokens": 983040,
+  "estimated_max_cost_usd": "7.7952",
+  "pricing_version": 1,
+  "pricing_effective_at": "2025-10-15",
+  "pricing_source": "https://www.anthropic.com/claude/haiku",
+  "confirmation_token": "9f25ed2463dce4dafe278b9b8537bff4d63ac37e62a77a05b8595d480a37e332",
+  "release_sha256": "3162d127da0126a1072c3c4ae920c00ba0dd1b7ecbcaca78bde836789c0b042d",
+  "runtime_release_sha256": "4a2881bc18286697cfad8c4da25147a1273a2e0ada0eccfc3161c1e9f1e7d517",
+  "assessment_as_of": "2026-08-18",
+  "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\corrected-v2-2026-08-19.json"
+}
