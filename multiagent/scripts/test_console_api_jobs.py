@@ -206,6 +206,118 @@ def test_job_detail_missing_returns_404(conn):
     print("[PASS] job detail tra 404 giong nhau cho id la va id sai dinh dang")
 
 
+def _login_as(conn, username: str, role: Role):
+    users.create_user(
+        conn,
+        username,
+        f"Mat-khau-{username}-2026",
+        role,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+    response = client.post(
+        "/api/console/v1/auth/login",
+        json={"username": username, "password": f"Mat-khau-{username}-2026"},
+    )
+    assert response.status_code == 200, response.text
+    return client, response.json()["csrf_token"]
+
+
+def _retry(client, csrf_token, public_id, *, confirm_cost=True, reason=None):
+    return client.post(
+        f"/api/console/v1/jobs/{public_id}/retry",
+        json={"confirm_cost": confirm_cost, "reason": reason},
+        headers={"X-CSRF-Token": csrf_token},
+    )
+
+
+def test_retry_requires_operator_role(conn):
+    _reset_schema(conn)
+    failed = _insert_job(conn, 1, status="failed")
+    client, csrf_token = _login_as(conn, "retry.viewer", Role.VIEWER)
+
+    response = _retry(client, csrf_token, failed)
+    assert response.status_code == 403, response.status_code
+    assert response.json()["error"]["code"] == "forbidden"
+    print("[PASS] retry: viewer bi tu choi 403")
+
+
+def test_retry_without_csrf_header_is_rejected(conn):
+    _reset_schema(conn)
+    failed = _insert_job(conn, 1, status="failed")
+    client, _ = _login_as(conn, "retry.nocsrf", Role.OPERATOR)
+
+    response = client.post(
+        f"/api/console/v1/jobs/{failed}/retry",
+        json={"confirm_cost": True, "reason": None},
+    )
+    assert response.status_code == 403, response.status_code
+    assert response.json()["error"]["code"] == "csrf_invalid"
+    print("[PASS] retry thieu header X-CSRF-Token bi tu choi")
+
+
+def test_retry_without_cost_confirmation_is_blocked(conn):
+    _reset_schema(conn)
+    failed = _insert_job(conn, 1, status="failed")
+    client, csrf_token = _login_as(conn, "retry.chiphi", Role.OPERATOR)
+
+    response = _retry(client, csrf_token, failed, confirm_cost=False)
+    assert response.status_code == 400, response.status_code
+    loi = response.json()["error"]
+    assert loi["code"] == "cost_not_confirmed", loi
+    assert loi["field"] == "confirm_cost", loi
+
+    # Cong chi phi phai chan TRUOC KHI goi retry that su.
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM review_job WHERE source='admin_retry'")
+        assert cur.fetchone()[0] == 0, "da tao job retry du chua xac nhan chi phi"
+    print("[PASS] retry khong xac nhan chi phi bi chan truoc khi goi API tra phi")
+
+
+def test_retry_creates_new_job_and_returns_it(conn):
+    _reset_schema(conn)
+    failed = _insert_job(conn, 1, status="failed")
+    client, csrf_token = _login_as(conn, "retry.operator", Role.OPERATOR)
+
+    response = _retry(client, csrf_token, failed, reason="Thu lai sau loi connector")
+    assert response.status_code == 200, response.text
+    body = response.json()
+
+    assert set(body) == DETAIL_FIELDS, set(body) ^ DETAIL_FIELDS
+    assert body["public_id"] != str(failed), "retry phai tra job MOI, khong phai job cu"
+    assert body["status"] == "queued", body["status"]
+    assert body["source"] == "admin_retry", body["source"]
+    assert body["supersedes_job_public_id"] == str(failed)
+    print("[PASS] retry tao job moi va tra chi tiet job moi do")
+
+
+def test_retry_on_non_failed_job_returns_409(conn):
+    _reset_schema(conn)
+    running = _insert_job(conn, 1, status="running")
+    client, csrf_token = _login_as(conn, "retry.conflict", Role.OPERATOR)
+
+    response = _retry(client, csrf_token, running)
+    assert response.status_code == 409, response.status_code
+    assert response.json()["error"]["code"] == "conflict"
+    print("[PASS] retry job khong o trang thai failed tra 409")
+
+
+def test_retry_missing_job_returns_404_before_cost_gate(conn):
+    _reset_schema(conn)
+    client, csrf_token = _login_as(conn, "retry.missing", Role.OPERATOR)
+
+    # confirm_cost=False nhung job khong ton tai: phai la 404, khong phai 400.
+    # Neu cong chi phi chan truoc, nguoi dung se tuong job co that va chi thieu
+    # xac nhan, gay nhieu khi truy su co.
+    response = _retry(client, csrf_token, uuid4(), confirm_cost=False)
+    assert response.status_code == 404, response.status_code
+    assert response.json()["error"]["code"] == "not_found"
+
+    sai_dinh_dang = _retry(client, csrf_token, "khong-phai-uuid", confirm_cost=False)
+    assert sai_dinh_dang.status_code == 404, sai_dinh_dang.status_code
+    print("[PASS] retry job khong ton tai tra 404 truoc khi xet cong chi phi")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -224,6 +336,12 @@ if __name__ == "__main__":
             test_jobs_filter_by_status_narrows_result,
             test_job_detail_returns_all_fields,
             test_job_detail_missing_returns_404,
+            test_retry_requires_operator_role,
+            test_retry_without_csrf_header_is_rejected,
+            test_retry_without_cost_confirmation_is_blocked,
+            test_retry_creates_new_job_and_returns_it,
+            test_retry_on_non_failed_job_returns_409,
+            test_retry_missing_job_returns_404_before_cost_gate,
         ):
             try:
                 fn(connection)

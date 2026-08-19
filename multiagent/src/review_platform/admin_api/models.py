@@ -152,6 +152,13 @@ class JobPage(PageResponse):
     items: list[JobListItemModel]
 
 
+class RetryRequest(BaseModel):
+    # Retry chay lai pipeline tuc la GOI API TRA PHI. Mac dinh False de mot
+    # request thieu truong nay khong tinh tien cua ai.
+    confirm_cost: bool = False
+    reason: str | None = None
+
+
 class JobDetailModel(BaseModel):
     public_id: str
     created_at: str
