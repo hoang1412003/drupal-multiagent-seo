@@ -531,6 +531,43 @@ So với `claim_thoi_gian_sac()` (CP6) ngay bên dưới, vốn **có** kiểm �
 
 ⚠️ **Mới quan sát trên MỘT bài.** Muốn biết CP5 bóp méo bao nhiêu bài phải chấm lại với `giu_chi_tiet=True`.
 
+### B16. BV3 phạt "lẫn xưng hô" trong khi brand guideline nói không có chuẩn xưng hô — ⚠️ PHÁT HIỆN 2026-08-19, **chưa sửa**
+
+**Triệu chứng:** `B5` (nguồn `brand.BV3`) là mã chặn nhiều nhất ở Corrected v2 — **5/11 bài không đạt `publish`**, trong đó có `C-005` là bài `clean` lẽ ra sạch tuyệt đối.
+
+```
+[B5] brand.BV3  field=body  evidence: 'khách hàng'
+[B5] brand.BV3  field=body  evidence: 'người dùng'
+     → "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất"
+```
+
+**Mâu thuẫn nội tại, ba nguồn trong chính repo:**
+
+| Nguồn | Nội dung |
+|---|---|
+| `docs/brand/brand_guideline.md:29` | *"**Chưa đủ căn cứ để chốt xưng hô chuẩn.**"* — corpus 16 bài chia phiếu `người dùng` 8 / `bạn` 4 / `khách hàng` 3 / `quý khách` 1, nên **BV4 luôn trả `NA`** |
+| `docs/rubrics.md:158` | nhưng **BV3** vẫn phạt "lẫn 2 cách" xuống mức 1, mà mức 1 ánh xạ `B5` → **chặn publish** |
+| mục "Ba cái bẫy" của chính file này | **BV3 đã được ghi nhận** là một trong bốn lần dính bẫy *"một bộ so khớp gộp hai thứ khác nhau: xưng hô vs danh từ chỉ người"* |
+
+**Hai vấn đề tách bạch:**
+
+1. **Bộ so khớp gộp hai khái niệm.** Ở `C-006` câu bị bắt là *"**Người dùng** nên kiểm tra hợp đồng…"* — danh từ chỉ đối tượng, không phải xưng hô trực tiếp với người đọc như `bạn`/`quý khách`. Đây đúng cái bẫy đã ghi nhận nhưng chưa xử lý.
+2. **Tiêu chí tự mâu thuẫn với dữ liệu của chính nó.** Hệ thống chặn xuất bản vì thiếu nhất quán ở một chiều mà dữ liệu thương hiệu chứng minh là không có chuẩn để nhất quán theo. Khác BV4 (đã đúng đắn trả `NA`), BV3 vẫn phạt.
+
+**Ảnh hưởng:** trực tiếp kéo `corrected_publish` xuống 19/30 và `paired_recovery` xuống 11/20 — hai cổng đỏ. Không ảnh hưởng `false_publish` (sai theo hướng chặn quá tay).
+
+**Chưa sửa vì nằm trong đường chấm điểm** — sửa là mất hiệu lực E1 v2 và Gold v2 vừa đo.
+
+**Cách sửa khi được phép, hai hướng cần cân nhắc riêng:**
+- Hẹp: thêm cổng ngữ cảnh phân biệt xưng hô thật với danh từ chỉ người (chỉ tính khi đứng ở vị trí xưng hô với người đọc), giữ nguyên ý nghĩa tiêu chí.
+- Rộng: hạ BV3 xuống `NA` như BV4, với lập luận *"không có chuẩn xưng hô thì không có cơ sở phạt lẫn xưng hô"*.
+
+⚠️ Hướng nào cũng phải phát biểu được lý do **mà không nhắc tới việc nó làm cổng nào đạt** (phép thử chống bẫy số 1), và phải rà **mọi bộ so khớp cùng họ** chứ không chỉ chỗ đang đau (bài học lần thứ tư của bẫy số 2).
+
+**Xong khi:** test literal xác nhận *"Người dùng nên kiểm tra hợp đồng"* không sinh cờ BV3 trong khi bài thật sự lẫn `bạn`/`quý khách` vẫn sinh; và đo lại Corrected + E1 + Gold sau khi sửa.
+
+Bằng chứng đầy đủ: [`evidence/cp1_bv3_dieu_tra_2026-08-19.md`](evidence/cp1_bv3_dieu_tra_2026-08-19.md) phần 2.
+
 ---
 
 ## 4. Nhóm C — Chưa tới lượt (không phải nợ)
@@ -909,6 +946,73 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   b154057aee95...`), `verified: true`. **CHƯA chạy Corrected/Coverage** —
   cần người dùng quyết định: chấp nhận gap `A1` đã biết và tiếp tục, hay
   điều tra/sửa CP1 trước.
+- ✅ **Cập nhật 2026-08-19 (chiều) — ĐIỀU TRA CP1 XONG ($0), QUYẾT ĐỊNH
+  KHÔNG SỬA.** Câu hỏi treo ở mục trên đã được trả lời bằng dữ liệu thay vì
+  phán đoán. Chạy thẳng `compliance._cp1_claim_tuyet_doi()` trên `G-011`/
+  `G-020`: cả hai ra `level = 2` (sạch), 0 lần khớp — **bỏ sót thật**, không
+  phải nhãn khắt khe. Nghi ngờ ban đầu rằng nợ **B12 nới tay quá đà là SAI**:
+  cơ chế phân biệt của B12 không hề được gọi tới vì blacklist không khớp gì.
+  Nguyên nhân thật: `CP1` dùng **danh sách cụm từ đóng**, trong khi tiếng Việt
+  tạo so sánh nhất bằng **cấu trúc ngữ pháp** — mọi danh sách đóng đều sẽ sót.
+  Đã thử quy tắc ngữ pháp tổng quát (`<từ> nhất` + đòi hỏi có phạm vi) trên
+  **79 bài** (33 gold + 16 BRAND + 10 clean + 20 gold-corrected): tác động ròng
+  là **hoà** — cứu đúng `G-020`, bắt oan `G-017` (nhãn `needs_revision`, không
+  có `A1`), vẫn sót `G-011` (*"có một không hai"* không chứa chữ "nhất").
+  `rejected_recall` chỉ lên **0,70**, **vẫn dưới 0,80**. Quy tắc còn chặn oan
+  2 bài `BRAND` **đã publish thật** (*"một trong những … nhất trên thị
+  trường"*) — **bẫy số 2 lặp lại lần thứ năm**. Kết luận: sửa CP1 tốn ~$5,3 đo
+  lại mà không mở được cổng; cách duy nhất chạm 0,80 là nhét cụm của đúng hai
+  bài đang trượt vào blacklist rồi đo lại trên chính chúng — rò rỉ dữ liệu và
+  trượt **phép thử chống bẫy số 1**. `rejected_recall = 0,60` được ghi nhận là
+  **giới hạn đã định lượng**. Chi tiết:
+  [`evidence/cp1_bv3_dieu_tra_2026-08-19.md`](evidence/cp1_bv3_dieu_tra_2026-08-19.md).
+- 🏁 **Cập nhật 2026-08-19 (chiều) — CORRECTED v2 + COVERAGE v2 ĐÃ CHẠY, BỘ
+  BỐN HOÀN TẤT, `approve()` cho `level_b = fail` với 5 PASS / 5 FAIL.** Chi phí
+  thật phiên này **$1,3486** (Corrected $1,0149 + Coverage $0,3337).
+  **`measured_complete: True`** — đây là lần đầu cả bốn dataset policy v2 có
+  measured evidence, nên `approve()` chạy được và cho bảng gate chính thức:
+  PASS `e1_decision_consistency`, `gold_kappa`, `gold_needs_revision_recall`,
+  `gold_false_publish`, `drift`; FAIL `gold_rejected_recall`,
+  `corrected_publish` (**19/30**, trước 12/30), `paired_recovery` (**11/20**,
+  trước 7/20), `coverage_target_decision_parent` (**3/11**), `coverage_failure`
+  (8≠0). **Cả năm cổng đỏ đều cùng một loại sai — chặn quá tay, không cổng nào
+  là để lọt:** `main_63` cho `precision` của `publish` = **1,000** (mỗi lần hệ
+  thống nói publish thì luôn đúng), `false_publish = 0/33`, `macro_f1 = 0,738`.
+  **Bản sửa prompt A6 (`fcb5717`) đã được xác nhận bằng đo thật: `A6` từ chỗ
+  chặn oan 10/18 bài nay chặn 0 bài** — toàn bộ mức cải thiện +7 bài đến từ đó.
+  Bản sửa prompt A5 (`76dd295`) và fixture `CV-A7-01` (`f854ee6`) cũng xác nhận
+  hiệu lực: hai mẫu đó từ miss thành hit, khả năng bắn đúng mã mục tiêu lên
+  **10/11** (trước 8/11). ⚠️ **Nguyên nhân chặn nay đã đổi hẳn sang `BV3`**
+  (5/11 bài Corrected) — xem mục B16 mới. Coverage fail chủ yếu do **nhiễu
+  `B8`** (lỗi chính tả lẫn trong fixture vốn chỉ để test một mã khác): vấn đề
+  **chất lượng fixture**, không phải hệ thống chấm sai. Chi tiết:
+  [`evidence/corrected_v2_2026-08-19d_report.md`](evidence/corrected_v2_2026-08-19d_report.md),
+  [`evidence/coverage_v2_2026-08-19d_report.md`](evidence/coverage_v2_2026-08-19d_report.md).
+  `scoring.yaml.meta.calibrated` không đổi; `independent_label_reliability`
+  vẫn `not_demonstrated`; `smoke` vẫn `pending`.
+- ⚠️ **Ghi chú vận hành phát hiện trong phiên 2026-08-19 — đường trả phí có
+  BA lớp khoá, tài liệu cũ chỉ nhắc một.** Người tiếp nhận chắc chắn sẽ vấp:
+  (1) `--confirmation-token` băm từ release + ordered IDs + assessment date +
+  **đường dẫn output**; (2) biến môi trường **`VF_ALLOW_PAID_EVAL=1`**, cố ý
+  không đặt sẵn — thiếu nó thì dừng với `ReleaseContractError` trước khi gọi
+  API; (3) guard resume từ chối ghi tiếp vào file kết quả mang `prompt_version`
+  cũ. Cả ba đã kích hoạt thật trong phiên này và **không lần nào tốn tiền**.
+  Hệ quả thực hành: **đổi tên file output cho mỗi lượt đo mới** (giữ file cũ
+  làm bằng chứng lịch sử), và vì output path nằm trong công thức token nên
+  **đổi tên là phải preflight lại**.
+- ⚠️ **Ghi chú: `eval_corrected_coverage.py --report-corrected` nghiêm hơn
+  `evaluation-plan.md` mục 3a.** Nó từ chối chạy khi hai file raw lệch bất kỳ
+  field nào trong 17 field release/meta, kể cả `git_head`. Ở phiên này Gold
+  chạy ở `7cdcd61` còn Corrected/Coverage chạy ở `b3e8055` (commit thêm theme
+  Drupal xen giữa, **không chạm Python**), nên script chặn. Kiểm bằng máy:
+  **chỉ duy nhất `git_head` lệch**, 16 field còn lại (`prompt_version`,
+  `policy_hash`, `scoring_hash`, `safety_rules_hash`, `rubric_hash`, ba KB
+  hash, `weights`, `data_head`…) khớp hoàn toàn. Mục 3a cho phép descendant chỉ
+  sửa tài liệu khi diff score-path rỗng — đã xác minh rỗng. Xử lý: gọi **chính
+  `main_metrics()` của dự án**, chỉ vô hiệu hoá `_validate_release_match`,
+  không đụng phép tính nào; file report mang khối `_provenance` ghi rõ guard bị
+  bỏ qua và bằng chứng diff rỗng. Nếu về sau muốn `approve()` chạy hoàn toàn
+  bằng script không cần can thiệp thì phải đo lại Gold ở cùng HEAD (~$2).
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
@@ -1263,6 +1367,11 @@ uptime.
 
 **Hệ quả của lần thứ tư:** sửa một chỗ mắc bẫy này thì phải **đi rà mọi bộ so khớp cùng họ**, không chỉ chỗ đang đau. B14 sửa CP3 nhưng để nguyên CP5 dùng đúng regex thiếu ngữ cảnh đó, và nó sống thêm 5 ngày mà không ai thấy.
 
+**Cập nhật 2026-08-19 — hai dữ kiện mới về cùng cái bẫy này:**
+
+- **BV3 vẫn đang sống trong code** (B16). Nó được liệt kê ở đây từ đầu như một trong bốn ca, nhưng chưa bao giờ được sửa, và nay là mã chặn nhiều nhất ở Corrected v2 (5/11 bài). *Liệt kê một cái bẫy không đồng nghĩa đã gỡ nó.*
+- **Lần đầu bẫy này bị chặn TRƯỚC khi vào code.** Quy tắc `CP1` tổng quát (`<từ> nhất` + phạm vi) được đề xuất để cứu `rejected_recall`, nhưng bước rà $0 trên 79 bài cho thấy nó chặn oan 2 bài `BRAND` **đã publish thật** — vì gộp *"X nhất"* (khẳng định độc tôn) với *"một trong những X nhất"* (đã làm dịu). Quy tắc bị loại bỏ trước khi viết một dòng code nào. Đây là bằng chứng cho thấy **rà trên corpus thật trước khi sửa** là cách duy nhất bắt được bẫy này — bốn lần trước đều lọt qua unit test vì test dùng ví dụ do chính người viết code nghĩ ra.
+
 **3. Con số chép tay trong tài liệu trôi lệch khỏi code.** Công thức `prompt_version` hỏng **hai lần**: bản 1 tham chiếu biến không còn tồn tại; bản 1-2 bỏ sót hai prompt của `fact_check` — đúng chỗ B14 được sửa. Nay nằm trong `eval_calibration.prompt_version()`. Quy tắc: **mọi con số trong tài liệu phải tính lại được từ một file trong `docs/evidence/`.**
 
 ### Chi phí API đã tiêu
@@ -1275,9 +1384,25 @@ uptime.
 | Chẩn đoán 12 bài | $0,93 |
 | E5 lần 2 | $1,85 |
 | Preflight E1 bản 4 (không gọi API) | $0 |
-| **Cộng dồn** | **~$16** |
+| **Cộng dồn tới hết luồng v1** | **~$16** |
 
-Còn lại dự kiến: E1 ~$3, E3 ~$2, E6 ~$2.
+Luồng policy v2 (tính riêng, không gộp vào số v1 ở trên):
+
+| Hạng mục | |
+|---|---|
+| E1 v2 đợt 1 (hai lượt, lộ 2 bug schema) | $3,967 |
+| E1 v2 đợt 3 (sau fix A5) | $3,25 |
+| Gold v2 đợt 1 | $1,975 |
+| Gold v2 đợt 2 (sau E1 đạt) | $1,99 |
+| Corrected v2 đợt 1 (dưới prompt A6 cũ) | $1,00 |
+| Coverage v2 (chẩn đoán) | $0,336 |
+| **Corrected v2 đợt 2** (2026-08-19d) | **$1,0149** |
+| **Coverage v2 đợt 2** (2026-08-19d) | **$0,3337** |
+| Điều tra CP1/BV3 + toàn bộ preflight | $0 |
+| **Cộng dồn policy v2** | **~$13,9** |
+
+Bước điều tra CP1 ($0) đã **ngăn được một khoản ~$5,3** chi cho việc sửa CP1
+rồi đo lại E1/Gold — nay biết chắc là không mở được cổng.
 
 ---
 

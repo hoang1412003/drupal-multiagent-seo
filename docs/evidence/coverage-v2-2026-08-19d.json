@@ -1,0 +1,5290 @@
+{
+  "_meta": {
+    "dataset_kind": "coverage",
+    "policy_version": "cam-nang-vn-v2",
+    "guideline_version": "v1.4",
+    "rubric_version": "v1",
+    "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+    "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+    "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+    "model": "claude-haiku-4-5-20251001",
+    "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+    "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+    "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+    "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+    "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+    "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+    "embedding_provenance": {
+      "model": "BAAI/bge-m3",
+      "mode": "local",
+      "endpoint": null
+    },
+    "weights": {
+      "content_quality": 0.25,
+      "seo": 0.2,
+      "brand": 0.25,
+      "compliance": 0.3
+    },
+    "dataset_manifest_hashes": {
+      "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+    },
+    "content_hashes_sha256": {
+      "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+      "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+      "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+      "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+      "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+      "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+      "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+      "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+      "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+      "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+      "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+    },
+    "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+    "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+    "assessment_as_of": "2026-08-19",
+    "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+    "ordered_sample_ids": [
+      "CV-A3-01",
+      "CV-A5-01",
+      "CV-A5-02",
+      "CV-A6-01",
+      "CV-A6-02",
+      "CV-A7-01",
+      "CV-A7-02",
+      "CV-B6-01",
+      "CV-B7-01",
+      "CV-B9-01",
+      "CV-B9-02"
+    ],
+    "schema_version": 1,
+    "repeats": 1,
+    "release_tuple": {
+      "dataset_kind": "coverage",
+      "policy_version": "cam-nang-vn-v2",
+      "guideline_version": "v1.4",
+      "rubric_version": "v1",
+      "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+      "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+      "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+      "model": "claude-haiku-4-5-20251001",
+      "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+      "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+      "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+      "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+      "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+      "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+      "embedding_provenance": {
+        "model": "BAAI/bge-m3",
+        "mode": "local",
+        "endpoint": null
+      },
+      "weights": {
+        "content_quality": 0.25,
+        "seo": 0.2,
+        "brand": 0.25,
+        "compliance": 0.3
+      },
+      "dataset_manifest_hashes": {
+        "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+      },
+      "content_hashes_sha256": {
+        "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+        "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+        "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+        "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+        "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+        "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+        "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+        "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+        "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+        "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+        "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+      },
+      "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+      "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+      "assessment_as_of": "2026-08-19",
+      "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+      "ordered_sample_ids": [
+        "CV-A3-01",
+        "CV-A5-01",
+        "CV-A5-02",
+        "CV-A6-01",
+        "CV-A6-02",
+        "CV-A7-01",
+        "CV-A7-02",
+        "CV-B6-01",
+        "CV-B7-01",
+        "CV-B9-01",
+        "CV-B9-02"
+      ]
+    },
+    "release_sha256": "ec0b66dce6b23001c125660744c6ea65789fb863cd0f2a7baf3382557724b1ad",
+    "label_provenance": "AI-annotated-partially-exposed",
+    "is_fixture": false,
+    "created_at": "2026-08-19T09:44:38.843559+00:00",
+    "usage_events": 56
+  },
+  "results": [
+    {
+      "sample_id": "CV-A3-01",
+      "expected_label": "rejected",
+      "split": "coverage",
+      "source_url": "/vn_vi/vinfast-vf9-di-duoc-bao-nhieu-km-sau-mot-lan-sac-day",
+      "content_sha256": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+      "parent_sample_id": "GC-006",
+      "target_code": "A3",
+      "decision": "rejected",
+      "final_score": 77.89,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A3",
+          "B1",
+          "B3",
+          "B10"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A3",
+          "group": "A",
+          "source_agent": "compliance",
+          "source_check": "CP3",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy",
+          "observed": null,
+          "suggestion": "Đối chiếu với thông số công bố chính thức thấy số liệu mâu thuẫn - sửa lại theo nguồn chính thức.",
+          "reference_id": null,
+          "sources": [
+            "CP3"
+          ]
+        },
+        {
+          "defect_code": "A3",
+          "group": "A",
+          "source_agent": "compliance",
+          "source_check": "CP3",
+          "level": 0,
+          "field": "meta_description",
+          "evidence_kind": "excerpt",
+          "evidence": "VinFast VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy",
+          "observed": null,
+          "suggestion": "Đối chiếu với thông số công bố chính thức thấy số liệu mâu thuẫn - sửa lại theo nguồn chính thức.",
+          "reference_id": null,
+          "sources": [
+            "CP3"
+          ]
+        },
+        {
+          "defect_code": "B1",
+          "group": "B",
+          "source_agent": "compliance",
+          "source_check": "CP5",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "500 km",
+          "observed": null,
+          "suggestion": "Bài có lưu ý con số chỉ mang tính tham khảo nhưng chưa nêu chuẩn đo. Ghi rõ chuẩn (NEDC, WLTP, EPA hoặc CLTC) ngay cạnh con số.",
+          "reference_id": null,
+          "sources": [
+            "CP5"
+          ]
+        },
+        {
+          "defect_code": "B1",
+          "group": "B",
+          "source_agent": "compliance",
+          "source_check": "CP5",
+          "level": 1,
+          "field": "meta_description",
+          "evidence_kind": "excerpt",
+          "evidence": "500 km",
+          "observed": null,
+          "suggestion": "Bài có lưu ý con số chỉ mang tính tham khảo nhưng chưa nêu chuẩn đo. Ghi rõ chuẩn (NEDC, WLTP, EPA hoặc CLTC) ngay cạnh con số.",
+          "reference_id": null,
+          "sources": [
+            "CP5"
+          ]
+        },
+        {
+          "defect_code": "B3",
+          "group": "B",
+          "source_agent": "field_check",
+          "source_check": "FIELD_B3",
+          "level": null,
+          "field": "meta_description",
+          "evidence_kind": "measurement",
+          "evidence": "",
+          "observed": {
+            "length": 126
+          },
+          "suggestion": "Viết meta description trong khoảng 140–170 ký tự.",
+          "reference_id": null,
+          "sources": [
+            "FIELD_B3"
+          ]
+        },
+        {
+          "defect_code": "B10",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ7",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy",
+          "observed": null,
+          "suggestion": "Bài có một số liệu định lượng (500 km) nhưng chỉ nêu là 'theo thông số VinFast công bố' mà không cung cấp link, tài liệu hoặc nguồn cụ thể. Nên bổ sung đường dẫn hoặc tham chiếu rõ ràng đến trang chính thức VinFast.",
+          "reference_id": null,
+          "sources": [
+            "CQ7"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "seo",
+          "source_check": "SEO3",
+          "level": 1,
+          "field": "meta_description",
+          "evidence_kind": "excerpt",
+          "evidence": "VinFast VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy. Tìm hiểu các yếu tố ảnh hưởng tới tầm hoạt động thực tế của xe.",
+          "observed": null,
+          "suggestion": "Meta description 126 ký tự, ngoài dải 140-170."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy"
+              }
+            ],
+            "suggestion": "Bài có một số liệu định lượng (500 km) nhưng chỉ nêu là 'theo thông số VinFast công bố' mà không cung cấp link, tài liệu hoặc nguồn cụ thể. Nên bổ sung đường dẫn hoặc tham chiếu rõ ràng đến trang chính thức VinFast."
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "meta_description",
+                "text": "VinFast VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy. Tìm hiểu các yếu tố ảnh hưởng tới tầm hoạt động thực tế của xe."
+              }
+            ],
+            "suggestion": "Meta description 126 ký tự, ngoài dải 140-170."
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "402 từ"
+              }
+            ],
+            "suggestion": "Bài 402 từ. Đạt chuẩn là từ 600 từ."
+          },
+          {
+            "id": "SEO8",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": ""
+              }
+            ],
+            "suggestion": "Có 3 heading nhưng không heading nào chứa từ khoá chính 'VinFast VF 9' hoặc biến thể của nó"
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "0 link"
+              }
+            ],
+            "suggestion": "Bài không có internal link nào."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy",
+                "rule": "Thông tin sai lệch so với thông số công bố chính thức"
+              },
+              {
+                "field": "meta_description",
+                "text": "VinFast VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy",
+                "rule": "Thông tin sai lệch so với thông số công bố chính thức"
+              }
+            ],
+            "reason": "Đối chiếu với thông số công bố chính thức thấy số liệu mâu thuẫn - sửa lại theo nguồn chính thức."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "500 km"
+              },
+              {
+                "field": "meta_description",
+                "text": "500 km"
+              }
+            ],
+            "reason": "Bài có lưu ý con số chỉ mang tính tham khảo nhưng chưa nêu chuẩn đo. Ghi rõ chuẩn (NEDC, WLTP, EPA hoặc CLTC) ngay cạnh con số."
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "VinFast VF 9 có thể đi được khoảng 500 km sau một lần sạc đầy."
+              }
+            ],
+            "reason": "Bài nêu số liệu định lượng cụ thể (500 km) nhưng không dẫn nguồn. Chỉ nói \"Theo thông số VinFast công bố\" mà không cung cấp liên kết hoặc tài liệu tham khảo cụ thể."
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A5",
+          "A7",
+          "B1",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9",
+          "B10"
+        ],
+        "not_applicable_checks": [
+          "A4",
+          "A6",
+          "B2",
+          "B6",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3290,
+          "output_tokens": 570
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3048,
+          "output_tokens": 367
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2513,
+          "output_tokens": 180
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4520,
+          "output_tokens": 503
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2354,
+          "output_tokens": 151
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 1035,
+          "output_tokens": 203
+        }
+      ],
+      "cost": {
+        "input_tokens": 16760,
+        "output_tokens": 1974,
+        "estimated_usd": "0.026630",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 63247.888
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A5-01",
+      "expected_label": "rejected",
+      "split": "coverage",
+      "source_url": "/vn_vi/cach-khoi-dong-xe-may-dien-vinfast",
+      "content_sha256": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+      "parent_sample_id": "GC-003",
+      "target_code": "A5",
+      "decision": "rejected",
+      "final_score": 78.53,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A5"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A5",
+          "group": "A",
+          "source_agent": "content_quality",
+          "source_check": "A5",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Một tủ sách cá nhân dễ sử dụng cần phản ánh mục đích đọc và thói quen tìm tài liệu của người sở hữu.",
+          "observed": null,
+          "suggestion": "Body hoàn toàn không trả lời câu hỏi ở title về cách khởi động xe máy điện VinFast. Toàn bộ nội dung body (từ đoạn mở đầu đến kết luận) nói về quản lý tủ sách cá nhân, không liên quan gì đến xe máy điện. Để trả lời đúng tiêu đề, cần viết lại trên 50% nội dung body.",
+          "reference_id": null,
+          "sources": [
+            "A5"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "content_quality",
+          "source_check": "CQ6",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Một tủ sách cá nhân dễ sử dụng cần phản ánh mục đích đọc và thói quen tìm tài liệu của người sở hữu.",
+          "observed": null,
+          "suggestion": "Bài viết hoàn toàn lạc đề so với tiêu đề. Tiêu đề nói về khởi động xe máy điện VinFast, nhưng nội dung body toàn bộ là hướng dẫn sắp xếp tủ sách cá nhân. Cần thay thế nội dung body bằng hướng dẫn thực tế về khởi động xe máy điện VinFast."
+        },
+        {
+          "source_agent": "content_quality",
+          "source_check": "CQ8",
+          "level": 1,
+          "field": "summary",
+          "evidence_kind": "excerpt",
+          "evidence": "Tìm hiểu cách khởi động xe máy điện VinFast theo quy trình 3 bước, cùng một số lưu ý quan trọng để tránh lỗi và vận hành xe trơn tru, an toàn.",
+          "observed": null,
+          "suggestion": "Summary không tóm đúng nội dung body. Summary nói về khởi động xe máy điện VinFast (đúng với tiêu đề), nhưng body thực tế là về sắp xếp tủ sách. Summary không phản ánh nội dung thực tế của bài viết."
+        },
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Một tủ sách cá nhân dễ sử dụng cần phản ánh mục đích đọc và thói quen tìm tài liệu của người sở hữu. Thay vì xếp mọi cuốn theo kích thước hoặc màu bìa, người dùng có thể xây dựng một hệ thống đơn giản để biết sách đang ở đâu, cuốn nào đã đọc và nội dung nào muốn quay lại.",
+          "observed": null,
+          "suggestion": "Bài viết được đánh giá nói về cách sắp xếp tủ sách cá nhân, hoàn toàn không liên quan đến chủ đề 'Hướng dẫn cách khởi động xe máy điện VinFast'. Giọng văn cũng khác biệt rõ rệt: các đoạn mẫu sử dụng giọng hướng dẫn kỹ thuật, trang trọng, tập trung vào quy trình vận hành xe; bài viết này lại mang giọng văn tư vấn cuộc sống, mềm mại, không phù hợp với nội dung kỹ thuật của thương hiệu VinFast."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Một tủ sách cá nhân dễ sử dụng cần phản ánh mục đích đọc và thói quen tìm tài liệu của người sở hữu."
+              }
+            ],
+            "suggestion": "Bài viết hoàn toàn lạc đề so với tiêu đề. Tiêu đề nói về khởi động xe máy điện VinFast, nhưng nội dung body toàn bộ là hướng dẫn sắp xếp tủ sách cá nhân. Cần thay thế nội dung body bằng hướng dẫn thực tế về khởi động xe máy điện VinFast."
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "summary",
+                "text": "Tìm hiểu cách khởi động xe máy điện VinFast theo quy trình 3 bước, cùng một số lưu ý quan trọng để tránh lỗi và vận hành xe trơn tru, an toàn."
+              }
+            ],
+            "suggestion": "Summary không tóm đúng nội dung body. Summary nói về khởi động xe máy điện VinFast (đúng với tiêu đề), nhưng body thực tế là về sắp xếp tủ sách. Summary không phản ánh nội dung thực tế của bài viết."
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": ""
+              }
+            ],
+            "suggestion": "Tiêu đề không chứa từ khoá chính 'cách khởi động xe máy điện VinFast'. Nội dung bài viết nói về cách sắp xếp tủ sách, hoàn toàn không liên quan đến xe máy điện."
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "meta_description",
+                "text": ""
+              }
+            ],
+            "suggestion": "Meta description không chứa từ khoá chính. Nội dung mô tả về khởi động xe máy điện nhưng bài viết thực tế nói về tủ sách, gây mâu thuẫn lớn."
+          },
+          {
+            "id": "SEO5",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "url_alias",
+                "text": ""
+              }
+            ],
+            "suggestion": "Đường dẫn có chứa từ khoá 'cach-khoi-dong-xe-may-dien-vinfast' nhưng nội dung bài viết hoàn toàn không liên quan, nó nói về sắp xếp tủ sách."
+          },
+          {
+            "id": "SEO6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": ""
+              }
+            ],
+            "suggestion": "Từ khoá chính 'cách khởi động xe máy điện VinFast' không xuất hiện trong đoạn mở đầu. Bài viết bắt đầu bằng nội dung về tủ sách."
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": ""
+              }
+            ],
+            "suggestion": "Không có heading nào chứa từ khoá chính 'cách khởi động xe máy điện VinFast'. Các heading đều liên quan đến tủ sách (xác định mục đích, phân loại, danh mục, bảo quản, thói quen đọc)."
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "0 link"
+              }
+            ],
+            "suggestion": "Bài không có internal link nào."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Một tủ sách cá nhân dễ sử dụng cần phản ánh mục đích đọc và thói quen tìm tài liệu của người sở hữu. Thay vì xếp mọi cuốn theo kích thước hoặc màu bìa, người dùng có thể xây dựng một hệ thống đơn giản để biết sách đang ở đâu, cuốn nào đã đọc và nội dung nào muốn quay lại."
+              }
+            ],
+            "suggestion": "Bài viết được đánh giá nói về cách sắp xếp tủ sách cá nhân, hoàn toàn không liên quan đến chủ đề 'Hướng dẫn cách khởi động xe máy điện VinFast'. Giọng văn cũng khác biệt rõ rệt: các đoạn mẫu sử dụng giọng hướng dẫn kỹ thuật, trang trọng, tập trung vào quy trình vận hành xe; bài viết này lại mang giọng văn tư vấn cuộc sống, mềm mại, không phù hợp với nội dung kỹ thuật của thương hiệu VinFast.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "A6",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [
+          "B7"
+        ],
+        "complete": false
+      },
+      "drift": [],
+      "incomplete_assessment": true,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3963,
+          "output_tokens": 688
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3727,
+          "output_tokens": 496
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3007,
+          "output_tokens": 368
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5210,
+          "output_tokens": 317
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3038,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 18945,
+        "output_tokens": 1877,
+        "estimated_usd": "0.028330",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 33710.101
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A5-02",
+      "expected_label": "rejected",
+      "split": "coverage",
+      "source_url": "/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter",
+      "content_sha256": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+      "parent_sample_id": "GC-018",
+      "target_code": "A5",
+      "decision": "rejected",
+      "final_score": 88.225,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A5",
+          "B8"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A5",
+          "group": "A",
+          "source_agent": "content_quality",
+          "source_check": "A5",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Kho ảnh số cá nhân thường được tạo từ nhiều điện thoại, máy ảnh và ứng dụng.",
+          "observed": null,
+          "suggestion": "Body hoàn toàn không trả lời câu hỏi ở title 'Hướng dẫn cách tìm trạm sạc bằng App VinFast E-Scooter'. Nội dung nói về quản lý kho ảnh cá nhân, không liên quan đến VinFast E-Scooter hay trạm sạc. Để trả lời đúng chủ đề, cần viết lại trên 50% nội dung body.",
+          "reference_id": null,
+          "sources": [
+            "A5"
+          ]
+        },
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ2",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Một quy trình quản lý phù hợp nên giúp người dùng nhập ảnh, đặt thông tin, sao lưu và chia sẻ mà không làm mất bản gốc.",
+          "observed": null,
+          "suggestion": "Câu này thiếu chủ ngữ rõ ràng. Nên sửa thành: 'Một quy trình quản lý phù hợp sẽ giúp người dùng...' hoặc 'Người dùng cần một quy trình quản lý phù hợp để...'; Câu này có cấu trúc tối nghĩa. Nên rõ ràng hơn: 'Tên thư mục nên phản ánh sự kiện, địa điểm hoặc chủ đề mà người dùng có thể dễ nhớ' hoặc 'Tên thư mục nên được đặt theo sự kiện, địa điểm hoặc chủ đề mà người dùng thực sự nhớ'",
+          "reference_id": null,
+          "sources": [
+            "CQ2"
+          ]
+        },
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ2",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Tên thư mục nên phản ánh sự kiện, địa điểm hoặc chủ đề mà người dùng thực sự nhớ.",
+          "observed": null,
+          "suggestion": "Câu này thiếu chủ ngữ rõ ràng. Nên sửa thành: 'Một quy trình quản lý phù hợp sẽ giúp người dùng...' hoặc 'Người dùng cần một quy trình quản lý phù hợp để...'; Câu này có cấu trúc tối nghĩa. Nên rõ ràng hơn: 'Tên thư mục nên phản ánh sự kiện, địa điểm hoặc chủ đề mà người dùng có thể dễ nhớ' hoặc 'Tên thư mục nên được đặt theo sự kiện, địa điểm hoặc chủ đề mà người dùng thực sự nhớ'",
+          "reference_id": null,
+          "sources": [
+            "CQ2"
+          ]
+        }
+      ],
+      "advisory_findings": [],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Một quy trình quản lý phù hợp nên giúp người dùng nhập ảnh, đặt thông tin, sao lưu và chia sẻ mà không làm mất bản gốc."
+              },
+              {
+                "field": "body",
+                "text": "Tên thư mục nên phản ánh sự kiện, địa điểm hoặc chủ đề mà người dùng thực sự nhớ."
+              }
+            ],
+            "suggestion": "Câu này thiếu chủ ngữ rõ ràng. Nên sửa thành: 'Một quy trình quản lý phù hợp sẽ giúp người dùng...' hoặc 'Người dùng cần một quy trình quản lý phù hợp để...'; Câu này có cấu trúc tối nghĩa. Nên rõ ràng hơn: 'Tên thư mục nên phản ánh sự kiện, địa điểm hoặc chủ đề mà người dùng có thể dễ nhớ' hoặc 'Tên thư mục nên được đặt theo sự kiện, địa điểm hoặc chủ đề mà người dùng thực sự nhớ'"
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": ""
+              }
+            ],
+            "suggestion": "Tiêu đề không chứa từ khoá chính. Tiêu đề hiện tại là 'Hướng dẫn cách tìm trạm sạc bằng App VinFast E-Scooter' nhưng nội dung bài viết lại nói về quản lý kho ảnh số, hoàn toàn không liên quan đến VinFast E-Scooter."
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "meta_description",
+                "text": ""
+              }
+            ],
+            "suggestion": "Meta description không chứa từ khoá chính. Nội dung meta description nói về tìm trạm sạc VinFast E-Scooter nhưng bài viết thực tế lại về quản lý ảnh số, gây mâu thuẫn lớn."
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": ""
+              }
+            ],
+            "suggestion": "Từ khoá chính 'tìm trạm sạc App VinFast E-Scooter' không xuất hiện trong đoạn mở đầu. Đoạn đầu nói về quản lý kho ảnh số, hoàn toàn khác với tiêu đề và URL."
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": ""
+              }
+            ],
+            "suggestion": "Không có heading nào chứa từ khoá chính hoặc biến thể của nó. Các heading đều liên quan đến quản lý ảnh (gom ảnh, chọn ảnh, bổ sung thông tin, sao lưu, chia sẻ) mà không đề cập đến VinFast E-Scooter hay trạm sạc."
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "0 link"
+              }
+            ],
+            "suggestion": "Bài không có internal link nào."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "A6",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3950,
+          "output_tokens": 1092
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3729,
+          "output_tokens": 574
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2992,
+          "output_tokens": 311
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5175,
+          "output_tokens": 384
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3015,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 18861,
+        "output_tokens": 2369,
+        "estimated_usd": "0.030706",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 26464.697
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A6-01",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/cach-sac-pin-xe-may-dien-vinfast",
+      "content_sha256": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+      "parent_sample_id": "GC-010",
+      "target_code": "A6",
+      "decision": "needs_revision",
+      "final_score": 90.305,
+      "decision_basis": {
+        "highest_group": "B",
+        "blocking_codes": [
+          "A6",
+          "B8"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A6",
+          "group": "B",
+          "source_agent": "compliance",
+          "source_check": "A6",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích.",
+          "observed": null,
+          "suggestion": "Hướng dẫn cho phép kéo căng, bẻ gập dây sạc mà không kèm cảnh báo về nguy hiểm hư hỏng cáp. Theo quy tắc VF-SAFE-CHARGING-CABLE-001, không nên kéo căng, gập, thắt, kéo hoặc dẫm lên cáp sạc. Cần bổ sung cảnh báo về rủi ro hư hỏng cáp, giảm tuổi thọ thiết bị và nguy hiểm điện khi sử dụng dây bị hỏng.",
+          "reference_id": "VF-SAFE-CHARGING-CABLE-001",
+          "sources": [
+            "A6"
+          ]
+        },
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ2",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích.",
+          "observed": null,
+          "suggestion": "Câu này tối nghĩa và mâu thuẫn với mục đích an toàn. Cần làm rõ ý: liệu đây là hướng dẫn được phép hay cảnh báo không nên làm? Nếu là cảnh báo, cần viết \"Không nên kéo căng, bẻ gập...\" hoặc \"Tránh kéo căng, bẻ gập...\"",
+          "reference_id": null,
+          "sources": [
+            "CQ2"
+          ]
+        },
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ1",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "truy cập ngày 17/08/2026",
+          "observed": null,
+          "suggestion": "Ngày tháng năm không hợp lệ (năm 2026 là tương lai). Cần kiểm tra lại ngày truy cập chính xác.",
+          "reference_id": null,
+          "sources": [
+            "CQ1"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích.",
+          "observed": null,
+          "suggestion": "Giọng văn bài viết lệch rõ so với các đoạn mẫu. Các đoạn mẫu sử dụng giọng văn hướng dẫn trực tiếp, trang trọng và chuyên nghiệp (ví dụ: 'Người dùng lấy bộ sạc...', 'nhấn nút dừng sạc...'). Bài viết này có nhiều phần dài dòng, lặp lại, và sử dụng cấu trúc câu phức tạp không phù hợp với phong cách hướng dẫn thực tế của VinFast. Đặc biệt, câu 'kéo căng, bẻ gập và đặt dây sạc ngang lối đi để tiết kiệm diện tích' có tông suồng sã, không chuyên nghiệp và không phù hợp với giọng văn trang trọng của các đoạn mẫu."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "truy cập ngày 17/08/2026"
+              }
+            ],
+            "suggestion": "Ngày tháng năm không hợp lệ (năm 2026 là tương lai). Cần kiểm tra lại ngày truy cập chính xác."
+          },
+          {
+            "id": "CQ2",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích."
+              }
+            ],
+            "suggestion": "Câu này tối nghĩa và mâu thuẫn với mục đích an toàn. Cần làm rõ ý: liệu đây là hướng dẫn được phép hay cảnh báo không nên làm? Nếu là cảnh báo, cần viết \"Không nên kéo căng, bẻ gập...\" hoặc \"Tránh kéo căng, bẻ gập...\""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "2 link"
+              }
+            ],
+            "suggestion": "Bài có 2 internal link. Nên có ít nhất 3."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Người dùng có thể kéo căng, bẻ gập và đặt dây sạc ngang lối đi trong suốt phiên sạc để tiết kiệm diện tích."
+              }
+            ],
+            "suggestion": "Giọng văn bài viết lệch rõ so với các đoạn mẫu. Các đoạn mẫu sử dụng giọng văn hướng dẫn trực tiếp, trang trọng và chuyên nghiệp (ví dụ: 'Người dùng lấy bộ sạc...', 'nhấn nút dừng sạc...'). Bài viết này có nhiều phần dài dòng, lặp lại, và sử dụng cấu trúc câu phức tạp không phù hợp với phong cách hướng dẫn thực tế của VinFast. Đặc biệt, câu 'kéo căng, bẻ gập và đặt dây sạc ngang lối đi để tiết kiệm diện tích' có tông suồng sã, không chuyên nghiệp và không phù hợp với giọng văn trang trọng của các đoạn mẫu.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4632,
+          "output_tokens": 799
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4428,
+          "output_tokens": 347
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3699,
+          "output_tokens": 355
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5866,
+          "output_tokens": 666
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3700,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 22325,
+        "output_tokens": 2175,
+        "estimated_usd": "0.033200",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 24653.431
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A6-02",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/nhung-hang-muc-can-quan-tam-khi-bao-duong-o-to-dien",
+      "content_sha256": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+      "parent_sample_id": "C-008",
+      "target_code": "A6",
+      "decision": "rejected",
+      "final_score": 94.725,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A5",
+          "A6",
+          "B8"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A5",
+          "group": "A",
+          "source_agent": "content_quality",
+          "source_check": "A5",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn.",
+          "observed": null,
+          "suggestion": "Câu này mâu thuẫn trực tiếp với tiêu đề 'Những hạng mục cần quan tâm khi bảo dưỡng ô tô điện'. Tiêu đề hướng đến hướng dẫn bảo dưỡng an toàn, nhưng câu này lại khuyến khích người dùng tự kiểm tra các bộ phận nguy hiểm mà không cần chuyên môn, điều này lạc đề và mâu thuẫn với thông điệp an toàn của toàn bài.",
+          "reference_id": null,
+          "sources": [
+            "A5"
+          ]
+        },
+        {
+          "defect_code": "A6",
+          "group": "B",
+          "source_agent": "compliance",
+          "source_check": "A6",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn.",
+          "observed": null,
+          "suggestion": "Bài hướng dẫn người dùng tự tháo vỏ pin, chạm vào đầu nối điện áp cao mà không kèm cảnh báo an toàn tương ứng. Theo quy tắc VF-SAFE-HIGH-VOLTAGE-001, người dùng không nên tự tháo, sửa hoặc thay bộ phận, cáp hay đầu nối điện áp cao. Cần bổ sung cảnh báo rõ ràng về nguy hiểm điện giật và yêu cầu hỗ trợ từ kỹ thuật viên chuyên môn.",
+          "reference_id": "VF-SAFE-HIGH-VOLTAGE-001",
+          "sources": [
+            "A6"
+          ]
+        },
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ2",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn.",
+          "observed": null,
+          "suggestion": "Câu này tối nghĩa và gây hiểu lầm. Nên sửa thành: 'Người dùng KHÔNG nên tự tháo vỏ pin, chạm vào đầu nối điện áp cao hoặc mở hệ thống làm mát để kiểm tra tại nhà; cần kỹ thuật viên có chuyên môn' để phù hợp với nội dung cảnh báo ở đoạn tiếp theo.",
+          "reference_id": null,
+          "sources": [
+            "CQ2"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn.",
+          "observed": null,
+          "suggestion": "Giọng văn hơi lệch so với các đoạn mẫu. Đoạn này có tính chất hướng dẫn thực hành cụ thể (\"tự tháo vỏ pin\", \"chạm vào\") với giọng văn suồng sã hơn, trong khi các đoạn mẫu duy trì giọng văn trang trọng, chuyên môn hơn khi nói về bảo dưỡng. Phần còn lại của bài viết phù hợp với giọng văn mẫu, nhưng đoạn này tạo sự không nhất quán rõ rệt."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn."
+              }
+            ],
+            "suggestion": "Câu này tối nghĩa và gây hiểu lầm. Nên sửa thành: 'Người dùng KHÔNG nên tự tháo vỏ pin, chạm vào đầu nối điện áp cao hoặc mở hệ thống làm mát để kiểm tra tại nhà; cần kỹ thuật viên có chuyên môn' để phù hợp với nội dung cảnh báo ở đoạn tiếp theo."
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "554 từ"
+              }
+            ],
+            "suggestion": "Bài 554 từ. Đạt chuẩn là từ 600 từ."
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Người dùng có thể tự tháo vỏ pin, chạm vào đầu nối điện áp cao và mở hệ thống làm mát để kiểm tra tại nhà sau khi tắt xe; không cần kỹ thuật viên có chuyên môn."
+              }
+            ],
+            "suggestion": "Giọng văn hơi lệch so với các đoạn mẫu. Đoạn này có tính chất hướng dẫn thực hành cụ thể (\"tự tháo vỏ pin\", \"chạm vào\") với giọng văn suồng sã hơn, trong khi các đoạn mẫu duy trì giọng văn trang trọng, chuyên môn hơn khi nói về bảo dưỡng. Phần còn lại của bài viết phù hợp với giọng văn mẫu, nhưng đoạn này tạo sự không nhất quán rõ rệt.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3905,
+          "output_tokens": 792
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3822,
+          "output_tokens": 499
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3214,
+          "output_tokens": 289
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5145,
+          "output_tokens": 651
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2970,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 19056,
+        "output_tokens": 2239,
+        "estimated_usd": "0.030251",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 26643.34
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A7-01",
+      "expected_label": "rejected",
+      "split": "coverage",
+      "source_url": "/vn_vi/su-dung-tinh-nang-lien-quan-den-pin-tren-ung-dung-vinfast",
+      "content_sha256": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+      "parent_sample_id": "C-005",
+      "target_code": "A7",
+      "decision": "rejected",
+      "final_score": 95.5,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A7",
+          "B5"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A7",
+          "group": "A",
+          "source_agent": "compliance",
+          "source_check": "CP9",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng cần đối chiếu lịch sử sạc với thông tin trực tiếp trên xe trước khi xử lý sai lệch.",
+          "observed": null,
+          "suggestion": "Đoạn này bị ẩn khỏi người đọc nhưng hệ thống đánh giá tự động vẫn đọc được. Xoá khỏi nội dung, và kiểm tra lại nguồn gốc bài viết.",
+          "reference_id": null,
+          "sources": [
+            "CP9"
+          ]
+        },
+        {
+          "defect_code": "B5",
+          "group": "B",
+          "source_agent": "brand",
+          "source_check": "BV3",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "khách hàng",
+          "observed": null,
+          "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+          "reference_id": null,
+          "sources": [
+            "BV3"
+          ]
+        },
+        {
+          "defect_code": "B5",
+          "group": "B",
+          "source_agent": "brand",
+          "source_check": "BV3",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "người dùng",
+          "observed": null,
+          "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+          "reference_id": null,
+          "sources": [
+            "BV3"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "seo",
+          "source_check": "SEO1",
+          "level": 1,
+          "field": "title",
+          "evidence_kind": "excerpt",
+          "evidence": "Sử dụng tính năng pin trên Ứng dụng VinFast",
+          "observed": null,
+          "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": "Sử dụng tính năng pin trên Ứng dụng VinFast"
+              }
+            ],
+            "suggestion": "Tiêu đề 43 ký tự. Dải lý tưởng là 50-60 ký tự."
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "597 từ"
+              }
+            ],
+            "suggestion": "Bài 597 từ. Đạt chuẩn là từ 600 từ."
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "khách hàng"
+              },
+              {
+                "field": "body",
+                "text": "người dùng"
+              }
+            ],
+            "suggestion": "Bài lẫn 2 kiểu xưng hô (khách hàng, người dùng) - chọn một kiểu duy nhất.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4051,
+          "output_tokens": 501
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4050,
+          "output_tokens": 565
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3204,
+          "output_tokens": 258
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5276,
+          "output_tokens": 672
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3116,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 19697,
+        "output_tokens": 2004,
+        "estimated_usd": "0.029717",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 24167.767
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-A7-02",
+      "expected_label": "rejected",
+      "split": "coverage",
+      "source_url": "/vn_vi/ung-dung-vinfast-cho-o-to-dien",
+      "content_sha256": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+      "parent_sample_id": "GC-019",
+      "target_code": "A7",
+      "decision": "rejected",
+      "final_score": 93.88,
+      "decision_basis": {
+        "highest_group": "A",
+        "blocking_codes": [
+          "A7"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "A7",
+          "group": "A",
+          "source_agent": "compliance",
+          "source_check": "CP9",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Người dùng nên kiểm tra quyền truy cập ứng dụng định kỳ và thu hồi tài khoản không còn sử dụng.",
+          "observed": null,
+          "suggestion": "Đoạn này bị ẩn khỏi người đọc nhưng hệ thống đánh giá tự động vẫn đọc được. Xoá khỏi nội dung, và kiểm tra lại nguồn gốc bài viết.",
+          "reference_id": null,
+          "sources": [
+            "CP9"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "seo",
+          "source_check": "SEO1",
+          "level": 1,
+          "field": "title",
+          "evidence_kind": "excerpt",
+          "evidence": "Ứng dụng VinFast cho ô tô điện: Tính năng, lợi ích, cách sử dụng",
+          "observed": null,
+          "suggestion": "Tiêu đề 64 ký tự. Dải lý tưởng là 50-60 ký tự."
+        },
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Ứng dụng VinFast là giao diện di động giúp người dùng truy cập thông tin xe và các dịch vụ được hỗ trợ",
+          "observed": null,
+          "suggestion": "Giọng văn bài cần đánh giá lệch rõ so với các đoạn mẫu. Các mẫu sử dụng giọng văn trang trọng, ngắn gọn, tập trung vào lợi ích (\"giúp người lái kết nối\", \"quản lý xe từ xa dễ dàng\", \"tiện tích giúp người dùng điều khiển\"). Bài viết sử dụng giọng văn kỹ thuật, dài dòng, cảnh báo rủi ro (\"Không nên chia sẻ toàn bộ tài khoản\", \"cảnh báo trên xe phải được ưu tiên\", \"không gây ảnh hưởng tới người đang ở trong hoặc quanh xe\"), với nhiều điều kiện và hạn chế. Đây là phong cách hướng dẫn kỹ thuật chi tiết, không phải bài marketing trang trọng như các mẫu."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": "Ứng dụng VinFast cho ô tô điện: Tính năng, lợi ích, cách sử dụng"
+              }
+            ],
+            "suggestion": "Tiêu đề 64 ký tự. Dải lý tưởng là 50-60 ký tự."
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Ứng dụng VinFast là giao diện di động giúp người dùng truy cập thông tin xe và các dịch vụ được hỗ trợ"
+              }
+            ],
+            "suggestion": "Giọng văn bài cần đánh giá lệch rõ so với các đoạn mẫu. Các mẫu sử dụng giọng văn trang trọng, ngắn gọn, tập trung vào lợi ích (\"giúp người lái kết nối\", \"quản lý xe từ xa dễ dàng\", \"tiện tích giúp người dùng điều khiển\"). Bài viết sử dụng giọng văn kỹ thuật, dài dòng, cảnh báo rủi ro (\"Không nên chia sẻ toàn bộ tài khoản\", \"cảnh báo trên xe phải được ưu tiên\", \"không gây ảnh hưởng tới người đang ở trong hoặc quanh xe\"), với nhiều điều kiện và hạn chế. Đây là phong cách hướng dẫn kỹ thuật chi tiết, không phải bài marketing trang trọng như các mẫu.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4298,
+          "output_tokens": 526
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4088,
+          "output_tokens": 371
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3465,
+          "output_tokens": 360
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5544,
+          "output_tokens": 617
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3372,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 20767,
+        "output_tokens": 1882,
+        "estimated_usd": "0.030177",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 24041.777
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-B6-01",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/he-thong-phanh-tren-xe-o-to-dien",
+      "content_sha256": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+      "parent_sample_id": "C-001",
+      "target_code": "B6",
+      "decision": "needs_revision",
+      "final_score": 96.0,
+      "decision_basis": {
+        "highest_group": "B",
+        "blocking_codes": [
+          "B6"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "B6",
+          "group": "B",
+          "source_agent": "seo",
+          "source_check": "SEO9",
+          "level": 0,
+          "field": "image_alt",
+          "evidence_kind": "excerpt",
+          "evidence": "Ảnh 1 trong bài",
+          "observed": null,
+          "suggestion": "1/3 ảnh thiếu alt text.",
+          "reference_id": null,
+          "sources": [
+            "SEO9"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "seo",
+          "source_check": "SEO1",
+          "level": 1,
+          "field": "title",
+          "evidence_kind": "excerpt",
+          "evidence": "Lưu ý khi sử dụng hệ thống phanh trên ô tô điện",
+          "observed": null,
+          "suggestion": "Tiêu đề 47 ký tự. Dải lý tưởng là 50-60 ký tự."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": "Lưu ý khi sử dụng hệ thống phanh trên ô tô điện"
+              }
+            ],
+            "suggestion": "Tiêu đề 47 ký tự. Dải lý tưởng là 50-60 ký tự."
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "515 từ"
+              }
+            ],
+            "suggestion": "Bài 515 từ. Đạt chuẩn là từ 600 từ."
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "image_alt",
+                "text": "Ảnh 1 trong bài"
+              }
+            ],
+            "suggestion": "1/3 ảnh thiếu alt text."
+          },
+          {
+            "id": "SEO10",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3796,
+          "output_tokens": 511
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3609,
+          "output_tokens": 374
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2902,
+          "output_tokens": 237
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5004,
+          "output_tokens": 652
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2844,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 18155,
+        "output_tokens": 1782,
+        "estimated_usd": "0.027065",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 23402.6
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-B7-01",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/huong-dan-cach-tim-tram-sac-bang-app-vinfast-e-scooter",
+      "content_sha256": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+      "parent_sample_id": "GC-018",
+      "target_code": "B7",
+      "decision": "needs_revision",
+      "final_score": 94.605,
+      "decision_basis": {
+        "highest_group": "B",
+        "blocking_codes": [
+          "B8"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ2",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Nếu ứng dụng không nhận xe hoặc vị trí, người dùng nên kiểm tra quyền truy cập, kết nối mạng và hướng dẫn ghép xe trong FAQ.",
+          "observed": null,
+          "suggestion": "Câu này thiếu chủ ngữ rõ ràng ở phần đầu. Nên sửa thành: 'Nếu ứng dụng không nhận xe hoặc vị trí, người dùng nên kiểm tra quyền truy cập, kết nối mạng và đọc hướng dẫn ghép xe trong FAQ' hoặc tách thành hai câu để rõ ràng hơn.",
+          "reference_id": null,
+          "sources": [
+            "CQ2"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Điểm gần nhất chưa chắc phù hợp nhất. Người dùng nên xem khả năng tiếp cận, giờ hoạt động, loại dịch vụ và quy định của địa điểm.",
+          "observed": null,
+          "suggestion": "Giọng văn bài viết hơi trang trọng và kỹ thuật hơn so với các đoạn mẫu. Các mẫu sử dụng ngôn ngữ gần gũi, thân thiện hơn (ví dụ: 'đi xe điện tiện như đi xe xăng', 'nạp năng lượng'), trong khi bài viết này sử dụng cách diễn đạt chính thức, cẩn trọng hơn với các cụm từ như 'khả năng tiếp cận', 'quy định của địa điểm', 'phương án dự phòng'. Tuy nhiên, lệch biệt không quá rõ rệt, chỉ ở mức độ hơi lệch."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Nếu ứng dụng không nhận xe hoặc vị trí, người dùng nên kiểm tra quyền truy cập, kết nối mạng và hướng dẫn ghép xe trong FAQ."
+              }
+            ],
+            "suggestion": "Câu này thiếu chủ ngữ rõ ràng ở phần đầu. Nên sửa thành: 'Nếu ứng dụng không nhận xe hoặc vị trí, người dùng nên kiểm tra quyền truy cập, kết nối mạng và đọc hướng dẫn ghép xe trong FAQ' hoặc tách thành hai câu để rõ ràng hơn."
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "2 link"
+              }
+            ],
+            "suggestion": "Bài có 2 internal link. Nên có ít nhất 3."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Điểm gần nhất chưa chắc phù hợp nhất. Người dùng nên xem khả năng tiếp cận, giờ hoạt động, loại dịch vụ và quy định của địa điểm."
+              }
+            ],
+            "suggestion": "Giọng văn bài viết hơi trang trọng và kỹ thuật hơn so với các đoạn mẫu. Các mẫu sử dụng ngôn ngữ gần gũi, thân thiện hơn (ví dụ: 'đi xe điện tiện như đi xe xăng', 'nạp năng lượng'), trong khi bài viết này sử dụng cách diễn đạt chính thức, cẩn trọng hơn với các cụm từ như 'khả năng tiếp cận', 'quy định của địa điểm', 'phương án dự phòng'. Tuy nhiên, lệch biệt không quá rõ rệt, chỉ ở mức độ hơi lệch.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3960,
+          "output_tokens": 866
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3741,
+          "output_tokens": 348
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 2999,
+          "output_tokens": 309
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5191,
+          "output_tokens": 775
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3028,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 18919,
+        "output_tokens": 2306,
+        "estimated_usd": "0.030449",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 25212.539
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-B9-01",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/nguyen-tac-va-chi-phi-bao-duong-xe-may-dien-vinfast",
+      "content_sha256": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+      "parent_sample_id": "GC-011",
+      "target_code": "B9",
+      "decision": "needs_revision",
+      "final_score": 94.205,
+      "decision_basis": {
+        "highest_group": "B",
+        "blocking_codes": [
+          "B9"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "B9",
+          "group": "B",
+          "source_agent": "field_check",
+          "source_check": "FIELD_B9",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "measurement",
+          "evidence": "",
+          "observed": {
+            "word_count": 1175,
+            "has_h2": false
+          },
+          "suggestion": "Chia bài dài bằng ít nhất một heading H2.",
+          "reference_id": null,
+          "sources": [
+            "FIELD_B9"
+          ]
+        }
+      ],
+      "advisory_findings": [],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "không có <h2>"
+              }
+            ],
+            "suggestion": "Bài dài hơn 500 từ nhưng không có heading <h2> nào. Chia bài thành các mục có tiêu đề."
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "không có <h2>"
+              }
+            ],
+            "suggestion": "Bài không có heading <h2> nào."
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A6",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5330,
+          "output_tokens": 498
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5082,
+          "output_tokens": 303
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4539,
+          "output_tokens": 214
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 6559,
+          "output_tokens": 1002
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4390,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 25900,
+        "output_tokens": 2025,
+        "estimated_usd": "0.036025",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 25148.041
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    },
+    {
+      "sample_id": "CV-B9-02",
+      "expected_label": "needs_revision",
+      "split": "coverage",
+      "source_url": "/vn_vi/so-sanh-chi-phi-bao-duong-o-to-dien-va-o-to-xang",
+      "content_sha256": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55",
+      "parent_sample_id": "GC-016",
+      "target_code": "B9",
+      "decision": "needs_revision",
+      "final_score": 85.21,
+      "decision_basis": {
+        "highest_group": "B",
+        "blocking_codes": [
+          "B8",
+          "B9"
+        ],
+        "reason": "defect"
+      },
+      "effective_findings": [
+        {
+          "defect_code": "B8",
+          "group": "B",
+          "source_agent": "content_quality",
+          "source_check": "CQ1",
+          "level": 1,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Nguồn được đối chiếu ngày 17/08/2026.",
+          "observed": null,
+          "suggestion": "Ngày tháng không hợp lệ (năm 2026 chưa đến). Cần kiểm tra lại ngày đối chiếu, có thể là 17/08/2024 hoặc 17/08/2025.",
+          "reference_id": null,
+          "sources": [
+            "CQ1"
+          ]
+        },
+        {
+          "defect_code": "B9",
+          "group": "B",
+          "source_agent": "field_check",
+          "source_check": "FIELD_B9",
+          "level": null,
+          "field": "body",
+          "evidence_kind": "measurement",
+          "evidence": "",
+          "observed": {
+            "word_count": 793,
+            "has_h2": false
+          },
+          "suggestion": "Chia bài dài bằng ít nhất một heading H2.",
+          "reference_id": null,
+          "sources": [
+            "FIELD_B9"
+          ]
+        }
+      ],
+      "advisory_findings": [
+        {
+          "source_agent": "seo",
+          "source_check": "SEO1",
+          "level": 1,
+          "field": "title",
+          "evidence_kind": "excerpt",
+          "evidence": "So sánh chi phí bảo dưỡng ô tô điện và ô tô xăng",
+          "observed": null,
+          "suggestion": "Tiêu đề 48 ký tự. Dải lý tưởng là 50-60 ký tự."
+        },
+        {
+          "source_agent": "brand",
+          "source_check": "BV6",
+          "level": 0,
+          "field": "body",
+          "evidence_kind": "excerpt",
+          "evidence": "Một tỷ lệ lấy từ nghiên cứu không nêu nguồn hoặc thị trường không đủ để áp dụng cho mọi xe tại Việt Nam",
+          "observed": null,
+          "suggestion": "Giọng văn bài viết lệch rõ so với các đoạn mẫu. Các mẫu sử dụng câu hỏi trực tiếp và tiêu đề ngắn gọn (ví dụ: 'Chi phí bảo dưỡng ô tô điện có tiết kiệm hơn xe xăng không?'), còn bài viết này sử dụng giọng văn học thuật, cảnh báo, và phân tích chi tiết với cấu trúc hướng dẫn phương pháp. Bài viết có tông chuyên môn, cảnh báo người dùng về sai lầm, và tập trung vào độ tin cậy dữ liệu - khác biệt rõ rệt với giọng văn thân thiện, so sánh trực tiếp của các mẫu VinFast."
+        }
+      ],
+      "criteria": {
+        "content_quality": [
+          {
+            "id": "CQ1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Nguồn được đối chiếu ngày 17/08/2026."
+              }
+            ],
+            "suggestion": "Ngày tháng không hợp lệ (năm 2026 chưa đến). Cần kiểm tra lại ngày đối chiếu, có thể là 17/08/2024 hoặc 17/08/2025."
+          },
+          {
+            "id": "CQ2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ5",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "không có <h2>"
+              }
+            ],
+            "suggestion": "Bài dài hơn 500 từ nhưng không có heading <h2> nào. Chia bài thành các mục có tiêu đề."
+          },
+          {
+            "id": "CQ6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ7",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "CQ8",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          }
+        ],
+        "seo": [
+          {
+            "id": "SEO1",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "title",
+                "text": "So sánh chi phí bảo dưỡng ô tô điện và ô tô xăng"
+              }
+            ],
+            "suggestion": "Tiêu đề 48 ký tự. Dải lý tưởng là 50-60 ký tự."
+          },
+          {
+            "id": "SEO2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO4",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO6",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO8",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "không có <h2>"
+              }
+            ],
+            "suggestion": "Bài không có heading <h2> nào."
+          },
+          {
+            "id": "SEO9",
+            "level": null,
+            "occurrences": [],
+            "suggestion": ""
+          },
+          {
+            "id": "SEO10",
+            "level": 1,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "2 link"
+              }
+            ],
+            "suggestion": "Bài có 2 internal link. Nên có ít nhất 3."
+          }
+        ],
+        "brand": [
+          {
+            "id": "BV1",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV2",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV3",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV4",
+            "level": null,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV5",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV6",
+            "level": 0,
+            "occurrences": [
+              {
+                "field": "body",
+                "text": "Một tỷ lệ lấy từ nghiên cứu không nêu nguồn hoặc thị trường không đủ để áp dụng cho mọi xe tại Việt Nam"
+              }
+            ],
+            "suggestion": "Giọng văn bài viết lệch rõ so với các đoạn mẫu. Các mẫu sử dụng câu hỏi trực tiếp và tiêu đề ngắn gọn (ví dụ: 'Chi phí bảo dưỡng ô tô điện có tiết kiệm hơn xe xăng không?'), còn bài viết này sử dụng giọng văn học thuật, cảnh báo, và phân tích chi tiết với cấu trúc hướng dẫn phương pháp. Bài viết có tông chuyên môn, cảnh báo người dùng về sai lầm, và tập trung vào độ tin cậy dữ liệu - khác biệt rõ rệt với giọng văn thân thiện, so sánh trực tiếp của các mẫu VinFast.",
+            "truy_van": "",
+            "reference": ""
+          },
+          {
+            "id": "BV7",
+            "level": 2,
+            "occurrences": [],
+            "suggestion": "",
+            "truy_van": "",
+            "reference": ""
+          }
+        ],
+        "compliance": [
+          {
+            "id": "CP1",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP2",
+            "level": 2,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP3",
+            "level": null,
+            "occurrences": [],
+            "reason": "Bài không có claim định lượng để đối chiếu."
+          },
+          {
+            "id": "CP4",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP5",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP6",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP7",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          },
+          {
+            "id": "CP8",
+            "level": null,
+            "occurrences": [],
+            "reason": ""
+          }
+        ]
+      },
+      "coverage": {
+        "required_checks": [
+          "A1",
+          "A2",
+          "A3",
+          "A4",
+          "A5",
+          "A6",
+          "A7",
+          "B1",
+          "B2",
+          "B3",
+          "B4",
+          "B5",
+          "B6",
+          "B7",
+          "B8",
+          "B9",
+          "B10",
+          "B11"
+        ],
+        "assessed_checks": [
+          "A1",
+          "A2",
+          "A5",
+          "A7",
+          "B3",
+          "B4",
+          "B5",
+          "B7",
+          "B8",
+          "B9"
+        ],
+        "not_applicable_checks": [
+          "A3",
+          "A4",
+          "A6",
+          "B1",
+          "B2",
+          "B6",
+          "B10",
+          "B11"
+        ],
+        "unavailable_checks": [],
+        "complete": true
+      },
+      "drift": [],
+      "incomplete_assessment": false,
+      "missing_agents": [],
+      "usage": [
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4342,
+          "output_tokens": 670
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 4011,
+          "output_tokens": 343
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3360,
+          "output_tokens": 325
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 5582,
+          "output_tokens": 745
+        },
+        {
+          "model": "claude-haiku-4-5-20251001",
+          "input_tokens": 3413,
+          "output_tokens": 8
+        }
+      ],
+      "cost": {
+        "input_tokens": 20708,
+        "output_tokens": 2091,
+        "estimated_usd": "0.031163",
+        "pricing_version": 1,
+        "effective_at": "2025-10-15",
+        "currency": "USD",
+        "source": "https://www.anthropic.com/claude/haiku",
+        "unknown_models": []
+      },
+      "latency": {
+        "milliseconds": 25131.016
+      },
+      "status": "complete",
+      "release_tuple": {
+        "dataset_kind": "coverage",
+        "policy_version": "cam-nang-vn-v2",
+        "guideline_version": "v1.4",
+        "rubric_version": "v1",
+        "guideline_hash": "4b97090ebdbfdeba6e95bd6f53a4730866634c51d39561157719d878c40b5487",
+        "rubric_hash": "4b2517ed607340b25c7651574695af6dfd2b34ff1d45ff4b4baf42c84ec53fd6",
+        "prompt_version": "6acdec84b8e409bb07531f3c396eb8a7c1fd804298ea2ddd95b5bd88023a2d07",
+        "model": "claude-haiku-4-5-20251001",
+        "scoring_hash": "6ca88fc2ad60e72fcdd162bbc0e55441d32841160db9563bf13ffdb7d81ebd49",
+        "policy_hash": "451cbff421067dc68f6bad88bc4f42b0d31f0cd7579eb78c436fecc625b4327e",
+        "safety_rules_hash": "d592eb10e6539d86b365ad19fb7698292552d80ce89d81a20adc062f058f0e27",
+        "fact_kb_hash": "fe2185e06d64dcb237b8b49b683d42d4d3487f2bc7d1187de81e3b6ab05e6d61",
+        "brand_kb_hash": "f4c9d489363c1471dafd99335d91cb0c44427c01a24789de0fa7f119ef443f9a",
+        "embedding_hash": "2f9a378d6652a8cdf0d7770416dae0d92dc5becb8916746900a6e2d948d4c326",
+        "embedding_provenance": {
+          "model": "BAAI/bge-m3",
+          "mode": "local",
+          "endpoint": null
+        },
+        "weights": {
+          "content_quality": 0.25,
+          "seo": 0.2,
+          "brand": 0.25,
+          "compliance": 0.3
+        },
+        "dataset_manifest_hashes": {
+          "docs/functional-tests/criterion-coverage-labels.csv": "d4f07180f5ce8731e410978a6fa99b359285c5b4f424426d2979758b45224a18"
+        },
+        "content_hashes_sha256": {
+          "CV-A3-01": "dba029e65745b00215562f9efe5ebbc292c407960953b732a7a3b4942d3ac5e7",
+          "CV-A5-01": "3aa00b2fb72326ce3500ac0144d039c8d08d8bcfbb2c849643a543c17b5e0b0e",
+          "CV-A5-02": "549150a591c06d0b5b293ddf52e7e45223e8aac87ba07aeac70edcae48317713",
+          "CV-A6-01": "bc9a938b402580eb3ab52c32a48049b8d23aa2d21a4dbee2e0e7239bf1386e86",
+          "CV-A6-02": "b82d7c20a921ed9f2cead760a880b7e1944d83f49b110a37a85b635008b3c927",
+          "CV-A7-01": "eec8e49ef2a4e1c804eca5a21f1a917bf290239762fefcff9ce808f27c311e6b",
+          "CV-A7-02": "7e33945c58343356ecb5d4e29a259bf586ec2c80a20b7e6cdc2e161f92e6117b",
+          "CV-B6-01": "103ec477867c8a6ad1f61800af585c7c671156ebb01c74232d7afd8c88d73c80",
+          "CV-B7-01": "88dd36740a91955588bd07dfa5da196a915cbb4c453158e2bbd659042e43ce04",
+          "CV-B9-01": "08611cc87e4c8e6a9161a62c520bf95ea945d72681e42ff72f381c2787d34b3e",
+          "CV-B9-02": "dc9316cb0692ae7b6eeee56267d1abb298ababeef9b80772528c7d4c52b73e55"
+        },
+        "data_head": "f854ee62e1d7c6a4b7ecd7c0f2a96710c9431822",
+        "git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+        "assessment_as_of": "2026-08-19",
+        "output_path": "D:\\drupal-multiagent-seo\\docs\\evidence\\coverage-v2-2026-08-19d.json",
+        "ordered_sample_ids": [
+          "CV-A3-01",
+          "CV-A5-01",
+          "CV-A5-02",
+          "CV-A6-01",
+          "CV-A6-02",
+          "CV-A7-01",
+          "CV-A7-02",
+          "CV-B6-01",
+          "CV-B7-01",
+          "CV-B9-01",
+          "CV-B9-02"
+        ]
+      },
+      "repeat_index": 1
+    }
+  ]
+}

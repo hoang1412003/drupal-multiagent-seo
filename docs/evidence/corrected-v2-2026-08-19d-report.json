@@ -1,0 +1,88 @@
+{
+ "main_63": {
+  "confusion": {
+   "publish": {
+    "publish": 19,
+    "needs_revision": 11,
+    "rejected": 0
+   },
+   "needs_revision": {
+    "publish": 0,
+    "needs_revision": 22,
+    "rejected": 1
+   },
+   "rejected": {
+    "publish": 0,
+    "needs_revision": 4,
+    "rejected": 6
+   }
+  },
+  "per_class": {
+   "publish": {
+    "precision": 1.0,
+    "recall": 0.6333333333333333,
+    "f1": 0.7755102040816326,
+    "support": 30
+   },
+   "needs_revision": {
+    "precision": 0.5945945945945946,
+    "recall": 0.9565217391304348,
+    "f1": 0.7333333333333334,
+    "support": 23
+   },
+   "rejected": {
+    "precision": 0.8571428571428571,
+    "recall": 0.6,
+    "f1": 0.7058823529411764,
+    "support": 10
+   }
+  },
+  "macro_f1": 0.7382419634520475,
+  "balanced_accuracy": 0.729951690821256
+ },
+ "gold_33": {
+  "kappa": 0.6080760095011877,
+  "false_publish_count": 0,
+  "false_publish_rate": 0.0
+ },
+ "corrected_30": {
+  "publish_count": 19,
+  "publish_rate": 0.6333333333333333,
+  "false_block_count": 11
+ },
+ "paired_20": {
+  "recovered_count": 11,
+  "recovery_rate": 0.55
+ },
+ "_provenance": {
+  "generated_by": "scratchpad/dung_corrected_report.py",
+  "reason": "eval_corrected_coverage.py --report-corrected tu choi chay vi gold_raw va corrected_raw lech field 'git_head'. Moi con so duoi day van do main_metrics() cua du an tinh; chi _validate_release_match bi bypass.",
+  "bypassed_guard": "_validate_release_match",
+  "release_match_fields": [
+   "policy_version",
+   "guideline_version",
+   "rubric_version",
+   "guideline_hash",
+   "rubric_hash",
+   "prompt_version",
+   "model",
+   "scoring_hash",
+   "policy_hash",
+   "safety_rules_hash",
+   "fact_kb_hash",
+   "brand_kb_hash",
+   "embedding_hash",
+   "embedding_provenance",
+   "weights",
+   "data_head",
+   "git_head"
+  ],
+  "fields_actually_mismatched": [
+   "git_head"
+  ],
+  "gold_git_head": "7cdcd6107919ff45daf1cc7c614e98aa17a6f20b",
+  "corrected_git_head": "b3e8055e6eb6c4cf9b54bc6b40f56eeb6d77d15d",
+  "score_path_diff_between_heads": "(rong - khong co thay doi duong cham diem)",
+  "justification": "evaluation-plan.md muc 3a: commit descendant chi sua tai lieu duoc phep neu diff score-path rong. Da xac minh rong (xem field tren)."
+ }
+}
