@@ -1,0 +1,161 @@
+{#
+/**
+ * @file
+ * Theme override for VinFast Split-Screen User Login page.
+ */
+#}
+<div class="min-h-screen flex flex-col font-body-md text-body-md antialiased selection:bg-primary selection:text-white">
+  <!-- Top Navigation Bar -->
+  <header class="fixed top-0 left-0 w-full z-50 bg-surface-white/80 dark:bg-surface-dim/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm transition-all duration-300 ease-in-out font-body-md text-body-md">
+    <div class="flex justify-between items-center h-20 max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop">
+      <a class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed tracking-tight hover:opacity-90 transition-opacity" href="{{ path('<front>') }}">
+        VinFast
+      </a>
+      
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex space-x-8">
+        <a class="text-on-surface-variant hover:text-primary transition-colors hover:bg-surface-container-low/60 px-3 py-2 rounded-lg" href="{{ path('<front>') }}">
+          Tin tức & Blog
+        </a>
+      </nav>
+
+      <div class="flex items-center space-x-4">
+        <button class="text-on-surface-variant hover:text-primary transition-colors hidden md:flex p-2 rounded-full hover:bg-surface-container" aria-label="Tìm kiếm">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">search</span>
+        </button>
+        <a class="text-primary font-semibold border-b-2 border-primary pb-1 px-4 py-2 hover:bg-surface-container-low/60 transition-colors rounded-lg hidden md:block" href="/user/login">
+          Đăng nhập
+        </a>
+        <!-- Mobile Menu Toggle Button -->
+        <button data-vf-mobile-menu-btn class="md:hidden text-on-surface-variant p-2 focus:outline-none" aria-label="Menu">
+          <span class="material-symbols-outlined align-middle text-2xl">menu</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div data-vf-mobile-menu class="hidden md:hidden bg-surface-white border-b border-outline-variant/30 px-6 py-4 space-y-3 shadow-lg">
+      <a class="block py-2 font-body-md text-on-surface hover:text-primary" href="{{ path('<front>') }}">Tin tức & Blog</a>
+    </div>
+  </header>
+
+  <!-- Main Content: Split Screen Login -->
+  <main class="flex-grow flex pt-20">
+    <!-- Left Side: Brand Experience Banner -->
+    <div class="hidden lg:flex lg:w-1/2 relative bg-surface-container overflow-hidden min-h-[640px]">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent z-10"></div>
+      <div
+        class="bg-cover bg-center w-full h-full transform scale-105 transition-transform duration-1000 hover:scale-100"
+        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDgm4Br5XfgCHlX0__TTVKEvQpXFSCkRyCRpzz-GxnEIE5mP2a8jGhIhT_CzMrPPRQXPZCuowk53OfPsE4iI94XRfgfQC5cFKH-FU1i-YniZWgsp5caFO0GZqqxeCRfFcCQNgfLSkPDfisF2NYACzHIsJaB68pKL5ABlhf1UXbJluwzCoctU10vP6fGw3FQGNSYlkP7uA_jMn_xJiDtN6rsFsUk4PGOaB5hwCZ1Chr-8nPc401ykeKWUg')"
+      ></div>
+      <div class="absolute bottom-16 left-12 right-12 z-20 text-white max-w-lg">
+        <h1 class="font-display-lg text-4xl xl:text-5xl font-bold mb-4 leading-tight">
+          Dẫn lối tương lai.
+        </h1>
+        <p class="font-body-lg text-lg text-white/85 leading-relaxed">
+          Trải nghiệm đỉnh cao của hiệu suất bền vững và sự tinh xảo cao cấp cùng VinFast.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Side: Login Card -->
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-16 bg-surface-white">
+      <div class="w-full max-w-md glass-panel p-8 sm:p-10 md:p-12 rounded-2xl shadow-xl border border-outline-variant/30">
+        <!-- Header -->
+        <div class="mb-8 text-center lg:text-left">
+          <h2 class="font-headline-xl text-3xl font-bold text-primary mb-2">Đăng nhập</h2>
+          <p class="font-body-md text-sm sm:text-base text-on-surface-variant">
+            Chào mừng bạn quay trở lại. Vui lòng nhập thông tin để tiếp tục.
+          </p>
+        </div>
+
+        <!-- Drupal Status / Error Messages -->
+        {{ page.highlighted }}
+
+        <!-- Drupal Login Form -->
+        <div class="vf-drupal-login-form">
+          {{ page.content }}
+        </div>
+
+        <!-- Social Login Divider -->
+        <div class="mt-8">
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-outline-variant/40"></div>
+            </div>
+            <div class="relative flex justify-center text-xs sm:text-sm">
+              <span class="px-4 bg-surface-white font-label-sm text-label-sm text-secondary uppercase tracking-wider">
+                Hoặc đăng nhập bằng
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-2 gap-4">
+            <button type="button" class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg btn-outline border border-outline-variant hover:bg-surface-container transition-all">
+              <img
+                alt="Google"
+                class="h-5 w-5 object-contain"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtux7m0jcI8vySwU955DkKb9-fgf8kuLJQNFQU-5i8HvG7BJ0CKi8VpLYY9E8EfmwCnMbb2mQNCnT1HGQpZMgRpN1wcuzSQYjvpmERefMpe51vuJUeinNp9XHOh0RQwjGj8ubQMyH14rykwN0ptXUUUqj8F8BYd5IgB9zANuMPcFlIfrhXVsREsvo1_znGBlSgeBJ918j6Tn1Y80J2zXn-cf62CVAYPmviS0BZpGW-VGGa2T4l-KIuSA"
+              />
+              <span class="font-body-md text-xs font-semibold text-on-surface">Google</span>
+            </button>
+            <button type="button" class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 rounded-lg btn-outline border border-outline-variant hover:bg-surface-container transition-all">
+              <img
+                alt="Facebook"
+                class="h-5 w-5 object-contain"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCLVquoP3PGsNO425slUQR2IOwRheVZ38pzZYBg8Sq7lYuVfbhM7MmlsScL1nzi_FoIQYn7aQk-1OSM9hhT-HPQACBqObviNo_UHR2osDpM6ANDMdAdWi86f92YVncYRCiYoY1NhS1OOJrFnQbdr9ko8p-7pNOjuXi-pXlUvHG6gOb5HemLmhIB3kkWvyJXRXun9S6nvGQadCD5_prtOhlWXveoywakyR9uVTmpwGkDUzv9TBQ1fOUpw"
+              />
+              <span class="font-body-md text-xs font-semibold text-on-surface">Facebook</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Register Link -->
+        <div class="mt-8 text-center">
+          <p class="font-body-md text-sm text-on-surface-variant">
+            Chưa có tài khoản? <a class="text-primary font-semibold hover:underline hover:text-electric-blue transition-colors" href="/user/register">Đăng ký ngay</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full py-section-gap mt-section-gap bg-surface-container-highest dark:bg-surface-dim border-t border-outline-variant/50 font-body-md text-body-md">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop">
+      <div class="md:col-span-1 mb-8 md:mb-0">
+        <span class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed mb-4 inline-block">
+          VinFast
+        </span>
+        <p class="text-secondary dark:text-on-secondary-fixed-variant mt-3 text-sm">
+          Thúc đẩy quá trình chuyển đổi sang di chuyển bền vững.
+        </p>
+      </div>
+      <div class="space-y-3 flex flex-col">
+        <h4 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-2 font-semibold">Công ty</h4>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Về chúng tôi</a>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Phát triển bền vững</a>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Nhà đầu tư</a>
+      </div>
+      <div class="space-y-3 flex flex-col">
+        <h4 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-2 font-semibold">Hỗ trợ</h4>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Liên hệ</a>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Chính sách bảo mật</a>
+        <a class="text-secondary hover:text-primary transition-colors text-sm" href="#">Điều khoản dịch vụ</a>
+      </div>
+      <div class="flex flex-col">
+        <h4 class="font-label-md text-label-md text-on-surface uppercase tracking-wider mb-3 font-semibold">Kết nối</h4>
+        <div class="flex space-x-3">
+          <a class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-secondary hover:text-primary hover:border-primary transition-colors" href="#" aria-label="Chia sẻ">
+            <span class="material-symbols-outlined text-xl">share</span>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop mt-10 pt-6 border-t border-outline-variant/30">
+      <p class="text-xs text-secondary text-center md:text-left">
+        © {{ 'now'|date('Y') }} VinFast Vietnam. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</div>

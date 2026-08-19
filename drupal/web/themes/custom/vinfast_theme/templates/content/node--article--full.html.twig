@@ -1,0 +1,150 @@
+{#
+/**
+ * @file
+ * Theme override to display an Article node in full view mode (VinFast Blog Detail).
+ */
+#}
+<article{{ attributes.addClass('max-w-[1280px]', 'mx-auto', 'px-margin-mobile', 'md:px-margin-desktop', 'pt-6', 'md:pt-10', 'pb-16') }}>
+  <!-- Article Header -->
+  <header class="mb-10 text-center md:text-left max-w-4xl">
+    <!-- Category & Tags -->
+    <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-6">
+      {% for tag in vf_tags %}
+        <span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-3.5 py-1 uppercase tracking-wider rounded-md font-medium">
+          #{{ tag|replace({' ': ''}) }}
+        </span>
+      {% endfor %}
+    </div>
+
+    <!-- Article Main Title -->
+    <h1 class="font-display-lg text-3xl sm:text-4xl md:text-5xl lg:text-[54px] text-primary font-bold mb-6 leading-tight tracking-tight">
+      {{ label }}
+    </h1>
+
+    <!-- Author & Meta Bar -->
+    <div class="flex flex-col md:flex-row items-center justify-between border-t border-b border-outline-variant/30 py-4 mt-8 gap-4">
+      <div class="flex items-center space-x-4">
+        <div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container flex-shrink-0 shadow-inner">
+          <img class="w-full h-full object-cover" alt="{{ vf_author_name }}" src="{{ vf_author_avatar }}" />
+        </div>
+        <div class="text-left">
+          <p class="font-body-md text-base font-semibold text-on-surface">{{ vf_author_name }}</p>
+          <p class="font-body-md text-on-surface-variant text-sm">{{ vf_author_role }} | {{ vf_formatted_date }}</p>
+        </div>
+      </div>
+
+      <!-- Interactive Action Buttons -->
+      <div class="flex items-center space-x-3">
+        <button
+          data-vf-share-btn
+          aria-label="Chia sẻ bài viết"
+          title="Chia sẻ"
+          class="w-10 h-10 rounded-full border border-outline-variant/60 flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary hover:bg-surface-container transition-all"
+        >
+          <span class="material-symbols-outlined" style="font-size: 20px;">share</span>
+        </button>
+        <button
+          data-vf-bookmark-btn
+          data-bookmarked="false"
+          aria-label="Lưu bài viết"
+          title="Lưu bài viết"
+          class="w-10 h-10 rounded-full border border-outline-variant/60 flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary hover:bg-surface-container transition-all"
+        >
+          <span class="material-symbols-outlined" style="font-size: 20px;">bookmark</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero / Featured Image Figure -->
+  <figure class="w-full mb-14 rounded-2xl overflow-hidden shadow-lg border border-outline-variant/20 bg-surface-container">
+    <div class="w-full h-[320px] sm:h-[420px] md:h-[580px] relative overflow-hidden">
+      <img
+        class="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+        alt="{{ label }}"
+        src="{{ vf_hero_image }}"
+      />
+    </div>
+    {% if node.field_image.alt %}
+      <figcaption class="text-center font-body-md text-sm text-on-surface-variant py-3 italic bg-surface-container-low/50">
+        {{ node.field_image.alt }}
+      </figcaption>
+    {% else %}
+      <figcaption class="text-center font-body-md text-sm text-on-surface-variant py-3 italic bg-surface-container-low/50">
+        VinFast - Tiên phong kỷ nguyên di chuyển xanh và đẳng cấp tương lai.
+      </figcaption>
+    {% endif %}
+  </figure>
+
+  <!-- 2-Column Grid Body & Sidebar -->
+  <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+    <!-- Main Article Body -->
+    <div class="md:col-span-8 article-content font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+      {% if content.body %}
+        {{ content.body }}
+      {% else %}
+        <p class="lead text-xl text-on-surface font-medium mb-8 leading-relaxed">
+          Thị trường ô tô điện đang chứng kiến sự trỗi dậy mạnh mẽ của những mẫu xe xanh thế hệ mới, và các dòng xe VinFast chính là minh chứng rõ nét cho khát vọng vươn tầm thế giới của thương hiệu Việt.
+        </p>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="md:col-span-4 mt-12 md:mt-0 space-y-10 pl-0 md:pl-8 border-l-0 md:border-l border-outline-variant/30">
+      <!-- Newsletter Widget -->
+      <div class="glass-panel p-6 rounded-2xl shadow-sm border border-outline-variant/40">
+        <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-primary-fixed/30 text-primary">
+          <span class="material-symbols-outlined">mail</span>
+        </div>
+        <h3 class="font-headline-lg text-xl font-bold text-on-surface mb-2">Đăng Ký Nhận Bản Tin</h3>
+        <p class="font-body-md text-sm text-on-surface-variant mb-6 leading-relaxed">
+          Cập nhật những thông tin mới nhất về công nghệ và xe điện từ VinFast.
+        </p>
+        <form data-vf-newsletter-form class="space-y-4">
+          <div>
+            <label class="sr-only" for="vf-newsletter-email">Email</label>
+            <input
+              id="vf-newsletter-email"
+              class="w-full px-4 py-3 bg-surface-white border border-outline-variant rounded-lg font-body-md text-sm text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors shadow-inner"
+              placeholder="Địa chỉ email của bạn"
+              type="email"
+              required
+            />
+          </div>
+          <button class="w-full btn-primary py-3 rounded-lg font-body-md text-sm font-semibold tracking-wide" type="submit">
+            Đăng Ký Ngay
+          </button>
+        </form>
+      </div>
+
+      <!-- Related Articles Widget -->
+      <div>
+        <h3 class="font-headline-lg text-xl font-bold text-on-surface mb-6 border-b border-outline-variant/30 pb-3">
+          Bài Viết Liên Quan
+        </h3>
+        <ul class="space-y-5">
+          {% for related in vf_related_articles %}
+            <li class="flex space-x-4 group cursor-pointer">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-xl overflow-hidden bg-surface-container shadow-sm border border-outline-variant/30">
+                <a href="{{ related.url }}" class="block w-full h-full">
+                  <img
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    alt="{{ related.title }}"
+                    src="{{ related.image }}"
+                    loading="lazy"
+                  />
+                </a>
+              </div>
+              <div class="flex flex-col justify-center flex-1">
+                <a class="font-body-md font-semibold text-on-surface text-sm sm:text-base group-hover:text-primary transition-colors line-clamp-2 mb-1 leading-snug" href="{{ related.url }}">
+                  {{ related.title }}
+                </a>
+                <span class="font-label-sm text-xs text-secondary">{{ related.date }}</span>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</article>

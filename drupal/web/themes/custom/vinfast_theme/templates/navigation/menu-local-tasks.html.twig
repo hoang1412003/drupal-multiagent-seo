@@ -1,0 +1,26 @@
+{#
+/**
+ * @file
+ * Theme override to display primary and secondary local tasks (Admin action tabs).
+ */
+#}
+{% if primary %}
+  <div class="vf-local-tasks-wrapper mb-6">
+    <nav class="vf-local-tasks inline-flex items-center bg-surface-white/90 backdrop-blur-md p-1.5 rounded-2xl border border-outline-variant/40 shadow-sm" aria-label="{{ 'Tabs'|t }}">
+      <h2 class="sr-only">{{ 'Primary tabs'|t }}</h2>
+      <ul class="flex flex-wrap items-center gap-1.5 list-none m-0 p-0">
+        {{ primary }}
+      </ul>
+    </nav>
+  </div>
+{% endif %}
+{% if secondary %}
+  <div class="vf-local-tasks-secondary-wrapper mb-4">
+    <nav class="vf-local-tasks-secondary inline-flex items-center bg-surface-container-low p-1 rounded-xl border border-outline-variant/30" aria-label="{{ 'Secondary Tabs'|t }}">
+      <h2 class="sr-only">{{ 'Secondary tabs'|t }}</h2>
+      <ul class="flex flex-wrap items-center gap-1 list-none m-0 p-0 text-xs">
+        {{ secondary }}
+      </ul>
+    </nav>
+  </div>
+{% endif %}

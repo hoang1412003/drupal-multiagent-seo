@@ -35,4 +35,7 @@ drupal/web/*
 !drupal/web/modules/
 drupal/web/modules/*
 !drupal/web/modules/custom/
+!drupal/web/themes/
+drupal/web/themes/*
+!drupal/web/themes/custom/
 test_group_summary.json

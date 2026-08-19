@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VinFast VF 9: Đẳng cấp SUV điện hạng sang | VinFast</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-container-low": "#f3f3f3",
+                "on-tertiary-container": "#b2afaf",
+                "on-error-container": "#93000a",
+                "chrome-gradient-start": "#E6E7E8",
+                "surface-white": "#FFFFFF",
+                "surface-bright": "#f9f9f9",
+                "surface-container": "#eeeeee",
+                "tertiary-container": "#434343",
+                "on-error": "#ffffff",
+                "surface-container-high": "#e8e8e8",
+                "inverse-surface": "#2f3131",
+                "primary": "#00237a",
+                "tertiary-fixed": "#e5e2e1",
+                "chrome-gradient-end": "#A7A9AC",
+                "surface-variant": "#e2e2e2",
+                "on-surface": "#1a1c1c",
+                "tertiary": "#2d2d2d",
+                "secondary": "#5c5f61",
+                "surface": "#f9f9f9",
+                "error-container": "#ffdad6",
+                "primary-fixed-dim": "#b7c4ff",
+                "outline-variant": "#c4c5d6",
+                "on-surface-variant": "#444653",
+                "on-primary-container": "#97abff",
+                "outline": "#747685",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "on-secondary-fixed-variant": "#44474a",
+                "inverse-primary": "#b7c4ff",
+                "on-tertiary-fixed-variant": "#474646",
+                "primary-fixed": "#dde1ff",
+                "on-tertiary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-primary-fixed-variant": "#0b3ab1",
+                "inverse-on-surface": "#f1f1f1",
+                "on-tertiary-fixed": "#1c1b1b",
+                "surface-container-lowest": "#ffffff",
+                "primary-container": "#0035ad",
+                "surface-dim": "#dadada",
+                "error": "#ba1a1a",
+                "on-secondary-container": "#626567",
+                "surface-container-highest": "#e2e2e2",
+                "secondary-fixed-dim": "#c5c6ca",
+                "on-secondary": "#ffffff",
+                "surface-tint": "#3154c9",
+                "secondary-fixed": "#e1e2e6",
+                "on-primary-fixed": "#001552",
+                "on-background": "#1a1c1c",
+                "background": "#f9f9f9",
+                "secondary-container": "#e1e2e6",
+                "electric-blue": "#0055FF",
+                "on-secondary-fixed": "#191c1e"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "section-gap": "120px",
+                "margin-mobile": "20px",
+                "base": "8px",
+                "gutter": "24px",
+                "margin-desktop": "80px"
+        },
+        "fontFamily": {
+                "headline-lg": [
+                        "Plus Jakarta Sans"
+                ],
+                "label-sm": [
+                        "JetBrains Mono"
+                ],
+                "display-lg": [
+                        "Plus Jakarta Sans"
+                ],
+                "headline-xl": [
+                        "Plus Jakarta Sans"
+                ],
+                "body-lg": [
+                        "Inter"
+                ],
+                "headline-lg-mobile": [
+                        "Plus Jakarta Sans"
+                ],
+                "body-md": [
+                        "Inter"
+                ],
+                "label-md": [
+                        "JetBrains Mono"
+                ]
+        },
+        "fontSize": {
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-sm": [
+                        "12px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "500"
+                        }
+                ],
+                "display-lg": [
+                        "64px",
+                        {
+                                "lineHeight": "1.1",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-xl": [
+                        "48px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "28px",
+                        {
+                                "lineHeight": "1.3",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "label-md": [
+                        "14px",
+                        {
+                                "lineHeight": "1.2",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "500"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(230, 231, 232, 0.5);
+        }
+        .btn-primary {
+            background-color: theme('colors.primary');
+            color: theme('colors.on-primary');
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px 0 rgba(0, 35, 122, 0.15);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(0, 35, 122, 0.23);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: theme('colors.primary');
+            border: 1px solid theme('colors.outline-variant');
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: rgba(230, 231, 232, 0.2);
+            border-color: theme('colors.primary');
+        }
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+        .article-content h2 {
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .img-hover-zoom {
+            overflow: hidden;
+        }
+        .img-hover-zoom img {
+            transition: transform 0.5s ease;
+        }
+        .img-hover-zoom:hover img {
+            transform: scale(1.05);
+        }
+      </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface-white/60 dark:bg-surface-dim/60 backdrop-blur-xl fixed top-0 left-0 w-full z-50 border-b border-outline-variant/30 shadow-sm transition-all duration-300 ease-in-out hidden md:block">
+<div class="flex justify-between items-center h-20 max-w-[1280px] mx-auto px-margin-desktop md:px-margin-desktop">
+<a class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed tracking-tight" href="#">VinFast</a>
+<nav class="flex items-center space-x-8">
+<a class="text-on-surface-variant dark:text-on-secondary-container hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md hover:bg-surface-container-low/50 dark:hover:bg-surface-container-highest/10 px-3 py-2 rounded" href="#">Ô tô điện</a>
+<a class="text-on-surface-variant dark:text-on-secondary-container hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md hover:bg-surface-container-low/50 dark:hover:bg-surface-container-highest/10 px-3 py-2 rounded" href="#">Lối sống</a>
+<a class="text-on-surface-variant dark:text-on-secondary-container hover:text-primary dark:hover:text-primary-fixed transition-colors font-body-md text-body-md hover:bg-surface-container-low/50 dark:hover:bg-surface-container-highest/10 px-3 py-2 rounded" href="#">Đổi mới</a>
+<a class="text-primary dark:text-primary-fixed border-b-2 border-primary dark:border-primary-fixed pb-1 font-body-md text-body-md hover:bg-surface-container-low/50 dark:hover:bg-surface-container-highest/10 px-3 py-2 rounded" href="#">Tin tức</a>
+</nav>
+<div class="flex items-center space-x-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</button>
+<a class="btn-primary px-6 py-2 rounded-full font-body-md text-body-md font-medium" href="#">Đăng nhập</a>
+</div>
+</div>
+</header>
+<!-- Mobile Nav Header (Simplified) -->
+<header class="bg-surface-white/90 backdrop-blur-md fixed top-0 left-0 w-full z-50 border-b border-outline-variant/30 flex justify-between items-center h-16 px-margin-mobile md:hidden">
+<a class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary tracking-tight" href="#">VinFast</a>
+<button class="text-on-surface">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</header>
+<!-- Main Content Layout -->
+<main class="flex-grow pt-[100px] md:pt-[140px] pb-section-gap">
+<article class="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop">
+<!-- Article Header -->
+<header class="mb-12 text-center md:text-left max-w-4xl">
+<div class="flex items-center justify-center md:justify-start space-x-3 mb-6">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-3 py-1 uppercase tracking-wider rounded">#ElectricVehicles</span>
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-3 py-1 uppercase tracking-wider rounded">#LuxurySUV</span>
+</div>
+<h1 class="font-display-lg text-headline-xl md:text-display-lg text-primary mb-6 leading-tight">VinFast VF 9: Đẳng cấp SUV điện hạng sang</h1>
+<div class="flex flex-col md:flex-row items-center justify-between border-t border-b border-outline-variant/30 py-4 mt-8">
+<div class="flex items-center space-x-4 mb-4 md:mb-0">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A professional headshot portrait of a Vietnamese automotive journalist, wearing a smart casual blazer, standing in a brightly lit modern office environment. Soft natural lighting, high resolution, corporate modern aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKGsX3jZwWansQJRlh8nEMiPzt0Iyd7B7sFeKa367LS5FzdjzoeGAfIN5bAxXtrzHYPEh_YGELzfBTQTeMbv1ysnvuDHkkwiNbrkt7oe574cpUdCwnWISMtO80OiSARY15jPDjoCLZrmk9MAb7RT2R_t8J077t1SO-R4VSRJg6AmNZYP6bs7x_BYD3dJDWDYYE8Rz-sG4PnokxaaXz7tz_qy7K2c0VTDXrqO7UsOH15jLcc0XxcaYrTw"/>
+</div>
+<div>
+<p class="font-body-md text-body-md font-semibold text-on-surface">Nguyễn Văn A</p>
+<p class="font-body-md text-body-md text-on-surface-variant text-sm">Chuyên gia Ô tô | 15 Tháng 5, 2024</p>
+</div>
+</div>
+<div class="flex space-x-3">
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">share</span>
+</button>
+<button class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">bookmark</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Hero Image -->
+<figure class="w-full mb-16 rounded-xl overflow-hidden shadow-sm">
+<div class="aspect-w-16 aspect-h-9 md:aspect-h-7 bg-surface-container w-full h-[300px] md:h-[600px] relative">
+<img class="w-full h-full object-cover absolute inset-0" data-alt="A sleek, metallic dark blue VinFast VF 9 luxury electric SUV parked on a modern coastal highway overlooking a sunset ocean. The lighting is cinematic, reflecting cool chrome highlights off the car's aerodynamic curves. High-end automotive photography style, crystal clear focus, evoking premium craftsmanship and futuristic momentum." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9-2zReCRwCgiVUf9K-rG5kzY8ntCtk-4BVi8Clg-JXarWbE92jjrMtbI2GbMpY1rU1lKY1nMeZ4Ne7Mqy5Rhtw9Uu-B13CDtGCWTvjQwn2ht6L-a51hmNtS-S7jQnhZT6bvbkujBP0XFZgO7W20N-GG44BlkxrIXhvTEujbV-bMlqJ_LEJ-L6MeOqxdWQrNRIkvSaO45d7XZW1WTpeOt8sx9arOfbNpqiTI3Xr2DpZKcCXqT5gzifdw"/>
+</div>
+<figcaption class="text-center font-body-md text-sm text-on-surface-variant mt-3 italic">VinFast VF 9 mang đến diện mạo bề thế và đậm chất tương lai.</figcaption>
+</figure>
+<!-- Grid Layout for Content & Sidebar -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Main Body -->
+<div class="md:col-span-8 article-content font-body-lg text-body-lg text-on-surface-variant">
+<p class="lead text-xl text-on-surface font-medium mb-8 leading-relaxed">
+                        Thị trường ô tô điện đang chứng kiến sự trỗi dậy mạnh mẽ của những mẫu SUV cỡ lớn, và VinFast VF 9 chính là một minh chứng rõ nét cho khát vọng vươn tầm thế giới của thương hiệu Việt. Không chỉ đơn thuần là một phương tiện di chuyển, VF 9 thực sự là một tuyên ngôn về phong cách sống đẳng cấp, kết hợp hoàn hảo giữa công nghệ xanh và trải nghiệm xa xỉ.
+                    </p>
+<h2 class="font-headline-lg text-headline-lg text-primary">Thiết Kế Đậm Chất Tương Lai</h2>
+<p>
+                        Được chắp bút bởi studio danh tiếng Pininfarina, VF 9 sở hữu vóc dáng bề thế nhưng không kém phần uyển chuyển. Những đường nét khí động học được tính toán kỹ lưỡng, tối ưu hóa dải sáng LED hình cánh chim đặc trưng ở cả phần đầu và đuôi xe. Kính lái vuốt thấp cùng mui xe dốc nhẹ về phía sau tạo nên một hình bóng "Kinetic Tension" - sự giao thoa giữa nét mạnh mẽ của SUV và sự mềm mại của một chiếc coupe thể thao.
+                    </p>
+<figure class="my-10 rounded-lg overflow-hidden img-hover-zoom border border-outline-variant/30">
+<div class="h-[400px] w-full bg-surface-container relative">
+<img class="w-full h-full object-cover absolute inset-0" data-alt="Close-up detail shot of the VinFast VF 9 front grille and signature V-shaped LED light signature. The lighting emphasizes the precision engineering and premium glassmorphic aesthetic of the headlight assembly against a polished chrome-like silver car body. High-resolution, modern corporate styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWosi3-S6QP5XDib4o-D3tHoh0ueHdIdg77695Dc0fcvZ3GhWYthubF7vClhBcmvMt30mgMa44yheIeMZihPysjiQpFn7I6MX42_aXCd5H6G5xFuIya_7WtCMoMRDTNniXm7WWHuEJWoKCWtMMaq7DcFj5ORnX4b1ZbPfIRTqSejYiI9K7fK4d3grlHrwkMtLK_3gt7zUYeaaJrYW109HcC5BmoJxnnAwUtvSBuP0MgenNE36a_AzN6A"/>
+</div>
+</figure>
+<h2 class="font-headline-lg text-headline-lg text-primary">Không Gian Nội Thất Tinh Tế</h2>
+<p>
+                        Bước vào bên trong, VF 9 chào đón người lái bằng một không gian tối giản nhưng ngập tràn công nghệ. Triết lý thiết kế loại bỏ tối đa các nút bấm vật lý, thay vào đó là màn hình cảm ứng trung tâm kích thước 15.6 inch sắc nét, tích hợp hầu hết các chức năng điều khiển. Chất liệu da cao cấp, kết hợp cùng các chi tiết ốp kim loại mờ, mang lại cảm giác sang trọng, tương xứng với đẳng cấp của một mẫu xe hạng sang.
+                    </p>
+<blockquote class="my-12 p-8 border-l-4 border-primary bg-surface-container-low/50 rounded-r-lg glass-panel">
+<p class="font-headline-lg text-2xl text-primary font-light italic mb-4">
+                            "VF 9 không chỉ là một chiếc xe, nó là một không gian sống di động, nơi mọi hành trình đều trở thành một trải nghiệm tận hưởng đích thực nhờ sự tĩnh lặng tuyệt đối của động cơ điện."
+                        </p>
+<footer class="font-body-md text-body-md font-semibold text-on-surface">— Tạp chí Xe Xanh</footer>
+</blockquote>
+<h2 class="font-headline-lg text-headline-lg text-primary">Hiệu Năng Vượt Trội, Tầm Hoạt Động Ấn Tượng</h2>
+<p>
+                        Ẩn dưới vẻ ngoài lịch lãm là khối động cơ điện mạnh mẽ, sản sinh công suất tối đa lên tới 402 mã lực và mô-men xoắn cực đại 620 Nm. Khả năng tăng tốc từ 0-100 km/h chỉ trong khoảng 6.5 giây là một con số đáng nể đối với một mẫu SUV full-size. Hơn thế nữa, với các tùy chọn pin dung lượng lớn, VF 9 hứa hẹn mang đến tầm hoạt động vượt trội, xóa tan nỗi lo về quãng đường (range anxiety) thường trực trên xe điện.
+                    </p>
+<p>
+                        Hệ dẫn động 4 bánh toàn thời gian (AWD) cùng các chế độ lái linh hoạt giúp VF 9 tự tin chinh phục nhiều loại địa hình, đồng thời duy trì sự êm ái, ổn định nhờ hệ thống treo khí nén tiên tiến.
+                    </p>
+</div>
+<!-- Sidebar -->
+<aside class="md:col-span-4 mt-16 md:mt-0 space-y-12 pl-0 md:pl-8 border-l-0 md:border-l border-outline-variant/30">
+<!-- Newsletter Widget -->
+<div class="glass-panel p-6 rounded-xl shadow-sm">
+<div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full bg-primary-fixed/30 text-primary mb-4">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<h3 class="font-headline-lg text-xl font-bold text-on-surface mb-2">Đăng Ký Nhận Bản Tin</h3>
+<p class="font-body-md text-sm text-on-surface-variant mb-6">Cập nhật những thông tin mới nhất về công nghệ và xe điện từ VinFast.</p>
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<div>
+<label class="sr-only" for="email">Email</label>
+<input class="w-full px-4 py-3 bg-surface-white border border-outline-variant rounded-md font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors" id="email" placeholder="Địa chỉ email của bạn" type="email"/>
+</div>
+<button class="w-full btn-primary py-3 rounded-md font-body-md font-semibold tracking-wide" type="submit">Đăng Ký Ngay</button>
+</form>
+</div>
+<!-- Related Articles -->
+<div>
+<h3 class="font-headline-lg text-xl font-bold text-on-surface mb-6 border-b border-outline-variant/30 pb-2">Bài Viết Liên Quan</h3>
+<ul class="space-y-6">
+<!-- Related Article 1 -->
+<li class="flex space-x-4 group cursor-pointer">
+<div class="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A modern charging station in a sleek urban environment with a VinFast electric vehicle plugged in. Cool blue LED lights indicate charging status. Clean, tech-forward aesthetic with crisp lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa2wZuFxIQqjDtLSOUSaLfJafdj2G2xgYTRTWH4-mtxqJEe7DOSifOytfyCOIftJ0Z4vpgj9mS0oq2-kZkSiBUOFLfEzjvNpmV-rf6ZWcArP1Ss8zh8xRcZReu5uqlxWo1FKsHef3guqgdvHicFKW7KpUoHeGrMyQ79gDa1N4uATA-dqedXiQeK2XgeNhSguXSbmPYRtqCUMai-O5lE2SuTrHpNiMMGTw9E8CI1gnXgCnpvFhMyQOWVw"/>
+</div>
+<div class="flex flex-col justify-center">
+<a class="font-body-md font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-2 mb-1" href="#">Mở Rộng Trạm Sạc: Chìa Khóa Phổ Cập Xe Điện</a>
+<span class="font-body-md text-xs text-on-surface-variant">10 Tháng 5, 2024</span>
+</div>
+</li>
+<!-- Related Article 2 -->
+<li class="flex space-x-4 group cursor-pointer">
+<div class="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Interior view of a minimalist car dashboard displaying advanced driver assistance systems on a sleek digital screen. The interface is modern, using blues and whites. Focus is crisp, corporate tech style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5ZjwQFCvPfaDM_iDi_-xcSydCI_-Yyt_AhD6rwQ92UfpGaO-5zRG5Sgmi6CRtn22oJ3skP_CYXDmTJe3saCh8hHD5lQJu_6sFDB1jq_KGRdMCzue0ebqb-gaOSbeGJjMqNOcTMML40IfJEFSPqhKQiBsKwhQ1bpdOTSC1bIMjbpEauHTFtpKKz3awHxIigWL9CB5mjiOqN46S2-cmdpHKKNY-MeCm_dTqOFcOsldeOTYtjhEL7O38GA"/>
+</div>
+<div class="flex flex-col justify-center">
+<a class="font-body-md font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-2 mb-1" href="#">Công Nghệ ADAS Trên Các Mẫu Xe VinFast Thế Hệ Mới</a>
+<span class="font-body-md text-xs text-on-surface-variant">02 Tháng 5, 2024</span>
+</div>
+</li>
+<!-- Related Article 3 -->
+<li class="flex space-x-4 group cursor-pointer">
+<div class="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A beautifully crafted sustainable fabric material sample, used in luxury car interiors, resting on a clean white surface with subtle soft shadows. Highlighting texture and eco-conscious premium design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD49fb0jrL0wU4JSSA4fKONkfns6fOHAfwphvBKVsAQNkC7cpmMzNaG7DDoeHgw5Hepsf8uH1YA6ET2ebFjAC7nJ_E-bYtsGsezx-jyfK9hFLDAMYYVSw7WPb5dbSZ1IMezGbp09Nos3X-ysXooM65_j9xVmvcQrr5HGjdtC6qIillnPNNjhGZH2rpcs6Du3yOsMjZar_q6o_0zKhP7f7mYsxO6XX14-50QID3ISOrhReZ8ZSiZfzJnGw"/>
+</div>
+<div class="flex flex-col justify-center">
+<a class="font-body-md font-semibold text-on-surface group-hover:text-primary transition-colors line-clamp-2 mb-1" href="#">Vật Liệu Bền Vững Trong Nội Thất Xe Điện Tương Lai</a>
+<span class="font-body-md text-xs text-on-surface-variant">25 Tháng 4, 2024</span>
+</div>
+</li>
+</ul>
+</div>
+</aside>
+</div>
+</article>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-surface-dim w-full py-section-gap mt-section-gap border-t border-outline-variant/50 flat no shadows transition-all duration-200">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-[1280px] mx-auto px-margin-desktop">
+<div class="col-span-1 md:col-span-1 mb-8 md:mb-0">
+<a class="font-headline-lg text-headline-lg font-bold text-primary dark:text-primary-fixed mb-4 inline-block" href="#">VinFast</a>
+<p class="font-body-md text-body-md text-secondary dark:text-on-secondary-fixed-variant">
+                    © 2024 VinFast Vietnam. All rights reserved.
+                </p>
+</div>
+<div class="col-span-1">
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mb-4">Công ty</h4>
+<ul class="space-y-3 font-body-md text-body-md">
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Về chúng tôi</a></li>
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Phát triển bền vững</a></li>
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Nhà đầu tư</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mb-4">Hỗ trợ</h4>
+<ul class="space-y-3 font-body-md text-body-md">
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Liên hệ</a></li>
+</ul>
+</div>
+<div class="col-span-1">
+<h4 class="font-body-md text-body-md font-semibold text-on-surface mb-4">Pháp lý</h4>
+<ul class="space-y-3 font-body-md text-body-md">
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Chính sách bảo mật</a></li>
+<li><a class="text-secondary dark:text-on-secondary-fixed-variant hover:text-primary dark:hover:text-primary-fixed hover:opacity-80 transition-opacity" href="#">Điều khoản dịch vụ</a></li>
+</ul>
+</div>
+</div>
+</footer>
+</body></html>
