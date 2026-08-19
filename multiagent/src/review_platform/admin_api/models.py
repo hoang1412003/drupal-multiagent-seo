@@ -42,6 +42,24 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = ""
 
 
+class PageResponse(BaseModel):
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
+
+
+def page_payload(view, items: list) -> dict:
+    """Trai PageView thanh dict chuan. Dung cho MOI endpoint danh sach."""
+    return {
+        "items": items,
+        "page": view.page,
+        "page_size": view.page_size,
+        "total": view.total,
+        "total_pages": view.total_pages,
+    }
+
+
 class CostEstimateModel(BaseModel):
     input_tokens: int
     output_tokens: int
@@ -101,4 +119,92 @@ class DashboardResponse(BaseModel):
             worker_running=view.worker_running,
             worker_stale=view.worker_stale,
             worker_last_seen_at=iso(view.worker_last_seen_at),
+        )
+
+
+class JobListItemModel(BaseModel):
+    public_id: str
+    created_at: str
+    site_id: str
+    site_slug: str
+    external_content_id: str
+    status: str
+    attempts: int
+    source: str
+    policy_version: str
+
+    @classmethod
+    def from_view(cls, item) -> "JobListItemModel":
+        return cls(
+            public_id=str(item.public_id),
+            created_at=iso(item.created_at),
+            site_id=str(item.site_id),
+            site_slug=item.site_slug,
+            external_content_id=item.external_content_id,
+            status=item.status,
+            attempts=item.attempts,
+            source=item.source,
+            policy_version=item.policy_version,
+        )
+
+
+class JobPage(PageResponse):
+    items: list[JobListItemModel]
+
+
+class JobDetailModel(BaseModel):
+    public_id: str
+    created_at: str
+    updated_at: str
+    site_id: str
+    site_slug: str
+    site_name: str
+    profile_id: str
+    policy_version: str
+    external_content_id: str
+    external_revision_id: str | None
+    content_type: str
+    langcode: str
+    status: str
+    attempts: int
+    source: str
+    correlation_id: str
+    supersedes_job_public_id: str | None
+    last_error: str | None
+    run_public_id: str | None
+    writeback_status: str | None
+    run_scored_at: str | None
+    saved_result_available: bool
+
+    @classmethod
+    def from_view(cls, job) -> "JobDetailModel":
+        return cls(
+            public_id=str(job.public_id),
+            created_at=iso(job.created_at),
+            updated_at=iso(job.updated_at),
+            site_id=str(job.site_id),
+            site_slug=job.site_slug,
+            site_name=job.site_name,
+            profile_id=str(job.profile_id),
+            policy_version=job.policy_version,
+            external_content_id=job.external_content_id,
+            external_revision_id=job.external_revision_id,
+            content_type=job.content_type,
+            langcode=job.langcode,
+            status=job.status,
+            attempts=job.attempts,
+            source=job.source,
+            correlation_id=str(job.correlation_id),
+            supersedes_job_public_id=(
+                None
+                if job.supersedes_job_public_id is None
+                else str(job.supersedes_job_public_id)
+            ),
+            last_error=job.last_error,
+            run_public_id=(
+                None if job.run_public_id is None else str(job.run_public_id)
+            ),
+            writeback_status=job.writeback_status,
+            run_scored_at=iso(job.run_scored_at),
+            saved_result_available=job.saved_result_available,
         )
