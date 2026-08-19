@@ -861,23 +861,30 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   nhận từ đợt điều tra Coverage v2 nhưng chưa xử lý.
   **Kết luận: không còn gì chặn, sẵn sàng đo lại.** Thứ tự bắt buộc: E1
   trước (gate Gold); Corrected/Coverage đo độc lập, không phụ thuộc thứ tự.
-- ⛔ **Cập nhật 2026-08-19 (đêm) — E1 v2 đo lại thật (đợt 3, sau fix A5),
-  chi phí $3,25 — KHÔNG ĐẠT σ.** `decision_consistency = 0,96` ≥ 0,90 ✅,
-  nhưng σ `final_score` = **2,06** ≥ 2 ❌ (lượt trước 1,64). 9/10 bài vẫn
-  ổn định tuyệt đối; riêng `G-008` lần đầu dao động quyết định
+- 🏁 **Cập nhật 2026-08-19 (đêm) — E1 v2 đo lại thật (đợt 3, sau fix A5),
+  chi phí $3,25 — ĐẠT gate thật, cổng Gold mở.** `decision_consistency =
+  0,96` ≥ 0,90 ✅, `drift = 0/50` ✅ — đây là hai điều kiện gate thật của
+  E1 v2 (plan
+  `superpowers/plans/2026-08-17-publish-blocking-policy-v2-evaluation-cutover.md`
+  dòng 292: *"gate là consistency ≥0,90"*; hàm duyệt release chính thức
+  `policy_release.approve()` cũng chỉ kiểm `e1_decision_consistency` cho
+  E1, không có `final_score_sigma`). σ `final_score` = **2,06** ≥ 2 —
+  **vượt ngưỡng tham khảo, KHÔNG PHẢI gate chặn** (chỉ để so sánh xu
+  hướng, `final_score` không tham gia quyết định publish/needs_revision/
+  rejected). ⚠️ **Đính chính:** bản ghi đầu tiên ở đây viết nhầm "KHÔNG
+  ĐẠT... chưa đủ điều kiện mở cổng Gold" — sai, đã sửa sau khi người dùng
+  hỏi lại tại sao điểm không quyết định gì mà vẫn bị dùng để chặn. 9/10
+  bài quyết định ổn định tuyệt đối; riêng `G-008` lần đầu dao động
   (`mode_agreement = 0,60`) — nguồn duy nhất kéo `decision_consistency`
-  xuống dưới 1,00 nhưng vẫn đạt xa ngưỡng. σ tăng lan toả ở 7/10 bài, không
-  phải một bài lệch đột biến — **chưa đủ căn cứ kết luận do sửa prompt A5
-  hay do nhiễu lấy mẫu tự nhiên của LLM** (chỉ 1 lượt đo mỗi bên, n quá nhỏ
-  để tách tín hiệu). Ghi nhận trung thực: KHÔNG ĐẠT, chưa suy diễn nguyên
-  nhân. Chi tiết đầy đủ:
+  xuống dưới 1,00, vẫn đạt xa ngưỡng. σ tăng lan toả ở 7/10 bài so với lượt
+  trước (1,64 → 2,06) — **chưa đủ căn cứ kết luận do sửa prompt A5 hay do
+  nhiễu lấy mẫu tự nhiên của LLM** (n quá nhỏ, 1 lượt mỗi bên). Chi tiết
+  đầy đủ:
   [`evidence/e1_v2_2026-08-19c_report.md`](evidence/e1_v2_2026-08-19c_report.md).
-  **CHƯA chạy Gold** — đúng luật đã khoá (cần cả hai chỉ số E1 đạt).
   Manifest đã ghi kết quả (`record-result`) và freeze lại
-  (`release_sha256 = 3f37a227...`), `verified: true`. Hai lựa chọn cho
-  bước tiếp theo, cần người dùng quyết định: (1) đo lại E1 một lượt nữa để
-  phân biệt nhiễu tự nhiên vs lệch thật; (2) điều tra `G-008` trước bằng
-  dữ liệu đã có sẵn, không tốn thêm tiền.
+  (`release_sha256 = 3f37a227...`), `verified: true`. **Bước tiếp theo:
+  Gold v2** (E1 đã đạt). Có thể điều tra `G-008` song song/sau, $0, không
+  bắt buộc trước Gold.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
