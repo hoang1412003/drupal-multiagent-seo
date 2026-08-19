@@ -802,8 +802,47 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   `fcb5717`**, dù phân tích riêng cho thấy khả năng cao con số không đổi
   (không bài nào trong 2 lượt đó dựa riêng vào A6 để ra quyết định — xem
   chi tiết trong hội thoại bàn giao). Corrected v2 (đã biết không đạt) và
-  Coverage v2 (chưa chạy) cũng cần đo lại/đo mới sau khi có xác nhận chạy
-  tiếp. `scoring.yaml.meta.calibrated` không đổi.
+  Coverage v2 cũng cần đo lại/đo mới sau khi có xác nhận chạy tiếp (xem mục
+  tiếp theo — Coverage v2 **đã chạy** ngay sau bản ghi này, không phải
+  "chưa chạy" như câu trên viết ban đầu). `scoring.yaml.meta.calibrated`
+  không đổi.
+- 🏁 **Cập nhật 2026-08-19 (khuya) — Coverage v2 ĐÃ CHẠY (chẩn đoán, $0,336,**
+  11/11 mẫu CV-*), chạy dưới prompt A6 đã sửa nhưng TRƯỚC prompt A5 sửa bên
+  dưới. Chỉ 4/11 mẫu cô lập sạch đúng mã mục tiêu; 5/11 dính nhiễu `B8` phụ
+  (nhiều khả năng do chất lượng fixture, không phải bug code — chưa điều
+  tra riêng); **3/11 mã mục tiêu không bắn** — đã đọc sâu cả ba:
+  - `CV-A5-02` (A5 không bắn, `coverage.unavailable_checks=['A5']`): LLM
+    chấm **đúng** (phát hiện lạc đề, body nói về quản lý ảnh trong khi
+    title hỏi về tìm trạm sạc), nhưng field `evidence` trả về là một câu
+    **mô tả/tóm tắt cả đoạn** ("Toàn bộ nội dung body từ đoạn... đến...")
+    thay vì trích nguyên văn — bị 2 lớp fail-safe exact-match
+    (`trich_dan_co_that`, `_evidence_is_exact`) đúng luật từ chối, rơi về
+    `unavailable`. **Bug prompt thật** (khác bản chất bug A6 hôm trước:
+    A6 là mơ hồ present/absent, A5 là sai định dạng evidence). **Đã sửa**
+    prompt A5 (commit `76dd295`) — bắt evidence phải là NGUYÊN VĂN MỘT câu
+    trong body, giải thích lý do lạc đề chuyển sang field `reason`. Manifest
+    freeze lại `release_sha256 = 365cec35...`. Full offline suite 83/83, 0
+    hỏng, 0 skip.
+  - `CV-A7-01` (A7 không bắn): **không phải bug code** — detector CP9
+    (`_THE_AN` trong `prompt_builder.py`) chỉ nhận diện văn bản ẩn qua CSS
+    inline cụ thể (`display:none`/`visibility:hidden`/`font-size:0`), có
+    ghi chú rõ trong code là giới hạn chủ đích. Fixture lại dùng thuộc tính
+    HTML5 `<p hidden>` — kỹ thuật nằm ngoài phạm vi detector được thiết kế
+    để bắt. **Lỗi ở fixture, không phải ở code** — muốn CV-A7-01 test đúng
+    CP9 phải đổi sang `style="display:none"`. Chưa sửa fixture (chưa được
+    yêu cầu).
+  - `CV-B7-01` (SEO5 không bắn, `coverage.unavailable_checks=[]` — đã được
+    đánh giá đầy đủ): LLM chủ động chấm URL 77 ký tự là `level=2` (đạt).
+    SEO5 không có ngưỡng số tất định, hoàn toàn dựa phán đoán chủ quan của
+    LLM — **miss thật, đúng rủi ro đã biết trước khi thiết kế fixture**,
+    không phải bug hạ tầng.
+  ⛔ **CHƯA đo lại E1/Gold/Corrected/Coverage** theo đúng yêu cầu người
+  dùng (chỉ sửa, dừng ở đây). Cùng luật đã khoá ở trên: sửa prompt A5 =
+  thêm một lớp mất hiệu lực nữa cho E1 v2/Gold v2 (đã mất hiệu lực từ
+  `fcb5717`, nay cộng dồn với `76dd295`). Coverage v2 (2026-08-19 khuya,
+  file `evidence/coverage-v2-2026-08-19.json`) tự thân **không phải** kết
+  quả "measured" chính thức — được đóng khung ngay từ đầu là chạy chẩn
+  đoán để tìm lỗi, không phải cổng đo lường.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
