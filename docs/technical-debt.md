@@ -861,6 +861,23 @@ Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi vi�
   nhận từ đợt điều tra Coverage v2 nhưng chưa xử lý.
   **Kết luận: không còn gì chặn, sẵn sàng đo lại.** Thứ tự bắt buộc: E1
   trước (gate Gold); Corrected/Coverage đo độc lập, không phụ thuộc thứ tự.
+- ⛔ **Cập nhật 2026-08-19 (đêm) — E1 v2 đo lại thật (đợt 3, sau fix A5),
+  chi phí $3,25 — KHÔNG ĐẠT σ.** `decision_consistency = 0,96` ≥ 0,90 ✅,
+  nhưng σ `final_score` = **2,06** ≥ 2 ❌ (lượt trước 1,64). 9/10 bài vẫn
+  ổn định tuyệt đối; riêng `G-008` lần đầu dao động quyết định
+  (`mode_agreement = 0,60`) — nguồn duy nhất kéo `decision_consistency`
+  xuống dưới 1,00 nhưng vẫn đạt xa ngưỡng. σ tăng lan toả ở 7/10 bài, không
+  phải một bài lệch đột biến — **chưa đủ căn cứ kết luận do sửa prompt A5
+  hay do nhiễu lấy mẫu tự nhiên của LLM** (chỉ 1 lượt đo mỗi bên, n quá nhỏ
+  để tách tín hiệu). Ghi nhận trung thực: KHÔNG ĐẠT, chưa suy diễn nguyên
+  nhân. Chi tiết đầy đủ:
+  [`evidence/e1_v2_2026-08-19c_report.md`](evidence/e1_v2_2026-08-19c_report.md).
+  **CHƯA chạy Gold** — đúng luật đã khoá (cần cả hai chỉ số E1 đạt).
+  Manifest đã ghi kết quả (`record-result`) và freeze lại
+  (`release_sha256 = 3f37a227...`), `verified: true`. Hai lựa chọn cho
+  bước tiếp theo, cần người dùng quyết định: (1) đo lại E1 một lượt nữa để
+  phân biệt nhiễu tự nhiên vs lệch thật; (2) điều tra `G-008` trước bằng
+  dữ liệu đã có sẵn, không tốn thêm tiền.
 
 Protocol planned: [`evidence/corrected-publish-coverage-v1-protocol.md`](evidence/corrected-publish-coverage-v1-protocol.md).
 Plan thực thi hiện hành:
