@@ -72,6 +72,7 @@
     "test_admin_read_only.py",
     "test_admin_reviews.py",
     "test_admin_routes.py",
+    "test_admin_session_cookie_path.py",
     "test_admin_sessions.py",
     "test_admin_user_cli.py",
     "test_admin_user_routes.py",

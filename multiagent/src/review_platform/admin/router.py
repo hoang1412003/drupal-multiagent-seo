@@ -51,6 +51,19 @@ def _set_login_csrf(response, token: str, config: dependencies.AuthConfig) -> No
     )
 
 
+def _clear_session_cookie(response) -> None:
+    """Xoa cookie phien o ca duong dan moi lan duong dan cu.
+
+    Nguoi dang dang nhap luc trien khai van con cookie o /admin. Neu chi xoa o
+    "/", cookie cu o lai va trinh duyet giu hai cookie trung ten.
+    """
+    response.delete_cookie(SESSION_COOKIE, path=dependencies.SESSION_COOKIE_PATH)
+    response.delete_cookie(
+        SESSION_COOKIE,
+        path=dependencies.LEGACY_SESSION_COOKIE_PATH,
+    )
+
+
 def _client_ip(request: Request) -> str:
     return request.client.host if request.client is not None else "unknown"
 
@@ -203,7 +216,11 @@ def login(
         secure=config.cookie_secure,
         httponly=True,
         samesite="lax",
-        path="/admin",
+        path=dependencies.SESSION_COOKIE_PATH,
+    )
+    response.delete_cookie(
+        SESSION_COOKIE,
+        path=dependencies.LEGACY_SESSION_COOKIE_PATH,
     )
     response.delete_cookie(LOGIN_CSRF_COOKIE, path="/admin/login")
     return response
@@ -229,7 +246,7 @@ def logout(
             metadata={"session_id": str(resolved.session_id)},
         )
     response = RedirectResponse("/admin/login", status_code=303)
-    response.delete_cookie(SESSION_COOKIE, path="/admin")
+    _clear_session_cookie(response)
     return response
 
 
@@ -292,7 +309,7 @@ def change_password(
         )
 
     response = RedirectResponse("/admin/login", status_code=303)
-    response.delete_cookie(SESSION_COOKIE, path="/admin")
+    _clear_session_cookie(response)
     response.set_cookie(
         FLASH_COOKIE,
         "password_changed",

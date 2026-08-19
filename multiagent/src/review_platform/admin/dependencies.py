@@ -12,6 +12,12 @@ from review_platform.auth.rbac import Role, allows
 
 
 SESSION_COOKIE = "vf_admin_session"
+# Cookie phai gui duoc toi /api/console/v1 va /console, khong chi /admin.
+SESSION_COOKIE_PATH = "/"
+# Cookie cu con sot tren trinh duyet cua nguoi dang dang nhap luc trien khai.
+# Phai xoa o ca hai duong dan: neu khong, trinh duyet giu HAI cookie trung ten
+# va Starlette chi tra ve mot cai khong xac dinh.
+LEGACY_SESSION_COOKIE_PATH = "/admin"
 _MUST_CHANGE_ALLOWED = frozenset({
     "/admin/change-password",
     "/admin/logout",
