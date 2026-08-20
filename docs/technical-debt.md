@@ -1369,8 +1369,28 @@ với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn c
 - Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
 
 **Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
-trên Stitch; **Antigravity** code 7 màn hình; Claude review. Giai đoạn 1 dừng ở
-chỗ bàn giao — 7 trang trong `console_ui/src/pages/` hiện chỉ in JSON thô.
+trên Stitch; **Antigravity** code 7 màn hình; Claude review từng màn.
+
+**Trạng thái 2026-08-20: cả 7 màn đã xong và đã kiểm bằng ảnh chụp.** Jobs,
+Reviews, Dashboard, Job detail, Review detail, Login, Đổi mật khẩu.
+
+Stitch chỉ dùng cho **một** màn (Jobs). Sau đó chủ dự án quyết định dừng Stitch
+và giữ bản đó làm ảnh tham chiếu (`console-ui/reference/jobs-list.png`), vì
+Stitch không hiểu khái niệm "bốn trạng thái của cùng một màn hình" — nó sinh
+bốn màn riêng biệt và mỗi cái tự bịa lại bảng từ đầu.
+
+**Ba module gom dùng chung**, mỗi cái ra đời sau khi bản chép thứ tư bị lệch:
+`lib/format.ts` (hàm định dạng), `lib/status.ts` + `StatusPill.tsx` (nhãn và
+màu trạng thái), `lib/ErrorBanner.tsx` (banner lỗi).
+
+**Về Antigravity, ghi lại để lần sau biết mà chuẩn bị:** nó giữ tốt mọi ràng
+buộc nặng (không XSS, không viết lại logic retry, không đụng `localStorage`,
+không sửa file ngoài phạm vi, xử lý đúng dữ liệu lồng nhau khoá tự do). Nhưng
+nó bỏ sót đều đặn các chi tiết ngữ nghĩa — nhãn tiếng Việt, ẩn khối rỗng, đổi
+đơn vị, dùng module chung — và **không học từ màn trước**: cùng ba lỗi lặp lại
+ở màn 4 và 5 dù đã sửa và đã ghi vào `design-system.md`. **Lần nào nó cũng tự
+đánh giá "hoàn thành đúng yêu cầu"** trong khi vi phạm quy tắc tường minh.
+Tổng 17 lỗi qua 6 nhiệm vụ, không lỗi nào bị `tsc` bắt.
 
 **Ngoài phạm vi giai đoạn 1:** users, connection, audit, config-kb, evaluation;
 xoá admin Jinja2; dựng JS test harness.
@@ -1413,9 +1433,18 @@ reviews,mount}`, `test_console_stitch_briefs`). Smoke end-to-end qua **server
 thật** 7/7 bước, gồm khẳng định cookie nằm ở `Path=/` — thứ mà TestClient có
 thể che giấu. `tsc --noEmit` sạch, `npm run build` OK.
 
-**Đã kiểm bằng mắt (2026-08-20).** Bốn ảnh chụp xác nhận đăng nhập, điều
-hướng, và ba trang trả dữ liệu thật. Bảy trang hiện chỉ in JSON thô — đúng
-thiết kế, phần trình bày là việc của Antigravity.
+**Đã kiểm bằng mắt (2026-08-20).** Cả bảy màn đã được xác nhận bằng ảnh chụp
+trên dữ liệu thật, gồm cả các ca biên: job `done` không có nút Thử lại, review
+thiếu agent hiện banner cảnh báo, `criteria` lồng nhau in ra JSON thay vì
+`[object Object]`, và retry tạo job mới có link "Thay thế cho job".
+
+**Chưa kiểm chứng:** chế độ tối (chủ dự án quyết định bỏ qua) và màn hình hẹp.
+
+**Một cái bẫy về quy trình, đã cắn một lần:** sửa file Python trong
+`multiagent/src/` thì **phải khởi động lại uvicorn** — nó không tự nạp lại như
+Vite. Ngày 20/08 thông báo lỗi đã sửa thành tiếng Việt có dấu trên đĩa nhưng
+màn hình vẫn hiện chuỗi cũ, vì tiến trình chạy từ sáng giữ bản cũ trong bộ
+nhớ. Thêm `--reload` vào lệnh chạy nếu muốn tránh.
 
 **Ảnh chụp bắt được một lỗi mà không phép kiểm tự động nào bắt được.** Brief
 Stitch ghi trạng thái job là `queued/running/succeeded/failed`, trong khi thực
