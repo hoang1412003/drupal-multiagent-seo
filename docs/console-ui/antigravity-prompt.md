@@ -81,14 +81,103 @@ quả. Không tự ý làm màn hình khác.
 
 ---
 
-## Sáu nhiệm vụ còn lại
+## NHIỆM VỤ 2 — Reviews
 
-Chờ màn Jobs được duyệt rồi mới làm. Câu lệnh CLI y hệt, chỉ đổi tên nhiệm vụ.
-Nội dung nhiệm vụ giống NHIỆM VỤ 1, đổi ba chỗ theo bảng:
+**Bối cảnh.** Giống nhiệm vụ 1. Màn này là danh sách kết quả review đã chấm
+xong — biên tập viên quét để tìm bài AI đánh dấu cần sửa.
+
+**Đọc bốn file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, công thức class, **mục 4b về
+   hàm định dạng dùng chung**
+3. `docs/console-ui/stitch-briefs.md` mục "5. Reviews" — cột nào, cấm cái gì
+4. `docs/console-ui/integration.md` — mã lỗi, phân trang, endpoint `/filters`
+
+**Xem `multiagent/console_ui/src/pages/JobsPage.tsx`** — màn Jobs đã làm xong và
+đã được duyệt. Màn này cùng khuôn: thẻ lọc, bảng, phân trang. **Bám đúng cấu
+trúc và class của nó**, đừng nghĩ ra bố cục mới.
+
+**Sửa đúng một file:** `multiagent/console_ui/src/pages/ReviewsPage.tsx`.
+`AppShell.tsx` đã xong ở nhiệm vụ 1, không đụng vào.
+
+**Bảng phải có đúng 10 cột, không thêm không bớt:**
+
+```
+Mã review · Thời gian chấm (giờ VN) · Site · ID nội dung · Quyết định ·
+Điểm · Hồ sơ · Phiên bản policy · Model · Dữ liệu mẫu
+```
+
+Ánh xạ sang trường API: `public_id`, `scored_at`, `site_slug`,
+`external_content_id`, `decision`, `final_score`, `profile_code`,
+`policy_version`, `model`, `is_fixture`. Trường `site_id` **không hiện** — bảng
+hiện `site_slug` cho người đọc.
+
+**Bốn điểm khác màn Jobs, chú ý kỹ:**
+
+1. `decision` **có thể null**, và có 4 giá trị: `publish` (Xuất bản),
+   `needs_revision` (Cần sửa), `rejected` (Từ chối), `unknown` (Chưa rõ). Lấy
+   danh sách từ `useFilters().review_decisions`, đừng viết cứng. Pill dùng cùng
+   khuôn với Jobs: publish=emerald, needs_revision=amber, rejected=red,
+   unknown=gray.
+2. `final_score` **có thể null** và API trả nguyên độ chính xác
+   (`40.9090909090909`). Dùng `formatNumber(job.final_score)` — nó tự làm tròn
+   1 chữ số và tự trả `—` khi null. **Đừng hiện `0` thay cho null.**
+3. `model` là chuỗi dài (`claude-haiku-4-5-20251001`). Cắt bớt bằng
+   `truncate max-w-[14rem]` và cho `title` để hover xem đầy đủ.
+4. `is_fixture = true` nghĩa là dữ liệu mẫu, không phải review thật. Đánh dấu
+   bằng một nhãn xám mờ "mẫu". **Đừng ẩn dòng, đừng tô như lỗi.**
+
+**Bộ lọc — chỉ ba cái, ít hơn Jobs:** Quyết định (dropdown), Site (dropdown),
+ID nội dung (text), và khoảng ngày (Từ ngày / Đến ngày). **Không có** bộ lọc
+Nguồn ở màn này.
+
+**Tên tham số truy vấn lấy đúng từ `openapi.json`:** `decision`, `site`,
+`external_id`, `from`, `to`, `page`, `page_size`. Gõ sai tên server trả 422.
+
+**Đủ 4 trạng thái**, dùng chung một khung như màn Jobs — sidebar, thẻ lọc và
+**đầu bảng** luôn hiện, chỉ thân bảng đổi:
+
+| Trạng thái | Thân bảng |
+|---|---|
+| đang tải | skeleton xám, giữ đúng 10 cột |
+| rỗng | "Chưa có review nào khớp bộ lọc" + nút "Xóa bộ lọc" |
+| lỗi | banner đỏ phía trên bảng + nút "Thử lại" |
+| lọc sai | thông báo trong thẻ lọc, **giữ nguyên** giá trị người dùng đã nhập |
+
+**Một điều phải ghi trong giao diện:** danh sách này **không** lọc theo ngày mặc
+định và **không** loại dữ liệu mẫu, nên tổng số ở đây sẽ **không khớp** với
+"Tổng số review" trên Dashboard (Dashboard lọc 7 ngày và loại dữ liệu mẫu). Ghi
+một dòng chú thích nhỏ dưới tiêu đề để chênh lệch đọc ra là có chủ ý.
+
+**Ràng buộc — giống hệt nhiệm vụ 1:**
+
+- KHÔNG sửa `src/api/api-types.ts` (file sinh tự động)
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client` trong `src/api/client.ts`
+- KHÔNG lưu bất cứ gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG viết cứng danh sách quyết định — lấy từ `useFilters()`
+- KHÔNG tự viết hàm định dạng — dùng `src/lib/format.ts`
+- KHÔNG thêm mục menu, không thêm nút tạo/xóa/duyệt/xuất file
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa `AppShell.tsx` hay bất kỳ file nào ngoài `ReviewsPage.tsx`
+
+**Xong thì:** chạy `npx tsc --noEmit` trong `multiagent/console_ui` và báo kết
+quả. Không tự ý làm màn hình khác.
+
+---
+
+## Năm nhiệm vụ còn lại
+
+Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
+nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
+bảng**, vì chỉ dẫn gián tiếp là thứ đã làm lệch bản thiết kế Stitch hôm
+2026-08-20.
+
+Bảng dưới chỉ để biết trước quy mô:
 
 | Nhiệm vụ | File trang | Mục trong stitch-briefs | Quy mô |
 |---|---|---|---|
-| 2 — Reviews | `ReviewsPage.tsx` | "5. Reviews" | 11 cột |
 | 3 — Dashboard | `DashboardPage.tsx` | "2. Dashboard" | 15 trường |
 | 4 — Job detail | `JobDetailPage.tsx` | "4. Job detail" | 22 trường |
 | 5 — Review detail | `ReviewDetailPage.tsx` | "6. Review detail" | 28 trường |
