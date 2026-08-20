@@ -7,8 +7,20 @@
  */
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
+import { RequireRole } from "../auth/RequireRole";
 
-const NAV = [
+type Role = "viewer" | "operator" | "admin";
+
+type NavItem = {
+  to: string;
+  label: string;
+  end: boolean;
+  /** Bo trong = ai dang nhap cung thay. */
+  requireRole?: Role;
+  icon: React.ReactNode;
+};
+
+const NAV: NavItem[] = [
   {
     to: "/",
     label: "Tổng quan",
@@ -40,6 +52,17 @@ const NAV = [
       </svg>
     ),
   },
+  {
+    to: "/audit",
+    label: "Nhật ký",
+    end: false,
+    requireRole: "admin",
+    icon: (
+      <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+      </svg>
+    ),
+  },
 ];
 
 export function AppShell() {
@@ -63,24 +86,35 @@ export function AppShell() {
           </Link>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2 py-4">
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-md px-2 py-2 transition-colors xl:px-3 ${
-                  isActive
-                    ? "bg-vf/10 font-medium text-vf dark:bg-[#3b5bdb]/20 dark:text-[#3b5bdb]"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1c1c] dark:text-[#9ca3af] dark:hover:bg-white/5 dark:hover:text-[#e8e9e9]"
-                }`
-              }
-              title={item.label}
-            >
-              {item.icon}
-              <span className="hidden xl:inline">{item.label}</span>
-            </NavLink>
-          ))}
+          {NAV.map((item) => {
+            const link = (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-md px-2 py-2 transition-colors xl:px-3 ${
+                    isActive
+                      ? "bg-vf/10 font-medium text-vf dark:bg-[#3b5bdb]/20 dark:text-[#3b5bdb]"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-[#1a1c1c] dark:text-[#9ca3af] dark:hover:bg-white/5 dark:hover:text-[#e8e9e9]"
+                  }`
+                }
+                title={item.label}
+              >
+                {item.icon}
+                <span className="hidden xl:inline">{item.label}</span>
+              </NavLink>
+            );
+
+            if (item.requireRole) {
+              return (
+                <RequireRole key={item.to} role={item.requireRole}>
+                  {link}
+                </RequireRole>
+              );
+            }
+            return link;
+          })}
         </nav>
       </aside>
 

@@ -9,6 +9,7 @@ import { JobsPage } from "./pages/JobsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { ReviewDetailPage } from "./pages/ReviewDetailPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
+import { AuditPage } from "./pages/AuditPage";
 
 export const router = createBrowserRouter(
   [
@@ -25,6 +26,7 @@ export const router = createBrowserRouter(
             { path: "/jobs/:publicId", element: <JobDetailPage /> },
             { path: "/reviews", element: <ReviewsPage /> },
             { path: "/reviews/:publicId", element: <ReviewDetailPage /> },
+            { path: "/audit", element: <AuditPage /> },
           ],
         },
       ],

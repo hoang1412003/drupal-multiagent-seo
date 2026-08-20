@@ -75,6 +75,12 @@ export const WORKER_STATUS: Record<string, PillStyle> = {
   unavailable: { label: "Chưa từng chạy", ...GRAY },
 };
 
+export const AUDIT_OUTCOME: Record<string, PillStyle> = {
+  success: { label: "Thành công", ...EMERALD },
+  denied: { label: "Bị từ chối", ...RED },
+  failed: { label: "Lỗi", ...AMBER },
+};
+
 /** Gia tri la (hoac null) van phai hien duoc, khong duoc lam vo giao dien. */
 export function pillOf(
   bang: Record<string, PillStyle>,
