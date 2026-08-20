@@ -28,7 +28,7 @@ def _parsed_job_id(public_id: str) -> UUID:
     try:
         return UUID(public_id)
     except ValueError as exc:
-        raise errors.not_found("Job khong ton tai") from exc
+        raise errors.not_found("Không tìm thấy job") from exc
 
 
 @router.get("/jobs", response_model=models.JobPage)
@@ -73,7 +73,7 @@ def get_job(
 ):
     job = queries.get_job(conn, _parsed_job_id(public_id))
     if job is None:
-        raise errors.not_found("Job khong ton tai")
+        raise errors.not_found("Không tìm thấy job")
     return models.JobDetailModel.from_view(job)
 
 
@@ -93,13 +93,13 @@ def retry_job(
     # phi", lam nguoi dung tuong job co that va gay nhieu khi truy su co.
     parsed = _parsed_job_id(public_id)
     if queries.get_job(conn, parsed) is None:
-        raise errors.not_found("Job khong ton tai")
+        raise errors.not_found("Không tìm thấy job")
 
     if not payload.confirm_cost:
         raise errors.ConsoleError(
             400,
             "cost_not_confirmed",
-            "Phai xac nhan kha nang phat sinh chi phi truoc khi retry",
+            "Phải xác nhận khả năng phát sinh chi phí trước khi thử lại",
             "confirm_cost",
         )
 
@@ -111,7 +111,7 @@ def retry_job(
             reason=payload.reason,
         )
     except reviews.JobRetryNotFound as exc:
-        raise errors.not_found("Job khong ton tai") from exc
+        raise errors.not_found("Không tìm thấy job") from exc
     except (reviews.JobRetryConflict, reviews.JobRetryContextError) as exc:
         raise errors.ConsoleError(409, "conflict", str(exc)) from exc
     except PermissionError as exc:

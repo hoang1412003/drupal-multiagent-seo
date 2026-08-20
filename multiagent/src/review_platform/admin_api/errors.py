@@ -37,16 +37,16 @@ def console_error_handler(request: Request, exc: ConsoleError) -> JSONResponse:
 
 
 def unauthenticated() -> ConsoleError:
-    return ConsoleError(401, "unauthenticated", "Chua dang nhap")
+    return ConsoleError(401, "unauthenticated", "Chưa đăng nhập")
 
 
 def forbidden(
-    message: str = "Ban khong co quyen thuc hien thao tac nay",
+    message: str = "Bạn không có quyền thực hiện thao tác này",
 ) -> ConsoleError:
     return ConsoleError(403, "forbidden", message)
 
 
-def not_found(message: str = "Khong tim thay") -> ConsoleError:
+def not_found(message: str = "Không tìm thấy") -> ConsoleError:
     return ConsoleError(404, "not_found", message)
 
 

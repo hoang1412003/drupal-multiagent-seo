@@ -30,7 +30,7 @@ def _parsed_review_id(public_id: str) -> UUID:
     try:
         return UUID(public_id)
     except ValueError as exc:
-        raise errors.not_found("Review khong ton tai") from exc
+        raise errors.not_found("Không tìm thấy review") from exc
 
 
 @router.get("/reviews", response_model=models.ReviewPage)
@@ -68,5 +68,5 @@ def get_review(
 ):
     review = queries.get_review(conn, _parsed_review_id(public_id))
     if review is None:
-        raise errors.not_found("Review khong ton tai")
+        raise errors.not_found("Không tìm thấy review")
     return models.ReviewDetailModel.from_view(review)

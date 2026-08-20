@@ -96,7 +96,7 @@ def test_no_session_returns_401_json_not_redirect(conn):
     assert response.json() == {
         "error": {
             "code": "unauthenticated",
-            "message": "Chua dang nhap",
+            "message": "Chưa đăng nhập",
             "field": None,
         }
     }

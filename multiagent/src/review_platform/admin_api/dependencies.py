@@ -41,7 +41,7 @@ def console_session(
         raise errors.ConsoleError(
             403,
             "must_change_password",
-            "Phai doi mat khau truoc khi dung tiep",
+            "Bạn phải đổi mật khẩu trước khi sử dụng hệ thống",
         )
     sessions.touch(conn, raw_token)
     request.state.console_session = resolved
@@ -65,7 +65,7 @@ def require_console_csrf(
 ) -> None:
     supplied = request.headers.get("X-CSRF-Token")
     if not csrf.verify_session_csrf(resolved.csrf_token, supplied):
-        raise errors.ConsoleError(403, "csrf_invalid", "CSRF token khong hop le")
+        raise errors.ConsoleError(403, "csrf_invalid", "Yêu cầu không hợp lệ. Vui lòng tải lại trang.")
 
 
 def reject_unknown_query_params(request: Request, allowed: frozenset[str]) -> None:
@@ -79,6 +79,6 @@ def reject_unknown_query_params(request: Request, allowed: frozenset[str]) -> No
     unknown = sorted(set(request.query_params) - allowed)
     if unknown:
         raise errors.invalid_filter(
-            "Tham so khong hop le: " + ", ".join(unknown),
+            "Tham số lọc không hợp lệ: " + ", ".join(unknown),
             unknown[0],
         )

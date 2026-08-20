@@ -67,7 +67,7 @@ def _throttled() -> errors.ConsoleError:
     return errors.ConsoleError(
         429,
         "throttled",
-        "Tam thoi chua the dang nhap. Vui long thu lai sau.",
+        "Tạm thời chưa thể đăng nhập. Vui lòng thử lại sau.",
     )
 
 
@@ -112,7 +112,7 @@ def login(
             raise errors.ConsoleError(
                 401,
                 "invalid_credentials",
-                "Thong tin dang nhap khong hop le",
+                "Thông tin đăng nhập không hợp lệ",
             )
 
         limiter.record_success(payload.username, ip_address)
@@ -204,7 +204,7 @@ def change_password(
         raise errors.ConsoleError(
             400,
             "password_rejected",
-            "Khong the doi mat khau. Vui long kiem tra thong tin va thu lai.",
+            "Không thể đổi mật khẩu. Kiểm tra lại mật khẩu hiện tại, và mật khẩu mới phải có ít nhất 12 ký tự.",
         ) from exc
 
     with conn.transaction():
