@@ -321,7 +321,157 @@ Mặc định khi không truyền gì: server tự lấy **7 ngày gần nhất*
 
 ---
 
-## Bốn nhiệm vụ còn lại
+## NHIỆM VỤ 4 — Job detail
+
+**Màn này có hành động THẬT đầu tiên trong cả sản phẩm, và hành động đó tiêu
+tiền.** Đọc kỹ phần "Nút Thử lại" trước khi viết.
+
+**Bối cảnh.** Người đọc đang chẩn đoán vì sao một job thất bại và quyết định có
+chạy lại hay không. Trường quan trọng nhất trên màn hình là `last_error`.
+
+**Đọc bốn file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
+3. `docs/console-ui/stitch-briefs.md` mục "4. Job detail"
+4. `docs/console-ui/integration.md` — mã lỗi, đặc biệt `409` và `400`
+
+**Xem `JobsPage.tsx`** — dùng lại đúng thẻ, pill trạng thái, và bảng màu.
+
+**Sửa đúng một file:** `multiagent/console_ui/src/pages/JobDetailPage.tsx`.
+
+---
+
+### ĐỌC TRƯỚC: phần logic đã viết sẵn, KHÔNG được viết lại
+
+File `JobDetailPage.tsx` **đã có sẵn** toàn bộ phần gọi API và xử lý retry:
+
+- `useQuery` đọc chi tiết job
+- `useMutation` gọi `POST /jobs/{id}/retry` với `confirm_cost: true`
+- `onSuccess` điều hướng sang **job mới** (`navigate(/jobs/${jobMoi.public_id})`)
+- `onError` bắt `ConsoleApiError` và đặt thông báo
+- `<RequireRole role="operator">` bọc quanh nút
+
+**Việc của bạn là KHOÁC GIAO DIỆN LÊN phần đó, không viết lại nó.** Cụ thể:
+
+- Giữ nguyên `useMutation`, `onSuccess`, `onError` — không đổi tham số, không
+  đổi thứ tự, không bỏ `replace: true`
+- Giữ nguyên `confirm_cost: true` và **giữ nguyên việc nó chỉ được gửi sau khi
+  người dùng bấm xác nhận** trong hộp thoại
+- Giữ nguyên `<RequireRole role="operator">`
+
+Lý do: `POST /retry` chạy lại pipeline AI, tức là **gọi API tính tiền thật**.
+Server có cổng chặn `confirm_cost` — gửi `false` thì trả `400`. Viết lại phần
+này là chỗ duy nhất trong cả dự án mà một lỗi code làm mất tiền.
+
+---
+
+### 22 trường, chia sáu nhóm
+
+Bố cục hai cột: nhóm "Trạng thái" và "Kết quả" ở cột trái (rộng hơn), các nhóm
+còn lại ở cột phải. `last_error` chiếm hết chiều ngang bên dưới.
+
+**Nhóm 1 — Trạng thái** (nổi bật nhất)
+- `status` — pill, 5 giá trị, nhãn và màu **y hệt `JobsPage.tsx`**
+- `attempts` — số nguyên, "Đã thử N lần"
+- `source` — chuỗi tự do (`event`, `reconcile`, `admin_retry`, …)
+
+**Nhóm 2 — Lỗi**
+- `last_error` — **có thể null**. Đây là thứ người đọc vào xem. Cho nó một
+  khối riêng chiếm hết chiều ngang, nền xám nhạt, chữ monospace, xuống dòng
+  được (`whitespace-pre-wrap break-words`), và cuộn dọc nếu quá dài
+  (`max-h-64 overflow-y-auto`). Null thì **ẩn hẳn khối này**, đừng hiện khối
+  rỗng.
+
+**Nhóm 3 — Thời gian** (ghi nhãn `TIMEZONE_LABEL`)
+- `created_at`, `updated_at` — dùng `formatDateTime`
+
+**Nhóm 4 — Nội dung**
+- `external_content_id`, `external_revision_id` (**có thể null**),
+  `content_type`, `langcode`
+
+**Nhóm 5 — Ngữ cảnh**
+- `site_slug`, `site_name` — hiện `site_name` là chính, `site_slug` nhỏ bên dưới
+- `site_id`, `profile_id` — UUID, dùng `shortId`, monospace
+- `policy_version`
+
+**Nhóm 6 — Nhận dạng và liên kết**
+- `public_id` — UUID đầy đủ, monospace, có nút copy nếu tiện
+- `correlation_id` — `shortId`, monospace
+- `supersedes_job_public_id` (**có thể null**) — khi có, nhãn **"Thay thế cho
+  job"** và là **link tới `/jobs/{id}`**
+- `run_public_id` (**có thể null**) — khi có, nhãn **"Kết quả review"** và là
+  **link tới `/reviews/{id}`**
+- `run_scored_at` (**có thể null**) — `formatDateTime`
+- `writeback_status` (**có thể null**) — pill, nhãn tiếng Việt theo bảng
+  writeback trong `design-system.md`
+- `saved_result_available` — boolean, hiện "Có"/"Không"
+
+**Mọi giá trị null hiện `—`.** Không hiện ô trống, không hiện "N/A".
+
+---
+
+### Nút "Thử lại" — phần nhạy cảm nhất
+
+**Chỉ hiện khi cả hai điều kiện đúng:**
+1. `status === "failed"` — trạng thái khác thì **không vẽ nút, kể cả dạng mờ**
+2. Role là operator hoặc admin — đã có `<RequireRole role="operator">` lo
+
+**Bấm nút mở hộp thoại xác nhận, không gọi API ngay.** Hộp thoại phải có:
+
+- Câu cảnh báo rõ: **"Thử lại sẽ chạy lại pipeline AI và có thể phát sinh chi
+  phí."**
+- Ô "Lý do" (không bắt buộc)
+- Nút "Xác nhận thử lại" (nút chính) và "Hủy" (nút phụ)
+- Trạng thái đang gửi: nút đổi chữ thành "Đang thử lại…" và bị vô hiệu
+
+**Sau khi thành công**, code sẵn có đã điều hướng sang job mới. Thêm một dòng
+thông báo ngắn trên màn hình mới rằng đây là job vừa tạo — nếu không, người
+dùng thấy màn hình giống hệt và tưởng không có gì xảy ra.
+
+**Khi lỗi**, hiện thông báo **trong hộp thoại**, không đóng hộp thoại:
+
+| Mã | `code` | Thông báo gợi ý |
+|---|---|---|
+| 409 | `conflict` | "Không thể thử lại: job không còn ở trạng thái thất bại." |
+| 403 | `forbidden` | "Bạn không có quyền thực hiện thao tác này." |
+| 400 | `cost_not_confirmed` | Lỗi lập trình, không nên xảy ra — ghi console |
+
+---
+
+### Năm trạng thái
+
+| Trạng thái | Hiện gì |
+|---|---|
+| đang tải | skeleton cho từng nhóm, giữ nguyên bố cục |
+| job `failed` | đầy đủ + nút "Thử lại" + khối `last_error` |
+| job `done`/`running`/… | đầy đủ, **không có nút Thử lại**, không có khối lỗi |
+| không tìm thấy (404) | trang trống: "Không tìm thấy job" + link quay lại danh sách |
+| không đủ quyền (403) | "Bạn không có quyền xem nội dung này", **không chuyển trang** |
+
+---
+
+### Ràng buộc
+
+- **KHÔNG viết lại `useMutation` / `onSuccess` / `onError` / `RequireRole`**
+- KHÔNG gửi `confirm_cost: true` trước khi người dùng bấm xác nhận
+- KHÔNG vẽ nút Thử lại khi `status !== "failed"`
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML` — `last_error` là văn bản tự do từ hệ
+  thống, render bằng `{}` của React
+- KHÔNG viết cứng danh sách trạng thái — lấy từ `useFilters()`
+- KHÔNG tự viết hàm định dạng — dùng `src/lib/format.ts`
+- KHÔNG thêm nút xóa/hủy job/sửa job — API không có
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài `JobDetailPage.tsx`
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+
+---
+
+## Ba nhiệm vụ còn lại
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
@@ -332,7 +482,6 @@ Bảng dưới chỉ để biết trước quy mô:
 
 | Nhiệm vụ | File trang | Mục trong stitch-briefs | Quy mô |
 |---|---|---|---|
-| 4 — Job detail | `JobDetailPage.tsx` | "4. Job detail" | 22 trường |
 | 5 — Review detail | `ReviewDetailPage.tsx` | "6. Review detail" | 28 trường |
 | 6 — Login | `LoginPage.tsx` | "1. Login" | 3 ô nhập |
 | 7 — Đổi mật khẩu | `ChangePasswordPage.tsx` | "1. Login" (biến thể) | 2 ô nhập |
