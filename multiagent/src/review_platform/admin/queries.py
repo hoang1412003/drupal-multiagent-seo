@@ -223,10 +223,18 @@ def _review_entries(value, *, limit: int = 50) -> tuple[dict, ...]:
     if value is None:
         return ()
     if isinstance(value, Mapping):
-        raw_items = [
-            {"criterion": key, "value": nested}
-            for key, nested in list(value.items())[:limit]
-        ]
+        # Lam sach cap khoa-gia tri TRUOC khi tai cau truc. Neu doi cho truoc,
+        # ten khoa (vi du "api-key") chuyen sang vi tri gia tri, bo loc theo ten
+        # khoa khong con khop va bi mat di thang ra UI. `criteria` thuong la
+        # dict nen day la nhanh hay gap nhat.
+        raw_items = []
+        for key, nested in list(value.items())[:limit]:
+            safe_pair = _review_value({key: nested})
+            if isinstance(safe_pair, Mapping) and safe_pair:
+                safe_nested = next(iter(safe_pair.values()))
+            else:
+                safe_nested = safe_pair
+            raw_items.append({"criterion": key, "value": safe_nested})
     elif isinstance(value, (list, tuple)):
         raw_items = list(value[:limit])
     else:
@@ -915,3 +923,53 @@ def _connector_status(conn) -> str:
     if row is None or row[0] is None:
         return "unknown"
     return row[0]
+
+
+@dataclass(frozen=True)
+class SiteOption:
+    slug: str
+    name: str
+    active: bool
+
+
+@dataclass(frozen=True)
+class FilterOptions:
+    sites: tuple[SiteOption, ...]
+    job_sources: tuple[str, ...]
+
+
+# Chan mot dataset co qua nhieu `source` khac nhau lam vo dropdown. 200 la du
+# rong cho moi truong hop that va van du hep de khong bao gio nang trang.
+MAX_FILTER_OPTIONS = 200
+
+
+def filter_options(conn) -> FilterOptions:
+    """Gia tri co that de lap dropdown loc.
+
+    Site DA TAT van duoc tra ve: du lieu lich su cua no van nam trong danh
+    sach job/review, nen bo di thi khong con cach nao loc ra.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug, name, active FROM site ORDER BY slug LIMIT %s",
+            (MAX_FILTER_OPTIONS,),
+        )
+        sites = tuple(
+            SiteOption(
+                slug=row[0],
+                name=sanitize_text(row[1], max_length=200),
+                active=bool(row[2]),
+            )
+            for row in cur.fetchall()
+        )
+
+        cur.execute(
+            "SELECT DISTINCT source FROM review_job WHERE source IS NOT NULL "
+            "ORDER BY source LIMIT %s",
+            (MAX_FILTER_OPTIONS,),
+        )
+        job_sources = tuple(
+            sanitize_text(row[0], max_length=100) for row in cur.fetchall()
+        )
+
+    return FilterOptions(sites=sites, job_sources=job_sources)

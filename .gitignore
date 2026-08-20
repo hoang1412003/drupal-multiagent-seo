@@ -39,3 +39,8 @@ drupal/web/modules/*
 drupal/web/themes/*
 !drupal/web/themes/custom/
 test_group_summary.json
+
+# Console React: phu thuoc va ban build deu sinh lai duoc bang
+# `npm install && npm run build` trong multiagent/console_ui/.
+multiagent/console_ui/node_modules/
+multiagent/console_ui/dist/

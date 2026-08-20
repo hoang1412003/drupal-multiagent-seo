@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/* Tailwind 4 bo tailwind.config.js: token thuong hieu khai bao o day.
+   Gia tri lay tu drupal/web/themes/custom/vinfast_theme/css/. */
+@theme {
+  --color-vf: #00237a;
+  --color-vf-hover: #001f68;
+  --color-surface: #f9f9f9;
+  --color-ink: #1a1c1c;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

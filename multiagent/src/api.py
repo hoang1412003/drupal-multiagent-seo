@@ -17,12 +17,15 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import job_queue as q
 from review_platform import database as platform_database
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import router as admin_router
+from review_platform.admin_api import errors as console_errors
+from review_platform.admin_api import router as console_router
 from review_platform import security as platform_security
 from review_platform.api import router as api_v1_router
 from review_platform.api.limits import RequestSizeLimitMiddleware
@@ -46,14 +49,28 @@ app.add_exception_handler(
     admin_dependencies.AdminForbidden,
     admin_router.forbidden_response,
 )
-app.include_router(admin_router.router)
+# include_in_schema=False cho admin Jinja2: openapi.json la hop dong giao cho
+# agent viet frontend Console. Route tra HTML lot vao do se khien no tuong co
+# the goi bang fetch va nhan JSON.
+app.include_router(admin_router.router, include_in_schema=False)
 app.include_router(api_v1_router.router)
+app.add_exception_handler(
+    console_errors.ConsoleError,
+    console_errors.console_error_handler,
+)
+app.include_router(console_router.router)
 # Thu tu quan trong: add_middleware xep tu trong ra ngoai, nen SecurityMiddleware
 # them SAU se boc NGOAI limiter. Nho vay exception cua chinh limiter cung duoc
 # quy ve response an toan, va moi response deu co security header.
 app.add_middleware(
     RequestSizeLimitMiddleware,
-    gioi_han=(("/api/v1", 16 * 1024), ("/admin", platform_security.MAX_ADMIN_BODY)),
+    gioi_han=(
+        ("/api/v1", 16 * 1024),
+        # Duong dan khong khop prefix nao se di THANG, khong bi chan. Thieu
+        # dong nay thi Console API nhan body kich thuoc tuy y.
+        ("/api/console", platform_security.MAX_ADMIN_BODY),
+        ("/admin", platform_security.MAX_ADMIN_BODY),
+    ),
 )
 app.add_middleware(platform_security.SecurityMiddleware)
 app.mount(
@@ -61,6 +78,44 @@ app.mount(
     StaticFiles(directory=admin_router.STATIC_DIR),
     name="admin-static",
 )
+
+class SpaStaticFiles(StaticFiles):
+    """StaticFiles tra index.html cho moi duong dan khong phai file.
+
+    `html=True` cua Starlette KHONG du: no chi tra index.html cho duong dan
+    thu muc. Bam F5 tren /console/jobs se 404 ngay trong mount va khong roi
+    xuong route nao khac, vi Mount tu xu ly 404 cua chinh no.
+
+    React Router giu lich su o phia client nen moi duong dan con deu phai tra
+    ve cung mot index.html.
+    """
+
+    async def get_response(self, path: str, scope):
+        # Starlette NEM HTTPException(404) chu khong tra ve response 404, nen
+        # chi kiem tra status_code thoi la khong bao gio chay toi.
+        try:
+            response = await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            return await super().get_response("index.html", scope)
+        if response.status_code == 404:
+            return await super().get_response("index.html", scope)
+        return response
+
+
+# Ban build cua Console React. Mount SAU moi include_router, neu khong mount
+# se nuot cac route /api/console.
+#
+# Boc trong `if`: app phai khoi dong duoc khi chua ai chay `npm run build`.
+# Thieu dieu nay thi backend khong chay noi tren may chua cai Node.
+_CONSOLE_DIST = Path(__file__).resolve().parents[1] / "console_ui" / "dist"
+if _CONSOLE_DIST.is_dir():
+    app.mount(
+        "/console",
+        SpaStaticFiles(directory=_CONSOLE_DIST, html=True),
+        name="console",
+    )
 
 
 class JobIn(BaseModel):

@@ -12,6 +12,12 @@ from review_platform.auth.rbac import Role, allows
 
 
 SESSION_COOKIE = "vf_admin_session"
+# Cookie phai gui duoc toi /api/console/v1 va /console, khong chi /admin.
+SESSION_COOKIE_PATH = "/"
+# Cookie cu con sot tren trinh duyet cua nguoi dang dang nhap luc trien khai.
+# Phai xoa o ca hai duong dan: neu khong, trinh duyet giu HAI cookie trung ten
+# va Starlette chi tra ve mot cai khong xac dinh.
+LEGACY_SESSION_COOKIE_PATH = "/admin"
 _MUST_CHANGE_ALLOWED = frozenset({
     "/admin/change-password",
     "/admin/logout",
@@ -111,9 +117,11 @@ async def require_csrf(
     request: Request,
     resolved=Depends(current_session),
 ) -> None:
-    form = await request.form()
-    if not csrf.verify_session_csrf(
-        resolved.csrf_token,
-        form.get("csrf_token"),
-    ):
+    # Admin Jinja2 gui csrf_token trong form; Console API gui trong header.
+    # Giu ca hai nhanh: bo nhanh form se lam hong toan bo admin cu.
+    supplied = request.headers.get("X-CSRF-Token")
+    if supplied is None:
+        form = await request.form()
+        supplied = form.get("csrf_token")
+    if not csrf.verify_session_csrf(resolved.csrf_token, supplied):
         raise HTTPException(403, "CSRF token không hợp lệ")

@@ -1,0 +1,1384 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VF O2O Console API",
+    "version": "0.1.0",
+    "description": "Hop dong cho frontend Console tai /console. Xac thuc bang cookie phien HttpOnly (same-origin); moi POST phai gui header X-CSRF-Token lay tu GET /auth/me."
+  },
+  "paths": {
+    "/api/console/v1/auth/login": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_console_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/auth/me": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_console_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_console_v1_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        }
+      }
+    },
+    "/api/console/v1/auth/change-password": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Change Password",
+        "operationId": "change_password_api_console_v1_auth_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/dashboard": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Dashboard",
+        "operationId": "dashboard_api_console_v1_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/filters": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Filters",
+        "operationId": "filters_api_console_v1_filters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiltersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/jobs": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_api_console_v1_jobs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/jobs/{public_id}": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Get Job",
+        "operationId": "get_job_api_console_v1_jobs__public_id__get",
+        "parameters": [
+          {
+            "name": "public_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Public Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobDetailModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/jobs/{public_id}/retry": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Retry Job",
+        "operationId": "retry_job_api_console_v1_jobs__public_id__retry_post",
+        "parameters": [
+          {
+            "name": "public_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Public Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobDetailModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/reviews": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "List Reviews",
+        "operationId": "list_reviews_api_console_v1_reviews_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/reviews/{public_id}": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Get Review",
+        "operationId": "get_review_api_console_v1_reviews__public_id__get",
+        "parameters": [
+          {
+            "name": "public_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Public Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewDetailModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgentResultModel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "criteria": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Criteria"
+          },
+          "issues": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "evidence": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "score",
+          "criteria",
+          "issues",
+          "evidence"
+        ],
+        "title": "AgentResultModel"
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "title": "Current Password",
+            "default": ""
+          },
+          "new_password": {
+            "type": "string",
+            "title": "New Password",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ChangePasswordRequest"
+      },
+      "CostEstimateModel": {
+        "properties": {
+          "input_tokens": {
+            "type": "integer",
+            "title": "Input Tokens"
+          },
+          "output_tokens": {
+            "type": "integer",
+            "title": "Output Tokens"
+          },
+          "estimated_usd": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Usd"
+          },
+          "pricing_version": {
+            "type": "integer",
+            "title": "Pricing Version"
+          },
+          "effective_at": {
+            "type": "string",
+            "title": "Effective At"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "unknown_models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unknown Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_tokens",
+          "output_tokens",
+          "estimated_usd",
+          "pricing_version",
+          "effective_at",
+          "currency",
+          "source",
+          "unknown_models"
+        ],
+        "title": "CostEstimateModel"
+      },
+      "DashboardResponse": {
+        "properties": {
+          "date_from": {
+            "type": "string",
+            "title": "Date From"
+          },
+          "date_to": {
+            "type": "string",
+            "title": "Date To"
+          },
+          "queue_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Queue Counts"
+          },
+          "total_reviews": {
+            "type": "integer",
+            "title": "Total Reviews"
+          },
+          "decision_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Decision Counts"
+          },
+          "duration_p50_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration P50 Ms"
+          },
+          "duration_p95_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration P95 Ms"
+          },
+          "cost_estimate": {
+            "$ref": "#/components/schemas/CostEstimateModel"
+          },
+          "writeback_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Writeback Counts"
+          },
+          "writeback_success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writeback Success Rate"
+          },
+          "worker_status": {
+            "type": "string",
+            "title": "Worker Status"
+          },
+          "connector_status": {
+            "type": "string",
+            "title": "Connector Status"
+          },
+          "worker_running": {
+            "type": "integer",
+            "title": "Worker Running"
+          },
+          "worker_stale": {
+            "type": "integer",
+            "title": "Worker Stale"
+          },
+          "worker_last_seen_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Worker Last Seen At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date_from",
+          "date_to",
+          "queue_counts",
+          "total_reviews",
+          "decision_counts",
+          "duration_p50_ms",
+          "duration_p95_ms",
+          "cost_estimate",
+          "writeback_counts",
+          "writeback_success_rate",
+          "worker_status",
+          "connector_status",
+          "worker_running",
+          "worker_stale",
+          "worker_last_seen_at"
+        ],
+        "title": "DashboardResponse"
+      },
+      "FiltersResponse": {
+        "properties": {
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SiteOptionModel"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "job_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Job Sources"
+          },
+          "job_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Job Statuses"
+          },
+          "review_decisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Decisions"
+          },
+          "writeback_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Writeback Statuses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sites",
+          "job_sources",
+          "job_statuses",
+          "review_decisions",
+          "writeback_statuses"
+        ],
+        "title": "FiltersResponse",
+        "description": "Gia tri hop le cho moi bo loc, lay tu server.\n\nTon tai de frontend khong hard-code danh sach nao. Mot brief tung ghi\ntrang thai job la `succeeded` trong khi that su la `done`, va khong phep\nkiem nao bat duoc vi gia tri hop le chua bao gio nam trong hop dong."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "JobDetailModel": {
+        "properties": {
+          "public_id": {
+            "type": "string",
+            "title": "Public Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id"
+          },
+          "site_slug": {
+            "type": "string",
+            "title": "Site Slug"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "external_content_id": {
+            "type": "string",
+            "title": "External Content Id"
+          },
+          "external_revision_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Revision Id"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "langcode": {
+            "type": "string",
+            "title": "Langcode"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "correlation_id": {
+            "type": "string",
+            "title": "Correlation Id"
+          },
+          "supersedes_job_public_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Job Public Id"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "run_public_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Public Id"
+          },
+          "writeback_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writeback Status"
+          },
+          "run_scored_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Scored At"
+          },
+          "saved_result_available": {
+            "type": "boolean",
+            "title": "Saved Result Available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_id",
+          "created_at",
+          "updated_at",
+          "site_id",
+          "site_slug",
+          "site_name",
+          "profile_id",
+          "policy_version",
+          "external_content_id",
+          "external_revision_id",
+          "content_type",
+          "langcode",
+          "status",
+          "attempts",
+          "source",
+          "correlation_id",
+          "supersedes_job_public_id",
+          "last_error",
+          "run_public_id",
+          "writeback_status",
+          "run_scored_at",
+          "saved_result_available"
+        ],
+        "title": "JobDetailModel"
+      },
+      "JobListItemModel": {
+        "properties": {
+          "public_id": {
+            "type": "string",
+            "title": "Public Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id"
+          },
+          "site_slug": {
+            "type": "string",
+            "title": "Site Slug"
+          },
+          "external_content_id": {
+            "type": "string",
+            "title": "External Content Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "attempts": {
+            "type": "integer",
+            "title": "Attempts"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_id",
+          "created_at",
+          "site_id",
+          "site_slug",
+          "external_content_id",
+          "status",
+          "attempts",
+          "source",
+          "policy_version"
+        ],
+        "title": "JobListItemModel"
+      },
+      "JobPage": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobListItemModel"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "total_pages",
+          "items"
+        ],
+        "title": "JobPage"
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "default": ""
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "LoginRequest"
+      },
+      "MeResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          },
+          "csrf_token": {
+            "type": "string",
+            "title": "Csrf Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "role",
+          "must_change_password",
+          "csrf_token"
+        ],
+        "title": "MeResponse"
+      },
+      "RetryRequest": {
+        "properties": {
+          "confirm_cost": {
+            "type": "boolean",
+            "title": "Confirm Cost",
+            "default": false
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "RetryRequest"
+      },
+      "ReviewDetailModel": {
+        "properties": {
+          "public_id": {
+            "type": "string",
+            "title": "Public Id"
+          },
+          "scored_at": {
+            "type": "string",
+            "title": "Scored At"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "final_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Score"
+          },
+          "missing_agents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Agents"
+          },
+          "veto_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Veto Reason"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AgentResultModel"
+            },
+            "type": "array",
+            "title": "Agents"
+          },
+          "config_meta": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Meta"
+          },
+          "cost_estimate": {
+            "$ref": "#/components/schemas/CostEstimateModel"
+          },
+          "usage_available": {
+            "type": "boolean",
+            "title": "Usage Available"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "writeback_status": {
+            "type": "string",
+            "title": "Writeback Status"
+          },
+          "writeback_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Writeback Error"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id"
+          },
+          "site_slug": {
+            "type": "string",
+            "title": "Site Slug"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "profile_id": {
+            "type": "string",
+            "title": "Profile Id"
+          },
+          "profile_code": {
+            "type": "string",
+            "title": "Profile Code"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "external_content_id": {
+            "type": "string",
+            "title": "External Content Id"
+          },
+          "external_revision_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Revision Id"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "langcode": {
+            "type": "string",
+            "title": "Langcode"
+          },
+          "correlation_id": {
+            "type": "string",
+            "title": "Correlation Id"
+          },
+          "is_fixture": {
+            "type": "boolean",
+            "title": "Is Fixture"
+          },
+          "drupal_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drupal Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_id",
+          "scored_at",
+          "duration_ms",
+          "decision",
+          "final_score",
+          "missing_agents",
+          "veto_reason",
+          "note",
+          "agents",
+          "config_meta",
+          "cost_estimate",
+          "usage_available",
+          "model",
+          "writeback_status",
+          "writeback_error",
+          "site_id",
+          "site_slug",
+          "site_name",
+          "profile_id",
+          "profile_code",
+          "policy_version",
+          "external_content_id",
+          "external_revision_id",
+          "content_type",
+          "langcode",
+          "correlation_id",
+          "is_fixture",
+          "drupal_url"
+        ],
+        "title": "ReviewDetailModel"
+      },
+      "ReviewListItemModel": {
+        "properties": {
+          "public_id": {
+            "type": "string",
+            "title": "Public Id"
+          },
+          "scored_at": {
+            "type": "string",
+            "title": "Scored At"
+          },
+          "site_id": {
+            "type": "string",
+            "title": "Site Id"
+          },
+          "site_slug": {
+            "type": "string",
+            "title": "Site Slug"
+          },
+          "external_content_id": {
+            "type": "string",
+            "title": "External Content Id"
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision"
+          },
+          "final_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final Score"
+          },
+          "profile_code": {
+            "type": "string",
+            "title": "Profile Code"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "is_fixture": {
+            "type": "boolean",
+            "title": "Is Fixture"
+          }
+        },
+        "type": "object",
+        "required": [
+          "public_id",
+          "scored_at",
+          "site_id",
+          "site_slug",
+          "external_content_id",
+          "decision",
+          "final_score",
+          "profile_code",
+          "policy_version",
+          "model",
+          "is_fixture"
+        ],
+        "title": "ReviewListItemModel"
+      },
+      "ReviewPage": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewListItemModel"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "total_pages",
+          "items"
+        ],
+        "title": "ReviewPage"
+      },
+      "SiteOptionModel": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "active"
+        ],
+        "title": "SiteOptionModel"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

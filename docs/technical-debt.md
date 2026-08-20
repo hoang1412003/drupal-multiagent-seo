@@ -1357,6 +1357,129 @@ giữa worker polling và `/api/v1/jobs` khiến phải chạy thêm
 dừng/xoá sau demo — coi tài liệu đó là ghi chú vận hành, không phải cam kết
 uptime.
 
+### 8.11. Console React — ✅ GIAI ĐOẠN 1 ĐÃ XONG (2026-08-20)
+
+Tách frontend admin thành React SPA riêng tại `/console`, chạy **song song**
+với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn chạy).
+
+- Thiết kế: [`superpowers/specs/2026-08-19-console-react-admin-design.md`](superpowers/specs/2026-08-19-console-react-admin-design.md)
+- Kế hoạch: [`superpowers/plans/2026-08-19-console-react-admin.md`](superpowers/plans/2026-08-19-console-react-admin.md)
+- Hợp đồng giao cho agent viết giao diện: `multiagent/console_ui/openapi.json`
+  (11 đường dẫn, 17 schema) + [`console-ui/integration.md`](console-ui/integration.md)
+- Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
+
+**Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
+trên Stitch; **Antigravity** code 7 màn hình; Claude review. Giai đoạn 1 dừng ở
+chỗ bàn giao — 7 trang trong `console_ui/src/pages/` hiện chỉ in JSON thô.
+
+**Ngoài phạm vi giai đoạn 1:** users, connection, audit, config-kb, evaluation;
+xoá admin Jinja2; dựng JS test harness.
+
+**Bốn lỗ hổng phát hiện khi làm, đều CÓ SẴN và đều im lặng:**
+
+1. **Cookie phiên giới hạn ở `path=/admin`.** Trình duyệt không gửi nó tới
+   `/api/console/v1`, nên giả định "hai UI dùng chung phiên" không thể chạy.
+   Đã mở về `/`, và xoá cookie cũ ở **cả hai** đường dẫn — nếu chỉ xoá ở `/`
+   thì trình duyệt giữ hai cookie trùng tên và Starlette trả về một cái không
+   xác định.
+2. **`queries._review_entries` vô hiệu hoá lớp che bí mật với dữ liệu dạng
+   dict.** Nó tái cấu trúc thành `{"criterion": <khoá>, "value": <giá trị>}`
+   **trước** khi làm sạch, nên tên khoá (ví dụ `api-key`) chuyển sang vị trí
+   giá trị và bộ lọc theo tên khoá không còn khớp. `criteria` thường là dict
+   nên đây là nhánh hay gặp nhất, trên dữ liệu bắt nguồn từ output của model.
+   **Ảnh hưởng cả admin Jinja2 đang chạy.** Đã vá + test chặn hồi quy.
+3. **Console API không có giới hạn kích thước body.**
+   `RequestSizeLimitMiddleware` chỉ khai báo `/api/v1` và `/admin`; đường dẫn
+   không khớp prefix nào thì **đi thẳng**. Đã thêm `/api/console`.
+4. **Mười route Jinja2 lọt vào `openapi.json`.** Giao như vậy thì agent viết
+   frontend tưởng gọi được `/admin/jobs` bằng `fetch` để nhận JSON. Đã thêm
+   `include_in_schema=False`.
+
+**Hai bẫy kỹ thuật đã cắn, ghi lại để khỏi mất thời gian lần sau:**
+
+- `StaticFiles(html=True)` **không** đủ cho SPA deep link: Starlette chỉ trả
+  `index.html` cho đường dẫn *thư mục*, còn `/console/jobs` thì 404 ngay trong
+  Mount và **không rơi xuống** route nào khác. Phải có lớp con với fallback —
+  và lớp đó phải bắt `StarletteHTTPException`, vì StaticFiles **ném** ngoại lệ
+  chứ không trả response 404 (kiểm `response.status_code` sẽ không bao giờ
+  chạy tới).
+- Trả `Response(status_code=204, headers=dict(response.headers))` làm **mất
+  header `set-cookie`**: `dict()` gộp nhiều header trùng tên thành một. Đúng
+  cách là đặt cookie lên `response` đã tiêm rồi `return None`.
+
+**Kiểm chứng:** `all-offline` 90 file, hỏng 0, SKIP 0. Thêm 6 file test
+(`test_admin_session_cookie_path`, `test_console_api_{auth,dashboard,jobs,
+reviews,mount}`, `test_console_stitch_briefs`). Smoke end-to-end qua **server
+thật** 7/7 bước, gồm khẳng định cookie nằm ở `Path=/` — thứ mà TestClient có
+thể che giấu. `tsc --noEmit` sạch, `npm run build` OK.
+
+**Đã kiểm bằng mắt (2026-08-20).** Bốn ảnh chụp xác nhận đăng nhập, điều
+hướng, và ba trang trả dữ liệu thật. Bảy trang hiện chỉ in JSON thô — đúng
+thiết kế, phần trình bày là việc của Antigravity.
+
+**Ảnh chụp bắt được một lỗi mà không phép kiểm tự động nào bắt được.** Brief
+Stitch ghi trạng thái job là `queued/running/succeeded/failed`, trong khi thực
+tế là `queued/running/failed/done/superseded` — **năm** giá trị, và là `done`
+chứ không phải `succeeded`. Nếu để nguyên, Stitch vẽ badge 4 trạng thái sai
+tên, rồi Antigravity code bảng ánh xạ thiếu `done` và `superseded`, và **mọi
+dòng dữ liệu thật đều rơi vào nhánh mặc định**.
+
+Vì sao script đối chiếu không bắt được: nó so **tên trường** với
+`openapi.json`, mà ở đó `status` khai báo là `str` chứ không phải enum. Giá
+trị hợp lệ chưa bao giờ nằm trong hợp đồng.
+
+Đã bịt: `test_console_stitch_briefs.py` thêm chiều kiểm thứ ba, đọc
+`QUEUE_STATUSES` / `_REVIEW_DECISIONS` / `WRITEBACK_STATUSES` **thẳng từ
+code** và đối chiếu **từng màn hình** (không phải toàn tài liệu — khối `STYLE`
+lặp 6 lần có nhắc tên trạng thái để quy định màu, nên tìm trên toàn tài liệu
+sẽ luôn xanh). Bản kiểm đã được thử ngược: tái hiện đúng lỗi trên thì nó đỏ.
+
+**Đây là lần thứ năm của cái bẫy "unit test dùng ví dụ do chính người viết
+code nghĩ ra"** đã ghi ở cuối mục 8. Lần này biến thể là: *phép kiểm tự động
+chỉ kiểm được thứ nằm trong hợp đồng, còn thứ không nằm trong hợp đồng thì nó
+mù.* Chỉ dữ liệu thật mới lộ ra.
+
+**Đợt hai (cùng ngày): dữ liệu JSON thật lộ thêm bốn vấn đề nữa.**
+
+1. **Dashboard trộn hai phạm vi thời gian.** `queue_counts` chạy
+   `SELECT status, count(*) FROM review_job GROUP BY status` — **không lọc
+   ngày**, trong khi `total_reviews` / `decision_counts` / `cost_estimate` đều
+   `WHERE scored_at >= start AND < end`. Số học xác nhận: `0+0+2+13+0 = 15`
+   đúng bằng `total` của `/jobs`. Không có nhãn nào phân biệt, nên người đọc
+   sẽ kết luận số liệu sai.
+2. **Dashboard loại `is_fixture`, danh sách thì không.** Trong khoảng ngày có
+   7 review, trừ 2 bản mẫu → dashboard báo 5; `/reviews` báo 13. Hai màn hình
+   không bao giờ khớp nếu không giải thích.
+3. **`final_score` trả tới 13 chữ số thập phân** (`40.9090909090909`) cạnh
+   `50` và `80.21`. Hiển thị thô thì cột điểm lởm chởm.
+4. **Bộ lọc Site/Nguồn không có nguồn dữ liệu để làm dropdown.** Không có
+   endpoint nào liệt kê site hay source, và `source` là tự do (dữ liệu thật:
+   `event`, `reconcile`, `manual-test-b7`). **Đã bổ sung
+   `GET /api/console/v1/filters`** (endpoint thứ 11) trả `sites`,
+   `job_sources`, và cả ba enum (`job_statuses`, `review_decisions`,
+   `writeback_statuses`).
+
+   Trả enum qua API là chủ ý, không phải tiện tay: enum **không nằm trong
+   `openapi.json`** (`status` khai là `str`), nên một danh sách viết cứng bị
+   sai sẽ không phép kiểm nào bắt được — đúng lỗi vừa xảy ra. Lấy từ server
+   thì không thể lệch. Test khoá cả ba enum vào đúng hằng số trong code.
+
+   `sites` **gồm cả site đã tắt**: job và review lịch sử của site đó vẫn nằm
+   trong danh sách, bỏ đi thì không còn cách nào lọc ra.
+
+**Lỗ hổng thứ hai của chính script kiểm**, cùng họ với lỗ hổng đầu: nó tìm tên
+trường **trên toàn tài liệu**, nên `source` của `JobListItemModel` che cho
+`source` của `CostEstimateModel` (trường này chưa hề được mô tả mà vẫn xanh).
+Đã siết sang kiểm **từng màn hình** cho cả tên trường lẫn enum; ngay khi siết
+nó tìm thêm 3 thiếu sót. Miễn trừ (ví dụ bảng danh sách không hiện `site_id`)
+khai báo **tường minh theo từng màn hình kèm lý do**, không miễn trừ chung —
+miễn trừ chung sẽ làm trường đó biến mất khỏi mọi màn hình, đúng cách lỗ hổng
+đầu tiên lọt qua.
+
+**Bài học về chính phép thử ngược:** lần thử đầu có 2/3 ca báo "không bắt
+được", và hoá ra **phép thử viết sai** — nó xoá đoạn mô tả nhưng vẫn để lại từ
+khoá trong câu. Phải kiểm chứng cả phép thử, không chỉ thứ nó kiểm.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
