@@ -151,6 +151,38 @@ font-mono text-xs           (mã job, ID nội dung)
 text-right tabular-nums     (số lần thử, điểm)
 ```
 
+## 4b. Định dạng dữ liệu — dùng hàm chung, không tự viết
+
+Mọi hàm định dạng nằm trong `console_ui/src/lib/format.ts`. **Không viết lại ở
+từng trang** — bảy màn hình mỗi trang một kiểu là cách nhanh nhất để cùng một
+job hiện hai giờ khác nhau ở hai chỗ.
+
+| Hàm | Dùng cho | Ví dụ |
+|---|---|---|
+| `formatDateTime(iso)` | mọi cột thời gian | `19/08/2026 14:32` |
+| `formatDate(iso)` | ngày không giờ (`date_from`, `effective_at`) | `19/08/2026` |
+| `formatNumber(n, digits)` | `final_score`, tỷ lệ, percentile | `40.9` |
+| `shortId(uuid)` | `public_id`, `correlation_id` | `a3f2…9c41` |
+
+Cả bốn hàm trả `"—"` khi giá trị là `null`. **Không bao giờ hiện `0` thay cho
+`null`** — `final_score` null nghĩa là chưa chấm được, khác hẳn chấm được 0
+điểm.
+
+**Múi giờ.** API luôn trả UTC. Console hiện **giờ Việt Nam** vì người vận hành
+đọc giờ VN. Nhưng mọi cột thời gian **bắt buộc** ghi nhãn `TIMEZONE_LABEL`
+("giờ VN") ngay trong tiêu đề cột:
+
+```tsx
+<th>Thời gian tạo <span className="font-normal normal-case text-gray-400">
+  ({TIMEZONE_LABEL})</span></th>
+```
+
+Lý do: admin Jinja2 cũ hiện UTC. Không ghi nhãn thì cùng một job hiện `11:20` ở
+Console và `04:20` ở `/admin`, và không ai hiểu tại sao.
+
+**Làm tròn `final_score` về 1 chữ số.** API trả nguyên độ chính xác, tới 13 chữ
+số thập phân (`40.9090909090909`). Hiện thô làm cột điểm lởm chởm.
+
 ## 5. Bốn trạng thái bắt buộc
 
 Đây là chỗ bản thiết kế sinh tự động hay hỏng nhất. **Cả bốn trạng thái dùng

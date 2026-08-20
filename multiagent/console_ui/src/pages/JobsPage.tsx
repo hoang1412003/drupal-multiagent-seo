@@ -5,12 +5,7 @@ import { useState, useEffect } from "react";
 import { client, query, ConsoleApiError } from "../api/client";
 import type { JobPage } from "../api/client";
 import { useFilters } from "../api/useFilters";
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
+import { formatDateTime, shortId, TIMEZONE_LABEL } from "../lib/format";
 
 const STATUS_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
   queued: { label: "Trong hàng đợi", dot: "bg-amber-500", bg: "bg-amber-50 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-300" },
@@ -211,7 +206,12 @@ export function JobsPage() {
             <thead className="border-b border-gray-200 bg-gray-50/60 px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500 dark:border-gray-800 dark:bg-white/5">
               <tr>
                 <th className="px-3 py-2 font-medium">Mã job</th>
-                <th className="px-3 py-2 font-medium">Thời gian tạo</th>
+                <th className="px-3 py-2 font-medium">
+                  Thời gian tạo{" "}
+                  <span className="font-normal normal-case text-gray-400">
+                    ({TIMEZONE_LABEL})
+                  </span>
+                </th>
                 <th className="px-3 py-2 font-medium">Site</th>
                 <th className="px-3 py-2 font-medium">ID nội dung</th>
                 <th className="px-3 py-2 font-medium">Trạng thái</th>
@@ -255,9 +255,9 @@ export function JobsPage() {
                   return (
                     <tr key={job.public_id} className="border-b border-gray-100 dark:border-gray-800">
                       <td className="px-3 py-2.5 text-xs font-mono">
-                        <Link to={`/jobs/${job.public_id}`} className="hover:underline text-ink dark:text-gray-100">{job.public_id.split("-")[0]}…</Link>
+                        <Link to={`/jobs/${job.public_id}`} className="hover:underline text-ink dark:text-gray-100">{shortId(job.public_id)}</Link>
                       </td>
-                      <td className="px-3 py-2.5 text-sm">{formatDate(job.created_at)}</td>
+                      <td className="px-3 py-2.5 text-sm">{formatDateTime(job.created_at)}</td>
                       <td className="px-3 py-2.5 text-sm">{job.site_slug}</td>
                       <td className="px-3 py-2.5 text-xs font-mono">{job.external_content_id}</td>
                       <td className="px-3 py-2.5 text-sm">

@@ -69,6 +69,12 @@ Nguồn · Phiên bản policy
 - KHÔNG thêm mục menu ngoài ba mục: Tổng quan, Jobs, Reviews
 - KHÔNG thêm nút tạo/xóa/duyệt/xuất file
 - KHÔNG cài thêm thư viện nào. Mọi thứ cần thiết đã có sẵn
+- KHÔNG tự viết hàm định dạng ngày/số/UUID — dùng `src/lib/format.ts`
+  (`formatDateTime`, `formatDate`, `formatNumber`, `shortId`). Mọi cột thời
+  gian phải ghi nhãn `TIMEZONE_LABEL` trong tiêu đề cột
+- KHÔNG tự đặt tên tham số truy vấn — lấy đúng tên trong `openapi.json`
+  (`external_id` chứ không phải `external_content_id`; `from`/`to` chứ không
+  phải `date_from`/`date_to`). Server trả 422 nếu gõ sai tên
 
 **Xong thì:** chạy `npx tsc --noEmit` trong `multiagent/console_ui` và báo kết
 quả. Không tự ý làm màn hình khác.
