@@ -894,7 +894,150 @@ sẵn — mỗi lần bạn đăng nhập là một bản ghi `login_success`.
 
 ---
 
-## Giai đoạn 2 — bốn màn còn lại
+## NHIỆM VỤ 8 — Cấu hình/KB và Kết quả đo (làm cùng một lượt)
+
+Hai màn **chỉ đọc**, không có bảng phân trang, không có bộ lọc. Đơn giản hơn
+mọi màn trước — nhưng dữ liệu có cấu trúc lạ, đọc kỹ phần "ba cạm bẫy".
+
+**Đọc ba file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
+3. `docs/console-ui/integration.md` — mã lỗi
+
+**Xem `JobDetailPage.tsx`** — dùng lại `Section` và `Field` của nó cho bố cục
+nhóm. Hai màn này không có bảng danh sách nên đừng bắt chước `JobsPage`.
+
+**Sửa/tạo bốn file:**
+
+- Tạo `src/pages/ConfigKbPage.tsx`
+- Tạo `src/pages/EvaluationPage.tsx`
+- Sửa `src/router.tsx` — thêm route `/cau-hinh` và `/danh-gia`
+- Sửa `src/layout/AppShell.tsx` — thêm hai mục menu
+
+**Dùng lại module chung**: `src/lib/format.ts`, `src/lib/status.ts` +
+`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`. Cần bảng pill mới thì **thêm vào
+`lib/status.ts`**, đừng khai báo trong file trang.
+
+---
+
+### Menu giờ có SÁU mục
+
+```
+Tổng quan · Jobs · Reviews · Nhật ký · Cấu hình · Kết quả đo
+```
+
+"Nhật ký" vẫn chỉ admin. Hai mục mới **ai đăng nhập cũng thấy** (server chỉ
+đòi role viewer). Vẫn cấm thêm mục nào khác.
+
+---
+
+### Màn 1 — Cấu hình/KB (`/cau-hinh`, gọi `GET /config-kb`)
+
+Ba nhóm, mỗi nhóm một `Section`:
+
+**Nhóm "File chính sách"** (`policy_files`) — mỗi phần tử:
+`label`, `relative_path`, `sha256`, `modified_at`, `metadata`, `error`.
+
+- `sha256` là chuỗi 64 ký tự. Dùng `shortId` **không hợp** ở đây vì nó bỏ dấu
+  gạch — cắt thủ công 12 ký tự đầu, monospace, kèm `title` để hover xem đủ
+- `modified_at` dùng `formatDateTime` + nhãn `TIMEZONE_LABEL`
+- `error` **có thể null**. Khi có, cả thẻ đó chuyển sang trạng thái lỗi (viền
+  đỏ + thông báo) và **không hiện metadata** — file đọc không được thì mọi
+  thông tin khác về nó đều không đáng tin
+
+**Nhóm "Site và hồ sơ"** (`profile_assignments`) — mỗi phần tử 12 trường.
+Hai trường boolean cần thành pill, không phải chữ "true"/"false":
+
+| Trường | true | false |
+|---|---|---|
+| `site_active` | "Đang bật" (xanh) | "Đã tắt" (xám) |
+| `intake_paused` | **"Đang tạm dừng" (đỏ)** | "Đang nhận" (xanh) |
+
+`intake_paused = true` nghĩa là site **không nhận bài mới** — đó là trạng thái
+người vận hành cần thấy ngay, nên nó phải nổi bật.
+
+**Nhóm "Kho tri thức"** (`kb_summary`) — 7 trường. `chunk_count` là số, căn
+phải. `embedding_model` và `embedding_dimension` **có thể null** → hiện `—`.
+
+---
+
+### Màn 2 — Kết quả đo (`/danh-gia`, gọi `GET /evaluation`)
+
+Danh sách phép đo (E1–E6), mỗi phép đo một thẻ. 12 trường mỗi thẻ.
+
+**`provenance_warning` là trường quan trọng nhất.** Khi khác null, nội dung là
+*"Provenance chưa đầy đủ; không suy diễn các trường còn thiếu."* — hiện thành
+**banner amber ngay đầu thẻ**, trước mọi số liệu. Null thì ẩn hẳn.
+
+Lý do: các trường như `head_commit`, `prompt_version`, `model` khi thiếu sẽ
+hiện `—`, và người đọc rất dễ tự lấp chỗ trống bằng suy đoán. Banner đó là thứ
+duy nhất ngăn việc kết luận từ dữ liệu không đầy đủ.
+
+**`status`** là chuỗi (`valid`, `pending`, …). Pill: `valid` xanh, mọi giá trị
+khác xám. Thêm bảng này vào `lib/status.ts`.
+
+**`has_evidence`** là boolean. Khi `true`, hiện nút/link **"Tải bằng chứng"**
+trỏ tới `/api/console/v1/evaluation/evidence/{experiment}`. Khi `false`,
+**không vẽ nút mờ** — bỏ hẳn.
+
+Các trường còn lại: `experiment`, `score_path_snapshot`, `head_commit`,
+`prompt_version`, `model`, `run_at`, `evidence_path`, `metadata_complete`,
+`summary`. `summary` là văn bản dài — cho nó cả chiều ngang.
+
+---
+
+### Ba cạm bẫy
+
+**1. `metadata` và `policy_metadata` là MẢNG, không phải object.** Dạng
+`[{label, value}, ...]` và **thứ tự có ý nghĩa**. Duyệt bằng `.map()` theo
+đúng thứ tự nhận được, đừng sắp xếp lại, đừng đổi sang object.
+
+**2. Nút tải bằng chứng phải là link thật, không phải `fetch`.** Endpoint đó
+trả **file thô** chứ không phải JSON, nên `client.get()` sẽ hỏng. Dùng thẻ
+`<a href="/api/console/v1/evaluation/evidence/...">` bình thường — trình duyệt
+tự gửi cookie phiên vì cùng origin.
+
+**3. Cả hai màn KHÔNG có bộ lọc, KHÔNG có phân trang.** API trả toàn bộ trong
+một lần. Đừng dựng thẻ lọc theo thói quen từ các màn trước.
+
+---
+
+### Ba trạng thái mỗi màn
+
+| Trạng thái | Hiện gì |
+|---|---|
+| đang tải | skeleton cho từng nhóm/thẻ |
+| lỗi | `<ErrorBanner>` |
+| rỗng | nhóm nào không có phần tử thì hiện "Chưa có dữ liệu" **trong nhóm đó**, các nhóm khác vẫn hiện bình thường |
+
+Không có trạng thái 403 riêng — mọi role đăng nhập đều xem được.
+
+---
+
+### Ràng buộc
+
+- KHÔNG thêm nút sửa/xoá/tải lại cấu hình — API chỉ có đọc
+- KHÔNG dùng `client.get()` cho endpoint tải bằng chứng — nó trả file thô
+- KHÔNG đổi `metadata` từ mảng sang object, đừng sắp xếp lại
+- KHÔNG vẽ nút "Tải bằng chứng" mờ khi `has_evidence = false`
+- KHÔNG dựng bộ lọc hay phân trang
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp cho các endpoint JSON — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG tự viết hàm định dạng hay bảng pill trong file trang
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài bốn file đã nêu (`lib/status.ts` được phép **thêm**)
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+
+**Dữ liệu để thử:** có sẵn — 4 file chính sách, 6 phép đo (E2 có bằng chứng
+tải được, các phép đo khác thì không).
+
+---
+
+## Giai đoạn 2 — hai màn còn lại
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
