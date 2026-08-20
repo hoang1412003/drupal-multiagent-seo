@@ -128,6 +128,8 @@ def test_filters_enums_match_code_exactly(conn):
     assert body["job_statuses"] == list(queries.QUEUE_STATUSES), body["job_statuses"]
     assert body["review_decisions"] == list(queries._REVIEW_DECISIONS)
     assert body["writeback_statuses"] == list(queries.WRITEBACK_STATUSES)
+    assert body["audit_actions"] == list(queries.AUDIT_ACTIONS)
+    assert body["audit_outcomes"] == list(queries.AUDIT_OUTCOMES)
 
     # Chot lai gia tri that de doi enum ma quen endpoint nay se lam do test.
     assert body["job_statuses"] == [

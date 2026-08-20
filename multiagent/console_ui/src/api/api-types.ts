@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/console/v1/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Audit */
+        get: operations["list_audit_api_console_v1_audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/v1/auth/login": {
         parameters: {
             query?: never;
@@ -214,6 +231,40 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
+        /** AuditEventModel */
+        AuditEventModel: {
+            /** Id */
+            id: number;
+            /** Actor User Id */
+            actor_user_id: string | null;
+            /** Actor Username */
+            actor_username: string;
+            /** Action */
+            action: string;
+            /** Target Type */
+            target_type: string;
+            /** Target Id */
+            target_id: string | null;
+            /** Outcome */
+            outcome: string;
+            /** Metadata Text */
+            metadata_text: string;
+            /** Created At */
+            created_at: string;
+        };
+        /** AuditPage */
+        AuditPage: {
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Total */
+            total: number;
+            /** Total Pages */
+            total_pages: number;
+            /** Items */
+            items: components["schemas"]["AuditEventModel"][];
+        };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
             /**
@@ -303,6 +354,10 @@ export interface components {
             review_decisions: string[];
             /** Writeback Statuses */
             writeback_statuses: string[];
+            /** Audit Actions */
+            audit_actions: string[];
+            /** Audit Outcomes */
+            audit_outcomes: string[];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -553,6 +608,50 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_audit_api_console_v1_audit_get: {
+        parameters: {
+            query?: {
+                /** @description xem GET /filters */
+                action?: string | null;
+                /** @description success|denied|failed */
+                outcome?: string | null;
+                /** @description khop mot phan ten dang nhap */
+                actor?: string | null;
+                /** @description YYYY-MM-DD */
+                from?: string | null;
+                /** @description phai di cung `from` */
+                to?: string | null;
+                /** @description mac dinh 1 */
+                page?: string | null;
+                /** @description mac dinh 25, toi da 100 */
+                page_size?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     login_api_console_v1_auth_login_post: {
         parameters: {
             query?: never;
@@ -657,7 +756,12 @@ export interface operations {
     };
     dashboard_api_console_v1_dashboard_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description YYYY-MM-DD */
+                from?: string | null;
+                /** @description phai di cung `from` */
+                to?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -671,6 +775,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -697,7 +810,24 @@ export interface operations {
     };
     list_jobs_api_console_v1_jobs_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description queued|running|failed|done|superseded */
+                status?: string | null;
+                /** @description slug cua site, khop chinh xac */
+                site?: string | null;
+                /** @description khop chinh xac, xem GET /filters */
+                source?: string | null;
+                /** @description khop mot phan chuoi */
+                external_id?: string | null;
+                /** @description YYYY-MM-DD */
+                from?: string | null;
+                /** @description phai di cung `from` */
+                to?: string | null;
+                /** @description mac dinh 1 */
+                page?: string | null;
+                /** @description mac dinh 25, toi da 100 */
+                page_size?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -711,6 +841,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -783,7 +922,22 @@ export interface operations {
     };
     list_reviews_api_console_v1_reviews_get: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description publish|needs_revision|rejected|unknown */
+                decision?: string | null;
+                /** @description slug cua site, khop chinh xac */
+                site?: string | null;
+                /** @description khop mot phan chuoi */
+                external_id?: string | null;
+                /** @description YYYY-MM-DD */
+                from?: string | null;
+                /** @description phai di cung `from` */
+                to?: string | null;
+                /** @description mac dinh 1 */
+                page?: string | null;
+                /** @description mac dinh 25, toi da 100 */
+                page_size?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -797,6 +951,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReviewPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

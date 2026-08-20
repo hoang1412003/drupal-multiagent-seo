@@ -6,6 +6,165 @@
     "description": "Hop dong cho frontend Console tai /console. Xac thuc bang cookie phien HttpOnly (same-origin); moi POST phai gui header X-CSRF-Token lay tu GET /auth/me."
   },
   "paths": {
+    "/api/console/v1/audit": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "List Audit",
+        "operationId": "list_audit_api_console_v1_audit_get",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "xem GET /filters",
+              "title": "Action"
+            },
+            "description": "xem GET /filters"
+          },
+          {
+            "name": "outcome",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "success|denied|failed",
+              "title": "Outcome"
+            },
+            "description": "success|denied|failed"
+          },
+          {
+            "name": "actor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "khop mot phan ten dang nhap",
+              "title": "Actor"
+            },
+            "description": "khop mot phan ten dang nhap"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "YYYY-MM-DD",
+              "title": "From"
+            },
+            "description": "YYYY-MM-DD"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "phai di cung `from`",
+              "title": "To"
+            },
+            "description": "phai di cung `from`"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 1",
+              "title": "Page"
+            },
+            "description": "mac dinh 1"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 25, toi da 100",
+              "title": "Page Size"
+            },
+            "description": "mac dinh 25, toi da 100"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/console/v1/auth/login": {
       "post": {
         "tags": [
@@ -742,6 +901,109 @@
         ],
         "title": "AgentResultModel"
       },
+      "AuditEventModel": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "actor_user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor User Id"
+          },
+          "actor_username": {
+            "type": "string",
+            "title": "Actor Username"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "metadata_text": {
+            "type": "string",
+            "title": "Metadata Text"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "actor_user_id",
+          "actor_username",
+          "action",
+          "target_type",
+          "target_id",
+          "outcome",
+          "metadata_text",
+          "created_at"
+        ],
+        "title": "AuditEventModel"
+      },
+      "AuditPage": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditEventModel"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "total_pages",
+          "items"
+        ],
+        "title": "AuditPage"
+      },
       "ChangePasswordRequest": {
         "properties": {
           "current_password": {
@@ -971,6 +1233,20 @@
             },
             "type": "array",
             "title": "Writeback Statuses"
+          },
+          "audit_actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Audit Actions"
+          },
+          "audit_outcomes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Audit Outcomes"
           }
         },
         "type": "object",
@@ -979,7 +1255,9 @@
           "job_sources",
           "job_statuses",
           "review_decisions",
-          "writeback_statuses"
+          "writeback_statuses",
+          "audit_actions",
+          "audit_outcomes"
         ],
         "title": "FiltersResponse",
         "description": "Gia tri hop le cho moi bo loc, lay tu server.\n\nTon tai de frontend khong hard-code danh sach nao. Mot brief tung ghi\ntrang thai job la `succeeded` trong khi that su la `done`, va khong phep\nkiem nao bat duoc vi gia tri hop le chua bao gio nam trong hop dong."

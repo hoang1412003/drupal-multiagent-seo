@@ -31,4 +31,6 @@ def filters(
         job_statuses=list(queries.QUEUE_STATUSES),
         review_decisions=list(queries._REVIEW_DECISIONS),
         writeback_statuses=list(queries.WRITEBACK_STATUSES),
+        audit_actions=list(queries.AUDIT_ACTIONS),
+        audit_outcomes=list(queries.AUDIT_OUTCOMES),
     )

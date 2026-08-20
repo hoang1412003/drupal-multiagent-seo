@@ -25,6 +25,7 @@ CONSOLE_ROUTES = {
     "/api/console/v1/auth/me",
     "/api/console/v1/auth/logout",
     "/api/console/v1/auth/change-password",
+    "/api/console/v1/audit",
     "/api/console/v1/dashboard",
     "/api/console/v1/filters",
     "/api/console/v1/jobs",
@@ -61,6 +62,7 @@ def test_real_app_mounts_all_console_routes():
         ("GET", "/api/console/v1/auth/me"),
         ("POST", "/api/console/v1/auth/logout"),
         ("POST", "/api/console/v1/auth/change-password"),
+        ("GET", "/api/console/v1/audit"),
         ("GET", "/api/console/v1/dashboard"),
         ("GET", "/api/console/v1/filters"),
         ("GET", "/api/console/v1/jobs"),
@@ -84,7 +86,7 @@ def test_real_app_mounts_all_console_routes():
         assert login.status_code != 404, "/auth/login chua duoc mount"
     finally:
         app_module.app.dependency_overrides.clear()
-    print("[PASS] ca 11 route Console deu mount tren app that va tra 401 dung chuan")
+    print("[PASS] ca 12 route Console deu mount tren app that va tra 401 dung chuan")
 
 
 def test_openapi_excludes_legacy_admin_routes():
@@ -125,9 +127,9 @@ def test_openapi_console_paths_are_complete():
     # kieu `unknown` va agent viet frontend mat toan bo loi ich cua kieu.
     components = schema.get("components", {}).get("schemas", {})
     for ten in ("MeResponse", "DashboardResponse", "JobPage", "JobDetailModel",
-                "ReviewPage", "ReviewDetailModel", "FiltersResponse"):
+                "ReviewPage", "ReviewDetailModel", "FiltersResponse", "AuditPage"):
         assert ten in components, f"thieu schema {ten} trong openapi"
-    print("[PASS] openapi co du 11 duong dan Console va 7 schema chinh")
+    print("[PASS] openapi co du 12 duong dan Console va 8 schema chinh")
 
 
 def test_exported_contract_excludes_connector_models():
@@ -171,6 +173,8 @@ def test_every_get_endpoint_declares_its_query_params():
                                  "from", "to", "page", "page_size"},
         "/api/console/v1/reviews": {"decision", "site", "external_id",
                                     "from", "to", "page", "page_size"},
+        "/api/console/v1/audit": {"action", "outcome", "actor",
+                                  "from", "to", "page", "page_size"},
         "/api/console/v1/dashboard": {"from", "to"},
     }
     for path, mong_doi in can_khai_bao.items():
@@ -197,11 +201,11 @@ def test_every_filtered_endpoint_rejects_unknown_params():
     import inspect
 
     from review_platform.admin_api import (
-        dashboard_routes, job_routes, review_routes,
+        audit_routes, dashboard_routes, job_routes, review_routes,
     )
 
     for ten, mod in (("jobs", job_routes), ("reviews", review_routes),
-                     ("dashboard", dashboard_routes)):
+                     ("dashboard", dashboard_routes), ("audit", audit_routes)):
         src = inspect.getsource(mod)
         assert "reject_unknown_query_params" in src, (
             f"{ten} khong goi reject_unknown_query_params; tham so go sai ten "

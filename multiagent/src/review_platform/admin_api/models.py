@@ -353,3 +353,38 @@ class FiltersResponse(BaseModel):
     job_statuses: list[str]
     review_decisions: list[str]
     writeback_statuses: list[str]
+    audit_actions: list[str]
+    audit_outcomes: list[str]
+
+
+class AuditEventModel(BaseModel):
+    id: int
+    actor_user_id: str | None
+    actor_username: str
+    action: str
+    target_type: str
+    target_id: str | None
+    outcome: str
+    # Da qua sanitization o queries: bi mat hien thanh "[da an]".
+    metadata_text: str
+    created_at: str
+
+    @classmethod
+    def from_view(cls, item) -> "AuditEventModel":
+        return cls(
+            id=item.id,
+            actor_user_id=(
+                None if item.actor_user_id is None else str(item.actor_user_id)
+            ),
+            actor_username=item.actor_username,
+            action=item.action,
+            target_type=item.target_type,
+            target_id=item.target_id,
+            outcome=item.outcome,
+            metadata_text=item.metadata_text,
+            created_at=iso(item.created_at),
+        )
+
+
+class AuditPage(PageResponse):
+    items: list[AuditEventModel]
