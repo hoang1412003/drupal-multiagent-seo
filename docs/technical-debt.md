@@ -1413,8 +1413,31 @@ reviews,mount}`, `test_console_stitch_briefs`). Smoke end-to-end qua **server
 thật** 7/7 bước, gồm khẳng định cookie nằm ở `Path=/` — thứ mà TestClient có
 thể che giấu. `tsc --noEmit` sạch, `npm run build` OK.
 
-**Chưa kiểm bằng mắt.** Dự án không có JS test harness; giao diện chưa được
-xác nhận bằng ảnh chụp. Đừng ghi là "đã kiểm thử giao diện".
+**Đã kiểm bằng mắt (2026-08-20).** Bốn ảnh chụp xác nhận đăng nhập, điều
+hướng, và ba trang trả dữ liệu thật. Bảy trang hiện chỉ in JSON thô — đúng
+thiết kế, phần trình bày là việc của Antigravity.
+
+**Ảnh chụp bắt được một lỗi mà không phép kiểm tự động nào bắt được.** Brief
+Stitch ghi trạng thái job là `queued/running/succeeded/failed`, trong khi thực
+tế là `queued/running/failed/done/superseded` — **năm** giá trị, và là `done`
+chứ không phải `succeeded`. Nếu để nguyên, Stitch vẽ badge 4 trạng thái sai
+tên, rồi Antigravity code bảng ánh xạ thiếu `done` và `superseded`, và **mọi
+dòng dữ liệu thật đều rơi vào nhánh mặc định**.
+
+Vì sao script đối chiếu không bắt được: nó so **tên trường** với
+`openapi.json`, mà ở đó `status` khai báo là `str` chứ không phải enum. Giá
+trị hợp lệ chưa bao giờ nằm trong hợp đồng.
+
+Đã bịt: `test_console_stitch_briefs.py` thêm chiều kiểm thứ ba, đọc
+`QUEUE_STATUSES` / `_REVIEW_DECISIONS` / `WRITEBACK_STATUSES` **thẳng từ
+code** và đối chiếu **từng màn hình** (không phải toàn tài liệu — khối `STYLE`
+lặp 6 lần có nhắc tên trạng thái để quy định màu, nên tìm trên toàn tài liệu
+sẽ luôn xanh). Bản kiểm đã được thử ngược: tái hiện đúng lỗi trên thì nó đỏ.
+
+**Đây là lần thứ năm của cái bẫy "unit test dùng ví dụ do chính người viết
+code nghĩ ra"** đã ghi ở cuối mục 8. Lần này biến thể là: *phép kiểm tự động
+chỉ kiểm được thứ nằm trong hợp đồng, còn thứ không nằm trong hợp đồng thì nó
+mù.* Chỉ dữ liệu thật mới lộ ra.
 
 ---
 

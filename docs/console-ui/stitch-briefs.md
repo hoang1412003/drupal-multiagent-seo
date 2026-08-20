@@ -60,8 +60,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.
@@ -88,9 +88,10 @@ right now. Desktop-first, data-dense. All UI labels in Vietnamese.
 DATA — show EXACTLY these, no invented metrics:
 - Khoảng thời gian: date_from and date_to (YYYY-MM-DD). Defaults to the last 7
   days. Both dates are always required together.
-- Hàng đợi (queue_counts): a small count per job status. The four statuses are
-  queued, running, succeeded, failed. Render as a compact inline row, NOT as
-  four large KPI cards.
+- Hàng đợi (queue_counts): a count per job status. There are FIVE statuses,
+  not four: queued / running / failed / done / superseded. Note it is "done",
+  NOT "succeeded" — do not rename it. Render as a compact inline row, NOT as
+  large KPI cards.
 - Tổng số review (total_reviews): one integer.
 - Quyết định (decision_counts): counts per decision — publish, needs_revision,
   rejected, unknown.
@@ -127,8 +128,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.
@@ -157,8 +158,10 @@ DATA — the table must show EXACTLY these columns, no others, no invented ones:
 - Thời gian tạo (created_at, ISO-8601 UTC)                      e.g. "19/08/2026 14:32"
 - Site          (site_slug, short string)                       e.g. "vinfast-vn"
 - ID nội dung   (external_content_id, string)                   e.g. "node-1842"
-- Trạng thái    (status — a badge with EXACTLY four possible values):
-                queued / running / succeeded / failed
+- Trạng thái    (status — a badge with EXACTLY these FIVE values, no others):
+                queued / running / failed / done / superseded
+                It is "done", NOT "succeeded". "superseded" means a newer job
+                replaced this one.
 - Số lần thử    (attempts, integer, right-aligned)              e.g. 2
 - Nguồn         (source, short string)                          e.g. "event", "admin_retry"
 - Phiên bản policy (policy_version, string)                     e.g. "cam-nang-vn-v1"
@@ -167,7 +170,7 @@ Rows are NOT clickable as a whole; the Mã job cell is the link to the detail
 screen.
 
 CONTROLS + STATES:
-Filters: Trạng thái (dropdown, the four values above), Site (dropdown), Nguồn
+Filters: Trạng thái (dropdown, the five values above), Site (dropdown), Nguồn
 (dropdown), ID nội dung (text, substring match), and a date range (Từ ngày /
 Đến ngày — both required together or both empty).
 Pagination: "Trang 1 / 3 · 137 kết quả" with previous/next. Page size is 25 by
@@ -185,8 +188,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.
@@ -214,7 +217,8 @@ DATA — show EXACTLY these 22 fields, grouped as suggested, nothing invented:
 Nhận dạng: public_id (UUID, monospace), correlation_id (UUID, monospace),
   supersedes_job_public_id (UUID or null — when present, label it "Thay thế cho
   job" and make it a link).
-Trạng thái: status (badge: queued / running / succeeded / failed), attempts
+Trạng thái: status (badge: queued / running / failed / done / superseded —
+  five values, and it is "done" NOT "succeeded"), attempts
   (integer), source (string), last_error (long free text, may be null — this is
   the field the reader came for, give it room and a monospace face).
 Thời gian: created_at, updated_at (both ISO-8601 UTC).
@@ -223,7 +227,8 @@ Nội dung: external_content_id, external_revision_id (may be null), content_typ
 Ngữ cảnh: site_slug, site_name, site_id (UUID), profile_id (UUID),
   policy_version.
 Kết quả: run_public_id (UUID or null — link to the review detail screen when
-  present), run_scored_at (timestamp or null), writeback_status (string or null),
+  present), run_scored_at (timestamp or null), writeback_status (one of
+  succeeded / failed / superseded / pending / unknown, or null),
   saved_result_available (boolean).
 When a value is null show "—", never an empty cell and never "N/A".
 
@@ -238,7 +243,7 @@ success the screen navigates to that new job — show a brief confirmation of th
 Design all five states:
 1. Loading
 2. Loaded, status failed (retry available)
-3. Loaded, status running (no retry button at all)
+3. Loaded, status done or running (no retry button at all)
 4. Not found — "Không tìm thấy job"
 5. Conflict — retry rejected because the job is no longer failed: inline banner
    "Không thể thử lại job này."
@@ -249,8 +254,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.
@@ -307,8 +312,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.
@@ -352,7 +357,8 @@ Kết quả từng agent (agents): a list of AT MOST FOUR agents. Each agent has
 Vận hành: duration_ms (integer, may be null), model (string), usage_available
   (boolean), cost_estimate (input_tokens, output_tokens, estimated_usd may be
   null, currency, pricing_version, effective_at, unknown_models list).
-Ghi ngược: writeback_status (string), writeback_error (text or null).
+Ghi ngược: writeback_status (one of succeeded / failed / superseded /
+  pending / unknown), writeback_error (text or null).
 Ngữ cảnh: public_id, correlation_id, scored_at, site_id, site_slug, site_name,
   profile_id, profile_code, policy_version, external_content_id,
   external_revision_id (may be null), content_type, langcode, is_fixture
@@ -379,8 +385,8 @@ of Linear or Stripe Dashboard, NOT a marketing page):
   Support light and dark mode.
 - Colour discipline: navy is reserved for the single primary action per screen.
   Everything else is neutral grey. The ONLY other colour is semantic status
-  (queued grey, running blue, succeeded green, failed red), shown as a quiet
-  pill, never as a filled row.
+  (queued grey, running blue, done green, failed red, superseded muted), shown
+  as a quiet pill, never as a filled row.
 - Tables: generous row height, tight horizontal padding, hairline row dividers
   rather than boxes, strong weight contrast between header and body, IDs and
   numbers in a monospace face and right-aligned.

@@ -4,10 +4,18 @@ Vi sao can: brief khong dinh kem anh admin cu, nen prompt la rang buoc duy nhat
 len Stitch. Mot ten truong bia ra trong brief se thanh mot cot trong thiet ke,
 roi thanh code khong chay duoc ben frontend. Script nay chan dieu do o goc.
 
-Kiem hai chieu:
+Kiem ba chieu:
 1. Thieu  - truong co trong hop dong nhung khong duoc nhac trong brief.
 2. Thua   - token kieu snake_case trong brief nhung khong co trong hop dong va
             khong nam trong danh sach gia tri hop le.
+3. Enum   - moi gia tri trang thai that phai xuat hien trong brief.
+
+Chieu 3 them sau khi mot loi that lot qua hai chieu dau: brief ghi trang thai
+job la "queued/running/succeeded/failed" trong khi that su la
+"queued/running/failed/done/superseded" - nam gia tri, va la `done` chu khong
+phai `succeeded`. openapi.json khai bao `status: str` chu khong phai enum nen
+doi chieu ten truong khong the bat duoc. Chi lo ra khi nhin anh chup man hinh
+that.
 
 Chay: ..\multiagent\.venv\Scripts\python.exe scripts	est_console_stitch_briefs.py
 Chay tu dong trong nhom `pure` cua run_test_group: brief lech khoi API se
@@ -56,6 +64,36 @@ GIA_TRI_HOP_LE = {
 }
 
 TOKEN = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
+
+TEN_MAN_HINH = (
+    "Login", "Dashboard", "Jobs", "Job detail", "Reviews", "Review detail",
+)
+# Man hinh nao phai liet ke enum nao. Login khong hien du lieu nghiep vu nen
+# khong co rang buoc.
+CAN_ENUM = {
+    1: ("trang thai job", "quyet dinh review"),
+    2: ("trang thai job",),
+    3: ("trang thai job", "trang thai ghi nguoc"),
+    4: ("quyet dinh review",),
+    5: ("quyet dinh review", "trang thai ghi nguoc"),
+}
+
+
+def _enum_that() -> dict[str, tuple[str, ...]]:
+    """Gia tri enum doc THANG tu code, khong go tay vao day.
+
+    Go tay se lap lai dung loi ma chieu kiem nay sinh ra de chan.
+    """
+    import os
+
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+    from review_platform.admin import queries
+
+    return {
+        "trang thai job": queries.QUEUE_STATUSES,
+        "quyet dinh review": queries._REVIEW_DECISIONS,
+        "trang thai ghi nguoc": queries.WRITEBACK_STATUSES,
+    }
 
 
 def doc_hop_dong() -> dict[str, set[str]]:
@@ -110,6 +148,22 @@ def main() -> int:
         if token in tat_ca_truong or token in GIA_TRI_HOP_LE:
             continue
         loi.append(f"THUA   '{token}' khong co trong hop dong va khong phai gia tri")
+
+    # Chieu 3: gia tri enum, kiem TUNG MAN HINH.
+    #
+    # Khong duoc tim tren toan tai lieu: khoi STYLE lap lai 6 lan va co nhac
+    # ten trang thai de quy dinh mau, nen mot man hinh bo sot gia tri van se
+    # "tim thay" o cho khac. Vi vay cat bo khoi STYLE truoc khi tim.
+    enum = _enum_that()
+    for chi_so, can_co in CAN_ENUM.items():
+        phan_data = khoi[chi_so].split("STYLE")[0]
+        for ten_enum in can_co:
+            for value in enum[ten_enum]:
+                if not re.search(rf"\b{re.escape(value)}\b", phan_data):
+                    loi.append(
+                        f"ENUM   brief #{chi_so + 1} ({TEN_MAN_HINH[chi_so]}) "
+                        f"thieu gia tri '{value}' cua {ten_enum}"
+                    )
 
     if loi:
         for dong in loi:
