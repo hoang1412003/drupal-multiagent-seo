@@ -28,6 +28,8 @@ export function ReviewsPage() {
     >
       {(page) => (
         // TODO(Antigravity): dựng bảng theo thiết kế Stitch "Reviews".
+        // Dropdown lọc: dùng useFilters() trong src/api/useFilters.ts.
+        // KHÔNG viết cứng danh sách trạng thái/quyết định.
         // final_score có thể null - hiện "—", đừng hiện 0.
         <pre>{JSON.stringify(page, null, 2)}</pre>
       )}

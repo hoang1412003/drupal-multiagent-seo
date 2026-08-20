@@ -28,6 +28,8 @@ export function JobsPage() {
     >
       {(page) => (
         // TODO(Antigravity): dựng bảng theo thiết kế Stitch "Jobs".
+        // Dropdown lọc: dùng useFilters() trong src/api/useFilters.ts.
+        // KHÔNG viết cứng danh sách trạng thái/quyết định.
         // Dữ liệu đã có trong page.items; KHÔNG gọi fetch trực tiếp.
         <pre>{JSON.stringify(page, null, 2)}</pre>
       )}

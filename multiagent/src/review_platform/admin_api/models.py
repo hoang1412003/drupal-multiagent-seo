@@ -332,3 +332,24 @@ class ReviewDetailModel(BaseModel):
             is_fixture=review.is_fixture,
             drupal_url=review.drupal_url,
         )
+
+
+class SiteOptionModel(BaseModel):
+    slug: str
+    name: str
+    active: bool
+
+
+class FiltersResponse(BaseModel):
+    """Gia tri hop le cho moi bo loc, lay tu server.
+
+    Ton tai de frontend khong hard-code danh sach nao. Mot brief tung ghi
+    trang thai job la `succeeded` trong khi that su la `done`, va khong phep
+    kiem nao bat duoc vi gia tri hop le chua bao gio nam trong hop dong.
+    """
+
+    sites: list[SiteOptionModel]
+    job_sources: list[str]
+    job_statuses: list[str]
+    review_decisions: list[str]
+    writeback_statuses: list[str]

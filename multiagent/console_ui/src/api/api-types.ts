@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/v1/filters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Filters */
+        get: operations["filters_api_console_v1_filters_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/v1/jobs": {
         parameters: {
             query?: never;
@@ -266,6 +283,26 @@ export interface components {
             worker_stale: number;
             /** Worker Last Seen At */
             worker_last_seen_at: string | null;
+        };
+        /**
+         * FiltersResponse
+         * @description Gia tri hop le cho moi bo loc, lay tu server.
+         *
+         *     Ton tai de frontend khong hard-code danh sach nao. Mot brief tung ghi
+         *     trang thai job la `succeeded` trong khi that su la `done`, va khong phep
+         *     kiem nao bat duoc vi gia tri hop le chua bao gio nam trong hop dong.
+         */
+        FiltersResponse: {
+            /** Sites */
+            sites: components["schemas"]["SiteOptionModel"][];
+            /** Job Sources */
+            job_sources: string[];
+            /** Job Statuses */
+            job_statuses: string[];
+            /** Review Decisions */
+            review_decisions: string[];
+            /** Writeback Statuses */
+            writeback_statuses: string[];
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -485,6 +522,15 @@ export interface components {
             /** Items */
             items: components["schemas"]["ReviewListItemModel"][];
         };
+        /** SiteOptionModel */
+        SiteOptionModel: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Active */
+            active: boolean;
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -625,6 +671,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DashboardResponse"];
+                };
+            };
+        };
+    };
+    filters_api_console_v1_filters_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FiltersResponse"];
                 };
             };
         };

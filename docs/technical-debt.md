@@ -1365,7 +1365,7 @@ với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn c
 - Thiết kế: [`superpowers/specs/2026-08-19-console-react-admin-design.md`](superpowers/specs/2026-08-19-console-react-admin-design.md)
 - Kế hoạch: [`superpowers/plans/2026-08-19-console-react-admin.md`](superpowers/plans/2026-08-19-console-react-admin.md)
 - Hợp đồng giao cho agent viết giao diện: `multiagent/console_ui/openapi.json`
-  (10 đường dẫn, 15 schema) + [`console-ui/integration.md`](console-ui/integration.md)
+  (11 đường dẫn, 17 schema) + [`console-ui/integration.md`](console-ui/integration.md)
 - Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
 
 **Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
@@ -1454,8 +1454,18 @@ mù.* Chỉ dữ liệu thật mới lộ ra.
    `50` và `80.21`. Hiển thị thô thì cột điểm lởm chởm.
 4. **Bộ lọc Site/Nguồn không có nguồn dữ liệu để làm dropdown.** Không có
    endpoint nào liệt kê site hay source, và `source` là tự do (dữ liệu thật:
-   `event`, `reconcile`, `manual-test-b7`). Brief đã đổi sang ô nhập văn bản.
-   Muốn dropdown thật thì phải thêm endpoint `/filters` — chưa làm.
+   `event`, `reconcile`, `manual-test-b7`). **Đã bổ sung
+   `GET /api/console/v1/filters`** (endpoint thứ 11) trả `sites`,
+   `job_sources`, và cả ba enum (`job_statuses`, `review_decisions`,
+   `writeback_statuses`).
+
+   Trả enum qua API là chủ ý, không phải tiện tay: enum **không nằm trong
+   `openapi.json`** (`status` khai là `str`), nên một danh sách viết cứng bị
+   sai sẽ không phép kiểm nào bắt được — đúng lỗi vừa xảy ra. Lấy từ server
+   thì không thể lệch. Test khoá cả ba enum vào đúng hằng số trong code.
+
+   `sites` **gồm cả site đã tắt**: job và review lịch sử của site đó vẫn nằm
+   trong danh sách, bỏ đi thì không còn cách nào lọc ra.
 
 **Lỗ hổng thứ hai của chính script kiểm**, cùng họ với lỗ hổng đầu: nó tìm tên
 trường **trên toàn tài liệu**, nên `source` của `JobListItemModel` che cho

@@ -15,6 +15,16 @@ nguyên khối, dán vào Stitch, **không đính kèm ảnh nào**.
    Hệ quả: **prompt là ràng buộc duy nhất**, nên phần `DATA` phải giữ nguyên
    văn — mọi tên trường trong đó đều lấy từ `openapi.json`.
 
+## Giá trị bộ lọc lấy từ API, không viết cứng
+
+Ba dropdown (Trạng thái, Site, Nguồn) và dropdown Quyết định đều nạp từ một lời
+gọi `GET /api/console/v1/filters`. Không viết cứng danh sách nào trong giao diện.
+
+Lý do rất cụ thể: enum trạng thái **không nằm trong `openapi.json`** (`status`
+khai là `str`), nên một danh sách viết cứng bị sai sẽ không phép kiểm nào bắt
+được. Chính brief này từng ghi `succeeded` trong khi giá trị thật là `done`, và
+chỉ lộ ra khi nhìn dữ liệu thật.
+
 ## Vì sao khối STYLE có một danh sách cấm
 
 Mọi công cụ sinh giao diện đều mặc định trả về trang kiểu tiếp thị: hero
@@ -182,14 +192,17 @@ Rows are NOT clickable as a whole; the Mã job cell is the link to the detail
 screen.
 
 CONTROLS + STATES:
-Filters: Trạng thái (dropdown — the five values above are a fixed list, so a
-dropdown works), Site (TEXT INPUT, not a dropdown), Nguồn (TEXT INPUT, not a
-dropdown), ID nội dung (text, substring match), and a date range (Từ ngày /
-Đến ngày — both required together or both empty).
-Site and Nguồn must be text inputs because the API has no endpoint that lists
-the available values, and Nguồn is free-form (real values include "event",
-"reconcile", "admin_retry", "manual-test-b7"). Site matches the slug exactly;
-Nguồn matches exactly. Design them with a hint showing an example value.
+Filters: Trạng thái (dropdown), Site (dropdown), Nguồn (dropdown), ID nội dung
+(text, substring match), and a date range (Từ ngày / Đến ngày — both required
+together or both empty).
+All three dropdowns are populated from a single call to GET /filters, so none
+of their values are hard-coded in the UI. Design each with a "Tất cả" option as
+the default. Site options carry a slug, a display name, and an `active` flag —
+show the name, and mark inactive sites with a muted "đã tắt" tag rather than
+hiding them, because their historical jobs are still in the list. Nguồn values
+are free-form strings from real data (e.g. "event", "reconcile", "admin_retry",
+"manual-test-b7"), so the dropdown must tolerate an unfamiliar value and a list
+that grows over time.
 Pagination: "Trang 1 / 3 · 137 kết quả" with previous/next. Page size is 25 by
 default and capped at 100. There is no infinite scroll and no export button.
 Design all four states:
@@ -317,11 +330,11 @@ DATA — the table must show EXACTLY these columns, no others, no invented ones:
                 hide the row and do NOT colour it like an error.)
 
 CONTROLS + STATES:
-Filters: Quyết định (dropdown — the four values are a fixed list), Site (TEXT
-INPUT, not a dropdown — the API has no endpoint listing available sites, and it
-matches the slug exactly), ID nội dung (text, substring match), and a date range
-(both dates required together or both empty). Pagination identical to the Jobs
-screen. No export button.
+Filters: Quyết định (dropdown), Site (dropdown), ID nội dung (text, substring
+match), and a date range (both dates required together or both empty).
+Both dropdowns are populated from GET /filters — the same call the Jobs screen
+makes — so no value is hard-coded. Each has a "Tất cả" default. Pagination
+identical to the Jobs screen. No export button.
 NOTE: this list does NOT exclude seeded test data, and it is not date-scoped by
 default — so its total will not match the Dashboard's "Tổng số review".
 Design all four states:

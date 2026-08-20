@@ -26,6 +26,7 @@ CONSOLE_ROUTES = {
     "/api/console/v1/auth/logout",
     "/api/console/v1/auth/change-password",
     "/api/console/v1/dashboard",
+    "/api/console/v1/filters",
     "/api/console/v1/jobs",
     "/api/console/v1/jobs/{public_id}",
     "/api/console/v1/jobs/{public_id}/retry",
@@ -61,6 +62,7 @@ def test_real_app_mounts_all_console_routes():
         ("POST", "/api/console/v1/auth/logout"),
         ("POST", "/api/console/v1/auth/change-password"),
         ("GET", "/api/console/v1/dashboard"),
+        ("GET", "/api/console/v1/filters"),
         ("GET", "/api/console/v1/jobs"),
         ("GET", f"/api/console/v1/jobs/{uuid_gia}"),
         ("POST", f"/api/console/v1/jobs/{uuid_gia}/retry"),
@@ -82,7 +84,7 @@ def test_real_app_mounts_all_console_routes():
         assert login.status_code != 404, "/auth/login chua duoc mount"
     finally:
         app_module.app.dependency_overrides.clear()
-    print("[PASS] ca 10 route Console deu mount tren app that va tra 401 dung chuan")
+    print("[PASS] ca 11 route Console deu mount tren app that va tra 401 dung chuan")
 
 
 def test_openapi_excludes_legacy_admin_routes():
@@ -123,9 +125,9 @@ def test_openapi_console_paths_are_complete():
     # kieu `unknown` va agent viet frontend mat toan bo loi ich cua kieu.
     components = schema.get("components", {}).get("schemas", {})
     for ten in ("MeResponse", "DashboardResponse", "JobPage", "JobDetailModel",
-                "ReviewPage", "ReviewDetailModel"):
+                "ReviewPage", "ReviewDetailModel", "FiltersResponse"):
         assert ten in components, f"thieu schema {ten} trong openapi"
-    print("[PASS] openapi co du 10 duong dan Console va 6 schema chinh")
+    print("[PASS] openapi co du 11 duong dan Console va 7 schema chinh")
 
 
 def test_exported_contract_excludes_connector_models():

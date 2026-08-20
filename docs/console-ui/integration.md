@@ -102,7 +102,38 @@ Hai điểm dễ làm sai:
 - **422 phải giữ nguyên giá trị lọc.** Xóa sạch bộ lọc khi báo lỗi là cách nhanh
   nhất làm người dùng bực.
 
-## 5. Phân trang
+## 5. Giá trị bộ lọc: `GET /filters`
+
+**Không viết cứng danh sách nào trong giao diện.** Một lời gọi trả về mọi giá
+trị hợp lệ:
+
+```json
+{
+  "sites": [{"slug": "drupal-vn-primary", "name": "Drupal VN primary", "active": true}],
+  "job_sources": ["admin_retry", "event", "manual-test-b7", "reconcile"],
+  "job_statuses": ["queued", "running", "failed", "done", "superseded"],
+  "review_decisions": ["publish", "needs_revision", "rejected", "unknown"],
+  "writeback_statuses": ["succeeded", "failed", "superseded", "pending", "unknown"]
+}
+```
+
+Ba điều cần biết:
+
+- **Gọi một lần, dùng chung** cho cả Jobs và Reviews. Giá trị hầu như không đổi
+  nên `staleTime` dài là hợp lý.
+- **`sites` gồm cả site đã tắt** (`active: false`). Đừng ẩn chúng: job và
+  review lịch sử của site đó vẫn nằm trong danh sách, ẩn đi thì không còn cách
+  nào lọc ra. Đánh dấu bằng nhãn mờ là đủ.
+- **`job_sources` là dữ liệu, không phải hằng số.** Nó sinh từ
+  `SELECT DISTINCT source` nên sẽ dài thêm theo thời gian và có thể chứa giá
+  trị lạ như `manual-test-b7`.
+
+Lý do endpoint này tồn tại: enum trạng thái **không nằm trong `openapi.json`**
+(`status` khai là `str`), nên một danh sách viết cứng bị sai sẽ không phép kiểm
+nào bắt được. Đã từng xảy ra: brief ghi `succeeded` trong khi giá trị thật là
+`done`, và chỉ lộ ra khi nhìn dữ liệu thật.
+
+## 6. Phân trang
 
 Mọi endpoint danh sách trả **cùng một hình dạng**:
 
@@ -113,7 +144,7 @@ Mọi endpoint danh sách trả **cùng một hình dạng**:
 `page_size` mặc định 25, tối đa 100. Truyền `page=0` hoặc `page_size=1000` sẽ
 nhận `422`.
 
-## 6. Ba cạm bẫy về dữ liệu
+## 7. Ba cạm bẫy về dữ liệu
 
 **Điểm số là `number`, nhưng có thể `null`.** `final_score` là `null` khi review
 chưa chấm được. Hiện `—`, đừng hiện `0` — chúng khác nhau về ý nghĩa.
@@ -126,7 +157,7 @@ nghĩa là chưa bao giờ chạy. Gộp hai cái này sẽ che mất một sự
 không phải job cũ. Điều hướng sang job mới đó; nếu ở lại trang cũ, người dùng
 sẽ tưởng retry không có tác dụng.
 
-## 7. Nội dung từ AI — quy tắc hiển thị
+## 8. Nội dung từ AI — quy tắc hiển thị
 
 `agents[].criteria`, `.issues`, `.evidence` trong review detail bắt nguồn từ
 output của model. Backend **đã** che bí mật (giá trị bị che hiện thành

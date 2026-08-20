@@ -137,6 +137,27 @@
         }
       }
     },
+    "/api/console/v1/filters": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Filters",
+        "operationId": "filters_api_console_v1_filters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiltersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/console/v1/jobs": {
       "get": {
         "tags": [
@@ -571,6 +592,55 @@
           "worker_last_seen_at"
         ],
         "title": "DashboardResponse"
+      },
+      "FiltersResponse": {
+        "properties": {
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SiteOptionModel"
+            },
+            "type": "array",
+            "title": "Sites"
+          },
+          "job_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Job Sources"
+          },
+          "job_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Job Statuses"
+          },
+          "review_decisions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Review Decisions"
+          },
+          "writeback_statuses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Writeback Statuses"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sites",
+          "job_sources",
+          "job_statuses",
+          "review_decisions",
+          "writeback_statuses"
+        ],
+        "title": "FiltersResponse",
+        "description": "Gia tri hop le cho moi bo loc, lay tu server.\n\nTon tai de frontend khong hard-code danh sach nao. Mot brief tung ghi\ntrang thai job la `succeeded` trong khi that su la `done`, va khong phep\nkiem nao bat duoc vi gia tri hop le chua bao gio nam trong hop dong."
       },
       "HTTPValidationError": {
         "properties": {
@@ -1245,6 +1315,29 @@
           "items"
         ],
         "title": "ReviewPage"
+      },
+      "SiteOptionModel": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "active"
+        ],
+        "title": "SiteOptionModel"
       },
       "ValidationError": {
         "properties": {

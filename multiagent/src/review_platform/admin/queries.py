@@ -923,3 +923,53 @@ def _connector_status(conn) -> str:
     if row is None or row[0] is None:
         return "unknown"
     return row[0]
+
+
+@dataclass(frozen=True)
+class SiteOption:
+    slug: str
+    name: str
+    active: bool
+
+
+@dataclass(frozen=True)
+class FilterOptions:
+    sites: tuple[SiteOption, ...]
+    job_sources: tuple[str, ...]
+
+
+# Chan mot dataset co qua nhieu `source` khac nhau lam vo dropdown. 200 la du
+# rong cho moi truong hop that va van du hep de khong bao gio nang trang.
+MAX_FILTER_OPTIONS = 200
+
+
+def filter_options(conn) -> FilterOptions:
+    """Gia tri co that de lap dropdown loc.
+
+    Site DA TAT van duoc tra ve: du lieu lich su cua no van nam trong danh
+    sach job/review, nen bo di thi khong con cach nao loc ra.
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug, name, active FROM site ORDER BY slug LIMIT %s",
+            (MAX_FILTER_OPTIONS,),
+        )
+        sites = tuple(
+            SiteOption(
+                slug=row[0],
+                name=sanitize_text(row[1], max_length=200),
+                active=bool(row[2]),
+            )
+            for row in cur.fetchall()
+        )
+
+        cur.execute(
+            "SELECT DISTINCT source FROM review_job WHERE source IS NOT NULL "
+            "ORDER BY source LIMIT %s",
+            (MAX_FILTER_OPTIONS,),
+        )
+        job_sources = tuple(
+            sanitize_text(row[0], max_length=100) for row in cur.fetchall()
+        )
+
+    return FilterOptions(sites=sites, job_sources=job_sources)
