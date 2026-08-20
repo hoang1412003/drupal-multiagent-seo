@@ -81,6 +81,26 @@ export const AUDIT_OUTCOME: Record<string, PillStyle> = {
   failed: { label: "Lỗi", ...AMBER },
 };
 
+export const EVALUATION_STATUS: Record<string, PillStyle> = {
+  valid: { label: "Hợp lệ", ...EMERALD },
+  pending: { label: "Chưa chạy", ...GRAY },
+  // Ket qua tung dung nhung code da doi tu do -> KHONG duoc dung lam bang
+  // chung cho ban hien tai. Day la canh bao, khong phai trang thai trung tinh:
+  // de mau xam se khien nguoi doc tuong no van dung duoc.
+  historical_invalid: { label: "Không còn hiệu lực", ...AMBER },
+};
+
+export const BOOLEAN_PILLS = {
+  SITE_ACTIVE: {
+    true: { label: "Đang bật", ...EMERALD },
+    false: { label: "Đã tắt", ...GRAY },
+  } as Record<string, PillStyle>,
+  INTAKE_PAUSED: {
+    true: { label: "Đang tạm dừng", ...RED },
+    false: { label: "Đang nhận", ...EMERALD },
+  } as Record<string, PillStyle>,
+};
+
 /** Gia tri la (hoac null) van phai hien duoc, khong duoc lam vo giao dien. */
 export function pillOf(
   bang: Record<string, PillStyle>,
