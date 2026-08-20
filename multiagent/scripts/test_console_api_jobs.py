@@ -7,6 +7,7 @@ Chay: ..\multiagent\.venv\Scripts\python.exe scripts\test_console_api_jobs.py
 """
 from datetime import datetime, timezone
 import os
+import pathlib
 from pathlib import Path
 import sys
 from uuid import UUID, uuid4
@@ -318,6 +319,67 @@ def test_retry_missing_job_returns_404_before_cost_gate(conn):
     print("[PASS] retry job khong ton tai tra 404 truoc khi xet cong chi phi")
 
 
+def test_every_documented_filter_actually_filters(conn):
+    """Moi tham so trong openapi.json phai THUC SU loc, khong duoc bo qua im lang.
+
+    Chan dung lop loi da xay ra 2026-08-20: frontend gui `external_content_id`
+    va `date_from` trong khi server doc `external_id` va `from`. Server bo qua
+    tham so la, khong bao loi, nen bo loc "chay" ma khong loc gi ca. Test
+    `status` truoc do khong bat duoc vi status tinh co trung ten.
+    """
+    import json as _json
+    import os as _os
+
+    _reset_schema(conn)
+    for index in range(1, 6):
+        _insert_job(conn, index, status="queued")
+    _insert_job(conn, 99, status="failed")
+    client = _login_viewer(conn, "jobs.everyfilter")
+
+    tong = client.get("/api/console/v1/jobs").json()["total"]
+    assert tong == 6, tong
+
+    # Doc thang ten tham so tu hop dong, khong go tay.
+    hop_dong = pathlib.Path(__file__).resolve().parents[1] / "console_ui" / "openapi.json"
+    schema = _json.loads(hop_dong.read_text(encoding="utf-8"))
+    khai_bao = {
+        p["name"]
+        for p in schema["paths"]["/api/console/v1/jobs"]["get"].get("parameters", [])
+    }
+    assert khai_bao, "openapi.json khong khai bao tham so nao cho /jobs"
+
+    # Moi tham so loc phai thu hep duoc ket qua.
+    thu = {
+        "status": ("failed", 1),
+        "source": ("khong-ton-tai-dau", 0),
+        "external_id": ("node-99", 1),
+        "site": ("khong-phai-site", 0),
+    }
+    for ten, (gia_tri, mong_doi) in thu.items():
+        assert ten in khai_bao, f"{ten} khong duoc khai bao trong openapi.json"
+        got = client.get(f"/api/console/v1/jobs?{ten}={gia_tri}").json()["total"]
+        assert got == mong_doi, f"loc {ten}={gia_tri} tra {got}, mong doi {mong_doi}"
+
+    # Khoang ngay dung ten `from`/`to`, KHONG phai `date_from`/`date_to`.
+    assert "from" in khai_bao and "to" in khai_bao
+    trong_khoang = client.get(
+        "/api/console/v1/jobs?from=2026-08-01&to=2026-08-01"
+    ).json()["total"]
+    ngoai_khoang = client.get(
+        "/api/console/v1/jobs?from=2026-01-01&to=2026-01-02"
+    ).json()["total"]
+    assert trong_khoang == 6 and ngoai_khoang == 0, (trong_khoang, ngoai_khoang)
+
+    # Ten sai phai bi TU CHOI, khong duoc bo qua im lang.
+    for ten_sai in ("external_content_id", "date_from"):
+        r = client.get(f"/api/console/v1/jobs?{ten_sai}=bat-ky")
+        assert r.status_code == 422, (
+            f"tham so la `{ten_sai}` duoc chap nhan im lang (tra {r.status_code}). "
+            "Frontend go sai ten se tuong bo loc chay ma that ra khong loc gi."
+        )
+    print("[PASS] moi tham so trong hop dong deu that su loc, ten la bi tu choi")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -334,6 +396,7 @@ if __name__ == "__main__":
             test_jobs_pagination_shape,
             test_jobs_invalid_filter_returns_422_error_shape,
             test_jobs_filter_by_status_narrows_result,
+            test_every_documented_filter_actually_filters,
             test_job_detail_returns_all_fields,
             test_job_detail_missing_returns_404,
             test_retry_requires_operator_role,

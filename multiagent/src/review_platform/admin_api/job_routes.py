@@ -5,7 +5,7 @@ quy tac loc va phan trang (page_size toi da 100, mac dinh 25).
 """
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from review_platform import reviews
 from review_platform.admin import dependencies as admin_dependencies
@@ -14,6 +14,10 @@ from review_platform.admin import queries
 from review_platform.admin_api import dependencies, errors, models
 from review_platform.auth.rbac import Role
 
+
+_QUERY_PARAMS = frozenset({
+    "status", "site", "source", "external_id", "from", "to", "page", "page_size",
+})
 
 router = APIRouter()
 
@@ -30,9 +34,26 @@ def _parsed_job_id(public_id: str) -> UUID:
 @router.get("/jobs", response_model=models.JobPage)
 def list_jobs(
     request: Request,
+    # Khai bao de openapi.json ghi DUNG TEN tham so. Khong khai bao thi hop
+    # dong khong he nhac toi chung, va nguoi viet frontend chi con cach doan
+    # theo ten truong trong response - da xay ra: doan `external_content_id`
+    # va `date_from`, gui len bi bo qua IM LANG vi server khong biet ten do.
+    #
+    # Co y de kieu `str | None` khong rang buoc: viec kiem tra van do
+    # legacy_jobs._filters lam, de loi tra ve dung hinh dang {"error": ...}
+    # thay vi hinh dang 422 mac dinh cua FastAPI.
+    status: str | None = Query(None, description="queued|running|failed|done|superseded"),
+    site: str | None = Query(None, description="slug cua site, khop chinh xac"),
+    source: str | None = Query(None, description="khop chinh xac, xem GET /filters"),
+    external_id: str | None = Query(None, description="khop mot phan chuoi"),
+    date_from: str | None = Query(None, alias="from", description="YYYY-MM-DD"),
+    date_to: str | None = Query(None, alias="to", description="phai di cung `from`"),
+    page: str | None = Query(None, description="mac dinh 1"),
+    page_size: str | None = Query(None, description="mac dinh 25, toi da 100"),
     resolved=Depends(dependencies.require_console_role(Role.VIEWER)),
     conn=Depends(admin_dependencies.get_db),
 ):
+    dependencies.reject_unknown_query_params(request, _QUERY_PARAMS)
     try:
         filters, page_number, page_size = legacy_jobs._filters(request)
         view = queries.list_jobs(conn, filters, page_number, page_size)

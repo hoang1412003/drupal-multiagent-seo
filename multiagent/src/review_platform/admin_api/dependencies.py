@@ -66,3 +66,19 @@ def require_console_csrf(
     supplied = request.headers.get("X-CSRF-Token")
     if not csrf.verify_session_csrf(resolved.csrf_token, supplied):
         raise errors.ConsoleError(403, "csrf_invalid", "CSRF token khong hop le")
+
+
+def reject_unknown_query_params(request: Request, allowed: frozenset[str]) -> None:
+    """Tu choi tham so truy van khong co trong hop dong.
+
+    Mac dinh cua FastAPI la BO QUA tham so la. Voi mot API ma frontend do agent
+    khac viet, bo qua im lang la bay: go sai ten thi bo loc "chay" ma khong loc
+    gi ca, va khong co dau hieu nao. Da xay ra 2026-08-20 voi
+    `external_content_id` (dung: `external_id`) va `date_from` (dung: `from`).
+    """
+    unknown = sorted(set(request.query_params) - allowed)
+    if unknown:
+        raise errors.invalid_filter(
+            "Tham so khong hop le: " + ", ".join(unknown),
+            unknown[0],
+        )

@@ -165,6 +165,152 @@
         ],
         "summary": "List Jobs",
         "operationId": "list_jobs_api_console_v1_jobs_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "queued|running|failed|done|superseded",
+              "title": "Status"
+            },
+            "description": "queued|running|failed|done|superseded"
+          },
+          {
+            "name": "site",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "slug cua site, khop chinh xac",
+              "title": "Site"
+            },
+            "description": "slug cua site, khop chinh xac"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "khop chinh xac, xem GET /filters",
+              "title": "Source"
+            },
+            "description": "khop chinh xac, xem GET /filters"
+          },
+          {
+            "name": "external_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "khop mot phan chuoi",
+              "title": "External Id"
+            },
+            "description": "khop mot phan chuoi"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "YYYY-MM-DD",
+              "title": "From"
+            },
+            "description": "YYYY-MM-DD"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "phai di cung `from`",
+              "title": "To"
+            },
+            "description": "phai di cung `from`"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 1",
+              "title": "Page"
+            },
+            "description": "mac dinh 1"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 25, toi da 100",
+              "title": "Page Size"
+            },
+            "description": "mac dinh 25, toi da 100"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -172,6 +318,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/JobPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -280,6 +436,134 @@
         ],
         "summary": "List Reviews",
         "operationId": "list_reviews_api_console_v1_reviews_get",
+        "parameters": [
+          {
+            "name": "decision",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "publish|needs_revision|rejected|unknown",
+              "title": "Decision"
+            },
+            "description": "publish|needs_revision|rejected|unknown"
+          },
+          {
+            "name": "site",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "slug cua site, khop chinh xac",
+              "title": "Site"
+            },
+            "description": "slug cua site, khop chinh xac"
+          },
+          {
+            "name": "external_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "khop mot phan chuoi",
+              "title": "External Id"
+            },
+            "description": "khop mot phan chuoi"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "YYYY-MM-DD",
+              "title": "From"
+            },
+            "description": "YYYY-MM-DD"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "phai di cung `from`",
+              "title": "To"
+            },
+            "description": "phai di cung `from`"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 1",
+              "title": "Page"
+            },
+            "description": "mac dinh 1"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 25, toi da 100",
+              "title": "Page Size"
+            },
+            "description": "mac dinh 25, toi da 100"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -287,6 +571,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReviewPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
