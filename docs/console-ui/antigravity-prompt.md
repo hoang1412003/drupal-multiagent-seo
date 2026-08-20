@@ -757,7 +757,144 @@ mất tài khoản, cứ mở `/console/doi-mat-khau` khi đang đăng nhập �
 
 ---
 
-## Đã xong toàn bộ bảy màn
+## NHIỆM VỤ 7 — Audit (Nhật ký thao tác) · GIAI ĐOẠN 2
+
+**Bối cảnh.** Giai đoạn 2 bổ sung 5 màn còn thiếu so với admin Jinja2 cũ. Đây
+là màn đầu tiên. Nó **chỉ đọc** và **chỉ admin xem được** — người vận hành dùng
+nó để truy ai đã làm gì trên hệ thống.
+
+**Đọc ba file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
+3. `docs/console-ui/integration.md` — mã lỗi, phân trang, `/filters`
+
+**Xem `JobsPage.tsx`** — màn này cùng khuôn hoàn toàn: thẻ lọc, bảng, phân
+trang. Dùng lại đúng cấu trúc và class của nó, đừng nghĩ ra bố cục mới.
+
+**Sửa/tạo hai file:**
+
+- Tạo `multiagent/console_ui/src/pages/AuditPage.tsx`
+- Sửa `multiagent/console_ui/src/router.tsx` — thêm route `/audit`
+- Sửa `multiagent/console_ui/src/layout/AppShell.tsx` — thêm mục menu thứ tư
+
+**Dùng lại ba module có sẵn, tuyệt đối đừng chép lại:**
+
+- `src/lib/format.ts` — `formatDateTime`, `shortId`, `TIMEZONE_LABEL`
+- `src/lib/status.ts` + `StatusPill.tsx` — `pillOf`
+- `src/lib/ErrorBanner.tsx` — banner lỗi
+
+---
+
+### Menu giờ có BỐN mục, không phải ba
+
+Các nhiệm vụ trước ghi "đúng ba mục". Giai đoạn 2 mở rộng. Menu mới:
+
+```
+Tổng quan · Jobs · Reviews · Nhật ký
+```
+
+**Mục "Nhật ký" chỉ hiện với role admin.** Bọc bằng `<RequireRole role="admin">`
+có sẵn trong `src/auth/RequireRole.tsx`. Viewer và operator không được thấy mục
+này — server trả 403 cho họ, nên hiện link dẫn tới trang lỗi là vô nghĩa.
+
+Vẫn **cấm** thêm bất kỳ mục nào khác.
+
+---
+
+### Bảng: đúng 7 cột
+
+```
+Thời gian (giờ VN) · Người thực hiện · Hành động · Đối tượng · Kết quả ·
+Chi tiết · Mã
+```
+
+Ánh xạ sang trường API:
+
+| Cột | Trường | Ghi chú |
+|---|---|---|
+| Thời gian | `created_at` | `formatDateTime`, nhãn `TIMEZONE_LABEL` |
+| Người thực hiện | `actor_username` | `actor_user_id` **không hiện** — UUID không giúp người đọc |
+| Hành động | `action` | pill, xem bảng nhãn bên dưới |
+| Đối tượng | `target_type` + `target_id` | gộp một cột: loại ở trên, `shortId(target_id)` mờ ở dưới. `target_id` có thể null |
+| Kết quả | `outcome` | pill: `success` xanh · `denied` đỏ · `failed` amber |
+| Chi tiết | `metadata_text` | **xem phần dưới** |
+| Mã | `id` | số nguyên, monospace, căn phải |
+
+**Nhãn tiếng Việt cho `outcome`:** `success` → "Thành công", `denied` → "Bị từ
+chối", `failed` → "Lỗi".
+
+**`action` là danh sách dài và sẽ dài thêm.** Lấy giá trị hợp lệ từ
+`useFilters().audit_actions`, **đừng viết cứng**. Hiện nguyên chuỗi
+(`login_success`, `password_changed`, …) trong pill xám — đừng cố dịch từng
+cái, danh sách sẽ lệch ngay khi backend thêm hành động mới.
+
+---
+
+### Cột "Chi tiết" — điểm dễ làm hỏng bố cục
+
+`metadata_text` là **một chuỗi JSON đã được làm sạch**, có thể rất dài, và
+thường chứa `[đã ẩn]` ở chỗ bí mật đã bị che.
+
+Đừng đổ nguyên vào ô bảng — nó sẽ phá chiều cao dòng. Cách làm:
+
+- Mặc định hiện **một dòng duy nhất, cắt bớt** (`truncate max-w-[24rem]`), kèm
+  `title` để hover xem đầy đủ
+- Nếu chuỗi dài hơn ngưỡng, thêm nút nhỏ "Xem" mở rộng ô đó thành khối
+  monospace nhiều dòng ngay trong bảng
+- Chuỗi `[đã ẩn]` **giữ nguyên**, đừng cố tô màu hay thay bằng biểu tượng —
+  người đọc cần biết chính xác backend đã che chỗ nào
+
+---
+
+### Bộ lọc
+
+Bốn ô: **Hành động** (dropdown từ `useFilters().audit_actions`), **Kết quả**
+(dropdown từ `useFilters().audit_outcomes`), **Người thực hiện** (text, khớp
+một phần), và khoảng ngày **Từ ngày / Đến ngày**.
+
+Tên tham số truy vấn lấy đúng từ `openapi.json`: `action`, `outcome`, `actor`,
+`from`, `to`, `page`, `page_size`. **Gõ sai tên server trả 422** — nó không bỏ
+qua im lặng.
+
+---
+
+### Đủ 4 trạng thái, dùng chung một khung
+
+Thẻ lọc và **đầu bảng** luôn hiện; chỉ thân bảng đổi.
+
+| Trạng thái | Thân bảng |
+|---|---|
+| đang tải | skeleton xám, giữ đúng 7 cột |
+| rỗng | "Chưa có bản ghi nào khớp bộ lọc" + nút "Xóa bộ lọc" |
+| lỗi | `<ErrorBanner>` phía trên bảng |
+| **không đủ quyền (403)** | "Bạn không có quyền xem nhật ký hệ thống." **Không chuyển trang.** Trạng thái này có thật ở đây — viewer/operator gõ thẳng URL sẽ gặp |
+
+---
+
+### Ràng buộc
+
+- **KHÔNG thêm nút sửa/xóa/xuất file** — nhật ký là bằng chứng, API không có
+  endpoint ghi nào và không được tạo ra vẻ như có
+- KHÔNG hiện `actor_user_id` (UUID) trong bảng
+- KHÔNG viết cứng danh sách `action` hay `outcome` — lấy từ `useFilters()`
+- KHÔNG tự viết hàm định dạng hay bảng pill — dùng `src/lib/`
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML` — `metadata_text` bắt nguồn từ dữ liệu
+  hệ thống, render bằng `{}` của React
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài ba file đã nêu
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+
+**Cách thử:** đăng nhập bằng `admin`, vào `/console/audit`. Dữ liệu thật đã có
+sẵn — mỗi lần bạn đăng nhập là một bản ghi `login_success`.
+
+---
+
+## Giai đoạn 2 — bốn màn còn lại
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
