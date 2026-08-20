@@ -80,6 +80,27 @@ Quyết định review dùng cùng khuôn pill:
 | `rejected` | Từ chối | red |
 | `unknown` | Chưa rõ | gray |
 
+Trạng thái ghi ngược (`writeback_statuses`) cũng phải có nhãn tiếng Việt —
+đừng để nguyên chuỗi tiếng Anh giữa một giao diện tiếng Việt:
+
+| Giá trị | Nhãn |
+|---|---|
+| `succeeded` | Thành công |
+| `failed` | Thất bại |
+| `superseded` | Bị thay thế |
+| `pending` | Đang chờ |
+| `unknown` | Chưa rõ |
+
+Trạng thái worker — **ba giá trị, và màu phải phản ánh mức độ nghiêm trọng**:
+
+| Giá trị | Nhãn | Màu | Vì sao |
+|---|---|---|---|
+| `running` | Đang chạy | emerald | bình thường |
+| `stale` | Mất tín hiệu | **red** | từng chạy rồi im lặng — đây mới là sự cố |
+| `unavailable` | Chưa từng chạy | **gray** | chưa bao giờ khởi động, chưa chắc là sự cố |
+
+Để `unavailable` màu đỏ sẽ báo động giả mỗi khi worker chỉ đơn giản là chưa bật.
+
 **Lấy giá trị từ `GET /filters`, đừng viết cứng danh sách.** Bảng trên chỉ ánh
 xạ giá trị sang màu và nhãn; bản thân danh sách giá trị đến từ API. Xem
 `integration.md` mục 5.

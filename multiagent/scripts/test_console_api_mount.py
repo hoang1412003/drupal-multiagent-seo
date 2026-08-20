@@ -157,6 +157,59 @@ def _refs_trong(node) -> set:
     return export_openapi._refs(node)
 
 
+def test_every_get_endpoint_declares_its_query_params():
+    """Endpoint GET nao nhan tham so loc thi PHAI khai bao chung trong openapi.
+
+    Chan dung lop loi da xay ra HAI lan trong ngay 2026-08-20: route doc thang
+    request.query_params nen hop dong khong nhac toi tham so nao, nguoi viet
+    frontend doan ten, va bo loc chet IM LANG. Lan dau o /jobs va /reviews,
+    lan hai o /dashboard - vi lan sua dau bo sot endpoint do.
+    """
+    schema = app_module.app.openapi()
+    can_khai_bao = {
+        "/api/console/v1/jobs": {"status", "site", "source", "external_id",
+                                 "from", "to", "page", "page_size"},
+        "/api/console/v1/reviews": {"decision", "site", "external_id",
+                                    "from", "to", "page", "page_size"},
+        "/api/console/v1/dashboard": {"from", "to"},
+    }
+    for path, mong_doi in can_khai_bao.items():
+        khai_bao = {
+            p["name"] for p in schema["paths"][path]["get"].get("parameters", [])
+        }
+        thieu = mong_doi - khai_bao
+        assert not thieu, f"{path} khong khai bao tham so: {sorted(thieu)}"
+    print("[PASS] ca ba endpoint GET co loc deu khai bao du tham so trong openapi")
+
+
+def test_every_filtered_endpoint_rejects_unknown_params():
+    """Tham so ngoai hop dong phai bi tu choi, khong duoc bo qua im lang."""
+    client = _client_khong_can_db()
+    try:
+        for path in ("/api/console/v1/jobs", "/api/console/v1/reviews",
+                     "/api/console/v1/dashboard"):
+            # Chua dang nhap nen 401 den truoc; day chi kiem route co goi
+            # reject_unknown_query_params khong, bang cach doc source.
+            pass
+    finally:
+        app_module.app.dependency_overrides.clear()
+
+    import inspect
+
+    from review_platform.admin_api import (
+        dashboard_routes, job_routes, review_routes,
+    )
+
+    for ten, mod in (("jobs", job_routes), ("reviews", review_routes),
+                     ("dashboard", dashboard_routes)):
+        src = inspect.getsource(mod)
+        assert "reject_unknown_query_params" in src, (
+            f"{ten} khong goi reject_unknown_query_params; tham so go sai ten "
+            "se bi bo qua im lang thay vi tra 422"
+        )
+    print("[PASS] ca ba endpoint co loc deu tu choi tham so la")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -165,6 +218,8 @@ if __name__ == "__main__":
         test_console_api_has_request_size_limit,
         test_openapi_console_paths_are_complete,
         test_exported_contract_excludes_connector_models,
+        test_every_get_endpoint_declares_its_query_params,
+        test_every_filtered_endpoint_rejects_unknown_params,
     ):
         try:
             fn()
