@@ -89,6 +89,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/v1/connection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Connection */
+        get: operations["get_connection_api_console_v1_connection_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/connection/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Connection */
+        post: operations["test_connection_api_console_v1_connection_test_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/connection/pause": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Pause Intake */
+        post: operations["pause_intake_api_console_v1_connection_pause_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/connection/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Intake */
+        post: operations["resume_intake_api_console_v1_connection_resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/v1/dashboard": {
         parameters: {
             query?: never;
@@ -344,6 +412,33 @@ export interface components {
             profile_assignments: components["schemas"]["ProfileAssignmentModel"][];
             /** Kb Summary */
             kb_summary: components["schemas"]["KBSummaryModel"][];
+        };
+        /** ConnectionModel */
+        ConnectionModel: {
+            /** Slug */
+            slug: string;
+            /** Name */
+            name: string;
+            /** Base Url */
+            base_url: string;
+            /** Secret Ref */
+            secret_ref: string;
+            /** Active */
+            active: boolean;
+            /** Intake Paused */
+            intake_paused: boolean;
+            /** Profile Code */
+            profile_code: string | null;
+            /** Policy Version */
+            policy_version: string | null;
+            /** Token Prefixes */
+            token_prefixes: string[];
+            /** Last Health Status */
+            last_health_status: string | null;
+            /** Last Health Checked At */
+            last_health_checked_at: string | null;
+            /** Last Health Error */
+            last_health_error: string | null;
         };
         /** CostEstimateModel */
         CostEstimateModel: {
@@ -640,6 +735,11 @@ export interface components {
             /** Policy Metadata */
             policy_metadata: components["schemas"]["LabelValueModel"][];
         };
+        /** ReasonRequest */
+        ReasonRequest: {
+            /** Reason */
+            reason?: string | null;
+        };
         /** RetryRequest */
         RetryRequest: {
             /**
@@ -756,6 +856,14 @@ export interface components {
             name: string;
             /** Active */
             active: boolean;
+        };
+        /** TestConnectionResponse */
+        TestConnectionResponse: {
+            /** Ok */
+            ok: boolean;
+            /** Error Code */
+            error_code: string | null;
+            connection: components["schemas"]["ConnectionModel"];
         };
         /** ValidationError */
         ValidationError: {
@@ -913,6 +1021,112 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_connection_api_console_v1_connection_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionModel"];
+                };
+            };
+        };
+    };
+    test_connection_api_console_v1_connection_test_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestConnectionResponse"];
+                };
+            };
+        };
+    };
+    pause_intake_api_console_v1_connection_pause_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_intake_api_console_v1_connection_resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionModel"];
+                };
             };
             /** @description Validation Error */
             422: {

@@ -521,3 +521,55 @@ class ExperimentModel(BaseModel):
 
 class EvaluationResponse(BaseModel):
     experiments: list[ExperimentModel]
+
+
+# Do dai toi da cua ly do tam dung/mo lai. Admin cu cat cut im lang o 300;
+# Console API tu choi han thay vi cat - xem connection_routes.
+MAX_REASON = 300
+
+
+class ConnectionModel(BaseModel):
+    slug: str
+    name: str
+    base_url: str
+    # TEN bien moi truong chua credential, khong phai gia tri. Xem
+    # connectors/secrets.py: secret_ref la khoa tra os.environ.
+    secret_ref: str
+    active: bool
+    intake_paused: bool
+    profile_code: str | None
+    policy_version: str | None
+    token_prefixes: list[str]
+    last_health_status: str | None
+    last_health_checked_at: str | None
+    last_health_error: str | None
+
+    @classmethod
+    def from_view(cls, view) -> "ConnectionModel":
+        return cls(
+            slug=view.slug,
+            name=view.name,
+            base_url=view.base_url,
+            secret_ref=view.secret_ref,
+            active=view.active,
+            intake_paused=view.intake_paused,
+            profile_code=view.profile_code,
+            policy_version=view.policy_version,
+            token_prefixes=list(view.token_prefixes),
+            last_health_status=view.last_health_status,
+            last_health_checked_at=iso(view.last_health_checked_at),
+            last_health_error=view.last_health_error,
+        )
+
+
+class ReasonRequest(BaseModel):
+    reason: str | None = None
+
+
+class TestConnectionResponse(BaseModel):
+    # `ok` la boolean ro rang thay vi bat frontend so sanh chuoi
+    # last_health_status == "ok". So sanh chuoi la dung loai chi tiet ma
+    # nguoi viet UI doan sai - da xay ra voi enum trang thai job.
+    ok: bool
+    error_code: str | None
+    connection: ConnectionModel

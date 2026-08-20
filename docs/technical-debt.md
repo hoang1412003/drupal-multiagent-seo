@@ -1365,7 +1365,7 @@ với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn c
 - Thiết kế: [`superpowers/specs/2026-08-19-console-react-admin-design.md`](superpowers/specs/2026-08-19-console-react-admin-design.md)
 - Kế hoạch: [`superpowers/plans/2026-08-19-console-react-admin.md`](superpowers/plans/2026-08-19-console-react-admin.md)
 - Hợp đồng giao cho agent viết giao diện: `multiagent/console_ui/openapi.json`
-  (11 đường dẫn, 17 schema) + [`console-ui/integration.md`](console-ui/integration.md)
+  (19 đường dẫn, 29 schema tính tới nhiệm vụ 9) + [`console-ui/integration.md`](console-ui/integration.md)
 - Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
 
 **Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
@@ -1394,6 +1394,38 @@ Tổng 17 lỗi qua 6 nhiệm vụ, không lỗi nào bị `tsc` bắt.
 
 **Ngoài phạm vi giai đoạn 1:** users, connection, audit, config-kb, evaluation;
 xoá admin Jinja2; dựng JS test harness.
+
+**Giai đoạn 2 (đang làm, thứ tự "dễ trước, rủi ro tăng dần"):**
+
+| # | Màn | Trạng thái |
+|---|---|---|
+| 7 | Nhật ký (audit) | ✅ xong 2026-08-20 |
+| 8 | Cấu hình/KB + Kết quả đo | ✅ xong 2026-08-20 |
+| 9 | Kết nối | API + đặc tả xong 2026-08-21; UI đang chờ Antigravity |
+| 10 | Người dùng | chưa bắt đầu — rủi ro cao nhất, có bảo vệ "admin hoạt động cuối cùng" |
+
+Màn Kết nối là màn Console **đầu tiên có thao tác ghi ngoài retry**: chẩn đoán
+kết nối (gọi sang Drupal), tạm dừng và mở lại việc nhận bài. Ba ràng buộc lấy
+nguyên từ admin cũ, không được nới: viewer xem được nhưng bị 403 ở **server**
+khi gọi thẳng; chẩn đoán **không bao giờ** gọi result callback (một lần bấm nút
+không được tạo revision trên bài của người ta); cả ba thao tác đều ghi sổ kiểm
+toán.
+
+**Một lỗ hổng hợp đồng vá khi làm màn này:** Console API hứa "một hình dạng lỗi
+duy nhất", nhưng body JSON sai kiểu vẫn rơi vào 422 mặc định của FastAPI
+(`{"detail": [...]}`) — hình dạng **thứ hai** mà `openapi.json` không hề mô tả,
+nên UI chỉ còn nhánh "lỗi không xác định". Đã thêm handler đổi về
+`{"error": {code, message, field}}`, **giới hạn ở `/api/console`**: `/api/v1`
+là hợp đồng với module Drupal đang chạy thật, đổi hình dạng lỗi của nó là thay
+đổi phá vỡ.
+
+**Hàng rào mới cho chính đặc tả** (`scripts/test_antigravity_prompt.py`): mọi
+tên trường snake_case và mọi hàm `formatX`/`useX` nhắc tới trong
+`console-ui/antigravity-prompt.md` phải có thật trong `openapi.json` /
+`console_ui/src`. Lý do: đặc tả là thứ **duy nhất** agent viết UI đọc — nó
+không đọc code. Một tên bịa ra ở đó thành code sai mà `tsc` không bắt được, vì
+agent sẽ tự tạo ra thứ còn thiếu. Đã xảy ra thật: đặc tả nhiệm vụ 9 bản nháp
+nhắc `formatText` của `lib/format.ts`, hàm đó không tồn tại.
 
 **Bốn lỗ hổng phát hiện khi làm, đều CÓ SẴN và đều im lặng:**
 

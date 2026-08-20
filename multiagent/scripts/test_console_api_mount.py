@@ -27,6 +27,10 @@ CONSOLE_ROUTES = {
     "/api/console/v1/auth/change-password",
     "/api/console/v1/audit",
     "/api/console/v1/config-kb",
+    "/api/console/v1/connection",
+    "/api/console/v1/connection/test",
+    "/api/console/v1/connection/pause",
+    "/api/console/v1/connection/resume",
     "/api/console/v1/dashboard",
     "/api/console/v1/evaluation",
     "/api/console/v1/evaluation/evidence/{experiment}",
@@ -67,6 +71,10 @@ def test_real_app_mounts_all_console_routes():
         ("POST", "/api/console/v1/auth/change-password"),
         ("GET", "/api/console/v1/audit"),
         ("GET", "/api/console/v1/config-kb"),
+        ("GET", "/api/console/v1/connection"),
+        ("POST", "/api/console/v1/connection/test"),
+        ("POST", "/api/console/v1/connection/pause"),
+        ("POST", "/api/console/v1/connection/resume"),
         ("GET", "/api/console/v1/dashboard"),
         ("GET", "/api/console/v1/evaluation"),
         ("GET", "/api/console/v1/filters"),
@@ -91,7 +99,7 @@ def test_real_app_mounts_all_console_routes():
         assert login.status_code != 404, "/auth/login chua duoc mount"
     finally:
         app_module.app.dependency_overrides.clear()
-    print("[PASS] ca 15 route Console deu mount tren app that va tra 401 dung chuan")
+    print(f"[PASS] ca {len(goi) + 1} route Console deu mount tren app that va tra 401 dung chuan")
 
 
 def test_openapi_excludes_legacy_admin_routes():
@@ -133,9 +141,10 @@ def test_openapi_console_paths_are_complete():
     components = schema.get("components", {}).get("schemas", {})
     for ten in ("MeResponse", "DashboardResponse", "JobPage", "JobDetailModel",
                 "ReviewPage", "ReviewDetailModel", "FiltersResponse", "AuditPage",
-                "ConfigKbResponse", "EvaluationResponse"):
+                "ConfigKbResponse", "EvaluationResponse", "ConnectionModel",
+                "TestConnectionResponse"):
         assert ten in components, f"thieu schema {ten} trong openapi"
-    print("[PASS] openapi co du 15 duong dan Console va 10 schema chinh")
+    print(f"[PASS] openapi co du {len(CONSOLE_ROUTES)} duong dan Console va cac schema chinh")
 
 
 def test_exported_contract_excludes_connector_models():
@@ -220,6 +229,37 @@ def test_every_filtered_endpoint_rejects_unknown_params():
     print("[PASS] ca ba endpoint co loc deu tu choi tham so la")
 
 
+def test_loi_422_cua_console_dung_hinh_dang_chung():
+    """Handler nay dang ky o cap APP, nen chi app that moi chung minh duoc.
+
+    Cac file test_console_api_* khac tu dung app rong va tu dang ky handler -
+    chung KHONG the phat hien api.py quen dang ky. Hang rao that nam o day.
+
+    Kem theo: /api/v1 phai giu nguyen hinh dang 422 mac dinh cua FastAPI. Do
+    la hop dong voi module Drupal dang chay that; doi no la thay doi pha vo.
+    """
+    client = TestClient(app_module.app, follow_redirects=False)
+
+    # Body sai kieu, gui khi CHUA dang nhap: van phai la hinh dang cua Console.
+    # (401 duoc kiem tra o test khac; o day chi quan tam toi hinh dang 422.)
+    r = client.post("/api/console/v1/auth/login", json={"username": 123})
+    assert r.status_code == 422, f"{r.status_code}: {r.text}"
+    body = r.json()
+    assert "error" in body, body
+    assert set(body["error"]) == {"code", "message", "field"}, body
+    assert body["error"]["code"] == "invalid_payload", body
+    assert body["error"]["field"] == "username", body
+
+    # Duong dan ngoai Console KHONG duoc doi hinh dang.
+    r = client.post("/api/v1/reviews", json={"external_content_id": 123})
+    if r.status_code == 422:
+        assert "detail" in r.json(), (
+            "/api/v1 da bi doi sang hinh dang loi cua Console - day la hop "
+            "dong voi module Drupal dang chay that"
+        )
+    print("[PASS] 422 cua Console dung hinh dang chung, /api/v1 giu nguyen")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -230,6 +270,7 @@ if __name__ == "__main__":
         test_exported_contract_excludes_connector_models,
         test_every_get_endpoint_declares_its_query_params,
         test_every_filtered_endpoint_rejects_unknown_params,
+        test_loi_422_cua_console_dung_hinh_dang_chung,
     ):
         try:
             fn()
