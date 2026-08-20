@@ -1357,6 +1357,65 @@ giữa worker polling và `/api/v1/jobs` khiến phải chạy thêm
 dừng/xoá sau demo — coi tài liệu đó là ghi chú vận hành, không phải cam kết
 uptime.
 
+### 8.11. Console React — ✅ GIAI ĐOẠN 1 ĐÃ XONG (2026-08-20)
+
+Tách frontend admin thành React SPA riêng tại `/console`, chạy **song song**
+với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn chạy).
+
+- Thiết kế: [`superpowers/specs/2026-08-19-console-react-admin-design.md`](superpowers/specs/2026-08-19-console-react-admin-design.md)
+- Kế hoạch: [`superpowers/plans/2026-08-19-console-react-admin.md`](superpowers/plans/2026-08-19-console-react-admin.md)
+- Hợp đồng giao cho agent viết giao diện: `multiagent/console_ui/openapi.json`
+  (10 đường dẫn, 15 schema) + [`console-ui/integration.md`](console-ui/integration.md)
+- Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
+
+**Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
+trên Stitch; **Antigravity** code 7 màn hình; Claude review. Giai đoạn 1 dừng ở
+chỗ bàn giao — 7 trang trong `console_ui/src/pages/` hiện chỉ in JSON thô.
+
+**Ngoài phạm vi giai đoạn 1:** users, connection, audit, config-kb, evaluation;
+xoá admin Jinja2; dựng JS test harness.
+
+**Bốn lỗ hổng phát hiện khi làm, đều CÓ SẴN và đều im lặng:**
+
+1. **Cookie phiên giới hạn ở `path=/admin`.** Trình duyệt không gửi nó tới
+   `/api/console/v1`, nên giả định "hai UI dùng chung phiên" không thể chạy.
+   Đã mở về `/`, và xoá cookie cũ ở **cả hai** đường dẫn — nếu chỉ xoá ở `/`
+   thì trình duyệt giữ hai cookie trùng tên và Starlette trả về một cái không
+   xác định.
+2. **`queries._review_entries` vô hiệu hoá lớp che bí mật với dữ liệu dạng
+   dict.** Nó tái cấu trúc thành `{"criterion": <khoá>, "value": <giá trị>}`
+   **trước** khi làm sạch, nên tên khoá (ví dụ `api-key`) chuyển sang vị trí
+   giá trị và bộ lọc theo tên khoá không còn khớp. `criteria` thường là dict
+   nên đây là nhánh hay gặp nhất, trên dữ liệu bắt nguồn từ output của model.
+   **Ảnh hưởng cả admin Jinja2 đang chạy.** Đã vá + test chặn hồi quy.
+3. **Console API không có giới hạn kích thước body.**
+   `RequestSizeLimitMiddleware` chỉ khai báo `/api/v1` và `/admin`; đường dẫn
+   không khớp prefix nào thì **đi thẳng**. Đã thêm `/api/console`.
+4. **Mười route Jinja2 lọt vào `openapi.json`.** Giao như vậy thì agent viết
+   frontend tưởng gọi được `/admin/jobs` bằng `fetch` để nhận JSON. Đã thêm
+   `include_in_schema=False`.
+
+**Hai bẫy kỹ thuật đã cắn, ghi lại để khỏi mất thời gian lần sau:**
+
+- `StaticFiles(html=True)` **không** đủ cho SPA deep link: Starlette chỉ trả
+  `index.html` cho đường dẫn *thư mục*, còn `/console/jobs` thì 404 ngay trong
+  Mount và **không rơi xuống** route nào khác. Phải có lớp con với fallback —
+  và lớp đó phải bắt `StarletteHTTPException`, vì StaticFiles **ném** ngoại lệ
+  chứ không trả response 404 (kiểm `response.status_code` sẽ không bao giờ
+  chạy tới).
+- Trả `Response(status_code=204, headers=dict(response.headers))` làm **mất
+  header `set-cookie`**: `dict()` gộp nhiều header trùng tên thành một. Đúng
+  cách là đặt cookie lên `response` đã tiêm rồi `return None`.
+
+**Kiểm chứng:** `all-offline` 90 file, hỏng 0, SKIP 0. Thêm 6 file test
+(`test_admin_session_cookie_path`, `test_console_api_{auth,dashboard,jobs,
+reviews,mount}`, `test_console_stitch_briefs`). Smoke end-to-end qua **server
+thật** 7/7 bước, gồm khẳng định cookie nằm ở `Path=/` — thứ mà TestClient có
+thể che giấu. `tsc --noEmit` sạch, `npm run build` OK.
+
+**Chưa kiểm bằng mắt.** Dự án không có JS test harness; giao diện chưa được
+xác nhận bằng ảnh chụp. Đừng ghi là "đã kiểm thử giao diện".
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
