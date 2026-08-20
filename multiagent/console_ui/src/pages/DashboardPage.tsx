@@ -153,7 +153,7 @@ export function DashboardPage() {
             <div className="flex flex-wrap gap-6">
               {(filtersData?.job_statuses ?? []).map((status) => {
                 const count = data.queue_counts[status] || 0;
-                const config = JOB_STATUS[status] || { label: status, text: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" };
+                const config = pillOf(JOB_STATUS, status);
                 return (
                   <div key={status} className="flex items-center gap-2">
                     <span className={`flex h-2.5 w-2.5 rounded-full ${config.dot}`}></span>
@@ -247,7 +247,7 @@ export function DashboardPage() {
                   <div className="flex flex-col gap-3">
                     {(filtersData?.review_decisions ?? []).map((decision) => {
                       const count = data.decision_counts[decision] || 0;
-                      const config = REVIEW_DECISION[decision] || { label: decision, dot: "bg-gray-400" };
+                      const config = pillOf(REVIEW_DECISION, decision);
                       return (
                         <div key={decision} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export function DashboardPage() {
                   <div className="mb-5">
                     <div className="text-sm text-gray-500 mb-1.5">Worker</div>
                     {(() => {
-                      const st = WORKER_STATUS[data.worker_status] || { label: data.worker_status, bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" };
+                      const st = pillOf(WORKER_STATUS, data.worker_status);
                       return (
                         <div className="mb-2">
                           <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${st.bg} ${st.text}`}>

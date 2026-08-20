@@ -10,6 +10,8 @@ import { LoginPage } from "./pages/LoginPage";
 import { ReviewDetailPage } from "./pages/ReviewDetailPage";
 import { ReviewsPage } from "./pages/ReviewsPage";
 import { AuditPage } from "./pages/AuditPage";
+import { ConfigKbPage } from "./pages/ConfigKbPage";
+import { EvaluationPage } from "./pages/EvaluationPage";
 
 export const router = createBrowserRouter(
   [
@@ -27,6 +29,8 @@ export const router = createBrowserRouter(
             { path: "/reviews", element: <ReviewsPage /> },
             { path: "/reviews/:publicId", element: <ReviewDetailPage /> },
             { path: "/audit", element: <AuditPage /> },
+            { path: "/cau-hinh", element: <ConfigKbPage /> },
+            { path: "/danh-gia", element: <EvaluationPage /> },
           ],
         },
       ],

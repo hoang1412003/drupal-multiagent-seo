@@ -229,7 +229,7 @@ export function JobDetailPage() {
           <Section title="Trạng thái">
             <Field label="Trạng thái">
               {(() => {
-                const config = JOB_STATUS[job.status] || { label: job.status, bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" };
+                const config = pillOf(JOB_STATUS, job.status);
                 return (
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${config.bg} ${config.text}`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`}></span>

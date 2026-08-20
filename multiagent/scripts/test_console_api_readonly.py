@@ -166,7 +166,41 @@ def test_hai_man_khong_co_endpoint_ghi(conn):
     print("[PASS] config-kb va evaluation khong co endpoint ghi nao")
 
 
+def test_moi_trang_thai_deu_co_nhan_tieng_viet():
+    """Khong can DB: doc thang file TypeScript.
+
+    Loi that da xay ra: bang EVALUATION_STATUS chi co nhan cho `valid`, nen
+    `pending` va `historical_invalid` hien ra man hinh bang tieng Anh tho.
+    `tsc` khong bat duoc vi Record<string, PillStyle> chap nhan bang thieu.
+    Chi anh chup man hinh moi phat hien ra - nen khoa lai bang test nay.
+
+    `historical_invalid` la truong hop dang lo nhat: no nghia la ket qua do
+    KHONG con hieu luc voi code hien tai. Hien xam nhu binh thuong la sai lech.
+    """
+    from review_platform.admin import evaluation
+
+    status_ts = (
+        Path(__file__).resolve().parents[1]
+        / "console_ui" / "src" / "lib" / "status.ts"
+    ).read_text(encoding="utf-8")
+
+    khoi = status_ts.split("export const EVALUATION_STATUS")[1].split("};")[0]
+    thieu = [s for s in sorted(evaluation.STATUSES) if f"{s}:" not in khoi]
+    assert not thieu, (
+        f"EVALUATION_STATUS thieu nhan cho: {thieu}. "
+        "Cac trang thai nay se hien tieng Anh tho tren man Ket qua do."
+    )
+    print(f"[PASS] ca {len(evaluation.STATUSES)} trang thai deu co nhan tieng Viet")
+
+
 if __name__ == "__main__":
+    khong_can_db = False
+    try:
+        test_moi_trang_thai_deu_co_nhan_tieng_viet()
+    except Exception as exc:
+        khong_can_db = True
+        print(f"[FAIL] test_moi_trang_thai_deu_co_nhan_tieng_viet: {exc}")
+
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
     except Exception as exc:
@@ -176,7 +210,7 @@ if __name__ == "__main__":
         )
         sys.exit(0)
 
-    failed = False
+    failed = khong_can_db
     try:
         for fn in (
             test_config_kb_tra_ba_nhom_va_viewer_xem_duoc,
