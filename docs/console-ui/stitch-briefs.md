@@ -15,6 +15,19 @@ nguyên khối, dán vào Stitch, **không đính kèm ảnh nào**.
    Hệ quả: **prompt là ràng buộc duy nhất**, nên phần `DATA` phải giữ nguyên
    văn — mọi tên trường trong đó đều lấy từ `openapi.json`.
 
+## Vì sao mỗi prompt có khối NAVIGATION và FORBIDDEN ACTIONS
+
+Đợt thiết kế đầu (2026-08-20) cho thấy: nếu prompt chỉ mô tả **một màn hình**
+mà không nói gì về khung ứng dụng bao quanh, Stitch sẽ **tự bịa một menu admin
+nghe hợp lý** — "Quản lý Site", "Policy AI", "Lịch sử hệ thống" — và bỏ mất
+Reviews. Nó cũng vẽ nút "Tạo Job Mới" dù API không có endpoint tạo job.
+
+Bịa ra thứ không tồn tại nguy hiểm hơn vẽ xấu: Antigravity sẽ code theo thiết
+kế, và bạn chỉ phát hiện khi bấm vào một menu dẫn tới hư không.
+
+Khối `VIETNAMESE LABELS` cũng sinh từ cùng đợt đó: `queued` bị dịch thành
+"Chờ duyệt", hàm ý có người phải bấm duyệt — hệ thống không hề có bước đó.
+
 ## Giá trị bộ lọc lấy từ API, không viết cứng
 
 Ba dropdown (Trạng thái, Site, Nguồn) và dropdown Quyết định đều nạp từ một lời
@@ -63,6 +76,59 @@ CONTROLS + STATES — design all four:
    states for these two cases.
 4. Rate limited — banner reading "Tạm thời chưa thể đăng nhập. Vui lòng thử lại
    sau." with the submit button disabled.
+
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
 
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
@@ -144,6 +210,59 @@ Design all four states:
 4. Invalid range — the API rejects a reversed range or only one date; show an
    inline validation message next to the date inputs.
 
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
+
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
 - Brand: primary #00237a, page background #f9f9f9, text #1a1c1c, font Inter.
@@ -212,6 +331,59 @@ Design all four states:
 4. Invalid filter — the API returns a validation message; show it above the
    table while KEEPING the filter values the user typed.
 
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
+
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
 - Brand: primary #00237a, page background #f9f9f9, text #1a1c1c, font Inter.
@@ -278,6 +450,59 @@ Design all five states:
 5. Conflict — retry rejected because the job is no longer failed: inline banner
    "Không thể thử lại job này."
 
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
+
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
 - Brand: primary #00237a, page background #f9f9f9, text #1a1c1c, font Inter.
@@ -342,6 +567,59 @@ Design all four states:
 2. Empty ("Chưa có review nào khớp bộ lọc")
 3. Error (inline banner with retry)
 4. Invalid filter — validation message above the table, filter values preserved.
+
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
 
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
@@ -418,6 +696,59 @@ Design all five states:
 4. Loaded, veto_reason present — the decision was forced; make that visually
    unmistakable
 5. Not found — "Không tìm thấy review"
+
+NAVIGATION — the app shell around this screen. Do NOT invent menu items.
+The left/top navigation has EXACTLY three destinations, in this order:
+  Tổng quan · Jobs · Reviews
+Nothing else exists. Do NOT add "Quản lý Site", "Nguồn dữ liệu", "Policy AI",
+"Lịch sử hệ thống", "Báo cáo", "Cài đặt", or any settings/admin section — none
+of them are implemented, and a menu item that leads nowhere is worse than no
+menu at all.
+The top-right corner shows: the signed-in username and role (e.g.
+"admin · admin"), a "Đổi mật khẩu" link, and a "Đăng xuất" button. Nothing else
+— no notification bell, no help icon, no avatar menu.
+
+FORBIDDEN ACTIONS — this product cannot do these things, so do not draw buttons
+for them:
+- NO "Tạo Job Mới" / create / add / new button anywhere. Jobs are created
+  automatically when an editor saves an article in Drupal; there is no manual
+  creation path.
+- NO delete, archive, bulk-select, or bulk-action controls.
+- NO approve / reject / duyệt buttons. The AI decides; a human never approves
+  inside this tool.
+- NO export / download button.
+The ONLY action in the entire product is "Thử lại" on a failed job, and it
+lives on the job detail screen, not here.
+
+VIETNAMESE LABELS for job status — use these exact words, they are not
+interchangeable:
+  queued      -> "Trong hàng đợi"   (waiting to be processed;
+                                     NOT "Chờ duyệt" — nobody approves anything)
+  running     -> "Đang chạy"
+  failed      -> "Thất bại"
+  done        -> "Hoàn thành"
+  superseded  -> "Bị thay thế"      (a newer job replaced this one)
+
+VIETNAMESE LABELS for review decision:
+  publish         -> "Xuất bản"
+  needs_revision  -> "Cần sửa"
+  rejected        -> "Từ chối"
+  unknown         -> "Chưa rõ"
+
+SAMPLE DATA — use the example values given in the DATA block VERBATIM. Do not
+substitute prettier-looking placeholders. Real values look like:
+  site_slug       "drupal-vn-primary"        (NOT "Site_A")
+  source          "event", "reconcile", "admin_retry", "manual-test-b7"
+                                             (NOT "API", "Batch", "Webhook")
+  policy_version  "cam-nang-vn-v1"           (NOT "v2.4.1")
+  created_at      render as "19/08/2026 14:32" — Vietnamese day/month/year
+                  order, NOT the raw ISO string and NOT mm/dd/yyyy
+A designer who invents friendlier-looking data hides how the real screen will
+feel when it is full of long UUIDs and slugs.
+
+CONSISTENCY — every state of this screen shows the SAME table with the SAME
+columns and the SAME filter bar. Only the content area changes between loading,
+empty, error, and populated. Do not redesign the table for the error state.
 
 STYLE — art direction (professional internal tool, aim for the visual restraint
 of Linear or Stripe Dashboard, NOT a marketing page):
