@@ -633,7 +633,131 @@ Mỗi agent là một khối đóng/mở được, mặc định **mở**. Tiêu
 
 ---
 
-## Hai nhiệm vụ còn lại
+## NHIỆM VỤ 6 — Login và Đổi mật khẩu (làm cùng một lượt)
+
+**Hai màn cuối, và chúng nối liền nhau:** đăng nhập xong, nếu tài khoản bị buộc
+đổi mật khẩu thì đi thẳng sang màn kia. Làm rời sẽ không thấy được luồng.
+
+**Đọc ba file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b
+3. `docs/console-ui/integration.md` mục 2, 3, 4 — vòng đời phiên, CSRF, mã lỗi
+
+**Sửa đúng hai file:**
+
+- `multiagent/console_ui/src/pages/LoginPage.tsx`
+- `multiagent/console_ui/src/pages/ChangePasswordPage.tsx`
+
+---
+
+### KHÁC MỌI MÀN TRƯỚC: hai màn này KHÔNG có sidebar
+
+Xem `src/router.tsx`. `/login` nằm ngoài `RequireAuth`, còn `/doi-mat-khau` nằm
+trong `RequireAuth` nhưng **ngoài `AppShell`**. Nghĩa là cả hai đều **không có
+thanh điều hướng, không có thanh trên**.
+
+Bố cục: **một thẻ đơn canh giữa** trên nền `bg-surface`, rộng khoảng `max-w-sm`,
+căn giữa cả ngang lẫn dọc (`min-h-screen flex items-center justify-center`).
+Phía trên thẻ có tên sản phẩm "AI Review Platform".
+
+---
+
+### KHÔNG viết lại phần logic
+
+`src/auth/AuthProvider.tsx` **đã có sẵn** `login()`, `changePassword()`, và việc
+xoá state khi phiên mất. Hai trang chỉ gọi chúng qua `useAuth()`.
+
+Đừng tự gọi `client.post("/auth/login")`. Đừng tự xử lý cookie hay CSRF.
+
+---
+
+### Màn 1 — Login
+
+**Đúng ba thành phần.** Không có gì khác:
+
+- Ô "Tên đăng nhập"
+- Ô "Mật khẩu" (che ký tự)
+- Nút "Đăng nhập"
+
+**KHÔNG được thêm**: "Ghi nhớ đăng nhập", "Quên mật khẩu", đăng nhập bằng
+Google/SSO, link đăng ký. **Không cái nào tồn tại trong hệ thống.**
+
+**Bốn trạng thái:**
+
+| Trạng thái | Hiện gì |
+|---|---|
+| bình thường | form trống, nút bật |
+| đang gửi | nút đổi chữ "Đang đăng nhập…", vô hiệu cả hai ô nhập |
+| sai thông tin (401) | banner đỏ trên form: "Thông tin đăng nhập không hợp lệ" |
+| bị chặn tạm (429) | banner đỏ với thông báo từ server, **vô hiệu nút** |
+
+**Điểm quan trọng về thông báo lỗi:** server cố tình trả **một thông báo duy
+nhất** cho cả hai trường hợp "không có tài khoản đó" và "sai mật khẩu". Đừng
+tách thành lỗi riêng cho từng ô — làm vậy là để lộ tài khoản nào có thật.
+
+**Sau khi đăng nhập thành công**, code sẵn có đã điều hướng. Nếu
+`must_change_password = true` thì đi `/doi-mat-khau`, ngược lại về `/`.
+
+---
+
+### Màn 2 — Đổi mật khẩu
+
+**Hai ô nhập**: "Mật khẩu hiện tại" và "Mật khẩu mới", cả hai che ký tự.
+Thêm ô thứ ba "Xác nhận mật khẩu mới" ở phía giao diện — so khớp tại chỗ trước
+khi gửi, **không gửi lên server nếu hai ô không khớp**.
+
+**Ghi rõ trên màn hình hai điều người dùng cần biết trước khi bấm:**
+
+1. Mật khẩu phải **ít nhất 12 ký tự** (server từ chối nếu ngắn hơn)
+2. **Đổi mật khẩu sẽ đăng xuất khỏi mọi thiết bị** và phải đăng nhập lại
+
+Điều 2 không phải doạ — `changePassword()` thu hồi mọi phiên, kể cả phiên hiện
+tại, rồi chuyển về `/login`. Không báo trước thì người dùng tưởng bị lỗi.
+
+**Trường hợp bị BUỘC đổi mật khẩu** (`must_change_password = true`): hiện một
+banner amber ở đầu thẻ — "Bạn phải đổi mật khẩu trước khi sử dụng hệ thống" —
+và **ẩn link quay lại**, vì mọi màn khác đều bị chặn. Lấy cờ đó từ
+`useAuth().user?.must_change_password`.
+
+**Bốn trạng thái:**
+
+| Trạng thái | Hiện gì |
+|---|---|
+| bình thường | form trống |
+| đang gửi | nút "Đang đổi…", vô hiệu các ô |
+| hai ô mới không khớp | báo tại chỗ dưới ô xác nhận, **không gọi API** |
+| server từ chối (400) | banner đỏ với thông báo từ server |
+
+**Điểm quan trọng về lỗi 400:** server dùng **một mã lỗi duy nhất**
+(`password_rejected`) cho cả "mật khẩu hiện tại sai" lẫn "mật khẩu mới quá
+yếu". Đừng đoán xem lỗi nào — hiện đúng thông báo server trả về.
+
+---
+
+### Ràng buộc
+
+- KHÔNG thêm "Ghi nhớ", "Quên mật khẩu", SSO, đăng ký
+- KHÔNG tách lỗi đăng nhập thành lỗi riêng cho từng ô
+- KHÔNG tự gọi `client.post("/auth/...")` — dùng `useAuth()`
+- KHÔNG sửa `src/auth/AuthProvider.tsx`
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage` — kể cả tên đăng nhập
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG tự viết hàm định dạng hay bảng pill — dùng `src/lib/`
+- KHÔNG dựng sidebar hay thanh trên cho hai màn này
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài hai file trên
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+
+**Cách thử:** đăng xuất rồi đăng nhập lại. Để thử màn đổi mật khẩu mà không
+mất tài khoản, cứ mở `/console/doi-mat-khau` khi đang đăng nhập — nhưng
+**đừng bấm gửi** nếu không muốn đổi mật khẩu thật.
+
+---
+
+## Đã xong toàn bộ bảy màn
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
