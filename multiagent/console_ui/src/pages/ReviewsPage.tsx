@@ -6,13 +6,7 @@ import { client, query, ConsoleApiError } from "../api/client";
 import type { ReviewPage } from "../api/client";
 import { useFilters } from "../api/useFilters";
 import { formatDateTime, formatNumber, shortId, TIMEZONE_LABEL } from "../lib/format";
-
-const DECISION_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
-  publish: { label: "Xuất bản", dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  needs_revision: { label: "Cần sửa", dot: "bg-amber-500", bg: "bg-amber-50 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-300" },
-  rejected: { label: "Từ chối", dot: "bg-red-500", bg: "bg-red-50 dark:bg-red-500/15", text: "text-red-700 dark:text-red-300" },
-  unknown: { label: "Chưa rõ", dot: "bg-gray-400", bg: "bg-gray-100 dark:bg-gray-500/15", text: "text-gray-600 dark:text-gray-300" },
-};
+import { REVIEW_DECISION } from "../lib/status";
 
 export function ReviewsPage() {
   const [params, setParams] = useSearchParams();
@@ -108,7 +102,7 @@ export function ReviewsPage() {
             >
               <option value="">Tất cả</option>
               {filtersData?.review_decisions.map((s) => (
-                <option key={s} value={s}>{DECISION_CONFIG[s]?.label || s}</option>
+                <option key={s} value={s}>{REVIEW_DECISION[s]?.label || s}</option>
               ))}
             </select>
           </div>
@@ -234,7 +228,7 @@ export function ReviewsPage() {
                 data?.items.map((review) => {
                   let badge = null;
                   if (review.decision) {
-                    const st = DECISION_CONFIG[review.decision] || {
+                    const st = REVIEW_DECISION[review.decision] || {
                       label: review.decision,
                       dot: "bg-gray-400",
                       bg: "bg-gray-100",

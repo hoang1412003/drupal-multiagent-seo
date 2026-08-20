@@ -6,14 +6,7 @@ import { client, query, ConsoleApiError } from "../api/client";
 import type { JobPage } from "../api/client";
 import { useFilters } from "../api/useFilters";
 import { formatDateTime, shortId, TIMEZONE_LABEL } from "../lib/format";
-
-const STATUS_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
-  queued: { label: "Trong hàng đợi", dot: "bg-amber-500", bg: "bg-amber-50 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-300" },
-  running: { label: "Đang chạy", dot: "bg-blue-500", bg: "bg-blue-50 dark:bg-blue-500/15", text: "text-blue-700 dark:text-blue-300" },
-  done: { label: "Hoàn thành", dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  failed: { label: "Thất bại", dot: "bg-red-500", bg: "bg-red-50 dark:bg-red-500/15", text: "text-red-700 dark:text-red-300" },
-  superseded: { label: "Bị thay thế", dot: "bg-gray-400", bg: "bg-gray-100 dark:bg-gray-500/15", text: "text-gray-600 dark:text-gray-300" },
-};
+import { JOB_STATUS } from "../lib/status";
 
 export function JobsPage() {
   const [params, setParams] = useSearchParams();
@@ -111,7 +104,7 @@ export function JobsPage() {
             >
               <option value="">Tất cả</option>
               {filtersData?.job_statuses.map((s) => (
-                <option key={s} value={s}>{STATUS_CONFIG[s]?.label || s}</option>
+                <option key={s} value={s}>{JOB_STATUS[s]?.label || s}</option>
               ))}
             </select>
           </div>
@@ -246,7 +239,7 @@ export function JobsPage() {
                 </tr>
               ) : (
                 data?.items.map((job) => {
-                  const st = STATUS_CONFIG[job.status] || {
+                  const st = JOB_STATUS[job.status] || {
                     label: job.status,
                     dot: "bg-gray-400",
                     bg: "bg-gray-100",

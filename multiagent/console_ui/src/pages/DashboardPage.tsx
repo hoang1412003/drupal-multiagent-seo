@@ -5,38 +5,8 @@ import { useState, useEffect } from "react";
 import { client, query, ConsoleApiError } from "../api/client";
 import type { DashboardResponse } from "../api/client";
 import { formatDate, formatDateTime, formatNumber } from "../lib/format";
+import { JOB_STATUS, REVIEW_DECISION, WORKER_STATUS, WRITEBACK_STATUS, pillOf } from "../lib/status";
 import { useFilters } from "../api/useFilters";
-
-const JOB_STATUS_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
-  queued: { label: "Trong hàng đợi", dot: "bg-amber-500", bg: "bg-amber-50 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-300" },
-  running: { label: "Đang chạy", dot: "bg-blue-500", bg: "bg-blue-50 dark:bg-blue-500/15", text: "text-blue-700 dark:text-blue-300" },
-  done: { label: "Hoàn thành", dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  failed: { label: "Thất bại", dot: "bg-red-500", bg: "bg-red-50 dark:bg-red-500/15", text: "text-red-700 dark:text-red-300" },
-  superseded: { label: "Bị thay thế", dot: "bg-gray-400", bg: "bg-gray-100 dark:bg-gray-500/15", text: "text-gray-600 dark:text-gray-300" },
-};
-
-const DECISION_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
-  publish: { label: "Xuất bản", dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  needs_revision: { label: "Cần sửa", dot: "bg-amber-500", bg: "bg-amber-50 dark:bg-amber-500/15", text: "text-amber-700 dark:text-amber-300" },
-  rejected: { label: "Từ chối", dot: "bg-red-500", bg: "bg-red-50 dark:bg-red-500/15", text: "text-red-700 dark:text-red-300" },
-  unknown: { label: "Chưa rõ", dot: "bg-gray-400", bg: "bg-gray-100 dark:bg-gray-500/15", text: "text-gray-600 dark:text-gray-300" },
-};
-
-const WORKER_STATUS_CONFIG: Record<string, { label: string, dot: string, bg: string, text: string }> = {
-  running: { label: "Hoạt động", dot: "bg-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/15", text: "text-emerald-700 dark:text-emerald-300" },
-  // stale = tung chay roi im lang -> DAY LA SU CO, mau do.
-  stale: { label: "Mất tín hiệu", dot: "bg-red-500", bg: "bg-red-50 dark:bg-red-500/15", text: "text-red-700 dark:text-red-300" },
-  // unavailable = chua bao gio bao cao -> chua chac la su co, mau xam.
-  unavailable: { label: "Chưa từng chạy", dot: "bg-gray-400", bg: "bg-gray-100 dark:bg-gray-500/15", text: "text-gray-600 dark:text-gray-300" },
-};
-
-const WRITEBACK_LABEL: Record<string, string> = {
-  succeeded: "Thành công",
-  failed: "Thất bại",
-  superseded: "Bị thay thế",
-  pending: "Đang chờ",
-  unknown: "Chưa rõ",
-};
 
 /** ms -> "7,7 giây" khi >= 1000ms, nguoc lai giu "820 ms". */
 function formatDuration(ms: number | null | undefined): string {
@@ -187,7 +157,7 @@ export function DashboardPage() {
             <div className="flex flex-wrap gap-6">
               {(filtersData?.job_statuses ?? []).map((status) => {
                 const count = data.queue_counts[status] || 0;
-                const config = JOB_STATUS_CONFIG[status] || { label: status, text: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" };
+                const config = JOB_STATUS[status] || { label: status, text: "text-gray-700", bg: "bg-gray-100", dot: "bg-gray-400" };
                 return (
                   <div key={status} className="flex items-center gap-2">
                     <span className={`flex h-2.5 w-2.5 rounded-full ${config.dot}`}></span>
@@ -281,7 +251,7 @@ export function DashboardPage() {
                   <div className="flex flex-col gap-3">
                     {(filtersData?.review_decisions ?? []).map((decision) => {
                       const count = data.decision_counts[decision] || 0;
-                      const config = DECISION_CONFIG[decision] || { label: decision, dot: "bg-gray-400" };
+                      const config = REVIEW_DECISION[decision] || { label: decision, dot: "bg-gray-400" };
                       return (
                         <div key={decision} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -309,7 +279,7 @@ export function DashboardPage() {
                   <div className="space-y-2 text-sm border-t border-gray-100 pt-3 dark:border-gray-800">
                     {Object.entries(data.writeback_counts).map(([status, count]) => (
                       <div key={status} className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">{WRITEBACK_LABEL[status] ?? status}</span>
+                        <span className="text-gray-600 dark:text-gray-400">{pillOf(WRITEBACK_STATUS, status).label}</span>
                         <span className="font-medium tabular-nums text-ink dark:text-gray-100">{count as number}</span>
                       </div>
                     ))}
@@ -323,7 +293,7 @@ export function DashboardPage() {
                   <div className="mb-5">
                     <div className="text-sm text-gray-500 mb-1.5">Worker</div>
                     {(() => {
-                      const st = WORKER_STATUS_CONFIG[data.worker_status] || { label: data.worker_status, bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" };
+                      const st = WORKER_STATUS[data.worker_status] || { label: data.worker_status, bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" };
                       return (
                         <div className="mb-2">
                           <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${st.bg} ${st.text}`}>
