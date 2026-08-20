@@ -26,7 +26,10 @@ CONSOLE_ROUTES = {
     "/api/console/v1/auth/logout",
     "/api/console/v1/auth/change-password",
     "/api/console/v1/audit",
+    "/api/console/v1/config-kb",
     "/api/console/v1/dashboard",
+    "/api/console/v1/evaluation",
+    "/api/console/v1/evaluation/evidence/{experiment}",
     "/api/console/v1/filters",
     "/api/console/v1/jobs",
     "/api/console/v1/jobs/{public_id}",
@@ -63,7 +66,9 @@ def test_real_app_mounts_all_console_routes():
         ("POST", "/api/console/v1/auth/logout"),
         ("POST", "/api/console/v1/auth/change-password"),
         ("GET", "/api/console/v1/audit"),
+        ("GET", "/api/console/v1/config-kb"),
         ("GET", "/api/console/v1/dashboard"),
+        ("GET", "/api/console/v1/evaluation"),
         ("GET", "/api/console/v1/filters"),
         ("GET", "/api/console/v1/jobs"),
         ("GET", f"/api/console/v1/jobs/{uuid_gia}"),
@@ -86,7 +91,7 @@ def test_real_app_mounts_all_console_routes():
         assert login.status_code != 404, "/auth/login chua duoc mount"
     finally:
         app_module.app.dependency_overrides.clear()
-    print("[PASS] ca 12 route Console deu mount tren app that va tra 401 dung chuan")
+    print("[PASS] ca 15 route Console deu mount tren app that va tra 401 dung chuan")
 
 
 def test_openapi_excludes_legacy_admin_routes():
@@ -127,9 +132,10 @@ def test_openapi_console_paths_are_complete():
     # kieu `unknown` va agent viet frontend mat toan bo loi ich cua kieu.
     components = schema.get("components", {}).get("schemas", {})
     for ten in ("MeResponse", "DashboardResponse", "JobPage", "JobDetailModel",
-                "ReviewPage", "ReviewDetailModel", "FiltersResponse", "AuditPage"):
+                "ReviewPage", "ReviewDetailModel", "FiltersResponse", "AuditPage",
+                "ConfigKbResponse", "EvaluationResponse"):
         assert ten in components, f"thieu schema {ten} trong openapi"
-    print("[PASS] openapi co du 12 duong dan Console va 8 schema chinh")
+    print("[PASS] openapi co du 15 duong dan Console va 10 schema chinh")
 
 
 def test_exported_contract_excludes_connector_models():

@@ -636,6 +636,89 @@
         }
       }
     },
+    "/api/console/v1/config-kb": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Config Kb",
+        "operationId": "config_kb_api_console_v1_config_kb_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigKbResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/evaluation": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Evaluation List",
+        "operationId": "evaluation_list_api_console_v1_evaluation_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvaluationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/evaluation/evidence/{experiment}": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Evaluation Evidence",
+        "description": "Tra FILE THO, khong phai JSON.\n\nGiu nguyen hai header cua admin cu. `nosniff` la thu ngan trinh duyet doan\nkieu mot file .txt thanh HTML roi chay script trong do; bo di la mo mot\nduong XSS qua noi dung file bang chung.",
+        "operationId": "evaluation_evidence_api_console_v1_evaluation_evidence__experiment__get",
+        "parameters": [
+          {
+            "name": "experiment",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Experiment"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/console/v1/reviews": {
       "get": {
         "tags": [
@@ -1020,6 +1103,38 @@
         "type": "object",
         "title": "ChangePasswordRequest"
       },
+      "ConfigKbResponse": {
+        "properties": {
+          "policy_files": {
+            "items": {
+              "$ref": "#/components/schemas/PolicyFileModel"
+            },
+            "type": "array",
+            "title": "Policy Files"
+          },
+          "profile_assignments": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileAssignmentModel"
+            },
+            "type": "array",
+            "title": "Profile Assignments"
+          },
+          "kb_summary": {
+            "items": {
+              "$ref": "#/components/schemas/KBSummaryModel"
+            },
+            "type": "array",
+            "title": "Kb Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "policy_files",
+          "profile_assignments",
+          "kb_summary"
+        ],
+        "title": "ConfigKbResponse"
+      },
       "CostEstimateModel": {
         "properties": {
           "input_tokens": {
@@ -1196,6 +1311,139 @@
           "worker_last_seen_at"
         ],
         "title": "DashboardResponse"
+      },
+      "EvaluationResponse": {
+        "properties": {
+          "experiments": {
+            "items": {
+              "$ref": "#/components/schemas/ExperimentModel"
+            },
+            "type": "array",
+            "title": "Experiments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "experiments"
+        ],
+        "title": "EvaluationResponse"
+      },
+      "ExperimentModel": {
+        "properties": {
+          "experiment": {
+            "type": "string",
+            "title": "Experiment"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "score_path_snapshot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Path Snapshot"
+          },
+          "head_commit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Head Commit"
+          },
+          "prompt_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Version"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run At"
+          },
+          "evidence_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Path"
+          },
+          "metadata_complete": {
+            "type": "boolean",
+            "title": "Metadata Complete"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "has_evidence": {
+            "type": "boolean",
+            "title": "Has Evidence"
+          },
+          "provenance_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provenance Warning"
+          }
+        },
+        "type": "object",
+        "required": [
+          "experiment",
+          "status",
+          "score_path_snapshot",
+          "head_commit",
+          "prompt_version",
+          "model",
+          "run_at",
+          "evidence_path",
+          "metadata_complete",
+          "summary",
+          "has_evidence",
+          "provenance_warning"
+        ],
+        "title": "ExperimentModel"
       },
       "FiltersResponse": {
         "properties": {
@@ -1524,6 +1772,82 @@
         ],
         "title": "JobPage"
       },
+      "KBSummaryModel": {
+        "properties": {
+          "collection": {
+            "type": "string",
+            "title": "Collection"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "langcode": {
+            "type": "string",
+            "title": "Langcode"
+          },
+          "chunk_count": {
+            "type": "integer",
+            "title": "Chunk Count"
+          },
+          "metadata_excerpt": {
+            "type": "string",
+            "title": "Metadata Excerpt"
+          },
+          "embedding_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Model"
+          },
+          "embedding_dimension": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Dimension"
+          }
+        },
+        "type": "object",
+        "required": [
+          "collection",
+          "content_type",
+          "langcode",
+          "chunk_count",
+          "metadata_excerpt",
+          "embedding_model",
+          "embedding_dimension"
+        ],
+        "title": "KBSummaryModel"
+      },
+      "LabelValueModel": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "string",
+            "title": "Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "value"
+        ],
+        "title": "LabelValueModel",
+        "description": "Cap nhan-gia tri co THU TU.\n\nNguon la tuple[tuple[str, str], ...] nen thu tu co y nghia. Doi sang dict\nse mat thu tu do va co the nuot khoa trung."
+      },
       "LoginRequest": {
         "properties": {
           "username": {
@@ -1567,6 +1891,125 @@
           "csrf_token"
         ],
         "title": "MeResponse"
+      },
+      "PolicyFileModel": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "relative_path": {
+            "type": "string",
+            "title": "Relative Path"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256"
+          },
+          "modified_at": {
+            "type": "string",
+            "title": "Modified At"
+          },
+          "metadata": {
+            "items": {
+              "$ref": "#/components/schemas/LabelValueModel"
+            },
+            "type": "array",
+            "title": "Metadata"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "relative_path",
+          "sha256",
+          "modified_at",
+          "metadata",
+          "error"
+        ],
+        "title": "PolicyFileModel"
+      },
+      "ProfileAssignmentModel": {
+        "properties": {
+          "site_slug": {
+            "type": "string",
+            "title": "Site Slug"
+          },
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "connector_type": {
+            "type": "string",
+            "title": "Connector Type"
+          },
+          "site_active": {
+            "type": "boolean",
+            "title": "Site Active"
+          },
+          "intake_paused": {
+            "type": "boolean",
+            "title": "Intake Paused"
+          },
+          "profile_code": {
+            "type": "string",
+            "title": "Profile Code"
+          },
+          "market_code": {
+            "type": "string",
+            "title": "Market Code"
+          },
+          "language_code": {
+            "type": "string",
+            "title": "Language Code"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "profile_status": {
+            "type": "string",
+            "title": "Profile Status"
+          },
+          "policy_version": {
+            "type": "string",
+            "title": "Policy Version"
+          },
+          "policy_metadata": {
+            "items": {
+              "$ref": "#/components/schemas/LabelValueModel"
+            },
+            "type": "array",
+            "title": "Policy Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "site_slug",
+          "site_name",
+          "connector_type",
+          "site_active",
+          "intake_paused",
+          "profile_code",
+          "market_code",
+          "language_code",
+          "content_type",
+          "profile_status",
+          "policy_version",
+          "policy_metadata"
+        ],
+        "title": "ProfileAssignmentModel"
       },
       "RetryRequest": {
         "properties": {

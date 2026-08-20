@@ -174,6 +174,64 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/v1/config-kb": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Config Kb */
+        get: operations["config_kb_api_console_v1_config_kb_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/evaluation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evaluation List */
+        get: operations["evaluation_list_api_console_v1_evaluation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/evaluation/evidence/{experiment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Evaluation Evidence
+         * @description Tra FILE THO, khong phai JSON.
+         *
+         *     Giu nguyen hai header cua admin cu. `nosniff` la thu ngan trinh duyet doan
+         *     kieu mot file .txt thanh HTML roi chay script trong do; bo di la mo mot
+         *     duong XSS qua noi dung file bang chung.
+         */
+        get: operations["evaluation_evidence_api_console_v1_evaluation_evidence__experiment__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/console/v1/reviews": {
         parameters: {
             query?: never;
@@ -278,6 +336,15 @@ export interface components {
              */
             new_password: string;
         };
+        /** ConfigKbResponse */
+        ConfigKbResponse: {
+            /** Policy Files */
+            policy_files: components["schemas"]["PolicyFileModel"][];
+            /** Profile Assignments */
+            profile_assignments: components["schemas"]["ProfileAssignmentModel"][];
+            /** Kb Summary */
+            kb_summary: components["schemas"]["KBSummaryModel"][];
+        };
         /** CostEstimateModel */
         CostEstimateModel: {
             /** Input Tokens */
@@ -334,6 +401,38 @@ export interface components {
             worker_stale: number;
             /** Worker Last Seen At */
             worker_last_seen_at: string | null;
+        };
+        /** EvaluationResponse */
+        EvaluationResponse: {
+            /** Experiments */
+            experiments: components["schemas"]["ExperimentModel"][];
+        };
+        /** ExperimentModel */
+        ExperimentModel: {
+            /** Experiment */
+            experiment: string;
+            /** Status */
+            status: string;
+            /** Score Path Snapshot */
+            score_path_snapshot: string | null;
+            /** Head Commit */
+            head_commit: string | null;
+            /** Prompt Version */
+            prompt_version: string | null;
+            /** Model */
+            model: string | null;
+            /** Run At */
+            run_at: string | null;
+            /** Evidence Path */
+            evidence_path: string | null;
+            /** Metadata Complete */
+            metadata_complete: boolean;
+            /** Summary */
+            summary: string;
+            /** Has Evidence */
+            has_evidence: boolean;
+            /** Provenance Warning */
+            provenance_warning: string | null;
         };
         /**
          * FiltersResponse
@@ -445,6 +544,36 @@ export interface components {
             /** Items */
             items: components["schemas"]["JobListItemModel"][];
         };
+        /** KBSummaryModel */
+        KBSummaryModel: {
+            /** Collection */
+            collection: string;
+            /** Content Type */
+            content_type: string;
+            /** Langcode */
+            langcode: string;
+            /** Chunk Count */
+            chunk_count: number;
+            /** Metadata Excerpt */
+            metadata_excerpt: string;
+            /** Embedding Model */
+            embedding_model: string | null;
+            /** Embedding Dimension */
+            embedding_dimension: number | null;
+        };
+        /**
+         * LabelValueModel
+         * @description Cap nhan-gia tri co THU TU.
+         *
+         *     Nguon la tuple[tuple[str, str], ...] nen thu tu co y nghia. Doi sang dict
+         *     se mat thu tu do va co the nuot khoa trung.
+         */
+        LabelValueModel: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
+        };
         /** LoginRequest */
         LoginRequest: {
             /**
@@ -468,6 +597,48 @@ export interface components {
             must_change_password: boolean;
             /** Csrf Token */
             csrf_token: string;
+        };
+        /** PolicyFileModel */
+        PolicyFileModel: {
+            /** Label */
+            label: string;
+            /** Relative Path */
+            relative_path: string;
+            /** Sha256 */
+            sha256: string;
+            /** Modified At */
+            modified_at: string;
+            /** Metadata */
+            metadata: components["schemas"]["LabelValueModel"][];
+            /** Error */
+            error: string | null;
+        };
+        /** ProfileAssignmentModel */
+        ProfileAssignmentModel: {
+            /** Site Slug */
+            site_slug: string;
+            /** Site Name */
+            site_name: string;
+            /** Connector Type */
+            connector_type: string;
+            /** Site Active */
+            site_active: boolean;
+            /** Intake Paused */
+            intake_paused: boolean;
+            /** Profile Code */
+            profile_code: string;
+            /** Market Code */
+            market_code: string;
+            /** Language Code */
+            language_code: string;
+            /** Content Type */
+            content_type: string;
+            /** Profile Status */
+            profile_status: string;
+            /** Policy Version */
+            policy_version: string;
+            /** Policy Metadata */
+            policy_metadata: components["schemas"]["LabelValueModel"][];
         };
         /** RetryRequest */
         RetryRequest: {
@@ -907,6 +1078,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobDetailModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    config_kb_api_console_v1_config_kb_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConfigKbResponse"];
+                };
+            };
+        };
+    };
+    evaluation_list_api_console_v1_evaluation_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvaluationResponse"];
+                };
+            };
+        };
+    };
+    evaluation_evidence_api_console_v1_evaluation_evidence__experiment__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                experiment: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */

@@ -87,6 +87,7 @@
         "test_console_api_filters.py",
         "test_console_api_jobs.py",
         "test_console_api_mount.py",
+        "test_console_api_readonly.py",
         "test_console_api_reviews.py",
         "test_job_queue.py",
         "test_migrations.py",

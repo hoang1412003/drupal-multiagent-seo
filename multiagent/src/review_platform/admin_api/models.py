@@ -388,3 +388,136 @@ class AuditEventModel(BaseModel):
 
 class AuditPage(PageResponse):
     items: list[AuditEventModel]
+
+
+class LabelValueModel(BaseModel):
+    """Cap nhan-gia tri co THU TU.
+
+    Nguon la tuple[tuple[str, str], ...] nen thu tu co y nghia. Doi sang dict
+    se mat thu tu do va co the nuot khoa trung.
+    """
+
+    label: str
+    value: str
+
+
+class PolicyFileModel(BaseModel):
+    label: str
+    relative_path: str
+    sha256: str
+    modified_at: str
+    metadata: list[LabelValueModel]
+    error: str | None
+
+    @classmethod
+    def from_view(cls, item) -> "PolicyFileModel":
+        return cls(
+            label=item.label,
+            relative_path=item.relative_path,
+            sha256=item.sha256,
+            modified_at=iso(item.modified_at),
+            metadata=[
+                LabelValueModel(label=k, value=v) for k, v in item.metadata
+            ],
+            error=item.error,
+        )
+
+
+class ProfileAssignmentModel(BaseModel):
+    site_slug: str
+    site_name: str
+    connector_type: str
+    site_active: bool
+    intake_paused: bool
+    profile_code: str
+    market_code: str
+    language_code: str
+    content_type: str
+    profile_status: str
+    policy_version: str
+    policy_metadata: list[LabelValueModel]
+
+    @classmethod
+    def from_view(cls, item) -> "ProfileAssignmentModel":
+        return cls(
+            site_slug=item.site_slug,
+            site_name=item.site_name,
+            connector_type=item.connector_type,
+            site_active=item.site_active,
+            intake_paused=item.intake_paused,
+            profile_code=item.profile_code,
+            market_code=item.market_code,
+            language_code=item.language_code,
+            content_type=item.content_type,
+            profile_status=item.profile_status,
+            policy_version=item.policy_version,
+            policy_metadata=[
+                LabelValueModel(label=k, value=v) for k, v in item.policy_metadata
+            ],
+        )
+
+
+class KBSummaryModel(BaseModel):
+    collection: str
+    content_type: str
+    langcode: str
+    chunk_count: int
+    metadata_excerpt: str
+    embedding_model: str | None
+    embedding_dimension: int | None
+
+    @classmethod
+    def from_view(cls, item) -> "KBSummaryModel":
+        return cls(
+            collection=item.collection,
+            content_type=item.content_type,
+            langcode=item.langcode,
+            chunk_count=item.chunk_count,
+            metadata_excerpt=item.metadata_excerpt,
+            embedding_model=item.embedding_model,
+            embedding_dimension=item.embedding_dimension,
+        )
+
+
+class ConfigKbResponse(BaseModel):
+    policy_files: list[PolicyFileModel]
+    profile_assignments: list[ProfileAssignmentModel]
+    kb_summary: list[KBSummaryModel]
+
+
+class ExperimentModel(BaseModel):
+    experiment: str
+    status: str
+    score_path_snapshot: str | None
+    head_commit: str | None
+    prompt_version: str | None
+    model: str | None
+    run_at: str | None
+    evidence_path: str | None
+    metadata_complete: bool
+    summary: str
+    has_evidence: bool
+    # Loi nhac dung suy dien tu cac truong con thieu. Bo di la mo duong cho
+    # nguoi doc ket luan tu du lieu khong day du.
+    provenance_warning: str | None
+
+    @classmethod
+    def from_view(cls, item) -> "ExperimentModel":
+        return cls(
+            experiment=item.experiment,
+            status=item.status,
+            score_path_snapshot=item.score_path_snapshot,
+            head_commit=item.head_commit,
+            prompt_version=item.prompt_version,
+            model=item.model,
+            run_at=item.run_at,
+            evidence_path=item.evidence_path,
+            metadata_complete=item.metadata_complete,
+            summary=item.summary,
+            has_evidence=item.evidence_file is not None,
+            provenance_warning=item.provenance_warning,
+        )
+
+
+class EvaluationResponse(BaseModel):
+    experiments: list[ExperimentModel]
