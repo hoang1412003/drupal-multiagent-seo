@@ -6,6 +6,7 @@ import { client, query, ConsoleApiError } from "../api/client";
 import type { DashboardResponse } from "../api/client";
 import { formatDate, formatDateTime, formatNumber } from "../lib/format";
 import { JOB_STATUS, REVIEW_DECISION, WORKER_STATUS, WRITEBACK_STATUS, pillOf } from "../lib/status";
+import { ErrorBanner } from "../lib/ErrorBanner";
 import { useFilters } from "../api/useFilters";
 
 /** ms -> "7,7 giây" khi >= 1000ms, nguoc lai giu "820 ms". */
@@ -119,7 +120,7 @@ export function DashboardPage() {
             )}
           </div>
           {is422 && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700 ml-auto">
+            <div className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700 ml-auto dark:border-red-900 dark:bg-red-500/10 dark:text-red-300">
               {apiError?.message || "Lỗi thời gian đã chọn."}
             </div>
           )}
@@ -133,16 +134,11 @@ export function DashboardPage() {
       )}
 
       {isError && (
-        <div className="flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          <span>{apiError?.message || "Đã xảy ra lỗi khi tải dữ liệu tổng quan."}</span>
-          <button
-            type="button"
-            className="h-9 rounded-md border border-red-200 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50"
-            onClick={() => refetch()}
-          >
-            Thử lại
-          </button>
-        </div>
+        <ErrorBanner
+            inset
+            message={apiError?.message || "Đã xảy ra lỗi khi tải dữ liệu tổng quan."}
+            onRetry={() => refetch()}
+          />
       )}
 
       {isLoading && renderSkeleton()}

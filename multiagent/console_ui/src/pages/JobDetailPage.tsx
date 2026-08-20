@@ -7,6 +7,7 @@ import type { JobDetail } from "../api/client";
 import { RequireRole } from "../auth/RequireRole";
 import { formatDateTime, shortId, TIMEZONE_LABEL } from "../lib/format";
 import { JOB_STATUS, WRITEBACK_STATUS, pillOf } from "../lib/status";
+import { ErrorBanner } from "../lib/ErrorBanner";
 import { StatusPill } from "../lib/StatusPill";
 
 function Field({ label, children, colSpan = false, mono = false }: { label: string, children: React.ReactNode, colSpan?: boolean, mono?: boolean }) {
@@ -143,7 +144,7 @@ export function JobDetailPage() {
                     Thử lại sẽ chạy lại pipeline AI và có thể phát sinh chi phí.
                   </p>
                   {retryError && (
-                    <div className="mb-3 rounded-md bg-red-50 p-2 text-xs text-red-700 border border-red-200">
+                    <div className="mb-3 rounded-md bg-red-50 p-2 text-xs text-red-700 border border-red-200 dark:border-red-900 dark:bg-red-500/10 dark:text-red-300">
                       {retryError}
                     </div>
                   )}
@@ -201,16 +202,11 @@ export function JobDetailPage() {
       )}
 
       {isError && (
-        <div className="flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          <span>{apiError?.message || "Đã xảy ra lỗi khi tải dữ liệu."}</span>
-          <button
-            type="button"
-            className="h-9 rounded-md border border-red-200 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50"
-            onClick={() => refetch()}
-          >
-            Thử lại
-          </button>
-        </div>
+        <ErrorBanner
+            inset
+            message={apiError?.message || "Đã xảy ra lỗi khi tải dữ liệu."}
+            onRetry={() => refetch()}
+          />
       )}
 
       {isLoading && renderSkeleton()}

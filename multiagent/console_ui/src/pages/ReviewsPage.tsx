@@ -7,6 +7,7 @@ import type { ReviewPage } from "../api/client";
 import { useFilters } from "../api/useFilters";
 import { formatDateTime, formatNumber, shortId, TIMEZONE_LABEL } from "../lib/format";
 import { REVIEW_DECISION } from "../lib/status";
+import { ErrorBanner } from "../lib/ErrorBanner";
 
 export function ReviewsPage() {
   const [params, setParams] = useSearchParams();
@@ -88,9 +89,7 @@ export function ReviewsPage() {
 
       <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-[#1a1c1c]">
         {is422 && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {apiError?.message || "Lỗi bộ lọc."}
-          </div>
+          <ErrorBanner message={apiError?.message || "Lỗi bộ lọc."} />
         )}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
           <div>
@@ -167,16 +166,11 @@ export function ReviewsPage() {
 
       <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-800 dark:bg-[#1a1c1c]">
         {isError && (
-          <div className="m-4 flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            <span>{apiError?.message || "Đã xảy ra lỗi khi tải danh sách."}</span>
-            <button
-              type="button"
-              className="h-9 rounded-md border border-red-200 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50"
-              onClick={() => refetch()}
-            >
-              Thử lại
-            </button>
-          </div>
+          <ErrorBanner
+            inset
+            message={apiError?.message || "Đã xảy ra lỗi khi tải danh sách."}
+            onRetry={() => refetch()}
+          />
         )}
 
         <div className="overflow-x-auto">

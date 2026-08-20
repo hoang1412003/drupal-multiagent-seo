@@ -220,10 +220,18 @@ Chỉ phần thân bảng đổi.
 Lọc sai (422) là một dạng của trạng thái lỗi, nhưng banner nằm **trong thẻ bộ
 lọc**, sát ô gây lỗi, và **giữ nguyên giá trị người dùng đã nhập**.
 
-## 6. Chế độ tối
+## 6. Chế độ tối — ĐÃ VIẾT, CHƯA KIỂM CHỨNG
 
-Bắt buộc có. Dùng biến thể `dark:` của Tailwind, theo `prefers-color-scheme`,
-không cần nút chuyển.
+> **Trạng thái 2026-08-20: chưa ai nhìn thấy chế độ tối lần nào.** Class `dark:`
+> đã có trong mọi màn và đã rà tĩnh cho đủ cặp, nhưng **có class không có nghĩa
+> là hiển thị đúng**. Chủ dự án quyết định bỏ qua phần kiểm chứng này ở giai
+> đoạn 1. Đừng ghi là "đã hỗ trợ chế độ tối" cho tới khi có ảnh chụp.
+>
+> Cách kiểm khi cần: `F12` → `Ctrl+Shift+P` → **Show Rendering** → **Emulate
+> CSS media feature prefers-color-scheme** → `dark`.
+
+Dùng biến thể `dark:` của Tailwind, theo `prefers-color-scheme`, không cần nút
+chuyển.
 
 Hai chỗ dễ sai: pill trạng thái cần nền đậm hơn ở chế độ tối
 (`dark:bg-emerald-500/15 dark:text-emerald-300`), và navy `#00237a` quá tối
