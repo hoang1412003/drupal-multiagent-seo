@@ -471,7 +471,169 @@ dùng thấy màn hình giống hệt và tưởng không có gì xảy ra.
 
 ---
 
-## Ba nhiệm vụ còn lại
+## NHIỆM VỤ 5 — Review detail
+
+**Màn dày nhất trong cả sản phẩm: 28 trường, có dữ liệu lồng nhau.** Và là màn
+**duy nhất có rủi ro XSS thật**. Đọc hết trước khi viết.
+
+**Bối cảnh.** Biên tập viên đọc màn này để hiểu **vì sao AI ra quyết định đó**.
+Thứ họ vào xem là phần `agents` — điểm và lý do của từng agent.
+
+**Đọc bốn file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
+3. `docs/console-ui/stitch-briefs.md` mục "6. Review detail"
+4. `docs/console-ui/integration.md` mục 8 — quy tắc hiển thị nội dung từ AI
+
+**Xem `JobDetailPage.tsx`** — dùng lại đúng `Section`, `Field`, thẻ, và bảng
+màu của nó. Đừng nghĩ ra bố cục mới.
+
+**Sửa đúng một file:** `multiagent/console_ui/src/pages/ReviewDetailPage.tsx`.
+
+**Dùng lại ba module có sẵn, đừng chép lại:**
+
+- `src/lib/format.ts` — `formatDateTime`, `formatNumber`, `shortId`
+- `src/lib/status.ts` + `StatusPill.tsx` — `REVIEW_DECISION`,
+  `WRITEBACK_STATUS`, `pillOf`
+- `src/lib/ErrorBanner.tsx` — banner lỗi
+
+---
+
+### ĐIỀU CẤM TUYỆT ĐỐI: dangerouslySetInnerHTML
+
+`agents[].criteria`, `.issues`, `.evidence` là **văn bản tự do sinh ra từ output
+của model**. Backend đã che bí mật và giới hạn kích thước, nhưng **cố ý không
+escape HTML** — escape là việc của tầng hiển thị, và React làm sẵn khi render
+bằng `{}`.
+
+Dùng `dangerouslySetInnerHTML` ở màn này biến mọi trường tự do từ AI thành một
+lỗ XSS. Đây là chỗ duy nhất trong cả sản phẩm có rủi ro đó.
+
+---
+
+### MÀN NÀY CHỈ ĐỌC
+
+Không có nút duyệt, từ chối, sửa, xóa, hay chấm lại. **API không có endpoint
+nào cho những việc đó.** Tên màn là "review" nhưng không có ai duyệt gì cả —
+AI quyết định, con người chỉ đọc.
+
+Ba thứ tương tác duy nhất được phép:
+1. Đóng/mở từng agent
+2. Đóng/mở khối `config_meta`
+3. Link ngoài tới `drupal_url`
+
+---
+
+### Phần quan trọng nhất: `agents`
+
+`agents` là mảng **tối đa 4 phần tử**. Mỗi phần tử:
+
+```
+name      chuỗi, ví dụ "content_quality", "seo", "brand", "compliance"
+score     SỐ, HOẶC CHUỖI, HOẶC null — đừng giả định luôn là số
+criteria  mảng object, khoá TỰ DO
+issues    mảng object, khoá TỰ DO
+evidence  mảng object, khoá TỰ DO
+```
+
+**`criteria`/`issues`/`evidence` có khoá khác nhau tuỳ agent.** Không dựng bảng
+cột cố định được. Phải là **danh sách nhãn–giá trị chịu được khoá bất kỳ**:
+duyệt `Object.entries(item)` của từng phần tử và hiện ra.
+
+Hai điều bắt buộc:
+
+- **Giá trị là chuỗi `[đã ẩn]`** nghĩa là backend đã che một bí mật ở đó. Hiện
+  thành **chip xám mờ**, đừng hiện như dữ liệu thật.
+- **Giá trị có thể là object hoặc mảng lồng thêm.** Đừng để nó render thành
+  `[object Object]` — nếu không phải chuỗi/số thì `JSON.stringify` rồi hiện
+  trong khối monospace.
+
+Mỗi agent là một khối đóng/mở được, mặc định **mở**. Tiêu đề khối gồm `name` và
+`score`.
+
+---
+
+### 28 trường, chia sáu nhóm
+
+**Nhóm 1 — Kết luận** (nổi bật nhất, đặt trên cùng)
+- `decision` — pill, dùng `pillOf(REVIEW_DECISION, ...)`. **Có thể null**
+- `final_score` — dùng `formatNumber`, làm tròn 1 chữ số. **Có thể null**
+- `veto_reason` (**có thể null**) — khi có, đây là **lý do quyết định bị ép
+  buộc**. Cho nó một khối cảnh báo nổi bật (nền amber), không phải một dòng
+  bình thường. Null thì **ẩn hẳn khối**
+- `note` (**có thể null**) — ẩn hẳn khi null
+- `missing_agents` — mảng tên agent không báo cáo. **Rỗng thì ẩn**; có phần tử
+  thì hiện cảnh báo: "Kết quả chưa đầy đủ: thiếu N agent"
+
+**Nhóm 2 — Kết quả từng agent** — xem phần trên
+
+**Nhóm 3 — Vận hành**
+- `duration_ms` (**có thể null**) — đổi sang giây khi ≥ 1000ms
+- `model` — chuỗi dài, cắt bớt kèm `title`
+- `usage_available` — boolean, "Có"/"Không"
+- `cost_estimate` — 8 trường con: `input_tokens`, `output_tokens`,
+  `estimated_usd` (**có thể null**), `currency`, `pricing_version`,
+  `effective_at`, `source` (**là URL**, render thành link), `unknown_models`
+  (mảng; rỗng thì ẩn)
+
+**Nhóm 4 — Ghi ngược**
+- `writeback_status` — pill, dùng `pillOf(WRITEBACK_STATUS, ...)`
+- `writeback_error` (**có thể null**) — khối monospace như `last_error` ở màn
+  Job detail. Ẩn hẳn khi null
+
+**Nhóm 5 — Ngữ cảnh**
+- `site_slug`, `site_name`, `site_id`, `profile_id`, `profile_code`,
+  `policy_version`, `external_content_id`, `external_revision_id`
+  (**có thể null**), `content_type`, `langcode`
+
+**Nhóm 6 — Nhận dạng và liên kết**
+- `public_id`, `correlation_id` — monospace
+- `scored_at` — `formatDateTime`, ghi nhãn `TIMEZONE_LABEL`
+- `is_fixture` — boolean. **True thì hiện nhãn "dữ liệu mẫu" ngay cạnh tiêu đề
+  trang**, để người đọc không nhầm là kết quả thật
+- `drupal_url` (**có thể null**) — link ngoài "Xem bài trên Drupal", mở tab mới
+  với `rel="noreferrer"`
+- `config_meta` — object JSON tự do. **Mặc định đóng**, mở ra thì hiện
+  `JSON.stringify(..., null, 2)` trong khối monospace cuộn được
+
+**Mọi giá trị null hiện `—`**, trừ những khối tôi đã ghi rõ là "ẩn hẳn".
+
+---
+
+### Bốn trạng thái
+
+| Trạng thái | Hiện gì |
+|---|---|
+| đang tải | skeleton cho từng nhóm |
+| đã tải | đầy đủ |
+| không tìm thấy (404) | "Không tìm thấy review" + link về danh sách |
+| không đủ quyền (403) | thông báo tại chỗ, **không** chuyển trang |
+
+---
+
+### Ràng buộc
+
+- **KHÔNG dùng `dangerouslySetInnerHTML`** — xem phần đầu
+- **KHÔNG thêm nút duyệt/từ chối/sửa/xóa/chấm lại** — API không có
+- KHÔNG giả định `agents[].score` luôn là số
+- KHÔNG dựng bảng cột cố định cho `criteria`/`issues`/`evidence`
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG viết cứng danh sách quyết định — lấy từ `useFilters()`
+- KHÔNG tự viết hàm định dạng hay bảng pill — dùng `src/lib/`
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài `ReviewDetailPage.tsx`
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+
+**Dữ liệu để thử:** mở màn Reviews, bấm vào bất kỳ mã review nào. Ví dụ có đủ
+4 agent: `5376baad-59ec-4192-b3b9-096b31084acf`.
+
+---
+
+## Hai nhiệm vụ còn lại
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
@@ -482,7 +644,6 @@ Bảng dưới chỉ để biết trước quy mô:
 
 | Nhiệm vụ | File trang | Mục trong stitch-briefs | Quy mô |
 |---|---|---|---|
-| 5 — Review detail | `ReviewDetailPage.tsx` | "6. Review detail" | 28 trường |
 | 6 — Login | `LoginPage.tsx` | "1. Login" | 3 ô nhập |
 | 7 — Đổi mật khẩu | `ChangePasswordPage.tsx` | "1. Login" (biến thể) | 2 ô nhập |
 
