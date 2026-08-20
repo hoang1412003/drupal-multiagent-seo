@@ -15,6 +15,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -57,6 +58,11 @@ app.include_router(api_v1_router.router)
 app.add_exception_handler(
     console_errors.ConsoleError,
     console_errors.console_error_handler,
+)
+# Chi doi hinh dang 422 cho /api/console; handler tu ne cac duong dan khac.
+app.add_exception_handler(
+    RequestValidationError,
+    console_errors.validation_error_handler,
 )
 app.include_router(console_router.router)
 # Thu tu quan trong: add_middleware xep tu trong ra ngoai, nen SecurityMiddleware

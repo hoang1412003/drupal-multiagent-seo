@@ -275,6 +275,130 @@
         }
       }
     },
+    "/api/console/v1/connection": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Get Connection",
+        "operationId": "get_connection_api_console_v1_connection_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/connection/test": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Test Connection",
+        "operationId": "test_connection_api_console_v1_connection_test_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestConnectionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/connection/pause": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Pause Intake",
+        "operationId": "pause_intake_api_console_v1_connection_pause_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/connection/resume": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Resume Intake",
+        "operationId": "resume_intake_api_console_v1_connection_resume_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/console/v1/dashboard": {
       "get": {
         "tags": [
@@ -1134,6 +1258,112 @@
           "kb_summary"
         ],
         "title": "ConfigKbResponse"
+      },
+      "ConnectionModel": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "base_url": {
+            "type": "string",
+            "title": "Base Url"
+          },
+          "secret_ref": {
+            "type": "string",
+            "title": "Secret Ref"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "intake_paused": {
+            "type": "boolean",
+            "title": "Intake Paused"
+          },
+          "profile_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Code"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "token_prefixes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Token Prefixes"
+          },
+          "last_health_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Health Status"
+          },
+          "last_health_checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Health Checked At"
+          },
+          "last_health_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Health Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "name",
+          "base_url",
+          "secret_ref",
+          "active",
+          "intake_paused",
+          "profile_code",
+          "policy_version",
+          "token_prefixes",
+          "last_health_status",
+          "last_health_checked_at",
+          "last_health_error"
+        ],
+        "title": "ConnectionModel"
       },
       "CostEstimateModel": {
         "properties": {
@@ -2011,6 +2241,23 @@
         ],
         "title": "ProfileAssignmentModel"
       },
+      "ReasonRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "ReasonRequest"
+      },
       "RetryRequest": {
         "properties": {
           "confirm_cost": {
@@ -2401,6 +2648,35 @@
           "active"
         ],
         "title": "SiteOptionModel"
+      },
+      "TestConnectionResponse": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "connection": {
+            "$ref": "#/components/schemas/ConnectionModel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "error_code",
+          "connection"
+        ],
+        "title": "TestConnectionResponse"
       },
       "ValidationError": {
         "properties": {

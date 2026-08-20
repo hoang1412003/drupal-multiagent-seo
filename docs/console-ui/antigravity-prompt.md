@@ -1037,12 +1037,245 @@ tải được, các phép đo khác thì không).
 
 ---
 
-## Giai đoạn 2 — hai màn còn lại
+## NHIỆM VỤ 9 — Kết nối (`/ket-noi`) · GIAI ĐOẠN 2
 
-Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
-nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
-bảng**, vì chỉ dẫn gián tiếp là thứ đã làm lệch bản thiết kế Stitch hôm
-2026-08-20.
+Đây là màn **đầu tiên của Console có nút thay đổi trạng thái hệ thống** (ngoài
+nút thử lại job). Ba nút ở đây tác động thật: một nút gọi sang Drupal, hai nút
+kia bật/tắt việc nhận bài của toàn bộ hệ thống. Đọc kỹ phần "bốn cạm bẫy".
+
+**Đọc ba file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
+3. `docs/console-ui/integration.md` — mã lỗi
+
+**Xem `JobDetailPage.tsx`** — dùng lại `Section` và `Field` của nó cho bố cục
+nhóm, và xem cách nó bọc nút "Thử lại" trong `<RequireRole role="operator">`.
+Màn này không có bảng danh sách nên đừng bắt chước `JobsPage`.
+
+**Sửa/tạo ba file:**
+
+- Tạo `src/pages/ConnectionPage.tsx`
+- Sửa `src/router.tsx` — thêm route `/ket-noi`
+- Sửa `src/layout/AppShell.tsx` — thêm một mục menu
+
+**Dùng lại module chung**: `src/lib/format.ts`, `src/lib/status.ts` +
+`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`. Cần bảng pill mới thì **thêm vào
+`lib/status.ts`**, đừng khai báo trong file trang.
+
+---
+
+### Menu giờ có BẢY mục
+
+```
+Tổng quan · Jobs · Reviews · Nhật ký · Cấu hình · Kết quả đo · Kết nối
+```
+
+"Nhật ký" vẫn chỉ admin. "Kết nối" thì **ai đăng nhập cũng thấy** — viewer xem
+được trạng thái, chỉ không bấm được nút. Vẫn cấm thêm mục nào khác.
+
+---
+
+### Nội dung màn (`GET /connection`)
+
+Ba nhóm, dùng `Section`/`Field`:
+
+**Nhóm 1 — Site**
+
+| Trường | Nguồn | Ghi chú hiển thị |
+|---|---|---|
+| Tên | `name` | |
+| Slug | `slug` | font mono |
+| Địa chỉ | `base_url` | font mono, `break-all` |
+| Biến môi trường chứa credential | `secret_ref` | font mono. **Ghi rõ nhãn là "biến môi trường"** — đây là TÊN biến, không phải giá trị. Đừng đặt nhãn "Secret" trống không, người đọc sẽ tưởng đang lộ khoá. |
+| Trạng thái site | `active` | pill: `true` → "Đang bật" (xanh), `false` → "Đã tắt" (xám) |
+| Nhận bài | `intake_paused` | pill: `true` → "Đang tạm dừng" (**đỏ**), `false` → "Đang nhận" (xanh) |
+
+`BOOLEAN_PILLS.SITE_ACTIVE` và `BOOLEAN_PILLS.INTAKE_PAUSED` **đã có sẵn**
+trong `lib/status.ts` — dùng lại, đừng viết bảng mới.
+
+**Nhóm 2 — Hồ sơ đang áp dụng**
+
+`profile_code` và `policy_version`. Cả hai có thể `null` → hiện `—`. Ở đây
+viết thẳng `?? "—"`, **không** thêm hàm mới vào `lib/format.ts`: hai chỗ dùng
+thì chưa đáng một hàm dùng chung.
+
+**Nhóm 3 — Lần chẩn đoán gần nhất**
+
+| Trường | Nguồn |
+|---|---|
+| Kết quả | `last_health_status` — xem bảng nhãn bên dưới |
+| Thời điểm | `last_health_checked_at` — `formatDateTime`, có hậu tố "giờ VN" |
+| Mã lỗi | `last_health_error` — chỉ hiện khi khác `null` |
+
+Cả ba đều `null` khi chưa từng chẩn đoán → hiện đúng một dòng
+"Chưa từng chẩn đoán kết nối", **không hiện ba dòng `—`**.
+
+Ngoài ra hiện `token_prefixes` (mảng chuỗi): mỗi phần tử một chip font mono.
+Mảng rỗng → ẩn cả khối, đừng hiện `—`.
+
+---
+
+### Bảng nhãn cho `last_health_status`
+
+Thêm vào `lib/status.ts`:
+
+```ts
+export const HEALTH_STATUS: Record<string, PillStyle> = {
+  ok: { label: "Đạt", ...EMERALD },
+};
+```
+
+Chỉ `"ok"` là giá trị cố định. Mọi giá trị khác **là mã lỗi** (ví dụ
+`auth_failed`, `internal`) — `pillOf()` sẽ tự hiện nguyên văn mã đó màu đỏ.
+Để làm được vậy, **đừng dùng `pillOf` cho trường này**; viết:
+
+```ts
+const health = conn.last_health_status;
+const pill = health === null
+  ? null
+  : health === "ok"
+    ? HEALTH_STATUS.ok
+    : { label: health, ...RED_PILL };
+```
+
+`RED_PILL` cũng thêm vào `lib/status.ts` và export — file đó đã có sẵn hằng
+`RED` ở phạm vi module, chỉ cần thêm dòng:
+
+```ts
+export const RED_PILL = RED;
+```
+
+Lý do không dùng `pillOf`:
+mặc định của nó là màu **xám**, mà một kết nối hỏng hiện xám thì người trực
+lướt qua sẽ không thấy.
+
+---
+
+### Ba nút thao tác
+
+Cả ba bọc trong `<RequireRole role="operator">`. Với viewer, thay vì nút thì
+hiện đúng một dòng chữ nhỏ màu xám:
+
+> Bạn đang xem với quyền chỉ đọc. Liên hệ quản trị viên để thao tác.
+
+**Nút 1 — "Chẩn đoán kết nối"** → `POST /connection/test`, body `{}`
+
+Trả về `{ ok, error_code, connection }`:
+
+- `ok === true` → banner xanh "Kết nối đạt"
+- `ok === false` → banner đỏ "Kết nối chưa đạt (mã: {error_code})"
+
+**Dùng trường `ok`. Đừng so sánh chuỗi `last_health_status === "ok"`** — đó
+đúng là kiểu suy đoán đã làm sai enum trạng thái job ở nhiệm vụ trước.
+
+Sau khi có kết quả, cập nhật lại toàn màn từ `connection` trong response
+(hoặc `invalidateQueries`) — ba dòng ở Nhóm 3 phải đổi theo ngay.
+
+**Nút 2 — "Tạm dừng nhận bài"** → `POST /connection/pause`
+**Nút 3 — "Mở lại nhận bài"** → `POST /connection/resume`
+
+Cả hai nhận body `{ "reason": "..." }` hoặc `{}`.
+
+Hiện **đúng một nút** tuỳ `intake_paused`: đang nhận thì hiện nút Tạm dừng,
+đang tạm dừng thì hiện nút Mở lại. Đừng hiện cả hai rồi làm mờ một cái.
+
+---
+
+### Ô "Lý do" và giới hạn 300 ký tự
+
+Một `<textarea>` không bắt buộc, đi kèm hai nút Tạm dừng/Mở lại.
+
+- `maxLength={300}` trên thẻ
+- Đếm ký tự dưới ô: `{value.length}/300`, chuyển đỏ khi ≥ 300
+- Ô trống → gửi `{}` (hoặc `{"reason": null}`), **đừng gửi chuỗi rỗng**
+
+Server trả **422** với `error.field === "reason"` nếu quá 300. Bắt trường hợp
+đó và tô đỏ đúng ô này, đừng chỉ hiện banner chung.
+
+---
+
+### Xác nhận trước khi tạm dừng
+
+Nút "Tạm dừng nhận bài" phải hỏi lại trước khi gọi API — một hộp xác nhận
+trong trang (không dùng `window.confirm`), nội dung:
+
+> Tạm dừng nhận bài sẽ khiến toàn bộ bài mới từ Drupal không được tiếp nhận
+> cho tới khi mở lại. Tiếp tục?
+
+Nút "Mở lại nhận bài" **không** cần xác nhận — nó khôi phục trạng thái bình
+thường.
+
+---
+
+### Bốn cạm bẫy
+
+**1. Đừng gọi `POST /connection/test` khi trang vừa mở.**
+Nó gọi thật sang Drupal và ghi một dòng vào sổ kiểm toán mỗi lần. Dùng
+`useMutation` gắn vào sự kiện bấm nút — **không** `useQuery`, không
+`useEffect`, không tự chạy lại. Mỗi lần bấm là một lần chẩn đoán có chủ đích.
+
+**2. `secret_ref` là TÊN biến môi trường, không phải giá trị.**
+Hiện nguyên văn, nhưng nhãn phải nói rõ. Đừng che bằng dấu chấm, đừng thêm nút
+"hiện/ẩn" — không có gì bí mật để che, và che đi thì người vận hành mất thông
+tin cần để đối chiếu cấu hình.
+
+**3. Ẩn nút KHÔNG phải là phân quyền.**
+`RequireRole` chỉ là tiện nghi. Server đã kiểm role ở cả ba endpoint. Đừng
+thêm bất kỳ lớp kiểm tra nào ở client và đừng bỏ `RequireRole` với lý do
+"server kiểm rồi" — cả hai đều cần, mỗi cái làm một việc khác nhau.
+
+**4. Khi chưa cấu hình site nào, `GET /connection` trả 404.**
+Đó **không** phải lỗi hệ thống. Hiện trạng thái rỗng: "Chưa cấu hình site
+nào." Đừng hiện banner đỏ "Không tìm thấy", và đừng hiện ba nút thao tác.
+
+---
+
+### Bốn trạng thái của màn
+
+| Trạng thái | Hiển thị |
+|---|---|
+| Đang tải | khung xám nhấp nháy (`animate-pulse`), giống các màn trước |
+| Lỗi (≠404) | `ErrorBanner` + nút "Thử lại" |
+| 404 | trạng thái rỗng "Chưa cấu hình site nào", không có nút thao tác |
+| Có dữ liệu | ba nhóm + nút thao tác theo role |
+
+Khi một thao tác đang chạy: vô hiệu hoá nút đang bấm và hiện chữ đang xử lý
+trên chính nút đó. Đừng khoá cả trang.
+
+---
+
+### Ràng buộc
+
+- KHÔNG gọi `POST /connection/test` tự động — chỉ khi người dùng bấm
+- KHÔNG so sánh chuỗi `last_health_status === "ok"` để quyết định đạt/chưa đạt
+- KHÔNG hiện cả nút Tạm dừng lẫn Mở lại cùng lúc
+- KHÔNG dùng `window.confirm` / `window.alert`
+- KHÔNG che hay ẩn `secret_ref`
+- KHÔNG thêm nút sửa cấu hình site — API không có endpoint ghi cấu hình
+- KHÔNG thêm tự động làm mới theo chu kỳ (polling)
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG tự viết hàm định dạng hay bảng pill trong file trang
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài ba file đã nêu (`lib/status.ts` được phép **thêm**)
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+
+**Dữ liệu để thử:** có sẵn một site `drupal-vn-primary`. Chẩn đoán sẽ **không
+đạt** nếu Drupal chưa chạy — đó là kết quả hợp lệ để thử nhánh lỗi, không phải
+bug của màn này.
+
+---
+
+## Giai đoạn 2 — màn cuối cùng
+
+Chỉ còn màn **Người dùng** — màn rủi ro cao nhất, có cơ chế bảo vệ "admin
+hoạt động cuối cùng". Khi tới lượt, nhiệm vụ đó sẽ được viết đủ ra như các
+nhiệm vụ trên — **đừng suy ra từ bảng**, vì chỉ dẫn gián tiếp là thứ đã làm
+lệch bản thiết kế Stitch hôm 2026-08-20.
 
 Bảng dưới chỉ để biết trước quy mô:
 
