@@ -167,7 +167,161 @@ quả. Không tự ý làm màn hình khác.
 
 ---
 
-## Năm nhiệm vụ còn lại
+## NHIỆM VỤ 3 — Dashboard (Tổng quan)
+
+**Đây là màn khó nhất trong ba màn đầu.** Đọc hết trước khi viết.
+
+**Bối cảnh.** Màn đầu tiên sau khi đăng nhập. Người đọc là kỹ thuật viên vận
+hành, đang muốn biết **hệ thống có đang khoẻ không, ngay lúc này**. Không phải
+trang báo cáo cho lãnh đạo.
+
+**Đọc bốn file này trước khi viết dòng code nào:**
+
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, **mục 4b hàm định dạng**
+3. `docs/console-ui/stitch-briefs.md` mục "2. Dashboard"
+4. `docs/console-ui/integration.md` — mã lỗi, `/filters`
+
+**Xem `JobsPage.tsx` và `ReviewsPage.tsx`** — hai màn đã duyệt. Dùng lại đúng
+thẻ (card), nhãn ô lọc, nút, và bảng màu của chúng.
+
+**Sửa đúng một file:** `multiagent/console_ui/src/pages/DashboardPage.tsx`.
+
+---
+
+### Điều quan trọng nhất: màn này trộn HAI phạm vi thời gian
+
+Đây là chỗ dễ làm người dùng tưởng hệ thống hỏng.
+
+| Khối | Phạm vi | Có bỏ dữ liệu mẫu? |
+|---|---|---|
+| `queue_counts` (hàng đợi) | **TOÀN THỜI GIAN** — không lọc ngày | không |
+| Mọi khối còn lại | **chỉ khoảng ngày đã chọn** | **có, bỏ dữ liệu mẫu** |
+
+Vì vậy giao diện **bắt buộc**:
+
+- Tách `queue_counts` thành một khối riêng, đặt **trên cùng**, tiêu đề ghi rõ
+  **"Hàng đợi hiện tại — toàn thời gian"**.
+- Các khối còn lại gom vào một vùng có tiêu đề ghi rõ khoảng ngày, kèm chú
+  thích nhỏ: **"Chỉ tính khoảng ngày đã chọn, không tính dữ liệu mẫu."**
+
+Không tách thì người đọc thấy "Hoàn thành: 13" và "Tổng số review: 5" rồi kết
+luận số liệu sai.
+
+---
+
+### 15 trường, không thêm không bớt
+
+**Khối 1 — Hàng đợi hiện tại (toàn thời gian)**
+
+`queue_counts` là một object đếm theo trạng thái, 5 khoá: `queued`, `running`,
+`failed`, `done`, `superseded`. Lấy danh sách khoá từ
+`useFilters().job_statuses`, **đừng viết cứng**. Nhãn tiếng Việt và màu dùng
+đúng bảng của `JobsPage.tsx`.
+
+Hiển thị thành **một hàng ngang gọn**, mỗi trạng thái là một pill kèm số.
+**KHÔNG** dựng 5 thẻ KPI cỡ lớn.
+
+**Khối 2 — Khoảng thời gian**
+
+`date_from`, `date_to` (chuỗi `YYYY-MM-DD`). Hiện bằng `formatDate()`. Đây cũng
+là giá trị hiện tại của bộ lọc ngày.
+
+**Khối 3 — Kết quả review trong khoảng**
+
+- `total_reviews` (số nguyên) — tổng
+- `decision_counts` — object đếm theo 4 quyết định. Lấy khoá từ
+  `useFilters().review_decisions`. Nhãn và màu dùng đúng bảng của
+  `ReviewsPage.tsx`.
+
+**Khối 4 — Thời lượng xử lý**
+
+- `duration_p50_ms`, `duration_p95_ms` — **số hoặc null**. Nhãn "Trung vị" và
+  "Phân vị 95". Đổi sang giây khi lớn hơn 1000ms cho dễ đọc (`7688` →
+  `7,7 giây`). Dùng `formatNumber`, null hiện `—`.
+
+**Khối 5 — Ghi ngược (writeback)**
+
+- `writeback_counts` — object đếm 5 khoá: `succeeded`, `failed`, `superseded`,
+  `pending`, `unknown`. Lấy khoá từ `useFilters().writeback_statuses`.
+- `writeback_success_rate` — **tỷ lệ 0..1, có thể null**. Hiện dạng phần trăm
+  (`1` → `100%`). Null hiện `—`.
+
+**Khối 6 — Chi phí ước tính** (`cost_estimate`, 8 trường con)
+
+- `input_tokens`, `output_tokens` (số nguyên, có dấu phân cách nghìn)
+- `estimated_usd` (**có thể null**) — hiện kèm `currency`
+- `pricing_version` (số nguyên) và `effective_at` (ngày) — gộp thành một chú
+  thích nhỏ: "Bảng giá v1, hiệu lực 15/10/2025"
+- `source` — **là một URL**. Hiện thành link ngoài nhỏ ("nguồn giá"), không in
+  ra URL thô
+- `unknown_models` — mảng tên model chưa có giá. Rỗng thì không hiện gì; có
+  phần tử thì hiện cảnh báo mờ: "N model chưa có bảng giá, chi phí có thể
+  thiếu"
+
+**Khối 7 — Tình trạng worker**
+
+- `worker_status` — **đúng ba giá trị, và chúng KHÁC NHAU**:
+
+  | Giá trị | Nhãn tiếng Việt | Ý nghĩa | Màu |
+  |---|---|---|---|
+  | `running` | Đang chạy | bình thường | xanh lá |
+  | `stale` | Mất tín hiệu | **từng chạy rồi im lặng** — đây là sự cố | đỏ |
+  | `unavailable` | Chưa từng chạy | chưa bao giờ báo cáo | xám |
+
+  **Gộp `stale` và `unavailable` làm một là che mất một sự cố thật.**
+
+- `worker_running`, `worker_stale` (số nguyên) — số worker mỗi loại
+- `worker_last_seen_at` (**có thể null**) — dùng `formatDateTime`, ghi nhãn
+  `TIMEZONE_LABEL`
+- `connector_status` — chuỗi tự do (giá trị thật: `"ok"`). Hiện thành pill:
+  `ok` màu xanh lá, giá trị khác màu đỏ
+
+---
+
+### Bộ lọc
+
+Chỉ hai ô: **Từ ngày** và **Đến ngày**, cùng nút "Lọc" và "Đặt lại".
+
+Tên tham số truy vấn là **`from` và `to`** (xem `openapi.json`). Hai ngày phải
+đi **cùng nhau** — truyền một cái server trả 422. Nếu người dùng chỉ điền một ô,
+chặn ngay ở giao diện và báo tại chỗ, đừng gửi lên.
+
+Mặc định khi không truyền gì: server tự lấy **7 ngày gần nhất**.
+
+---
+
+### Đủ 4 trạng thái
+
+| Trạng thái | Hiện gì |
+|---|---|
+| đang tải | skeleton xám cho từng khối, giữ nguyên bố cục |
+| rỗng | `total_reviews = 0`: vẫn hiện đủ khối, các số là `0` và `—`, kèm dòng "Không có dữ liệu trong khoảng đã chọn". **Đừng ẩn khối nào** |
+| lỗi | banner đỏ + nút "Thử lại" |
+| lọc sai | thông báo cạnh ô ngày, **giữ nguyên** giá trị đã nhập |
+
+---
+
+### Cấm — màn này dễ vi phạm nhất
+
+- **KHÔNG biểu đồ tròn.** Không biểu đồ nào cả. Chưa có thư viện vẽ đồ thị và
+  không được cài thêm.
+- **KHÔNG số KPI cỡ đại** chiếm nửa màn hình.
+- **KHÔNG** thẻ có gradient, bóng đổ dày, hay icon trang trí.
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG viết cứng danh sách trạng thái/quyết định — lấy từ `useFilters()`
+- KHÔNG tự viết hàm định dạng — dùng `src/lib/format.ts`
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài `DashboardPage.tsx`
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+
+---
+
+## Bốn nhiệm vụ còn lại
 
 Làm lần lượt, mỗi màn xong thì review rồi mới sang màn sau. Khi tới lượt màn
 nào, nhiệm vụ đó sẽ được viết đủ ra như hai nhiệm vụ trên — **đừng suy ra từ
@@ -178,7 +332,6 @@ Bảng dưới chỉ để biết trước quy mô:
 
 | Nhiệm vụ | File trang | Mục trong stitch-briefs | Quy mô |
 |---|---|---|---|
-| 3 — Dashboard | `DashboardPage.tsx` | "2. Dashboard" | 15 trường |
 | 4 — Job detail | `JobDetailPage.tsx` | "4. Job detail" | 22 trường |
 | 5 — Review detail | `ReviewDetailPage.tsx` | "6. Review detail" | 28 trường |
 | 6 — Login | `LoginPage.tsx` | "1. Login" | 3 ô nhập |
