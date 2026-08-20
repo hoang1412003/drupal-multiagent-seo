@@ -7,13 +7,43 @@ nguyên khối, dán vào Stitch, **không đính kèm ảnh nào**.
 
 ## Cách dùng
 
-1. Mỗi màn hình một prompt. Dán trọn cả bốn khối `CONTEXT` / `DATA` /
-   `CONTROLS+STATES` / `STYLE`.
-2. Khối `STYLE` **giống hệt nhau ở cả sáu prompt** và được chép đầy đủ trong
-   từng prompt — không viết "như prompt trên", vì bạn copy từng prompt riêng lẻ.
-3. Không đính kèm ảnh admin cũ. Chủ dự án muốn Stitch thiết kế lại tự do.
-   Hệ quả: **prompt là ràng buộc duy nhất**, nên phần `DATA` phải giữ nguyên
-   văn — mọi tên trường trong đó đều lấy từ `openapi.json`.
+1. Mỗi màn hình một prompt. Dán trọn tất cả các khối từ `CONTEXT` đến hết
+   `STYLE`.
+2. Các khối `NAVIGATION`, `FORBIDDEN ACTIONS`, `VIETNAMESE LABELS`,
+   `SAMPLE DATA`, `CONSISTENCY` và `STYLE` **giống hệt nhau ở cả sáu prompt**
+   và được chép đầy đủ trong từng prompt — không viết "như prompt trên", vì
+   bạn copy từng prompt riêng lẻ.
+3. Không đính kèm ảnh admin cũ. **Prompt là ràng buộc duy nhất**, nên phần
+   `DATA` phải giữ nguyên văn — mọi tên trường trong đó đều lấy từ
+   `openapi.json`.
+
+### Sinh từng trạng thái một, không sinh cả bốn cùng lúc
+
+**Quan trọng.** Stitch không hiểu khái niệm "bốn trạng thái của cùng một màn
+hình". Nếu prompt yêu cầu cả bốn, nó sẽ sinh ra **bốn màn hình riêng biệt** và
+mỗi cái tự bịa lại bảng từ đầu — thực tế đã xảy ra ngày 2026-08-20: bản có dữ
+liệu thì đúng cả 8 cột, còn ba bản kia vẽ ra "Người tạo", "Độ ưu tiên",
+"Tiến độ" và cả nút "Tạo Job Mới" đã bị cấm.
+
+Cách làm đúng, hai bước:
+
+**Bước 1 — sinh bản có dữ liệu.** Dán prompt, nhưng trong khối
+`CONTROLS + STATES` **chỉ giữ lại trạng thái có dữ liệu**, xoá ba trạng thái
+kia. Lặp lại tới khi bản này đạt cả sáu mục kiểm.
+
+**Bước 2 — sinh ba trạng thái còn lại TỪ bản vừa đạt.** Dùng chức năng chỉnh
+sửa/biến thể của Stitch trên chính màn hình đó, với câu lệnh ngắn kiểu:
+
+> Keep this screen exactly as it is — same navigation, same filter bar, same
+> eight table columns, same header labels. Change ONLY the content area to show
+> the loading state: replace every table row with a grey skeleton bar. Do not
+> add or remove any column, button, or filter.
+
+Rồi lặp lại cho trạng thái rỗng và trạng thái lỗi. Vì Stitch sửa từ màn hình
+đã có thay vì sinh lại từ đầu, bảng sẽ không bị bịa lại.
+
+Nếu Stitch vẫn bịa ở bước 2, đó là dấu hiệu nó đang sinh mới chứ không sửa —
+quay lại bước 1 và nói rõ hơn rằng đây là *chỉnh sửa*, không phải thiết kế mới.
 
 ## Vì sao mỗi prompt có khối NAVIGATION và FORBIDDEN ACTIONS
 
@@ -297,7 +327,7 @@ people keep open all day. All UI labels in Vietnamese.
 DATA — the table must show EXACTLY these columns, no others, no invented ones:
 - Mã job        (public_id, UUID, shown shortened, monospace)   e.g. "a3f2…9c41"
 - Thời gian tạo (created_at, ISO-8601 UTC)                      e.g. "19/08/2026 14:32"
-- Site          (site_slug, short string)                       e.g. "vinfast-vn"
+- Site          (site_slug, short string)                       e.g. "drupal-vn-primary"
 - ID nội dung   (external_content_id, string)                   e.g. "node-1842"
 - Trạng thái    (status — a badge with EXACTLY these FIVE values, no others):
                 queued / running / failed / done / superseded
