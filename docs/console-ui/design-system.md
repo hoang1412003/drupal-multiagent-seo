@@ -220,24 +220,30 @@ Chỉ phần thân bảng đổi.
 Lọc sai (422) là một dạng của trạng thái lỗi, nhưng banner nằm **trong thẻ bộ
 lọc**, sát ô gây lỗi, và **giữ nguyên giá trị người dùng đã nhập**.
 
-## 6. Chế độ tối — ĐÃ VIẾT, CHƯA KIỂM CHỨNG
+## 6. Chế độ tối — ĐÃ KIỂM CHỨNG (2026-08-20)
 
-> **Trạng thái 2026-08-20: chưa ai nhìn thấy chế độ tối lần nào.** Class `dark:`
-> đã có trong mọi màn và đã rà tĩnh cho đủ cặp, nhưng **có class không có nghĩa
-> là hiển thị đúng**. Chủ dự án quyết định bỏ qua phần kiểm chứng này ở giai
-> đoạn 1. Đừng ghi là "đã hỗ trợ chế độ tối" cho tới khi có ảnh chụp.
->
-> Cách kiểm khi cần: `F12` → `Ctrl+Shift+P` → **Show Rendering** → **Emulate
-> CSS media feature prefers-color-scheme** → `dark`.
+Đã xác nhận bằng ảnh chụp trên màn Tổng quan: nền, thẻ, chữ, viền, pill trạng
+thái và nút hành động chính đều đổi đúng. Rà tĩnh cũng không còn nền màu nào
+thiếu cặp `dark:`.
 
 Dùng biến thể `dark:` của Tailwind, theo `prefers-color-scheme`, không cần nút
 chuyển.
+
+**Cách kiểm nhanh nhất** không phải DevTools mà là đổi chế độ màu của Windows
+(Cài đặt → Cá nhân hoá → Màu → Tối) — Chrome tự theo. Đường DevTools là
+`F12` → `Ctrl+Shift+P` → **Show Rendering** → cuộn tới **Emulate CSS media
+feature prefers-color-scheme**; bảng đó mở ở **nửa dưới** khung DevTools nên
+rất dễ tưởng là không có gì hiện ra.
 
 Hai chỗ dễ sai: pill trạng thái cần nền đậm hơn ở chế độ tối
 (`dark:bg-emerald-500/15 dark:text-emerald-300`), và navy `#00237a` quá tối
 trên nền đen — dùng `#3b5bdb` cho hành động chính ở chế độ tối.
 
-## 7. Màn hình hẹp
+## 7. Màn hình hẹp — ĐÃ KIỂM CHỨNG (2026-08-20)
+
+Đã xác nhận bằng ảnh chụp ở khoảng 1250px: sidebar thu về icon-only (icon có
+`title` nên di chuột vẫn biết tên), thẻ lọc xếp thành một cột, thanh trên giữ
+nguyên. Bảng có `overflow-x-auto` ở cả Jobs lẫn Reviews.
 
 Desktop-first. Dưới `1280px`: sidebar thu về icon-only (`w-14`, ẩn chữ). Dưới
 `1024px`: thẻ bộ lọc xếp dọc thành một cột. Bảng **luôn** cuộn ngang trong
