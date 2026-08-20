@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Response
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import job_queue as q
 from review_platform import database as platform_database
@@ -77,6 +78,44 @@ app.mount(
     StaticFiles(directory=admin_router.STATIC_DIR),
     name="admin-static",
 )
+
+class SpaStaticFiles(StaticFiles):
+    """StaticFiles tra index.html cho moi duong dan khong phai file.
+
+    `html=True` cua Starlette KHONG du: no chi tra index.html cho duong dan
+    thu muc. Bam F5 tren /console/jobs se 404 ngay trong mount va khong roi
+    xuong route nao khac, vi Mount tu xu ly 404 cua chinh no.
+
+    React Router giu lich su o phia client nen moi duong dan con deu phai tra
+    ve cung mot index.html.
+    """
+
+    async def get_response(self, path: str, scope):
+        # Starlette NEM HTTPException(404) chu khong tra ve response 404, nen
+        # chi kiem tra status_code thoi la khong bao gio chay toi.
+        try:
+            response = await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            return await super().get_response("index.html", scope)
+        if response.status_code == 404:
+            return await super().get_response("index.html", scope)
+        return response
+
+
+# Ban build cua Console React. Mount SAU moi include_router, neu khong mount
+# se nuot cac route /api/console.
+#
+# Boc trong `if`: app phai khoi dong duoc khi chua ai chay `npm run build`.
+# Thieu dieu nay thi backend khong chay noi tren may chua cai Node.
+_CONSOLE_DIST = Path(__file__).resolve().parents[1] / "console_ui" / "dist"
+if _CONSOLE_DIST.is_dir():
+    app.mount(
+        "/console",
+        SpaStaticFiles(directory=_CONSOLE_DIST, html=True),
+        name="console",
+    )
 
 
 class JobIn(BaseModel):
