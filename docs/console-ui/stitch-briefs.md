@@ -92,7 +92,18 @@ DATA — show EXACTLY these, no invented metrics:
   not four: queued / running / failed / done / superseded. Note it is "done",
   NOT "succeeded" — do not rename it. Render as a compact inline row, NOT as
   large KPI cards.
-- Tổng số review (total_reviews): one integer.
+  CRITICAL — this block is NOT filtered by the date range. It is an all-time
+  count of the job queue, while every other number on this screen is scoped to
+  the selected dates. Label it explicitly (e.g. "Hàng đợi hiện tại — toàn thời
+  gian") and visually separate it from the date-scoped section, otherwise a
+  reader will assume both cover the same period and conclude the numbers are
+  broken.
+- Tổng số review (total_reviews): one integer. Scoped to the date range AND
+  it EXCLUDES seeded test data (rows with is_fixture = true). The Reviews list
+  screen does NOT exclude them, so the two screens will disagree — e.g. 5 here
+  versus 13 there. Put a short caption under the date-scoped section saying it
+  covers the selected range and excludes dữ liệu mẫu, so the difference reads
+  as intentional rather than as a bug.
 - Quyết định (decision_counts): counts per decision — publish, needs_revision,
   rejected, unknown.
 - Thời lượng: duration_p50_ms and duration_p95_ms (milliseconds, may be null).
@@ -102,9 +113,10 @@ DATA — show EXACTLY these, no invented metrics:
 - Chi phí ước tính (cost_estimate): input_tokens, output_tokens, estimated_usd
   (may be null), currency, pricing_version, effective_at (the date that price
   table took effect — show it as a small caption under the cost, so a reader can
-  tell an estimate was priced with an old table), and unknown_models (a list of
-  model names with no price on file — show a quiet warning when this list is not
-  empty).
+  tell an estimate was priced with an old table), source (a URL to the vendor
+  pricing page — render it as a small external link, not as raw text), and
+  unknown_models (a list of model names with no price on file — show a quiet
+  warning when this list is not empty).
 - Trạng thái worker: worker_status is exactly one of running / stale /
   unavailable. These are THREE DISTINCT states, not two — "stale" means it was
   running and has gone quiet, "unavailable" means it has never reported. Show
@@ -170,9 +182,14 @@ Rows are NOT clickable as a whole; the Mã job cell is the link to the detail
 screen.
 
 CONTROLS + STATES:
-Filters: Trạng thái (dropdown, the five values above), Site (dropdown), Nguồn
-(dropdown), ID nội dung (text, substring match), and a date range (Từ ngày /
+Filters: Trạng thái (dropdown — the five values above are a fixed list, so a
+dropdown works), Site (TEXT INPUT, not a dropdown), Nguồn (TEXT INPUT, not a
+dropdown), ID nội dung (text, substring match), and a date range (Từ ngày /
 Đến ngày — both required together or both empty).
+Site and Nguồn must be text inputs because the API has no endpoint that lists
+the available values, and Nguồn is free-form (real values include "event",
+"reconcile", "admin_retry", "manual-test-b7"). Site matches the slug exactly;
+Nguồn matches exactly. Design them with a hint showing an example value.
 Pagination: "Trang 1 / 3 · 137 kết quả" with previous/next. Page size is 25 by
 default and capped at 100. There is no infinite scroll and no export button.
 Design all four states:
@@ -287,7 +304,10 @@ DATA — the table must show EXACTLY these columns, no others, no invented ones:
 - Quyết định    (decision — a badge with EXACTLY four possible values, and it
                 may also be null): publish / needs_revision / rejected / unknown
 - Điểm          (final_score, a number 0..100, MAY BE NULL — show "—" when null,
-                right-aligned, monospace)
+                right-aligned, monospace). The API returns full precision, up
+                to 13 decimal places (a real value is 40.9090909090909). Round
+                to ONE decimal place for display; showing the raw value makes
+                the column ragged and unreadable.
 - Hồ sơ         (profile_code, short string)
 - Phiên bản policy (policy_version)
 - Model         (model, e.g. "claude-sonnet-4-5-20250929" — this string is long,
@@ -297,9 +317,13 @@ DATA — the table must show EXACTLY these columns, no others, no invented ones:
                 hide the row and do NOT colour it like an error.)
 
 CONTROLS + STATES:
-Filters: Quyết định (dropdown), Site (dropdown), ID nội dung (text), and a date
-range (both dates required together or both empty). Pagination identical to the
-Jobs screen. No export button.
+Filters: Quyết định (dropdown — the four values are a fixed list), Site (TEXT
+INPUT, not a dropdown — the API has no endpoint listing available sites, and it
+matches the slug exactly), ID nội dung (text, substring match), and a date range
+(both dates required together or both empty). Pagination identical to the Jobs
+screen. No export button.
+NOTE: this list does NOT exclude seeded test data, and it is not date-scoped by
+default — so its total will not match the Dashboard's "Tổng số review".
 Design all four states:
 1. Loading (skeleton rows)
 2. Empty ("Chưa có review nào khớp bộ lọc")
@@ -339,7 +363,9 @@ reached its decision. Desktop-first. All UI labels in Vietnamese.
 
 DATA — show EXACTLY these 28 fields, grouped as suggested, nothing invented:
 Kết luận: decision (badge: publish / needs_revision / rejected / unknown, may be
-  null), final_score (number 0..100, may be null), veto_reason (text or null —
+  null), final_score (number 0..100, may be null — the API returns full
+  precision, up to 13 decimal places; round to one decimal for display),
+  veto_reason (text or null —
   when present this is WHY the decision was forced, so give it prominence),
   note (text or null), missing_agents (a list of agent names that did not
   report — when non-empty this is a warning, the result is incomplete).
@@ -356,7 +382,8 @@ Kết quả từng agent (agents): a list of AT MOST FOUR agents. Each agent has
   the literal text "[đã ẩn]" (redacted) — render that as a neutral muted chip.
 Vận hành: duration_ms (integer, may be null), model (string), usage_available
   (boolean), cost_estimate (input_tokens, output_tokens, estimated_usd may be
-  null, currency, pricing_version, effective_at, unknown_models list).
+  null, currency, pricing_version, effective_at, source — a URL to the vendor
+  pricing page, render as a small external link — and unknown_models list).
 Ghi ngược: writeback_status (one of succeeded / failed / superseded /
   pending / unknown), writeback_error (text or null).
 Ngữ cảnh: public_id, correlation_id, scored_at, site_id, site_slug, site_name,

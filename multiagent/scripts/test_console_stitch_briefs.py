@@ -49,6 +49,14 @@ KHONG_CAN_HIEN = {
     "csrf_token",  # co che noi bo, nguoi dung khong bao gio thay
 }
 
+# Mien tru THEO TUNG MAN HINH, moi dong phai co ly do. Khai bao tuong minh
+# thay vi mien tru chung: mien tru chung se lam mot truong bien mat khoi MOI
+# man hinh, va do la dung cach lo hong ban dau lot qua.
+MIEN_TRU = {
+    (2, "site_id"): "bang Jobs hien site_slug cho nguoi doc, khong hien UUID",
+    (4, "site_id"): "bang Reviews hien site_slug cho nguoi doc, khong hien UUID",
+}
+
 # Token snake_case la GIA TRI hoac thuat ngu, khong phai ten truong.
 GIA_TRI_HOP_LE = {
     # gia tri cua decision
@@ -68,6 +76,15 @@ TOKEN = re.compile(r"\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b")
 TEN_MAN_HINH = (
     "Login", "Dashboard", "Jobs", "Job detail", "Reviews", "Review detail",
 )
+# Man hinh nao phai mo ta schema nao.
+CAN_SCHEMA = {
+    0: ("MeResponse",),
+    1: ("DashboardResponse", "CostEstimateModel"),
+    2: ("JobListItemModel",),
+    3: ("JobDetailModel",),
+    4: ("ReviewListItemModel",),
+    5: ("ReviewDetailModel", "AgentResultModel", "CostEstimateModel"),
+}
 # Man hinh nao phai liet ke enum nao. Login khong hien du lieu nghiep vu nen
 # khong co rang buoc.
 CAN_ENUM = {
@@ -135,13 +152,24 @@ def main() -> int:
 
     loi = []
 
-    # Chieu 1: truong trong hop dong phai duoc nhac trong brief.
-    for ten_schema, truong in sorted(hop_dong.items()):
-        for field in sorted(truong):
-            if field in KHONG_CAN_HIEN:
-                continue
-            if not re.search(rf"\b{re.escape(field)}\b", brief):
-                loi.append(f"THIEU  {ten_schema}.{field} khong duoc nhac trong brief")
+    # Chieu 1: truong phai duoc nhac trong DUNG man hinh dung no.
+    #
+    # Khong tim tren toan tai lieu: mot ten truong co the trung giua hai schema
+    # (vi du `source` co ca o JobListItemModel lan CostEstimateModel), va khi
+    # do man hinh nay se "che" cho man hinh kia. Loi that da lot qua theo dung
+    # duong nay: cost_estimate.source khong he duoc mo ta trong brief dashboard
+    # nhung van xanh, vi Jobs co nhac `source`.
+    for chi_so, schemas in CAN_SCHEMA.items():
+        phan_data = khoi[chi_so].split("STYLE")[0]
+        for ten_schema in schemas:
+            for field in sorted(hop_dong[ten_schema]):
+                if field in KHONG_CAN_HIEN or (chi_so, field) in MIEN_TRU:
+                    continue
+                if not re.search(rf"\b{re.escape(field)}\b", phan_data):
+                    loi.append(
+                        f"THIEU  brief #{chi_so + 1} ({TEN_MAN_HINH[chi_so]}) "
+                        f"khong nhac {ten_schema}.{field}"
+                    )
 
     # Chieu 2: token snake_case trong brief phai co that.
     for token in sorted(set(TOKEN.findall(brief))):

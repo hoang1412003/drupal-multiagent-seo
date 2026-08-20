@@ -1439,6 +1439,37 @@ code nghĩ ra"** đã ghi ở cuối mục 8. Lần này biến thể là: *phé
 chỉ kiểm được thứ nằm trong hợp đồng, còn thứ không nằm trong hợp đồng thì nó
 mù.* Chỉ dữ liệu thật mới lộ ra.
 
+**Đợt hai (cùng ngày): dữ liệu JSON thật lộ thêm bốn vấn đề nữa.**
+
+1. **Dashboard trộn hai phạm vi thời gian.** `queue_counts` chạy
+   `SELECT status, count(*) FROM review_job GROUP BY status` — **không lọc
+   ngày**, trong khi `total_reviews` / `decision_counts` / `cost_estimate` đều
+   `WHERE scored_at >= start AND < end`. Số học xác nhận: `0+0+2+13+0 = 15`
+   đúng bằng `total` của `/jobs`. Không có nhãn nào phân biệt, nên người đọc
+   sẽ kết luận số liệu sai.
+2. **Dashboard loại `is_fixture`, danh sách thì không.** Trong khoảng ngày có
+   7 review, trừ 2 bản mẫu → dashboard báo 5; `/reviews` báo 13. Hai màn hình
+   không bao giờ khớp nếu không giải thích.
+3. **`final_score` trả tới 13 chữ số thập phân** (`40.9090909090909`) cạnh
+   `50` và `80.21`. Hiển thị thô thì cột điểm lởm chởm.
+4. **Bộ lọc Site/Nguồn không có nguồn dữ liệu để làm dropdown.** Không có
+   endpoint nào liệt kê site hay source, và `source` là tự do (dữ liệu thật:
+   `event`, `reconcile`, `manual-test-b7`). Brief đã đổi sang ô nhập văn bản.
+   Muốn dropdown thật thì phải thêm endpoint `/filters` — chưa làm.
+
+**Lỗ hổng thứ hai của chính script kiểm**, cùng họ với lỗ hổng đầu: nó tìm tên
+trường **trên toàn tài liệu**, nên `source` của `JobListItemModel` che cho
+`source` của `CostEstimateModel` (trường này chưa hề được mô tả mà vẫn xanh).
+Đã siết sang kiểm **từng màn hình** cho cả tên trường lẫn enum; ngay khi siết
+nó tìm thêm 3 thiếu sót. Miễn trừ (ví dụ bảng danh sách không hiện `site_id`)
+khai báo **tường minh theo từng màn hình kèm lý do**, không miễn trừ chung —
+miễn trừ chung sẽ làm trường đó biến mất khỏi mọi màn hình, đúng cách lỗ hổng
+đầu tiên lọt qua.
+
+**Bài học về chính phép thử ngược:** lần thử đầu có 2/3 ca báo "không bắt
+được", và hoá ra **phép thử viết sai** — nó xoá đoạn mô tả nhưng vẫn để lại từ
+khoá trong câu. Phải kiểm chứng cả phép thử, không chỉ thứ nó kiểm.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại
