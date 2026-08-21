@@ -114,4 +114,15 @@ export const HEALTH_STATUS: Record<string, PillStyle> = {
   ok: { label: "Đạt", ...EMERALD },
 };
 
+export const USER_ROLE: Record<string, PillStyle> = {
+  viewer: { label: "Chỉ xem", ...GRAY },
+  operator: { label: "Vận hành", ...BLUE },
+  admin: { label: "Quản trị", ...AMBER },
+};
+
+export const USER_ACTIVE: Record<string, PillStyle> = {
+  true: { label: "Đang hoạt động", ...EMERALD },
+  false: { label: "Đã khoá", ...RED },
+};
+
 export const RED_PILL = RED;

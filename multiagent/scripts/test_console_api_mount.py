@@ -6,7 +6,9 @@ app that (thu tu mount, middleware, schema openapi).
 
 Chay: ..\multiagent\.venv\Scripts\python.exe scripts\test_console_api_mount.py
 """
+import json
 import os
+from pathlib import Path
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -272,6 +274,50 @@ def test_loi_422_cua_console_dung_hinh_dang_chung():
     print("[PASS] 422 cua Console dung hinh dang chung, /api/v1 giu nguyen")
 
 
+def test_openapi_tren_dia_khop_voi_code():
+    """File hop dong da commit phai khop voi model hien tai.
+
+    Sua model roi quen chay export_openapi.py la loi lap lai duoc: hop dong
+    tren dia van la ban cu, agent viet frontend doc ban cu do, va `tsc` chi
+    bao loi khi frontend TINH CO dung toi truong moi. Da xay ra that
+    (2026-08-21): them `id` vao MeResponse nhung khong sinh lai openapi.json,
+    va no da kip di vao mot PR.
+
+    Sua khi test nay do: chay
+        .venv\Scripts\python.exe scripts\export_openapi.py
+        cd console_ui && npm run types
+    """
+    import export_openapi
+
+    tren_dia = json.loads(
+        (Path(__file__).resolve().parents[1] / "console_ui" / "openapi.json")
+        .read_text(encoding="utf-8")
+    )
+    tu_code = export_openapi.build_schema()
+
+    duong_dan_thieu = set(tu_code["paths"]) - set(tren_dia["paths"])
+    duong_dan_thua = set(tren_dia["paths"]) - set(tu_code["paths"])
+    assert not duong_dan_thieu and not duong_dan_thua, (
+        f"openapi.json cu: thieu {sorted(duong_dan_thieu)}, "
+        f"thua {sorted(duong_dan_thua)}. Chay lai scripts/export_openapi.py"
+    )
+
+    tren_dia_schema = tren_dia.get("components", {}).get("schemas", {})
+    tu_code_schema = tu_code.get("components", {}).get("schemas", {})
+    for ten, dinh_nghia in tu_code_schema.items():
+        assert ten in tren_dia_schema, (
+            f"openapi.json thieu schema {ten}. Chay lai scripts/export_openapi.py"
+        )
+        truong_code = set(dinh_nghia.get("properties", {}))
+        truong_dia = set(tren_dia_schema[ten].get("properties", {}))
+        assert truong_code == truong_dia, (
+            f"schema {ten} lech: code co {sorted(truong_code - truong_dia)} ma "
+            f"file khong, file co {sorted(truong_dia - truong_code)} ma code "
+            "khong. Chay lai scripts/export_openapi.py"
+        )
+    print(f"[PASS] openapi.json khop voi code ({len(tu_code_schema)} schema)")
+
+
 if __name__ == "__main__":
     failed = False
     for fn in (
@@ -283,6 +329,7 @@ if __name__ == "__main__":
         test_every_get_endpoint_declares_its_query_params,
         test_every_filtered_endpoint_rejects_unknown_params,
         test_loi_422_cua_console_dung_hinh_dang_chung,
+        test_openapi_tren_dia_khop_voi_code,
     ):
         try:
             fn()

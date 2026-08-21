@@ -2417,6 +2417,10 @@
       },
       "MeResponse": {
         "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
           "username": {
             "type": "string",
             "title": "Username"
@@ -2436,6 +2440,7 @@
         },
         "type": "object",
         "required": [
+          "id",
           "username",
           "role",
           "must_change_password",

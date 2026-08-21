@@ -92,8 +92,10 @@ Only three inputs exist. Do not invent "remember me", SSO buttons, social login,
 - Tên đăng nhập (username, text)
 - Mật khẩu (password, masked)
 - Nút "Đăng nhập" (primary action)
-On success the server returns: username, role (one of viewer/operator/admin),
-must_change_password (boolean). When must_change_password is true the user is
+On success the server returns: id, username, role (one of
+viewer/operator/admin), must_change_password (boolean). `id` is not displayed
+anywhere - it exists so a screen can tell "this row is me", which the Users
+screen needs before locking or demoting an account. When must_change_password is true the user is
 sent straight to the change-password screen — design that redirect state as a
 brief inline notice, not a modal.
 
