@@ -91,6 +91,13 @@ cho tới khi deploy nơi khác:
 
 ## 4. Địa chỉ (chỉ để tham khảo — instance có thể đã bị tắt/xoá)
 
+**Địa chỉ hiện tại (từ 2026-08-21, sau khi bật HTTPS — xem mục 7):**
+
+- Drupal: `https://vf-multiagent.duckdns.org`
+- Console: `https://vf-multiagent.duckdns.org/console/`
+
+**Địa chỉ cũ, giữ lại làm bản ghi:**
+
 - Drupal: `http://<EC2-public-IP>`
 - Platform Admin: `http://<EC2-public-IP>:8900/admin` — **địa chỉ của lần deploy
   16–17/08/2026, nay không còn**: admin Jinja2 đã bị xoá ngày 2026-08-21 và
@@ -108,7 +115,11 @@ lúc nào, IP sẽ đổi nếu instance khởi động lại (chưa gắn Elast
   lệnh `drush` nặng là máy nghẹt cả HTTP lẫn SSH (đã xảy ra 2026-08-21). Đã bật
   swap 2 GB làm giảm nhẹ, nhưng swap chậm hơn RAM nhiều lần — đây vẫn là máy
   demo, không phải máy chịu tải.
-- Không có HTTPS/domain. `ADMIN_COOKIE_SECURE=false` cố ý để khớp HTTP.
+- ~~Không có HTTPS/domain~~ — **đã có từ 2026-08-21** (mục 7):
+  `vf-multiagent.duckdns.org`, chứng chỉ Let's Encrypt, `ADMIN_COOKIE_SECURE=true`.
+  Nhưng tên miền là **DuckDNS miễn phí**, không phải miền của tổ chức; và IP sẽ
+  đổi nếu instance bị Stop rồi Start (reboot thì không), lúc đó phải cập nhật
+  lại bản ghi DuckDNS.
 - Security group mở `0.0.0.0/0` cho cổng 80/443/8900; SSH (22) giới hạn theo
   IP đã SSH lúc tạo máy — sẽ chặn nếu đổi mạng, phải sửa lại rule SSH.
 - Database Drupal là ảnh chụp một lần, không có cơ chế sync/backup định kỳ.
@@ -303,3 +314,146 @@ Vấp hai lần, cả hai đã ghi thành mục 6.2 và 6.3:
 Tổng thời gian ~40 phút, trong đó 25 phút là do sự cố ở mục 2. Nếu bật swap
 trước, làm đúng thứ tự, và nhớ bật theme thì khoảng 10 phút.
 
+## 7. Bật HTTPS (2026-08-21)
+
+Trước ngày này server chạy HTTP trần, `ADMIN_COOKIE_SECURE=false` cố ý để khớp.
+Mục này ghi lại cách bật HTTPS và **bốn thứ phải đổi kèm** — bỏ sót một cái là
+hệ thống hỏng, mà ba trong bốn cái hỏng **im lặng**.
+
+### 7.1. Bắt buộc phải có tên miền
+
+Let's Encrypt **không cấp chứng chỉ cho địa chỉ IP trần**. Phải có một tên.
+
+Đang dùng **DuckDNS** (miễn phí): `vf-multiagent.duckdns.org` → `18.142.116.87`.
+Tài khoản đăng nhập bằng Google, quản lý tại [duckdns.org](https://www.duckdns.org).
+
+Cạm bẫy khi tạo: DuckDNS **tự điền IP của máy bạn đang ngồi**, không phải IP
+server. Phải sửa tay thành IP EC2 rồi bấm *update ip*. Để nguyên thì Let's
+Encrypt gửi yêu cầu xác minh về máy cá nhân, không ai trả lời, và từ chối cấp.
+
+Kiểm trước khi xin chứng chỉ:
+
+```bash
+nslookup vf-multiagent.duckdns.org 8.8.8.8   # phải ra IP của EC2
+```
+
+### 7.2. Bốn thứ phải đổi kèm
+
+**(1) Drupal `trusted_host_patterns` — hỏng ngay, dễ thấy**
+
+`web/sites/default/settings.php` chỉ liệt kê IP, `127.0.0.1`, `localhost`. Gọi
+qua tên miền mới sẽ nhận **400 Bad Request**. Đây là cơ chế chống giả mạo Host
+header, không phải lỗi. Thêm tên miền vào mảng:
+
+```php
+$settings['trusted_host_patterns'] = [
+  '^vf-multiagent\.duckdns\.org$',
+  '^18\.142\.116\.87$',
+  ...
+];
+```
+
+**(2) Cổng 8900 phải vào sau nginx — hỏng im lặng**
+
+uvicorn phục vụ Console/API thẳng ở cổng 8900, không qua nginx. Chứng chỉ gắn
+vào nginx nên nó **không** bảo vệ cổng đó.
+
+Nếu bật `ADMIN_COOKIE_SECURE=true` mà Console vẫn chạy HTTP, trình duyệt từ
+chối gửi cookie "chỉ dành cho HTTPS" — **đăng nhập xong lại quay về trang đăng
+nhập**, không lỗi nào hiện ra.
+
+Cách làm: cho nginx đứng trước cả hai.
+
+```nginx
+location ^~ /console      { proxy_pass http://127.0.0.1:8900; include .../proxy-headers.inc; }
+location ^~ /api/console  { proxy_pass http://127.0.0.1:8900; include .../proxy-headers.inc; }
+location ^~ /api/v1       { proxy_pass http://127.0.0.1:8900; include .../proxy-headers.inc; }
+location = /health        { proxy_pass http://127.0.0.1:8900; include .../proxy-headers.inc; }
+```
+
+**`^~` là bắt buộc.** Không có nó, quy tắc regex `\.(js|css|gif|jpe?g|png)$`
+của Drupal sẽ nuốt file tĩnh của Console và đi tìm trong docroot Drupal → 404,
+Console trắng trang.
+
+Xong thì **đóng cổng 8900** trong security group: nginx gọi qua loopback nên
+không cần mở ra ngoài nữa, và đóng lại thì không còn đường vòng qua HTTP.
+
+**(3) `--forwarded-allow-ips` cho uvicorn — hỏng im lặng, nguy hiểm nhất**
+
+Đặt nginx ở giữa khiến `request.client.host` thành `127.0.0.1` cho **mọi**
+request. `admin_api/auth_routes.py::_client_ip()` đọc thẳng giá trị đó, nên:
+
+- cơ chế chặn dò mật khẩu gộp tất cả mọi người vào **một rổ** — một người gõ
+  sai vài lần là khoá cả hệ thống
+- mất hoàn toàn giá trị truy vết theo IP
+
+Sửa trong `/etc/systemd/system/multiagent-api.service`:
+
+```
+ExecStart=... uvicorn api:app --host 0.0.0.0 --port 8900 --app-dir src \
+  --proxy-headers --forwarded-allow-ips=127.0.0.1
+```
+
+Giới hạn `127.0.0.1` là quan trọng: uvicorn chỉ tin `X-Forwarded-For` khi
+request đến **từ chính nginx**. Request từ ngoài vào thẳng cổng 8900 không được
+tin, nên không ai giả mạo IP được.
+
+Và nginx phải thực sự gửi header đó (`proxy-headers.inc`):
+
+```nginx
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+```
+
+Kiểm chứng — nhật ký uvicorn phải ghi IP THẬT, không phải 127.0.0.1:
+
+```bash
+sudo journalctl -u multiagent-api --since "5 min ago" | grep auth/login | tail -3
+```
+
+**(4) `ADMIN_COOKIE_SECURE=true` trong `.env`**
+
+Đổi rồi `systemctl restart multiagent-api`. Sao lưu `.env` trước: nếu đăng nhập
+Console hỏng thì lùi về `false` là cách khôi phục nhanh nhất.
+
+### 7.3. Cái KHÔNG được đổi
+
+`DRUPAL_BASE_URL` và `base_url` của site trong Postgres đang là
+`http://127.0.0.1` — **giữ nguyên**. Đó là lưu lượng loopback trong máy, không
+ra ngoài, và chứng chỉ chỉ hợp lệ cho tên miền chứ không cho `127.0.0.1`. Đổi
+sang `https://` sẽ làm worker không gọi được Drupal.
+
+### 7.4. Lệnh xin chứng chỉ
+
+```bash
+sudo dnf install -y certbot python3-certbot-nginx
+sudo sed -i 's/server_name _;/server_name vf-multiagent.duckdns.org;/' /etc/nginx/conf.d/drupal.conf
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d vf-multiagent.duckdns.org \
+  --non-interactive --agree-tos --email <email> --redirect
+```
+
+certbot tự sửa nginx cho cổng 443, tự thêm chuyển hướng HTTP→HTTPS, và tự đặt
+lịch gia hạn. Chứng chỉ hiện tại hết hạn **2026-11-19**.
+
+Nhớ mở cổng **443** trong security group trước.
+
+### 7.5. Kiểm chứng sau khi bật
+
+```bash
+D=https://vf-multiagent.duckdns.org
+curl -s -o /dev/null -w "%{http_code}\n" $D              # 200 Drupal
+curl -s -o /dev/null -w "%{http_code}\n" $D/console/     # 200 Console
+curl -s -o /dev/null -w "%{http_code}\n" $D/health       # 200
+curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://vf-multiagent.duckdns.org  # 301
+```
+
+Và ba thứ chỉ kiểm được bằng tay:
+
+1. Tải một file JS của Console (`/console/assets/*.js`) → phải trả `200` với
+   `content-type: application/javascript`, không phải HTML của Drupal.
+2. **Đăng nhập Console** → phải vào được. Quay về trang đăng nhập nghĩa là
+   cookie `Secure` không qua được (mục 7.2 phần 2 hoặc 4).
+3. Nhật ký uvicorn ghi IP thật (mục 7.2 phần 3).
