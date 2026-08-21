@@ -44,3 +44,6 @@ test_group_summary.json
 # `npm install && npm run build` trong multiagent/console_ui/.
 multiagent/console_ui/node_modules/
 multiagent/console_ui/dist/
+# Bo nho dem cua trinh bien dich TypeScript: doi moi lan chay `tsc`, nen neu
+# theo doi thi `git status` luon bao "da sua" du khong ai dong vao.
+multiagent/console_ui/tsconfig.tsbuildinfo

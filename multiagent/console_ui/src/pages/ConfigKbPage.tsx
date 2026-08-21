@@ -5,28 +5,9 @@ import { formatDateTime, TIMEZONE_LABEL } from "../lib/format";
 import { ErrorBanner } from "../lib/ErrorBanner";
 import { BOOLEAN_PILLS, pillOf } from "../lib/status";
 import { StatusPill } from "../lib/StatusPill";
+import { Field, Panel } from "../lib/DetailLayout";
 
 type ConfigKbResponse = components["schemas"]["ConfigKbResponse"];
-
-function Field({ label, children, colSpan = false, mono = false }: { label: string, children: React.ReactNode, colSpan?: boolean, mono?: boolean }) {
-  return (
-    <div className={colSpan ? "sm:col-span-full" : "sm:col-span-1"}>
-      <dt className="text-sm font-medium text-gray-500 mb-1">{label}</dt>
-      <dd className={`text-sm ${mono ? "font-mono text-xs" : ""} text-ink dark:text-gray-200 break-words`}>
-        {children ?? "—"}
-      </dd>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string, children: React.ReactNode }) {
-  return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c]">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">{title}</h2>
-      {children}
-    </section>
-  );
-}
 
 function Card({ children, isError = false }: { children: React.ReactNode, isError?: boolean }) {
   return (
@@ -51,15 +32,15 @@ export function ConfigKbPage() {
         <h1 className="text-xl font-semibold text-ink dark:text-gray-100">Cấu hình & Kho tri thức</h1>
         <p className="text-sm text-gray-500">Xem chi tiết chính sách và thiết lập AI.</p>
       </div>
-      <Section title="File chính sách">
+      <Panel title="File chính sách">
         <div className="h-32 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-      </Section>
-      <Section title="Site và hồ sơ">
+      </Panel>
+      <Panel title="Site và hồ sơ">
         <div className="h-32 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-      </Section>
-      <Section title="Kho tri thức">
+      </Panel>
+      <Panel title="Kho tri thức">
         <div className="h-32 w-full animate-pulse rounded bg-gray-200 dark:bg-gray-700"></div>
-      </Section>
+      </Panel>
     </div>
   );
 
@@ -76,7 +57,7 @@ export function ConfigKbPage() {
 
       {!error && (
         <>
-          <Section title="File chính sách">
+          <Panel title="File chính sách">
             {(!data?.policy_files || data.policy_files.length === 0) ? (
               <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
             ) : (
@@ -116,9 +97,9 @@ export function ConfigKbPage() {
                 </Card>
               ))
             )}
-          </Section>
+          </Panel>
 
-          <Section title="Site và hồ sơ">
+          <Panel title="Site và hồ sơ">
             {(!data?.profile_assignments || data.profile_assignments.length === 0) ? (
               <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
             ) : (
@@ -159,9 +140,9 @@ export function ConfigKbPage() {
                 </Card>
               ))
             )}
-          </Section>
+          </Panel>
 
-          <Section title="Kho tri thức">
+          <Panel title="Kho tri thức">
             {(!data?.kb_summary || data.kb_summary.length === 0) ? (
               <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
             ) : (
@@ -180,7 +161,7 @@ export function ConfigKbPage() {
                 </Card>
               ))
             )}
-          </Section>
+          </Panel>
         </>
       )}
     </div>

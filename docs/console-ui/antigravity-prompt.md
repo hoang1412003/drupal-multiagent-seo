@@ -905,7 +905,7 @@ mọi màn trước — nhưng dữ liệu có cấu trúc lạ, đọc kỹ ph�
 2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
 3. `docs/console-ui/integration.md` — mã lỗi
 
-**Xem `JobDetailPage.tsx`** — dùng lại `Section` và `Field` của nó cho bố cục
+**Dùng `Section` và `Field` của `src/lib/DetailLayout.tsx`** cho bố cục
 nhóm. Hai màn này không có bảng danh sách nên đừng bắt chước `JobsPage`.
 
 **Sửa/tạo bốn file:**
@@ -916,7 +916,8 @@ nhóm. Hai màn này không có bảng danh sách nên đừng bắt chước `J
 - Sửa `src/layout/AppShell.tsx` — thêm hai mục menu
 
 **Dùng lại module chung**: `src/lib/format.ts`, `src/lib/status.ts` +
-`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`. Cần bảng pill mới thì **thêm vào
+`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`, `src/lib/DetailLayout.tsx`
+(`Panel` / `Section` / `Field` — **đừng khai báo lại trong file trang**). Cần bảng pill mới thì **thêm vào
 `lib/status.ts`**, đừng khai báo trong file trang.
 
 ---
@@ -1049,7 +1050,7 @@ kia bật/tắt việc nhận bài của toàn bộ hệ thống. Đọc kỹ ph
 2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng
 3. `docs/console-ui/integration.md` — mã lỗi
 
-**Xem `JobDetailPage.tsx`** — dùng lại `Section` và `Field` của nó cho bố cục
+**Dùng `Section` và `Field` của `src/lib/DetailLayout.tsx`** cho bố cục
 nhóm, và xem cách nó bọc nút "Thử lại" trong `<RequireRole role="operator">`.
 Màn này không có bảng danh sách nên đừng bắt chước `JobsPage`.
 
@@ -1060,7 +1061,8 @@ Màn này không có bảng danh sách nên đừng bắt chước `JobsPage`.
 - Sửa `src/layout/AppShell.tsx` — thêm một mục menu
 
 **Dùng lại module chung**: `src/lib/format.ts`, `src/lib/status.ts` +
-`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`. Cần bảng pill mới thì **thêm vào
+`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`, `src/lib/DetailLayout.tsx`
+(`Panel` / `Section` / `Field` — **đừng khai báo lại trong file trang**). Cần bảng pill mới thì **thêm vào
 `lib/status.ts`**, đừng khai báo trong file trang.
 
 ---
