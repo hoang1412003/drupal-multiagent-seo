@@ -10,7 +10,7 @@ như evidence lịch sử, không phải kết quả của policy v2.
 
 **Policy v2 chưa measured và chưa active.** Core/evaluator/release guard tới
 commit `d54d6f9` đã qua focused post-commit release-guard test; test manifest
-phủ 82 file. Một lượt pure 53/53 đã chạy trước vòng hardening guard cuối nên
+khi đó phủ 82 file (**tính tới 2026-08-21 là 91 file**). Một lượt pure 53/53 đã chạy trước vòng hardening guard cuối nên
 không được dùng làm chứng nhận cho HEAD này; full `all-offline` fresh
 checkpoint vẫn pending. Manifest
 `docs/evidence/publish-policy-v2-manifest.json` còn là skeleton unfrozen;
