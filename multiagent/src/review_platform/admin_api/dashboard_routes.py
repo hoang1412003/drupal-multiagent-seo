@@ -6,7 +6,7 @@ khac nhau tren cung mot du lieu, va sai lech kieu do rat kho phat hien.
 """
 from fastapi import APIRouter, Depends, Query, Request
 
-from review_platform.admin import dashboard_routes as legacy_dashboard
+from review_platform.admin import filters as admin_filters
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import queries
 from review_platform.admin_api import dependencies, errors, models
@@ -31,8 +31,8 @@ def dashboard(
 ):
     dependencies.reject_unknown_query_params(request, _QUERY_PARAMS)
     try:
-        date_from, date_to, _, _ = legacy_dashboard._date_range(request)
-    except legacy_dashboard.DashboardInputError as exc:
+        date_from, date_to, _, _ = admin_filters.date_range(request)
+    except admin_filters.DashboardInputError as exc:
         raise errors.invalid_filter(str(exc)) from exc
 
     view = queries.dashboard(conn, date_from=date_from, date_to=date_to)

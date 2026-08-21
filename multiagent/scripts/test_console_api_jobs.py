@@ -20,6 +20,7 @@ from fastapi.testclient import TestClient
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin_api import errors, router as console_router
+from review_platform import reviews
 from review_platform.auth import users
 from review_platform.auth.rbac import Role
 
@@ -380,6 +381,78 @@ def test_every_documented_filter_actually_filters(conn):
     print("[PASS] moi tham so trong hop dong deu that su loc, ten la bi tu choi")
 
 
+def test_retry_ghi_so_kiem_toan_hong_thi_khong_tao_job_moi(conn):
+    """Retry GOI API TRA PHI. Ghi so hong ma van tao job la tieu tien mu.
+
+    Chuyen tu test_admin_jobs.py (2026-08-21) khi xoa admin Jinja2. Phep kiem
+    goi thang `reviews.retry_failed`, khong qua HTTP: no kiem tinh nguyen khoi
+    cua giao dich, khong kiem route.
+    """
+    _reset_schema(conn)
+    actor = users.create_user(
+        conn,
+        "retry.atomic",
+        "Mat-khau-retry-atomic-2026",
+        Role.OPERATOR,
+        must_change_password=False,
+    )
+    failed = _insert_job(conn, 1, status="failed")
+
+    goc = reviews.audit_log.write_event
+
+    def hong(*args, **kwargs):
+        raise RuntimeError("audit unavailable")
+
+    reviews.audit_log.write_event = hong
+    try:
+        try:
+            reviews.retry_failed(
+                conn,
+                job_public_id=failed,
+                actor=actor,
+                reason="atomic",
+            )
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError("audit hong ma retry van thanh cong")
+    finally:
+        reviews.audit_log.write_event = goc
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM review_job WHERE source='admin_retry'")
+        assert cur.fetchone()[0] == 0, "job moi van duoc tao du audit hong"
+    print("[PASS] audit hong -> retry quay lui, khong tao job moi")
+
+
+def test_retry_bi_chan_khi_site_da_tat(conn):
+    """Site tat nghia la khong duoc goi sang no nua - ke ca de retry.
+
+    Chuyen tu test_admin_jobs.py (2026-08-21).
+    """
+    _reset_schema(conn)
+    actor = users.create_user(
+        conn,
+        "retry.inactive",
+        "Mat-khau-retry-inactive-2026",
+        Role.OPERATOR,
+        must_change_password=False,
+    )
+    failed = _insert_job(conn, 1, status="failed")
+    with conn.cursor() as cur:
+        cur.execute("UPDATE site SET active=false WHERE id=%s", (SITE_ID,))
+
+    try:
+        reviews.retry_failed(
+            conn, job_public_id=failed, actor=actor, reason=None
+        )
+    except reviews.JobRetryContextError:
+        pass
+    else:
+        raise AssertionError("site da tat ma retry van chay")
+    print("[PASS] site da tat -> retry bi chan truoc khi goi API tra phi")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -397,6 +470,8 @@ if __name__ == "__main__":
             test_jobs_invalid_filter_returns_422_error_shape,
             test_jobs_filter_by_status_narrows_result,
             test_every_documented_filter_actually_filters,
+            test_retry_ghi_so_kiem_toan_hong_thi_khong_tao_job_moi,
+            test_retry_bi_chan_khi_site_da_tat,
             test_job_detail_returns_all_fields,
             test_job_detail_missing_returns_404,
             test_retry_requires_operator_role,

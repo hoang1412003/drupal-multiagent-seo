@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 
 from review_platform import sites
-from review_platform.admin import connection_routes as legacy_connection
+from review_platform.admin import queries
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin_api import dependencies, errors, models
 from review_platform.auth import audit_log
@@ -34,7 +34,7 @@ def _connection_factory(conn, site_id):
 
 
 def _view_or_404(conn):
-    view = legacy_connection._view(conn)
+    view = queries.connection_view(conn)
     if view is None:
         raise errors.not_found("Chưa cấu hình site nào")
     return view
@@ -76,7 +76,7 @@ def test_connection(
     conn=Depends(admin_dependencies.get_db),
 ):
     view = _view_or_404(conn)
-    site_id, slug = legacy_connection._site_row(conn)
+    site_id, slug = queries.site_row(conn)
 
     try:
         health = _connection_factory(conn, site_id).health()
@@ -121,17 +121,17 @@ def test_connection(
     return models.TestConnectionResponse(
         ok=health.ok,
         error_code=health.error_code,
-        connection=models.ConnectionModel.from_view(legacy_connection._view(conn)),
+        connection=models.ConnectionModel.from_view(queries.connection_view(conn)),
     )
 
 
 def _doi_intake(conn, resolved, payload, *, tam_dung: bool):
     _view_or_404(conn)
     reason = _reason(payload)
-    legacy_connection._doi_intake(
+    queries.set_intake_paused(
         conn, resolved.user, tam_dung=tam_dung, reason=reason
     )
-    return models.ConnectionModel.from_view(legacy_connection._view(conn))
+    return models.ConnectionModel.from_view(queries.connection_view(conn))
 
 
 @router.post(

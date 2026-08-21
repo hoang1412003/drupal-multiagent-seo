@@ -8,7 +8,7 @@ loc, va `queries.list_audit_events` da lam sach metadata truoc khi tra ve.
 """
 from fastapi import APIRouter, Depends, Query, Request
 
-from review_platform.admin import audit_routes as legacy_audit
+from review_platform.admin import filters as admin_filters
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import queries
 from review_platform.admin_api import dependencies, errors, models
@@ -37,7 +37,7 @@ def list_audit(
 ):
     dependencies.reject_unknown_query_params(request, _QUERY_PARAMS)
     try:
-        filters, page_number, page_size_value = legacy_audit._filters(request)
+        filters, page_number, page_size_value = admin_filters.audit_filters(request)
         view = queries.list_audit_events(conn, filters, page_number, page_size_value)
     except ValueError as exc:
         raise errors.invalid_filter(str(exc)) from exc

@@ -206,12 +206,16 @@ Dashboard tối thiểu đọc dữ liệu thật để hiển thị health, que
 
 Pause chặn enqueue mới và chặn worker claim job `queued`, nhưng để job đang chạy hoàn tất và giữ nguyên queue cho tới lúc resume. Retry write-back phải dùng lại kết quả đã lưu, không gọi LLM lần hai. Mọi job/run mới phải có correlation ID cùng site/profile/policy để điều tra xuyên Drupal → API → worker → write-back.
 
+> **Cập nhật 2026-08-21:** giao diện Jinja2 ở `/admin` **đã bị xoá**. Mọi
+> màn hình mô tả trong các đoạn trạng thái dưới đây nay nằm ở Console React
+> tại `/console/`. Các đoạn có ghi ngày được giữ nguyên làm hồ sơ lịch sử.
+
 **Trạng thái ngày 2026-08-13:** `/admin` hiện đã có dashboard đọc dữ liệu thật, jobs/detail + retry có role/CSRF/audit/cảnh báo chi phí, review history/detail, quản lý user, config/KB/evaluation chỉ đọc và audit admin-only. Evidence checkpoint: [`evidence/platform-admin-operations-verification.txt`](evidence/platform-admin-operations-verification.txt). Config/evaluation không có endpoint mutation; E2 đã xuất evidence $0 có commit, còn E1/E3/E6 pending và E5 lịch sử được đánh dấu hết hiệu lực.
 
 **Cập nhật ngày 2026-08-14 (P4 đã qua checkpoint):** `/api/v1`, connector Drupal revision-aware, result callback compare-and-set, trang `/admin/connection` với test connection và pause/resume intake đã triển khai. Evidence: [`evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
 
 - Connector health đọc **quyền thật** của tài khoản machine qua `GET /vf-ai/integration/v1/capabilities`, rồi gọi pending feed và fetch đúng một revision. Thiếu bất kỳ năng lực nào cũng là chưa đạt. Đã kiểm chứng: gỡ `view latest version` khỏi role thì `revision_read` chuyển `false`, trả lại thì `true`.
-- `site.last_health_status` chỉ được ghi khi operator bấm nút ở `/admin/connection` (có CSRF và audit). Chưa ai bấm thì cột đó `NULL` và dashboard hiển thị connector `unknown` — **không** hiển thị `ok`.
+- `site.last_health_status` chỉ được ghi khi operator bấm nút ở màn **Kết nối** của Console (có CSRF và audit). Chưa ai bấm thì cột đó `NULL` và dashboard hiển thị connector `unknown` — **không** hiển thị `ok`.
 - Worker health vẫn `unknown`: heartbeat thật thuộc Plan 5.
 
 ### 6.1. Cutover sang `/api/v1` và cửa sổ rollback
@@ -239,7 +243,7 @@ Thứ tự deploy bắt buộc — sai thứ tự thì bài không được ch�
    ```
 
    ⚠️ **Không dùng UID 1 làm tài khoản tích hợp.** UID 1 của Drupal bỏ qua mọi kiểm tra quyền, nên `capabilities` sẽ trả `true` cho cả ba năng lực bất kể role đúng hay sai — test connection xanh giả. Phải là một user riêng chỉ có role `ai_service`.
-4. Restart API/worker, chạy test connection ở `/admin/connection`, xác nhận đủ feed + result callback + revision read.
+4. Restart API/worker, chạy chẩn đoán kết nối ở màn **Kết nối** của Console, xác nhận đủ feed + result callback + revision read.
 5. Chỉ sau bước 4 mới deploy commit **client** (`ServiceClient` + hook) để Drupal gửi sang `/api/v1`.
 
 **Rollback trong cửa sổ chuyển đổi:** revert *riêng* commit client về endpoint legacy, **giữ nguyên** commit endpoint:
@@ -317,9 +321,9 @@ Database **không** lưu giá trị secret nào — chỉ lưu **tên biến** (
 
 1. Backup + `migrate.py status` — xem mục 6.5.
 2. `migrate.py apply` (migration là append-only).
-3. Deploy API/admin → kiểm `/health` và trang admin đã xác thực.
+3. Deploy API → kiểm `/health` và Console ở `/console/` đã xác thực.
 4. Deploy worker → **chờ heartbeat chuyển sang "Đang chạy"** trên dashboard.
-5. Test connection ở `/admin/connection` → phải đủ ba năng lực.
+5. Chẩn đoán kết nối ở màn **Kết nối** của Console → phải đủ ba năng lực.
 6. Deploy module/role Drupal.
 7. Một bài staging không thuộc gold set → Needs Review → chạy `staging_connector_smoke.py` (**engine giả, không gọi Anthropic**).
 8. Kiểm đúng một job, một run, một revision AI mới, correlation xuyên suốt, không rò nội dung.

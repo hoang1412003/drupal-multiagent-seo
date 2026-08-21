@@ -1,14 +1,21 @@
-"""FastAPI dependencies va startup config cho Platform Admin."""
+"""Cau hinh xac thuc va ket noi DB dung chung.
+
+Goi `admin` truoc day la giao dien quan tri Jinja2. Giao dien do da bi xoa
+(2026-08-21); nhung gi con lai o day la TANG DU LIEU va CAU HINH ma Console
+React dung. Ten goi giu nguyen de khoi phai doi hang chuc cho import.
+
+Rieng cac dependency cua FastAPI (kiem phien, kiem role, kiem CSRF) thi KHONG
+con o day: ban cua Jinja2 tra ve redirect 303, khong dung cho mot API JSON.
+Console co ban rieng trong `admin_api/dependencies.py`.
+"""
 from collections.abc import Mapping
 from dataclasses import dataclass
 import hmac
 import os
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import HTTPException, Request
 
 from review_platform import database as platform_database
-from review_platform.auth import csrf, sessions
-from review_platform.auth.rbac import Role, allows
 
 
 SESSION_COOKIE = "vf_admin_session"
@@ -18,17 +25,7 @@ SESSION_COOKIE_PATH = "/"
 # Phai xoa o ca hai duong dan: neu khong, trinh duyet giu HAI cookie trung ten
 # va Starlette chi tra ve mot cai khong xac dinh.
 LEGACY_SESSION_COOKIE_PATH = "/admin"
-_MUST_CHANGE_ALLOWED = frozenset({
-    "/admin/change-password",
-    "/admin/logout",
-})
-
-
 class AuthConfigError(RuntimeError):
-    pass
-
-
-class AdminForbidden(RuntimeError):
     pass
 
 
@@ -69,59 +66,3 @@ def get_auth_config(request: Request) -> AuthConfig:
         return request.app.state.auth_config
     except AttributeError as exc:
         raise HTTPException(500, "admin auth config chưa được khởi tạo") from exc
-
-
-def _login_redirect() -> HTTPException:
-    return HTTPException(303, headers={"Location": "/admin/login"})
-
-
-def current_session(request: Request, conn=Depends(get_db)) -> sessions.ResolvedSession:
-    raw_token = request.cookies.get(SESSION_COOKIE)
-    if not raw_token:
-        raise _login_redirect()
-    resolved = sessions.resolve(conn, raw_token)
-    if resolved is None:
-        raise _login_redirect()
-    if not resolved.user.active:
-        sessions.revoke(conn, raw_token, "user_inactive")
-        raise _login_redirect()
-    if (
-        resolved.must_change_password
-        and request.url.path not in _MUST_CHANGE_ALLOWED
-    ):
-        raise HTTPException(
-            303,
-            headers={"Location": "/admin/change-password"},
-        )
-    sessions.touch(conn, raw_token)
-    request.state.admin_session = resolved
-    return resolved
-
-
-def current_user(resolved=Depends(current_session)):
-    return resolved.user
-
-
-def require_role(required: Role):
-    required = Role(required)
-
-    def dependency(user=Depends(current_user)):
-        if not allows(user.role, required):
-            raise AdminForbidden("Bạn không có quyền thực hiện thao tác này")
-        return user
-
-    return dependency
-
-
-async def require_csrf(
-    request: Request,
-    resolved=Depends(current_session),
-) -> None:
-    # Admin Jinja2 gui csrf_token trong form; Console API gui trong header.
-    # Giu ca hai nhanh: bo nhanh form se lam hong toan bo admin cu.
-    supplied = request.headers.get("X-CSRF-Token")
-    if supplied is None:
-        form = await request.form()
-        supplied = form.get("csrf_token")
-    if not csrf.verify_session_csrf(resolved.csrf_token, supplied):
-        raise HTTPException(403, "CSRF token không hợp lệ")

@@ -333,6 +333,64 @@ def test_secret_ref_la_ten_bien_khong_phai_gia_tri(conn):
     print("[PASS] secret_ref van la ten bien moi truong, khong phai gia tri")
 
 
+def test_thieu_mot_capability_la_that_bai(conn):
+    """Chan doan phai doi DU nang luc, khong chi doi Drupal tra 200.
+
+    Chuyen tu test_admin_connection.py (2026-08-21). Mot GET chung chung thanh
+    cong khong chung minh duoc rang feed, result callback va doc revision deu
+    dung - va do moi la thu pipeline can.
+    """
+    _reset_schema(conn)
+    _seed_site(conn)
+    client = _login(conn, "cn.capability", Role.OPERATOR)
+
+    from review_platform.admin_api import connection_routes
+
+    with _connector(connection_routes, ConnectorGia(_health(False, "capability_missing"))):
+        r = client.post("/api/console/v1/connection/test", json={})
+
+    assert r.status_code == 200, r.text
+    assert r.json()["ok"] is False
+    assert r.json()["error_code"] == "capability_missing"
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT last_health_status, last_health_error FROM site")
+        assert cur.fetchone() == ("capability_missing", "capability_missing")
+        cur.execute(
+            "SELECT outcome FROM admin_audit_log WHERE action='connection_tested'"
+        )
+        assert cur.fetchone()[0] == "failed", "chan doan hong phai ghi outcome=failed"
+    print("[PASS] thieu mot capability -> bao that bai va audit outcome=failed")
+
+
+def test_connector_nem_loi_van_luu_ma_an_toan(conn):
+    """Connector nem exception thi van phai luu mot MA, khong lam sap endpoint.
+
+    Chuyen tu test_admin_connection.py (2026-08-21). Ma luu phai la ma da biet
+    (`connector_auth`), khong phai chuoi loi tho - thong bao loi tho tu Drupal
+    co the chua duong dan hay token.
+    """
+    _reset_schema(conn)
+    _seed_site(conn)
+    client = _login(conn, "cn.exception", Role.OPERATOR)
+
+    from review_platform.admin_api import connection_routes
+
+    gia = ConnectorGia(loi=connector_base.ConnectorAuthError("403 tu Drupal"))
+    with _connector(connection_routes, gia):
+        r = client.post("/api/console/v1/connection/test", json={})
+
+    assert r.status_code == 200, r.status_code
+    assert r.json()["ok"] is False
+    with conn.cursor() as cur:
+        cur.execute("SELECT last_health_status FROM site")
+        luu = cur.fetchone()[0]
+    assert luu == "connector_auth", luu
+    # Thong bao loi tho khong duoc lot ra ngoai.
+    assert "403 tu Drupal" not in r.text
+    print("[PASS] connector nem loi -> luu ma an toan, khong lo thong bao tho")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -357,6 +415,8 @@ if __name__ == "__main__":
             test_test_connection_khong_goi_result_callback,
             test_ba_thao_tac_deu_ghi_so_kiem_toan,
             test_secret_ref_la_ten_bien_khong_phai_gia_tri,
+            test_thieu_mot_capability_la_that_bai,
+            test_connector_nem_loi_van_luu_ma_an_toan,
         ):
             try:
                 fn(connection)

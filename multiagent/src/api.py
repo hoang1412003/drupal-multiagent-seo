@@ -24,7 +24,6 @@ import job_queue as q
 from review_platform import database as platform_database
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
-from review_platform.admin import router as admin_router
 from review_platform.admin_api import errors as console_errors
 from review_platform.admin_api import router as console_router
 from review_platform import security as platform_security
@@ -46,14 +45,6 @@ async def _lifespan(app: FastAPI):
 
 
 app = FastAPI(title="VF O2O Multi-Agent", lifespan=_lifespan)
-app.add_exception_handler(
-    admin_dependencies.AdminForbidden,
-    admin_router.forbidden_response,
-)
-# include_in_schema=False cho admin Jinja2: openapi.json la hop dong giao cho
-# agent viet frontend Console. Route tra HTML lot vao do se khien no tuong co
-# the goi bang fetch va nhan JSON.
-app.include_router(admin_router.router, include_in_schema=False)
 app.include_router(api_v1_router.router)
 app.add_exception_handler(
     console_errors.ConsoleError,
@@ -79,11 +70,6 @@ app.add_middleware(
     ),
 )
 app.add_middleware(platform_security.SecurityMiddleware)
-app.mount(
-    "/admin/static",
-    StaticFiles(directory=admin_router.STATIC_DIR),
-    name="admin-static",
-)
 
 class SpaStaticFiles(StaticFiles):
     """StaticFiles tra index.html cho moi duong dan khong phai file.

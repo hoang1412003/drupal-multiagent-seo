@@ -237,7 +237,8 @@ không nhận `--password`, và buộc đổi mật khẩu ở lần đăng nh�
 .venv\Scripts\python.exe src\worker.py
 ```
 
-Sau khi service khởi động, Platform Admin ở `http://127.0.0.1:8900/admin`.
+Sau khi service khởi động, Console ở `http://127.0.0.1:8900/console/`.
+(Giao diện quản trị Jinja2 cũ ở `/admin` đã bị xoá ngày 2026-08-21.)
 Tài khoản này độc lập với tài khoản Drupal; người viết bài không cần và không
 được cấp tài khoản Platform Admin chỉ để gửi bài sang trạng thái Needs Review.
 
