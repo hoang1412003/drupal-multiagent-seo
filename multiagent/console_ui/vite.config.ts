@@ -1,4 +1,7 @@
-import { defineConfig, type Plugin } from "vite";
+import type { Plugin } from "vite";
+// defineConfig lay tu vitest/config chu khong phai vite: ban cua vite khong
+// biet khoa `test`, nen `tsc --noEmit` se bao loi kieu o chinh file nay.
+import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -41,5 +44,13 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
+  },
+  test: {
+    // DOM gia trong Node: khong can trinh duyet, khong can server nao chay.
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    // Chi lay file .test.tsx trong src; khong quet dist/ hay node_modules.
+    include: ["src/**/*.test.{ts,tsx}"],
   },
 });

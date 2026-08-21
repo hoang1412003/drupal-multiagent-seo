@@ -76,8 +76,8 @@ Nguồn · Phiên bản policy
   (`external_id` chứ không phải `external_content_id`; `from`/`to` chứ không
   phải `date_from`/`date_to`). Server trả 422 nếu gõ sai tên
 
-**Xong thì:** chạy `npx tsc --noEmit` trong `multiagent/console_ui` và báo kết
-quả. Không tự ý làm màn hình khác.
+**Xong thì:** chạy `npm run typecheck` và `npm test` trong
+`multiagent/console_ui`, báo kết quả cả hai. Không tự ý làm màn hình khác.
 
 ---
 
@@ -162,8 +162,8 @@ một dòng chú thích nhỏ dưới tiêu đề để chênh lệch đọc ra 
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa `AppShell.tsx` hay bất kỳ file nào ngoài `ReviewsPage.tsx`
 
-**Xong thì:** chạy `npx tsc --noEmit` trong `multiagent/console_ui` và báo kết
-quả. Không tự ý làm màn hình khác.
+**Xong thì:** chạy `npm run typecheck` và `npm test` trong
+`multiagent/console_ui`, báo kết quả cả hai. Không tự ý làm màn hình khác.
 
 ---
 
@@ -317,7 +317,15 @@ Mặc định khi không truyền gì: server tự lấy **7 ngày gần nhất*
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài `DashboardPage.tsx`
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành. Không tự ý làm màn khác.
 
 ---
 
@@ -467,7 +475,15 @@ dùng thấy màn hình giống hệt và tưởng không có gì xảy ra.
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài `JobDetailPage.tsx`
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành. Không tự ý làm màn khác.
 
 ---
 
@@ -626,7 +642,15 @@ Mỗi agent là một khối đóng/mở được, mặc định **mở**. Tiêu
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài `ReviewDetailPage.tsx`
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành. Không tự ý làm màn khác.
 
 **Dữ liệu để thử:** mở màn Reviews, bấm vào bất kỳ mã review nào. Ví dụ có đủ
 4 agent: `5376baad-59ec-4192-b3b9-096b31084acf`.
@@ -749,7 +773,15 @@ yếu". Đừng đoán xem lỗi nào — hiện đúng thông báo server trả
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài hai file trên
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành.
 
 **Cách thử:** đăng xuất rồi đăng nhập lại. Để thử màn đổi mật khẩu mà không
 mất tài khoản, cứ mở `/console/doi-mat-khau` khi đang đăng nhập — nhưng
@@ -887,7 +919,15 @@ Thẻ lọc và **đầu bảng** luôn hiện; chỉ thân bảng đổi.
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài ba file đã nêu
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả. Không tự ý làm màn khác.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành. Không tự ý làm màn khác.
 
 **Cách thử:** đăng nhập bằng `admin`, vào `/console/audit`. Dữ liệu thật đã có
 sẵn — mỗi lần bạn đăng nhập là một bản ghi `login_success`.
@@ -1031,7 +1071,15 @@ Không có trạng thái 403 riêng — mọi role đăng nhập đều xem đư
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài bốn file đã nêu (`lib/status.ts` được phép **thêm**)
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành.
 
 **Dữ liệu để thử:** có sẵn — 4 file chính sách, 6 phép đo (E2 có bằng chứng
 tải được, các phép đo khác thì không).
@@ -1264,7 +1312,15 @@ trên chính nút đó. Đừng khoá cả trang.
 - KHÔNG cài thêm thư viện nào
 - KHÔNG sửa file nào ngoài ba file đã nêu (`lib/status.ts` được phép **thêm**)
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành.
 
 **Dữ liệu để thử:** có sẵn một site `drupal-vn-primary`. Chẩn đoán sẽ **không
 đạt** nếu Drupal chưa chạy — đó là kết quả hợp lệ để thử nhánh lỗi, không phải
@@ -1497,7 +1553,15 @@ trên chính nút đó. Đừng khoá cả bảng.
 - KHÔNG sửa file nào ngoài ba file đã nêu (`lib/status.ts` được phép **thêm**)
 - KHÔNG xoá hay sửa file tài liệu nào
 
-**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+**Xong thì:** chạy cả hai lệnh này và báo kết quả:
+
+```
+npm run typecheck
+npm test
+```
+
+`npm test` là bộ kiểm Vitest, chạy khoảng 4 giây và **không cần server nào**.
+Nếu nó báo đỏ ở màn bạn vừa làm thì phải sửa, đừng báo hoàn thành.
 
 **Dữ liệu để thử:** đăng nhập bằng tài khoản admin. Muốn thử nhánh
 `last_active_admin` thì thử tự hạ quyền chính mình khi chỉ có một admin — server
@@ -1510,13 +1574,15 @@ sẽ trả 409.
 Chạy trong `multiagent/console_ui`:
 
 ```bash
-npx tsc --noEmit
+npm run typecheck
+npm test
 grep -rn "fetch(\|axios" src/ --exclude-dir=api
 grep -rn "localStorage\|sessionStorage" src/
 grep -rn "dangerouslySetInnerHTML" src/
 ```
 
-Lệnh đầu phải không báo lỗi. **Ba lệnh `grep` phải không ra kết quả nào** — và
+Hai lệnh đầu phải không báo lỗi. `npm test` là bộ kiểm Vitest, chạy khoảng 4
+giây và không cần server nào. **Ba lệnh `grep` phải không ra kết quả nào** — và
 chúng quan trọng hơn lệnh đầu. Nếu Antigravity tự viết `fetch` hoặc lưu gì vào
 `localStorage`, nghĩa là nó đã hiểu sai mô hình xác thực và phá đúng lớp bảo vệ
 mà dự án chọn cookie `HttpOnly` để có.

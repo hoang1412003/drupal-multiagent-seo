@@ -16,6 +16,7 @@
         "test_compliance_rules.py",
         "test_config.py",
         "test_console_stitch_briefs.py",
+        "test_console_ui_vitest.py",
         "test_cp9_chi_dan_an.py",
         "test_cq_rubric.py",
         "test_decision_policy.py",
