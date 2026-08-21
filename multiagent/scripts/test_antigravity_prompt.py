@@ -36,6 +36,8 @@ GIA_TRI_HOP_LE = {
     "admin_retry",         # gia tri cua source
     "auth_failed",         # ma loi cua connector
     "cost_not_confirmed",  # ma loi cua Console API
+    "invalid_role",        # ma loi khi role gui len khong hop le
+    "last_active_admin",   # ma loi khi dinh ha quyen/khoa admin cuoi cung
     "login_success",       # action trong so kiem toan
     "password_changed",
     "password_rejected",

@@ -40,6 +40,11 @@ CONSOLE_ROUTES = {
     "/api/console/v1/jobs/{public_id}/retry",
     "/api/console/v1/reviews",
     "/api/console/v1/reviews/{public_id}",
+    "/api/console/v1/users",
+    "/api/console/v1/users/{user_id}/role",
+    "/api/console/v1/users/{user_id}/lock",
+    "/api/console/v1/users/{user_id}/unlock",
+    "/api/console/v1/users/{user_id}/reset-password",
 }
 
 
@@ -83,6 +88,12 @@ def test_real_app_mounts_all_console_routes():
         ("POST", f"/api/console/v1/jobs/{uuid_gia}/retry"),
         ("GET", "/api/console/v1/reviews"),
         ("GET", f"/api/console/v1/reviews/{uuid_gia}"),
+        ("GET", "/api/console/v1/users"),
+        ("POST", "/api/console/v1/users"),
+        ("POST", f"/api/console/v1/users/{uuid_gia}/role"),
+        ("POST", f"/api/console/v1/users/{uuid_gia}/lock"),
+        ("POST", f"/api/console/v1/users/{uuid_gia}/unlock"),
+        ("POST", f"/api/console/v1/users/{uuid_gia}/reset-password"),
     )
     try:
         for method, path in goi:
@@ -142,7 +153,8 @@ def test_openapi_console_paths_are_complete():
     for ten in ("MeResponse", "DashboardResponse", "JobPage", "JobDetailModel",
                 "ReviewPage", "ReviewDetailModel", "FiltersResponse", "AuditPage",
                 "ConfigKbResponse", "EvaluationResponse", "ConnectionModel",
-                "TestConnectionResponse"):
+                "TestConnectionResponse", "UserPage", "UserModel",
+                "TemporaryPasswordResponse"):
         assert ten in components, f"thieu schema {ten} trong openapi"
     print(f"[PASS] openapi co du {len(CONSOLE_ROUTES)} duong dan Console va cac schema chinh")
 

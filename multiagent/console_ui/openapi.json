@@ -1043,6 +1043,292 @@
           }
         }
       }
+    },
+    "/api/console/v1/users": {
+      "get": {
+        "tags": [
+          "console"
+        ],
+        "summary": "List Users",
+        "operationId": "list_users_api_console_v1_users_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 1",
+              "title": "Page"
+            },
+            "description": "mac dinh 1"
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "mac dinh 25, toi da 100",
+              "title": "Page Size"
+            },
+            "description": "mac dinh 25, toi da 100"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Create User",
+        "operationId": "create_user_api_console_v1_users_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryPasswordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/users/{user_id}/role": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Change Role",
+        "operationId": "change_role_api_console_v1_users__user_id__role_post",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/users/{user_id}/lock": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Lock User",
+        "operationId": "lock_user_api_console_v1_users__user_id__lock_post",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/users/{user_id}/unlock": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Unlock User",
+        "operationId": "unlock_user_api_console_v1_users__user_id__unlock_post",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserModel"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/console/v1/users/{user_id}/reset-password": {
+      "post": {
+        "tags": [
+          "console"
+        ],
+        "summary": "Reset Password",
+        "operationId": "reset_password_api_console_v1_users__user_id__reset_password_post",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemporaryPasswordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1226,6 +1512,17 @@
         },
         "type": "object",
         "title": "ChangePasswordRequest"
+      },
+      "ChangeRoleRequest": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "ChangeRoleRequest"
       },
       "ConfigKbResponse": {
         "properties": {
@@ -1422,6 +1719,22 @@
           "unknown_models"
         ],
         "title": "CostEstimateModel"
+      },
+      "CreateUserRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "default": ""
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "CreateUserRequest"
       },
       "DashboardResponse": {
         "properties": {
@@ -1698,6 +2011,13 @@
             "type": "array",
             "title": "Job Statuses"
           },
+          "roles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Roles"
+          },
           "review_decisions": {
             "items": {
               "type": "string"
@@ -1732,6 +2052,7 @@
           "sites",
           "job_sources",
           "job_statuses",
+          "roles",
           "review_decisions",
           "writeback_statuses",
           "audit_actions",
@@ -2649,6 +2970,24 @@
         ],
         "title": "SiteOptionModel"
       },
+      "TemporaryPasswordResponse": {
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserModel"
+          },
+          "temporary_password": {
+            "type": "string",
+            "title": "Temporary Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user",
+          "temporary_password"
+        ],
+        "title": "TemporaryPasswordResponse",
+        "description": "Tra ve DUY NHAT mot lan, ngay sau khi tao hoac dat lai mat khau.\n\nEndpoint tra kieu nay phai dat Cache-Control: no-store. Mat khau con dung\nduoc ma nam trong bo nho dem cua proxy hay trinh duyet la mot ban sao\nkhong ai kiem soat va khong ai thu hoi duoc."
+      },
       "TestConnectionResponse": {
         "properties": {
           "ok": {
@@ -2677,6 +3016,98 @@
           "connection"
         ],
         "title": "TestConnectionResponse"
+      },
+      "UserModel": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "must_change_password": {
+            "type": "boolean",
+            "title": "Must Change Password"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "role",
+          "active",
+          "must_change_password",
+          "last_login_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserModel",
+        "description": "Mot tai khoan quan tri.\n\nKHONG co truong nao lien quan toi mat khau. `password_hash` nam ngay canh\ncac cot nay trong bang, nen moi lan them truong phai kiem lai: mot bam\nArgon2 lot ra ngoai la mot muc tieu be khoa ngoai tuyen."
+      },
+      "UserPage": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserModel"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "page_size",
+          "total",
+          "total_pages",
+          "items"
+        ],
+        "title": "UserPage"
       },
       "ValidationError": {
         "properties": {

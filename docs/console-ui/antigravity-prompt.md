@@ -1272,31 +1272,236 @@ bug của màn này.
 
 ---
 
-## Giai đoạn 2 — màn cuối cùng
+## NHIỆM VỤ 10 — Người dùng (`/nguoi-dung`) · GIAI ĐOẠN 2
 
-Chỉ còn màn **Người dùng** — màn rủi ro cao nhất, có cơ chế bảo vệ "admin
-hoạt động cuối cùng". Khi tới lượt, nhiệm vụ đó sẽ được viết đủ ra như các
-nhiệm vụ trên — **đừng suy ra từ bảng**, vì chỉ dẫn gián tiếp là thứ đã làm
-lệch bản thiết kế Stitch hôm 2026-08-20.
+Màn **rủi ro cao nhất** của Console. Nó tạo tài khoản, đổi quyền, khoá người.
+Một lỗi ở đây không làm xấu giao diện — nó làm mất quyền quản trị hoặc làm lộ
+mật khẩu. Đọc kỹ phần "năm cạm bẫy", đặc biệt cạm bẫy số 1.
 
-Bảng dưới chỉ để biết trước quy mô:
+**Đọc ba file này trước khi viết dòng code nào:**
 
-| Nhiệm vụ | File trang | Mục trong stitch-briefs | Quy mô |
-|---|---|---|---|
-| 6 — Login | `LoginPage.tsx` | "1. Login" | 3 ô nhập |
-| 7 — Đổi mật khẩu | `ChangePasswordPage.tsx` | "1. Login" (biến thể) | 2 ô nhập |
+1. `multiagent/console_ui/README.md` — 5 quy tắc bắt buộc
+2. `docs/console-ui/design-system.md` — bảng màu, class, mục 4b hàm định dạng,
+   **mục 4c khung thẻ dùng chung**
+3. `docs/console-ui/integration.md` — mã lỗi
 
-`AppShell.tsx` chỉ sửa một lần ở nhiệm vụ 1, các nhiệm vụ sau dùng lại.
+**Xem `JobsPage.tsx`** — màn này có bảng và phân trang, dùng lại đúng bố cục
+và cách phân trang của nó.
 
-**Nhiệm vụ 4 (Job detail)** có thêm việc: nút "Thử lại" chỉ hiện khi
-`status = failed` và chỉ với role operator/admin, kèm hộp thoại xác nhận chi
-phí. Bọc bằng `<RequireRole role="operator">` có sẵn trong
-`src/auth/RequireRole.tsx`. Phần logic gọi API đã viết sẵn trong
-`JobDetailPage.tsx` — chỉ cần khoác giao diện lên, đừng viết lại.
+**Sửa/tạo ba file:**
 
-**Nhiệm vụ 5 (Review detail)** là màn **chỉ đọc** — không có nút duyệt/từ chối
-nào cả. Riêng `agents[].criteria/issues/evidence` là dữ liệu tự do từ output
-của model: render bằng `{}` của React, tuyệt đối không `dangerouslySetInnerHTML`.
+- Tạo `src/pages/UsersPage.tsx`
+- Sửa `src/router.tsx` — thêm route `/nguoi-dung`
+- Sửa `src/layout/AppShell.tsx` — thêm một mục menu
+
+**Dùng lại module chung**: `src/lib/format.ts`, `src/lib/status.ts` +
+`StatusPill.tsx`, `src/lib/ErrorBanner.tsx`, `src/lib/DetailLayout.tsx`
+(`Panel` / `Section` / `Field` — **đừng khai báo lại trong file trang**).
+
+---
+
+### Menu giờ có TÁM mục
+
+```
+Tổng quan · Jobs · Reviews · Nhật ký · Cấu hình · Kết quả đo · Kết nối · Người dùng
+```
+
+"Người dùng" **chỉ admin thấy** — bọc trong `<RequireRole role="admin">`,
+giống hệt mục "Nhật ký". Vẫn cấm thêm mục nào khác.
+
+---
+
+### Bảng danh sách (`GET /users`, có phân trang)
+
+Sáu cột:
+
+| Cột | Nguồn | Hiển thị |
+|---|---|---|
+| Tên đăng nhập | `username` | |
+| Quyền | `role` | pill — xem bảng nhãn bên dưới |
+| Trạng thái | `active` | pill: `true` → "Đang hoạt động" (xanh), `false` → "Đã khoá" (đỏ) |
+| Đổi mật khẩu | `must_change_password` | `true` → chip vàng "Cần đổi"; `false` → để trống, **đừng hiện `—`** |
+| Đăng nhập gần nhất | `last_login_at` | `formatDateTime`, nhãn cột có "giờ VN" |
+| Thao tác | | bốn nút, xem bên dưới |
+
+Phân trang dùng `page` và `page_size` như `JobsPage`. **Không có bộ lọc** —
+API không nhận tham số lọc nào khác, gửi lên sẽ bị trả 422.
+
+---
+
+### Bảng nhãn cho `role`
+
+Thêm vào `lib/status.ts`:
+
+```ts
+export const USER_ROLE: Record<string, PillStyle> = {
+  viewer: { label: "Chỉ xem", ...GRAY },
+  operator: { label: "Vận hành", ...BLUE },
+  admin: { label: "Quản trị", ...AMBER },
+};
+
+export const USER_ACTIVE: Record<string, PillStyle> = {
+  true: { label: "Đang hoạt động", ...EMERALD },
+  false: { label: "Đã khoá", ...RED },
+};
+```
+
+Dùng qua `pillOf()`. **Đừng hard-code danh sách quyền ở bất kỳ đâu khác** —
+danh sách giá trị lấy từ `GET /filters` (trường `roles`), qua hook
+`useFilters()` đã có sẵn.
+
+---
+
+### Bốn nút thao tác trên mỗi dòng
+
+| Nút | Gọi | Ghi chú |
+|---|---|---|
+| Đổi quyền | `POST /users/{id}/role` body `{"role": "..."}` | ô chọn lấy từ `filters.roles` |
+| Khoá | `POST /users/{id}/lock` body `{}` | chỉ hiện khi `active = true` |
+| Mở khoá | `POST /users/{id}/unlock` body `{}` | chỉ hiện khi `active = false` |
+| Đặt lại mật khẩu | `POST /users/{id}/reset-password` body `{}` | trả về mật khẩu tạm |
+
+Khoá và Mở khoá là **một chỗ**, hiện đúng một nút tuỳ `active`. Đừng hiện cả
+hai rồi làm mờ một cái.
+
+---
+
+### Tạo người dùng (`POST /users`)
+
+Một biểu mẫu gọn: ô nhập **Tên đăng nhập** + ô chọn **Quyền** + nút "Tạo".
+
+**KHÔNG có ô mật khẩu.** Server tự sinh mật khẩu tạm và trả về. Thêm ô mật
+khẩu vào đây là tự tạo ra một đường để mật khẩu yếu lọt vào hệ thống.
+
+Lỗi cần bắt riêng:
+
+| Mã | HTTP | Hiển thị |
+|---|---|---|
+| `conflict`, `field = "username"` | 409 | tô đỏ ô Tên đăng nhập: "Tên đăng nhập đã tồn tại" |
+| `invalid_role`, `field = "role"` | 400 | tô đỏ ô Quyền |
+
+---
+
+### Năm cạm bẫy
+
+**1. Mật khẩu tạm — đây là chỗ nguy hiểm nhất của cả dự án.**
+
+`POST /users` và `POST /users/{id}/reset-password` trả về:
+
+```json
+{ "user": { ... }, "temporary_password": "xxxxxxxx" }
+```
+
+Bốn điều **bắt buộc**, mỗi điều một lý do cụ thể:
+
+- **Đừng đưa vào cache của TanStack Query.** Không `setQueryData`, không
+  `queryKey` nào chứa nó. Cache sống suốt phiên làm việc; một mật khẩu còn
+  dùng được nằm trong đó là bản sao không ai thu hồi được. Giữ trong
+  `useState` của component, xoá khi đóng.
+- **Đừng `console.log` nó**, kể cả lúc đang thử. Console của trình duyệt được
+  ghi lại trong nhiều công cụ giám sát.
+- **Đừng đưa vào URL** (query string, hash, `navigate()`). URL đi vào lịch sử
+  trình duyệt và log của proxy.
+- **Hiện đúng một lần**, trong một hộp có nút "Sao chép" và câu cảnh báo:
+  *"Mật khẩu này chỉ hiện một lần. Sao chép và gửi cho người dùng ngay."*
+  Đóng hộp thì gọi `setState(null)` để xoá khỏi bộ nhớ.
+
+Server đã đặt `Cache-Control: no-store` cho hai endpoint này. Đừng làm gì phá
+vỡ điều đó — cụ thể là **đừng gọi chúng bằng `useQuery`**, chỉ `useMutation`.
+
+**2. Admin đang hoạt động cuối cùng.**
+
+Hạ quyền hoặc khoá admin cuối cùng sẽ bị server trả **409** với
+`error.code === "last_active_admin"`. Bắt riêng mã này và hiện đúng câu:
+
+> Không thể hạ quyền hoặc khoá admin đang hoạt động cuối cùng. Hãy tạo hoặc mở
+> khoá một admin khác trước.
+
+**Đừng hiện banner lỗi chung.** Đây không phải trục trặc — đây là cơ chế bảo
+vệ đang làm đúng việc, và người dùng cần biết phải làm gì tiếp.
+
+**Đừng tự đoán ở client xem ai là admin cuối cùng** rồi làm mờ nút. Danh sách
+đang xem chỉ là một trang; admin khác có thể nằm ở trang sau. Cứ để server trả
+lời.
+
+**3. Tự khoá hoặc tự hạ quyền chính mình.**
+
+Server **cho phép** nếu còn admin khác. Nhưng hậu quả tức thì: bạn bị đăng xuất
+ở lần gọi tiếp theo. So `user.id` với `id` của người đang đăng nhập
+(`useAuth()`), và nếu trùng thì hộp xác nhận phải nói rõ:
+
+> Bạn đang thao tác trên chính tài khoản của mình. Sau thao tác này bạn sẽ bị
+> đăng xuất. Tiếp tục?
+
+**4. Ẩn nút KHÔNG phải là phân quyền.**
+
+Server đã kiểm role admin ở **cả sáu** endpoint. `RequireRole` chỉ là tiện
+nghi. Đừng bỏ nó với lý do "server kiểm rồi", và cũng đừng thêm lớp kiểm nào
+khác ở client.
+
+**5. Đừng hiện gì liên quan tới mật khẩu trong bảng.**
+
+`UserModel` cố ý không có trường nào về mật khẩu. Đừng thêm cột "Mật khẩu",
+đừng đoán độ mạnh, đừng hiện thời điểm đổi mật khẩu gần nhất — API không trả
+những thứ đó và không nên trả.
+
+---
+
+### Xác nhận trước thao tác
+
+| Thao tác | Có hỏi lại? |
+|---|---|
+| Tạo người dùng | không |
+| Đổi quyền | **có** — nêu rõ quyền cũ → quyền mới |
+| Khoá | **có** |
+| Mở khoá | không (khôi phục trạng thái bình thường) |
+| Đặt lại mật khẩu | **có** — nêu rõ "người này sẽ bị đăng xuất khỏi mọi thiết bị" |
+
+Hộp xác nhận **trong trang**, không dùng `window.confirm`. Nếu thao tác nhắm
+vào chính mình thì thêm câu ở cạm bẫy 3.
+
+---
+
+### Bốn trạng thái của màn
+
+| Trạng thái | Hiển thị |
+|---|---|
+| Đang tải | 8–12 dòng skeleton, giữ đúng 6 cột |
+| Lỗi | `ErrorBanner` + nút "Thử lại" |
+| Rỗng | "Chưa có tài khoản nào." (thực tế không xảy ra — luôn có ít nhất tài khoản của bạn) |
+| Có dữ liệu | bảng + biểu mẫu tạo |
+
+Khi một thao tác đang chạy: vô hiệu hoá nút đang bấm và hiện chữ đang xử lý
+trên chính nút đó. Đừng khoá cả bảng.
+
+---
+
+### Ràng buộc
+
+- KHÔNG đưa `temporary_password` vào cache TanStack, `console.log`, hay URL
+- KHÔNG gọi hai endpoint trả mật khẩu bằng `useQuery` — chỉ `useMutation`
+- KHÔNG thêm ô nhập mật khẩu vào biểu mẫu tạo
+- KHÔNG hard-code danh sách quyền — lấy từ `filters.roles`
+- KHÔNG tự đoán ai là admin cuối cùng rồi làm mờ nút
+- KHÔNG hiện banner lỗi chung cho `last_active_admin`
+- KHÔNG hiện cả nút Khoá lẫn Mở khoá cùng lúc
+- KHÔNG dùng `window.confirm` / `window.alert`
+- KHÔNG thêm cột nào liên quan tới mật khẩu
+- KHÔNG thêm bộ lọc — API chỉ nhận `page` và `page_size`
+- KHÔNG sửa `src/api/api-types.ts`
+- KHÔNG gọi `fetch`/`axios` trực tiếp — dùng `client`
+- KHÔNG lưu gì vào `localStorage`/`sessionStorage`
+- KHÔNG dùng `dangerouslySetInnerHTML`
+- KHÔNG tự viết hàm định dạng, bảng pill, hay khung thẻ trong file trang
+- KHÔNG cài thêm thư viện nào
+- KHÔNG sửa file nào ngoài ba file đã nêu (`lib/status.ts` được phép **thêm**)
+- KHÔNG xoá hay sửa file tài liệu nào
+
+**Xong thì:** chạy `npx tsc --noEmit` và báo kết quả.
+
+**Dữ liệu để thử:** đăng nhập bằng tài khoản admin. Muốn thử nhánh
+`last_active_admin` thì thử tự hạ quyền chính mình khi chỉ có một admin — server
+sẽ trả 409.
 
 ---
 

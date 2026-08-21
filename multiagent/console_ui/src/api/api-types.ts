@@ -334,6 +334,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/console/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["list_users_api_console_v1_users_get"];
+        put?: never;
+        /** Create User */
+        post: operations["create_user_api_console_v1_users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/users/{user_id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Role */
+        post: operations["change_role_api_console_v1_users__user_id__role_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/users/{user_id}/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Lock User */
+        post: operations["lock_user_api_console_v1_users__user_id__lock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/users/{user_id}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unlock User */
+        post: operations["unlock_user_api_console_v1_users__user_id__unlock_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/console/v1/users/{user_id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["reset_password_api_console_v1_users__user_id__reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -404,6 +490,14 @@ export interface components {
              */
             new_password: string;
         };
+        /** ChangeRoleRequest */
+        ChangeRoleRequest: {
+            /**
+             * Role
+             * @default
+             */
+            role: string;
+        };
         /** ConfigKbResponse */
         ConfigKbResponse: {
             /** Policy Files */
@@ -458,6 +552,19 @@ export interface components {
             source: string;
             /** Unknown Models */
             unknown_models: string[];
+        };
+        /** CreateUserRequest */
+        CreateUserRequest: {
+            /**
+             * Username
+             * @default
+             */
+            username: string;
+            /**
+             * Role
+             * @default
+             */
+            role: string;
         };
         /** DashboardResponse */
         DashboardResponse: {
@@ -544,6 +651,8 @@ export interface components {
             job_sources: string[];
             /** Job Statuses */
             job_statuses: string[];
+            /** Roles */
+            roles: string[];
             /** Review Decisions */
             review_decisions: string[];
             /** Writeback Statuses */
@@ -857,6 +966,19 @@ export interface components {
             /** Active */
             active: boolean;
         };
+        /**
+         * TemporaryPasswordResponse
+         * @description Tra ve DUY NHAT mot lan, ngay sau khi tao hoac dat lai mat khau.
+         *
+         *     Endpoint tra kieu nay phai dat Cache-Control: no-store. Mat khau con dung
+         *     duoc ma nam trong bo nho dem cua proxy hay trinh duyet la mot ban sao
+         *     khong ai kiem soat va khong ai thu hoi duoc.
+         */
+        TemporaryPasswordResponse: {
+            user: components["schemas"]["UserModel"];
+            /** Temporary Password */
+            temporary_password: string;
+        };
         /** TestConnectionResponse */
         TestConnectionResponse: {
             /** Ok */
@@ -864,6 +986,45 @@ export interface components {
             /** Error Code */
             error_code: string | null;
             connection: components["schemas"]["ConnectionModel"];
+        };
+        /**
+         * UserModel
+         * @description Mot tai khoan quan tri.
+         *
+         *     KHONG co truong nao lien quan toi mat khau. `password_hash` nam ngay canh
+         *     cac cot nay trong bang, nen moi lan them truong phai kiem lai: mot bam
+         *     Argon2 lot ra ngoai la mot muc tieu be khoa ngoai tuyen.
+         */
+        UserModel: {
+            /** Id */
+            id: string;
+            /** Username */
+            username: string;
+            /** Role */
+            role: string;
+            /** Active */
+            active: boolean;
+            /** Must Change Password */
+            must_change_password: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Created At */
+            created_at: string;
+            /** Updated At */
+            updated_at: string;
+        };
+        /** UserPage */
+        UserPage: {
+            /** Page */
+            page: number;
+            /** Page Size */
+            page_size: number;
+            /** Total */
+            total: number;
+            /** Total Pages */
+            total_pages: number;
+            /** Items */
+            items: components["schemas"]["UserModel"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -1438,6 +1599,201 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReviewDetailModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_users_api_console_v1_users_get: {
+        parameters: {
+            query?: {
+                /** @description mac dinh 1 */
+                page?: string | null;
+                /** @description mac dinh 25, toi da 100 */
+                page_size?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_user_api_console_v1_users_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_role_api_console_v1_users__user_id__role_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeRoleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    lock_user_api_console_v1_users__user_id__lock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unlock_user_api_console_v1_users__user_id__unlock_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserModel"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reset_password_api_console_v1_users__user_id__reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TemporaryPasswordResponse"];
                 };
             };
             /** @description Validation Error */

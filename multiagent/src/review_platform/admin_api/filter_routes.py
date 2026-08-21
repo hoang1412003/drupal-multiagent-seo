@@ -33,4 +33,8 @@ def filters(
         writeback_statuses=list(queries.WRITEBACK_STATUSES),
         audit_actions=list(queries.AUDIT_ACTIONS),
         audit_outcomes=list(queries.AUDIT_OUTCOMES),
+        # Lay THANG tu enum Role. Man Nguoi dung can danh sach nay de dung
+        # bang chon quyen; go tay o frontend la dung lai loi enum trang thai
+        # job (brief ghi `succeeded` trong khi that su la `done`).
+        roles=[role.value for role in Role],
     )

@@ -131,6 +131,7 @@ def login(
 
     _set_session_cookie(response, issued.raw_token, config)
     return models.MeResponse(
+        id=str(candidate.id),
         username=candidate.username,
         role=candidate.role.value,
         must_change_password=candidate.must_change_password,
@@ -141,6 +142,7 @@ def login(
 @router.get("/auth/me", response_model=models.MeResponse)
 def me(resolved=Depends(dependencies.console_session)):
     return models.MeResponse(
+        id=str(resolved.user.id),
         username=resolved.user.username,
         role=resolved.user.role.value,
         must_change_password=resolved.must_change_password,
