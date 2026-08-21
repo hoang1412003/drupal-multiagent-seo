@@ -26,6 +26,10 @@ def to_number(value: Decimal | None) -> float | None:
 
 
 class MeResponse(BaseModel):
+    # `id` de frontend nhan ra "day la chinh minh" khi khoa hay ha quyen mot
+    # tai khoan. So sanh bang username cung chay duoc nhung so sanh danh tinh
+    # thi phai dung dinh danh.
+    id: str
     username: str
     role: str
     must_change_password: bool
@@ -351,6 +355,7 @@ class FiltersResponse(BaseModel):
     sites: list[SiteOptionModel]
     job_sources: list[str]
     job_statuses: list[str]
+    roles: list[str]
     review_decisions: list[str]
     writeback_statuses: list[str]
     audit_actions: list[str]
@@ -573,3 +578,59 @@ class TestConnectionResponse(BaseModel):
     ok: bool
     error_code: str | None
     connection: ConnectionModel
+
+
+class UserModel(BaseModel):
+    """Mot tai khoan quan tri.
+
+    KHONG co truong nao lien quan toi mat khau. `password_hash` nam ngay canh
+    cac cot nay trong bang, nen moi lan them truong phai kiem lai: mot bam
+    Argon2 lot ra ngoai la mot muc tieu be khoa ngoai tuyen.
+    """
+
+    id: str
+    username: str
+    role: str
+    active: bool
+    must_change_password: bool
+    last_login_at: str | None
+    created_at: str
+    updated_at: str
+
+    @classmethod
+    def from_view(cls, item) -> "UserModel":
+        return cls(
+            id=str(item.id),
+            username=item.username,
+            role=item.role.value,
+            active=item.active,
+            must_change_password=item.must_change_password,
+            last_login_at=iso(item.last_login_at),
+            created_at=iso(item.created_at),
+            updated_at=iso(item.updated_at),
+        )
+
+
+class UserPage(PageResponse):
+    items: list[UserModel]
+
+
+class CreateUserRequest(BaseModel):
+    username: str = ""
+    role: str = ""
+
+
+class ChangeRoleRequest(BaseModel):
+    role: str = ""
+
+
+class TemporaryPasswordResponse(BaseModel):
+    """Tra ve DUY NHAT mot lan, ngay sau khi tao hoac dat lai mat khau.
+
+    Endpoint tra kieu nay phai dat Cache-Control: no-store. Mat khau con dung
+    duoc ma nam trong bo nho dem cua proxy hay trinh duyet la mot ban sao
+    khong ai kiem soat va khong ai thu hoi duoc.
+    """
+
+    user: UserModel
+    temporary_password: str

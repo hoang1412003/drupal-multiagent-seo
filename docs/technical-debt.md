@@ -1365,7 +1365,7 @@ với admin Jinja2 ở `/admin` (admin cũ không bị đụng và phải còn c
 - Thiết kế: [`superpowers/specs/2026-08-19-console-react-admin-design.md`](superpowers/specs/2026-08-19-console-react-admin-design.md)
 - Kế hoạch: [`superpowers/plans/2026-08-19-console-react-admin.md`](superpowers/plans/2026-08-19-console-react-admin.md)
 - Hợp đồng giao cho agent viết giao diện: `multiagent/console_ui/openapi.json`
-  (19 đường dẫn, 29 schema tính tới nhiệm vụ 9) + [`console-ui/integration.md`](console-ui/integration.md)
+  (24 đường dẫn, 34 schema tính tới nhiệm vụ 10) + [`console-ui/integration.md`](console-ui/integration.md)
 - Brief thiết kế: [`console-ui/stitch-briefs.md`](console-ui/stitch-briefs.md)
 
 **Phân công:** Claude viết toàn bộ API + bộ khung React; chủ dự án thiết kế
@@ -1401,8 +1401,28 @@ xoá admin Jinja2; dựng JS test harness.
 |---|---|---|
 | 7 | Nhật ký (audit) | ✅ xong 2026-08-20 |
 | 8 | Cấu hình/KB + Kết quả đo | ✅ xong 2026-08-20 |
-| 9 | Kết nối | API + đặc tả xong 2026-08-21; UI đang chờ Antigravity |
-| 10 | Người dùng | chưa bắt đầu — rủi ro cao nhất, có bảo vệ "admin hoạt động cuối cùng" |
+| 9 | Kết nối | ✅ xong 2026-08-21 |
+| 10 | Người dùng | API + đặc tả xong 2026-08-21; UI đang chờ Antigravity |
+
+Sau nhiệm vụ 9, `Section`/`Field` đã có **5 bản chép và bắt đầu lệch nhau**, nên
+được gom về `console_ui/src/lib/DetailLayout.tsx` (`Panel` / `Section` /
+`Field`) — module gom chung thứ tư, sau `format.ts`, `status.ts` và
+`ErrorBanner.tsx`. Xem `console-ui/design-system.md` mục 4c.
+
+Màn Người dùng là màn **rủi ro cao nhất** của Console: nó tạo tài khoản, đổi
+quyền, khoá người. Ba điều khoá lại, mỗi điều một test riêng:
+
+- **Chỉ admin.** Viewer và operator bị 403 ở server trên cả sáu endpoint.
+- **Mật khẩu tạm trả về kèm `Cache-Control: no-store`.** Middleware bảo mật
+  chỉ đặt header này cho `/admin`, **không** cho `/api/console` — đã kiểm bằng
+  cách gỡ dòng đặt header ra và xác nhận test đỏ. Không có nó thì một mật khẩu
+  còn dùng được có thể nằm lại trong bộ nhớ đệm của proxy hay trình duyệt.
+- **Admin đang hoạt động cuối cùng không thể bị hạ quyền hay khoá** (409,
+  `code = last_active_admin`), và mỗi lần bị từ chối đều ghi sổ kiểm toán —
+  một chuỗi nhiều lần thử là thứ cần nhìn thấy khi truy sự cố.
+
+`MeResponse` được thêm trường `id` để giao diện nhận ra "đây là chính mình" khi
+khoá hay hạ quyền — thao tác đó khiến người dùng bị đăng xuất ngay sau đó.
 
 Màn Kết nối là màn Console **đầu tiên có thao tác ghi ngoài retry**: chẩn đoán
 kết nối (gọi sang Drupal), tạm dừng và mở lại việc nhận bài. Ba ràng buộc lấy

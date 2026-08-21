@@ -10,6 +10,7 @@ from review_platform.admin_api import (
     job_routes,
     readonly_routes,
     review_routes,
+    user_routes,
 )
 
 
@@ -22,3 +23,4 @@ router.include_router(filter_routes.router)
 router.include_router(job_routes.router)
 router.include_router(readonly_routes.router)
 router.include_router(review_routes.router)
+router.include_router(user_routes.router)
