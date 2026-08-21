@@ -1,0 +1,44 @@
+<?php
+
+/**
+ * @file
+ * Cài đặt và cập nhật cho vf_ai_trigger.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+
+/**
+ * Trọng số module. Phải nặng hơn content_moderation (mặc định 0).
+ *
+ * Vì sao cần: cả hai module đều nối một submit handler chuyển hướng vào cùng
+ * nút Lưu của form node. Handler chạy SAU thì thắng, mà Drupal xếp thứ tự
+ * alter theo THỨ TỰ MODULE chứ không theo loại hook —
+ * ModuleHandler::alter() duyệt `foreach ($modules as $module)` rồi mới tới
+ * từng biến thể hook của module đó.
+ *
+ * Không đặt trọng số thì ta vẫn chạy sau, nhưng chỉ nhờ thứ tự bảng chữ cái
+ * ('c' trước 'v') khi cả hai cùng trọng số 0. Đó là sự tình cờ, không phải
+ * ràng buộc: ai đó đặt trọng số cho một trong hai module là thứ tự lật, và
+ * nút Lưu sẽ IM LẶNG nhảy sang trang "phiên bản mới nhất" của
+ * content_moderation thay vì ở lại trang Edit. Không lỗi, không cảnh báo.
+ */
+const VF_AI_TRIGGER_MODULE_WEIGHT = 10;
+
+/**
+ * Implements hook_install().
+ */
+function vf_ai_trigger_install(): void {
+  module_set_weight('vf_ai_trigger', VF_AI_TRIGGER_MODULE_WEIGHT);
+}
+
+/**
+ * Đặt trọng số module để handler chuyển hướng chạy sau content_moderation.
+ */
+function vf_ai_trigger_update_9001(): TranslatableMarkup {
+  module_set_weight('vf_ai_trigger', VF_AI_TRIGGER_MODULE_WEIGHT);
+  return t('Đã đặt trọng số vf_ai_trigger = @w để nút Lưu giữ người dùng ở lại trang Edit khi bài ở trạng thái Needs Review.', [
+    '@w' => VF_AI_TRIGGER_MODULE_WEIGHT,
+  ]);
+}
