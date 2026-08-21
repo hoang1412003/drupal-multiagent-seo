@@ -1402,7 +1402,12 @@ xoá admin Jinja2; dựng JS test harness.
 | 7 | Nhật ký (audit) | ✅ xong 2026-08-20 |
 | 8 | Cấu hình/KB + Kết quả đo | ✅ xong 2026-08-20 |
 | 9 | Kết nối | ✅ xong 2026-08-21 |
-| 10 | Người dùng | API + đặc tả xong 2026-08-21; UI đang chờ Antigravity |
+| 10 | Người dùng | ✅ xong 2026-08-21 |
+
+**Giai đoạn 2 hoàn tất 2026-08-21. Console có đủ 8 màn, ngang bằng admin Jinja2
+cũ.** Hai việc còn để ngỏ, không gấp: xoá admin Jinja2 ở `/admin` (nên chạy
+song song một thời gian trước khi bỏ), và dựng bộ kiểm JS (hiện mọi tương tác
+đều kiểm bằng ảnh chụp tay, không có gì chặn hồi quy).
 
 Sau nhiệm vụ 9, `Section`/`Field` đã có **5 bản chép và bắt đầu lệch nhau**, nên
 được gom về `console_ui/src/lib/DetailLayout.tsx` (`Panel` / `Section` /
@@ -1420,6 +1425,18 @@ quyền, khoá người. Ba điều khoá lại, mỗi điều một test riêng
 - **Admin đang hoạt động cuối cùng không thể bị hạ quyền hay khoá** (409,
   `code = last_active_admin`), và mỗi lần bị từ chối đều ghi sổ kiểm toán —
   một chuỗi nhiều lần thử là thứ cần nhìn thấy khi truy sự cố.
+
+**Hai hàng rào dựng sau khi chính mình mắc lỗi:**
+
+- `test_console_api_mount.py` so `openapi.json` trên đĩa với schema sinh từ
+  code, **từng trường của từng schema**. Sửa model rồi quên chạy
+  `export_openapi.py` là lỗi lặp lại được, và `tsc` chỉ báo khi frontend
+  *tình cờ* dùng tới trường mới — đã xảy ra thật với `MeResponse.id`.
+- `test_antigravity_prompt.py` kiểm mọi tên trường snake_case và mọi hàm
+  `formatX`/`useX` nhắc trong `console-ui/antigravity-prompt.md` phải có thật.
+  Đặc tả là thứ **duy nhất** agent viết UI đọc. **Giới hạn đã biết:** nó không
+  bắt được trường tồn tại ở model *khác* — `user.id` lọt qua vì `id` có trong
+  `UserModel`.
 
 `MeResponse` được thêm trường `id` để giao diện nhận ra "đây là chính mình" khi
 khoá hay hạ quyền — thao tác đó khiến người dùng bị đăng xuất ngay sau đó.
