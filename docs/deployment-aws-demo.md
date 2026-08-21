@@ -92,7 +92,10 @@ cho tới khi deploy nơi khác:
 ## 4. Địa chỉ (chỉ để tham khảo — instance có thể đã bị tắt/xoá)
 
 - Drupal: `http://<EC2-public-IP>`
-- Console: `http://<EC2-public-IP>:8900/console/`
+- Platform Admin: `http://<EC2-public-IP>:8900/admin` — **địa chỉ của lần deploy
+  16–17/08/2026, nay không còn**: admin Jinja2 đã bị xoá ngày 2026-08-21 và
+  thay bằng Console React ở `/console/`. Bản deploy này có từ TRƯỚC khi Console
+  tồn tại, nên nó chưa bao giờ phục vụ `/console/`. Xem mục 6 để deploy lại.
 - HuggingFace Space: `https://hoang2003-bge-m3-embedding-api.hf.space`
 
 Không ghi IP/port cụ thể ở đây vì đây là máy demo dùng gói AWS Free Trial
@@ -108,3 +111,84 @@ lúc nào, IP sẽ đổi nếu instance khởi động lại (chưa gắn Elast
 - Không đụng gì tới các quyết định đo lường ở `technical-debt.md` mục 8 — đây
   thuần tuý là hạ tầng demo, không phải một lượt production pilot có ý nghĩa
   đo lường.
+
+## 6. Cập nhật server đã deploy (2026-08-21)
+
+Mục 1–5 ghi lần **dựng đầu tiên**. Mục này ghi cách **cập nhật** một server đã
+chạy — trước đây không có, nên mỗi lần cập nhật lại phải dò từ đầu.
+
+### 6.1. Việc dễ quên nhất: Console không có trong git
+
+`multiagent/console_ui/dist/` nằm trong `.gitignore`. Server `git pull` sẽ
+**không** có bản build, và `api.py` có `if _CONSOLE_DIST.is_dir()` nên nó
+**lặng lẽ không mount `/console`** — app vẫn chạy, `/health` vẫn 200, chỉ có
+điều không còn giao diện quản trị nào (`/admin` đã xoá 2026-08-21).
+
+Cách làm: **dựng ở máy dev rồi copy lên**. Không cài Node trên server vì
+`t3.micro` chỉ có 1 GB RAM, `vite build` dễ hết bộ nhớ.
+
+### 6.2. Quy trình đầy đủ
+
+**Bước 1 — ở máy dev**, dựng Console:
+
+```bash
+cd D:\drupal-multiagent-seo\multiagent\console_ui
+npm run build
+```
+
+**Bước 2 — ở máy dev**, đẩy bản build lên server:
+
+```bash
+scp -i <khoa.pem> -r dist ec2-user@<IP>:~/drupal-multiagent-seo/multiagent/console_ui/
+```
+
+**Bước 3 — SSH vào server**, kéo code:
+
+```bash
+ssh -i <khoa.pem> ec2-user@<IP>
+cd ~/drupal-multiagent-seo
+git pull
+```
+
+**Bước 4 — cập nhật Drupal.** Bắt buộc khi có `hook_update_N` mới:
+
+```bash
+cd ~/drupal-multiagent-seo/drupal
+./vendor/bin/drush updatedb --yes
+./vendor/bin/drush cache:rebuild
+```
+
+Nhớ gọi `./vendor/bin/drush`, **không** phải `php vendor/bin/drush` — xem mục 3.
+
+**Bước 5 — khởi động lại service.** Không làm thì systemd vẫn chạy code cũ
+trong bộ nhớ, và mọi thứ trông như deploy thất bại:
+
+```bash
+sudo systemctl restart multiagent-api multiagent-worker
+sudo systemctl status multiagent-api --no-pager | head -5
+```
+
+**Bước 6 — kiểm chứng.** Chạy ở máy dev, thay `<IP>`:
+
+```bash
+curl -s -o /dev/null -w "health   %{http_code}\n" http://<IP>:8900/health
+curl -s -o /dev/null -w "console  %{http_code}\n" http://<IP>:8900/console/
+curl -s -o /dev/null -w "admin    %{http_code}\n" http://<IP>:8900/admin
+```
+
+Kết quả đúng: `health 200`, `console 200`, **`admin 404`**.
+
+`admin` trả 303 nghĩa là service **chưa khởi động lại** (bước 5 chưa xong).
+`console` trả 404 nghĩa là bản build **chưa lên tới nơi** (bước 1–2 chưa xong).
+
+### 6.3. Sau khi deploy phải kiểm bằng tay
+
+Ba thứ dưới đây không có phép kiểm tự động nào phủ trên server:
+
+1. Đăng nhập `/console/`, xem đủ **tám** mục menu. Thiếu mục nào nghĩa là bản
+   build cũ — quay lại bước 1.
+2. Vào màn **Kết nối**, bấm **Chẩn đoán kết nối** → phải đạt. Không đạt thì
+   xem lại mục 2 (site_config, site_credential, service_url).
+3. Trên Drupal, sửa một bài rồi lưu ở trạng thái **Needs Review** → phải **ở
+   lại trang Edit**. Nhảy sang trang xem nghĩa là bước 4 chưa chạy.
+
