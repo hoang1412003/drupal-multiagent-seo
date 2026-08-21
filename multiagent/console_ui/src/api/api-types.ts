@@ -793,6 +793,8 @@ export interface components {
         };
         /** MeResponse */
         MeResponse: {
+            /** Id */
+            id: string;
             /** Username */
             username: string;
             /** Role */
