@@ -132,7 +132,7 @@ function vinfast_theme_preprocess_page(&$variables) {
         if ($node->hasField('field_image') && !$node->get('field_image')->isEmpty()) {
           $file = File::load($node->get('field_image')->target_id);
           if ($file) {
-            $img_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+            $img_url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
           }
         }
         if (!$img_url) {
@@ -225,7 +225,7 @@ function vinfast_theme_preprocess_node(&$variables) {
   if ($node->hasField('field_image') && !$node->get('field_image')->isEmpty()) {
     $file = File::load($node->get('field_image')->target_id);
     if ($file) {
-      $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+      $image_url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
     }
   }
   if (!$image_url) {
@@ -276,7 +276,7 @@ function vinfast_theme_preprocess_node(&$variables) {
         if ($r_node->hasField('field_image') && !$r_node->get('field_image')->isEmpty()) {
           $f = File::load($r_node->get('field_image')->target_id);
           if ($f) {
-            $r_img = \Drupal::service('file_url_generator')->generateAbsoluteString($f->getFileUri());
+            $r_img = \Drupal::service('file_url_generator')->generateString($f->getFileUri());
           }
         }
         if (!$r_img) {
