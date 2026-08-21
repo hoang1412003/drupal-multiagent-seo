@@ -12,6 +12,7 @@ import { ReviewsPage } from "./pages/ReviewsPage";
 import { AuditPage } from "./pages/AuditPage";
 import { ConfigKbPage } from "./pages/ConfigKbPage";
 import { EvaluationPage } from "./pages/EvaluationPage";
+import { ConnectionPage } from "./pages/ConnectionPage";
 
 export const router = createBrowserRouter(
   [
@@ -31,6 +32,7 @@ export const router = createBrowserRouter(
             { path: "/audit", element: <AuditPage /> },
             { path: "/cau-hinh", element: <ConfigKbPage /> },
             { path: "/danh-gia", element: <EvaluationPage /> },
+            { path: "/ket-noi", element: <ConnectionPage /> },
           ],
         },
       ],

@@ -109,3 +109,9 @@ export function pillOf(
   if (!value) return { label: "—", ...GRAY };
   return bang[value] ?? { label: value, ...GRAY };
 }
+
+export const HEALTH_STATUS: Record<string, PillStyle> = {
+  ok: { label: "Đạt", ...EMERALD },
+};
+
+export const RED_PILL = RED;
