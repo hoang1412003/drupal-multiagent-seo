@@ -28,7 +28,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 
 Không suy trạng thái hiện hành từ ngày sửa file hoặc từ các báo cáo lịch sử. Trước khi đề xuất việc tiếp theo, model phải đọc theo thứ tự:
 
-1. [`docs/technical-debt.md` mục 8 — BÀN GIAO](docs/technical-debt.md#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-13) — **nguồn sự thật cho trạng thái đang làm**, việc kế tiếp, lệnh chạy, cổng chi phí và các việc tuyệt đối chưa được suy đoán là đã xong.
+1. [`docs/technical-debt.md` mục 8 — BÀN GIAO](docs/technical-debt.md#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-21) — **nguồn sự thật cho trạng thái đang làm**, việc kế tiếp, lệnh chạy, cổng chi phí và các việc tuyệt đối chưa được suy đoán là đã xong. **Đọc khối 8.0-BIS ở đầu mục trước tiên**: phần còn lại của mục 8 ghi theo thứ tự thời gian nên câu mở đầu của nó đã cũ.
 2. [`docs/evaluation-plan.md` mục 3a và 4](docs/evaluation-plan.md#3a-khoá-code-chấm-điểm--2026-08-12-bản-4) — hợp đồng đo lường, bộ code/prompt/model đã khoá và cách phân biệt kết quả hiện hành với số lịch sử.
 3. Tài liệu chuyên biệt theo việc đang làm; riêng gán nhãn/test–retest phải đọc [`docs/goldset/annotation-guideline.md` mục 8](docs/goldset/annotation-guideline.md#8-đo-độ-tin-cậy-của-chính-nhãn).
 
@@ -84,7 +84,7 @@ drupal-multiagent-seo/
 │   │   │   ├── fact_check.py        # CP3: trích claim định lượng, đối chiếu KB thông số
 │   │   │   └── brand_voice.py       # đã triển khai (rubric BV1-BV7 + RAG) - Sprint 2
 │   │   ├── graph.py              # đồ thị LangGraph (Orchestrator, fan-out/fan-in, Aggregator)
-│   │   ├── api.py                # service HTTP: job/status/health + mount Platform Admin
+│   │   ├── api.py                # service HTTP: job/status/health + Console API + mount /console
 │   │   ├── job_queue.py          # hàng đợi Postgres (SKIP LOCKED, retry, dead-letter)
 │   │   ├── worker.py             # vòng lặp lấy job, gọi graph.py, ghi run_log, write-back
 │   │   ├── reconcile.py          # vòng đối soát định kỳ - lưới an toàn cho đường event
@@ -104,6 +104,13 @@ drupal-multiagent-seo/
 Song với Sprint 3, phần Python được tổ chức thành **nền tảng Multi-Agent độc lập** theo modular monolith:
 
 - **P1 Foundation:** migration versioned, `site`/`review_profile`, queue/audit scoped, startup schema gate, connection lifecycle.
+> ⚠️ **Cập nhật 2026-08-21:** giao diện quản trị mô tả ở P2/P3/P4 dưới đây (tại
+> `/admin`, render server bằng Jinja2) **đã bị xoá**. Nó được thay bằng **Console
+> React tại `/console`** — cùng chức năng, thêm bộ kiểm JS. Cơ chế xác thực,
+> phân quyền và audit thì giữ nguyên. Các gạch đầu dòng dưới đây là bản ghi
+> những gì đã xây, không phải mô tả code hiện tại. Xem `docs/technical-debt.md`
+> mục 8.11.
+
 - **P2 Admin Auth:** `/admin`, tài khoản local riêng, Argon2id, server-side session, CSRF, throttle, audit auth, ba role `viewer` / `operator` / `admin`.
 - **P3 Admin Operations:** dashboard đọc dữ liệu thật, jobs/detail + retry có audit, review history, quản lý user, config/KB/evaluation chỉ đọc, audit admin-only.
 - **P4 API/Connector:** `/api/v1` với credential riêng theo site, connector Drupal đọc **đúng revision**, **result callback compare-and-set** (không PATCH JSON:API), fingerprint v2 phủ sáu field, trang `/admin/connection` có test connection và pause/resume intake. Endpoint legacy `/jobs` vẫn chạy kèm header `Deprecation: true` để rollback được.

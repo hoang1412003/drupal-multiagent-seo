@@ -3,7 +3,7 @@
 **Phiên bản:** v1 (2026-08-04; cập nhật 2026-08-05 thêm B8–B11, đóng B6/B7; 2026-08-11 thêm B14 và mục 8; **2026-08-13 cập nhật checkpoint P2 Admin Auth sau security review**)
 **Mục đích:** một chỗ duy nhất liệt kê thứ chưa làm, làm dở, hoặc làm sai — kèm mức độ ảnh hưởng và bằng chứng.
 
-> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-13) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
+> 👉 **Tiếp nhận công việc? Đọc [mục 8 — BÀN GIAO](#8-bàn-giao--việc-còn-lại-cập-nhật-2026-08-21) trước.** Ở đó có việc còn lại theo thứ tự, kèm lệnh chạy, tiêu chí xong, và cảnh báo **mục 8.0** phải đọc trước khi chạy bất kỳ script đo nào.
 
 Tài liệu này cũng là bản nháp cho mục **"Giới hạn đã biết"** của báo cáo cuối. Nêu rõ giới hạn mạnh hơn nhiều so với để người chấm tự phát hiện.
 
@@ -684,9 +684,50 @@ Lý do E1 đứng đầu, và kết quả của việc đó: nó **rẻ, không 
 
 ---
 
-## 8. BÀN GIAO — việc còn lại (cập nhật 2026-08-13)
+## 8. BÀN GIAO — việc còn lại (cập nhật 2026-08-21)
 
 Mục này viết cho người/agent **chưa từng đọc dự án**. Mỗi việc ghi đủ: chạy lệnh gì, sửa file nào, thế nào là xong, và cái bẫy đã biết.
+
+### 8.0-BIS. TRẠNG THÁI TÍNH TỚI 2026-08-21 — đọc khối này trước
+
+Phần "Trạng thái hiện hành" ngay dưới đây và các gạch đầu dòng sau nó được ghi
+**theo thứ tự thời gian** từ 2026-08-13, nên câu đầu tiên của chúng đã cũ. Khối
+này là trạng thái **hiện tại**; bên dưới là lịch sử để tra cứu quá trình.
+
+**Bộ bốn phép đo policy v2 ĐÃ CHẠY XONG** (2026-08-19). Câu "việc tiếp theo duy
+nhất: 4 lượt đo trả phí thật" ở dưới **không còn đúng**.
+
+`measured_complete: True`, `approve()` cho `level_b = fail` với **5 PASS /
+5 FAIL**:
+
+| Kết quả | Cổng |
+|---|---|
+| ✅ PASS | `e1_decision_consistency` (0,96), `gold_kappa` (0,608), `gold_needs_revision_recall` (0,957), `gold_false_publish` (0/33), `drift` (0/50) |
+| ❌ FAIL | `gold_rejected_recall` (0,60 < 0,80), `corrected_publish` (19/30), `paired_recovery` (11/20), `coverage_target_decision_parent` (3/11), `coverage_failure` (8≠0) |
+
+**Cả năm cổng đỏ đều cùng một loại sai: chặn quá tay, không cổng nào là để
+lọt.** `precision` của `publish` = 1,000; `false_publish` = 0/33.
+
+**Việc tiếp theo của dự án:** điều tra **BV3** — nguyên nhân chặn đã đổi hẳn
+sang nó sau khi sửa A6 (xem mục **B16**). Đây là việc `$0`, không cần đo trả
+phí. `scoring.yaml.meta.calibrated` vẫn `false`;
+`independent_label_reliability` vẫn `not_demonstrated`.
+
+**Đã xong trong tuần 16–21/08, không cần làm lại:**
+
+- **Console React đủ 8 màn** tại `/console`, thay hoàn toàn admin Jinja2 — xem
+  mục 8.11.
+- **Admin Jinja2 đã bị XOÁ** (2026-08-21). Gói Python `review_platform/admin/`
+  **vẫn còn và vẫn dùng** — nó là tầng dữ liệu dùng chung (queries, filters,
+  sanitization), không phải UI. Đừng xoá nốt.
+- **Bộ kiểm JS đã dựng** (Vitest, 74 test) và nằm trong `all-offline`.
+- **Đã deploy lên EC2 và bật HTTPS** tại `https://vf-multiagent.duckdns.org` —
+  xem `deployment-aws-demo.md` mục 6 (cập nhật server) và mục 7 (HTTPS).
+
+**Số hiện hành của bộ test:** `run_test_group.py all-offline` cho **91 file,
+0 hỏng, 0 SKIP**. Mọi con số 72/82/83 ở dưới là lịch sử.
+
+---
 
 **Trạng thái hiện hành — policy v2 candidate:**
 
@@ -1051,9 +1092,12 @@ bằng chứng, không dùng làm lệnh chạy policy v2.**
 - ⛔ **Không bật `meta.calibrated` và không ghi ngưỡng nào vào `scoring.yaml`:** không ngưỡng nào được calibrate theo đúng nghĩa. `nr=50` được xác nhận nhưng nó vốn đã là giá trị đang chạy. Mọi lượt API trả phí vẫn cần người dùng xác nhận riêng.
 - ✅ **Productization P1 → P5 ĐÃ HOÀN TẤT (2026-08-14):** foundation, admin auth, admin operations, `/api/v1` + connector CAS, và hardening/rollout (heartbeat, redaction, security header, usage theo agent, role Drupal, E2E + ma trận lỗi, CI, diễn tập backup/rollback). Ma trận nghiệm thu **11/11 pass**: [`evidence/platform-mvp-acceptance.md`](evidence/platform-mvp-acceptance.md). Việc này **không** thay đổi thứ tự test–retest → E1 → E5: `prompt_version` vẫn `020738e209017213` và score-path diff vẫn rỗng. **Không có kết quả chấm điểm thật nào sinh ra từ P1→P5** — mọi run đều `is_fixture=true`.
 - 🧪 **Runner thống nhất:** `python scripts/run_test_group.py all-offline`.
-  Mốc 72 file/0 hỏng/0 skip là checkpoint lịch sử; manifest hiện phủ **82
-  file, 0 hỏng, 0 skip** — chạy fresh ngày 2026-08-18 ở Task 9, xem
+  **Số hiện hành: 91 file, 0 hỏng, 0 SKIP** (2026-08-21). Các mốc 72 và 82
+  file là checkpoint lịch sử — 82 là lượt fresh ngày 2026-08-18 ở Task 9, xem
   [`evidence/publish-policy-v2-core-offline-verification.md`](evidence/publish-policy-v2-core-offline-verification.md).
+  Từ 91 file này có một file là `test_console_ui_vitest.py`: nó gọi
+  `npm run typecheck` và `npm test` của `console_ui`, nên bộ kiểm JS (74 test)
+  cũng nằm trong cùng một lệnh.
 
 ### 8.0. ⚠️ ĐỌC TRƯỚC KHI CHẠY BẤT KỲ SCRIPT ĐO NÀO
 
