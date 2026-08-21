@@ -204,6 +204,30 @@ Console và `04:20` ở `/admin`, và không ai hiểu tại sao.
 **Làm tròn `final_score` về 1 chữ số.** API trả nguyên độ chính xác, tới 13 chữ
 số thập phân (`40.9090909090909`). Hiện thô làm cột điểm lởm chởm.
 
+## 4c. Khung thẻ màn chi tiết — dùng `lib/DetailLayout.tsx`
+
+Ba thành phần dùng chung cho mọi màn chi tiết. **Không khai báo lại ở file
+trang** — chúng đã bị chép ở năm file và bắt đầu lệch nhau trước khi gom
+(2026-08-21).
+
+| Thành phần | Là gì | Dùng khi |
+|---|---|---|
+| `Panel` | vỏ thẻ bo góc có viền, `title` không bắt buộc | thẻ chứa nội dung tự do, màn hình rỗng |
+| `Section` | `Panel` + lưới `<dl>` bên trong | nhóm các cặp nhãn–giá trị |
+| `Field` | một cặp nhãn–giá trị trong `Section` | mọi trường dữ liệu |
+
+`Section` nhận `columns` là `3` (mặc định) hoặc `4`. **Mặc định là 3** vì ba
+màn có trước — Job detail, Review detail, Cấu hình/KB — đều dùng 3 và đã kiểm
+bằng ảnh chụp. Để mặc định thành 4 sẽ đổi bố cục của chúng ở màn hình rộng mà
+không ai yêu cầu.
+
+`Field` nhận `breakAll` cho chuỗi dài không có khoảng trắng (URL, mã băm
+SHA-256): `break-words` không ngắt được chúng nên chúng tràn ra ngoài thẻ —
+lỗi này đã xảy ra thật với mã SHA-256 ở màn Cấu hình/KB.
+
+Đây là module gom chung **thứ tư**, sau `format.ts`, `status.ts` và
+`ErrorBanner.tsx`. Ba cái trước đều ra đời sau khi bản chép thứ tư đã lệch.
+
 ## 5. Bốn trạng thái bắt buộc
 
 Đây là chỗ bản thiết kế sinh tự động hay hỏng nhất. **Cả bốn trạng thái dùng

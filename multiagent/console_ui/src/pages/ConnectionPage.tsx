@@ -7,31 +7,10 @@ import { formatDateTime, TIMEZONE_LABEL } from "../lib/format";
 import { ErrorBanner } from "../lib/ErrorBanner";
 import { BOOLEAN_PILLS, HEALTH_STATUS, RED_PILL, pillOf } from "../lib/status";
 import { StatusPill } from "../lib/StatusPill";
+import { Field, Panel, Section } from "../lib/DetailLayout";
 
 type ConnectionModel = components["schemas"]["ConnectionModel"];
 type TestConnectionResponse = components["schemas"]["TestConnectionResponse"];
-
-function Field({ label, children, colSpan = false, mono = false, breakAll = false }: { label: string, children: React.ReactNode, colSpan?: boolean, mono?: boolean, breakAll?: boolean }) {
-  return (
-    <div className={colSpan ? "sm:col-span-full" : "sm:col-span-1"}>
-      <dt className="text-sm font-medium text-gray-500 mb-1">{label}</dt>
-      <dd className={`text-sm ${mono ? "font-mono text-xs" : ""} text-ink dark:text-gray-200 ${breakAll ? "break-all" : "break-words"}`}>
-        {children ?? "—"}
-      </dd>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string, children: React.ReactNode }) {
-  return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c]">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">{title}</h2>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {children}
-      </dl>
-    </section>
-  );
-}
 
 export function ConnectionPage() {
   const queryClient = useQueryClient();
@@ -91,9 +70,9 @@ export function ConnectionPage() {
           <h1 className="text-xl font-semibold text-ink dark:text-gray-100">Kết nối</h1>
           <p className="text-sm text-gray-500">Quản lý kết nối tới hệ thống nguồn.</p>
         </div>
-        <section className="rounded-lg border border-gray-200 bg-white p-8 text-center dark:border-gray-800 dark:bg-[#1a1c1c]">
+        <Panel className="text-center">
           <p className="text-sm text-gray-500">Chưa cấu hình site nào.</p>
-        </section>
+        </Panel>
       </div>
     );
   }
@@ -169,7 +148,7 @@ export function ConnectionPage() {
         />
       )}
 
-      <Section title="Site">
+      <Section title="Site" columns={4}>
         <Field label="Tên">{conn.name}</Field>
         <Field label="Slug" mono>{conn.slug}</Field>
         <Field label="Địa chỉ" mono breakAll colSpan>{conn.base_url}</Field>
@@ -194,12 +173,12 @@ export function ConnectionPage() {
         )}
       </Section>
 
-      <Section title="Hồ sơ đang áp dụng">
+      <Section title="Hồ sơ đang áp dụng" columns={4}>
         <Field label="Hồ sơ (Profile)" mono>{conn.profile_code ?? "—"}</Field>
         <Field label="Phiên bản Policy">{conn.policy_version ?? "—"}</Field>
       </Section>
 
-      <Section title="Lần chẩn đoán gần nhất">
+      <Section title="Lần chẩn đoán gần nhất" columns={4}>
         {isNeverChecked ? (
           <div className="sm:col-span-full">
             <p className="text-sm text-gray-500">Chưa từng chẩn đoán kết nối</p>
@@ -221,8 +200,7 @@ export function ConnectionPage() {
         )}
       </Section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c]">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">Thao tác</h2>
+      <Panel title="Thao tác">
         
         <RequireRole 
           role="operator"
@@ -315,7 +293,7 @@ export function ConnectionPage() {
             </div>
           </div>
         </RequireRole>
-      </section>
+      </Panel>
     </div>
   );
 }

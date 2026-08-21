@@ -5,27 +5,9 @@ import { formatDateTime, TIMEZONE_LABEL } from "../lib/format";
 import { ErrorBanner } from "../lib/ErrorBanner";
 import { EVALUATION_STATUS, pillOf } from "../lib/status";
 import { StatusPill } from "../lib/StatusPill";
+import { Field, Panel } from "../lib/DetailLayout";
 
 type EvaluationResponse = components["schemas"]["EvaluationResponse"];
-
-function Field({ label, children, colSpan = false, mono = false }: { label: string, children: React.ReactNode, colSpan?: boolean, mono?: boolean }) {
-  return (
-    <div className={colSpan ? "sm:col-span-full" : "sm:col-span-1"}>
-      <dt className="text-sm font-medium text-gray-500 mb-1">{label}</dt>
-      <dd className={`text-sm ${mono ? "font-mono text-xs" : ""} text-ink dark:text-gray-200 break-words`}>
-        {children ?? "—"}
-      </dd>
-    </div>
-  );
-}
-
-function Card({ children }: { children: React.ReactNode }) {
-  return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c] mb-6 last:mb-0">
-      {children}
-    </section>
-  );
-}
 
 export function EvaluationPage() {
   const { data, isLoading, error } = useQuery({
@@ -57,13 +39,13 @@ export function EvaluationPage() {
       {error && <ErrorBanner message="Không thể tải dữ liệu đánh giá." />}
 
       {!error && (!data?.experiments || data.experiments.length === 0) && (
-        <div className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c]">
+        <Panel>
           <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
-        </div>
+        </Panel>
       )}
 
       {!error && data?.experiments && data.experiments.map((exp) => (
-        <Card key={exp.experiment}>
+        <Panel key={exp.experiment} className="mb-6 last:mb-0">
           {exp.provenance_warning && (
             <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-300 flex items-start gap-2">
               <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -105,7 +87,7 @@ export function EvaluationPage() {
               </dd>
             </div>
           </dl>
-        </Card>
+        </Panel>
       ))}
     </div>
   );

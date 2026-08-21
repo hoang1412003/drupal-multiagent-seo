@@ -9,28 +9,7 @@ import { formatDateTime, shortId, TIMEZONE_LABEL } from "../lib/format";
 import { JOB_STATUS, WRITEBACK_STATUS, pillOf } from "../lib/status";
 import { ErrorBanner } from "../lib/ErrorBanner";
 import { StatusPill } from "../lib/StatusPill";
-
-function Field({ label, children, colSpan = false, mono = false }: { label: string, children: React.ReactNode, colSpan?: boolean, mono?: boolean }) {
-  return (
-    <div className={colSpan ? "sm:col-span-full" : "sm:col-span-1"}>
-      <dt className="text-sm font-medium text-gray-500 mb-1">{label}</dt>
-      <dd className={`text-sm ${mono ? "font-mono text-xs" : ""} text-ink dark:text-gray-200 break-words`}>
-        {children ?? "—"}
-      </dd>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string, children: React.ReactNode }) {
-  return (
-    <section className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-[#1a1c1c]">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">{title}</h2>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
-        {children}
-      </dl>
-    </section>
-  );
-}
+import { Field, Section } from "../lib/DetailLayout";
 
 export function JobDetailPage() {
   const { publicId } = useParams();
