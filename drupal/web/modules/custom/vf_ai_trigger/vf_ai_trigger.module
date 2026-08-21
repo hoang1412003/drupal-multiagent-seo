@@ -97,6 +97,19 @@ function _vf_ai_trigger_ban_job(NodeInterface $node): void {
 }
 
 /**
+ * Submit handler: tự động chuyển hướng ở lại trang edit nếu lưu ở trạng thái needs_review.
+ */
+function _vf_ai_trigger_form_submit_redirect(array &$form, FormStateInterface $form_state): void {
+  $node = $form_state->getFormObject()->getEntity();
+  if ($node instanceof NodeInterface && $node->id()) {
+    $moderation_state = $form_state->getValue(['moderation_state', 0, 'value']);
+    if ($moderation_state === VF_AI_TRIGGER_STATE) {
+      $form_state->setRedirect('entity.node.edit_form', ['node' => $node->id()]);
+    }
+  }
+}
+
+/**
  * Implements hook_form_BASE_FORM_ID_alter() for node_form.
  *
  * Chèn ô trạng thái vào chính khối báo cáo của vf_ai_review. Nếu khối đó
@@ -105,7 +118,25 @@ function _vf_ai_trigger_ban_job(NodeInterface $node): void {
  */
 function vf_ai_trigger_form_node_form_alter(array &$form, FormStateInterface $form_state, string $form_id): void {
   $node = $form_state->getFormObject()->getEntity();
-  if ($node->bundle() !== 'article' || $node->isNew() || !isset($form['vf_ai_review'])) {
+  if ($node->bundle() !== 'article') {
+    return;
+  }
+
+  // Tự động giữ ở trang Edit khi bài được lưu ở trạng thái needs_review.
+  //
+  // Nối thẳng vào cuối là đủ: EntityForm::actions() luôn đặt sẵn
+  // ['::submitForm', '::save'] lúc dựng form, tức là trước mọi hook_form_alter.
+  //
+  // Thứ tự ở đây có ý nghĩa. content_moderation cũng nối một handler chuyển
+  // hướng (EntityTypeInfo::bundleFormRedirect) vào đúng nút này, và nó trỏ
+  // sang trang "phiên bản mới nhất". Handler chạy SAU thì thắng. Ta chạy sau
+  // là nhờ trọng số module đặt trong vf_ai_trigger.install — đừng bỏ trọng số
+  // đó, mất nó thì nút Lưu im lặng nhảy sang trang khác.
+  if (isset($form['actions']['submit'])) {
+    $form['actions']['submit']['#submit'][] = '_vf_ai_trigger_form_submit_redirect';
+  }
+
+  if ($node->isNew() || !isset($form['vf_ai_review'])) {
     return;
   }
   if (!\Drupal::currentUser()->hasPermission('xem bao cao ai')) {
