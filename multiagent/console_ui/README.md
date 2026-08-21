@@ -93,12 +93,34 @@ Luồng auth, CSRF, bảng mã lỗi: `docs/console-ui/integration.md`
   phải job cũ. Phải điều hướng sang job mới, nếu không người dùng tưởng retry
   không có tác dụng.
 
-## Không có JS test harness
+## Bộ kiểm JS
 
-Dự án này **không có** bộ test JavaScript, và đợt này không dựng thêm. Nghĩa là
-giao diện chỉ được xác nhận bằng **ảnh chụp màn hình**. Đừng báo "đã kiểm thử
-giao diện" khi thực tế chỉ là đọc code — chạy `npm run typecheck`, mở trình
-duyệt, và chụp lại.
+```bash
+npm test          # chạy một lần, ~4 giây
+npm run test:watch   # chạy lại mỗi khi lưu file
+```
+
+Vitest + Testing Library, DOM giả trong Node — **không cần server nào chạy**.
+
+Bộ kiểm này cũng nằm trong lệnh kiểm chung của dự án, nên đừng quên nó:
+
+```bash
+cd .. && .venv/Scripts/python.exe scripts/run_test_group.py all-offline
+```
+
+**Giả lập ở mức `fetch`, không giả lập module `client`.** Nhờ vậy test vẫn chạy
+qua code thật của `client.ts`: gắn header `X-CSRF-Token`, bóc hình dạng lỗi
+`{error:{code,message,field}}`, xử lý 204. Giả lập `client` sẽ bỏ qua hết những
+thứ đó — mà chính chúng là chỗ dễ sai.
+
+Khai báo route trong `src/test/harness.tsx`. Test nào gọi ra mạng mà chưa khai
+báo route sẽ **ném lỗi**, không lặng lẽ nhận `undefined`: một test đi qua vì
+không có dữ liệu là test không kiểm gì cả.
+
+**Bộ kiểm không thay được ảnh chụp.** Nó không nhìn thấy bố cục, màu sắc, hay
+chuỗi dài tràn ra ngoài thẻ — mã SHA-256 tràn thẻ ở màn Cấu hình/KB là lỗi
+`tsc` lẫn Vitest đều không bắt được. Vẫn phải mở trình duyệt và chụp lại. Đừng
+báo "đã kiểm thử giao diện" khi mới chỉ chạy `npm test`.
 
 ## Về Tailwind
 

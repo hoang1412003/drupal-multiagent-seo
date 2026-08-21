@@ -175,6 +175,7 @@ export function UsersPage() {
         <div className="rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20 shadow-sm relative">
           <button 
             type="button"
+            aria-label="Đóng"
             className="absolute top-2 right-2 text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200"
             onClick={() => {
               setTempPassword(null);
@@ -224,8 +225,9 @@ export function UsersPage() {
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-900 dark:text-gray-100">Tạo tài khoản mới</h2>
           <form onSubmit={handleCreate} className="flex flex-col sm:flex-row items-start gap-4">
             <div className="w-full sm:w-64">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên đăng nhập</label>
+              <label htmlFor="new-username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tên đăng nhập</label>
               <input
+                id="new-username"
                 type="text"
                 value={newUsername}
                 onChange={(e) => setNewUsername(e.target.value)}
@@ -240,8 +242,9 @@ export function UsersPage() {
               {createErrors.username && <p className="mt-1 text-xs text-red-500">{createErrors.username}</p>}
             </div>
             <div className="w-full sm:w-48">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quyền</label>
+              <label htmlFor="new-role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quyền</label>
               <select
+                id="new-role"
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
                 disabled={createMutation.isPending}
@@ -433,8 +436,9 @@ export function UsersPage() {
                     {modalState.user.role} → {modalRole}
                   </p>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chọn quyền mới</label>
+                    <label htmlFor="modal-role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Chọn quyền mới</label>
                     <select
+                      id="modal-role"
                       value={modalRole}
                       onChange={(e) => setModalRole(e.target.value)}
                       className="block w-full rounded-md border border-gray-300 p-2 text-sm focus:border-vf focus:outline-none focus:ring-2 focus:ring-vf/20 dark:border-gray-700 dark:bg-[#111314] dark:text-gray-100"

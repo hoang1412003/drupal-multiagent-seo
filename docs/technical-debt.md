@@ -1393,7 +1393,7 @@ nó bỏ sót đều đặn các chi tiết ngữ nghĩa — nhãn tiếng Việ
 Tổng 17 lỗi qua 6 nhiệm vụ, không lỗi nào bị `tsc` bắt.
 
 **Ngoài phạm vi giai đoạn 1:** users, connection, audit, config-kb, evaluation;
-xoá admin Jinja2; dựng JS test harness.
+xoá admin Jinja2; dựng JS test harness (bộ kiểm JS đã dựng 2026-08-21, xem cuối mục này).
 
 **Giai đoạn 2 (đang làm, thứ tự "dễ trước, rủi ro tăng dần"):**
 
@@ -1406,8 +1406,27 @@ xoá admin Jinja2; dựng JS test harness.
 
 **Giai đoạn 2 hoàn tất 2026-08-21. Console có đủ 8 màn, ngang bằng admin Jinja2
 cũ.** Hai việc còn để ngỏ, không gấp: xoá admin Jinja2 ở `/admin` (nên chạy
-song song một thời gian trước khi bỏ), và dựng bộ kiểm JS (hiện mọi tương tác
-đều kiểm bằng ảnh chụp tay, không có gì chặn hồi quy).
+song song một thời gian trước khi bỏ).
+
+**Bộ kiểm JS đã dựng 2026-08-21** — Vitest + Testing Library, 64 test phủ hai
+màn rủi ro nhất (Kết nối, Người dùng) và hai module dùng chung (`format.ts`,
+`status.ts`). Chạy trong ~4 giây, không cần server, và **nằm trong
+`run_test_group.py all-offline`** qua `scripts/test_console_ui_vitest.py` —
+file đó chạy cả `npm run typecheck` (trước đây không lệnh tự động nào chạy
+`tsc`) lẫn `npm test`.
+
+Giả lập ở mức `fetch` chứ không giả lập module `client`, nên test vẫn đi qua
+code thật của `client.ts` (gắn CSRF, bóc hình dạng lỗi). Đã tái hiện lỗi
+enum thô của nhiệm vụ 10 để xác nhận bộ kiểm chặn được hồi quy thật.
+
+Ngay khi dựng, bộ kiểm phát hiện **ba lỗi có thật** mà ảnh chụp không lộ ra:
+nhãn không liên kết với ô nhập liệu (`htmlFor`/`id`), nút đóng chỉ có hình SVG
+nên không có tên cho trình đọc màn hình, và `tsc --noEmit` đang hỏng ở
+`vite.config.ts` (`npm run build` dùng `tsc -b` với phạm vi khác nên không lộ).
+
+**Nó không thay được ảnh chụp**: bố cục, màu sắc và chuỗi dài tràn thẻ vẫn nằm
+ngoài tầm — mã SHA-256 tràn thẻ ở màn Cấu hình/KB là lỗi cả `tsc` lẫn Vitest
+đều không bắt được.
 
 Sau nhiệm vụ 9, `Section`/`Field` đã có **5 bản chép và bắt đầu lệch nhau**, nên
 được gom về `console_ui/src/lib/DetailLayout.tsx` (`Panel` / `Section` /
