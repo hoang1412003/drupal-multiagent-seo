@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin import queries
-from review_platform.admin import review_routes as legacy_reviews
+from review_platform.admin import filters as admin_filters
 from review_platform.admin_api import dependencies, errors, models
 from review_platform.auth.rbac import Role
 
@@ -50,7 +50,7 @@ def list_reviews(
 ):
     dependencies.reject_unknown_query_params(request, _QUERY_PARAMS)
     try:
-        filters, page_number, page_size = legacy_reviews._filters(request)
+        filters, page_number, page_size = admin_filters.review_filters(request)
         view = queries.list_reviews(conn, filters, page_number, page_size)
     except ValueError as exc:
         raise errors.invalid_filter(str(exc)) from exc

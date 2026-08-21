@@ -63,15 +63,12 @@ def test_duong_thanh_cong_di_het_mot_vong():
     print("[PASS] E2E: 202 -> trung 200 -> 1 engine, 1 fetch, 1 callback, scope xuyen suot")
 
 
-def test_bao_cao_dang_ngo_van_duoc_escape_khi_render():
-    """LLM co the tra ve chuoi giong the HTML. Report phai escape khi render."""
-    from review_platform.admin import rendering
-
-    doc_ac_y = "<script>alert('xss')</script>"
-    template = rendering.templates.env.from_string("{{ x }}")
-    assert "<script>" not in template.render(x=doc_ac_y)
-    assert "&lt;script&gt;" in template.render(x=doc_ac_y)
-    print("[PASS] chuoi giong the HTML bi escape khi render, khong thanh script")
+# `test_bao_cao_dang_ngo_van_duoc_escape_khi_render` da bi xoa cung admin
+# Jinja2 (2026-08-21). No kiem autoescape cua Jinja2, ma Jinja2 khong con.
+# Tinh chat tuong duong cho Console nam o hai cho:
+#   - console_ui/src/pages/ReviewDetailPage.test.tsx: chuoi giong the HTML
+#     hien ra thanh CHU, khong thanh phan tu
+#   - phep grep cam `dangerouslySetInnerHTML` trong ca src/
 
 
 def test_engine_ghi_usage_roi_loi_van_giu_duoc_chi_phi():
@@ -133,12 +130,6 @@ def test_khong_luu_toan_van_bai_o_bat_ky_dau():
 
 if __name__ == "__main__":
     failed = False
-    for fn in (test_bao_cao_dang_ngo_van_duoc_escape_khi_render,):
-        try:
-            fn()
-        except Exception as exc:
-            failed = True
-            print(f"[FAIL] {fn.__name__}: {exc}")
 
     if not co_postgres():
         print("[SKIP] khong ket noi duoc Postgres; [SKIP] khong phai [PASS]")

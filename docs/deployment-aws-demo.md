@@ -92,7 +92,7 @@ cho tới khi deploy nơi khác:
 ## 4. Địa chỉ (chỉ để tham khảo — instance có thể đã bị tắt/xoá)
 
 - Drupal: `http://<EC2-public-IP>`
-- Platform Admin: `http://<EC2-public-IP>:8900/admin`
+- Console: `http://<EC2-public-IP>:8900/console/`
 - HuggingFace Space: `https://hoang2003-bge-m3-embedding-api.hf.space`
 
 Không ghi IP/port cụ thể ở đây vì đây là máy demo dùng gói AWS Free Trial

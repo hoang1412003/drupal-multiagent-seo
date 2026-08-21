@@ -1408,6 +1408,40 @@ xoá admin Jinja2; dựng JS test harness (bộ kiểm JS đã dựng 2026-08-21
 cũ.** Hai việc còn để ngỏ, không gấp: xoá admin Jinja2 ở `/admin` (nên chạy
 song song một thời gian trước khi bỏ).
 
+**Admin Jinja2 đã bị xoá ngày 2026-08-21.** Đây **không** phải một lệnh xoá thư
+mục: Console dùng lại phần lớn gói `admin/`, nên chỉ lớp route bị xoá.
+
+| Phần | Xử lý |
+|---|---|
+| `queries.py`, `dependencies.py`, `evaluation.py`, `sanitization.py`, `read_only_sources.py` | giữ — Console dùng trực tiếp |
+| `filters.py` | **mới** — gom `_filters`/`_date_range` vốn nằm rải rác trong 4 file route và bị chép 3 lần |
+| `connection_view` / `site_row` / `set_intake_paused` | chuyển vào `queries.py` — chúng là thao tác dữ liệu, không phải route |
+| `router.py`, `rendering.py`, `templates/`, `static/`, 8 file route | xoá |
+| `current_session`, `require_role`, `require_csrf`, `AdminForbidden` | xoá — chết theo lớp route; Console có bản riêng trong `admin_api/dependencies.py` |
+
+**Chín phép kiểm được chuyển đi trước khi xoá.** Chúng kiểm code **ở lại** và
+không được phủ ở đâu khác — xoá thẳng là mất phủ im lặng:
+
+| Chuyển tới | Kiểm gì |
+|---|---|
+| `test_console_api_users.py` | ghi sổ kiểm toán hỏng → mọi thao tác quay lui; **hai request song song không hạ hết admin** |
+| `test_console_api_jobs.py` | audit hỏng → retry không tạo job mới; site tắt → retry bị chặn |
+| `test_console_api_auth.py` | đổi/đặt lại mật khẩu thu hồi cả phiên vừa cấp trong lúc đó |
+| `test_console_api_connection.py` | thiếu một năng lực là thất bại; connector ném lỗi vẫn lưu mã an toàn |
+| `test_auth_config.py` (mới) | khoá thiếu/ngắn/trùng phải chết ngay lúc khởi động |
+| `test_evaluation_manifest.py` (mới) | 10 dạng manifest sai đều bị từ chối |
+| `test_read_only_sources.py` (mới) | bộ nạp policy chặn `../`; SQL của KB không đọc `document`/`embedding` |
+| `console_ui/src/lib/status.test.ts` | ba trạng thái worker phải **nhìn khác nhau** |
+| `console_ui/src/pages/ReviewDetailPage.test.tsx` | chuỗi giống thẻ HTML hiện thành chữ, không thành phần tử |
+
+Hai chỗ trong test Python cũ được để lại ghi chú trỏ tới nơi thay thế, thay vì
+xoá không dấu vết.
+
+Bộ test: 91 file, 0 hỏng, 0 SKIP (giảm từ 100 vì 10 file test route HTML bị xoá).
+
+Bản CSS 844 dòng của chủ dự án cho admin cũ đã sao lưu ra
+`C:\Users\MSIo\Documents\vf-backup\admin.css.wip-2026-08-21` trước khi xoá.
+
 **Bộ kiểm JS đã dựng 2026-08-21** — Vitest + Testing Library, 64 test phủ hai
 màn rủi ro nhất (Kết nối, Người dùng) và hai module dùng chung (`format.ts`,
 `status.ts`). Chạy trong ~4 giây, không cần server, và **nằm trong

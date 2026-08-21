@@ -284,7 +284,7 @@ Phạm vi hiện tại (bài cẩm nang tiếng Việt về xe điện) là **l�
 
 MVP vẫn chỉ phục vụ **một công ty, một Drupal site, thị trường Việt Nam, tiếng Việt và bài `cam_nang`**. Khả năng mở rộng nằm ở ranh giới connector, `site_id` và `review_profile`; không được mô tả thành “đã hỗ trợ đa website/đa thị trường”. Mỗi thị trường mới vẫn phải có policy, KB, gold set và calibration riêng.
 
-Kiến trúc chọn **modular monolith**, không phải microservice phân mảnh: một FastAPI app phục vụ `/api/v1` cho Drupal và UI server-rendered `/admin`; worker là tiến trình riêng; PostgreSQL giữ queue, run history, KB, site/profile và auth. Engine LangGraph/4 agent/Aggregator hiện tại được cô lập thành module và phải giữ nguyên hành vi.
+Kiến trúc chọn **modular monolith**, không phải microservice phân mảnh: một FastAPI app phục vụ `/api/v1` cho Drupal và giao diện quản trị (ban đầu là UI server-rendered ở `/admin`; **từ 2026-08-21 là Console React ở `/console`, `/admin` đã bị xoá**); worker là tiến trình riêng; PostgreSQL giữ queue, run history, KB, site/profile và auth. Engine LangGraph/4 agent/Aggregator hiện tại được cô lập thành module và phải giữ nguyên hành vi.
 
 **Danh tính và role tách theo ranh giới hệ thống:**
 

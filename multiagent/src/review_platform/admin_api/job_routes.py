@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from review_platform import reviews
 from review_platform.admin import dependencies as admin_dependencies
-from review_platform.admin import job_routes as legacy_jobs
+from review_platform.admin import filters as admin_filters
 from review_platform.admin import queries
 from review_platform.admin_api import dependencies, errors, models
 from review_platform.auth.rbac import Role
@@ -40,7 +40,7 @@ def list_jobs(
     # va `date_from`, gui len bi bo qua IM LANG vi server khong biet ten do.
     #
     # Co y de kieu `str | None` khong rang buoc: viec kiem tra van do
-    # legacy_jobs._filters lam, de loi tra ve dung hinh dang {"error": ...}
+    # admin_filters.job_filters lam, de loi tra ve dung hinh dang {"error": ...}
     # thay vi hinh dang 422 mac dinh cua FastAPI.
     status: str | None = Query(None, description="queued|running|failed|done|superseded"),
     site: str | None = Query(None, description="slug cua site, khop chinh xac"),
@@ -55,7 +55,7 @@ def list_jobs(
 ):
     dependencies.reject_unknown_query_params(request, _QUERY_PARAMS)
     try:
-        filters, page_number, page_size = legacy_jobs._filters(request)
+        filters, page_number, page_size = admin_filters.job_filters(request)
         view = queries.list_jobs(conn, filters, page_number, page_size)
     except ValueError as exc:
         raise errors.invalid_filter(str(exc)) from exc

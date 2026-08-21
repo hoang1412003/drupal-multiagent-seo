@@ -123,9 +123,9 @@ ddev drush php:script scripts/configure_ai_service_role.php -- --apply
 ddev drush php:script scripts/test_ai_service_role.php
 ```
 
-⚠️ **`DRUPAL_USER` không được là `admin` (UID 1).** UID 1 bỏ qua mọi kiểm tra quyền, nên trang `/admin/connection` sẽ báo "kết nối đạt" kể cả khi role sai hoàn toàn — đúng loại xanh giả mà nút đó sinh ra để chống. Tạo một user riêng, gán **chỉ** role `ai_service`, rồi trỏ `DRUPAL_USER`/`DRUPAL_PASSWORD` sang tài khoản đó.
+⚠️ **`DRUPAL_USER` không được là `admin` (UID 1).** UID 1 bỏ qua mọi kiểm tra quyền, nên màn **Kết nối** của Console sẽ báo "kết nối đạt" kể cả khi role sai hoàn toàn — đúng loại xanh giả mà nút đó sinh ra để chống. Tạo một user riêng, gán **chỉ** role `ai_service`, rồi trỏ `DRUPAL_USER`/`DRUPAL_PASSWORD` sang tài khoản đó.
 
-Platform Admin ở `http://127.0.0.1:8900/admin`, trang **Kết nối** có nút kiểm tra. Kiểm chứng và giới hạn đã biết: [`docs/evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
+Console ở `http://127.0.0.1:8900/console/`, màn **Kết nối** có nút chẩn đoán. Kiểm chứng và giới hạn đã biết: [`docs/evidence/platform-api-cutover-verification.txt`](evidence/platform-api-cutover-verification.txt).
 
 ---
 

@@ -9,6 +9,7 @@ Chay: ..\multiagent\.venv\Scripts\python.exe scripts\test_console_api_auth.py
 import os
 from pathlib import Path
 import sys
+import threading
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -18,7 +19,7 @@ from fastapi.testclient import TestClient
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin_api import dependencies as console_dependencies
-from review_platform.admin_api import errors, router as console_router
+from review_platform.admin_api import auth_routes, errors, router as console_router
 from review_platform.auth import sessions, users
 from review_platform.auth.rbac import Role
 
@@ -247,6 +248,115 @@ def test_change_password_requires_csrf_and_clears_must_change(conn):
     print("[PASS] doi mat khau bat buoc CSRF, tu choi mat khau cu sai, go co buoc doi")
 
 
+def _dang_nhap_dua_voi(conn, doi_mat_khau, ten_thao_tac: str):
+    """Ep mot lan dang nhap gap dung mot lan doi mat khau dang chay.
+
+    Cach lam: chan `verify_password` lai NGAY SAU khi no xac nhan mat khau
+    dung, roi cho thao tac doi mat khau chay xen vao. Neu khong co khoa row,
+    hai ben se di qua nhau va phien vua cap se song sot - tuc la ke biet mat
+    khau cu van giu duoc quyen truy cap sau khi mat khau da bi doi.
+    """
+    mat_khau_cu = f"Mat-khau-{ten_thao_tac}-cu-2026"
+    nguoi_dung = users.create_user(
+        conn, f"race.{ten_thao_tac}", mat_khau_cu, Role.VIEWER,
+        must_change_password=False,
+    )
+    client = _make_client(conn)
+
+    # Ket noi RIENG cho luong doi mat khau: dung chung connection thi hai luong
+    # noi tiep nhau va tranh chap khong bao gio xay ra.
+    conn_khac = db.psycopg.connect(db.dsn(), autocommit=True)
+    with conn_khac.cursor() as cur:
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+
+    da_xac_thuc = threading.Event()
+    cho_di_tiep = threading.Event()
+    doi_xong = threading.Event()
+    ket_qua_login: dict = {}
+    ket_qua_doi: dict = {}
+    goc = auth_routes.passwords.verify_password
+
+    def chan_lai(hash_value, password):
+        ket_qua = goc(hash_value, password)
+        if password == mat_khau_cu and ket_qua:
+            da_xac_thuc.set()
+            if not cho_di_tiep.wait(5):
+                raise AssertionError("test qua gio khi cho login di tiep")
+        return ket_qua
+
+    def chay_login():
+        try:
+            ket_qua_login["response"] = client.post(
+                "/api/console/v1/auth/login",
+                json={"username": nguoi_dung.username, "password": mat_khau_cu},
+            )
+        except Exception as exc:
+            ket_qua_login["error"] = exc
+
+    def chay_doi():
+        try:
+            doi_mat_khau(conn_khac, nguoi_dung.id)
+        except Exception as exc:
+            ket_qua_doi["error"] = exc
+        finally:
+            doi_xong.set()
+
+    auth_routes.passwords.verify_password = chan_lai
+    luong_login = threading.Thread(target=chay_login)
+    luong_doi = threading.Thread(target=chay_doi)
+    bi_chan = False
+    try:
+        luong_login.start()
+        assert da_xac_thuc.wait(5), "login khong toi duoc diem xac thuc"
+        luong_doi.start()
+        # Neu co khoa row, luong doi mat khau phai BI CHAN o day.
+        bi_chan = not doi_xong.wait(0.25)
+    finally:
+        cho_di_tiep.set()
+        luong_login.join(5)
+        if luong_doi.ident is not None:
+            luong_doi.join(5)
+        auth_routes.passwords.verify_password = goc
+        conn_khac.close()
+
+    assert not luong_login.is_alive() and not luong_doi.is_alive(), "co luong bi treo"
+    assert "error" not in ket_qua_login, ket_qua_login
+    assert "error" not in ket_qua_doi, ket_qua_doi
+    assert bi_chan, f"{ten_thao_tac} khong cho khoa row cua login"
+    assert ket_qua_login["response"].status_code == 200
+
+    # Phien vua cap PHAI da bi thu hoi.
+    raw_token = client.cookies.get(admin_dependencies.SESSION_COOKIE)
+    assert raw_token is not None
+    assert sessions.resolve(conn, raw_token) is None, (
+        "phien cap cho ke dung mat khau cu van con song sau khi doi mat khau"
+    )
+
+
+def test_dat_lai_mat_khau_thu_hoi_ca_phien_dang_dang_nhap(conn):
+    """Chuyen tu test_admin_routes.py (2026-08-21)."""
+    _reset_schema(conn)
+    _dang_nhap_dua_voi(
+        conn,
+        lambda c, uid: users.reset_password(c, uid, "Mat-khau-race-moi-2026"),
+        "reset",
+    )
+    print("[PASS] dat lai mat khau thu hoi ca phien vua duoc cap trong luc do")
+
+
+def test_doi_mat_khau_thu_hoi_ca_phien_dang_dang_nhap(conn):
+    """Chuyen tu test_admin_routes.py (2026-08-21)."""
+    _reset_schema(conn)
+    _dang_nhap_dua_voi(
+        conn,
+        lambda c, uid: users.change_password(
+            c, uid, "Mat-khau-change-cu-2026", "Mat-khau-race-moi-2026"
+        ),
+        "change",
+    )
+    print("[PASS] doi mat khau thu hoi ca phien vua duoc cap trong luc do")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -267,6 +377,8 @@ if __name__ == "__main__":
             test_wrong_role_returns_403_not_401,
             test_logout_requires_csrf_header_and_revokes_session,
             test_change_password_requires_csrf_and_clears_must_change,
+        test_dat_lai_mat_khau_thu_hoi_ca_phien_dang_dang_nhap,
+        test_doi_mat_khau_thu_hoi_ca_phien_dang_dang_nhap,
         ):
             try:
                 fn(connection)

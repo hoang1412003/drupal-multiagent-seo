@@ -19,6 +19,8 @@ Chay: ..\multiagent\.venv\Scripts\python.exe scripts\test_console_api_users.py
 import os
 from pathlib import Path
 import sys
+import threading
+from uuid import UUID
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -29,7 +31,7 @@ from fastapi.testclient import TestClient
 from review_platform import migrations
 from review_platform.admin import dependencies as admin_dependencies
 from review_platform.admin_api import errors, router as console_router
-from review_platform.auth import users
+from review_platform.auth import sessions, users
 from review_platform import security as platform_security
 from review_platform.auth.rbac import Role
 
@@ -370,6 +372,138 @@ def test_me_co_id_de_nhan_ra_chinh_minh(conn):
     print("[PASS] /auth/me va login deu tra id, khop voi danh sach nguoi dung")
 
 
+def test_ghi_so_kiem_toan_hong_thi_moi_thao_tac_quay_lui(conn):
+    """So kiem toan hong thi thao tac phai HUY, khong duoc chay tiep.
+
+    Chuyen tu test_admin_user_routes.py (2026-08-21).
+
+    Vi sao: mot tai khoan bi doi quyen ma khong co dong nao trong so kiem toan
+    la thay doi khong ai truy nguon duoc. Tha khong lam gi con hon lam ma
+    khong ghi lai.
+    """
+    _reset_schema(conn)
+    client = _login(conn, "u.atomic.admin", Role.ADMIN)
+    client.post("/api/console/v1/users", json={"username": "u.muc.tieu", "role": "viewer"})
+    client.post("/api/console/v1/users", json={"username": "u.dang.khoa", "role": "viewer"})
+    muc_tieu = _id_cua(conn, "u.muc.tieu")
+    dang_khoa = _id_cua(conn, "u.dang.khoa")
+    client.post(f"/api/console/v1/users/{dang_khoa}/lock", json={})
+
+    from review_platform.admin_api import user_routes
+
+    # Phien dang mo cua muc tieu: reset-password bi huy thi no phai con song.
+    issued = sessions.issue(conn, muc_tieu)
+
+    goc = user_routes.audit_log.write_event
+
+    def hong(*args, **kwargs):
+        raise RuntimeError("audit unavailable")
+
+    user_routes.audit_log.write_event = hong
+    try:
+        phan_hoi = [
+            client.post(
+                "/api/console/v1/users",
+                json={"username": "u.khong.duoc.tao", "role": "viewer"},
+            ),
+            client.post(f"/api/console/v1/users/{muc_tieu}/role", json={"role": "operator"}),
+            client.post(f"/api/console/v1/users/{muc_tieu}/lock", json={}),
+            client.post(f"/api/console/v1/users/{dang_khoa}/unlock", json={}),
+            client.post(f"/api/console/v1/users/{muc_tieu}/reset-password", json={}),
+        ]
+    finally:
+        user_routes.audit_log.write_event = goc
+
+    assert all(r.status_code == 500 for r in phan_hoi), [r.status_code for r in phan_hoi]
+
+    # Khong thao tac nao de lai dau vet.
+    assert users.find_by_username(conn, "u.khong.duoc.tao") is None
+    assert users.get_user(conn, UUID(muc_tieu)).role is Role.VIEWER
+    assert users.get_user(conn, UUID(muc_tieu)).active is True
+    assert users.get_user(conn, UUID(dang_khoa)).active is False
+    # Phien cua muc tieu van song: `reset_password` thu hoi moi phien, nen
+    # phien con do la bang chung reset da bi huy that su, khong chi la
+    # response 500.
+    assert sessions.resolve(conn, issued.raw_token) is not None, (
+        "phien bi thu hoi du thao tac reset-password da bi huy"
+    )
+    print("[PASS] so kiem toan hong -> ca nam thao tac deu quay lui")
+
+
+def test_hai_request_song_song_khong_vo_hieu_het_admin(conn):
+    """Hai admin bam khoa nhau CUNG LUC thi phai con lai mot nguoi.
+
+    Chuyen tu test_admin_user_routes.py (2026-08-21).
+
+    Day la dieu kien tranh chap that: neu ca hai request cung doc "dang co 2
+    admin" roi cung ghi, he thong con 0 admin va khong ai vao sua duoc nua.
+    `users.set_active` khoa row de chan dieu do; test nay dung Barrier de ep
+    hai request gap nhau dung o diem nguy hiem.
+    """
+    _reset_schema(conn)
+    client_a = _login(conn, "u.race.a", Role.ADMIN)
+    a = _id_cua(conn, "u.race.a")
+
+    # Ket noi RIENG cho luong thu hai: dung chung mot connection thi hai luong
+    # noi tiep nhau, va tranh chap khong bao gio xay ra.
+    conn_b = db.psycopg.connect(db.dsn(), autocommit=True)
+    with conn_b.cursor() as cur:
+        cur.execute(f"SET search_path TO {SCHEMA}, public")
+    users.create_user(
+        conn, "u.race.b", "Mat-khau-u.race.b-2026", Role.ADMIN, must_change_password=False
+    )
+    b = _id_cua(conn, "u.race.b")
+    client_b = _make_client(conn_b)
+    dang_nhap_b = client_b.post(
+        "/api/console/v1/auth/login",
+        json={"username": "u.race.b", "password": "Mat-khau-u.race.b-2026"},
+    )
+    client_b.headers["X-CSRF-Token"] = dang_nhap_b.json()["csrf_token"]
+
+    from review_platform.admin_api import user_routes
+
+    rao = threading.Barrier(2)
+    goc = user_routes.users.set_active
+
+    def dong_bo(target_conn, user_id, active):
+        rao.wait(timeout=5)
+        return goc(target_conn, user_id, active)
+
+    user_routes.users.set_active = dong_bo
+    ket_qua = []
+
+    def khoa(client, uid):
+        ket_qua.append(
+            client.post(f"/api/console/v1/users/{uid}/lock", json={}).status_code
+        )
+
+    luong = (
+        threading.Thread(target=khoa, args=(client_a, a)),
+        threading.Thread(target=khoa, args=(client_b, b)),
+    )
+    try:
+        for t in luong:
+            t.start()
+        for t in luong:
+            t.join(10)
+    finally:
+        user_routes.users.set_active = goc
+        conn_b.close()
+
+    assert not any(t.is_alive() for t in luong), "co luong bi treo"
+    # Mot thanh cong, mot bi chan - khong duoc ca hai cung thanh cong.
+    assert sorted(ket_qua) == [200, 409], ket_qua
+
+    with conn.cursor() as cur:
+        cur.execute("SELECT count(*) FROM admin_user WHERE active AND role='admin'")
+        assert cur.fetchone()[0] == 1, "he thong con 0 admin - da mat quyen quan tri"
+        cur.execute(
+            "SELECT count(*) FROM admin_audit_log WHERE action='last_admin_denied'"
+        )
+        assert cur.fetchone()[0] == 1
+    print("[PASS] hai request song song van giu lai mot admin dang hoat dong")
+
+
 if __name__ == "__main__":
     try:
         connection = db.psycopg.connect(db.dsn(), autocommit=True)
@@ -396,6 +530,8 @@ if __name__ == "__main__":
             test_mat_khau_tam_khong_bao_gio_lap_lai,
             test_filters_co_danh_sach_role,
             test_me_co_id_de_nhan_ra_chinh_minh,
+            test_ghi_so_kiem_toan_hong_thi_moi_thao_tac_quay_lui,
+            test_hai_request_song_song_khong_vo_hieu_het_admin,
         ):
             try:
                 fn(connection)

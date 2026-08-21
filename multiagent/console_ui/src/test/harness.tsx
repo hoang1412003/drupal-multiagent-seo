@@ -14,7 +14,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { vi } from "vitest";
 
 import { setCsrfToken } from "../api/client";
@@ -102,7 +102,15 @@ export function loi(status: number, code: string, message: string, field: string
   return { status, body: { error: { code, message, field } } };
 }
 
-export function renderPage(ui: ReactElement, { duongDan = "/" } = {}) {
+/**
+ * @param duongDan  duong dan gia lap, vi du "/reviews/abc-123"
+ * @param mau       mau route khi trang doc tham so, vi du "/reviews/:publicId".
+ *                  Thieu no thi `useParams()` tra ve rong va trang goi sai URL.
+ */
+export function renderPage(
+  ui: ReactElement,
+  { duongDan = "/", mau }: { duongDan?: string; mau?: string } = {},
+) {
   setCsrfToken("csrf-test");
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -113,7 +121,9 @@ export function renderPage(ui: ReactElement, { duongDan = "/" } = {}) {
   return render(
     <MemoryRouter initialEntries={[duongDan]}>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>{ui}</AuthProvider>
+        <AuthProvider>
+          {mau ? <Routes><Route path={mau} element={ui} /></Routes> : ui}
+        </AuthProvider>
       </QueryClientProvider>
     </MemoryRouter>,
   );

@@ -80,26 +80,38 @@ def test_log_khong_lo_canary():
     print("[PASS] log khong lo canary, ke ca tren duong loi")
 
 
-def test_html_admin_khong_lo_canary():
-    """Trang admin doc tu database, nen no la noi ro ri cuoi cung."""
-    from review_platform.admin import queries, rendering
+def test_json_console_khong_lo_canary():
+    """Console doc tu database, nen no la noi ro ri cuoi cung.
 
-    with moi_truong("vf_test_leak_html") as mt:
+    Truoc 2026-08-21 phep kiem nay render template Jinja2 cua admin cu. Admin
+    do da bi xoa; thay vao do quet chinh JSON ma Console tra ve - do moi la
+    thu nguoi dung nhan duoc bay gio.
+
+    Man chi tiet review duoc chon vi no hien nhieu du lieu run nhat: ket qua
+    tung agent, du lieu tho, va ca chuoi loi.
+    """
+    import json
+
+    from review_platform.admin import queries
+    from review_platform.admin_api import models
+
+    with moi_truong("vf_test_leak_json") as mt:
         mt.post_job()
         mt.chay()
 
-        # Render review detail - man hinh hien nhieu du lieu run nhat.
         public_id = mt.scalar("SELECT public_id FROM run_log")
         chi_tiet = queries.get_review(mt.conn, public_id)
         assert chi_tiet is not None
 
-        template = rendering.templates.env.get_template("review_detail.html")
-        html = template.render(
-            request=None, user=None, csrf_token="x", review=chi_tiet, error=None,
-        )
-        lo = _quet("review_detail.html", html)
-        assert not lo, f"HTML admin lo canary: {lo}"
-    print("[PASS] HTML admin khong lo canary")
+        # Serialize DUNG cach Console serialize: qua model Pydantic, khong
+        # phai str() cua dataclass. Hai cach cho ra hai chuoi khac nhau, va
+        # chi cach dau moi la thu di ra ngoai mang.
+        payload = models.ReviewDetailModel.from_view(chi_tiet).model_dump()
+        noi_dung = json.dumps(payload, ensure_ascii=False, default=str)
+
+        lo = _quet("review detail JSON", noi_dung)
+        assert not lo, f"JSON cua Console lo canary: {lo}"
+    print("[PASS] JSON cua Console khong lo canary")
 
 
 def test_gia_tri_duoc_phep_van_con_dung_duoc():
@@ -141,7 +153,7 @@ if __name__ == "__main__":
     for fn in (
         test_khong_bang_nao_luu_canary,
         test_log_khong_lo_canary,
-        test_html_admin_khong_lo_canary,
+        test_json_console_khong_lo_canary,
         test_gia_tri_duoc_phep_van_con_dung_duoc,
         test_usage_event_chi_co_so_dem_khong_co_noi_dung,
     ):

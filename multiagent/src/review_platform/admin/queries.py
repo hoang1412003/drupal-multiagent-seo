@@ -973,3 +973,107 @@ def filter_options(conn) -> FilterOptions:
         )
 
     return FilterOptions(sites=sites, job_sources=job_sources)
+
+
+# --- Ket noi tới site ---------------------------------------------------
+# Ba ham duoi day truoc nam trong admin/connection_routes.py. Khi xoa admin
+# Jinja2 (2026-08-21) chung duoc chuyen vao day vi chung la thao tac DU LIEU,
+# khong phai route.
+
+MAX_REASON = 300
+
+
+@dataclass(frozen=True)
+class ConnectionView:
+    slug: str
+    name: str
+    base_url: str
+    # TEN bien moi truong chua credential, khong phai gia tri. Xem
+    # connectors/secrets.py.
+    secret_ref: str
+    active: bool
+    intake_paused: bool
+    profile_code: str | None
+    policy_version: str | None
+    token_prefixes: tuple
+    last_health_status: str | None
+    last_health_checked_at: datetime | None
+    last_health_error: str | None
+
+
+def site_row(conn):
+    """(id, slug) cua site dau tien, hoac None khi chua cau hinh site nao."""
+    with conn.cursor() as cur:
+        cur.execute("SELECT id, slug FROM site ORDER BY slug LIMIT 1")
+        return cur.fetchone()
+
+
+def connection_view(conn) -> ConnectionView | None:
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT s.slug, s.name, s.base_url, s.secret_ref, s.active, "
+            "s.intake_paused, s.last_health_status, s.last_health_checked_at, "
+            "s.last_health_error, p.code, p.policy_version "
+            "FROM site AS s "
+            "LEFT JOIN site_profile_assignment AS a "
+            "  ON a.site_id=s.id AND a.active "
+            "LEFT JOIN review_profile AS p "
+            "  ON p.id=a.profile_id AND p.status='active' "
+            "ORDER BY s.slug LIMIT 1"
+        )
+        row = cur.fetchone()
+    if row is None:
+        return None
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT c.token_prefix FROM site_api_credential AS c "
+            "JOIN site AS s ON s.id=c.site_id "
+            "WHERE s.slug=%s AND c.active ORDER BY c.created_at",
+            (row[0],),
+        )
+        prefixes = tuple(item[0] for item in cur.fetchall())
+
+    return ConnectionView(
+        slug=row[0],
+        name=row[1],
+        base_url=row[2],
+        secret_ref=row[3],
+        active=row[4],
+        intake_paused=row[5],
+        last_health_status=row[6],
+        last_health_checked_at=row[7],
+        last_health_error=row[8],
+        profile_code=row[9],
+        policy_version=row[10],
+        token_prefixes=prefixes,
+    )
+
+
+def set_intake_paused(conn, actor, *, tam_dung: bool, reason: str | None):
+    row = site_row(conn)
+    if row is None:
+        return None
+    site_id, slug = row
+    with conn.transaction():
+        with conn.cursor() as cur:
+            # Khoa row de hai lan bam song song khong ghi de nhau.
+            cur.execute("SELECT id FROM site WHERE id=%s FOR UPDATE", (site_id,))
+            cur.execute(
+                "UPDATE site SET intake_paused=%s, updated_at=now() WHERE id=%s",
+                (tam_dung, site_id),
+            )
+        audit_log.write_event(
+            conn,
+            action=(
+                audit_log.AuditAction.INTAKE_PAUSED if tam_dung
+                else audit_log.AuditAction.INTAKE_RESUMED
+            ),
+            actor_user_id=actor.id,
+            actor_username=actor.username,
+            target_type="site",
+            target_id=str(site_id),
+            outcome="success",
+            metadata={"site_slug": slug, "reason": (reason or "")[:MAX_REASON] or None},
+        )
+    return slug

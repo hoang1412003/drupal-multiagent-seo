@@ -60,6 +60,17 @@ describe("bang nhan trang thai", () => {
       }
     });
 
+
+    it(`${ten} khong co hai gia tri nao trong giong het nhau`, () => {
+      // Chuyen tu test_admin_dashboard.py (2026-08-21). Vi du cu the: `stale`
+      // la worker tung chay roi im lang - mot SU CO. `unavailable` la chua bao
+      // gio bat - binh thuong. Cho chung cung nhan hoac cung mau se lam su co
+      // trong giong binh thuong.
+      const nhan = gia_tri.map((v) => bang[v]?.label);
+      expect(new Set(nhan).size, `${ten} co nhan trung nhau: ${nhan.join(", ")}`)
+        .toBe(gia_tri.length);
+    });
+
     it(`${ten} co du bon thuoc tinh mau cho moi nhan`, () => {
       // Thieu mot thuoc tinh thi class Tailwind thanh "undefined" va o che do
       // toi no ra mot vet trang - da xay ra voi ErrorBanner truoc khi gom.

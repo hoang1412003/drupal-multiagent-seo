@@ -292,91 +292,10 @@ def test_dashboard_include_fixture_noi_bo(conn):
     print("[PASS] include_fixtures=True chi mo lai fixture trong read-model noi bo")
 
 
-def test_template_dashboard_hien_dung_trang_thai_connector_da_luu():
-    """Khoa khe ho GIUA read-model va template.
-
-    `test_dashboard_range_...` da assert `view.connector_status == "unknown"`,
-    nhung no chi kiem PHIA PYTHON. Template lai viet cung chuoi "Chua xac minh",
-    nen du database co `last_health_status='ok'` va audit ghi day du thi dashboard
-    van hien "Chua xac minh" - dung loi da xay ra that ngay 2026-08-14.
-
-    Ba trang thai phai nhin KHAC nhau: dat, chua kiem bao gio, va kiem roi
-    nhung hong. Gop hai cai sau lam mot se lam connector dang loi trong giong
-    connector chua ai dung toi.
-    """
-    from review_platform.admin import rendering
-
-    template = rendering.templates.env.get_template("partials/dashboard_metrics.html")
-
-    def _render(trang_thai, *, worker="unknown", worker_stale=0):
-        # Dung DashboardView THAT chu khong bia mot fake: fake thieu field thi
-        # template nem Undefined va test do vi ly do khong lien quan, che mat
-        # chinh dieu can kiem.
-        return template.render(
-            error=None,
-            view=queries.DashboardView(
-                date_from=date(2026, 8, 1),
-                date_to=date(2026, 8, 2),
-                queue_counts=dict.fromkeys(queries.QUEUE_STATUSES, 0),
-                total_reviews=0,
-                decision_counts={
-                    "publish": 0, "needs_revision": 0, "rejected": 0, "unknown": 0,
-                },
-                duration_p50_ms=None,
-                duration_p95_ms=None,
-                cost_estimate=estimate_usage([], PRICING_PATH),
-                writeback_counts=dict.fromkeys(queries.WRITEBACK_STATUSES, 0),
-                writeback_success_rate=None,
-                connector_status=trang_thai,
-                worker_status=worker,
-                worker_stale=worker_stale,
-            ),
-        )
-
-    dat = _render("ok")
-    assert "Đạt" in dat, dat[:400]
-    assert "status-ok" in dat
-    # Day la khang dinh quan trong nhat: da kiem dat thi KHONG con chu do.
-    assert "Chưa kiểm tra bao giờ" not in dat
-
-    chua = _render("unknown")
-    assert "Chưa kiểm tra bao giờ" in chua
-    assert _render(None) == chua, "None va 'unknown' phai hien nhu nhau"
-
-    hong = _render("auth_failed")
-    assert "auth_failed" in hong, "phai hien ma loi de chan doan duoc"
-    assert "status-error" in hong
-    assert "Chưa kiểm tra bao giờ" not in hong
-
-    css = (rendering.STATIC_DIR / "admin.css").read_text(encoding="utf-8")
-    assert ".status-error" in css, "class bao loi phai co dinh nghia trong CSS"
-
-    # Worker: cung khe ho, cung ba trang thai. Truoc P5 dong nay viet cung
-    # "Chua xac minh"; gio phai doc worker_status that.
-    #
-    # CHI xet trong khoi <dl class="status-list">: chuoi "Dang chay" con la
-    # nhan mot COT CUA HANG DOI, nen assert tren ca trang se khop nham va
-    # test thanh vo nghia. (Da bat duoc dung loi do khi viet test nay.)
-    def _khoi_trang_thai(html):
-        return html.split('<dl class="status-list">', 1)[1].split("</dl>", 1)[0]
-
-    chay = _khoi_trang_thai(_render("ok", worker="running"))
-    assert "Đang chạy" in chay, chay
-    assert "Không có heartbeat" not in chay
-
-    treo = _khoi_trang_thai(_render("ok", worker="stale"))
-    assert "Quá hạn" in treo, treo
-    assert "status-error" in treo
-    assert "Đang chạy" not in treo
-
-    chua_bat = _khoi_trang_thai(_render("ok", worker="unavailable"))
-    assert "Không có heartbeat" in chua_bat, chua_bat
-    assert "Quá hạn" not in chua_bat
-
-    # Con instance treo thi van phai bao, khong duoc giau di.
-    lan_lon = _khoi_trang_thai(_render("ok", worker="running", worker_stale=2))
-    assert "2 instance quá hạn" in lan_lon, lan_lon
-    print("[PASS] template dashboard hien dung trang thai connector VA worker")
+# `test_template_dashboard_hien_dung_trang_thai_connector_da_luu` da bi xoa
+# cung admin Jinja2 (2026-08-21). Tinh chat no khoa - ba trang thai worker
+# phai NHIN KHAC NHAU - nay do console_ui/src/lib/status.test.ts giu:
+# "khong co hai gia tri nao trong giong het nhau".
 
 
 def test_dashboard_chan_date_range_sai_truoc_khi_query():
@@ -402,7 +321,6 @@ if __name__ == "__main__":
         test_pricing_decimal_sum_unknown_va_validation,
         test_page_view_contract,
         test_dashboard_chan_date_range_sai_truoc_khi_query,
-        test_template_dashboard_hien_dung_trang_thai_connector_da_luu,
     ):
         try:
             fn()
