@@ -2,12 +2,17 @@
 
 /**
  * @file
- * Tạo 3 bài demo trên Drupal từ file gốc trong `docs/`.
+ * Tạo 3 bài demo trên Drupal từ bản xuất `scripts/demo-articles.json`.
  *
  * Vì sao là script chứ không phải tạo tay: bài demo phải giống hệt nhau giữa
  * máy dev và máy deploy, nếu không thì kết quả chấm hai bên không so được với
- * nhau. Nội dung lấy thẳng từ file đã dùng cho gold set / functional-test nên
- * không có bản chép thứ hai để trôi lệch.
+ * nhau.
+ *
+ * Vì sao xuất ra JSON chứ không đọc thẳng file gốc trong `docs/`: sau khi
+ * người soạn chèn ảnh, CKEditor viết lại body (thêm `data-entity-uuid`, đổi
+ * thứ tự thuộc tính) — body trong CSDL đã khác file `.txt` gốc. `docs/` vẫn là
+ * nguồn chuẩn cho việc CHẤM ĐIỂM; file JSON này là bản chụp của đúng ba bài
+ * đã chuẩn bị để demo, kèm đường dẫn ảnh.
  *
  * Vì sao chạy bằng drush chứ không POST qua JSON:API: tài khoản tích hợp
  * `ai_service` có đúng bảy quyền và KHÔNG được tạo node (cố ý, quyền tối
@@ -18,87 +23,115 @@
  *
  * Chạy lại nhiều lần được: bài đã tồn tại (khớp `title`) thì bỏ qua.
  *
- * Cách chạy trên máy chủ deploy (nginx + php-fpm, repo ở ~/drupal-multiagent-seo):
- *   cd ~/drupal-multiagent-seo/drupal
- *   ../vendor/bin/drush php:script scripts/seed_demo_articles.php
+ * ẢNH: file ảnh nằm trong `web/sites/default/files/`, mà thư mục đó bị
+ * `.gitignore` loại khỏi repo. Phải chép sang server TRƯỚC khi chạy script này,
+ * nếu không bài vẫn tạo được nhưng các thẻ `<img>` sẽ trỏ vào file không tồn
+ * tại. Xem `docs/deployment-aws-demo.md` mục 6.7.
  *
- * Trên máy dev dùng DDEV thì `docs/` KHÔNG được mount vào container, nên phải
- * chỉ đường dẫn khác:
- *   ddev drush php:script /var/www/html/scripts/seed_demo_articles.php -- --docs=<duong-dan-trong-container>
+ * Cách chạy:
+ *   cd <repo>/drupal
+ *   drush php:script scripts/seed_demo_articles.php
  */
 
+use Drupal\file\Entity\File;
 use Drupal\node\Entity\Node;
 
-// Mặc định: docs/ nằm cạnh drupal/ trong cùng repo.
-$thu_muc_docs = realpath(__DIR__ . '/../../docs');
-foreach ($extra ?? [] as $tham_so) {
-  if (str_starts_with($tham_so, '--docs=')) {
-    $thu_muc_docs = substr($tham_so, 7);
-  }
-}
-
-// (đường dẫn tương đối trong docs/, nhãn để in ra)
-$bai = [
-  'functional-tests/clean/C-008.txt' => 'C-008 · kỳ vọng publish',
-  'goldset/raw/G-014.txt' => 'G-014 · kỳ vọng needs_revision',
-  'goldset/raw/G-010.txt' => 'G-010 · kỳ vọng rejected',
-];
-
-if (!$thu_muc_docs || !is_dir($thu_muc_docs)) {
-  echo "LOI: khong tim thay thu muc docs. Dung --docs=<duong-dan>.\n";
+$duong_dan_json = __DIR__ . '/demo-articles.json';
+if (!is_file($duong_dan_json)) {
+  echo "LOI: khong thay $duong_dan_json\n";
   return;
 }
 
-foreach ($bai as $duong_dan => $nhan) {
-  $file = $thu_muc_docs . '/' . $duong_dan;
-  if (!is_file($file)) {
-    echo "BO QUA $nhan — khong thay file: $file\n";
-    continue;
-  }
+$ds_bai = json_decode(file_get_contents($duong_dan_json), TRUE);
+if (!is_array($ds_bai)) {
+  echo "LOI: demo-articles.json khong doc duoc\n";
+  return;
+}
 
-  // Định dạng file: các dòng "khoá: giá trị", rồi một dòng "---", rồi body HTML.
-  [$dau, $body] = explode("\n---\n", file_get_contents($file), 2);
-  $truong = [];
-  foreach (explode("\n", $dau) as $dong) {
-    if (str_contains($dong, ':')) {
-      [$k, $v] = explode(':', $dong, 2);
-      $truong[trim($k)] = trim($v);
-    }
+/**
+ * Tra về entity file cho một URI, tạo mới nếu chưa có bản ghi.
+ *
+ * File vật lý phải được chép sẵn; hàm này chỉ đăng ký nó với Drupal.
+ */
+function _vf_demo_file(string $uri): ?File {
+  $co = \Drupal::entityTypeManager()->getStorage('file')
+    ->loadByProperties(['uri' => $uri]);
+  if ($co) {
+    return reset($co);
   }
+  if (!file_exists($uri)) {
+    return NULL;
+  }
+  $file = File::create(['uri' => $uri, 'status' => 1]);
+  $file->save();
+  return $file;
+}
 
+foreach ($ds_bai as $bai) {
   $da_co = \Drupal::entityQuery('node')
     ->accessCheck(FALSE)
     ->condition('type', 'article')
-    ->condition('title', $truong['title'])
+    ->condition('title', $bai['title'])
     ->range(0, 1)
     ->execute();
   if ($da_co) {
-    printf("DA CO   %s (nid=%s)\n", $nhan, reset($da_co));
+    printf("DA CO   nid=%-4s %s\n", reset($da_co), mb_substr($bai['title'], 0, 50));
     continue;
   }
 
-  $node = Node::create([
+  $gia_tri = [
     'type' => 'article',
     // Phạm vi dự án là nội dung tiếng Việt và KB RAG lọc theo langcode='vi';
     // để mặc định của site sẽ tạo bài sai ngôn ngữ.
     'langcode' => 'vi',
-    'title' => $truong['title'],
+    'title' => $bai['title'],
     'body' => [
-      'value' => trim($body),
-      'summary' => $truong['summary'] ?? '',
-      // Format chỉ ảnh hưởng lúc HIỂN THỊ: phía Python đọc `body.value` thô
-      // qua JSON:API nên việc chấm điểm không phụ thuộc giá trị này.
-      'format' => 'basic_html',
+      'value' => $bai['body'],
+      'summary' => $bai['summary'] ?? '',
+      'format' => $bai['format'] ?? 'basic_html',
     ],
-    'field_meta_description' => $truong['meta_description'] ?? '',
+    'field_meta_description' => $bai['meta_description'] ?? '',
     'moderation_state' => 'draft',
-  ]);
-  if (!empty($truong['url_alias'])) {
-    $node->set('path', ['alias' => $truong['url_alias']]);
+  ];
+
+  $node = Node::create($gia_tri);
+
+  if (!empty($bai['url_alias'])) {
+    $node->set('path', ['alias' => $bai['url_alias']]);
   }
+
+  $thieu_anh = FALSE;
+  if (!empty($bai['hero_image']['uri'])) {
+    $file = _vf_demo_file($bai['hero_image']['uri']);
+    if ($file) {
+      $node->set('field_image', [
+        'target_id' => $file->id(),
+        'alt' => $bai['hero_image']['alt'] ?? '',
+      ]);
+    }
+    else {
+      $thieu_anh = TRUE;
+    }
+  }
+
+  // Tag phải là term có thật; không tự tạo term mới để tránh đẻ ra bản trùng
+  // tên chỉ khác khoảng trắng.
+  $ids = [];
+  foreach ($bai['tags'] ?? [] as $ten) {
+    $tim = \Drupal::entityTypeManager()->getStorage('taxonomy_term')
+      ->loadByProperties(['name' => $ten, 'vid' => 'tags']);
+    if ($tim) {
+      $ids[] = ['target_id' => reset($tim)->id()];
+    }
+  }
+  if ($ids) {
+    $node->set('field_tags', $ids);
+  }
+
   $node->save();
 
-  printf("DA TAO  %s\n   nid=%d  %s\n", $nhan, $node->id(), $truong['title']);
+  printf("DA TAO  nid=%-4d %s%s\n", $node->id(), mb_substr($bai['title'], 0, 50),
+    $thieu_anh ? '   [!] thieu file anh dai dien' : '');
 }
 
 echo "\nXong. Bai o trang thai 'draft', chua co bao cao AI.\n";

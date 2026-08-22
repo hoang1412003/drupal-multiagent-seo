@@ -314,6 +314,52 @@ Vấp hai lần, cả hai đã ghi thành mục 6.2 và 6.3:
 Tổng thời gian ~40 phút, trong đó 25 phút là do sự cố ở mục 2. Nếu bật swap
 trước, làm đúng thứ tự, và nhớ bật theme thì khoảng 10 phút.
 
+### 6.7. Đưa ba bài demo lên server
+
+Ba bài dùng để demo (`C-008` publish, `G-014` needs_revision, `G-010` rejected)
+được dựng lại bằng script, **không tạo tay** — tạo tay thì nội dung hai bên lệch
+nhau và kết quả chấm không so sánh được.
+
+**Nguồn dữ liệu:** [`drupal/scripts/demo-articles.json`](../drupal/scripts/demo-articles.json)
+— bản chụp nguyên văn ba bài, gồm cả `src` ảnh mà CKEditor đã chèn.
+
+> **Vì sao không đọc thẳng `docs/goldset/raw/*.txt`:** sau khi chèn ảnh,
+> CKEditor viết lại body (thêm `data-entity-uuid`, đổi độ dài từ 14.086 lên
+> 18.954 ký tự ở `G-014`). File `.txt` vẫn là nguồn chuẩn cho việc **chấm
+> điểm**; JSON là bản chụp của **ba bài đã chuẩn bị để demo**.
+
+**Ảnh phải chép sang TRƯỚC.** 21 file, khoảng 5 MB, nằm trong
+`web/sites/default/files/` — thư mục bị `.gitignore` loại khỏi repo (dòng 34
+`drupal/web/*`), nên `git pull` **không** mang chúng lên. Chép thiếu thì bài vẫn
+tạo được nhưng thẻ `<img>` trỏ vào file không tồn tại.
+
+Gom ảnh ở máy dev (script đọc `demo-articles.json`, chỉ lấy đúng file được
+tham chiếu):
+
+```bash
+# tao thu muc demo-images/ o goc repo
+python scripts_gom_anh.py   # hoac gom tay theo src trong demo-articles.json
+scp -i <khoa.pem> -r demo-images/* \
+    ec2-user@<IP>:~/drupal-multiagent-seo/drupal/web/sites/default/files/
+```
+
+Rồi trên server:
+
+```bash
+cd ~/drupal-multiagent-seo
+git pull --ff-only
+cd drupal
+drush php:script scripts/seed_demo_articles.php
+```
+
+Script **chạy lại được nhiều lần**: bài đã tồn tại (khớp `title`) thì bỏ qua,
+không tạo bản trùng. Nếu thiếu file ảnh đại diện nó in cảnh báo
+`[!] thieu file anh dai dien` chứ không im lặng.
+
+**Bài được tạo ở trạng thái `draft` và không có báo cáo AI** — cố ý, để lúc demo
+tự chuyển sang "Needs Review" và chấm ngay trước mặt người xem. Muốn vậy thì
+service và worker trên server phải đang chạy (mục 6.3).
+
 ## 7. Bật HTTPS (2026-08-21)
 
 Trước ngày này server chạy HTTP trần, `ADMIN_COOKIE_SECURE=false` cố ý để khớp.
