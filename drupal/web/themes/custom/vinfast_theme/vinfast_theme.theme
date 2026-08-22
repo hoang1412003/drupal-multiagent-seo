@@ -101,15 +101,6 @@ function vinfast_theme_preprocess_page(&$variables) {
 
     $articles = [];
     $hero_article = NULL;
-    $curated_images = [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBy7iEsQJdVm-uhF70vtNkXoF8C9sVOpn27tAex87elmxy2Ms7MuGtDuvQxt3AoH5KtKwelKHgMevvdo8wjGQw_Oc4X-RVtr5nED1qr4B8OvrwGISotXf1vcp5uZgyGbvwesb09cw-58pSPOYBFTpZuIJ2jqMeiz_GGvlwx4dzVFa9YOd20iaOMwMJ9SX59EqKFnvKTPssT7y8OxQpDOYux9e9nTRgJYyAhosT0iEbqbvVVod5y77WnKg',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuAPCET-IRjOCA2UI-VECmXGvTx2Nwx1SF8IFUrHtoeWH1jBxGC4x9aCNZUgDad4vTAAeoWwjJ4Gd1lShRMbLabfjaY2BNMWV8XXNo_Ypnqv_mHQAcorGwAZa6Sb_sTtEE9K8kkZsy3sdDLdRJfQEOX1PmSfuDkU1QA8h889ygbUPOyj1-0Px3w64nnkKKx0gUW9n0wFM3sa0_3geSYdtyx212rG1y1K78xTMv4gFV02XK95_U0YT-JzaA',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBcEt6-RT25yJd6w-wEfBf9PDBj0uZjGoA_egpFD0YcLoriC6nTopDvlccfqdT191wVG6apR3GMotkH7BJ6W8XLZ_R6xnbwl787Efsg57_L3nJ91HmgdHz_LeP9fPv5pMSbXkhDMziSykICvZB4YJSFwgGQIRI-uVNIFtNgtHkI5G2-0i7VW_gSjZ9JMMLn52WyD8AaT5VQFFOXGKhp9Inq194Oj8UmzkLVqy9nmpO1xKgHonGJEQaS5A',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDhjwHLUy3sx0G-1nj-9A1GK2MXs_2aCwU1Oa__-9WxZG7aWpwNqGgoMLZ6aKOdW45H4GBzCMeQHNRJk5XCGdESV1oouLeUWtJdoDndaGAZF7S9jwASghn5XvRECCeV8vl3br4jL4kaX5VLbLvkkywlxfWwoIkwgTq-ij8CcaIb5sqANpT2JmJk9C2BrcprqYXoSh4L6GN7XHBpz8kBY8aXMt-X5VynfQk3kyGgshphJ75S0ikJKgw2IA',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBa2wZuFxIQqjDtLSOUSaLfJafdj2G2xgYTRTWH4-mtxqJEe7DOSifOytfyCOIftJ0Z4vpgj9mS0oq2-kZkSiBUOFLfEzjvNpmV-rf6ZWcArP1Ss8zh8xRcZReu5uqlxWo1FKsHef3guqgdvHicFKW7KpUoHeGrMyQ79gDa1N4uATA-dqedXiQeK2XgeNhSguXSbmPYRtqCUMai-O5lE2SuTrHpNiMMGTw9E8CI1gnXgCnpvFhMyQOWVw',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuD9-2zReCRwCgiVUf9K-rG5kzY8ntCtk-4BVi8Clg-JXarWbE92jjrMtbI2GbMpY1rU1lKY1nMeZ4Ne7Mqy5Rhtw9Uu-B13CDtGCWTvjQwn2ht6L-a51hmNtS-S7jQnhZT6bvbkujBP0XFZgO7W20N-GG44BlkxrIXhvTEujbV-bMlqJ_LEJ-L6MeOqxdWQrNRIkvSaO45d7XZW1WTpeOt8sx9arOfbNpqiTI3Xr2DpZKcCXqT5gzifdw'
-    ];
-
     // Load dynamic taxonomy tags from Drupal vocabulary 'tags'
     $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree('tags');
     $taxonomy_tags = [];
@@ -135,9 +126,9 @@ function vinfast_theme_preprocess_page(&$variables) {
             $img_url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
           }
         }
-        if (!$img_url) {
-          $img_url = $curated_images[$idx % count($curated_images)];
-        }
+        // Khong con muon anh cam cung theo chi so. Bai chua co anh thi de
+        // rong - template hien o mau nen thay vi mot tam anh khong lien quan
+        // gi toi noi dung bai.
 
         // Tags - Lấy trực tiếp từ trường field_tags của bài viết
         $tags = [];
@@ -183,19 +174,10 @@ function vinfast_theme_preprocess_page(&$variables) {
       }
     }
 
-    // Default hero fallback if empty
-    if (!$hero_article) {
-      $hero_article = [
-        'id' => 1,
-        'title' => 'Tương lai di chuyển xanh',
-        'url' => '#',
-        'image' => $curated_images[0],
-        'category' => 'Khám Phá',
-        'date' => '15 Tháng 05, 2024',
-        'summary' => 'VinFast tiên phong định hình kỷ nguyên di chuyển điện hóa tại Việt Nam và trên toàn cầu, mang đến những giải pháp thông minh, bền vững.',
-      ];
-    }
-
+    // Khong con bai hero bia khi danh sach rong. Ban truoc dung ra mot bai
+    // "Tuong lai di chuyen xanh" voi url '#' va ngay 15/05/2024 - bai khong
+    // he ton tai, bam vao khong di dau. Khong co bai that thi template an
+    // han khoi hero (xem `{% if vf_hero_article %}`).
     $variables['vf_hero_article'] = $hero_article;
     $variables['vf_blog_articles'] = $articles;
   }
@@ -214,11 +196,27 @@ function vinfast_theme_preprocess_node(&$variables) {
   $created = $node->getCreatedTime();
   $variables['vf_formatted_date'] = date('d', $created) . ' Tháng ' . date('m', $created) . ', ' . date('Y', $created);
 
-  // Author details
+  // Author details — CHI dung du lieu that cua Drupal.
+  //
+  // Ban truoc: ten mac dinh 'Nguyen Van A', chuc danh 'Chuyen gia O to' ghi
+  // cung VO DIEU KIEN, va anh dai dien la mot URL anh nguoi la. Nghia la moi
+  // bai deu mang mot danh tinh khong co that.
+  //
+  // Chuc danh bi bo han: Drupal khong co field nao chua no. Muon hien lai thi
+  // phai tao field that tren user roi doc tu do.
   $author = $node->getOwner();
-  $variables['vf_author_name'] = $author ? $author->getDisplayName() : 'Nguyễn Văn A';
-  $variables['vf_author_role'] = 'Chuyên gia Ô tô';
-  $variables['vf_author_avatar'] = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCKGsX3jZwWansQJRlh8nEMiPzt0Iyd7B7sFeKa367LS5FzdjzoeGAfIN5bAxXtrzHYPEh_YGELzfBTQTeMbv1ysnvuDHkkwiNbrkt7oe574cpUdCwnWISMtO80OiSARY15jPDjoCLZrmk9MAb7RT2R_t8J077t1SO-R4VSRJg6AmNZYP6bs7x_BYD3dJDWDYYE8Rz-sG4PnokxaaXz7tz_qy7K2c0VTDXrqO7UsOH15jLcc0XxcaYrTw';
+  $variables['vf_author_name'] = $author ? $author->getDisplayName() : '';
+
+  // Anh dai dien: doc field user_picture co san cua Drupal. Khong co anh thi
+  // de rong - template an the <img>, chi con o tron mau nen.
+  $avatar = '';
+  if ($author && $author->hasField('user_picture') && !$author->get('user_picture')->isEmpty()) {
+    $anh = File::load($author->get('user_picture')->target_id);
+    if ($anh) {
+      $avatar = \Drupal::service('file_url_generator')->generateString($anh->getFileUri());
+    }
+  }
+  $variables['vf_author_avatar'] = $avatar;
 
   // Hero / Featured Image
   $image_url = '';
@@ -228,9 +226,9 @@ function vinfast_theme_preprocess_node(&$variables) {
       $image_url = \Drupal::service('file_url_generator')->generateString($file->getFileUri());
     }
   }
-  if (!$image_url) {
-    $image_url = 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9-2zReCRwCgiVUf9K-rG5kzY8ntCtk-4BVi8Clg-JXarWbE92jjrMtbI2GbMpY1rU1lKY1nMeZ4Ne7Mqy5Rhtw9Uu-B13CDtGCWTvjQwn2ht6L-a51hmNtS-S7jQnhZT6bvbkujBP0XFZgO7W20N-GG44BlkxrIXhvTEujbV-bMlqJ_LEJ-L6MeOqxdWQrNRIkvSaO45d7XZW1WTpeOt8sx9arOfbNpqiTI3Xr2DpZKcCXqT5gzifdw';
-  }
+  // Khong con anh cam cung khi field_image rong: de chuoi rong va template
+  // bo han khoi <figure> (xem `{% if vf_hero_image %}`). Anh cu la URL ngoai
+  // tren lh3.googleusercontent.com - mang chap la vo anh giua buoi demo.
   $variables['vf_hero_image'] = $image_url;
 
   // Tags
@@ -246,41 +244,65 @@ function vinfast_theme_preprocess_node(&$variables) {
   $variables['vf_tags'] = $tags;
 
 
-  // Related Articles for sidebar on full view
+  // Related Articles for sidebar on full view.
+  //
+  // "Lien quan" = co tag chung voi bai dang xem, xep theo SO TAG TRUNG giam
+  // dan. Truoc day truy van chi lay 3 bai moi nhat va khong doc tag - tuc
+  // nhan "Bai Viet Lien Quan" khong dung voi viec code lam. Bai khong co tag
+  // chung thi khoi nay bi an han, khong con doc bai bia vao cho du 3.
   if ($variables['view_mode'] === 'full') {
-    $related_query = \Drupal::entityQuery('node')
-      ->condition('type', 'article')
-      ->condition('nid', $node->id(), '!=')
-      ->sort('created', 'DESC')
-      ->range(0, 3);
-
-    if (!\Drupal::currentUser()->hasPermission('view own unpublished content')) {
-      $related_query->condition('status', 1);
+    $tag_ids = [];
+    if ($node->hasField('field_tags')) {
+      foreach ($node->get('field_tags')->referencedEntities() as $term) {
+        $tag_ids[] = $term->id();
+      }
     }
-    $related_query->accessCheck(TRUE);
-    $related_nids = $related_query->execute();
+
+    $related_nids = [];
+    if (!empty($tag_ids)) {
+      $related_query = \Drupal::entityQuery('node')
+        ->condition('type', 'article')
+        ->condition('nid', $node->id(), '!=')
+        ->condition('field_tags', $tag_ids, 'IN')
+        ->sort('created', 'DESC');
+
+      if (!\Drupal::currentUser()->hasPermission('view own unpublished content')) {
+        $related_query->condition('status', 1);
+      }
+      $related_query->accessCheck(TRUE);
+      $related_nids = $related_query->execute();
+    }
 
 
     $related = [];
-    $sample_related_images = [
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuBa2wZuFxIQqjDtLSOUSaLfJafdj2G2xgYTRTWH4-mtxqJEe7DOSifOytfyCOIftJ0Z4vpgj9mS0oq2-kZkSiBUOFLfEzjvNpmV-rf6ZWcArP1Ss8zh8xRcZReu5uqlxWo1FKsHef3guqgdvHicFKW7KpUoHeGrMyQ79gDa1N4uATA-dqedXiQeK2XgeNhSguXSbmPYRtqCUMai-O5lE2SuTrHpNiMMGTw9E8CI1gnXgCnpvFhMyQOWVw',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuA5ZjwQFCvPfaDM_iDi_-xcSydCI_-Yyt_AhD6rwQ92UfpGaO-5zRG5Sgmi6CRtn22oJ3skP_CYXDmTJe3saCh8hHD5lQJu_6sFDB1jq_KGRdMCzue0ebqb-gaOSbeGJjMqNOcTMML40IfJEFSPqhKQiBsKwhQ1bpdOTSC1bIMjbpEauHTFtpKKz3awHxIigWL9CB5mjiOqN46S2-cmdpHKKNY-MeCm_dTqOFcOsldeOTYtjhEL7O38GA',
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuD49fb0jrL0wU4JSSA4fKONkfns6fOHAfwphvBKVsAQNkC7cpmMzNaG7DDoeHgw5Hepsf8uH1YA6ET2ebFjAC7nJ_E-bYtsGsezx-jyfK9hFLDAMYYVSw7WPb5dbSZ1IMezGbp09Nos3X-ysXooM65_j9xVmvcQrr5HGjdtC6qIillnPNNjhGZH2rpcs6Du3yOsMjZar_q6o_0zKhP7f7mYsxO6XX14-50QID3ISOrhReZ8ZSiZfzJnGw'
-    ];
 
-    $i = 0;
     if (!empty($related_nids)) {
+      // Query tra ve theo ngay giam dan va gop trung nid, nen so tag trung
+      // phai dem lai o day. uasort giu nguyen thu tu ngay khi bang diem
+      // (sap xep on dinh tu PHP 8.0).
       $related_nodes = Node::loadMultiple($related_nids);
+      $diem_trung = [];
       foreach ($related_nodes as $r_node) {
+        $r_tags = [];
+        foreach ($r_node->get('field_tags')->referencedEntities() as $term) {
+          $r_tags[] = $term->id();
+        }
+        $diem_trung[$r_node->id()] = count(array_intersect($tag_ids, $r_tags));
+      }
+      uasort($related_nodes, function ($a, $b) use ($diem_trung) {
+        return $diem_trung[$b->id()] <=> $diem_trung[$a->id()];
+      });
+      $related_nodes = array_slice($related_nodes, 0, 3, TRUE);
+
+      foreach ($related_nodes as $r_node) {
+        // Khong con anh mau cam cung: bai chua co anh thi de trong, template
+        // dung o mau nen thay cho anh gia.
         $r_img = '';
         if ($r_node->hasField('field_image') && !$r_node->get('field_image')->isEmpty()) {
           $f = File::load($r_node->get('field_image')->target_id);
           if ($f) {
             $r_img = \Drupal::service('file_url_generator')->generateString($f->getFileUri());
           }
-        }
-        if (!$r_img) {
-          $r_img = $sample_related_images[$i % count($sample_related_images)];
         }
 
         $r_created = $r_node->getCreatedTime();
@@ -292,34 +314,7 @@ function vinfast_theme_preprocess_node(&$variables) {
           'image' => $r_img,
           'date' => $r_date,
         ];
-        $i++;
       }
-    }
-
-    // Fill with fallback related articles if less than 3
-    $fallback_related = [
-      [
-        'title' => 'Mở Rộng Trạm Sạc: Chìa Khóa Phổ Cập Xe Điện',
-        'url' => '#',
-        'image' => $sample_related_images[0],
-        'date' => '10 Tháng 5, 2024',
-      ],
-      [
-        'title' => 'Công Nghệ ADAS Trên Các Mẫu Xe VinFast Thế Hệ Mới',
-        'url' => '#',
-        'image' => $sample_related_images[1],
-        'date' => '02 Tháng 5, 2024',
-      ],
-      [
-        'title' => 'Vật Liệu Bền Vững Trong Nội Thất Xe Điện Tương Lai',
-        'url' => '#',
-        'image' => $sample_related_images[2],
-        'date' => '25 Tháng 4, 2024',
-      ],
-    ];
-
-    while (count($related) < 3) {
-      $related[] = $fallback_related[count($related)];
     }
 
     $variables['vf_related_articles'] = $related;

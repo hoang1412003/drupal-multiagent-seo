@@ -22,6 +22,14 @@ class AiReportRenderer {
   public const VERSION = 1;
 
   /**
+   * So agent cua he Multi-Agent: content_quality, seo, brand, compliance.
+   *
+   * Dat thanh hang so vi truoc day "3/4 agent" duoc ghi cung trong chuoi HTML,
+   * nen bao cao thieu HAI agent van hien "3/4".
+   */
+  public const TONG_SO_AGENT = 4;
+
+  /**
    * Field tham gia tính content_hash, ĐÚNG THỨ TỰ NÀY.
    *
    * Phải khớp _HASH_FIELDS trong multiagent/src/text_utils.py. Lệch là băng
@@ -305,6 +313,10 @@ class AiReportRenderer {
   private const NHAN_TRANG_THAI = [
     'co_loi' => 'Cần sửa',
     'chua_cham' => 'Chưa chấm',
+    // Thieu khoa nay thi nhan roi ve chinh ten khoa, tuc bang hien chu
+    // "dang_cham" tho. Truoc day khong lo ra vi vf_ai_trigger.js ve de len,
+    // nhung PHP van phai tu dung mot minh.
+    'dang_cham' => 'Đang chấm',
     'dat' => 'Đạt',
     'veto' => 'Bị từ chối',
     'stale' => 'Nội dung đã sửa sau chấm',
@@ -338,7 +350,10 @@ class AiReportRenderer {
 
     if ($trang_thai === 'veto') {
       $out .= '<span class="vf-ai-band__badge vf-ai-band__badge--veto" data-vf-ai-nhan="' . $this->esc($nhan) . '">VETO</span>';
-      $out .= '<span class="vf-ai-band__dem"><strong style="color:#8f1717;">Bài bị từ chối</strong> <span style="color:#55565b;">— 1 lỗi nghiêm trọng ở Tuân thủ</span></span>';
+      // Dem THAT bang demChan(), khong ghi cung "1": mot bai co the dinh
+      // nhieu loi nghiem trong cung luc.
+      $so_chan = $this->demChan($report);
+      $out .= '<span class="vf-ai-band__dem"><strong style="color:#8f1717;">Bài bị từ chối</strong> <span style="color:#55565b;">— ' . $so_chan . ' lỗi nghiêm trọng ở Tuân thủ</span></span>';
       $out .= '<span class="vf-ai-band__ngan"></span>';
       $out .= '<span class="vf-ai-band__diem">Điểm tổng không tính khi còn veto</span>';
     }
@@ -348,14 +363,19 @@ class AiReportRenderer {
     }
     elseif ($trang_thai === 'dang_cham') {
       $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="' . $this->esc($nhan) . '"><span class="vf-ai-spinner"></span>' . $this->esc($nhan) . '</span>';
-      $out .= '<span style="display:flex; align-items:center; gap:12px; font-size:13.5px; color:#3d3e44;">';
-      $out .= '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>SEO</span>';
-      $out .= '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>Chất lượng</span>';
-      $out .= '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-spinner"></span>Brand Voice</span>';
-      $out .= '<span style="display:flex; align-items:center; gap:6px; color:#8b8c92;"><span class="vf-ai-dot-cho"></span>Tuân thủ</span>';
-      $out .= '</span>';
-      $out .= '<span style="flex:1; min-width:120px; max-width:220px; height:5px; border-radius:3px; background:#e8e9ee;"><span style="display:block; width:62%; height:5px; border-radius:3px; background:#003ecc;"></span></span>';
-      $out .= '<span style="font-size:12.5px; color:#6a6b70;">còn ~40 giây · bạn vẫn có thể sửa bài</span>';
+      // KHONG hien tien trinh tung agent. Ban truoc ve cung "SEO ✓ · Chat
+      // luong ✓ · Brand Voice dang quay · Tuan thu cho" cung thanh 62% va
+      // "con ~40 giay" - khong doc mot du lieu nao, nen Tuan thu KHONG BAO
+      // GIO quay du bai da cham xong.
+      //
+      // Khong sua thanh "that" duoc bang CSS/JS: 4 agent chay SONG SONG
+      // (fan-out LangGraph) nen khong co thu tu xong truoc/sau, va worker
+      // khong ghi trang thai giua chung ra dau ca. Drupal chi biet job dang
+      // chay. Muon co that thi phai them cot DB + endpoint + polling.
+      //
+      // "Khoang 40 giay" thi GIU: no co can cu that - E4 do duoc 39,3 giay
+      // moi luot. Ghi ro la trung binh, khong phai dem nguoc.
+      $out .= '<span class="vf-ai-band__dem" style="font-size:14.5px; color:#3d3e44;">Cả 4 agent đang chấm <strong>song song</strong> — trung bình khoảng 40 giây. Bạn vẫn có thể sửa bài trong lúc chờ.</span>';
     }
     elseif ($trang_thai === 'stale') {
       $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="' . $this->esc($nhan) . '"><span class="vf-ai-band__dot"></span>' . $this->esc($nhan) . '</span>';
@@ -363,19 +383,29 @@ class AiReportRenderer {
     }
     elseif ($trang_thai === 'thieu') {
       $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="' . $this->esc($nhan) . '"><span class="vf-ai-band__dot"></span>' . $this->esc($nhan) . '</span>';
-      $missing = !empty($report['missing_agents']) ? implode(', ', $report['missing_agents']) : 'Brand Voice';
+      // Doc DUNG agent bi thieu. Ban truoc mac dinh ve 'Brand Voice' nen bao
+      // cao thieu SEO hay Tuan thu van do vay Brand Voice.
+      $ds_thieu = array_filter((array) ($report['missing_agents'] ?? []), 'is_string');
+      $missing = $ds_thieu ? implode(', ', $ds_thieu) : 'một agent';
+      $so_chay = self::TONG_SO_AGENT - count($ds_thieu);
       $out .= '<span class="vf-ai-band__dem"><strong class="vf-ai-band__dem-so">' . $so_loi
         . ' vấn đề</strong> <span class="vf-ai-band__dem-truong">trên ' . $so_field . ' trường</span></span>';
       $out .= '<span class="vf-ai-band__ngan"></span>';
-      $out .= '<span style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px; border-radius:12px; background:#eceef2; color:#4a4b50; font-size:12.5px; font-weight:700;">3/4 agent — ' . $this->esc($missing) . ' lỗi</span>';
-      $out .= '<span style="font-size:13px; color:#6a6b70;">timeout sau 30s</span>';
+      // "3/4" truoc day ghi cung; nay tinh tu so agent thuc su thieu.
+      $out .= '<span style="display:inline-flex; align-items:center; gap:7px; padding:4px 10px; border-radius:12px; background:#eceef2; color:#4a4b50; font-size:12.5px; font-weight:700;">' . $so_chay . '/' . self::TONG_SO_AGENT . ' agent — ' . $this->esc($missing) . ' lỗi</span>';
+      // Bo "timeout sau 30s": bao cao khong mang ly do loi, nen day chi la
+      // phong doan duoc trinh bay nhu su that.
     }
     elseif ($trang_thai === 'dat') {
       $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="' . $this->esc($nhan) . '"><span class="vf-ai-band__dot"></span>' . $this->esc($nhan) . '</span>';
       $out .= '<span class="vf-ai-band__dem"><strong>Không phát hiện vấn đề</strong> <span style="color:#55565b;">— cả 4 agent</span></span>';
       $out .= '<span class="vf-ai-band__ngan"></span>';
-      $diem = $report['final_score'] ?? 92.0;
-      $out .= '<span class="vf-ai-band__diem">Điểm <strong class="vf-ai-band__diem-so">' . $this->esc($diem) . '</strong>/100</span>';
+      // Khong con mac dinh 92.0: thieu diem thi khong hien o diem, chu khong
+      // bia mot con so trong ra nhu diem that.
+      $diem = $report['final_score'] ?? NULL;
+      if ($diem !== NULL) {
+        $out .= '<span class="vf-ai-band__diem">Điểm <strong class="vf-ai-band__diem-so">' . $this->esc($diem) . '</strong>/100</span>';
+      }
     }
     else { // co_loi & loi_json
       $out .= '<span class="vf-ai-band__badge" data-vf-ai-nhan="' . $this->esc($nhan) . '"><span class="vf-ai-band__dot"></span>' . $this->esc($nhan) . '</span>';
@@ -406,11 +436,15 @@ class AiReportRenderer {
       $out .= '<button type="button" class="vf-ai-nut-rescore vf-ai-nut-rescore--primary" style="margin-left:auto;">Chấm lại bản mới</button>';
     }
     elseif ($trang_thai === 'thieu') {
+      // Bo lien ket "Bao cho admin": href="#" nen bam khong di dau ca. Chua
+      // co luong bao loi that thi khong bay ra nut giai vo.
       $out .= '<button type="button" class="vf-ai-nut-rescore">Chấm lại</button>';
-      $out .= '<a href="#" class="vf-ai-link-toggle" style="color:#003ecc;">Báo cho admin</a>';
     }
     elseif ($trang_thai === 'veto') {
-      $out .= '<span class="vf-ai-band__pos">Lỗi 1/1</span>';
+      // O trong: JS dem so the loi that roi dien vao (this.viTri). Ban truoc
+      // ghi cung "Loi 1/1" nen bai co 3 loi nghiem trong van hien 1/1 neu JS
+      // chua kip chay.
+      $out .= '<span class="vf-ai-band__pos"></span>';
       $out .= '<button type="button" class="vf-ai-nut-rescore">Chấm lại</button>';
     }
     elseif (!empty($report['veto_reason'])) {
@@ -462,54 +496,54 @@ class AiReportRenderer {
       return '';
     }
 
-    $final_score = (float) ($report['final_score'] ?? 76.5);
+    // Diem THAT tung agent, do Python ghi kem trong report_json.
+    //
+    // Ban truoc SUY RA cac con so nay tu `final_score` bang cong thuc cong tru
+    // theo so loi dem duoc. No hien sai toi 40 diem: bai nid 36 co Compliance
+    // that 75 nhung card hien 35 (cong thuc ra 31,6 roi bi kep san 35). Card
+    // ma noi sai thi vo dung hon la khong co card.
+    // Bao cao cham TRUOC khi Python bat dau ghi `agent_scores`. Khong bia so,
+    // nhung cung khong an card khong mot loi giai thich: card bien mat lang le
+    // lam nguoi dung tuong giao dien hong (da gap that khi trien khai).
+    $diem_raw = $report['agent_scores'] ?? NULL;
+    $thieu_diem_agent = !is_array($diem_raw) && $trang_thai !== 'chua_cham';
 
-    $loi_theo_agent = ['seo' => 0, 'cq' => 0, 'bv' => 0, 'cp' => 0];
-    if ($report !== NULL) {
-      foreach (($report['fields'] ?? []) as $field_issues) {
-        if (!is_array($field_issues)) continue;
-        foreach ($field_issues as $issue) {
-          $ag = strtolower((string) ($issue['agent'] ?? ''));
-          if (str_contains($ag, 'seo')) {
-            $loi_theo_agent['seo']++;
-          }
-          elseif (str_contains($ag, 'chất lượng') || str_contains($ag, 'content') || str_contains($ag, 'cq')) {
-            $loi_theo_agent['cq']++;
-          }
-          elseif (str_contains($ag, 'brand') || str_contains($ag, 'bv')) {
-            $loi_theo_agent['bv']++;
-          }
-          elseif (str_contains($ag, 'tuân thủ') || str_contains($ag, 'compliance') || str_contains($ag, 'cp')) {
-            $loi_theo_agent['cp']++;
-          }
-        }
-      }
-    }
-
-    $diem_agent = [
-      'seo' => max(40, min(98, (int) round($final_score + 5 - $loi_theo_agent['seo'] * 4))),
-      'cq' => max(40, min(95, (int) round($final_score - $loi_theo_agent['cq'] * 3))),
-      'bv' => max(40, min(95, (int) round($final_score - 2 - $loi_theo_agent['bv'] * 4))),
-      'cp' => max(35, min(95, (int) round($final_score - 8 - $loi_theo_agent['cp'] * 6))),
+    // Khoa ben Python la ten agent day du; khoa ben nay la ma ngan cua UI.
+    $anh_xa = [
+      'seo' => 'seo',
+      'cq' => 'content_quality',
+      'bv' => 'brand',
+      'cp' => 'compliance',
+    ];
+    $ten_agent = [
+      'seo' => 'SEO',
+      'cq' => 'Chất lượng',
+      'bv' => 'Brand Voice',
+      'cp' => 'Tuân thủ',
     ];
 
-    if ($trang_thai === 'dat') {
-      $diem_agent = ['seo' => 95, 'cq' => 90, 'bv' => 92, 'cp' => 91];
+    $ds_agent = [];
+    foreach ($anh_xa as $ma => $khoa_python) {
+      $diem = is_array($diem_raw) ? ($diem_raw[$khoa_python] ?? NULL) : NULL;
+      $co_diem = is_numeric($diem);
+      $ds_agent[$ma] = [
+        'ten' => $ten_agent[$ma],
+        // Thanh bar can so nguyen 0-100; agent loi -> bar rong.
+        'diem' => $co_diem ? (int) round((float) $diem) : 0,
+        // Giu mot chu so thap phan khi co, bo duoi ".0" cho gon: 75.0 -> "75",
+        // 81.2 -> "81.2". Agent loi -> "loi", KHONG phai "0".
+        'val_text' => $co_diem
+          ? rtrim(rtrim(sprintf('%.1f', (float) $diem), '0'), '.')
+          : 'lỗi',
+      ];
     }
-
-    $ds_agent = [
-      'seo' => ['ten' => 'SEO', 'diem' => $diem_agent['seo'], 'val_text' => (string) $diem_agent['seo']],
-      'cq' => ['ten' => 'Chất lượng', 'diem' => $diem_agent['cq'], 'val_text' => (string) $diem_agent['cq']],
-      'bv' => ['ten' => 'Brand Voice', 'diem' => $diem_agent['bv'], 'val_text' => (string) $diem_agent['bv']],
-      'cp' => ['ten' => 'Tuân thủ', 'diem' => $diem_agent['cp'], 'val_text' => (string) $diem_agent['cp']],
-    ];
 
     $card_class = 'vf-ai-agent-card';
     if ($trang_thai === 'stale') {
       $card_class .= ' vf-ai-agent-card--stale';
     }
 
-    if ($trang_thai === 'chua_cham') {
+    if ($trang_thai === 'chua_cham' || $thieu_diem_agent) {
       foreach ($ds_agent as $k => &$item) {
         $item['diem'] = 0;
         $item['val_text'] = '—';
@@ -517,13 +551,14 @@ class AiReportRenderer {
       unset($item);
     }
     elseif ($trang_thai === 'veto') {
-      $ds_agent['cp']['diem'] = 100;
+      // Chi doi CHU, giu nguyen do dai thanh theo diem that. Ban truoc dat
+      // diem = 100 o day, tuc hien thanh DAY cho dung agent vua chan bai
+      // (G-010: Compliance that 50 nhung thanh full) - nguoc han su that.
       $ds_agent['cp']['val_text'] = 'veto';
     }
-    elseif ($trang_thai === 'thieu') {
-      $ds_agent['bv']['diem'] = 0;
-      $ds_agent['bv']['val_text'] = 'lỗi';
-    }
+    // Khong con nhanh rieng cho trang thai 'thieu': agent loi da tu ra "loi"
+    // o vong lap tren, va no dung cho DUNG agent bi loi. Ban truoc hardcode
+    // 'bv' nen bao cao thieu SEO hay Compliance van do vay Brand Voice.
 
     $out = '<div class="' . $card_class . '">';
     $out .= '<div class="vf-ai-agent-card__head">Điểm theo agent</div>';
@@ -543,14 +578,22 @@ class AiReportRenderer {
 
     $gio_cham = !empty($report['scored_at']) ? $this->dinhDangGio($report['scored_at']) : date('d/m/Y H:i');
     $footer_text = 'Chấm lúc ' . $this->esc($gio_cham);
-    if ($trang_thai === 'chua_cham') {
+    if ($thieu_diem_agent) {
+      $footer_text = 'Báo cáo cũ chưa có điểm theo agent — bấm "Chấm lại" để xem';
+    }
+    elseif ($trang_thai === 'chua_cham') {
       $footer_text = 'Chưa có kết quả chấm cho bài này';
     }
     elseif ($trang_thai === 'veto') {
       $footer_text = 'Điểm tổng không được tính khi còn veto';
     }
     elseif ($trang_thai === 'thieu') {
-      $footer_text = 'Brand Voice lỗi: timeout sau 30s · job #4182';
+      // Ban truoc ghi cung 'Brand Voice loi: timeout sau 30s - job #4182':
+      // sai agent, sai ly do, va so job thi bia han. Doc tu missing_agents.
+      $thieu = array_filter((array) ($report['missing_agents'] ?? []), 'is_string');
+      $footer_text = $thieu
+        ? 'Không có kết quả từ: ' . $this->esc(implode(', ', $thieu))
+        : 'Thiếu kết quả của một agent';
     }
     elseif ($trang_thai === 'stale') {
       $footer_text = 'Kết quả cho bản cũ — bài đã sửa sang bản mới';

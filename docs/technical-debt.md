@@ -1675,6 +1675,55 @@ miễn trừ chung sẽ làm trường đó biến mất khỏi mọi màn hình
 được", và hoá ra **phép thử viết sai** — nó xoá đoạn mô tả nhưng vẫn để lại từ
 khoá trong câu. Phải kiểm chứng cả phép thử, không chỉ thứ nó kiểm.
 
+### 8.12. `graph.py` có diff so với snapshot — KHÔNG làm mất hiệu lực phép đo (2026-08-22)
+
+**Đọc mục này trước khi hoảng.** Nếu bạn chạy phép kiểm "score-path diff rỗng"
+so với snapshot `04f10e1` một cách máy móc, `multiagent/src/graph.py` **sẽ hiện
+ra một diff**, vì `evaluation-plan.md` mục 3a dòng 45 liệt kê "graph" một cách
+chung chung. Diff đó là chủ đích và đã được kiểm chứng là vô hại.
+
+**Thay đổi:** thêm trường `agent_scores` vào `_build_report_json()` — hàm dựng
+báo cáo **để hiển thị** trên Drupal. 19 dòng thêm, **0 dòng xoá**, trong đó chỉ
+5 dòng là code thật (một dict comprehension đọc `report["details"]`). Không
+chạm `aggregator_node`, `aggregate_score_v1`, agent, `scoring.py` hay bất kỳ
+rule/KB nào.
+
+**Vì sao cần:** trước đó report JSON chỉ mang `final_score`, nên
+`AiReportRenderer` dựng card "Điểm theo agent" bằng cách **suy ra** điểm từng
+agent từ điểm tổng cộng trừ theo số lỗi. Nó hiển thị sai tới **40 điểm** — node
+36 có Compliance thật 75 nhưng card hiện 35. Đây đúng là hạng mục mà mục 8 ghi
+là *"chỉ làm được sau khi mở khoá đường chấm điểm"*; hoá ra làm được mà không
+cần mở khoá, vì dữ liệu cần nằm sẵn trong state.
+
+**Bằng chứng kiểm được bằng máy** — bốn script đo đều KHÔNG nạp `graph.py`:
+
+```
+grep -nE "^from graph|^import graph|_build_report_json|build_graph|aggregator_node" \
+  scripts/eval_calibration.py scripts/eval_policy_v2.py \
+  scripts/eval_functional_clean.py scripts/eval_corrected_coverage.py
+```
+
+- `eval_calibration.py` — chỉ khớp một dòng **chú thích**: *"Ban sao logic
+  graph.aggregator_node… Chep lai thay vi goi thang aggregator_node vi ham do
+  doc nguong tu config."* Nó tự chép logic, không import.
+- Ba script còn lại — **không tham chiếu `graph` một lần nào**.
+
+Nên `_build_report_json()` không nằm trên đường đo: code đó không hề chạy trong
+bất kỳ lượt E1/E5/gold/corrected/coverage nào.
+
+`prompt_version` cũng không đổi — công thức chỉ băm `agents/*.py` (v2) và sáu
+chuỗi prompt (v1), không có `graph.py`.
+
+**Tiền lệ áp dụng:** đây là ca thứ hai cùng loại với `model_pricing.yaml` (mục
+3a dòng 59–63) — một file nằm trong phạm vi "đường chấm" theo cách viết của
+luật, nhưng đường chấm thực tế không đọc tới. Xử lý giống hệt: chạy phép kiểm
+bằng máy, ghi kết luận, **không đổi luật và không đo lại**. Bản khoá vẫn là
+`04f10e1`, `prompt_version` vẫn `020738e209017213`.
+
+Kèm 2 test mới khoá hành vi: `test_report_json.py` kiểm `agent_scores` lấy đúng
+điểm từng agent, và agent lỗi trả `None` chứ không phải 0. Full offline suite
+sau thay đổi: **91 file, 0 hỏng, 0 skip**.
+
 ---
 
 ### Ba cái bẫy đã cắn dự án này, đừng lặp lại

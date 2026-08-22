@@ -186,12 +186,8 @@
         }
       });
       containerNav.appendChild(nutRescoreThieu);
-
-      var linkAdmin = this.doc.createElement("a");
-      linkAdmin.href = "#";
-      linkAdmin.className = "vf-ai-link-toggle";
-      linkAdmin.textContent = "Báo cho admin";
-      containerNav.appendChild(linkAdmin);
+      // Đã bỏ liên kết "Báo cho admin": nó dùng href="#" nên bấm không đi
+      // đâu cả. Chưa có luồng báo lỗi thật thì không bày ra nút giả vờ.
       return;
     }
 

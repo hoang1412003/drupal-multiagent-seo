@@ -148,6 +148,12 @@ Hệ thống chỉ **đề xuất**; nút Publish vẫn của người (`archite
 
 Đây không phải chi tiết câu chữ vụn vặt - nó là ranh giới trách nhiệm giữa hệ thống và người duyệt, và là điểm sẽ bị hỏi khi bảo vệ.
 
+> ⚠️ **Dòng đầu của bảng trên đã HẾT HIỆU LỰC từ 2026-08-22.** Giao diện nay
+> **không hiện nhãn đề xuất nào** (kể cả "Đề xuất: Có thể xuất bản"), vì ranh
+> giới `publish`/`needs_revision` dựa trên ngưỡng chưa calibrate. Tinh thần của
+> mục 4.5 giữ nguyên — và bỏ hẳn nhãn còn tuân thủ nó chặt hơn. Lý do đầy đủ và
+> điều kiện để bật lại: [mục 10.7](#107-cố-ý-không-hiện-nhãn-publish--needs_revision).
+
 ---
 
 ## 5. Dữ liệu: text blob hay JSON
@@ -334,6 +340,37 @@ Cả bốn chỉ lộ ra khi nhìn ảnh chụp trình duyệt thật. Không c�
 → Nhắm `[name="X[0][value]"]` trước, dự phòng `[name^="X["]` cho `url_alias` (`path[0][alias]`). Khung CKEditor lấy bằng `sourceElement.nextElementSibling`, đúng quan hệ mà `core/modules/ckeditor5/js/ckeditor5.js:637` dùng.
 
 **Bài học chung:** với ba bẫy sau, chẩn đoán đầu tiên đều **hợp lý nhưng sai**. Chỉ khi đi đọc source của core và dump thứ tự DOM thật mới ra đúng nguyên nhân. Không nhìn được DOM thì phải lấy bằng chứng, đừng suy luận tiếp.
+
+### 10.7. Cố ý KHÔNG hiện nhãn `publish` / `needs_revision`
+
+`AiReportRenderer::trangThai()` **không đọc `report['decision']`** (grep ra 0 lần),
+và cả bốn field AI đều ẩn khỏi form soạn bài. Băng trạng thái suy ra từ **số lỗi**
+và **veto**, không từ quyết định của hệ thống.
+
+**Đây là chủ đích, không phải bỏ sót.**
+
+Ranh giới `publish` / `needs_revision` do so `final_score` với ngưỡng 80, mà
+`scoring.yaml` ghi `meta.calibrated: false`, và E5 đo được ngưỡng đó đề xuất
+`publish` sai cho **9/33 bài** gold.
+
+Bằng chứng gần nhất, đo trên hệ thống thật ngày 2026-08-22 (node 36): máy trả
+`decision = publish` ở **81,625 điểm**, trong khi giao diện liệt kê ngay bên dưới
+**20 vấn đề** — gồm lỗi ngữ pháp (CQ2), 7 câu quá dài (CQ3) và meta description
+172 ký tự ngoài dải 140–170 (SEO3). In "Đề xuất: Đăng bài" lên đầu màn hình đó là
+**tự mâu thuẫn với chính danh sách lỗi của mình**.
+
+**Ngược lại, veto VẪN hiện** ("Bài bị từ chối — N lỗi nghiêm trọng ở Tuân thủ"),
+vì nó tất định: CP1 tra danh sách cụm từ đóng, severity tra bảng theo mã tiêu chí
+(`scoring.py`). Node 37 cùng ngày bị chặn đúng bằng đường này.
+
+Nguyên tắc rút ra: **hiện phần tất định, giấu phần chưa hiệu chỉnh.**
+
+**Điều kiện để bật lại nhãn:** `scoring.yaml` có `meta.calibrated: true`. Không
+phải "thấy giao diện trống thì thêm vào cho đủ" — thiếu nhãn ở đây là kết luận
+của phép đo, không phải việc còn dở.
+
+Mục 4.5 có một dòng ghi ngược lại điều này ("Đề xuất: Có thể xuất bản"); dòng đó
+đã được đánh dấu hết hiệu lực tại chỗ.
 
 ---
 

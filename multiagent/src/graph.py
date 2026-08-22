@@ -329,11 +329,30 @@ def _build_report_json(state: ContentReviewState) -> dict:
                     _issue_to_json(agent_key, issue)
                 )
 
+    # Điểm từng agent cho card ở cột phải. Đọc thẳng từ report["details"] -
+    # đúng nguồn Aggregator vừa dùng để tính điểm tổng, không tính lại.
+    #
+    # Vì sao phải có: trước đây report JSON chỉ mang `final_score`, nên phía
+    # Drupal dựng card bằng cách SUY RA điểm agent từ điểm tổng cộng trừ theo
+    # số lỗi đếm được. Cách đó hiển thị sai tới 40 điểm (Compliance thật 75 ra
+    # 35) vì nó chỉ là ước lượng, không phải số thật.
+    #
+    # Agent lỗi -> None chứ không phải 0: "chưa chấm được" khác "0 điểm", cùng
+    # quy ước với `final_score` ở write_back_node.
+    #
+    # KHÔNG nâng "version": trường này là tùy chọn nên báo cáo cũ vẫn đọc
+    # được, mà AiReportRenderer thì từ chối thẳng report khác version.
+    diem_agent = {
+        agent_key: (result.get("score") if isinstance(result, dict) else None)
+        for agent_key, result in (report.get("details") or {}).items()
+    }
+
     return {
         "version": 1,
         "policy_version": _policy_cua(state),
         "scored_at": datetime.now(timezone.utc).isoformat(),
         "content_hash": content_hash(state.get("fields") or {}),
+        "agent_scores": diem_agent,
         # Lấy decision/final_score từ STATE chứ không từ report, vì đó đúng
         # là nguồn write_back() ghi vào field_ai_status/field_ai_score. Đọc
         # từ report là tạo nguồn thứ hai cho cùng một giá trị - lệch nhau thì

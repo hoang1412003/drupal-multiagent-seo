@@ -3,6 +3,7 @@
 Khong goi LLM, khong can Drupal. Chay:
     .venv\\Scripts\\python.exe scripts\\test_report_json.py
 """
+import copy
 import json
 import os
 import sys
@@ -99,6 +100,28 @@ def test_cau_truc_co_ban():
     assert len(j["content_hash"]) == 64
     assert j["scored_at"], "phai co moc thoi gian"
     print("[PASS] cau truc co ban day du")
+
+
+def test_agent_scores_lay_diem_that_cua_tung_agent():
+    """Card ben Drupal phai doc so THAT, khong duoc suy ra tu final_score.
+
+    Truoc khi co truong nay, AiReportRenderer uoc luong diem tung agent bang
+    cong thuc cong tru theo so loi dem duoc va hien sai toi 40 diem
+    (Compliance that 75 hien thanh 35).
+    """
+    j = _build_report_json(STATE_MAU)
+    assert j["agent_scores"] == {"seo": 75, "compliance": 85}, j["agent_scores"]
+    print("[PASS] agent_scores lay dung diem tung agent")
+
+
+def test_agent_loi_thi_score_none_khong_phai_0():
+    """Chua cham duoc KHAC 0 diem - cung quy uoc voi final_score."""
+    state = copy.deepcopy(STATE_MAU)
+    state["report"]["details"]["brand"] = None
+    j = _build_report_json(state)
+    assert j["agent_scores"]["brand"] is None, j["agent_scores"]
+    assert j["agent_scores"]["seo"] == 75, "agent khac khong bi anh huong"
+    print("[PASS] agent loi -> None, khong phai 0 diem")
 
 
 def test_report_v2_co_basis_findings_coverage_va_giu_field_cu():
@@ -317,6 +340,8 @@ if __name__ == "__main__":
         test_field_thieu_coi_nhu_rong,
         test_field_none_coi_nhu_rong,
         test_cau_truc_co_ban,
+        test_agent_scores_lay_diem_that_cua_tung_agent,
+        test_agent_loi_thi_score_none_khong_phai_0,
         test_report_v2_co_basis_findings_coverage_va_giu_field_cu,
         test_issue_gom_dung_field,
         test_severity_chi_tu_compliance,

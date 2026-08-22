@@ -15,6 +15,7 @@ Tài liệu (cập nhật song song với code, xem trực tiếp trên GitHub):
 - [`docs/prompt-injection.md`](docs/prompt-injection.md) — mô hình mối đe doạ khi LLM đọc nội dung do người ngoài soạn, và biện pháp giảm thiểu
 - [`docs/config-spec.md`](docs/config-spec.md) — đặc tả `scoring.yaml`: trọng số và ngưỡng theo `(content_type, langcode)`, là đầu ra của calibration
 - [`docs/operations.md`](docs/operations.md) — nhật ký truy vết mỗi lần chấm và vòng phản hồi người duyệt
+- [`docs/runbook.md`](docs/runbook.md) — **sổ tay vận hành**: khởi động bốn tiến trình, kiểm tra sức khoẻ, và chẩn đoán sự cố theo triệu chứng (phần lớn sự cố ở hệ này hỏng *im lặng*)
 - [`docs/goldset/annotation-guideline.md`](docs/goldset/annotation-guideline.md) — quy tắc gán nhãn gold set và cách đo độ tin cậy của nhãn
 - [`docs/goldset/sources.md`](docs/goldset/sources.md) — nguồn dữ liệu thật + phân chia `BRAND`/`GOLD`/`PERT`
 - [`docs/brand/brand_guideline.md`](docs/brand/brand_guideline.md) — brand guideline **sinh tự động** từ corpus 16 bài `BRAND`, mỗi quy tắc kèm số liệu và p-value chứng minh

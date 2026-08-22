@@ -33,15 +33,25 @@
 
           var trai = band.querySelector('.vf-ai-band__trai');
           if (trai) {
+            // KHÔNG vẽ tiến trình từng agent. Bản trước ghi cứng "SEO ✓ ·
+            // Chất lượng ✓ · Brand Voice đang quay · Tuân thủ chờ" cùng thanh
+            // 62% — không đọc dữ liệu nào, nên Tuân thủ không bao giờ quay dù
+            // bài đã chấm xong.
+            //
+            // Không làm "thật" được: 4 agent chạy SONG SONG (fan-out
+            // LangGraph) nên không có thứ tự xong trước/sau, và worker không
+            // ghi trạng thái giữa chừng ra đâu cả — poll chỉ biết job đang
+            // queued/running/done.
+            //
+            // "Khoảng 40 giây" thì giữ: có căn cứ thật (E4 đo 39,3 giây mỗi
+            // lượt). Ghi rõ là trung bình, không phải đếm ngược.
+            //
+            // ĐOẠN NÀY PHẢI KHỚP VỚI AiReportRenderer::bangHtml() nhánh
+            // 'dang_cham' — cùng một băng, hai module cùng vẽ.
             trai.innerHTML = '<span class="vf-ai-band__badge"><span class="vf-ai-spinner"></span>Đang chấm</span>'
-              + '<span style="display:flex; align-items:center; gap:12px; font-size:13.5px; color:#3d3e44;">'
-              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>SEO</span>'
-              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-dot-done">✓</span>Chất lượng</span>'
-              + '<span style="display:flex; align-items:center; gap:6px;"><span class="vf-ai-spinner"></span>Brand Voice</span>'
-              + '<span style="display:flex; align-items:center; gap:6px; color:#8b8c92;"><span class="vf-ai-dot-cho"></span>Tuân thủ</span>'
-              + '</span>'
-              + '<span style="flex:1; min-width:120px; max-width:220px; height:5px; border-radius:3px; background:#e8e9ee;"><span style="display:block; width:62%; height:5px; border-radius:3px; background:#003ecc;"></span></span>'
-              + '<span style="font-size:12.5px; color:#6a6b70;">còn ~40 giây · bạn vẫn có thể sửa bài</span>';
+              + '<span class="vf-ai-band__dem" style="font-size:14.5px; color:#3d3e44;">'
+              + 'Cả 4 agent đang chấm <strong>song song</strong> — trung bình khoảng 40 giây. '
+              + 'Bạn vẫn có thể sửa bài trong lúc chờ.</span>';
           }
           var phai = band.querySelector('[data-vf-ai-nav]');
           if (phai) {
